@@ -648,7 +648,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const fullAlert = previewAlerts[0]._source;
-        expect(fullAlert?.['host.asset.criticality']).to.eql('important');
+        expect(fullAlert?.['host.asset.criticality']).to.eql('high_impact');
       });
     });
   });

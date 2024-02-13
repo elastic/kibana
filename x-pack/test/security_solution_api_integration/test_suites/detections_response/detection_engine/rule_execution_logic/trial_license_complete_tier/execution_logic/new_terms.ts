@@ -1064,8 +1064,8 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const fullAlert = previewAlerts[0]._source;
 
-        expect(fullAlert?.['host.asset.criticality']).to.eql('normal');
-        expect(fullAlert?.['user.asset.criticality']).to.eql('very_important');
+        expect(fullAlert?.['host.asset.criticality']).to.eql('medium_impact');
+        expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
       });
     });
   });
