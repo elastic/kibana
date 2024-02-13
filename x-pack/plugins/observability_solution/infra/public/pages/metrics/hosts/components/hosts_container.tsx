@@ -5,15 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useMetricsDataViewContext } from '../hooks/use_metrics_data_view';
 import { UnifiedSearchBar } from './search_bar/unified_search_bar';
 import { HostsContent } from './hosts_content';
 import { ErrorCallout } from './error_callout';
 import { UnifiedSearchProvider } from '../hooks/use_unified_search';
+import { HostsTableProvider } from '../hooks/use_hosts_table';
+import { HostsViewProvider } from '../hooks/use_hosts_view';
+import { HostCountProvider } from '../hooks/use_host_count';
 
 export const HostContainer = () => {
   const { dataView, loading, error, metricAlias, retry } = useMetricsDataViewContext();
@@ -48,8 +51,13 @@ export const HostContainer = () => {
   ) : (
     <UnifiedSearchProvider>
       <UnifiedSearchBar />
-      <EuiSpacer size="m" />
-      <HostsContent />
+      <HostsViewProvider>
+        <HostsTableProvider>
+          <HostCountProvider>
+            <HostsContent />
+          </HostCountProvider>
+        </HostsTableProvider>
+      </HostsViewProvider>
     </UnifiedSearchProvider>
   );
 };

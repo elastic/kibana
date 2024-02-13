@@ -72,9 +72,10 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
+        dashboard,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
+    [dashboard, dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
 
   const maybeRedirect = useCallback(
