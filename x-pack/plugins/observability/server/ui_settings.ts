@@ -40,6 +40,7 @@ import {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   enableInfrastructureProfilingIntegration,
+  apmEnableTransactionProfiling,
   enableInfrastructureHostsCustomDashboards,
 } from '../common/ui_settings_keys';
 
@@ -567,6 +568,15 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+  },
+  [apmEnableTransactionProfiling]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
+      defaultMessage: 'Enable Universal Profiling on Transaction view',
+    }),
+    value: false,
+    schema: schema.boolean(),
     requiresPageReload: true,
   },
 };

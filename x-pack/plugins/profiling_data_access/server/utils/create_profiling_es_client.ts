@@ -50,6 +50,8 @@ export function createProfilingEsClient({
       pervCPUWattArm64,
       pervCPUWattX86,
       azureCostDiscountRate,
+      indices,
+      stacktraceIdsField,
     }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -68,6 +70,8 @@ export function createProfilingEsClient({
               aws_cost_factor: awsCostDiscountRate,
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
+              indices,
+              stacktrace_ids_field: stacktraceIdsField,
             },
           },
           {
@@ -113,6 +117,8 @@ export function createProfilingEsClient({
       pervCPUWattArm64,
       pervCPUWattX86,
       azureCostDiscountRate,
+      indices,
+      stacktraceIdsField,
     }) {
       const controller = new AbortController();
 
@@ -132,6 +138,8 @@ export function createProfilingEsClient({
               aws_cost_factor: awsCostDiscountRate,
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
+              indices,
+              stacktrace_ids_field: stacktraceIdsField,
             },
           },
           {

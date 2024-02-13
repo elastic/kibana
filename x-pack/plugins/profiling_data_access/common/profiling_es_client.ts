@@ -30,6 +30,8 @@ export interface ProfilingESClient {
     awsCostDiscountRate?: number;
     costPervCPUPerHour?: number;
     azureCostDiscountRate?: number;
+    indices?: string[];
+    stacktraceIdsField?: string;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
@@ -44,5 +46,7 @@ export interface ProfilingESClient {
     awsCostDiscountRate?: number;
     azureCostDiscountRate?: number;
     costPervCPUPerHour?: number;
+    indices?: string[];
+    stacktraceIdsField?: string;
   }): Promise<BaseFlameGraph>;
 }

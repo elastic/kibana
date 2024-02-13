@@ -40,3 +40,4 @@ export const profilingDatacenterPUE = 'observability:profilingDatacenterPUE';
 export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDiscountRate';
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
+export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
