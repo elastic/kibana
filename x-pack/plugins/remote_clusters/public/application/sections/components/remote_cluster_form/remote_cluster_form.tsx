@@ -42,10 +42,10 @@ import { RequestFlyout } from './request_flyout';
 import { ConnectionMode } from './components';
 import {
   ClusterErrors,
-  validateCluster,
   convertCloudRemoteAddressToProxyConnection,
+  validateCluster,
+  isCloudAdvancedOptionsEnabled,
 } from './validators';
-import { isCloudAdvancedOptionsEnabled } from './validators/validate_cloud_url';
 
 const defaultClusterValues: ClusterPayload = {
   name: '',
@@ -110,7 +110,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     this.generateId = htmlIdGenerator();
     this.state = {
       fields: fieldsState,
-      fieldsErrors: validateCluster(fieldsState, true),
+      fieldsErrors: validateCluster(fieldsState, isCloudEnabled),
       areErrorsVisible: false,
       isRequestVisible: false,
     };
