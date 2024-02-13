@@ -14,7 +14,6 @@ import {
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
-  VisualizationDimensionGroupConfig,
   DatasourceMap,
   VisualizationMap,
   UserMessagesGetter,
@@ -22,6 +21,7 @@ import {
   RegisterLibraryAnnotationGroupFunction,
   StateSetter,
   DragDropOperation,
+  VisualizationDimensionGroupConfig,
 } from '../../../types';
 
 export interface ConfigPanelWrapperProps {
@@ -87,10 +87,4 @@ export interface LayerPanelProps {
 export interface LayerDatasourceDropProps {
   state: unknown;
   setState: (newState: unknown) => void;
-}
-
-export interface ActiveDimensionState {
-  isNew: boolean;
-  activeId?: string;
-  activeGroup?: VisualizationDimensionGroupConfig;
 }
