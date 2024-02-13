@@ -427,6 +427,7 @@ packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/plugins/fleet @elastic/fleet
 packages/kbn-flot-charts @elastic/kibana-operations
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
+packages/kbn-formatters @elastic/obs-ux-logs-team
 src/plugins/ftr_apis @elastic/kibana-core
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ftr-common-functional-ui-services @elastic/appex-qa
@@ -674,6 +675,7 @@ packages/kbn-search-index-documents @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/platform-deployment-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
+packages/kbn-security-hardening @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
 x-pack/packages/security/plugin_types_common @elastic/kibana-security
 x-pack/packages/security/plugin_types_public @elastic/kibana-security
@@ -1256,7 +1258,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 # Security Solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
-/x-pack/test/detection_engine_api_integration @elastic/security-solution
+/x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
@@ -1500,6 +1502,9 @@ x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/secu
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/risk_score @elastic/security-entity-analytics
+
+## Security Solution sub teams - GenAI
+x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows

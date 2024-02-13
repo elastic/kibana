@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CRITICALITY_LEVEL_TITLE, CRITICALITY_LEVEL_DESCRIPTION } from './translations';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
-const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
+export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
   very_important: '#E7664C',
   important: '#D6BF57',
   normal: '#54B399',
@@ -22,12 +22,14 @@ export const AssetCriticalityBadge: React.FC<{
   criticalityLevel: CriticalityLevel;
   withDescription?: boolean;
   style?: React.CSSProperties;
+  className?: string;
   dataTestSubj?: string;
 }> = ({
   criticalityLevel,
   style,
   dataTestSubj = 'asset-criticality-badge',
   withDescription = false,
+  className,
 }) => {
   const showDescription = withDescription ?? false;
   const badgeContent = showDescription ? (
@@ -46,6 +48,7 @@ export const AssetCriticalityBadge: React.FC<{
       data-test-subj={dataTestSubj}
       color={CRITICALITY_LEVEL_COLOR[criticalityLevel]}
       style={style}
+      className={className}
     >
       {badgeContent}
     </EuiHealth>
@@ -57,7 +60,8 @@ export const AssetCriticalityBadgeAllowMissing: React.FC<{
   withDescription?: boolean;
   style?: React.CSSProperties;
   dataTestSubj?: string;
-}> = ({ criticalityLevel, style, dataTestSubj, withDescription }) => {
+  className?: string;
+}> = ({ criticalityLevel, style, dataTestSubj, withDescription, className }) => {
   if (criticalityLevel) {
     return (
       <AssetCriticalityBadge
@@ -65,15 +69,16 @@ export const AssetCriticalityBadgeAllowMissing: React.FC<{
         dataTestSubj={dataTestSubj}
         withDescription={withDescription}
         style={style}
+        className={className}
       />
     );
   }
 
   return (
-    <EuiHealth color="subdued" data-test-subj={dataTestSubj}>
+    <EuiHealth color="subdued" data-test-subj={dataTestSubj} className={className}>
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
-        defaultMessage="No criticality assigned"
+        defaultMessage="Criticality Unassigned"
       />
     </EuiHealth>
   );

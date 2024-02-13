@@ -156,6 +156,7 @@ export interface UsageStats {
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
+  'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
@@ -165,5 +166,8 @@ export interface UsageStats {
   'observability:profilingDatacenterPUE': number;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
+  'observability:profilingAzureCostDiscountRate': number;
   'data_views:fields_excluded_data_tiers': string;
+  'observability:apmEnableTransactionProfiling': boolean;
+  'devTools:enableDockedConsole': boolean;
 }
