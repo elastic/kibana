@@ -26,6 +26,7 @@ import React, { useEffect, useMemo } from 'react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsElementMounted } from '../rules_table/guided_onboarding/use_is_element_mounted';
+import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from '../upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import * as i18n from './translations';
 
 export interface RulesFeatureTourContextType {
@@ -34,7 +35,6 @@ export interface RulesFeatureTourContextType {
 }
 
 export const PER_FIELD_UPGRADE_TOUR_ANCHOR = 'updates';
-export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
 const TOUR_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE;
 const TOUR_POPOVER_WIDTH = 400;
