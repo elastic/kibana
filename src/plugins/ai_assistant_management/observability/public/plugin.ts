@@ -11,6 +11,8 @@ import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { EnterpriseSearchPublicStart } from '@kbn/enterprise-search-plugin/public';
+
 import type {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
@@ -31,6 +33,7 @@ export interface SetupDependencies {
 export interface StartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
   serverless?: ServerlessPluginStart;
+  enterpriseSearch?: EnterpriseSearchPublicStart;
 }
 
 export class AiAssistantManagementObservabilityPlugin

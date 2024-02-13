@@ -10,6 +10,7 @@ import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
+import { CONTENT_FIELD, RESOURCE_FIELD, SMART_FALLBACK_FIELDS } from '../../common/constants';
 import {
   ChartDisplayOptions,
   DisplayOptions,
@@ -21,10 +22,16 @@ import type { ControlOptions, OptionsListControl } from '../controller';
 export const getGridColumnDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
 ): GridColumnDisplayOptions[] | undefined =>
-  discoverAppState.columns?.map((field) => ({
-    field,
-    width: discoverAppState.grid?.columns?.[field]?.width,
-  }));
+  discoverAppState.columns?.map((field) => {
+    if (field === CONTENT_FIELD || field === RESOURCE_FIELD) {
+      return SMART_FALLBACK_FIELDS[field];
+    }
+    return {
+      type: 'document-field',
+      field,
+      width: discoverAppState.grid?.columns?.[field]?.width,
+    };
+  });
 
 export const getGridRowsDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
@@ -58,18 +65,32 @@ export const getDiscoverAppStateFromContext = (
   filters: cloneDeep(displayOptions.filters),
 });
 
+export const getDiscoverColumnsWithFallbackFieldsFromDisplayOptions = (
+  displayOptions: DisplayOptions
+): DiscoverAppState['columns'] =>
+  displayOptions.grid.columns.flatMap((column) => {
+    return column.type === 'document-field'
+      ? column.field
+      : SMART_FALLBACK_FIELDS[column.smartField].fallbackFields;
+  });
+
 export const getDiscoverColumnsFromDisplayOptions = (
   displayOptions: DisplayOptions
-): DiscoverAppState['columns'] => displayOptions.grid.columns.map(({ field }) => field);
+): DiscoverAppState['columns'] =>
+  displayOptions.grid.columns.flatMap((column) => {
+    return column.type === 'document-field' ? column.field : column.smartField;
+  });
 
 export const getDiscoverGridFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): DiscoverAppState['grid'] => ({
   columns: displayOptions.grid.columns.reduce<
     NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
-  >((gridColumns, { field, width }) => {
-    if (width != null) {
-      gridColumns[field] = { width };
+  >((gridColumns, column) => {
+    const key = column.type === 'document-field' ? column.field : column.smartField;
+
+    if (column.width != null) {
+      gridColumns[key] = { width: column.width };
     }
     return gridColumns;
   }, {}),

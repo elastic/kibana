@@ -16,11 +16,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { CASES_FEATURE_ID } from '../../../common';
-import type { StartServices } from '../../types';
 import { ReactQueryClientProvider } from '../containers/query_client/query_client_provider';
-import { createMockStore } from './test_providers';
-
-export const kibanaMock = {} as unknown as StartServices;
+import { createMockStore } from './create_store';
 
 const uiSettings = {
   get: (setting: string) => {

@@ -567,7 +567,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
       return response.ok({
         body: {
-          connector: connectorResult?.value,
+          connector: connectorResult,
         },
       });
     })
@@ -592,9 +592,9 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       let connectorResponse;
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-        const indexNameToDelete = shouldDeleteIndex ? connector?.value.index_name : null;
-        const apiKeyId = connector?.value.api_key_id;
-        const secretId = connector?.value.api_key_secret_id;
+        const indexNameToDelete = shouldDeleteIndex ? connector?.index_name : null;
+        const apiKeyId = connector?.api_key_id;
+        const secretId = connector?.api_key_secret_id;
 
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
 
