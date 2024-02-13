@@ -87,56 +87,109 @@ describe('options list fetch all suggestions query', () => {
     });
   });
 
-  test('suggestion parsing', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
-      size: 10,
-      fieldName: 'bytes',
-      allowExpensiveQueries: true,
-      fieldSpec: {
-        type: 'number',
-      } as unknown as FieldSpec,
-      sort: {
-        by: '_key',
-        direction: 'asc',
-      },
-    };
-    const aggregationBuilder = getAllSuggestionsAggregationBuilder();
-    const searchResponseMock = {
-      hits: {
-        total: 10,
-        max_score: 10,
-        hits: [],
-      },
-      took: 10,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 1,
-        total: 1,
-        skipped: 0,
-      },
-      aggregations: {
-        suggestions: {
-          buckets: [
-            { doc_count: 5, key: '1' },
-            { doc_count: 4, key: '2' },
-            { doc_count: 3, key: '3' },
-          ],
+  describe('suggestion parsing', () => {
+    test('key is already a string', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
+        fieldName: 'bytes',
+        allowExpensiveQueries: true,
+        fieldSpec: {
+          type: 'number',
+        } as unknown as FieldSpec,
+        sort: {
+          by: '_key',
+          direction: 'asc',
         },
-        unique_terms: {
-          value: 3,
+      };
+      const aggregationBuilder = getAllSuggestionsAggregationBuilder();
+      const searchResponseMock = {
+        hits: {
+          total: 10,
+          max_score: 10,
+          hits: [],
         },
-      },
-    };
+        took: 10,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 1,
+          total: 1,
+          skipped: 0,
+        },
+        aggregations: {
+          suggestions: {
+            buckets: [
+              { doc_count: 5, key: '1' },
+              { doc_count: 4, key: '2' },
+              { doc_count: 3, key: '3' },
+            ],
+          },
+          unique_terms: {
+            value: 3,
+          },
+        },
+      };
 
-    const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
-    expect(parsed).toMatchObject({
-      suggestions: [
-        { value: '1', docCount: 5 },
-        { value: '2', docCount: 4 },
-        { value: '3', docCount: 3 },
-      ],
-      totalCardinality: 3,
+      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
+      expect(parsed).toMatchObject({
+        suggestions: [
+          { value: '1', docCount: 5 },
+          { value: '2', docCount: 4 },
+          { value: '3', docCount: 3 },
+        ],
+        totalCardinality: 3,
+      });
+    });
+
+    test('key is not a string - boolean field', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
+        fieldName: 'cancelled',
+        allowExpensiveQueries: true,
+        fieldSpec: {
+          type: 'boolean',
+        } as unknown as FieldSpec,
+        sort: {
+          by: '_key',
+          direction: 'desc',
+        },
+      };
+      const aggregationBuilder = getAllSuggestionsAggregationBuilder();
+      const searchResponseMock = {
+        hits: {
+          total: 10,
+          max_score: 10,
+          hits: [],
+        },
+        took: 10,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 1,
+          total: 1,
+          skipped: 0,
+        },
+        aggregations: {
+          suggestions: {
+            buckets: [
+              { doc_count: 54, key: 0, key_as_string: 'false' },
+              { doc_count: 46, key: 1, key_as_string: 'true' },
+            ],
+          },
+          unique_terms: {
+            value: 2,
+          },
+        },
+      };
+
+      const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
+      expect(parsed).toMatchObject({
+        suggestions: [
+          { value: 'false', docCount: 54 },
+          { value: 'true', docCount: 46 },
+        ],
+        totalCardinality: 2,
+      });
     });
   });
 });
