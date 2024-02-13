@@ -256,7 +256,7 @@ export function createSearchBar({
             dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
-            quickFilters={props.quickFilters}
+            additionalQueryBarMenuItems={props.additionalQueryBarMenuItems}
             {...overrideDefaultBehaviors(props)}
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
