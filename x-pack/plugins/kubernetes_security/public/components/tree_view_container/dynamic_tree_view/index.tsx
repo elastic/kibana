@@ -68,6 +68,7 @@ export const DynamicTreeView = ({
   onSelect,
   selected = '',
   expanded = true,
+  onKeyDown,
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
   const euiStyles = euiTreeViewStyles(useEuiTheme());
@@ -138,7 +139,7 @@ export const DynamicTreeView = ({
   }, [data?.pages]);
 
   return (
-    <EuiText size="s" css={styles.euiTreeViewWrapper} hidden={!expanded}>
+    <EuiText size="s" css={styles.euiTreeViewWrapper} hidden={!expanded} onKeyDown={onKeyDown}>
       {depth === 0 && (
         <EuiI18n
           token="euiTreeView.listNavigationInstructions"
@@ -298,22 +299,6 @@ const DynamicTreeViewItem = ({
     }
   };
 
-  const isSelected = useMemo(() => {
-    return (
-      selected ===
-      Object.entries({
-        ...selectionDepth,
-        [tree[depth].type]: aggData.key,
-        ...(tree[depth].type === 'clusterId' &&
-          aggData.key_as_string && {
-            clusterName: aggData.key_as_string,
-          }),
-      })
-        .map(([k, v]) => `${k}.${v}`)
-        .join()
-    );
-  }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
-
   const clusterLevel = BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS[tree[depth].type];
 
   return (
@@ -321,7 +306,6 @@ const DynamicTreeViewItem = ({
       id={aggData.key_as_string || `${aggData.key}`}
       hasArrow={!isLastNode}
       isExpanded={isExpanded}
-      isActive={isSelected}
       onClick={onButtonToggle}
       onKeyDown={onKeyDown}
       icon={<TreeViewIcon {...tree[depth].iconProps} />}
@@ -333,27 +317,26 @@ const DynamicTreeViewItem = ({
       buttonRef={(el: HTMLButtonElement) => (buttonRef.current[aggData.key] = el)}
       data-test-subj={expanded ? BUTTON_TEST_ID : ''}
     >
-      <div
-        onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}
-      >
-        {!isLastNode && (
-          <DynamicTreeView
-            expanded={isExpanded}
-            query={query}
-            depth={depth + 1}
-            selectionDepth={{
-              ...selectionDepth,
-              [tree[depth].type]: aggData.key,
-              ...(tree[depth].type === 'clusterId' && {
-                clusterName: aggData.key_as_string,
-              }),
-            }}
-            tree={tree}
-            onSelect={onSelect}
-            selected={selected}
-          />
-        )}
-      </div>
+      {!isLastNode && (
+        <DynamicTreeView
+          expanded={isExpanded}
+          query={query}
+          depth={depth + 1}
+          selectionDepth={{
+            ...selectionDepth,
+            [tree[depth].type]: aggData.key,
+            ...(tree[depth].type === 'clusterId' && {
+              clusterName: aggData.key_as_string,
+            }),
+          }}
+          tree={tree}
+          onSelect={onSelect}
+          selected={selected}
+          onKeyDown={(event: React.KeyboardEvent) =>
+            onChildrenKeydown(event, aggData.key.toString())
+          }
+        />
+      )}
     </EuiTreeView.Item>
   );
 };

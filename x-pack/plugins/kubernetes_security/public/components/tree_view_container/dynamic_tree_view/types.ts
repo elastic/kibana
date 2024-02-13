@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KeyboardEventHandler } from 'react';
 import { QueryDslQueryContainerBool, KubernetesCollectionMap, DynamicTree } from '../../../types';
 
 export type DynamicTreeViewProps = {
@@ -21,9 +22,12 @@ export type DynamicTreeViewProps = {
   hasSelection?: boolean;
   selected?: string;
   expanded?: boolean;
+  onKeyDown?: KeyboardEventHandler | undefined;
 };
 
-export type DynamicTreeViewItemProps = Required<Omit<DynamicTreeViewProps, 'hasSelection'>> & {
+export type DynamicTreeViewItemProps = Required<
+  Omit<DynamicTreeViewProps, 'hasSelection' | 'onKeyDown'>
+> & {
   onToggleExpand: any;
   aggData: any;
   isExpanded: boolean;
