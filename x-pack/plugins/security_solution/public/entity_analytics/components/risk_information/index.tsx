@@ -250,6 +250,13 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 id="xpack.securitySolution.riskInformation.riskCalculationStep3"
                 defaultMessage="If the 'Asset Criticality' feature is enabled in your space, entity risk scoring verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Asset Criticality' category."
               />
+              <EuiSpacer size="s" />
+              <EuiBasicTable
+                columns={getCriticalityLevelTableColumns()}
+                items={criticalityLevelTableItems}
+                data-test-subj="criticality-level-information-table"
+              />
+              <EuiSpacer size="s" />
             </li>
             <li>
               <FormattedMessage
@@ -262,40 +269,17 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 id="xpack.securitySolution.riskInformation.riskCalculationStep5"
                 defaultMessage="Maps the entity risk label based on the normalized risk score."
               />
+              <EuiSpacer size="s" />
+              <EuiBasicTable
+                columns={getRiskLevelTableColumns()}
+                items={riskLevelTableItems}
+                data-test-subj="risk-level-information-table"
+              />
+              <EuiSpacer size="s" />
             </li>
           </SpacedOrderedList>
         </EuiText>
-        <EuiSpacer />
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.riskLevelTableTitle"
-              defaultMessage="Risk Levels"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          columns={getRiskLevelTableColumns()}
-          items={riskLevelTableItems}
-          data-test-subj="risk-level-information-table"
-        />
-        <EuiSpacer size="l" />
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.criticalityLevelTableTitle"
-              defaultMessage="Asset Criticality"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          columns={getCriticalityLevelTableColumns()}
-          items={criticalityLevelTableItems}
-          data-test-subj="criticality-level-information-table"
-        />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <RiskScoreDocLink
           title={
             <FormattedMessage

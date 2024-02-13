@@ -11,7 +11,7 @@ import { getRiskEntityTranslation } from '../risk_score/translations';
 export const INFORMATION_LEVEL_HEADER = i18n.translate(
   'xpack.securitySolution.riskInformation.levelHeader',
   {
-    defaultMessage: 'Level',
+    defaultMessage: 'Risk Level',
   }
 );
 
@@ -35,7 +35,7 @@ export const INFORMATION_RISK_HEADER = i18n.translate(
 export const INFORMATION_TIER_HEADER = i18n.translate(
   'xpack.securitySolution.riskInformation.tierColumnHeader',
   {
-    defaultMessage: 'Tier',
+    defaultMessage: 'Asset Criticality Tier',
   }
 );
 
