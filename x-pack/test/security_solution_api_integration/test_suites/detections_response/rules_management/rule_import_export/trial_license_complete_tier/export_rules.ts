@@ -12,17 +12,19 @@ import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
   binaryToString,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
-  waitForRulePartialFailure,
   updateUsername,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRulePartialFailure,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

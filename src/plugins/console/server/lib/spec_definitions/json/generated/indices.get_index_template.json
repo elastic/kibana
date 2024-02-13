@@ -21,7 +21,7 @@
       "_index_template",
       "_index_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-template.html",
     "availability": {
       "stack": true,
       "serverless": true
