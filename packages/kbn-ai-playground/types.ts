@@ -8,6 +8,7 @@
  */
 
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { HttpStart } from '@kbn/core-http-browser';
 
 export enum MessageRole {
   'user' = 'user',
@@ -26,7 +27,7 @@ export enum ChatFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
-  openAIKey = 'openAIKey',
+  openAIKey = 'api_key',
 }
 
 export interface ChatForm {
@@ -38,4 +39,5 @@ export interface ChatForm {
 
 export interface AIPlaygroundPluginStartDeps {
   security: SecurityPluginStart;
+  http: HttpStart;
 }

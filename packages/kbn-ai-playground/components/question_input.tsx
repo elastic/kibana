@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 interface QuestionInputProps {
   value: string;
   onChange: (value: string) => void;
-  onEnterPress: () => void;
   button: React.ReactNode;
   isDisabled?: boolean;
 }
@@ -23,16 +22,10 @@ interface QuestionInputProps {
 export const QuestionInput: React.FC<QuestionInputProps> = ({
   value,
   onChange,
-  onEnterPress,
   button,
   isDisabled,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      onEnterPress();
-    }
-  };
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" css={{ position: 'relative' }}>
@@ -47,7 +40,6 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
         })}
         value={value}
         onChange={handleChange}
-        onKeyDown={handleKeyDown}
         disabled={isDisabled}
       />
 
