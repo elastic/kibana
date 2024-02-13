@@ -61,11 +61,11 @@ describe('getHelp()', () => {
         node scripts/foo --bar --baz
 
         Some thing that we wrote to help us execute things.
-
+        
         Example:
-
+        
           foo = bar = baz
-
+        
           Are you getting it?
 
         Options:
