@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: ['Invalid selection.\nbark'],
+          invalidSelections: ['bark'],
         });
         // only valid selections are applied as filters.
         expect(await pieChart.getPieSliceCount()).to.be(1);
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           suggestions: {
             hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
           },
-          invalidSelections: ['Invalid selection.\nmeow', 'Invalid selection.\nbark'],
+          invalidSelections: ['meow', 'bark'],
         });
         // there are no valid selections, so no pie chart is rendered.
         expect(await pieChart.expectEmptyPieChart());

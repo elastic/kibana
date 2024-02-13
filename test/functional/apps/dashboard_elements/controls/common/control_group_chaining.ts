@@ -152,11 +152,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
         suggestions: { Fluffy: 6, 'Fee Fee': 3, Rover: 3 },
-        invalidSelections: ['Invalid selection.\nsylvester'],
+        invalidSelections: ['sylvester'],
       });
       await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
         suggestions: {},
-        invalidSelections: ['Invalid selection.\nmeow'],
+        invalidSelections: ['meow'],
       });
     });
 
