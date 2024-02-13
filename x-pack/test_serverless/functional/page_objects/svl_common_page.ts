@@ -125,7 +125,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
     async forceLogout() {
       log.debug('SvlCommonPage.forceLogout');
-      if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
+      if (await find.existsByDisplayedByCssSelector('.login-form', 2000)) {
         log.debug('Already on the login page, not forcing anything');
         return;
       }
