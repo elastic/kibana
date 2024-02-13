@@ -603,6 +603,7 @@ class AgentPolicyService {
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
         authorizationHeader: options?.authorizationHeader,
+        force: options?.force,
       });
     }
 
