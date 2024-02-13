@@ -36,10 +36,6 @@ describe('ScheduleNotificationResponseActions', () => {
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
     osqueryCreateActionService: osqueryActionMock,
     endpointAppContextService: endpointActionMock as never,
-    experimentalFeatures: {
-      automatedProcessActionsEnabled: true,
-      endpointResponseActionsEnabled: true,
-    } as never,
   });
 
   describe('Osquery', () => {

@@ -121,26 +121,53 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          actions: {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: expect.any(String),
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment: 'test comment',
             targets: [
               {
+                agentType: 'endpoint',
                 endpointId: '1-2-3',
                 hostname: 'Host-ku5jy6j0pw',
               },
               {
+                agentType: 'endpoint',
                 endpointId: 'invalid-id',
                 hostname: '',
               },
             ],
-            type: 'isolate',
           },
-          comment: 'test comment',
+          externalReferenceStorage: {
+            type: 'elasticSearchDoc',
+          },
           owner: 'securitySolution',
-          type: 'actions',
+          type: 'externalReference',
         },
       ],
       caseId: 'case-a',
     });
+  });
+
+  it('should create an action with error', async () => {
+    await endpointActionsClient.isolate(getCommonResponseActionOptions(), {
+      error: 'something is wrong',
+    });
+
+    expect(
+      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+    ).not.toHaveBeenCalled();
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          error: {
+            message: 'something is wrong',
+          },
+        }),
+      }),
+      { meta: true }
+    );
   });
 
   it('should return ActionDetails for newly created action', async () => {
