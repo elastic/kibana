@@ -48,9 +48,9 @@ import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
 } from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
-import { OverallStats } from '../../types/overall_stats';
+import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import {
@@ -66,46 +66,17 @@ import { ActionsPanel } from '../actions_panel';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
-  RandomSamplerOption,
+  type RandomSamplerOption,
 } from '../../constants/random_sampler';
-
-interface DataVisualizerPageState {
-  overallStats: OverallStats;
-  metricConfigs: FieldVisConfig[];
-  totalMetricFieldCount: number;
-  populatedMetricFieldCount: number;
-  metricsLoaded: boolean;
-  nonMetricConfigs: FieldVisConfig[];
-  nonMetricsLoaded: boolean;
-  documentCountStats?: FieldVisConfig;
-}
+import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
 const defaultSearchQuery = {
   match_all: {},
 };
 
-export function getDefaultPageState(): DataVisualizerPageState {
-  return {
-    overallStats: {
-      totalCount: 0,
-      aggregatableExistsFields: [],
-      aggregatableNotExistsFields: [],
-      nonAggregatableExistsFields: [],
-      nonAggregatableNotExistsFields: [],
-    },
-    metricConfigs: [],
-    totalMetricFieldCount: 0,
-    populatedMetricFieldCount: 0,
-    metricsLoaded: false,
-    nonMetricConfigs: [],
-    nonMetricsLoaded: false,
-    documentCountStats: undefined,
-  };
-}
 export const getDefaultDataVisualizerListState = (
   overrides?: Partial<DataVisualizerIndexBasedAppState>
 ): Required<DataVisualizerIndexBasedAppState> => ({
@@ -244,7 +215,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
   };
 
-  const input: DataVisualizerGridInput = useMemo(() => {
+  const input: Required<DataVisualizerGridInput, 'dataView'> = useMemo(() => {
     return {
       dataView: currentDataView,
       savedSearch: currentSavedSearch,

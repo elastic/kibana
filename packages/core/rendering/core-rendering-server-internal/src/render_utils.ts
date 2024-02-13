@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom } from 'rxjs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import type { IConfigService } from '@kbn/config';
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import {
+  config as loggingConfigDef,
+  type LoggingConfigWithBrowserType,
+} from '@kbn/core-logging-server-internal';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -53,4 +60,13 @@ export const getStylesheetPaths = ({
           `${baseHref}/ui/legacy_light_theme.min.css`,
         ]),
   ];
+};
+
+export const getBrowserLoggingConfig = async (
+  configService: IConfigService
+): Promise<BrowserLoggingConfig> => {
+  const loggingConfig = await firstValueFrom(
+    configService.atPath<LoggingConfigWithBrowserType>(loggingConfigDef.path)
+  );
+  return loggingConfig.browser;
 };

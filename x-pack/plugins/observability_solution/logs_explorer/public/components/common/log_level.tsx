@@ -31,11 +31,13 @@ export function LogLevel({ level, dataTestSubj, renderInFlyout = false }: LogLev
     ? euiTheme.colors[LEVEL_DICT[level as keyof typeof LEVEL_DICT]]
     : null;
 
+  const truncatedLogLevel = level.length > 10 ? level.substring(0, 10) + '...' : level;
+
   if (renderInFlyout) {
     return (
       <ChipWithPopover
         property={constants.LOG_LEVEL_FIELD}
-        text={level}
+        text={truncatedLogLevel}
         borderColor={levelColor}
         style={{ width: 'none' }}
         dataTestSubj={dataTestSubj}
@@ -50,7 +52,7 @@ export function LogLevel({ level, dataTestSubj, renderInFlyout = false }: LogLev
       text={level}
       rightSideIcon="arrowDown"
       borderColor={levelColor}
-      style={{ width: '80px' }}
+      style={{ width: '80px', marginTop: '-3px' }}
     />
   );
 }

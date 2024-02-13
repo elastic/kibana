@@ -20,6 +20,12 @@ jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
 
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+}));
+
 const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
 
 jest.mock('../../../../api/hooks/use_risk_score', () => ({
@@ -52,16 +58,28 @@ describe('RiskInputsTab', () => {
       data: [riskScore],
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-contexts-title')).toBeInTheDocument();
+    expect(queryByTestId('risk-input-contexts-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
       'Risk inputRule Name'
     );
+  });
+
+  it('renders the context section if enabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-contexts-title')).toBeInTheDocument();
   });
 
   it('paginates', () => {
