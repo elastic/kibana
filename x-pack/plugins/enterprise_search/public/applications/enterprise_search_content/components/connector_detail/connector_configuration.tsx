@@ -103,7 +103,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.generateApiKey.title',
+                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.title',
                     {
                       defaultMessage: 'Generate an API key',
                     }
@@ -115,7 +115,7 @@ export const ConnectorConfiguration: React.FC = () => {
                     <>
                       <EuiText size="s">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
+                          id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.secondParagraph"
                           defaultMessage="The connectors repository contains several {link}. Use our framework to accelerate developing connectors for custom data sources."
                           values={{
                             link: (
@@ -125,7 +125,7 @@ export const ConnectorConfiguration: React.FC = () => {
                                 external
                               >
                                 {i18n.translate(
-                                  'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.clientExamplesLink',
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.clientExamplesLink',
                                   { defaultMessage: 'connector client examples' }
                                 )}
                               </EuiLink>
@@ -136,7 +136,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiSpacer />
                       <EuiText size="s">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.thirdParagraph"
+                          id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.thirdParagraph"
                           defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
                           values={{
                             link: (
@@ -146,7 +146,7 @@ export const ConnectorConfiguration: React.FC = () => {
                                 external
                               >
                                 {i18n.translate(
-                                  'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.configurationFileLink',
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.configurationFileLink',
                                   { defaultMessage: 'configuration file' }
                                 )}
                               </EuiLink>
@@ -168,7 +168,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiSpacer />
                       <EuiText size="s">
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorDeployedText',
+                          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorDeployedText',
                           {
                             defaultMessage:
                               'Once configured, deploy the connector on your infrastructure.',
@@ -182,7 +182,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       ? 'incomplete'
                       : 'complete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
+                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.deployConnector.title',
                     {
                       defaultMessage: 'Deploy connector',
                     }
@@ -213,7 +213,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       {!connector.status || connector.status === ConnectorStatus.CREATED ? (
                         <EuiCallOut
                           title={i18n.translate(
-                            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorTitle',
+                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.waitingForConnectorTitle',
                             {
                               defaultMessage: 'Waiting for your connector',
                             }
@@ -221,7 +221,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           iconType="iInCircle"
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorText',
+                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.waitingForConnectorText',
                             {
                               defaultMessage:
                                 'Your connector has not connected to Search. Troubleshoot your configuration and refresh the page.',
@@ -235,7 +235,7 @@ export const ConnectorConfiguration: React.FC = () => {
                             isLoading={recheckIndexLoading}
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnector.button.label',
+                              'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.waitingForConnector.button.label',
                               {
                                 defaultMessage: 'Recheck now',
                               }
@@ -247,7 +247,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           iconType="check"
                           color="success"
                           title={i18n.translate(
-                            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorConnected',
+                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorConnected',
                             {
                               defaultMessage:
                                 'Your connector {name} has connected to Search successfully.',
@@ -261,7 +261,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   status:
                     connector.status === ConnectorStatus.CONNECTED ? 'complete' : 'incomplete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.enhance.title',
+                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.enhance.title',
                     {
                       defaultMessage: 'Enhance your connector client',
                     }
@@ -274,7 +274,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiFlexItem>
                         <EuiText size="s">
                           {i18n.translate(
-                            'xpack.enterpriseSearch.content.indices.configurationConnector.scheduleSync.description',
+                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.scheduleSync.description',
                             {
                               defaultMessage:
                                 'Finalize your connector by triggering a one-time sync, or setting a recurring sync to keep your data source in sync over time',
@@ -294,7 +294,7 @@ export const ConnectorConfiguration: React.FC = () => {
                               })}`}
                             >
                               {i18n.translate(
-                                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.button.label',
+                                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.schedule.button.label',
                                 {
                                   defaultMessage: 'Set schedule and sync',
                                 }
@@ -310,7 +310,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   ),
                   status: connector.scheduling.full.enabled ? 'complete' : 'incomplete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
+                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.schedule.title',
                     {
                       defaultMessage: 'Sync your data',
                     }
@@ -330,7 +330,7 @@ export const ConnectorConfiguration: React.FC = () => {
                     <EuiText>
                       <h4>
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.support.title',
+                          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.title',
                           {
                             defaultMessage: 'Support and documentation',
                           }
@@ -341,7 +341,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   <EuiFlexItem>
                     <EuiText size="s">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.description',
+                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.description',
                         {
                           defaultMessage:
                             'You need to deploy this connector on your own infrastructure.',
@@ -352,7 +352,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   <EuiFlexItem>
                     <EuiLink href={docLinks.connectors} target="_blank">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.viewDocumentation.label',
+                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.viewDocumentation.label',
                         {
                           defaultMessage: 'View documentation',
                         }
@@ -362,7 +362,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   <EuiFlexItem>
                     <EuiLinkTo to={'/app/management/security/api_keys'} shouldNotCreateHref>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.manageKeys.label',
+                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.manageKeys.label',
                         {
                           defaultMessage: 'Manage API keys',
                         }
@@ -375,7 +375,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       target="_blank"
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.readme.label',
+                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.readme.label',
                         {
                           defaultMessage: 'Connector readme',
                         }
@@ -386,7 +386,7 @@ export const ConnectorConfiguration: React.FC = () => {
                     <EuiFlexItem>
                       <EuiLink href={docsUrl} target="_blank">
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.support.dockerDeploy.label',
+                          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.dockerDeploy.label',
                           {
                             defaultMessage: 'Deploy with Docker',
                           }
@@ -400,7 +400,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       target="_blank"
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.deploy.label',
+                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.deploy.label',
                         {
                           defaultMessage: 'Deploy without Docker',
                         }

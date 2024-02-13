@@ -111,7 +111,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               )}
               customOptionText={i18n.translate(
                 'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.customOption',
-                { defaultMessage: 'Create {searchValue} new index' }
+                {
+                  defaultMessage: 'Create {searchValue} new index',
+                  values: { searchValue: '{searchValue}' },
+                }
               )}
               isLoading={isLoading}
               options={options}
