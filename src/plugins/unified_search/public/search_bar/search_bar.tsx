@@ -27,6 +27,7 @@ import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
@@ -64,6 +65,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
+  additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   prependFilterBar?: React.ReactNode;
@@ -155,6 +157,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     showSubmitButton: true,
     showAutoRefreshOnly: false,
     filtersForSuggestions: [],
+    additionalQueryBarMenuItems: [],
   };
 
   private services = this.props.kibana.services;
@@ -530,6 +533,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
+        additionalQueryBarMenuItems={this.props.additionalQueryBarMenuItems ?? {}}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         query={this.state.query as Query}
         savedQuery={this.props.savedQuery}
@@ -543,7 +547,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         filtersForSuggestions={this.props.filtersForSuggestions}
         manageFilterSetComponent={
-          this.props.showFilterBar && this.state.query
+          this.props.showFilterBar && this.state.query && this.props.onClearSavedQuery
             ? this.renderSavedQueryManagement(
                 this.props.onClearSavedQuery,
                 this.props.showSaveQuery,
@@ -649,11 +653,11 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
   private renderSavedQueryManagement = memoizeOne(
     (
-      onClearSavedQuery: SearchBarOwnProps['onClearSavedQuery'],
+      onClearSavedQuery: NonNullable<SearchBarOwnProps['onClearSavedQuery']>,
       showSaveQuery: SearchBarOwnProps['showSaveQuery'],
       savedQuery: SearchBarOwnProps['savedQuery']
     ) => {
-      const savedQueryManagement = onClearSavedQuery && (
+      const savedQueryManagement = (
         <SavedQueryManagementList
           showSaveQuery={showSaveQuery}
           loadedSavedQuery={savedQuery}

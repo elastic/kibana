@@ -37,6 +37,7 @@ import {
   Alert,
   Alerts,
   AlertsTableConfigurationRegistry,
+  AlertsTableConfigurationRegistryContract,
   AlertsTableProps,
   RowSelectionState,
   TableUpdateHandlerArgs,
@@ -49,7 +50,6 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
-import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const DefaultPagination = {
@@ -58,7 +58,7 @@ const DefaultPagination = {
 };
 
 export type AlertsTableStateProps = {
-  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
+  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];

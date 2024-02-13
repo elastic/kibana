@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
-
-export const ALERT_TABLE_GENERIC_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-generic-alert-table`;
+import { GlobalAlertsPage } from './global_alerts_page';
+// eslint-disable-next-line import/no-default-export
+export default GlobalAlertsPage;
