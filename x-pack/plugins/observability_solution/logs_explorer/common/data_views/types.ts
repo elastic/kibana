@@ -20,8 +20,8 @@ export const dataViewDescriptorRT = rt.exact(
       dataType: dataTypeRT,
     }),
     rt.partial({
-      namespaces: rt.union([rt.array(rt.string), rt.undefined]),
-      type: rt.union([rt.string, rt.undefined]),
+      kibanaSpaces: rt.array(rt.string),
+      type: rt.string,
     }),
   ])
 );

@@ -11,9 +11,9 @@ import { DataViewSpecWithId } from '../../dataset_selection';
 import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
 
-type Whitelist = Array<string | RegExp>;
+type Allowlist = Array<string | RegExp>;
 
-const LOGS_WHITELIST: Whitelist = [
+const LOGS_ALLOWLIST: Allowlist = [
   buildIndexPatternRegExp(['logs', 'auditbeat', 'filebeat', 'winbeat']),
   // Add more strings or regex patterns as needed
 ];
@@ -21,16 +21,16 @@ const LOGS_WHITELIST: Whitelist = [
 export class DataViewDescriptor {
   id: DataViewDescriptorType['id'];
   dataType: DataViewDescriptorType['dataType'];
+  kibanaSpaces: DataViewDescriptorType['kibanaSpaces'];
   name: DataViewDescriptorType['name'];
-  namespaces: DataViewDescriptorType['namespaces'];
   title: DataViewDescriptorType['title'];
   type: DataViewDescriptorType['type'];
 
   private constructor(dataViewDescriptor: DataViewDescriptorType) {
     this.id = dataViewDescriptor.id;
     this.dataType = dataViewDescriptor.dataType;
+    this.kibanaSpaces = dataViewDescriptor.kibanaSpaces;
     this.name = dataViewDescriptor.name;
-    this.namespaces = dataViewDescriptor.namespaces;
     this.title = dataViewDescriptor.title;
     this.type = dataViewDescriptor.type;
   }
@@ -43,7 +43,6 @@ export class DataViewDescriptor {
     return {
       id: this.id,
       name: this.name,
-      timeFieldName: TIMESTAMP_FIELD,
       title: this.title,
     };
   }
@@ -57,15 +56,23 @@ export class DataViewDescriptor {
     };
   }
 
-  public static create(dataViewListItem: DataViewListItem) {
-    const name = dataViewListItem.name ?? dataViewListItem.title;
-    const dataType = DataViewDescriptor.#extractDataType(dataViewListItem.title);
+  public static create({ id, namespaces, title, type, name }: DataViewListItem) {
+    const nameWithFallbackTitle = name ?? title;
+    const dataType = DataViewDescriptor.#extractDataType(title);
+    const kibanaSpaces = namespaces;
 
-    return new DataViewDescriptor({ ...dataViewListItem, dataType, name });
+    return new DataViewDescriptor({
+      id,
+      dataType,
+      kibanaSpaces,
+      name: nameWithFallbackTitle,
+      title,
+      type,
+    });
   }
 
   static #extractDataType(title: string): DataViewDescriptorType['dataType'] {
-    if (testAgainstWhitelist(title, LOGS_WHITELIST)) {
+    if (isAllowed(title, LOGS_ALLOWLIST)) {
       return 'logs';
     }
 
@@ -81,8 +88,8 @@ export class DataViewDescriptor {
   }
 }
 
-function testAgainstWhitelist(value: string, whitelist: Whitelist) {
-  for (const allowedItem of whitelist) {
+function isAllowed(value: string, allowList: Allowlist) {
+  for (const allowedItem of allowList) {
     if (typeof allowedItem === 'string') {
       return value === allowedItem;
     }
@@ -91,6 +98,6 @@ function testAgainstWhitelist(value: string, whitelist: Whitelist) {
     }
   }
 
-  // If no match is found in the whitelist, return false
+  // If no match is found in the allowList, return false
   return false;
 }
