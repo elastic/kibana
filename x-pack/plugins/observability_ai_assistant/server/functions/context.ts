@@ -93,6 +93,8 @@ export function registerContextFunction({
           ? nonEmptyQueries
           : compact([userMessage?.message.content]);
 
+        queriesOrUserPrompt.push(screenDescription);
+
         const suggestions = await retrieveSuggestions({
           userMessage,
           client,
