@@ -12,9 +12,6 @@ import { ProfilingESClient } from '../../../common/profiling_es_client';
 interface Params {
   client: ProfilingESClient;
   sampleSize: number;
-  rangeFrom: number;
-  rangeTo: number;
-  kuery: string;
   durationSeconds: number;
   co2PerKWH: number;
   datacenterPUE: number;
