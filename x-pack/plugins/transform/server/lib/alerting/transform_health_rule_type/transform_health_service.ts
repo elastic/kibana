@@ -154,6 +154,7 @@ export function transformHealthServiceProvider({
     },
     /**
      * Returns report about transforms that contain error messages
+     * @deprecated This health check is no longer in use
      * @param transformIds
      */
     async getErrorMessagesReport(

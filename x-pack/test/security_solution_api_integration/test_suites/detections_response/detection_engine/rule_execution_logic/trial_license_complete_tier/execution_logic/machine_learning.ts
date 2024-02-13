@@ -34,9 +34,6 @@ import {
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   executeSetupModuleRequest,
   forceStartDatafeeds,
   getOpenAlerts,
@@ -44,6 +41,11 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -289,8 +291,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(1);
         const fullAlert = previewAlerts[0]._source;
 
-        expect(fullAlert?.['host.asset.criticality']).toBe('normal');
-        expect(fullAlert?.['user.asset.criticality']).toBe('very_important');
+        expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
+        expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
       });
     });
   });
