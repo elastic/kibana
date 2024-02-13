@@ -19,7 +19,12 @@ import {
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
+import { appContextService } from '../../services/app_context';
+
 import { validateFilterKueryNode, validateKuery } from './filter_utils';
+
+jest.mock('../../services/app_context');
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
@@ -507,6 +512,14 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 });
 
 describe('validateKuery validates real kueries', () => {
+  beforeEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      disableKQLValidation: false,
+    });
+  });
+  afterEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReset();
+  });
   describe('Agent policies', () => {
     it('Search by data_output_id', async () => {
       const validationObj = validateKuery(
@@ -830,6 +843,21 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toEqual(`KQLSyntaxError: Invalid key`);
+    });
+  });
+  describe('Feature flag disableKQLValidation', () => {
+    it('Allows to skip validation', async () => {
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        disableKQLValidation: true,
+      });
+      const validationObj = validateKuery(
+        `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`,
+        [FLEET_ENROLLMENT_API_PREFIX],
+        ENROLLMENT_API_KEY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
     });
   });
 });
