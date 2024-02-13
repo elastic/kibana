@@ -26,6 +26,7 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
   outputSecretsStorage: true,
   remoteESOutput: true,
   agentless: false,
+  disableKQLValidation: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
