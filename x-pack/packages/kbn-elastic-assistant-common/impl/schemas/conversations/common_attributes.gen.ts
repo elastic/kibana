@@ -47,21 +47,6 @@ export const User = z.object({
 });
 
 /**
- * Could be any string, not necessarily a UUID
- */
-export type MessagePresentation = z.infer<typeof MessagePresentation>;
-export const MessagePresentation = z.object({
-  /**
-   * Could be any string, not necessarily a UUID
-   */
-  delay: z.number().int().optional(),
-  /**
-   * Could be any string, not necessarily a UUID
-   */
-  stream: z.boolean().optional(),
-});
-
-/**
  * trace Data
  */
 export type TraceData = z.infer<typeof TraceData>;
@@ -111,7 +96,6 @@ export const Message = z.object({
    * Message content.
    */
   reader: Reader.optional(),
-  replacements: Replacement.optional(),
   /**
    * Message role.
    */
@@ -124,10 +108,6 @@ export const Message = z.object({
    * Is error message.
    */
   isError: z.boolean().optional(),
-  /**
-   * ID of the exception container
-   */
-  presentation: MessagePresentation.optional(),
   /**
    * trace Data
    */

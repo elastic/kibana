@@ -12,10 +12,19 @@ import { estypes } from '@elastic/elasticsearch';
 import { SearchEsConversationSchema } from './types';
 import { getConversation } from './get_conversation';
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),
 }));
+
+const mockUser1 = {
+  username: 'my_username',
+  authentication_realm: {
+    type: 'my_realm_type',
+    name: 'my_realm_name',
+  },
+} as AuthenticatedUser;
 
 export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',
@@ -141,7 +150,7 @@ describe('createConversation', () => {
       esClient,
       conversationIndex: 'index-1',
       spaceId: 'test',
-      user: { name: 'test' },
+      user: mockUser1,
       conversation,
       logger,
     });
@@ -174,7 +183,7 @@ describe('createConversation', () => {
       esClient,
       conversationIndex: 'index-1',
       spaceId: 'test',
-      user: { name: 'test' },
+      user: mockUser1,
       conversation,
       logger,
     });
@@ -196,7 +205,7 @@ describe('createConversation', () => {
       esClient,
       conversationIndex: 'index-1',
       spaceId: 'test',
-      user: { name: 'test' },
+      user: mockUser1,
       conversation,
       logger,
     });
@@ -220,7 +229,7 @@ describe('createConversation', () => {
       esClient,
       conversationIndex: 'index-1',
       spaceId: 'test',
-      user: { name: 'test' },
+      user: mockUser1,
       conversation,
       logger,
     });

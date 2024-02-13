@@ -41,9 +41,7 @@ export const transformESToConversations = (
             timestamp: message['@timestamp'],
             content: message.content,
             ...(message.is_error ? { isError: message.is_error } : {}),
-            ...(message.presentation ? { presentation: message.presentation } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
-            ...(message.replacements ? { replacements: message.replacements as Replacement } : {}),
             role: message.role,
             ...(message.trace_data
               ? {
@@ -62,18 +60,4 @@ export const transformESToConversations = (
 
       return conversation;
     });
-};
-
-export const encodeHitVersion = <T>(hit: T): string | undefined => {
-  // Have to do this "as cast" here as these two types aren't included in the SearchResponse hit type
-  const { _seq_no: seqNo, _primary_term: primaryTerm } = hit as unknown as {
-    _seq_no: number;
-    _primary_term: number;
-  };
-
-  if (seqNo == null || primaryTerm == null) {
-    return undefined;
-  } else {
-    return Buffer.from(JSON.stringify([seqNo, primaryTerm]), 'utf8').toString('base64');
-  }
 };

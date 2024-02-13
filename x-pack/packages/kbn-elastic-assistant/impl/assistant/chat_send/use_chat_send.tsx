@@ -77,7 +77,6 @@ export const useChatSend = ({
           ...currentConversation,
           replacements,
         });
-        return replacements;
       };
 
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
@@ -176,9 +175,10 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    setEditingSystemPromptId(defaultSystemPromptId);
     await clearConversation(currentConversation.id);
     await refresh();
+
+    setEditingSystemPromptId(defaultSystemPromptId);
   }, [
     allSystemPrompts,
     clearConversation,

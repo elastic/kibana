@@ -28,17 +28,6 @@ components:
           type: string
           description: User name.
 
-    MessagePresentation:
-      type: object
-      description: Could be any string, not necessarily a UUID
-      properties:
-        delay:
-          type: integer
-          description: Could be any string, not necessarily a UUID
-        stream:
-          type: boolean
-          description: Could be any string, not necessarily a UUID
-
     TraceData:
       type: object
       description: trace Data
@@ -87,8 +76,6 @@ components:
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
-        replacements:
-          $ref: '#/components/schemas/Replacement'
         role:
           $ref: '#/components/schemas/MessageRole'
           description: Message role.
@@ -98,9 +85,6 @@ components:
         isError:
           type: boolean
           description: Is error message.
-        presentation:
-          $ref: '#/components/schemas/MessagePresentation'
-          description: ID of the exception container
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: trace Data

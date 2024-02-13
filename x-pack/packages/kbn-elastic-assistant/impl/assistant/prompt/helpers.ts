@@ -50,9 +50,7 @@ export function getCombinedMessage({
     rawValue: string;
   }) => string;
   isNewChat: boolean;
-  onNewReplacements: (
-    newReplacements: Record<string, string>
-  ) => Record<string, string> | undefined;
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;

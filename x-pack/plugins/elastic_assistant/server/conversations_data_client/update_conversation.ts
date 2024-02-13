@@ -13,6 +13,7 @@ import {
   ConversationUpdateProps,
   Provider,
   MessageRole,
+  getMessageContentWithoutReplacements,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
@@ -186,11 +187,12 @@ export const transformToUpdateScheme = (
     replacements,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
-      content: message.content,
+      content: getMessageContentWithoutReplacements({
+        messageContent: message.content,
+        replacements: replacements as Record<string, string> | undefined,
+      }),
       is_error: message.isError,
-      presentation: message.presentation,
       reader: message.reader,
-      replacements: message.replacements,
       role: message.role,
       trace_data: {
         trace_id: message.traceData?.traceId,

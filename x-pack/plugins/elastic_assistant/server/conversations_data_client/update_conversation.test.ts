@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',
@@ -26,6 +27,14 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacements: {} as any,
 });
+
+const mockUser1 = {
+  username: 'my_username',
+  authentication_realm: {
+    type: 'my_realm_type',
+    name: 'my_realm_name',
+  },
+} as AuthenticatedUser;
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   id: 'test',
@@ -79,10 +88,7 @@ describe('updateConversation', () => {
       conversationIndex: 'index-1',
       existingConversation,
       conversationUpdateProps: conversation,
-      user: {
-        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        name: 'elastic',
-      },
+      user: mockUser1,
     });
     const expected: ConversationResponse = {
       ...getConversationResponseMock(),
@@ -104,10 +110,7 @@ describe('updateConversation', () => {
       conversationIndex: 'index-1',
       existingConversation,
       conversationUpdateProps: conversation,
-      user: {
-        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        name: 'elastic',
-      },
+      user: mockUser1,
     });
     expect(updatedList).toEqual(null);
   });
@@ -125,10 +128,7 @@ describe('updateConversation', () => {
         conversationIndex: 'index-1',
         existingConversation,
         conversationUpdateProps: conversation,
-        user: {
-          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-          name: 'elastic',
-        },
+        user: mockUser1,
       })
     ).rejects.toThrow('No conversation has been updated');
   });

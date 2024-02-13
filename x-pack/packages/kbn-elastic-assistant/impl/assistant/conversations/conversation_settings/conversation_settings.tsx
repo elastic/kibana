@@ -221,6 +221,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId: connector?.id,
+              connectorTypeTitle: connector?.connectorTypeTitle,
               provider: config?.apiProvider,
               model: config?.defaultModel,
             },
