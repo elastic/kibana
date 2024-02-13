@@ -90,8 +90,9 @@ export const populateInferenceServicesProvider = (client: IScopedClusterClient) 
       if (!asInternal && e.statusCode === 403) {
         // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
         await populateInferenceServices(trainedModels, true);
+      } else {
+        mlLog.error(e);
       }
-      mlLog.debug(e);
     }
   };
 };

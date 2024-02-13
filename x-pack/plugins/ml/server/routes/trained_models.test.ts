@@ -71,6 +71,8 @@ describe('populateInferenceServicesProvider', () => {
 
       expect(trainedModels[1].inference_apis).toEqual(undefined);
       expect(trainedModels[1].hasInferenceServices).toBe(undefined);
+
+      expect(mlLog.error).not.toHaveBeenCalled();
     });
   });
 
@@ -106,6 +108,8 @@ describe('populateInferenceServicesProvider', () => {
 
       expect(trainedModels[1].inference_apis).toEqual(undefined);
       expect(trainedModels[1].hasInferenceServices).toBe(undefined);
+
+      expect(mlLog.error).not.toHaveBeenCalled();
     });
   });
 
@@ -130,6 +134,6 @@ describe('populateInferenceServicesProvider', () => {
 
     expect(client.asInternalUser.transport.request).not.toHaveBeenCalled();
 
-    expect(mlLog.debug).toHaveBeenCalledWith(notFoundError);
+    expect(mlLog.error).toHaveBeenCalledWith(notFoundError);
   });
 });
