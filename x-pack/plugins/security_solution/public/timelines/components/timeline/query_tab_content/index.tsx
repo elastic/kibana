@@ -24,6 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -282,7 +283,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [dispatch, filterManager, timelineId, useDiscoverComponentsInTimeline]);
 
   const [
-    isQueryLoading,
+    queryLoadingState,
     { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
@@ -299,6 +300,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     startDate: start,
     timerangeKind,
   });
+
+  const isQueryLoading = useMemo(
+    () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
+    [queryLoadingState]
+  );
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });

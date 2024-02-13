@@ -139,7 +139,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
       'unifiedComponentsInTimelineEnabled'
-    );  
+    );
     const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -192,11 +192,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             $isVisible={TimelineTabs.queryNew === activeTimelineTab}
             data-test-subj={`timeline-tab-content-${TimelineTabs.queryNew}`}
           >
-            <NewQueryTab
-              renderCellValue={renderCellValue}
-              rowRenderers={rowRenderers}
-              timelineId={timelineId}
-            />
+            <NewQueryTab rowRenderers={rowRenderers} timelineId={timelineId} />
           </HideShowContainer>
         )}
         {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
@@ -309,7 +305,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 }) => {
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
-  );  
+  );
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
@@ -369,7 +365,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const setQueryNewAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.queryNew);
   }, [setActiveTab]);
-
 
   const setEqlAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.eql);

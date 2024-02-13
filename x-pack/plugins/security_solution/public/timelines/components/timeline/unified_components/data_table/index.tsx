@@ -38,7 +38,7 @@ import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
 import { getUnifiedDataTableColumnHeader } from '../../body/column_headers/helpers';
-import { getFormattedFields } from '../../body/renderers/get_formatted_fields';
+import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
@@ -125,7 +125,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
     const [fetchedPage, setFechedPage] = useState<number>(0);
 
-    // const [sampleSize, setSampleSize] = useState<number>(SAMPLE_SIZE_SETTING);
     const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
@@ -349,7 +348,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const customColumnRenderers = useMemo(
       () =>
         getFormattedFields({
-          unifiedDataTableRows: tableRows,
+          dataTableRows: tableRows,
           scopeId: 'timeline',
           headers: columns,
           browserFieldsByName,

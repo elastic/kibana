@@ -63,7 +63,6 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
 
   return (
     <>
-      {' '}
       <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={timelineId} />
       <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
       <span className="rightPosition">

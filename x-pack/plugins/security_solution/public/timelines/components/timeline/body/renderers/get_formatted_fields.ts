@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import React from 'react';
+import type React from 'react';
 import type { BrowserField, ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 
