@@ -2619,7 +2619,7 @@
                 "section": "def-common.PanelPackage",
                 "text": "PanelPackage"
               },
-              ") => Promise<string>; } & Partial<Pick<",
+              ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -9894,7 +9894,9 @@
         "parentPluginId": "embeddable",
         "id": "def-public.EmbeddableContext",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "EmbeddableContext",
         "description": [],
         "signature": [
@@ -9908,8 +9910,30 @@
           "<T>"
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "embeddableEnhanced",
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
+          },
+          {
+            "plugin": "embeddableEnhanced",
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
+          },
+          {
+            "plugin": "embeddableEnhanced",
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
+          },
+          {
+            "plugin": "discoverEnhanced",
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
+          },
+          {
+            "plugin": "discoverEnhanced",
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "embeddable",
@@ -13522,7 +13546,7 @@
             "section": "def-common.PanelPackage",
             "text": "PanelPackage"
           },
-          ") => Promise<string>; } & Partial<Pick<",
+          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
