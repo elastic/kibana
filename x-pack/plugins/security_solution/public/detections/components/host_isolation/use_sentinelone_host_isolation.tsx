@@ -6,45 +6,51 @@
  */
 
 import { isEmpty } from 'lodash';
-import type {
-  SentinelOneGetAgentsParams,
-  SentinelOneGetAgentsResponse,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import { SENTINELONE_CONNECTOR_ID, SUB_ACTION } from '@kbn/stack-connectors-plugin/public/common';
+import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { ENDPOINT_AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
+import { useHttp } from '../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useSubAction } from '../../../timelines/components/side_panel/event_details/flyout/use_sub_action';
-import { useLoadConnectors } from '../../../common/components/response_actions/use_load_connectors';
-import { SENTINEL_ONE_NETWORK_STATUS } from './sentinel_one_agent_status';
 
-/**
- * Using SentinelOne connector to pull agent's data from the SentinelOne API. If the agentId is in the transition state
- * (isolating/releasing) it will keep pulling the state until it finalizes the action
- * @param agentId
- */
-export const useSentinelOneAgentData = ({ agentId }: { agentId?: string }) => {
+interface ErrorType {
+  statusCode: number;
+  message: string;
+  meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
+}
+
+export const useGetSentinelOneAgentStatus = (
+  agentIds: string[],
+  options: UseQueryOptions<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> = {}
+): UseQueryResult<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> => {
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
-  const { data: connector } = useLoadConnectors({ actionTypeId: SENTINELONE_CONNECTOR_ID });
 
-  return useSubAction<SentinelOneGetAgentsParams, SentinelOneGetAgentsResponse>({
-    connectorId: connector?.[0]?.id,
-    subAction: SUB_ACTION.GET_AGENTS,
-    subActionParams: {
-      uuid: agentId,
-    },
-    disabled: !sentinelOneManualHostActionsEnabled || isEmpty(agentId),
-    // @ts-expect-error update types
-    refetchInterval: (lastResponse: { data: SentinelOneGetAgentsResponse }) => {
-      const networkStatus = lastResponse?.data?.data?.[0]
-        .networkStatus as SENTINEL_ONE_NETWORK_STATUS;
+  const http = useHttp();
 
-      return [
-        SENTINEL_ONE_NETWORK_STATUS.CONNECTING,
-        SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING,
-      ].includes(networkStatus)
-        ? 5000
-        : false;
-    },
+  return useQuery<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>>({
+    queryKey: ['get-agent-status', agentIds],
+    ...options,
+    enabled: !(
+      sentinelOneManualHostActionsEnabled &&
+      isEmpty(agentIds.filter((agentId) => agentId.trim().length))
+    ),
+    // TODO: update this to use a function instead of a number
+    refetchInterval: 2000,
+    queryFn: () =>
+      http
+        .get<{ data: AgentStatusApiResponse['data'] }>(ENDPOINT_AGENT_STATUS_ROUTE, {
+          version: '1',
+          query: {
+            agentIds,
+            // 8.13 sentinel_one support via internal API
+            agentType: 'sentinel_one',
+          },
+        })
+        .then((response) => response.data),
   });
 };

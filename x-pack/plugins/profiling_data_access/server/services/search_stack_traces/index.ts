@@ -22,6 +22,7 @@ export async function searchStackTraces({
   pervCPUWattArm64,
   awsCostDiscountRate,
   costPervCPUPerHour,
+  showErrorFrames,
 }: {
   client: ProfilingESClient;
   sampleSize: number;
@@ -35,6 +36,7 @@ export async function searchStackTraces({
   pervCPUWattArm64: number;
   awsCostDiscountRate: number;
   costPervCPUPerHour: number;
+  showErrorFrames: boolean;
 }) {
   const response = await client.profilingStacktraces({
     query: {
@@ -64,5 +66,5 @@ export async function searchStackTraces({
     costPervCPUPerHour,
   });
 
-  return decodeStackTraceResponse(response);
+  return decodeStackTraceResponse(response, showErrorFrames);
 }

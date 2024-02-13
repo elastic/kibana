@@ -50,12 +50,8 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 import {
   createExceptionList,
   createExceptionListItem,
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   getOpenAlerts,
   getPreviewAlerts,
-  getRuleForAlertTesting,
   getSimpleRule,
   previewRule,
   setAlertStatus,
@@ -65,6 +61,12 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   dataGeneratorFactory,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
