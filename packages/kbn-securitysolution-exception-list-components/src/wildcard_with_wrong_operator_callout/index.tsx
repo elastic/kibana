@@ -15,21 +15,35 @@ import { EuiCallOut } from '@elastic/eui';
 export const WildCardWithWrongOperatorCallout = () => {
   return (
     <EuiCallOut
-      title={i18n.translate(
-        'xpack.lists.exceptions.wildcardWithWrongOperatorWarning.callout.title',
-        { defaultMessage: 'Please review your entries' }
-      )}
+      title={i18n.translate('exceptionList-components.wildcardWithWrongOperatorCallout.title', {
+        defaultMessage: 'Please review your entries',
+      })}
       iconType="warning"
       color="warning"
       size="s"
+      data-test-subj="wildcardWithWrongOperatorCallout"
     >
       <p>
         <FormattedMessage
-          id="xpack.lists.exceptions.wildcardWithWrongOperatorWarning.callout.body"
+          id="exceptionList-components.wildcardWithWrongOperatorCallout.body"
           defaultMessage="Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. {operator} to '{matches}' to ensure wildcards run properly."
           values={{
-            operator: <strong>Change the operator</strong>,
-            matches: <strong>matches</strong>,
+            operator: (
+              <strong>
+                {i18n.translate(
+                  'exceptionList-components.wildcardWithWrongOperatorCallout.changeTheOperator',
+                  { defaultMessage: 'Change the operator' }
+                )}
+              </strong>
+            ),
+            matches: (
+              <strong>
+                {i18n.translate(
+                  'exceptionList-components.wildcardWithWrongOperatorCallout.matches',
+                  { defaultMessage: 'matches' }
+                )}
+              </strong>
+            ),
           }}
         />
       </p>
