@@ -40,7 +40,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Adhoc data views functionality
    */
-  useAdHocDataViews({ stateContainer, services });
+  useAdHocDataViews({ services });
 
   /**
    * State changes (data view, columns), when a text base query result is returned

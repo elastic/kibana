@@ -11,9 +11,9 @@ import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public'
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { Datatable } from '@kbn/expressions-plugin/common';
+import { useSavedSearch } from '../../services/discover_state_provider';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { FetchStatus } from '../../../types';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
@@ -34,11 +34,11 @@ export const DiscoverHistogramLayout = ({
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
-  const hideChart = useAppStateSelector((state) => state.hideChart);
+  const savedSearch = useSavedSearch();
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
     inspectorAdapters: dataState.inspectorAdapters,
-    hideChart,
+    hideChart: savedSearch.hideChart,
     isPlainRecord,
   });
 

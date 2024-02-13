@@ -11,21 +11,13 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { DiscoverServices } from '../../../build_services';
 import { useSavedSearch } from '../services/discover_state_provider';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { useAppStateSelector } from '../services/discover_app_state_container';
-import { useInternalStateSelector } from '../services/discover_internal_state_container';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
-import { DiscoverStateContainer } from '../services/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
 
-export const useAdHocDataViews = ({
-  services,
-}: {
-  stateContainer: DiscoverStateContainer;
-  services: DiscoverServices;
-}) => {
-  const query = useAppStateSelector((state) => state.query);
-  const dataView = useInternalStateSelector((state) => state.dataView);
+export const useAdHocDataViews = ({ services }: { services: DiscoverServices }) => {
   const savedSearch = useSavedSearch();
+  const dataView = savedSearch.searchSource.getField('index');
+  const query = savedSearch.searchSource.getField('query');
   const isTextBasedMode = isTextBasedQuery(query);
   const { filterManager, toastNotifications } = services;
 

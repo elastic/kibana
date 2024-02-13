@@ -23,11 +23,10 @@ import {
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
-import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { Filter } from '@kbn/es-query';
+import { useSavedSearchInitial, useSavedSearch } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -59,7 +58,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     trackUiMetric,
     capabilities,
     dataViews,
-    data,
     uiSettings,
     filterManager,
     history,
@@ -68,21 +66,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     serverless,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
-  const globalQueryState = data.query.getState();
-  const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
-    state.query,
-    state.savedQuery,
-    state.columns,
-    state.sort,
-  ]);
-  const viewMode: VIEW_MODE = useAppStateSelector((state) => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  });
-  const dataView = useInternalStateSelector((state) => state.dataView);
-  const dataState: DataMainMsg = useDataState(main$);
+  const savedSearchEdited = useSavedSearch();
   const savedSearch = useSavedSearchInitial();
+  const dataState: DataMainMsg = useDataState(stateContainer.dataState.data$.main$);
+  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+
+  const viewMode: VIEW_MODE = useMemo(() => {
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
+    return savedSearchEdited.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+  }, [uiSettings, savedSearchEdited]);
+
+  const dataView = savedSearchEdited.searchSource.getField('index');
 
   const fetchCounter = useRef<number>(0);
 
@@ -102,7 +96,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isPlainRecord = useMemo(
+    () =>
+      getRawRecordType(savedSearchEdited.searchSource.getField('query')) === RecordRawType.PLAIN,
+    [savedSearchEdited]
+  );
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]
@@ -119,8 +117,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataViews,
     setAppState: stateContainer.appState.update,
     useNewFieldsApi,
-    columns,
-    sort,
+    columns: savedSearchEdited.columns,
+    sort: savedSearchEdited.sort,
   });
 
   const onAddFilter = useCallback(
@@ -160,7 +158,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
 
   const textBasedLanguageModeWarning = useMemo(() => {
     if (isPlainRecord) {
@@ -268,7 +265,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             })}
       </h1>
       <TopNavMemoized
-        savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
@@ -333,8 +329,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                       <DiscoverNoResults
                         stateContainer={stateContainer}
                         isTimeBased={isTimeBased}
-                        query={globalQueryState.query}
-                        filters={globalQueryState.filters}
+                        query={savedSearchEdited.searchSource.getField('query')}
+                        filters={savedSearchEdited.searchSource.getField('filter') as Filter[]}
                         dataView={dataView}
                         onDisableFilters={onDisableFilters}
                       />

@@ -36,14 +36,14 @@ export interface DiscoverTopNavProps {
 }
 
 export const DiscoverTopNav = ({
-  savedQuery,
   stateContainer,
   updateQuery,
   textBasedLanguageModeErrors,
   textBasedLanguageModeWarning,
   onFieldEdited,
 }: DiscoverTopNavProps) => {
-  const query = useAppStateSelector((state) => state.query);
+  const [query, savedQuery] = useAppStateSelector((state) => [state.query, state.savedQuery]);
+
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);

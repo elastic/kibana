@@ -8,10 +8,10 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useSavedSearch } from '../../services/discover_state_provider';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
@@ -24,6 +24,7 @@ export const useDiscoverTopNav = ({
   stateContainer: DiscoverStateContainer;
 }) => {
   const services = useDiscoverServices();
+  const savedSearch = useSavedSearch();
   const topNavCustomization = useDiscoverCustomization('top_nav');
   const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
   const hasUnsavedChanges = Boolean(
@@ -41,9 +42,9 @@ export const useDiscoverTopNav = ({
     [stateContainer, services, hasUnsavedChanges, topNavCustomization]
   );
 
-  const dataView = useInternalStateSelector((state) => state.dataView);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
-  const query = useAppStateSelector((state) => state.query);
+  const query = savedSearch.searchSource.getField('query');
+  const dataView = savedSearch.searchSource.getField('index');
   const isTextBased = useMemo(() => isTextBasedQuery(query), [query]);
   const onOpenInspector = useInspector({
     inspector: services.inspector,
