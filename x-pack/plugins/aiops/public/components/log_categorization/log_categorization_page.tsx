@@ -227,15 +227,15 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   }, [
     dataView,
     selectedField,
-    earliest,
-    latest,
     cancelRequest,
     runValidateFieldRequest,
+    earliest,
+    latest,
     searchQuery,
-    embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
     toasts,
+    embeddingOrigin,
   ]);
 
   useEffect(() => {

@@ -224,22 +224,20 @@ export const CategoryTable: FC<Props> = ({
     // on the rare occasion that examples are not available, replace the examples column with tokens
     columns.splice(2, 1, {
       name: (
-        <>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.aiops.logCategorization.column.tokens.tooltip', {
-              defaultMessage:
-                'If the selected field is an alias, example documents cannot be displayed. Showing pattern tokens instead.',
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.aiops.logCategorization.column.tokens.tooltip', {
+            defaultMessage:
+              'If the selected field is an alias, example documents cannot be displayed. Showing pattern tokens instead.',
+          })}
+        >
+          <>
+            {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
+              defaultMessage: 'Tokens',
             })}
-          >
-            <>
-              {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
-                defaultMessage: 'Tokens',
-              })}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </>
-          </EuiToolTip>
-        </>
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
       ),
       render: (item: Category) => <FormattedTokens category={item} count={1} />,
     });
