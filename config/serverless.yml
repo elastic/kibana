@@ -69,21 +69,21 @@ xpack.security.ui.roleMappingManagementEnabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
-# Telemetry enabled by default and not disableable via UI
-telemetry.optIn: true
-telemetry.allowChangingOptInStatus: false
-
 # Harden security response headers, see https://github.com/elastic/kibana/issues/150884
 # The browser should remember that a site, including subdomains, is only to be accessed using HTTPS for 1 year
 # Can override this setting in kibana.dev.yml, e.g. server.securityResponseHeaders.strictTransportSecurity: null
 server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
-
 # default to newest routes
 server.versioned.versionResolution: newest
 # do not enforce client version check
 server.versioned.strictClientVersionCheck: false
+server.cdn.url: <TODO>
+
+# Telemetry enabled by default and not disableable via UI
+telemetry.optIn: true
+telemetry.allowChangingOptInStatus: false
 
 # Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
