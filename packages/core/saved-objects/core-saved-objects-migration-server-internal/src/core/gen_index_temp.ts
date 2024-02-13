@@ -10,11 +10,16 @@
  * This file contains logic to build and diff the index mappings for a migration.
  */
 
-import { cloneDeep } from 'lodash';
-import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import crypto from 'crypto';
+import { cloneDeep, mapValues } from 'lodash';
 import type {
-  IndexMapping,
-  SavedObjectsTypeMappingDefinitions,
+  ISavedObjectTypeRegistry,
+  SavedObjectsMappingProperties,
+} from '@kbn/core-saved-objects-server';
+import {
+  getVirtualVersionMap,
+  type IndexMapping,
+  type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import * as HASH_TO_VERSION_MAP from './hash_to_version_map.json';
 
@@ -26,16 +31,29 @@ import * as HASH_TO_VERSION_MAP from './hash_to_version_map.json';
  */
 export function buildActiveMappings(
   typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
-  override?: Partial<IndexMapping>
+  registry: ISavedObjectTypeRegistry
 ): IndexMapping {
   const mapping = getBaseMappings();
 
   const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
+  // const indexHashes = md5Values(mergedProperties);
+  // const virtualVersions = getVirtualVersionMap(registry.getAllTypes());
+
+  // console.log('INDEX ', index);
+  // Object.entries(indexHashes).forEach(([type, hash]) => {
+  //   if (virtualVersions[type]) {
+  //     console.log(`"${type}|${hash}": '${virtualVersions[type]}',`);
+  //   }
+  // });
+
   return cloneDeep({
     ...mapping,
-    ...override,
     properties: mergedProperties,
+    _meta: {
+      // migrationMappingPropertyHashes: md5Values(mergedProperties),
+      migrationMappingPropertyHashes: getVirtualVersionMap(registry.getAllTypes()),
+    },
   });
 }
 
@@ -91,16 +109,55 @@ export const getUpdatedTypes = ({
 /**
  *
  * @param type The saved object type to check
- * @param indexHashOrVersion The current "level" of the saved object, stored in the mappings._meta (it can be either a hash or a version)
- * @param appVersion The expected "level" of the saved object, according to the current Kibana version
+ * @param appHashOrVersion The current "level" of the saved object, stored in the mappings._meta (it can be either a hash or a version)
+ * @param modelVersion The expected "level" of the saved object, according to the current Kibana version
  * @returns True if the type has changed since Kibana was last started
  */
-function isTypeUpdated(type: string, indexHashOrVersion: string, appVersion: string): boolean {
-  const indexEquivalentVersion = (HASH_TO_VERSION_MAP as Record<string, string>)[
-    `${type}|${indexHashOrVersion}`
+function isTypeUpdated(type: string, appHashOrVersion: string, modelVersion: string): boolean {
+  const appEquivalentVersion = (HASH_TO_VERSION_MAP as Record<string, string>)[
+    `${type}|${appHashOrVersion}`
   ];
 
-  return indexHashOrVersion !== appVersion && indexEquivalentVersion !== appVersion;
+  return appHashOrVersion !== modelVersion && appEquivalentVersion !== modelVersion;
+}
+
+// Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
+function md5Object(obj: any) {
+  return crypto.createHash('md5').update(canonicalStringify(obj)).digest('hex');
+}
+
+// JSON.stringify is non-canonical, meaning the same object may produce slightly
+// different JSON, depending on compiler optimizations (e.g. object keys
+// are not guaranteed to be sorted). This function consistently produces the same
+// string, if passed an object of the same shape. If the outpuf of this function
+// changes from one release to another, migrations will run, so it's important
+// that this function remains stable across releases.
+function canonicalStringify(obj: any): string {
+  if (Array.isArray(obj)) {
+    return `[${obj.map(canonicalStringify)}]`;
+  }
+
+  if (!obj || typeof obj !== 'object') {
+    return JSON.stringify(obj);
+  }
+
+  const keys = Object.keys(obj);
+
+  // This is important for properly handling Date
+  if (!keys.length) {
+    return JSON.stringify(obj);
+  }
+
+  const sortedObj = keys
+    .sort((a, b) => a.localeCompare(b))
+    .map((k) => `${k}: ${canonicalStringify(obj[k])}`);
+
+  return `{${sortedObj}}`;
+}
+
+// Convert an object's values to md5 hash strings
+function md5Values(obj: any) {
+  return mapValues(obj, md5Object);
 }
 
 // If something exists in actual, but is missing in expected, we don't
@@ -111,8 +168,7 @@ function findChangedProp(actual: any, expected: any) {
 }
 
 /**
- * Defines the mappings for the root fields, common to all saved objects.
- * These are present in all SO indices.
+ * These mappings are required for any saved object index.
  *
  * @returns {IndexMapping}
  */

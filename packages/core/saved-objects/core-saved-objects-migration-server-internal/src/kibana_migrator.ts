@@ -19,9 +19,9 @@ import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import {
-  type SavedObjectUnsanitizedDoc,
-  type ISavedObjectTypeRegistry,
+import type {
+  SavedObjectUnsanitizedDoc,
+  ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -101,6 +101,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.typeRegistry = typeRegistry;
     this.defaultIndexTypesMap = defaultIndexTypesMap;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
+    // build mappings.properties for all types, all indices
     this.mappingProperties = buildTypesMappings(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.kibanaVersion = kibanaVersion;
@@ -112,8 +113,6 @@ export class KibanaMigrator implements IKibanaMigrator {
     });
     this.waitForMigrationCompletion = waitForMigrationCompletion;
     this.nodeRoles = nodeRoles;
-    // Building the active mappings (and associated md5sums) is an expensive
-    // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
     this.esCapabilities = esCapabilities;

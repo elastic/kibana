@@ -50,7 +50,7 @@ export interface RunResilientMigratorParams {
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
   indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
+  targetIndexMappings: IndexMapping;
   preMigrationScript?: string;
   readyToReindex: WaitGroup<void>;
   doneReindexing: WaitGroup<void>;
@@ -77,7 +77,7 @@ export async function runResilientMigrator({
   waitForMigrationCompletion,
   mustRelocateDocuments,
   indexTypesMap,
-  targetMappings,
+  targetIndexMappings,
   logger,
   preMigrationScript,
   readyToReindex,
@@ -97,7 +97,7 @@ export async function runResilientMigrator({
     waitForMigrationCompletion,
     mustRelocateDocuments,
     indexTypesMap,
-    targetMappings,
+    targetIndexMappings,
     preMigrationScript,
     coreMigrationVersionPerType,
     migrationVersionPerType,

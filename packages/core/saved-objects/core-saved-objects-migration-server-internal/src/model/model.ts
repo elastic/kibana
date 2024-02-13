@@ -1448,8 +1448,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else if (isTypeof(left, 'compared_mappings_changed')) {
         const rootFields = Object.keys(getBaseMappings().properties);
-        const updatedRootFields = left.updatedHashes.filter((field) => rootFields.includes(field));
-        const updatedTypesQuery = Option.fromNullable(buildPickupMappingsQuery(left.updatedHashes));
+        const updatedRootFields = left.updatedTypes.filter((field) => rootFields.includes(field));
+        const updatedTypesQuery = Option.fromNullable(buildPickupMappingsQuery(left.updatedTypes));
 
         if (updatedRootFields.length) {
           // compatible migration: some core fields have been updated
@@ -1477,7 +1477,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               ...stateP.logs,
               {
                 level: 'info',
-                message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedHashes}.`,
+                message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
               },
             ],
           };

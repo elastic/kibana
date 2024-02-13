@@ -14,11 +14,11 @@ import {
   type ComparedMappingsChanged,
   type ComparedMappingsMatch,
 } from './check_target_mappings';
-import { getUpdatedHashes } from '../core/build_active_mappings';
+import { getUpdatedTypes } from '../core/build_active_mappings';
 
 jest.mock('../core/build_active_mappings');
 
-const getUpdatedHashesMock = getUpdatedHashes as jest.MockedFn<typeof getUpdatedHashes>;
+const getUpdatedTypesMock = getUpdatedTypes as jest.MockedFn<typeof getUpdatedTypes>;
 
 const properties: SavedObjectsMappingProperties = {
   type1: { type: 'long' },
@@ -103,12 +103,12 @@ describe('checkTargetMappings', () => {
           actualMappings: expectedMappings,
         });
 
-        getUpdatedHashesMock.mockReturnValueOnce(['type1', 'type2', 'someRootField']);
+        getUpdatedTypesMock.mockReturnValueOnce(['type1', 'type2', 'someRootField']);
 
         const result = await task();
         const expected: ComparedMappingsChanged = {
           type: 'compared_mappings_changed' as const,
-          updatedHashes: ['type1', 'type2', 'someRootField'],
+          updatedTypes: ['type1', 'type2', 'someRootField'],
         };
         expect(result).toEqual(Either.left(expected));
       });
@@ -121,7 +121,7 @@ describe('checkTargetMappings', () => {
           actualMappings: expectedMappings,
         });
 
-        getUpdatedHashesMock.mockReturnValueOnce([]);
+        getUpdatedTypesMock.mockReturnValueOnce([]);
 
         const result = await task();
         const expected: ComparedMappingsMatch = {

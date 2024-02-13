@@ -29,7 +29,7 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
   indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
+  targetIndexMappings: IndexMapping;
   preMigrationScript?: string;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
@@ -39,6 +39,16 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   esCapabilities: ElasticsearchCapabilities;
 }
 
+const TEMP_INDEX_MAPPINGS: IndexMapping = {
+  dynamic: false,
+  properties: {
+    type: { type: 'keyword' },
+    typeMigrationVersion: {
+      type: 'version',
+    },
+  },
+};
+
 /**
  * Construct the initial state for the model
  */
@@ -47,7 +57,7 @@ export const createInitialState = ({
   waitForMigrationCompletion,
   mustRelocateDocuments,
   indexTypesMap,
-  targetMappings,
+  targetIndexMappings,
   preMigrationScript,
   coreMigrationVersionPerType,
   migrationVersionPerType,
@@ -62,16 +72,6 @@ export const createInitialState = ({
     coreMigrationVersionPerType,
     migrationVersionPerType,
   });
-
-  const reindexTargetMappings: IndexMapping = {
-    dynamic: false,
-    properties: {
-      type: { type: 'keyword' },
-      typeMigrationVersion: {
-        type: 'version',
-      },
-    },
-  };
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
   const excludeFilterHooks = Object.fromEntries(
@@ -101,14 +101,6 @@ export const createInitialState = ({
     );
   }
 
-  const targetIndexMappings: IndexMapping = {
-    ...targetMappings,
-    _meta: {
-      ...targetMappings._meta,
-      indexTypesMap,
-    },
-  };
-
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
@@ -124,7 +116,7 @@ export const createInitialState = ({
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings,
-    tempIndexMappings: reindexTargetMappings,
+    tempIndexMappings: TEMP_INDEX_MAPPINGS,
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,

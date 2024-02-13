@@ -31,18 +31,23 @@ const migrationsConfig = {
   maxReadBatchSizeBytes: ByteSizeValue.parse('500mb'),
 } as unknown as SavedObjectsMigrationConfigType;
 
+const indexTypesMap = {
+  '.kibana': ['typeA', 'typeB', 'typeC'],
+  '.kibana_task_manager': ['task'],
+  '.kibana_cases': ['typeD', 'typeE'],
+};
+
 const createInitialStateCommonParams = {
   kibanaVersion: '8.1.0',
   waitForMigrationCompletion: false,
   mustRelocateDocuments: true,
-  indexTypesMap: {
-    '.kibana': ['typeA', 'typeB', 'typeC'],
-    '.kibana_task_manager': ['task'],
-    '.kibana_cases': ['typeD', 'typeE'],
-  },
-  targetMappings: {
+  indexTypesMap,
+  targetIndexMappings: {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
+    _meta: {
+      indexTypesMap,
+    },
   } as IndexMapping,
   coreMigrationVersionPerType: {},
   migrationVersionPerType: {},

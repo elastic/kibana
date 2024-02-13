@@ -71,7 +71,7 @@ describe('runResilientMigrator', () => {
       waitForMigrationCompletion: options.waitForMigrationCompletion,
       mustRelocateDocuments: options.mustRelocateDocuments,
       indexTypesMap: options.indexTypesMap,
-      targetMappings: options.targetMappings,
+      targetIndexMappings: options.targetIndexMappings,
       preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
       coreMigrationVersionPerType: options.coreMigrationVersionPerType,
@@ -118,7 +118,7 @@ const mockOptions = (): RunResilientMigratorParams => {
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
     indexTypesMap: indexTypesMapMock,
-    targetMappings: {
+    targetIndexMappings: {
       properties: {
         a: { type: 'keyword' },
         c: { type: 'long' },

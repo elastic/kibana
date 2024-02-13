@@ -17,11 +17,13 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
-import type {
-  IndexTypesMap,
-  MigrationResult,
-  SavedObjectsMigrationConfigType,
-  SavedObjectsTypeMappingDefinitions,
+import {
+  getVirtualVersionMap,
+  type IndexMapping,
+  type IndexTypesMap,
+  type MigrationResult,
+  type SavedObjectsMigrationConfigType,
+  type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import Semver from 'semver';
 import type { DocumentMigrator } from './document_migrator';
@@ -113,6 +115,16 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   // but if their SOs must be relocated to another index, we still need a migrator to do the job
   indicesWithRelocatingTypes.forEach((index) => migratorIndices.add(index));
 
+  // we will store model versions instead of hashes (to be FIPS compliant)
+  const appVersions = getVirtualVersionMap(options.typeRegistry.getAllTypes());
+  // the mappings._meta will be common to all SO indices
+  const commonIndexMeta: Partial<IndexMapping> = {
+    _meta: {
+      migrationMappingPropertyHashes: appVersions,
+      indexTypesMap,
+    },
+  };
+
   const migrators = Array.from(migratorIndices).map((indexName, i) => {
     return {
       migrate: (): Promise<MigrationResult> => {
@@ -128,8 +140,10 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           mustRelocateDocuments,
           indexTypesMap,
           waitForMigrationCompletion: options.waitForMigrationCompletion,
-          // a migrator's index might no longer have any associated types to it
-          targetMappings: buildActiveMappings(indexMap[indexName]?.typeMappings ?? {}),
+          targetIndexMappings: buildActiveMappings(
+            indexMap[indexName]?.typeMappings ?? {}, // a migrator's index might no longer have any associated types to it,
+            commonIndexMeta
+          ),
           logger: options.logger,
           preMigrationScript: indexMap[indexName]?.script,
           readyToReindex,

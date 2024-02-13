@@ -6,13 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type {
+jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
+  getVirtualVersionMap: jest.fn(() => ({ a: '10.0.0', b: '10.1.0' })),
+}));
+
+import {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { buildActiveMappings, diffMappings, getUpdatedHashes } from './build_active_mappings';
+import { getVirtualVersionMapMock } from '../zdt/utils/check_version_compatibility.test.mocks';
+import {
+  buildActiveMappings,
+  diffMappings,
+  getBaseMappings,
+  getUpdatedTypes,
+} from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
+  beforeEach(() => {
+    getVirtualVersionMapMock.mockReset().mockReturnValueOnce({ type1: '10.0.0', type2: '10.3.0' });
+  });
   test('creates a strict mapping', () => {
     const mappings = buildActiveMappings({});
     expect(mappings.dynamic).toEqual('strict');
@@ -58,19 +71,32 @@ describe('buildActiveMappings', () => {
     expect(buildActiveMappings(typeMappings)).toMatchSnapshot();
   });
 
-  test('generated hashes are stable', () => {
+  test(`includes the provided override properties, except for 'properties'`, () => {
     const properties = {
       aaa: { type: 'keyword', fields: { a: { type: 'keyword' }, b: { type: 'text' } } },
       bbb: { fields: { b: { type: 'text' }, a: { type: 'keyword' } }, type: 'keyword' },
       ccc: { fields: { b: { type: 'text' }, a: { type: 'text' } }, type: 'keyword' },
     } as const;
 
-    const mappings = buildActiveMappings(properties);
-    const hashes = mappings._meta!.migrationMappingPropertyHashes!;
+    const someOverrideMappings: Partial<IndexMapping> = {
+      dynamic: true, // just to illustrate override works, not something we want to do
+      _meta: {
+        migrationMappingPropertyHashes: {
+          foo: 'someLongHash',
+          bar: 'anotherLongHash',
+          baz: '10.3.0', // hashes and versions will NOT coexist (it's either one or the other)
+        },
+      },
+      properties: {
+        // this illustrates that we cannot override properties
+        ddd: { type: 'keyword', fields: { a: { type: 'keyword' }, b: { type: 'text' } } },
+      },
+    };
 
-    expect(hashes.aaa).toBeDefined();
-    expect(hashes.aaa).toEqual(hashes.bbb);
-    expect(hashes.aaa).not.toEqual(hashes.ccc);
+    const mappings = buildActiveMappings(properties, someOverrideMappings);
+    expect(mappings.dynamic).toEqual(true);
+    expect(mappings._meta).toEqual(someOverrideMappings._meta);
+    expect(mappings.properties.ddd).toBeUndefined();
   });
 });
 
@@ -209,7 +235,7 @@ describe('diffMappings', () => {
   });
 });
 
-describe('getUpdatedHashes', () => {
+describe('getUpdatedTypes', () => {
   test('gives all hashes if _meta is missing from actual', () => {
     const actual: IndexMapping = {
       dynamic: 'strict',
@@ -223,7 +249,7 @@ describe('getUpdatedHashes', () => {
       properties: {},
     };
 
-    expect(getUpdatedHashes({ actual, expected })).toEqual(['foo', 'bar']);
+    expect(getUpdatedTypes({ actual, expected })).toEqual(['foo', 'bar']);
   });
 
   test('gives all hashes if migrationMappingPropertyHashes is missing from actual', () => {
@@ -240,7 +266,7 @@ describe('getUpdatedHashes', () => {
       properties: {},
     };
 
-    expect(getUpdatedHashes({ actual, expected })).toEqual(['foo', 'bar']);
+    expect(getUpdatedTypes({ actual, expected })).toEqual(['foo', 'bar']);
   });
 
   test('gives a list of the types with updated hashes', () => {
@@ -267,6 +293,57 @@ describe('getUpdatedHashes', () => {
       },
     };
 
-    expect(getUpdatedHashes({ actual, expected })).toEqual(['type2', 'type4']);
+    expect(getUpdatedTypes({ actual, expected })).toEqual(['type2', 'type4']);
+  });
+});
+
+describe('getBaseMappings', () => {
+  test('root properties cannot change, as we currently do NOT have model versions for them', () => {
+    expect(getBaseMappings()).toEqual({
+      dynamic: 'strict',
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+        namespace: {
+          type: 'keyword',
+        },
+        namespaces: {
+          type: 'keyword',
+        },
+        originId: {
+          type: 'keyword',
+        },
+        updated_at: {
+          type: 'date',
+        },
+        created_at: {
+          type: 'date',
+        },
+        references: {
+          type: 'nested',
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+        coreMigrationVersion: {
+          type: 'keyword',
+        },
+        typeMigrationVersion: {
+          type: 'version',
+        },
+        managed: {
+          type: 'boolean',
+        },
+      },
+    });
   });
 });
