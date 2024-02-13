@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
@@ -64,6 +65,8 @@ export const mockService: ObservabilityAIAssistantService = {
       navigate: () => {},
     } as unknown as SharePluginStart),
   register: () => {},
+  setScreenContext: () => noop,
+  getScreenContexts: () => [],
 };
 
 function createSetupContract(): ObservabilityAIAssistantPluginSetup {

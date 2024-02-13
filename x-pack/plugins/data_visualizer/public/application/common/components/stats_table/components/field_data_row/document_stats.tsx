@@ -32,7 +32,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
 
   const { count, sampleCount } = stats;
 
-  const total = sampleCount ?? totalCount;
+  const total = Math.min(sampleCount ?? Infinity, totalCount ?? Infinity);
 
   // If field exists is docs but we don't have count stats then don't show
   // Otherwise if field doesn't appear in docs at all, show 0%

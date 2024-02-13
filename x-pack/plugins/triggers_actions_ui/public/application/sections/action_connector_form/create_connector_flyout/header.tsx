@@ -8,18 +8,18 @@
 import React, { memo } from 'react';
 import {
   EuiBadge,
-  EuiTitle,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiText,
   EuiFlyoutHeader,
-  IconType,
+  EuiIcon,
   EuiSpacer,
-  EuiBetaBadge,
+  EuiText,
+  EuiTitle,
+  IconType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { betaBadgeProps } from '../beta_badge_props';
+import { betaBadgeProps, technicalPreviewBadgeProps } from '../beta_badge_props';
 
 interface Props {
   icon?: IconType | null;
@@ -27,6 +27,7 @@ interface Props {
   actionTypeMessage?: string | null;
   compatibility?: string[] | null;
   isExperimental?: boolean;
+  isBeta?: boolean;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -35,6 +36,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   actionTypeMessage,
   compatibility,
   isExperimental,
+  isBeta,
 }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -61,14 +63,23 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
-                {actionTypeName && isExperimental && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={betaBadgeProps.label}
-                      tooltipContent={betaBadgeProps.tooltipContent}
-                    />
-                  </EuiFlexItem>
-                )}
+                {actionTypeName
+                  ? isBeta && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBetaBadge
+                          label={betaBadgeProps.label}
+                          tooltipContent={betaBadgeProps.tooltipContent}
+                        />
+                      </EuiFlexItem>
+                    )
+                  : isExperimental && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBetaBadge
+                          label={technicalPreviewBadgeProps.label}
+                          tooltipContent={technicalPreviewBadgeProps.tooltipContent}
+                        />
+                      </EuiFlexItem>
+                    )}
               </EuiFlexGroup>
               <EuiText size="s" color="subdued">
                 {actionTypeMessage}

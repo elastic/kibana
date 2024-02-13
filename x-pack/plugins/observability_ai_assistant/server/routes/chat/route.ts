@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { messageRt } from '../runtime_types';
+import { screenContextRt, messageRt } from '../runtime_types';
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -84,6 +84,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     body: t.intersection([
       t.type({
         messages: t.array(messageRt),
+        screenContexts: t.array(screenContextRt),
         connectorId: t.string,
         persist: toBooleanRt,
       }),
@@ -106,7 +107,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, conversationId, title, persist },
+      body: { messages, connectorId, conversationId, title, persist, screenContexts },
     } = params;
 
     const controller = new AbortController();
@@ -119,9 +120,10 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       signal: controller.signal,
       resources,
       client,
+      screenContexts,
     });
 
-    const response$ = await client.complete({
+    const response$ = client.complete({
       messages,
       connectorId,
       conversationId,
