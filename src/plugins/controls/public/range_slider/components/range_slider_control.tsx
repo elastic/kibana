@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
@@ -164,6 +164,13 @@ export const RangeSliderControl: FC = () => {
         inputPopoverProps={{
           panelMinWidth: MIN_POPOVER_WIDTH,
         }}
+        append={
+          isInvalid ? (
+            <div className="rangeSlider__invalidToken">
+              <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
+            </div>
+          ) : undefined
+        }
         onMouseUp={() => {
           // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
           // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
