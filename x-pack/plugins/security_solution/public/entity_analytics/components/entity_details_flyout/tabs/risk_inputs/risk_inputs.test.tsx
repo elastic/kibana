@@ -66,7 +66,7 @@ describe('RiskInputsTab', () => {
 
     expect(queryByTestId('risk-input-contexts-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
-      'Risk inputRule Name'
+      'Risk contributionRule Name'
     );
   });
 
