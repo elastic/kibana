@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { formatBytes } from '../../../../common/utils';
+import { formatBytes } from '@kbn/formatters';
 import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelEstimatedDataText,
