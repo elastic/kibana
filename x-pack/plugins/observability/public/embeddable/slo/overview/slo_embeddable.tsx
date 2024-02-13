@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-
+import { Router } from '@kbn/shared-ux-router';
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
@@ -23,6 +23,8 @@ import {
   NotificationsStart,
 } from '@kbn/core/public';
 import { Subject } from 'rxjs';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { createBrowserHistory } from 'history';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import type { SloEmbeddableInput } from './types';
@@ -78,21 +80,25 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={this.deps}>
-          <QueryClientProvider client={queryClient}>
-            {showAllGroupByInstances ? (
-              <SloCardChartList sloId={sloId!} />
-            ) : (
-              <SloOverview
-                onRenderComplete={() => this.onRenderComplete()}
-                sloId={sloId}
-                sloInstanceId={sloInstanceId}
-                reloadSubject={this.reloadSubject}
-                showAllGroupByInstances={showAllGroupByInstances}
-              />
-            )}
-          </QueryClientProvider>
-        </KibanaContextProvider>
+        <Router history={createBrowserHistory()}>
+          <EuiThemeProvider darkMode={true}>
+            <KibanaContextProvider services={this.deps}>
+              <QueryClientProvider client={queryClient}>
+                {showAllGroupByInstances ? (
+                  <SloCardChartList sloId={sloId!} />
+                ) : (
+                  <SloOverview
+                    onRenderComplete={() => this.onRenderComplete()}
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    reloadSubject={this.reloadSubject}
+                    showAllGroupByInstances={showAllGroupByInstances}
+                  />
+                )}
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiThemeProvider>
+        </Router>
       </I18nContext>,
       node
     );
