@@ -11,6 +11,7 @@ import {
   profilingDatacenterPUE,
   profilingPervCPUWattArm64,
   profilingPervCPUWattX86,
+  profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
 import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { createTopNFunctions } from '@kbn/profiling-utils';
@@ -52,6 +53,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
       pervCPUWattArm64,
       awsCostDiscountRate,
       costPervCPUPerHour,
+      showErrorFrames,
     ] = await Promise.all([
       core.uiSettings.client.get<number>(profilingCo2PerKWH),
       core.uiSettings.client.get<number>(profilingDatacenterPUE),
@@ -59,6 +61,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
       core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
       core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
       core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+      core.uiSettings.client.get<boolean>(profilingShowErrorFrames),
     ]);
 
     const profilingEsClient = createProfilingEsClient({ esClient });
@@ -77,6 +80,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         pervCPUWattArm64,
         awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
         costPervCPUPerHour,
+        showErrorFrames,
       }
     );
 
@@ -89,6 +93,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         stackFrames,
         stackTraces,
         startIndex,
+        showErrorFrames,
       });
     });
 

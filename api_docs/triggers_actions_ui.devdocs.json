@@ -2888,6 +2888,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.isBeta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBeta",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionTypeModel.isExperimental",
             "type": "CompoundType",
             "tags": [],

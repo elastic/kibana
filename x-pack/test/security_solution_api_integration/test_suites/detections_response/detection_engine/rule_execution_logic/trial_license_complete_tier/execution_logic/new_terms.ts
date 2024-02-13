@@ -14,9 +14,6 @@ import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   getOpenAlerts,
   getPreviewAlerts,
   previewRule,
@@ -24,6 +21,11 @@ import {
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
