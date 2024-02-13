@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { dataStreamService } from './data_stream';
-export { indexStatsService } from './index_stats';
+export * from './state_machine';
+export * from './types';
+export * from './defaults';
+export * from './notifications';

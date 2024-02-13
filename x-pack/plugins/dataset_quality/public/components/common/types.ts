@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { dataStreamService } from './data_stream';
-export { indexStatsService } from './index_stats';
+export type QualityIndicators = 'good' | 'poor' | 'degraded';
+export type InfoIndicators = 'success' | 'danger' | 'warning';
