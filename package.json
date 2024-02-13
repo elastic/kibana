@@ -463,6 +463,7 @@
     "@kbn/fleet-plugin": "link:x-pack/plugins/fleet",
     "@kbn/flot-charts": "link:packages/kbn-flot-charts",
     "@kbn/foo-plugin": "link:x-pack/test/ui_capabilities/common/plugins/foo_plugin",
+    "@kbn/formatters": "link:packages/kbn-formatters",
     "@kbn/ftr-apis-plugin": "link:src/plugins/ftr_apis",
     "@kbn/functional-with-es-ssl-cases-test-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/cases",
     "@kbn/gen-ai-streaming-response-example-plugin": "link:x-pack/examples/gen_ai_streaming_response_example",

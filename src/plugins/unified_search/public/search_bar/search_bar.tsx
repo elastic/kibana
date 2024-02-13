@@ -543,7 +543,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         filtersForSuggestions={this.props.filtersForSuggestions}
         manageFilterSetComponent={
-          this.props.showFilterBar && this.state.query
+          this.props.showFilterBar && this.state.query && this.props.onClearSavedQuery
             ? this.renderSavedQueryManagement(
                 this.props.onClearSavedQuery,
                 this.props.showSaveQuery,
@@ -649,11 +649,11 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
   private renderSavedQueryManagement = memoizeOne(
     (
-      onClearSavedQuery: SearchBarOwnProps['onClearSavedQuery'],
+      onClearSavedQuery: NonNullable<SearchBarOwnProps['onClearSavedQuery']>,
       showSaveQuery: SearchBarOwnProps['showSaveQuery'],
       savedQuery: SearchBarOwnProps['savedQuery']
     ) => {
-      const savedQueryManagement = onClearSavedQuery && (
+      const savedQueryManagement = (
         <SavedQueryManagementList
           showSaveQuery={showSaveQuery}
           loadedSavedQuery={savedQuery}
