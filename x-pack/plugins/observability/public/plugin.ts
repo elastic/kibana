@@ -410,8 +410,6 @@ export class Plugin
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant.service.isEnabled();
 
-              console.log({ isAiAssistantEnabled });
-
               const aiAssistantLink =
                 isAiAssistantEnabled &&
                 !Boolean(pluginsSetup.serverless) &&

@@ -150,4 +150,61 @@ describe('useAlertsHistory', () => {
     expect(result.current.data.histogramTriggeredAlerts?.length).toEqual(31);
     expect(result.current.data.totalTriggeredAlerts).toEqual(32);
   });
+
+  it('calls http post including term queries', async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const mockedHttpPost = jest.fn();
+    const http = {
+      post: mockedHttpPost.mockResolvedValue({
+        hits: { total: { value: 32, relation: 'eq' }, max_score: null, hits: [] },
+        aggregations: {
+          avgTimeToRecoverUS: { doc_count: 28, recoveryTime: { value: 134959464.2857143 } },
+          histogramTriggeredAlerts: {
+            buckets: [
+              { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 0 },
+            ],
+          },
+        },
+      }),
+    } as unknown as HttpSetup;
+
+    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+      () =>
+        useAlertsHistory({
+          http,
+          featureIds: [AlertConsumers.APM],
+          ruleId,
+          dateRange: { from: start, to: end },
+          queries: [
+            {
+              term: {
+                'kibana.alert.group.value': {
+                  value: 'host=1',
+                },
+              },
+            },
+          ],
+        }),
+      {
+        wrapper,
+      }
+    );
+
+    await act(async () => {
+      await waitFor(() => result.current.isSuccess);
+    });
+    expect(mockedHttpPost).toBeCalledWith('/internal/rac/alerts/find', {
+      body:
+        '{"size":0,"feature_ids":["apm"],"query":{"bool":{"must":[' +
+        '{"term":{"kibana.alert.rule.uuid":"cfd36e60-ef22-11ed-91eb-b7893acacfe2"}},' +
+        '{"term":{"kibana.alert.group.value":{"value":"host=1"}}},' +
+        '{"range":{"kibana.alert.time_range":{"from":"2023-04-10T00:00:00.000Z","to":"2023-05-10T00:00:00.000Z"}}}]}},' +
+        '"aggs":{"histogramTriggeredAlerts":{"date_histogram":{"field":"kibana.alert.start","fixed_interval":"1d",' +
+        '"extended_bounds":{"min":"2023-04-10T00:00:00.000Z","max":"2023-05-10T00:00:00.000Z"}}},' +
+        '"avgTimeToRecoverUS":{"filter":{"term":{"kibana.alert.status":"recovered"}},' +
+        '"aggs":{"recoveryTime":{"avg":{"field":"kibana.alert.duration.us"}}}}}}',
+      signal,
+    });
+  });
 });

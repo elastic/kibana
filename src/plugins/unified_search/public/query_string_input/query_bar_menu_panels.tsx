@@ -373,7 +373,7 @@ export function useQueryBarMenuPanels({
       panel: QueryBarMenuPanel.loadQuery,
       icon: 'filter',
       'data-test-subj': 'saved-query-management-load-button',
-      disabled: !hasSavedQueries,
+      disabled: !hasSavedQueries || !Boolean(manageFilterSetComponent),
     },
     {
       name: savedQuery ? strings.getSaveAsNewFilterSetLabel() : strings.getSaveFilterSetLabel(),
