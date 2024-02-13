@@ -178,24 +178,13 @@ export const renderApp = (
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
     fieldFormats: deps.fieldFormats,
-    autocomplete: deps.unifiedSearch.autocomplete,
     config: coreStart.uiSettings!,
-    chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,
     toastNotifications: coreStart.notifications.toasts,
-    overlays: coreStart.overlays,
-    theme: coreStart.theme,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    basePath: coreStart.http.basePath,
-    savedSearch: deps.savedSearch,
     application: coreStart.application,
     http: coreStart.http,
-    security: deps.security,
-    dashboard: deps.dashboard,
     maps: deps.maps,
-    dataVisualizer: deps.dataVisualizer,
-    share: deps.share,
-    lens: deps.lens,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());
