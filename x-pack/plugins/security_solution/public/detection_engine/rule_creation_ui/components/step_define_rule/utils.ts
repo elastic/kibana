@@ -11,7 +11,12 @@ import type { BrowserField } from '../../../../common/containers/source';
 
 import { CUSTOM_QUERY_REQUIRED, EQL_QUERY_REQUIRED, ESQL_QUERY_REQUIRED } from './translations';
 
-import { isEqlRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isEsqlRule,
+  isQueryRule,
+  isThreatMatchRule,
+} from '../../../../../common/detection_engine/utils';
 
 /**
  * Filters out fields, that are not supported in terms aggregation.
@@ -39,4 +44,8 @@ export const getQueryRequiredMessage = (ruleType: Type) => {
   }
 
   return CUSTOM_QUERY_REQUIRED;
+};
+
+export const showSuppressionMaxGroupValidationError = (ruleType: Type) => {
+  return isQueryRule(ruleType) || isThreatMatchRule(ruleType) || isEqlRule(ruleType);
 };
