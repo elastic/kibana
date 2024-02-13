@@ -82,7 +82,7 @@ export const FILTER_FOR_CONTENT = [
   'agent.',
   'elastic_agent.',
   'data_stream.',
-  'data_stream.',
+  'ecs.',
   'host.',
   'container.',
   'cloud.',
