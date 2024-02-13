@@ -6,7 +6,6 @@
  */
 
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { TIMESTAMP_FIELD } from '../../constants';
 import { DataViewSpecWithId } from '../../dataset_selection';
 import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
