@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 import { EuiSpacer, EuiText, EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -10,12 +11,10 @@ import React from 'react';
 
 interface ConnectorUnconfiguredProps {
   configurationPathOnClick: () => void;
-  configurationPath: string;
   dataTelemetryIdPrefix: string;
 }
 export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({
   configurationPathOnClick,
-  configurationPath,
   dataTelemetryIdPrefix,
 }) => {
   return (
@@ -42,11 +41,7 @@ export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({
         <EuiSpacer size="s" />
         <EuiButton
           data-telemetry-id={`${dataTelemetryIdPrefix}-connector-scheduling-configure`}
-          onClick={(event) => {
-            event.preventDefault();
-            configurationPathOnClick();
-          }}
-          href={configurationPath}
+          onClick={configurationPathOnClick}
           fill
           size="s"
         >

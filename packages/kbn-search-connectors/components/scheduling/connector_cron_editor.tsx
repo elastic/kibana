@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConnectorScheduling, Frequency } from '@kbn/search-connectors/types';
-import React, { useState } from 'react';
+import { ConnectorScheduling } from '../../types/connectors';
+import { Frequency } from '../../types/cron_editor';
 import { CronEditor } from '../cron_editor';
 
 interface ConnectorCronEditorProps {

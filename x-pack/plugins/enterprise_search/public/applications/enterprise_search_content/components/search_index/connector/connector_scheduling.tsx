@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -54,7 +54,7 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 };
 
 export const ConnectorScheduling: React.FC = () => {
-  const { productFeatures, navigateToUrl, history } = useValues(KibanaLogic);
+  const { productFeatures, navigateToUrl } = useValues(KibanaLogic);
   const { ingestionStatus, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
     useValues(IndexViewLogic);
   const { index } = useValues(IndexViewLogic);
@@ -64,26 +64,19 @@ export const ConnectorScheduling: React.FC = () => {
 
   const shouldShowIncrementalSync =
     hasIncrementalSyncFeature && productFeatures.hasIncrementalSyncEnabled;
+
   const shouldShowAccessControlSync =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
 
+  const handleHasChanges = useCallback(
+    (changes) => {
+      setHasChanges(changes);
+    },
+    [hasChanges]
+  );
   if (!indices.isConnectorIndex(index)) {
     return <></>;
   }
-  const path = history.createHref({
-    pathname: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-      indexName: index.name,
-      tabId: SearchIndexTabId.CONFIGURATION,
-    }),
-  });
-  const configurationPathOnClick = () => {
-    return navigateToUrl(
-      generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-        indexName: index.name,
-        tabId: SearchIndexTabId.CONFIGURATION,
-      })
-    );
-  };
 
   return (
     <>
@@ -121,13 +114,19 @@ export const ConnectorScheduling: React.FC = () => {
             <EuiSpacer size="l" />
           </>
         }
-        configurationPath={path}
-        configurationPathOnClick={configurationPathOnClick}
+        configurationPathOnClick={() =>
+          navigateToUrl(
+            generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+              indexName: index.name,
+              tabId: SearchIndexTabId.CONFIGURATION,
+            })
+          )
+        }
         dataTelemetryIdPrefix="entSearchContent"
         hasChanges={hasChanges}
         index={index}
         ingestionStatus={ingestionStatus}
-        setHasChanges={setHasChanges}
+        setHasChanges={handleHasChanges}
         shouldShowAccessControlSync={shouldShowAccessControlSync}
         shouldShowIncrementalSync={shouldShowIncrementalSync}
         updateConnectorStatus={status === Status.LOADING}

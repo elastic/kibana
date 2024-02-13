@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -16,15 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IngestionStatus } from '../../types/indices';
 import {
   ConnectorStatus,
   ConnectorViewIndex,
   CrawlerViewIndex,
-  IngestionStatus,
   SchedulingConfiguraton,
   SyncJobType,
-} from '@kbn/search-connectors/types';
-import React, { useContext, useEffect, useState } from 'react';
+} from '../../types/connectors';
 import { LicenseContext } from '../configuration';
 import { ConnectorError } from './connector_error';
 import { ConnectorUnconfigured } from './connector_unconfigured';
@@ -56,7 +57,6 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 
 interface ConnectorContentSchedulingProps {
   children?: React.ReactNode;
-  configurationPath: string;
   configurationPathOnClick: () => void;
   dataTelemetryIdPrefix: string;
   hasChanges: boolean;
@@ -71,7 +71,6 @@ interface ConnectorContentSchedulingProps {
 
 export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingProps> = ({
   children,
-  configurationPath,
   configurationPathOnClick,
   dataTelemetryIdPrefix,
   hasChanges,
@@ -91,12 +90,13 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   const isDocumentLevelSecurityDisabled =
     !index.connector.configuration.use_document_level_security?.value;
 
-  useEffect(() => {
-    const newStatus = hasFullSyncChanges || hasAccessSyncChanges || hasIncrementalSyncChanges;
-    if (hasChanges != newStatus) {
-      setHasChanges(newStatus);
-    }
+  const hasSyncStatusChanged = useMemo(() => {
+    return hasFullSyncChanges || hasAccessSyncChanges || hasIncrementalSyncChanges;
   }, [hasFullSyncChanges, hasAccessSyncChanges, hasIncrementalSyncChanges]);
+  useEffect(() => {
+    if (hasChanges != hasSyncStatusChanged) setHasChanges(hasSyncStatusChanged);
+  }, [hasSyncStatusChanged]);
+
   if (
     index.connector.status === ConnectorStatus.CREATED ||
     index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION
@@ -105,7 +105,6 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
       <ConnectorUnconfigured
         dataTelemetryIdPrefix="entSearchContent"
         configurationPathOnClick={configurationPathOnClick}
-        configurationPath={configurationPath}
       />
     );
   }
@@ -205,13 +204,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                         defaultMessage="{link} for this connector to activate these options."
                         values={{
                           link: (
-                            <EuiLink
-                              href={configurationPath}
-                              onClick={(event) => {
-                                event.preventDefault();
-                                configurationPathOnClick();
-                              }}
-                            >
+                            <EuiLink onClick={configurationPathOnClick}>
                               {i18n.translate(
                                 'searchConnectors.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.link',
                                 {
