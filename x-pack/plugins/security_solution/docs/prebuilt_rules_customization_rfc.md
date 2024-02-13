@@ -1,13 +1,14 @@
 # RFC: Prebuilt Rules Customization
 
 _Status_: Finished Part 1, which includes sections from `Necessary rule schema changes` up until -and including- `Exporting and importing rules`.
- 
- Covers:
-  - rule schema changes
-  - mappings
-  - migration strategy and technical implementation
-  - exporting and importing rules
-  - schema-related changes needed in endpoints
+
+Covers:
+
+- rule schema changes
+- mappings
+- migration strategy and technical implementation
+- exporting and importing rules
+- schema-related changes needed in endpoints
 
 _Pending_:
 
@@ -35,65 +36,65 @@ You can create it by navigating to the directory of the markdown file and runnin
 pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -o output.md
 ```
 
--   [Necessary rule schema changes](#necessary-rule-schema-changes)
-    -   [`prebuilt` and `immutable` fields](#prebuilt-and-immutable-fields)
-        -   [`isCustomized` subfield](#iscustomized-subfield)
-        -   [`elasticUpdateDate` subfield](#elasticupdatedate-subfield)
-    -   [Changes needed in rule schema](#changes-needed-in-rule-schema)
-        -   [API schema](#api-schema)
-        -   [Internal rule schema](#internal-rule-schema)
-    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field)
--   [Mapping changes](#mapping-changes)
--   [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
-    -   [Context](#context)
-    -   [Migration strategy](#migration-strategy)
-        -   [Migration on write](#migration-on-write)
-            -   [Rule Management endpoints that should include migration-on-write logic](#rule-management-endpoints-that-should-include-migration-on-write-logic)
-        -   [Normalization on read](#normalization-on-read)
-            -   [Rule Management endpoints that will perform normalization-on-read](#rule-management-endpoints-that-will-perform-normalization-on-read)
-    -   [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
-        -   [`migratePrebuiltSchemaOnRuleCreation`](#migrateprebuiltschemaonrulecreation)
-            -   [`convertCreateAPIToInternalSchema` and `createRules`](#convertcreateapitointernalschema-and-createrules)
-            -   [`duplicateRule`](#duplicaterule)
-        -   [`migratePrebuiltSchemaOnRuleUpdate`](#migrateprebuiltschemaonruleupdate)
-            -   [`convertPatchAPIToInternalSchema` and `patchRules`](#convertpatchapitointernalschema-and-patchrules)
-            -   [`updateRules`](#updaterules)
-        -   [`migratePrebuiltSchemaOnRuleBulkEdit`](#migrateprebuiltschemaonrulebulkedit)
--   [Other endpoints and utilities that will need to be adapted to the new schema](#other-endpoints-and-utilities-that-will-need-to-be-adapted-to-the-new-schema)
-    -   [Utilities](#utilities)
-        -   [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
-    -   [Rule Management endpoints](#rule-management-endpoints)
-    -   [Prebuilt Rules endpoints](#prebuilt-rules-endpoints)
-    -   [Rule monitoring endpoints](#rule-monitoring-endpoints)
-    -   [Rule Execution Logs](#rule-execution-logs)
--   [Exporting and importing rules](#exporting-and-importing-rules)
-    -   [Exporting rules](#exporting-rules)
-    -   [Importing rules](#importing-rules)
-    -   [Handling the `version` parameter](#handling-the-version-parameter)
--   [Customizing Prebuilt Rules](#customizing-prebuilt-rules)
-    -   [Endpoints](#endpoints)
-        -   [Changes needed to endpoints](#changes-needed-to-endpoints)
-            -   [Update Rule - `PUT /rules`](#update-rule---put-rules)
-            -   [Patch Rule - `PATCH /rules`](#patch-rule---patch-rules)
-            -   [Bulk Patch Rules - `PATCH /rules/_bulk_update`](#bulk-patch-rules---patch-rules_bulk_update)
-            -   [Bulk Update Rules - `PUT /rules/_bulk_update`](#bulk-update-rules---put-rules_bulk_update)
-            -   [Bulk Actions - `POST /rules/_bulk_action`](#bulk-actions---post-rules_bulk_action)
-        -   [Updating the `customized` field](#updating-the-customized-field)
-    -   [In the UI](#in-the-ui)
-        -   [Via the Rule Edit Page](#via-the-rule-edit-page)
-        -   [Via Bulk Actions](#via-bulk-actions)
-        -   [Via the Rules Details Page](#via-the-rules-details-page)
-        -   [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
-        -   [Via the Stack Management \> Rules UI](#via-the-stack-management-rules-ui)
--   [List of things to fix (create tickets)](#list-of-things-to-fix-create-tickets)
-    -   [Rule fields](#rule-fields)
--   [Updating Prebuilt Rules](#updating-prebuilt-rules)
-    -   [Changes to upgrade `_review` and `_perform` endpoints](#changes-to-upgrade-_review-and-_perform-endpoints)
-    -   [Rule field diff algorithms](#rule-field-diff-algorithms)
--   [Changes in UI](#changes-in-ui)
--   [Scenarios for bulk accepting updates](#scenarios-for-bulk-accepting-updates)
--   [Marking rules (and their fields) as customized](#marking-rules-and-their-fields-as-customized)
--   [Other open questions](#other-open-questions)
+- [Necessary rule schema changes](#necessary-rule-schema-changes)
+  - [`prebuilt` and `immutable` fields](#prebuilt-and-immutable-fields)
+    - [`isCustomized` subfield](#iscustomized-subfield)
+    - [`elasticUpdateDate` subfield](#elasticupdatedate-subfield)
+  - [Changes needed in rule schema](#changes-needed-in-rule-schema)
+    - [API schema](#api-schema)
+    - [Internal rule schema](#internal-rule-schema)
+  - [Deprecating the `immutable` field](#deprecating-the-immutable-field)
+- [Mapping changes](#mapping-changes)
+- [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
+  - [Context](#context)
+  - [Migration strategy](#migration-strategy)
+    - [Migration on write](#migration-on-write)
+      - [Rule Management endpoints that should include migration-on-write logic](#rule-management-endpoints-that-should-include-migration-on-write-logic)
+    - [Normalization on read](#normalization-on-read)
+      - [Rule Management endpoints that will perform normalization-on-read](#rule-management-endpoints-that-will-perform-normalization-on-read)
+  - [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
+    - [`migratePrebuiltSchemaOnRuleCreation`](#migrateprebuiltschemaonrulecreation)
+      - [`convertCreateAPIToInternalSchema` and `createRules`](#convertcreateapitointernalschema-and-createrules)
+      - [`duplicateRule`](#duplicaterule)
+    - [`migratePrebuiltSchemaOnRuleUpdate`](#migrateprebuiltschemaonruleupdate)
+      - [`convertPatchAPIToInternalSchema` and `patchRules`](#convertpatchapitointernalschema-and-patchrules)
+      - [`updateRules`](#updaterules)
+    - [`migratePrebuiltSchemaOnRuleBulkEdit`](#migrateprebuiltschemaonrulebulkedit)
+- [Other endpoints and utilities that will need to be adapted to the new schema](#other-endpoints-and-utilities-that-will-need-to-be-adapted-to-the-new-schema)
+  - [Utilities](#utilities)
+    - [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
+  - [Rule Management endpoints](#rule-management-endpoints)
+  - [Prebuilt Rules endpoints](#prebuilt-rules-endpoints)
+  - [Rule monitoring endpoints](#rule-monitoring-endpoints)
+  - [Rule Execution Logs](#rule-execution-logs)
+- [Exporting and importing rules](#exporting-and-importing-rules)
+  - [Exporting rules](#exporting-rules)
+  - [Importing rules](#importing-rules)
+  - [Handling the `version` parameter](#handling-the-version-parameter)
+- [Customizing Prebuilt Rules](#customizing-prebuilt-rules)
+  - [Endpoints](#endpoints)
+    - [Changes needed to endpoints](#changes-needed-to-endpoints)
+      - [Update Rule - `PUT /rules`](#update-rule---put-rules)
+      - [Patch Rule - `PATCH /rules`](#patch-rule---patch-rules)
+      - [Bulk Patch Rules - `PATCH /rules/_bulk_update`](#bulk-patch-rules---patch-rules_bulk_update)
+      - [Bulk Update Rules - `PUT /rules/_bulk_update`](#bulk-update-rules---put-rules_bulk_update)
+      - [Bulk Actions - `POST /rules/_bulk_action`](#bulk-actions---post-rules_bulk_action)
+    - [Updating the `customized` field](#updating-the-customized-field)
+  - [In the UI](#in-the-ui)
+    - [Via the Rule Edit Page](#via-the-rule-edit-page)
+    - [Via Bulk Actions](#via-bulk-actions)
+    - [Via the Rules Details Page](#via-the-rules-details-page)
+    - [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
+    - [Via the Stack Management \> Rules UI](#via-the-stack-management-rules-ui)
+- [List of things to fix (create tickets)](#list-of-things-to-fix-create-tickets)
+  - [Rule fields](#rule-fields)
+- [Updating Prebuilt Rules](#updating-prebuilt-rules)
+  - [Changes to upgrade `_review` and `_perform` endpoints](#changes-to-upgrade-_review-and-_perform-endpoints)
+  - [Rule field diff algorithms](#rule-field-diff-algorithms)
+- [Changes in UI](#changes-in-ui)
+- [Scenarios for bulk accepting updates](#scenarios-for-bulk-accepting-updates)
+- [Marking rules (and their fields) as customized](#marking-rules-and-their-fields-as-customized)
+- [Other open questions](#other-open-questions)
 
 ## Note about scope of RFC
 
@@ -145,7 +146,6 @@ In this first phase, the `external_source` will contain three subfields: `repo_n
 #### `repo_name` subfield
 
 The `repo_name` will be a required string field that specifies the origin repo of the rule. For Elastic prebuilt rules, its value will be `elastic_prebuilt`. The field is required since it will be the leaf node used when searching/filtering for externally sourced rules when using KQL. More details about that below.
-
 
 #### `is_customized` subfield
 
@@ -202,7 +202,7 @@ ExternalSourceAttributes:
   description: Property whose existence determines whether the rule is an externally sourced rule. Contains information relating to externally sourced rules. Elastic Prebuilt rules are a specific case of externally sourced rules.
   properties:
     repo_name:
-      $ref: 
+      $ref:
     is_customized:
       $ref: '#/components/schemas/IsExternalRuleCustomized'
     source_updated_at:
@@ -340,7 +340,6 @@ Both the docs and the custom response header should communicate that the `immuta
 
 The endpoints should be updated to include a custom response header, using the [format we already use for our bulk CRUD endpoints.](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/deprecation.ts#L34-L43)
 
-
 ## Mapping changes
 
 **Alert (rule objects) mapping**
@@ -366,6 +365,103 @@ Since the migration of rules will be performed as the user calls the pertinent e
 ### Migration strategy
 
 Our migration strategy will consist of two distinct types of migration: a **migration on write** that will update the SO on Elasticsearch, and a **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
+
+#### Normalization on read
+
+All endpoints that respond with a rule Saved Object, typed as `RuleResponse`, will perform **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
+
+This means that the endpoints will always respond with the rules with the new schema, while the actual rule might still be stored with the legacy schema in Elasticsearch, if it still has not been migrated-on-write.
+
+The **normalization on read** will be carried out by a new `normalizePrebuiltSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. Inside this method, we will use `normalizePrebuiltSchemaOnRuleRead` to calculate the normalized values of `external_source` and `immutable`.
+
+_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
+
+```ts
+export const internalRuleToAPIResponse = (rule) => {
+  return {
+    ...commonParamsCamelToSnake(rule.params), // <--- rule params are converted here
+    ...typeSpecificCamelToSnake(rule.params),
+    // [... more object properties ...]
+  };
+};
+
+export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
+  const { immutable, external_source } = normalizePrebuiltSchemaOnRuleRead(params);
+
+  return {
+    immutable,
+    external_source,
+    // [... more object properties ...]
+  };
+};
+```
+
+And the `normalizePrebuiltSchemaOnRuleRead` can be defined so:
+
+_Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/prebuilt_rule_schema_migrations.ts_ (New file)
+
+```ts
+interface OnReadNormalizationResult {
+  immutable: IsRuleImmutable;
+  external_source?: ExternalSourceAttributes;
+}
+
+/**
+ * To calculate `external_source`:
+ * - Use `external_source` field  if already exists in the internal rule object params.
+ * - If it does not exist, check the value `immutable` from the rules param:
+ *   - if it is `true`, create a new `external_source` object, with `isCustomized` set to `false` and `repoNam` set to `elastic_prebuilt` (Use case of external_source rules that have not been yet migrated-on-write)
+ *   - otherwise, the field should be `undefined` (use case of custom rules).
+ */
+const getExternalSourceValueForRuleRead = (ruleParams: BaseRuleParams): ExternalSourceAttributes | undefined => {
+  if (ruleParams.external_source) {
+    return ruleParams.external_source;
+  }
+
+  if (ruleParams.immutable) {
+    return {
+      repoName: 'elastic_prebuilt'
+      isCustomized: false,
+    };
+  }
+
+  return undefined;
+};
+
+export const normalizePrebuiltSchemaOnRuleRead = (
+  ruleParams: BaseRuleParams
+): OnReadNormalizationResult => {
+
+/**
+ * To calculate `immutable`:
+ * - Checks if the `external_source` field exists in the rule's parameters.
+ *   - If `external_source` exists, sets `immutable` to `true`. (Use case of Rules that have already been migrated-on-write)
+ *   - If `external_source` does not exist, return the value of the params' `immutable` field. (Use case of Rules that have not yet been migrated on write.)
+ */
+  const immutable = Boolean(ruleParams.external_source) || Boolean(ruleParams.immutable);
+  const external_source = getExternalSourceValueForRuleRead(ruleParams);
+
+  return {
+    immutable,
+    external_source,
+  };
+};
+```
+
+##### Rule Management endpoints that will perform normalization-on-read
+
+- All endpoints that also perform migration-on-write, as listed in the below `Migration on write` section. All of them use the `internalRuleToAPIResponse` methods to transform the rule before returning the response, so the normalization on read will take place there. For these specific cases, however, the normalization-on-read will take place, but the data stored in ES for each rule should match the response given by the endpoint, i.e. the normalized in-memory value and the stored value of the rule should be the same.
+- **Find Rules - `GET /rules/_find`**
+- **Read Rule - GET /rules:**
+- **Delete Rules - DELETE /rules**
+- **Bulk Actions** - `POST /rules/_bulk_action`: all other action types not mentioned in the previous section will perform normalization-on-read before responding:
+  - Enable
+  - Disable
+  - Delete
+  - Export: see Importing and Exporting Rules section below
+- **Export Rules** - `POST /rules/_export`:
+  - this endpoint is unused via the UI, but might still be used via the public API
+  - same logic as for `_bulk_action` with the `export` action explained in section [Exporting rules](#exporting-rules) below: only normalization-on-read will be performed before writing to the output `ndjson` file.
 
 #### Migration on write
 
@@ -412,109 +508,199 @@ All other type of actions should **not** perform migration-on-write:
 - Delete
 - Export: see Importing and Exporting Rules section below
 
-#### Normalization on read with `normalizePrebuiltSchemaOnRuleRead`
-
-All endpoints that respond with a rule Saved Object, typed as `RuleResponse`, will also perform **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
-
-This means that the endpoints will always respond with the rules with the new schema, while the actual rule might still be stored with the legacy schema in Elasticsearch, if it still has not been migrated-on-write.
-
-The **normalization on read** will be carried out by a new `normalizePrebuiltSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. Inside this method, we will use `normalizePrebuiltSchemaOnRuleRead` to calculate the normalized values of `external_source` and `immutable`.
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
-
-```ts
-
-export const internalRuleToAPIResponse = (rule) => {
-  return {
-    ...commonParamsCamelToSnake(rule.params), // <--- rule params are converted here
-    ...typeSpecificCamelToSnake(rule.params),
-    // [... more object properties ...]
-  };
-};
-
-export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
-  const { immutable, external_source } = normalizePrebuiltSchemaOnRuleRead(params);
-
-  return {
-    immutable,
-    external_source,
-    // [... more object properties ...]
-  };
-};
-
-```
-
-And the `normalizePrebuiltSchemaOnRuleRead` can be defined so:
-
-_Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/prebuilt_rule_schema_migrations.ts_ (New file)
-
-```ts
-interface OnReadNormalizationResult {
-  immutable: IsRuleImmutable;
-  external_source?: ExternalSourceAttributes;
-}
-
-/**
- * To calculate `external_source`:
- * - Use `external_source` field  if already exists in the internal rule object params.
- * - If it does not exist, check the value `immutable` from the rules param:
- *   - if it is `true`, create a new `external_source` object, with `isCustomized` set to `false` and `repoNam` set to `elastic_prebuilt` (Use case of external_source rules that have not been yet migrated-on-write)
- *   - otherwise, the field should be `undefined` (use case of custom rules).
- */
-const getExternalSourceValueForRuleRead = (ruleParams: BaseRuleParams): ExternalSourceAttributes | undefined => {
-  if (ruleParams.external_source) {
-    return ruleParams.external_source;
-  }
-
-  if (ruleParams.immutable) {
-    return {
-      repoName: 'elastic_prebuilt'
-      isCustomized: false,
-    };
-  }
-
-  return undefined;
-};
-
-export const normalizePrebuiltSchemaOnRuleRead = (
-  ruleParams: BaseRuleParams
-): OnReadNormalizationResult => {
-  
-  
-/**
- * To calculate `immutable`:
- * - Checks if the `external_source` field exists in the rule's parameters.
- *   - If `external_source` exists, sets `immutable` to `true`. (Use case of Rules that have already been migrated-on-write)
- *   - If `external_source` does not exist, return the value of the params' `immutable` field. (Use case of Rules that have not yet been migrated on write.)
- */
-  const immutable = Boolean(ruleParams.external_source) || Boolean(ruleParams.immutable);  
-  const external_source = getExternalSourceValueForRuleRead(ruleParams);
-
-  return {
-    immutable,
-    external_source,
-  };
-};
-```
-
-##### Rule Management endpoints that will perform normalization-on-read
-
-- All endpoints that also perform migration-on-write, as listed above. All of them use the `internalRuleToAPIResponse` methods to transform the rule before returning the response, so the normalization on read will take place there. For these specific cases, however, the normalization-on-read will take place, but the data stored in ES for each rule should match the response given by the endpoint, i.e. the normalized in-memory value and the stored value of the rule should be the same.
-- **Find Rules - `GET /rules/_find`**: transforms rules in response to `RuleResponse` type with the `internalRuleToAPIResponse` method.
-- **Read Rule - GET /rules:**: transforms rule in response to `RuleResponse` type with the `internalRuleToAPIResponse` method.
-- **Delete Rules - DELETE /rules**: transforms rule in response to `RuleResponse` type with the `internalRuleToAPIResponse` method.
-- **Bulk Actions** - `POST /rules/_bulk_action`: all other action types not mentioned in the previous section will perform normalization-on-read before responding:
-  - Enable
-  - Disable
-  - Delete
-  - Export: see Importing and Exporting Rules section below
-- **Export Rules** - `POST /rules/_export`:
-  - this endpoint is unused via the UI, but might still be used via the public API
-  - same logic as for `_bulk_action` with the `export` action explained in section [Exporting rules](#exporting-rules) below: only normalization-on-read will be performed before writing to the output `ndjson` file.
-
 ### Technical implementation of migration-on-write
 
-The logic for the migration of the rule saved objects, which means the determination of the `immutable` and `external_source` fields before writing to ES, will be encapsulated in three helper methods:
+The logic for the migration of the rule saved objects, which means the determination of the `immutable` and `external_source` fields before writing to ES, might differ depending on the action being performed by the user.
+
+Let's see all possible use cases that will require migration-on-write, the endpoints that they apply to, and the expected resulting migrated field, based on the action and their input.
+
+#### Upgrading rules
+
+Upgrading rules can currently be performed via four endpoints:
+
+- **Update Rule** - `PUT /rules`
+- **Patch Rule** - `PATCH /rules`
+- **Bulk Update Rules** - `PUT /rules/_bulk_update`
+- **Bulk Patch Rules** - `PATCH /rules/_bulk_update`
+
+The resulting values for `immutable` and `external_source` when calling these endpoints, and the migration being performed in the background, should be as follows:
+
+<table valign="center">
+  <thead>
+    <tr>
+      <th>Use case</th>
+      <th>Current value of <pre>external_source</pre></th>
+      <th>Current value of <pre>immutable</pre></th>
+      <th>Any field diverges <br> from base version during update?</th>
+      <th>Results</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Migrating a custom rule (migrated or not yet)</td>
+      <td>
+        <pre>undefined</pre>
+      </td>
+      <td><pre>false</pre></td>
+      <td>N/A - Doesn't apply for custom rules</td>
+      <td>
+        <pre>
+          {
+            immutable: false
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a non yet migrated prebuilt rule, with customizations</td>
+      <td>
+        <pre>undefined</pre>
+      </td>
+      <td><pre>true</pre></td>
+      <td>Yes</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a non yet migrated prebuilt rule, with customizations</td>
+      <td>
+        <pre>undefined</pre>
+      </td>
+      <td><pre>true</pre></td>
+      <td>Yes</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a migrated non-customized prebuilt rule, no customizations</td>
+      <td>
+        <pre> 
+          {
+            repoName: 'elastic_prebuilt',
+            isCustomized: false,
+              ...
+          }
+          </pre>
+      </td>
+      <td><pre>true</pre></td>
+      <td>No</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: false,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a migrated customized prebuilt rule, no customizations</td>
+      <td>
+        <pre> 
+          {
+            repoName: 'elastic_prebuilt',
+            isCustomized: true,
+              ...
+          }
+          </pre>
+      </td>
+      <td><pre>true</pre></td>
+      <td>No</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a migrated customized prebuilt rule, with customizations</td>
+      <td>
+        <pre> 
+          {
+            repoName: 'elastic_prebuilt',
+            isCustomized: true,
+              ...
+          }
+          </pre>
+      </td>
+      <td><pre>true</pre></td>
+      <td>Yes</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Invalid case: Migrating a migrated non-customized prebuilt rule, with customizations. <br><br> `immutable` should never be false if `external_source` is defined. Migration should correct this inconsistency.</td>
+      <td>
+        <pre> 
+          {
+            repoName: 'elastic_prebuilt',
+            isCustomized: false,
+              ...
+          }
+          </pre>
+      </td>
+      <td><pre>false</pre></td>
+      <td>Yes</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+---
 
 - `migratePrebuiltSchemaOnRuleCreation` for rule creation
 - `migratePrebuiltSchemaOnRuleUpdate` for rule updates (including patching)
@@ -1897,7 +2083,8 @@ export const getRulesFromObjects = async (
 
 Notice that the **Bulk Actions** - `POST /rules/_bulk_action` does not perform a **dry run** in order to filter out prebuilt rules when the user runs an **export** action; this is the only check that is performed.
 
-*Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts)*
+_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts)_
+
 ```ts
 // [... file continues above ...]
 export const getExportAll = async (
@@ -2019,7 +2206,6 @@ Given the requirements described above, the following table shows the behaviour 
   </tbody>
 </table>
 
-
 If a user imports a prebuilt rule (where either the `prebuilt` or `immutable` fields are `true`), it will continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
 
 With this migration strategy for the import endpoints we can guarantee backwards compatibility for all rules, and don't need to do additional changes to the export endpoints.
@@ -2028,7 +2214,8 @@ The `importRules` helper method that our import endpoint handler use rely on the
 
 Given that, when importing rules, we can be creating a custom rule or a prebuilt rule, we need to calculate and appropiately pass the `isPrebuilt` flag to the `createRules` method. The `importRules` helper thus needs to be modified so:
 
-*Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts)*
+_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts)_
+
 ```ts
 // [... file continues above ...]
 
@@ -2099,8 +2286,9 @@ Since users will be importing rules via an `ndjson` file, they can potentially m
 **3. The user increases the `version` field from the importing payload:** or example, a user exports a prebuilt rule with `version: 5`, and before importing it modifies it to `version: 6`. This would mean that when the actual rule with `version: 6` was released, we wouldn't trigger the update workflow, since the version from the target version (the update) needs to be higher than what is currently installed for that to happen. However, the update would eventually be triggered when the next update was released, i.e. when `version: 7` is released, and work as expected.
 
 **4. The user sets the `version` field from the importing payload to a number that does not exist in the Prebuilt Rules package**: this scenario would still depend on whether the `version` that the user modifies the rule to is higher or lower than the version of the update:
-  - If it was higher, then we would be back in **scenario 3**, where the update workflow wouldn't trigger.
-  - If it was lower, then we would be in **scenario 2**, but with the additional problem that we wouldn't be able to fetch the **base** version of the rule - the unmodified version of the rule as it exists in the Prebuilt Rules package. However, we would still be able to normally display the rule field diffs between the current rule and the target (next version) rule (which is the default behaviour), but not between the base and the target (which is a feature that we want to a add as part of this Milestone).
+
+- If it was higher, then we would be back in **scenario 3**, where the update workflow wouldn't trigger.
+- If it was lower, then we would be in **scenario 2**, but with the additional problem that we wouldn't be able to fetch the **base** version of the rule - the unmodified version of the rule as it exists in the Prebuilt Rules package. However, we would still be able to normally display the rule field diffs between the current rule and the target (next version) rule (which is the default behaviour), but not between the base and the target (which is a feature that we want to a add as part of this Milestone).
 
 $\space$
 $\space$
@@ -2298,8 +2486,6 @@ This means that **no changes will be needed in this page.**
 1. Validation of EQL queries incorrectly fails: valid EQL queries that come with Prebuilt Rules are rejected by the EQL validator when trying to edit a rule. See [link](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/schema.tsx#L186).
 2. Custom Query field overflows the viewport and cannot be completely visualized/edited when the query is too long, i.e. occupies too many lines. This is often the case from Prebuilt Rules. The editable field also does not allow scrolling. See example:
    ![](2023-12-01-14-13-07.png)
-
-
 
 ### Rule fields
 
