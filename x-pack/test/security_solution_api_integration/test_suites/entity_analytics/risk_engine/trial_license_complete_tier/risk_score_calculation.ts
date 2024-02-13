@@ -327,7 +327,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await assetCriticalityRoutes.upsert({
             id_field: 'host.name',
             id_value: 'host-1',
-            criticality_level: 'important',
+            criticality_level: 'high_impact',
           });
         });
 
@@ -353,7 +353,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const [score] = normalizeScores(scores);
           expect(score).to.eql({
-            criticality_level: 'important',
+            criticality_level: 'high_impact',
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,

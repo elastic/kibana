@@ -100,7 +100,7 @@ describe(
         it('should show asset criticality in the risk input panel', () => {
           expandFirstAlertUserFlyout();
           expandRiskInputsFlyoutPanel();
-          cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
+          cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Extreme Impact');
         });
 
         it('should display asset criticality accordion', () => {
@@ -120,16 +120,16 @@ describe(
           toggleAssetCriticalityModal();
           cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
             'have.text',
-            'Pick asset criticality level'
+            'Change asset criticality'
           );
         });
 
         it('should update asset criticality state', () => {
           cy.log('asset criticality update');
           expandFirstAlertUserFlyout();
-          selectAssetCriticalityLevel('Important');
+          selectAssetCriticalityLevel('High Impact');
           cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
-            .contains('Important')
+            .contains('High Impact')
             .should('be.visible');
         });
       });
@@ -181,7 +181,7 @@ describe(
       it('should show asset criticality in the risk input panel', () => {
         expandFirstAlertHostFlyout();
         expandRiskInputsFlyoutPanel();
-        cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
+        cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Extreme Impact');
       });
 
       it('should display asset criticality accordion', () => {
@@ -201,16 +201,16 @@ describe(
         toggleAssetCriticalityModal();
         cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
           'have.text',
-          'Pick asset criticality level'
+          'Change asset criticality'
         );
       });
 
       it('should update asset criticality state', () => {
         cy.log('asset criticality update');
         expandFirstAlertHostFlyout();
-        selectAssetCriticalityLevel('Important');
+        selectAssetCriticalityLevel('High Impact');
         cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
-          .contains('Important')
+          .contains('High Impact')
           .should('be.visible');
       });
     });
