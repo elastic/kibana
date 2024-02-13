@@ -238,7 +238,7 @@ export function createDetectors(
 export async function getChartInfoFromVisualization(
   lens: LensPublicStart,
   vis: LensSavedObjectAttributes
-) {
+): Promise<ChartInfo> {
   const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
   if (!chartInfo) {
     throw new Error('Cannot create job, chart info is undefined');

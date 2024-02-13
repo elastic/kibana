@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import { type HasType, type HasParentApi, type PublishesLocalUnifiedSearch, apiIsOfType } from '@kbn/presentation-publishing';
+import type { HasMapConfig } from '@kbn/maps-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export async function redirectToGeoJobWizard(
-  embeddable: MapEmbeddable,
+  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>,
   dataViewId: string,
   geoField: string,
   layerQuery: Query | null,
@@ -20,8 +20,8 @@ export async function redirectToGeoJobWizard(
   share: SharePluginStart
 ) {
   const { query, filters, to, from } = await getJobsItemsFromEmbeddable(embeddable);
-  const embeddableQuery = await embeddable.getQuery();
-  const embeddableFilters = await embeddable.getFilters();
+  const embeddableQuery = embeddable.localQuery?.value;
+  const embeddableFilters = embeddable.localFilters?.value ?? [];
   const locator = share.url.locators.get(ML_APP_LOCATOR);
 
   const pageState = {
@@ -43,36 +43,21 @@ export async function redirectToGeoJobWizard(
   window.open(url, '_blank');
 }
 
-export function isCompatibleMapVisualization(embeddable: MapEmbeddable) {
-  return embeddable.getLayerList().some((layer) => {
-    const geoField = layer.getGeoFieldNames().length ? layer.getGeoFieldNames()[0] : undefined;
-    const dataViewId = layer.getIndexPatternIds().length
-      ? layer.getIndexPatternIds()[0]
-      : undefined;
-    return geoField && dataViewId;
+export function isCompatibleMapVisualization(api: HasMapConfig) {
+  return api.getLayerList().some((layer) => {
+    return layer.getGeoFieldNames().length && layer.getIndexPatternIds().length;
   });
 }
 
-export async function getJobsItemsFromEmbeddable(embeddable: MapEmbeddable) {
-  // Get dashboard level query/filters
-  const { filters, timeRange, ...input } = embeddable.getInput();
-  const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
-
-  if (timeRange === undefined) {
-    throw Error(
-      i18n.translate('xpack.ml.newJob.fromGeo.createJob.error.noTimeRange', {
-        defaultMessage: 'Time range not specified.',
-      })
-    );
-  }
-  const { to, from } = timeRange;
-  const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
-
+export async function getJobsItemsFromEmbeddable(embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>) {
+  const timeRange = embeddable.localTimeRange?.value ?? 
+    embeddable.parentApi?.localTimeRange?.value ?? 
+    { from: 'now-15m', to: 'now' };
   return {
-    from,
-    to,
-    query,
-    filters,
-    dashboard,
+    from: timeRange.from,
+    to: timeRange.to,
+    query: embeddable.parentApi?.localQuery ??  { query: '', language: 'kuery' },
+    filters: embeddable.parentApi?.localFilters ??  [],
+    dashboard: apiIsOfType(embeddable.parentApi, 'dashboard') ? embeddable.parentApi : undefined,
   };
 }

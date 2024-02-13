@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import { type HasType, type HasParentApi, type PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
@@ -62,7 +62,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
   }: {
     jobId: string;
     bucketSpan: string;
-    embeddable: MapEmbeddable;
+    embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>;
     startJob: boolean;
     runInRealTime: boolean;
     dataViewId?: string;
@@ -80,8 +80,8 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     } = await getJobsItemsFromEmbeddable(embeddable);
 
     // Map level stuff
-    const embeddableQuery = (await embeddable.getQuery()) ?? getDefaultQuery();
-    const embeddableFilters = (await embeddable.getFilters()) ?? [];
+    const embeddableQuery = embeddable.localQuery?.value as Query ?? getDefaultQuery();
+    const embeddableFilters = embeddable.localFilters?.value ?? [];
 
     if (dashboardQuery === undefined || dashboardFilters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');

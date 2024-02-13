@@ -6,7 +6,8 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { PublishesDataViews, PublishesPanelTitle } from '@kbn/presentation-publishing';
+import { type HasMapConfig } from '@kbn/maps-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -27,7 +28,7 @@ import {
 } from '../../../application/jobs/new_job/job_from_map';
 
 interface Props {
-  embeddable: MapEmbeddable;
+  embeddable: HasMapConfig & Partial<PublishesDataViews & PublishesPanelTitle>;
   onClose: () => void;
 }
 
@@ -63,7 +64,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
           <FormattedMessage
             id="xpack.ml.embeddables.geoJobFlyout.secondTitle"
             defaultMessage="Create an anomaly detection lat_long job from map visualization {title}."
-            values={{ title: embeddable.getTitle() }}
+            values={{ title: embeddable.panelTitle?.value ?? '' }}
           />
         </EuiText>
       </EuiFlyoutHeader>

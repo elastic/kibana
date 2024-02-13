@@ -6,14 +6,15 @@
  */
 
 import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
-import { LensSavedObjectAttributes } from '../embeddable';
+import type { ILayer } from '../classes/layers/layer';
 
-export type HasLensConfig = HasType<'lens'> & {
-  getSavedVis: () => LensSavedObjectAttributes;
+
+export type HasMapConfig = HasType<'map'> & {
+  getLayerList: () => ILayer[];
 };
 
-export const apiHasLensConfig = (api: unknown): api is HasLensConfig => {
+export const apiHasMapConfig = (api: unknown): api is HasMapConfig => {
   return Boolean(
-    api && apiIsOfType(api, 'lens') && typeof (api as HasLensConfig).getSavedVis === 'function'
+    api && apiIsOfType(api, 'map') && typeof (api as HasMapConfig).getLayerList === 'function'
   );
 };

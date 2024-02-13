@@ -6,17 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import {
+  type EmbeddableApiContext,
+  type HasType,
+  type HasParentApi,
+  type PublishesLocalUnifiedSearch,
+  apiHasType
+} from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { type HasLensConfig, apiHasLensConfig } from '@kbn/lens-plugin/public';
+import { type HasMapConfig, apiHasMapConfig } from '@kbn/maps-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/job_from_dashboard';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
+export type ActionApi = HasType<'lens' | 'map'> &
+  Partial<(HasLensConfig | HasMapConfig) & PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>;
+
+export const isApiCompatible = (api: unknown | null): api is ActionApi =>
+  Boolean(apiHasType(api));
+
 export function createVisToADJobAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<{ embeddable: Embeddable | MapEmbeddable }> {
+): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
@@ -27,7 +40,7 @@ export function createVisToADJobAction(
       i18n.translate('xpack.ml.actions.createADJobFromLens', {
         defaultMessage: 'Create anomaly detection job',
       }),
-    async execute({ embeddable }) {
+    async execute({ embeddable }: EmbeddableApiContext) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
@@ -49,15 +62,10 @@ export function createVisToADJobAction(
         return Promise.reject();
       }
     },
-    async isCompatible(context: { embeddable: Embeddable }) {
-      const embeddableType = context.embeddable.type;
-      if (embeddableType !== 'map') {
-        if (embeddableType !== 'lens' || !context.embeddable.getSavedVis()) {
-          return false;
-        }
-      }
+    async isCompatible({ embeddable }: EmbeddableApiContext) {
+      if (!isApiCompatible(embeddable) || !['map', 'lens'].includes(embeddable.type)) return false;
 
-      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart, { lens }]] =
+      const [{ getChartInfoFromVisualization, isCompatibleVisualizationType }, [coreStart, { lens }]] =
         await Promise.all([
           import('../application/jobs/new_job/job_from_lens'),
           getStartServices(),
@@ -65,7 +73,7 @@ export function createVisToADJobAction(
       const { isCompatibleMapVisualization } = await import(
         '../application/jobs/new_job/job_from_map'
       );
-
+      
       if (
         !coreStart.application.capabilities.ml?.canCreateJob ||
         !coreStart.application.capabilities.ml?.canStartStopDatafeed
@@ -74,13 +82,13 @@ export function createVisToADJobAction(
       }
 
       try {
-        if (embeddableType === 'lens' && lens) {
-          const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
-          return isCompatibleVisualizationType(chartInfo!);
-        } else if (isMapEmbeddable(context.embeddable)) {
-          return isCompatibleMapVisualization(context.embeddable);
+        if (apiHasLensConfig(embeddable) && lens) {
+          const chartInfo = await getChartInfoFromVisualization(lens, embeddable.getSavedVis());
+          return isCompatibleVisualizationType(chartInfo);
+        } else if (apiHasMapConfig(embeddable)) {
+          return isCompatibleMapVisualization(embeddable);
         }
-        return true;
+        return false;
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error attempting to check for ML job compatibility', error);

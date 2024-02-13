@@ -28,8 +28,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import { type HasType, type HasParentApi, type PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import type { TimeRange } from '@kbn/es-query';
@@ -46,7 +45,7 @@ import { useMlFromLensKibanaContext } from './context';
 export interface CreateADJobParams {
   jobId: string;
   bucketSpan: string;
-  embeddable: MapEmbeddable | Embeddable | undefined;
+  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>> | undefined;
   startJob: boolean;
   runInRealTime: boolean;
 }
@@ -57,7 +56,7 @@ interface Props {
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
   layerIndex: number;
-  embeddable: Embeddable | MapEmbeddable | undefined;
+  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>> | undefined;
   timeRange: TimeRange | undefined;
   incomingCreateError?: { text: string; errorText: string };
   outerFormComplete?: boolean;
