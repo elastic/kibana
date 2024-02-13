@@ -36,6 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'kibana_sample_admin',
         'test_logstash_reader',
       ]);
+      // disable the invalid selection warning toast
+      await browser.setLocalStorageItem('controls:showInvalidSelectionWarning', 'false');
+
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
