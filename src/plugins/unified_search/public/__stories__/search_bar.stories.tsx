@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { buildEmptyFilter, DataViewBase, Query } from '@kbn/es-query';
+import { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -712,33 +712,38 @@ storiesOf('SearchBar', module)
       renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
     })
   )
-  .add('with quick filters', () =>
+  .add('with additional query bar menu items', () =>
     wrapSearchBarInContext({
       showFilterBar: true,
-      quickFilters: [
-        {
-          name: 'Observability rule types',
-          filter: buildEmptyFilter(false),
-          icon: 'logoObservability',
-        },
-        {
-          name: 'Security rule types',
-          filter: buildEmptyFilter(false),
-          icon: 'logoSecurity',
-        },
-        {
-          groupName: 'Status',
-          items: [
-            {
-              name: 'Active',
-              filter: buildEmptyFilter(false),
-            },
-            {
-              name: 'Inactive',
-              filter: buildEmptyFilter(false),
-            },
-          ],
-        },
-      ],
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Observability rule types',
+            icon: 'logoObservability',
+          },
+          {
+            name: 'Security rule types',
+            icon: 'logoSecurity',
+          },
+          {
+            name: 'Status',
+            panel: 'status-panel',
+          },
+        ],
+        panels: [
+          {
+            id: 'status-panel',
+            title: 'Status',
+            items: [
+              {
+                name: 'Active',
+              },
+              {
+                name: 'Inactive',
+              },
+            ],
+          },
+        ],
+      },
     })
   );
