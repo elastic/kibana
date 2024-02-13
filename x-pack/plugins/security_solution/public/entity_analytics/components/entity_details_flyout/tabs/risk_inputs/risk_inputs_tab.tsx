@@ -6,7 +6,6 @@
  */
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiIconTip } from '@elastic/eui';
 import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -226,6 +225,10 @@ const RiskInputsAssetCriticalitySection: React.FC<{
 
     return riskScore.host.risk.criticality_level;
   }, [riskScore]);
+
+  if (loading || criticalityLevel === undefined) {
+    return null;
+  }
 
   return (
     <>
