@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EcsError } from '@kbn/ecs';
+import type { EcsError } from '@elastic/ecs';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionAgentType,
