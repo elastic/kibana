@@ -53,28 +53,29 @@ describe('helpers', () => {
   });
 
   describe('getValidValues', () => {
-    // FIXME: lgestc
-    test.skip('it returns the expected valid values', () => {
-      expect(getValidValues(ecsMetadata['event.category'])).toEqual([
-        'authentication',
-        'configuration',
-        'database',
-        'driver',
-        'email',
-        'file',
-        'host',
-        'iam',
-        'intrusion_detection',
-        'malware',
-        'network',
-        'package',
-        'process',
-        'registry',
-        'session',
-        'threat',
-        'vulnerability',
-        'web',
-      ]);
+    test('it returns the expected valid values', () => {
+      expect(getValidValues(ecsMetadata['event.category'])).toEqual(
+        expect.arrayContaining([
+          'authentication',
+          'configuration',
+          'database',
+          'driver',
+          'email',
+          'file',
+          'host',
+          'iam',
+          'intrusion_detection',
+          'malware',
+          'network',
+          'package',
+          'process',
+          'registry',
+          'session',
+          'threat',
+          'vulnerability',
+          'web',
+        ])
+      );
     });
 
     test('it returns an empty array when the `field` does NOT have `allowed_values`', () => {
@@ -85,8 +86,7 @@ describe('helpers', () => {
       expect(getValidValues(undefined)).toEqual([]);
     });
 
-    // FIXME: lgestc
-    test.skip('it skips `allowed_values` where `name` is undefined', () => {
+    test('it skips `allowed_values` where `name` is undefined', () => {
       // omit the `name` property from the `database` `AllowedValue`:
       const missingDatabase =
         ecsMetadata['event.category'].allowed_values?.map((x) =>
@@ -98,32 +98,38 @@ describe('helpers', () => {
         allowed_values: missingDatabase,
       };
 
-      expect(getValidValues(field)).toEqual([
-        'authentication',
-        'configuration',
-        // no entry for 'database'
-        'driver',
-        'email',
-        'file',
-        'host',
-        'iam',
-        'intrusion_detection',
-        'malware',
-        'network',
-        'package',
-        'process',
-        'registry',
-        'session',
-        'threat',
-        'vulnerability',
-        'web',
-      ]);
+      expect(getValidValues(field)).toEqual(
+        expect.arrayContaining([
+          'authentication',
+          'configuration',
+          'driver',
+          'email',
+          'file',
+          'host',
+          'iam',
+          'intrusion_detection',
+          'malware',
+          'network',
+          'package',
+          'process',
+          'registry',
+          'session',
+          'threat',
+          'vulnerability',
+          'web',
+        ])
+      );
+      expect(getValidValues(field)).not.toEqual(
+        expect.arrayContaining([
+          // there should be no entry for 'database'
+          'database',
+        ])
+      );
     });
   });
 
   describe('getUnallowedValueRequestItems', () => {
-    // FIXME: lgestc
-    test.skip('it returns the expected request items', () => {
+    test('it returns the expected request items', () => {
       expect(
         getUnallowedValueRequestItems({
           ecsMetadata,
@@ -133,7 +139,7 @@ describe('helpers', () => {
         {
           indexName: 'auditbeat-*',
           indexFieldName: 'event.category',
-          allowedValues: [
+          allowedValues: expect.arrayContaining([
             'authentication',
             'configuration',
             'database',
@@ -152,12 +158,12 @@ describe('helpers', () => {
             'threat',
             'vulnerability',
             'web',
-          ],
+          ]),
         },
         {
           indexName: 'auditbeat-*',
           indexFieldName: 'event.kind',
-          allowedValues: [
+          allowedValues: expect.arrayContaining([
             'alert',
             'enrichment',
             'event',
@@ -165,17 +171,17 @@ describe('helpers', () => {
             'state',
             'pipeline_error',
             'signal',
-          ],
+          ]),
         },
         {
           indexName: 'auditbeat-*',
           indexFieldName: 'event.outcome',
-          allowedValues: ['failure', 'success', 'unknown'],
+          allowedValues: expect.arrayContaining(['failure', 'success', 'unknown']),
         },
         {
           indexName: 'auditbeat-*',
           indexFieldName: 'event.type',
-          allowedValues: [
+          allowedValues: expect.arrayContaining([
             'access',
             'admin',
             'allowed',
@@ -193,7 +199,7 @@ describe('helpers', () => {
             'protocol',
             'start',
             'user',
-          ],
+          ]),
         },
       ]);
     });

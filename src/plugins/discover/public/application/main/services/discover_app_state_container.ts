@@ -132,6 +132,10 @@ export interface DiscoverAppState {
    */
   rowHeight?: number;
   /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
+  /**
    * Number of rows in the grid per page
    */
   rowsPerPage?: number;
