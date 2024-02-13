@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
 import { LogsExplorerCustomizations } from '../../../../controller';
-import { getDiscoverColumnsWithFallbackFieldsFromDisplayOptions } from '../../../../utils/convert_discover_app_state';
-import { DataViewSelection, isDataViewSelection } from '../../../../../common/dataset_selection';
+import { isDataViewSelection } from '../../../../../common/dataset_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,

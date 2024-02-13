@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
-import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
