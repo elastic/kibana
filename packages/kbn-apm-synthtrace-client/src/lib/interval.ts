@@ -32,7 +32,7 @@ interface IntervalOptions {
   rate?: number;
 }
 
-export class Interval<TFields = Fields> {
+export class Interval<TFields extends Fields = Fields> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: unitOfTime.DurationConstructor;
 
@@ -63,13 +63,11 @@ export class Interval<TFields = Fields> {
     return timestamps;
   }
 
-  *generator<TGeneratedFields = TFields>(
+  *generator<TGeneratedFields extends Fields = TFields>(
     map: (
       timestamp: number,
       index: number
-      // @ts-expect-error upgrade typescript v4.9.5
     ) => Serializable<TGeneratedFields> | Array<Serializable<TGeneratedFields>>
-    // @ts-expect-error upgrade typescript v4.9.5
   ): SynthtraceGenerator<TGeneratedFields> {
     const timestamps = this.getTimestamps();
 
