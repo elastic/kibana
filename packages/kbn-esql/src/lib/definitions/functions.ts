@@ -907,18 +907,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
         ],
       },
-      {
-        minParams: 2,
-        params: [
-          { name: 'ip', type: 'string' },
-          { name: 'cidr_block', type: 'string' },
-        ],
-        returnType: 'boolean',
-        examples: [
-          'from index | where cidr_match(ip_string_field, "127.0.0.1/30")',
-          'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_string_field, "127.0.0.1/30", cidr)',
-        ],
-      },
     ],
   },
   {

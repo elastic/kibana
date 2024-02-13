@@ -555,23 +555,7 @@
       "error": false
     },
     {
-      "query": "row var = cidr_match(5, 5)",
-      "error": true
-    },
-    {
-      "query": "row var = cidr_match(\"a\", \"a\")",
-      "error": false
-    },
-    {
-      "query": "row cidr_match(\"a\", \"a\")",
-      "error": false
-    },
-    {
-      "query": "row var = cidr_match(to_string(\"a\"), to_string(\"a\"))",
-      "error": false
-    },
-    {
-      "query": "row var = cidr_match(5, 5)",
+      "query": "row var = cidr_match(\"a\", 5)",
       "error": true
     },
     {
@@ -4603,23 +4587,7 @@
       "error": false
     },
     {
-      "query": "from a_index | eval cidr_match(numberField, numberField)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = cidr_match(stringField, stringField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval cidr_match(stringField, stringField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval var = cidr_match(to_string(stringField), to_string(stringField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval cidr_match(numberField, numberField)",
+      "query": "from a_index | eval cidr_match(stringField, numberField)",
       "error": true
     },
     {
