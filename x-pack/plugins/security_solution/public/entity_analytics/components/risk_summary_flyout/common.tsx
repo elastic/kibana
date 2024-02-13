@@ -80,7 +80,9 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     align: 'right',
     footer: (props) =>
       showFooter ? (
-        <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+        <span data-test-subj="risk-summary-result-count">
+          {sumBy((i) => i.count ?? 0, props.items)}
+        </span>
       ) : undefined,
   },
 ];
