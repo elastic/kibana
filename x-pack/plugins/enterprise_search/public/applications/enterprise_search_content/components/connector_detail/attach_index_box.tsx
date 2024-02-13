@@ -99,11 +99,20 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexLabel',
               { defaultMessage: 'Associated index' }
             )}
-            helpText="You can use an existing index or create a new one"
+            helpText={i18n.translate(
+              'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
+              { defaultMessage: 'You can use an existing index or create a new one' }
+            )}
           >
             <EuiComboBox
-              placeholder="Select or create an index"
-              customOptionText="Create {searchValue} new index"
+              placeholder={i18n.translate(
+                'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.placeholder',
+                { defaultMessage: 'Select or create an index' }
+              )}
+              customOptionText={i18n.translate(
+                'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.customOption',
+                { defaultMessage: 'Create {searchValue} new index' }
+              )}
               isLoading={isLoading}
               options={options}
               onChange={(selection) => setSelectedIndex(selection[0] || undefined)}
