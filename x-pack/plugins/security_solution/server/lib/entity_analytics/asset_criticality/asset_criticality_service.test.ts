@@ -25,7 +25,7 @@ const buildMockCriticalityHit = (
     '@timestamp': '2021-09-16T15:00:00.000Z',
     id_field: 'host.name',
     id_value: 'hostname',
-    criticality_level: 'normal',
+    criticality_level: 'medium_impact',
     ...overrides,
   },
 });
@@ -140,7 +140,7 @@ describe('AssetCriticalityService', () => {
           buildMockCriticalityHit({
             id_field: 'user.name',
             id_value: 'username',
-            criticality_level: 'very_important',
+            criticality_level: 'extreme_impact',
           }),
         ];
 

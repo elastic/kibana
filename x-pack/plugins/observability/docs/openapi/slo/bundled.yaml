@@ -634,6 +634,58 @@ components:
           description: The type of indicator.
           type: string
           example: sli.apm.transactionDuration
+    filter_meta:
+      title: FilterMeta
+      description: Defines properties for a filter
+      type: object
+      properties:
+        alias:
+          type: string
+          nullable: true
+        disabled:
+          type: boolean
+        negate:
+          type: boolean
+        controlledBy:
+          type: string
+        group:
+          type: string
+        index:
+          type: string
+        isMultiIndex:
+          type: boolean
+        type:
+          type: string
+        key:
+          type: string
+        params:
+          type: object
+        value:
+          type: string
+    filter:
+      title: Filter
+      description: Defines properties for a filter
+      type: object
+      properties:
+        query:
+          type: object
+        meta:
+          $ref: '#/components/schemas/filter_meta'
+    kql_with_filters:
+      title: KQL with filters
+      description: Defines properties for a filter
+      oneOf:
+        - description: the KQL query to filter the documents with.
+          type: string
+          example: 'field.environment : "production" and service.name : "my-service"'
+        - type: object
+          properties:
+            kqlQuery:
+              type: string
+            filters:
+              type: array
+              items:
+                $ref: '#/components/schemas/filter'
     indicator_properties_custom_kql:
       title: Custom KQL
       required:
@@ -658,15 +710,14 @@ components:
               example: my-service-*
             filter:
               description: the KQL query to filter the documents with.
-              type: string
-              example: 'field.environment : "production" and service.name : "my-service"'
+              $ref: '#/components/schemas/kql_with_filters'
             good:
               description: the KQL query used to define the good events.
-              type: string
+              $ref: '#/components/schemas/kql_with_filters'
               example: 'request.latency <= 150 and request.status_code : "2xx"'
             total:
               description: the KQL query used to define all events.
-              type: string
+              $ref: '#/components/schemas/kql_with_filters'
               example: ''
             timestampField:
               description: |

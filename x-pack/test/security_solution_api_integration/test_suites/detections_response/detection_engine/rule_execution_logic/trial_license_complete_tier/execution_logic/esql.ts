@@ -894,7 +894,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts.length).toBe(1);
 
-        expect(previewAlerts[0]?._source?.['host.asset.criticality']).toBe('very_important');
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).toBe('extreme_impact');
       });
     });
 
