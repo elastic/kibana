@@ -22,6 +22,7 @@ export async function searchStackTraces({
   indices,
   stacktraceIdsField,
   query,
+  showErrorFrames,
 }: {
   client: ProfilingESClient;
   sampleSize: number;
@@ -35,6 +36,7 @@ export async function searchStackTraces({
   indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
+  showErrorFrames: boolean;
 }) {
   const response = await client.profilingStacktraces({
     query,
@@ -50,5 +52,5 @@ export async function searchStackTraces({
     stacktraceIdsField,
   });
 
-  return decodeStackTraceResponse(response);
+  return decodeStackTraceResponse(response, showErrorFrames);
 }
