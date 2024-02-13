@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-
-export const parseDataViewListItem = (dataViewListItem: DataViewListItem) => {
-  return {
-    ...dataViewListItem,
-    name: dataViewListItem.name ?? dataViewListItem.title,
-  };
-};
+export type QualityIndicators = 'good' | 'poor' | 'degraded';
+export type InfoIndicators = 'success' | 'danger' | 'warning';
