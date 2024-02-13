@@ -84,8 +84,9 @@ export const Content = ({
   const renderLogMessage = field && value;
 
   const shouldShowFieldHandler = useMemo(() => {
-    const dataViewFields = dataView?.fields.getAll().map((fld) => fld.name);
-    return getShouldShowFieldHandler(dataViewFields ?? [], dataView, true);
+    if (!dataView) return () => true;
+    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+    return getShouldShowFieldHandler(dataViewFields, dataView, true);
   }, [dataView]);
 
   if (isDetails && !renderLogMessage) {
