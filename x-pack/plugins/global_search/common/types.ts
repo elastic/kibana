@@ -7,6 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { Serializable } from '@kbn/utility-types';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 /**
  * Options provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method.
@@ -26,6 +27,11 @@ export interface GlobalSearchProviderFindOptions {
    * this can (and should) be used to cancel any pending asynchronous task and complete the result observable from within the provider.
    */
   aborted$: Observable<void>;
+  /**
+   * A ES client of type IScopedClusterClient is passed to the `find` call.
+   * When performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster.
+   */
+  client?: IScopedClusterClient;
   /**
    * The total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.
    * Any result emitted exceeding this quota will be ignored by the service and not emitted to the consumer.

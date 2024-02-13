@@ -59,7 +59,6 @@
     "@kbn/core-integrations-browser-mocks",
     "@kbn/core-apps-browser-mocks",
     "@kbn/core-logging-browser-mocks",
-    "@kbn/logging",
     "@kbn/config",
     "@kbn/core-custom-branding-browser-internal",
     "@kbn/core-custom-branding-browser-mocks",

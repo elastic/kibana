@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -15,6 +15,7 @@ import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import dedent from 'dedent';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -34,6 +35,9 @@ export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    observabilityAIAssistant: {
+      service: { setScreenContext },
+    },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -52,6 +56,31 @@ export function SloDetailsPage() {
   const isCloningOrDeleting = Boolean(useIsMutating());
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
+
+  useEffect(() => {
+    if (!slo) {
+      return;
+    }
+
+    return setScreenContext({
+      screenDescription: dedent(`
+        The user is looking at the detail page for the following SLO
+        
+        Name: ${slo.name}.
+        Id: ${slo.id}
+        Description: ${slo.description}
+        Observed value: ${slo.summary.sliValue}
+        Status: ${slo.summary.status}
+      `),
+      data: [
+        {
+          name: 'slo',
+          description: 'The SLO and its metadata',
+          value: slo,
+        },
+      ],
+    });
+  }, [setScreenContext, slo]);
 
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {

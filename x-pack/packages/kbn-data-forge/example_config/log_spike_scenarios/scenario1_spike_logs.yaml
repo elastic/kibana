@@ -1,0 +1,35 @@
+---
+# Define the connection to Elasticsearch
+elasticsearch:
+  host: "http://localhost:9200"
+  username: "elastic"
+  password: "changeme"
+  installKibanaUser: false
+
+# Define the connection to Kibana
+kibana:
+  host: "http://localhost:5601"
+  username: "elastic"
+  password: "changeme"
+  installAssets: false
+
+# Define the indexing options
+indexing:
+  dataset: "fake_logs"
+  eventsPerCycle: 2000
+  interval: 6000
+
+# Define the schedule
+schedule:
+  # This step send 2000 logs every 30 seconds
+  - template: "good"
+    eventsPerCycle: 2000
+    start: "now-2m"
+    end: "now+1m"
+  # This step send 6000 logs every 30 seconds
+  - template: "bad"
+    start: "now+1m"
+    end: "now+10m"
+    eventsPerCycle: 6000
+    randomness: 0.1
+
