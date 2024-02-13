@@ -812,6 +812,10 @@
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
+            },
+            {
               "plugin": "synthetics",
               "path": "x-pack/plugins/synthetics/server/telemetry/sender.ts"
             },
