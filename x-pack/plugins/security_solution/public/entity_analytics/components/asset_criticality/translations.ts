@@ -41,29 +41,3 @@ export const CRITICALITY_LEVEL_TITLE: Record<CriticalityLevel, string> = {
     }
   ),
 };
-export const CRITICALITY_LEVEL_DESCRIPTION: Record<CriticalityLevel, string> = {
-  medium_impact: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.normal',
-    {
-      defaultMessage: 'Entity risk score rises at normal speed',
-    }
-  ),
-  low_impact: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.notImportant',
-    {
-      defaultMessage: 'Entity risk score rises slower',
-    }
-  ),
-  high_impact: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.important',
-    {
-      defaultMessage: 'Entity risk score rises faster',
-    }
-  ),
-  extreme_impact: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.veryImportant',
-    {
-      defaultMessage: 'Entity risk score rises much faster',
-    }
-  ),
-};

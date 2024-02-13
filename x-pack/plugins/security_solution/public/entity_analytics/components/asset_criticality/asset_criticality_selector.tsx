@@ -238,7 +238,6 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
       criticalityLevel={level}
       style={{ lineHeight: 'inherit' }}
       dataTestSubj="asset-criticality-modal-select-option"
-      withDescription
     />
   ),
   inputDisplay: (
