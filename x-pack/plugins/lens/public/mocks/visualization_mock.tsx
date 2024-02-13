@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { toExpression } from '@kbn/interpreter';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualization> {
@@ -46,7 +47,15 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
         },
       ],
     })),
-    toExpression: jest.fn((_state, _frame) => 'expression'),
+    toExpression: jest.fn((state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+      toExpression({
+        type: 'expression',
+        chain: [
+          ...(datasourceExpressionsByLayers.first?.chain ?? []),
+          { type: 'function', function: 'testVis', arguments: {} },
+        ],
+      })
+    ),
     toPreviewExpression: jest.fn((_state, _frame) => 'expression'),
     getUserMessages: jest.fn((_state) => []),
     setDimension: jest.fn(),
