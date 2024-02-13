@@ -104,8 +104,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect([exportedRule1, exportedRule2]).toEqual(
           expect.arrayContaining([
-            expect.objectContaining(ruleToExport1),
-            expect.objectContaining(ruleToExport2),
+            expect.objectContaining(expect.objectContaining(ruleToExport1)),
+            expect.objectContaining(expect.objectContaining(ruleToExport2)),
           ])
         );
       });

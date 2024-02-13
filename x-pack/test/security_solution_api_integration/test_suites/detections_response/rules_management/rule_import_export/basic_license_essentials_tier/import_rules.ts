@@ -21,7 +21,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
 
   describe('@ess @serverless import_rules', () => {
     describe('importing rules with an index', () => {
