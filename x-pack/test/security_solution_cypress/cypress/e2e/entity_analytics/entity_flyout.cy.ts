@@ -54,6 +54,7 @@ describe(
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'entityAnalyticsAssetCriticalityEnabled',
             'newUserDetailsFlyoutManagedUser',
           ])}`,
         ],
