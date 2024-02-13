@@ -914,6 +914,12 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
+    if (this.isTextBasedLanguage()) {
+      this.updateInput({
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
+      });
+    }
+
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
         await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);

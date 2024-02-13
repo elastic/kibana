@@ -8,7 +8,11 @@
 import * as uuid from 'uuid';
 import { ToolingLog } from '@kbn/tooling-log';
 import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
-import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import {
+  AgentPolicy,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
@@ -120,7 +124,11 @@ export function setPrereleaseSetting(supertest: any) {
   });
 }
 
-export const generateNPolicies = async (supertest: any, number: number) => {
+export const generateNPolicies = async (
+  supertest: any,
+  number: number,
+  overwrite?: Partial<CreateAgentPolicyRequest['body']>
+): Promise<AgentPolicy[]> => {
   const promises = [];
 
   for (let i = 0; i < number; i++) {
@@ -128,15 +136,14 @@ export const generateNPolicies = async (supertest: any, number: number) => {
       supertest
         .post(agentPolicyRouteService.getCreatePath())
         .set('kbn-xsrf', 'xxxx')
-        .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default' })
+        .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default', ...overwrite })
         .expect(200)
     );
   }
 
   const responses = await Promise.all(promises);
-  const policyIds = responses.map(({ body }) => (body as CreateAgentPolicyResponse).item.id);
 
-  return policyIds;
+  return responses.map(({ body }) => (body as CreateAgentPolicyResponse).item);
 };
 
 export const addUninstallTokenToPolicy = async (
