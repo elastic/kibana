@@ -183,6 +183,19 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
         </>
       ) : null}
 
+      {model.hasInferenceServices && inferenceServiceIDs.length === 0 ? (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.forceStopDialog.hasInferenceServicesWarning"
+              defaultMessage="The model is used by the _inference API"
+            />
+          }
+          color="warning"
+          iconType="warning"
+        />
+      ) : null}
+
       {inferenceServiceIDs.length > 0 ? (
         <>
           <EuiCallOut
