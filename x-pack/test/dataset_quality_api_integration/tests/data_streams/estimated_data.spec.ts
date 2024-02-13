@@ -62,12 +62,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns correct estimated data for 1 day of logs', async () => {
         const resp = await callApiAs('logs', oneDayEnd);
-        expect(resp.body.estimatedDataInBytes).to.be.greaterThan(1000);
+        expect(resp.body.estimatedDataInBytes).to.be.lessThan(2500).greaterThan(1000);
       });
 
       it('returns correct estimated data for 1 week of logs', async () => {
         const resp = await callApiAs('logs', oneWeekEnd);
-        expect(resp.body.estimatedDataInBytes).to.be.greaterThan(10000);
+        expect(resp.body.estimatedDataInBytes).to.be.lessThan(20000).greaterThan(10000);
       });
 
       it('returns correct estimated data for no data index', async () => {
