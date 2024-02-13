@@ -31,6 +31,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   if (stats === undefined) return null;
 
   const { count, sampleCount } = stats;
+
   const total = sampleCount ?? totalCount;
 
   // If field exists is docs but we don't have count stats then don't show
@@ -39,7 +40,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
     valueCount !== undefined && total !== undefined
-      ? `(${roundToDecimalPlace((valueCount / total) * 100)}%)`
+      ? `(${total === 0 ? 0 : roundToDecimalPlace((valueCount / total) * 100)}%)`
       : null;
 
   const content = (

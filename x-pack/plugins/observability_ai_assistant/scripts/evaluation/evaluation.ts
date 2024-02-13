@@ -24,6 +24,7 @@ import { getServiceUrls } from './get_service_urls';
 import { KibanaClient } from './kibana_client';
 import { initServices } from './services';
 import { setupSynthtrace } from './setup_synthtrace';
+import { EvaluationResult } from './types';
 
 function runEvaluations() {
   yargs(process.argv.slice(2))
@@ -36,7 +37,7 @@ function runEvaluations() {
             kibana: argv.kibana,
           });
 
-          const kibanaClient = new KibanaClient(serviceUrls.kibanaUrl, argv.spaceId);
+          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
           });
@@ -69,6 +70,8 @@ function runEvaluations() {
 
           log.info(`Using connector ${connector.id}`);
 
+          await kibanaClient.installKnowledgeBase();
+
           const scenarios =
             (argv.files !== undefined &&
               castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
@@ -86,9 +89,15 @@ function runEvaluations() {
             log,
           });
 
+          const mocha = new Mocha({
+            grep: argv.grep,
+            timeout: '5m',
+          });
+
           const chatClient = kibanaClient.createChatClient({
             connectorId: connector.id!,
             persist: argv.persist,
+            suite: mocha.suite,
           });
 
           const header: string[][] = [
@@ -128,7 +137,14 @@ function runEvaluations() {
             ],
           };
 
+          const results: EvaluationResult[] = [];
+          const failedScenarios: string[][] = [
+            ['Failed Tests', '', ''],
+            ['Scenario, Scores, Reasoning', '', ''],
+          ];
+
           chatClient.onResult((result) => {
+            results.push(result);
             log.debug(`Result:`, JSON.stringify(result));
             const output: string[][] = [
               [
@@ -151,11 +167,30 @@ function runEvaluations() {
             result.scores.forEach((score) => {
               output.push([
                 score.criterion,
-                score.score === 0 ? chalk.redBright('failed') : chalk.greenBright('passed'),
+                score.score < 1
+                  ? chalk.redBright(String(score.score))
+                  : chalk.greenBright(String(score.score)),
                 score.reasoning,
               ]);
             });
             log.write(table.table(output, tableConfig));
+
+            const totalResults = result.scores.length;
+            const failedResults = result.scores.filter((score) => score.score < 1).length;
+
+            if (failedResults / totalResults > 0) {
+              const reasoningConcat = result.scores.map((score) => score.reasoning).join(' ');
+              failedScenarios.push([
+                `${result.name} : ${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
+                  argv.spaceId ? `s/${argv.spaceId}/` : ''
+                }app/observabilityAIAssistant/conversations/${result.conversationId}`,
+                `Average score ${Math.round(
+                  (result.scores.reduce((total, next) => total + next.score, 0) * 100) /
+                    totalResults
+                )}. Failed ${failedResults} tests out of ${totalResults}`,
+                `Reasoning: ${reasoningConcat}`,
+              ]);
+            }
           });
 
           initServices({
@@ -163,11 +198,7 @@ function runEvaluations() {
             esClient,
             chatClient,
             synthtraceEsClients,
-          });
-
-          const mocha = new Mocha({
-            grep: argv.grep,
-            timeout: '5m',
+            logger: log,
           });
 
           mocha.suite.beforeAll(async () => {
@@ -190,6 +221,7 @@ function runEvaluations() {
           return new Promise((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
+                log.write(table.table(failedScenarios, tableConfig));
                 reject(new Error(`Some tests failed`));
                 return;
               }

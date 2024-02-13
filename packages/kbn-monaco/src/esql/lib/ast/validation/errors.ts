@@ -232,13 +232,19 @@ export function getMessageFromId<K extends ErrorTypes>({
   locations: ESQLLocation;
 }): ESQLMessage {
   const { message, type = 'error' } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations);
+  return createMessage(type, message, locations, payload.messageId);
 }
 
-export function createMessage(type: 'error' | 'warning', message: string, location: ESQLLocation) {
+export function createMessage(
+  type: 'error' | 'warning',
+  message: string,
+  location: ESQLLocation,
+  messageId: string
+) {
   return {
     type,
     text: message,
     location,
+    code: messageId,
   };
 }

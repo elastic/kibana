@@ -723,12 +723,16 @@ describe('#kill()', () => {
 });
 
 describe('#runServerless()', () => {
+  const defaultOptions = {
+    projectType: 'es' as dockerUtils.ServerlessProjectType,
+    basePath: installPath,
+  };
   test(`rejects if #start() was called before`, async () => {
     mockEsBin({ start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
       'ES stateful cluster has already been started'
     );
   });
@@ -738,7 +742,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
       'ES stateful cluster has already been started'
     );
   });
@@ -756,7 +760,7 @@ describe('#runServerless()', () => {
     );
 
     const cluster = new Cluster({ log });
-    const promise = cluster.runServerless({ basePath: installPath });
+    const promise = cluster.runServerless(defaultOptions);
     await ensureNoResolve(promise);
     resolveRunServerlessCluster!();
     await expect(ensureResolve(promise, 'runServerless()')).resolves.toEqual(nodeNames);
@@ -767,8 +771,8 @@ describe('#runServerless()', () => {
     runServerlessClusterMock.mockResolvedValueOnce(nodeNames);
 
     const cluster = new Cluster({ log });
-    await cluster.runServerless({ basePath: installPath });
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+    await cluster.runServerless(defaultOptions);
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
       'ES serverless docker cluster has already been started'
     );
   });
@@ -776,7 +780,7 @@ describe('#runServerless()', () => {
   test('rejects if #runServerlessCluster() rejects', async () => {
     runServerlessClusterMock.mockRejectedValueOnce(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError('foo');
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError('foo');
   });
 
   test('passes through all options+log to #runServerlessCluster()', async () => {
@@ -785,6 +789,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     const serverlessOptions = {
+      projectType: 'es' as dockerUtils.ServerlessProjectType,
       clean: true,
       basePath: installPath,
       teardown: true,

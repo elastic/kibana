@@ -221,7 +221,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'words', type: 'string' },
           { name: 'separator', type: 'string' },
         ],
-        returnType: 'string[]',
+        returnType: 'string',
         examples: [`ROW words="foo;bar;baz;qux;quux;corge" | EVAL word = SPLIT(words, ";")`],
       },
     ],
@@ -873,7 +873,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_avg(a)'],
       },
@@ -888,7 +888,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'multivalue', type: 'string[]' },
+          { name: 'multivalue', type: 'string' },
           { name: 'delimeter', type: 'string' },
         ],
         returnType: 'string',
@@ -904,7 +904,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'any[]' }],
+        params: [{ name: 'multivalue', type: 'any' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_count(a)'],
       },
@@ -917,8 +917,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'any[]' }],
-        returnType: 'any[]',
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
         examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
       },
     ],
@@ -959,7 +959,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
       },
@@ -973,7 +973,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
       },
@@ -987,7 +987,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_median(a)'],
       },
@@ -1001,7 +1001,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_sum(a)'],
       },
@@ -1052,4 +1052,5 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ...def,
     supportedCommands: ['eval', 'where', 'row'],
     supportedOptions: ['by'],
+    type: 'eval',
   }));
