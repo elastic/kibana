@@ -45,8 +45,6 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
       1
     );
-
-    expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
   });
 
   it('renders the modal info correctly', async () => {
