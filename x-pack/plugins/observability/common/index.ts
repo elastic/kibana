@@ -44,12 +44,14 @@ export {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
+  profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  apmEnableTransactionProfiling,
 } from './ui_settings_keys';
 
 export {

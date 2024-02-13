@@ -12,8 +12,7 @@
   ],
   "baseBranches": [
     "main",
-    "7.16",
-    "7.15"
+    "7.17"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,

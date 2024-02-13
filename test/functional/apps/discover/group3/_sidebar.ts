@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
-        expect(options).to.have.length(3);
+        expect(options).to.have.length(5);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '82 available fields.'
