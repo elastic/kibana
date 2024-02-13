@@ -5,6 +5,46 @@
     "functions": [
       {
         "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.apiHasDynamicActions",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasDynamicActions",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.HasDynamicActions",
+            "text": "HasDynamicActions"
+          }
+        ],
+        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.apiHasDynamicActions.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddableEnhanced",
         "id": "def-public.isEnhancedEmbeddable",
         "type": "Function",
         "tags": [],
@@ -74,12 +114,24 @@
         "parentPluginId": "embeddableEnhanced",
         "id": "def-public.EnhancedEmbeddableContext",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "EnhancedEmbeddableContext",
         "description": [],
         "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_edit_drilldown/menu_item.tsx"
+          },
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_edit_drilldown/menu_item.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "embeddableEnhanced",
@@ -123,6 +175,42 @@
               "; }; }"
             ],
             "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.HasDynamicActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasDynamicActions",
+        "description": [],
+        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.HasDynamicActions.enhancements",
+            "type": "Object",
+            "tags": [],
+            "label": "enhancements",
+            "description": [],
+            "signature": [
+              "{ dynamicActions: ",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.DynamicActionManager",
+                "text": "DynamicActionManager"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -255,31 +343,7 @@
             "section": "def-common.PresentableGroup",
             "text": "PresentableGroup"
           },
-          "<{ embeddable?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any> | undefined; }>[]"
+          "<unknown>[]"
         ],
         "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
         "deprecated": false,
