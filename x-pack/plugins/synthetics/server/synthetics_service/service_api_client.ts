@@ -280,16 +280,23 @@ export class ServiceAPIClient {
     };
   }
 
+  isLoggable(result: unknown): result is { status?: any; request?: any } {
+    const objCast = result as object;
+    return (
+      Object.keys(objCast).some((k) => k === 'status' || k === 'request') &&
+      'data' in objCast &&
+      typeof objCast?.data === 'string'
+    );
+  }
+
   logSuccessMessage(
     url: string,
     method: string,
     numMonitors: number,
-    result: AxiosResponse<any> | ServicePayload
+    result: AxiosResponse<unknown> | ServicePayload
   ) {
-    if ('status' in result || 'request' in result) {
-      // @ts-expect-error upgrade typescript v4.9.5
-      if (result.data) {
-        // @ts-expect-error upgrade typescript v4.9.5
+    if (this.isLoggable(result)) {
+      if (result.data && typeof result.data === 'string') {
         this.logger.debug(result.data);
       }
       this.logger.debug(

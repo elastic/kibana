@@ -16,7 +16,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
 } from '@kbn/core/server';
-import { FullValidationConfig } from '@kbn/core-http-server';
+import { FullValidationConfig, HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
 import { UptimeEsClient } from '../lib';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -59,14 +59,14 @@ export type UMKibanaRoute = UMRouteDefinition<
 >;
 
 export type SyntheticsRestApiRouteFactory<
-  ClientContract = any,
+  ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = any,
   Query = Record<string, any>,
   Body = any
 > = () => SyntheticsRoute<ClientContract, Params, Query, Body>;
 
 export type SyntheticsRoute<
-  ClientContract = unknown,
+  ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = Record<string, any>,
   Query = Record<string, any>,
   Body = any
@@ -105,7 +105,7 @@ export interface RouteContext<
 }
 
 export type SyntheticsRouteHandler<
-  ClientContract,
+  ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = Record<string, any>,
   Query = Record<string, any>,
   Body = any
@@ -115,6 +115,6 @@ export type SyntheticsRouteHandler<
   request,
   response,
   server,
-  savedObjectsClient, // @ts-expect-error upgrade typescript v4.9.5
-  subject: Subject, // @ts-expect-error upgrade typescript v4.9.5
+  savedObjectsClient,
+  subject,
 }: RouteContext<Params, Query, Body>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;

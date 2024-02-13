@@ -24,12 +24,12 @@ const value: InspectorContextValue = {
 
 export const InspectorContext = createContext<InspectorContextValue>(value);
 
-export type AddInspectorRequest = (
-  result: FetcherResult<{
-    mainStatisticsData?: { _inspect?: InspectResponse };
-    _inspect?: InspectResponse;
-  }>
-) => void;
+export interface InspectorRequestProps {
+  mainStatisticsData?: { _inspect?: InspectResponse };
+  _inspect?: InspectResponse;
+}
+
+export type AddInspectorRequest = (result: FetcherResult<InspectorRequestProps>) => void;
 
 export function InspectorContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();

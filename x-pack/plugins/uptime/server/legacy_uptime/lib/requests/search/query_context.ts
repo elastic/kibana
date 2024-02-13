@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import type { ESFilter } from '@kbn/es-types';
-import { CursorPagination } from './types';
+import type { SearchRequest } from '@kbn/data-plugin/common';
+import type { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { UptimeEsClient } from '../../lib';
 import { parseRelativeDate } from '../../../../../common/lib/get_histogram_interval';
@@ -43,8 +44,7 @@ export class QueryContext {
     this.query = query;
   }
 
-  async search<TParams>(params: TParams, operationName?: string) {
-    // @ts-expect-error upgrade typescript v4.9.5
+  async search<TParams extends SearchRequest>(params: TParams, operationName?: string) {
     return this.callES.search(params, operationName);
   }
 

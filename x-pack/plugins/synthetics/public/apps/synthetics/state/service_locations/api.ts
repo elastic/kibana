@@ -8,6 +8,7 @@
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   ServiceLocations,
+  ServiceLocationsApiResponse,
   ServiceLocationsApiResponseCodec,
   ThrottlingOptions,
 } from '../../../../../common/runtime_types';
@@ -17,8 +18,7 @@ export const fetchServiceLocations = async (): Promise<{
   throttling: ThrottlingOptions | undefined;
   locations: ServiceLocations;
 }> => {
-  // @ts-expect-error upgrade typescript v4.9.5
-  const { throttling, locations } = await apiService.get(
+  const { throttling, locations } = await apiService.get<ServiceLocationsApiResponse>(
     SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
     undefined,
     ServiceLocationsApiResponseCodec

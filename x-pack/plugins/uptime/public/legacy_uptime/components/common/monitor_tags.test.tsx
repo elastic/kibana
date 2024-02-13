@@ -143,7 +143,7 @@ describe('MonitorTags component', () => {
   });
 
   it('render against summary', () => {
-    // @ts-expect-error upgrade typescript v4.9.5
+    // @ts-expect-error upgrade typescript v4.9.5 test object types do not correspond 100%
     const component = shallowWithRouter(<MonitorTags summary={summaryPing} />);
     // dive() removes all unnecessary React-Router wrapping elements
     expect(component.dive()).toMatchSnapshot();
