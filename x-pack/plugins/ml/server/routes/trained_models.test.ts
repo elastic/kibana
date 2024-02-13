@@ -70,7 +70,7 @@ describe('populateInferenceServicesProvider', () => {
       expect(trainedModels[0].hasInferenceServices).toBe(true);
 
       expect(trainedModels[1].inference_apis).toEqual(undefined);
-      expect(trainedModels[1].hasInferenceServices).toBe(undefined);
+      expect(trainedModels[1].hasInferenceServices).toBe(false);
 
       expect(mlLog.error).not.toHaveBeenCalled();
     });
@@ -107,7 +107,7 @@ describe('populateInferenceServicesProvider', () => {
       expect(trainedModels[0].hasInferenceServices).toBe(true);
 
       expect(trainedModels[1].inference_apis).toEqual(undefined);
-      expect(trainedModels[1].hasInferenceServices).toBe(undefined);
+      expect(trainedModels[1].hasInferenceServices).toBe(false);
 
       expect(mlLog.error).not.toHaveBeenCalled();
     });

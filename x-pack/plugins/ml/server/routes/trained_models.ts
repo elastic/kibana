@@ -79,11 +79,10 @@ export const populateInferenceServicesProvider = (client: IScopedClusterClient) 
       );
 
       for (const model of trainedModels) {
-        if (model.model_id in inferenceAPIMap) {
-          if (!asInternal) {
-            model.inference_apis = inferenceAPIMap[model.model_id];
-          }
-          model.hasInferenceServices = !!inferenceAPIMap[model.model_id];
+        const inferenceApis = inferenceAPIMap[model.model_id];
+        model.hasInferenceServices = !!inferenceApis;
+        if (model.hasInferenceServices && !asInternal) {
+          model.inference_apis = inferenceApis;
         }
       }
     } catch (e) {
