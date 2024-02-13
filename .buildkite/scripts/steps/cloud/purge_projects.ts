@@ -61,9 +61,6 @@ async function deleteProject({
 
 async function purgeProjects() {
   const prProjects = await getPrProjects();
-
-  console.log(prProjects);
-
   const projectsToPurge = [];
   for (const project of prProjects) {
     const NOW = new Date().getTime() / 1000;
