@@ -44,8 +44,6 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
-  'elastic-ai-assistant-anonymization-fields',
-  'elastic-ai-assistant-prompts',
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',

@@ -3,12 +3,12 @@ info:
   title: Bulk Actions API endpoint
   version: '2023-10-31'
 paths:
-  /api/elastic_assistant/anonymization_fields/_bulk_action:
+  /api/elastic_assistant/prompts/_bulk_action:
     post:
       operationId: PerformBulkAction
       x-codegen-enabled: true
-      summary: Applies a bulk action to multiple anonymization fields
-      description: The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
+      summary: Applies a bulk action to multiple prompts
+      description: The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
       tags:
         - Bulk API
       requestBody:
@@ -22,11 +22,11 @@ paths:
                 create:
                   type: array
                   items:
-                    $ref: '#/components/schemas/AnonymizationFieldCreateProps'
+                    $ref: '#/components/schemas/PromptCreateProps'
                 update:
                   type: array
                   items:
-                    $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
+                    $ref: '#/components/schemas/PromptUpdateProps'
       responses:
         200:
           description: Indicates a successful call.
@@ -53,7 +53,7 @@ components:
     BulkActionSkipReason:
       type: string
       enum:
-        - ANONYMIZATION_FIELD_NOT_MODIFIED
+        - PROMPT_FIELD_NOT_MODIFIED
 
     BulkActionSkipResult:
       type: object
@@ -68,7 +68,7 @@ components:
         - id
         - skip_reason
 
-    AnonymizationFieldDetailsInError:
+    PromptDetailsInError:
       type: object
       properties:
         id:
@@ -78,7 +78,7 @@ components:
       required:
         - id
 
-    NormalizedAnonymizationFieldError:
+    NormalizedPromptError:
       type: object
       properties:
         message:
@@ -87,30 +87,38 @@ components:
           type: integer
         err_code:
           type: string
-        anonymization_fields:
+        prompts:
           type: array
           items:
-            $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
+            $ref: '#/components/schemas/PromptDetailsInError'
       required:
         - message
         - status_code
-        - anonymization_fields
+        - prompts
 
-    AnonymizationFieldResponse:
+    PromptResponse:
       type: object
       required:
         - id
-        - field
+        - name
+        - promptType
+        - content
       properties:
         id:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
         'timestamp':
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-        field:
+        name:
           type: string
-        defaultAllow:
+        promptType:
+          type: string
+        content:
+          type: string
+        isNewConversationDefault:
           type: boolean
-        defaultAllowReplacement:
+        isDefault:
+          type: boolean
+        isShared:
           type: boolean
         updatedAt:
           type: string
@@ -134,11 +142,11 @@ components:
         updated:
           type: array
           items:
-            $ref: '#/components/schemas/AnonymizationFieldResponse'
+            $ref: '#/components/schemas/PromptResponse'
         created:
           type: array
           items:
-            $ref: '#/components/schemas/AnonymizationFieldResponse'
+            $ref: '#/components/schemas/PromptResponse'
         deleted:
           type: array
           items:
@@ -179,7 +187,7 @@ components:
           type: integer
         message:
           type: string
-        anonymization_fields_count:
+        prompts_count:
           type: integer
         attributes:
           type: object
@@ -191,7 +199,7 @@ components:
             errors:
               type: array
               items:
-                $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
+                $ref: '#/components/schemas/NormalizedPromptError'
           required:
             - results
             - summary
@@ -205,35 +213,47 @@ components:
       properties:
         query:
           type: string
-          description: Query to filter anonymization fields
+          description: Query to filter promps
         ids:
           type: array
-          description: Array of anonymization fields IDs
+          description: Array of prompts IDs
           minItems: 1
           items:
             type: string
 
-    AnonymizationFieldCreateProps:
+    PromptCreateProps:
       type: object
       required:
-        - field
+        - name
+        - content
+
       properties:
-        field:
+        name:
           type: string
-        defaultAllow:
+        promptType:
+          type: string
+        content:
+          type: string
+        isNewConversationDefault:
           type: boolean
-        defaultAllowReplacement:
+        isDefault:
+          type: boolean
+        isShared:
           type: boolean
 
-    AnonymizationFieldUpdateProps:
+    PromptUpdateProps:
       type: object
       required:
         - id
       properties:
         id:
           type: string
-        defaultAllow:
+        content:
+          type: string
+        isNewConversationDefault:
           type: boolean
-        defaultAllowReplacement:
+        isDefault:
+          type: boolean
+        isShared:
           type: boolean
     

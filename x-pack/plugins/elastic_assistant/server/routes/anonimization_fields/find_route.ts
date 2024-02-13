@@ -52,7 +52,8 @@ export const findAnonymizationFieldsRoute = (
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsSOClient();
+          const dataClient =
+            await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
           const result = await dataClient?.findAnonymizationFields({
             perPage: query.per_page,

@@ -117,18 +117,19 @@ export class ConversationDataWriter implements ConversationDataWriter {
     const filterByUser = authenticatedUser
       ? [
           {
-            bool: {
-              should: [
-                {
-                  term: authenticatedUser.profile_uid
-                    ? {
-                        'user.id': { value: authenticatedUser.profile_uid },
-                      }
-                    : {
-                        'user.name': { value: authenticatedUser.username },
-                      },
+            nested: {
+              path: 'users',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      match: authenticatedUser.profile_uid
+                        ? { 'users.id': authenticatedUser.profile_uid }
+                        : { 'users.name': authenticatedUser.username },
+                    },
+                  ],
                 },
-              ],
+              },
             },
           },
         ]

@@ -166,7 +166,7 @@ export const ConversationResponse = z.object({
    */
   createdAt: z.string(),
   replacements: Replacement.optional(),
-  user: User,
+  users: z.array(User),
   /**
    * The conversation messages.
    */

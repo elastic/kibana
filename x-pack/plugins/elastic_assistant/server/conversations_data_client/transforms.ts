@@ -20,10 +20,11 @@ export const transformESToConversations = (
       const conversation: ConversationResponse = {
         timestamp: conversationSchema['@timestamp'],
         createdAt: conversationSchema.created_at,
-        user: {
-          id: conversationSchema.user?.id,
-          name: conversationSchema.user?.name,
-        },
+        users:
+          conversationSchema.users?.map((user) => ({
+            id: user.id,
+            name: user.name,
+          })) ?? [],
         title: conversationSchema.title,
         apiConfig: {
           connectorId: conversationSchema.api_config?.connector_id,

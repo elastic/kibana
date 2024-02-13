@@ -17,10 +17,10 @@ import { ArrayFromString } from '@kbn/zod-helpers';
  *   version: 2023-10-31
  */
 
-import { PromptResponse } from './crud_prompts_route.gen';
+import { PromptResponse } from './bulk_crud_prompts_route.gen';
 
 export type FindPromptsSortField = z.infer<typeof FindPromptsSortField>;
-export const FindPromptsSortField = z.enum(['created_at', 'is_default', 'title', 'updated_at']);
+export const FindPromptsSortField = z.enum(['created_at', 'is_default', 'name', 'updated_at']);
 export type FindPromptsSortFieldEnum = typeof FindPromptsSortField.enum;
 export const FindPromptsSortFieldEnum = FindPromptsSortField.enum;
 

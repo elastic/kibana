@@ -20,7 +20,6 @@ import {
   ElasticAssistantRequestHandlerContext,
 } from './types';
 import { AIAssistantService } from './ai_assistant_service';
-import { assistantPromptsType, assistantAnonymizationFieldsType } from './saved_object';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
@@ -76,9 +75,6 @@ export class ElasticAssistantPlugin
       (context, request) => requestContextFactory.create(context, request)
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
-
-    core.savedObjects.registerType(assistantPromptsType);
-    core.savedObjects.registerType(assistantAnonymizationFieldsType);
 
     // this.assistantService registerKBTask
     registerRoutes(router, this.logger, plugins);

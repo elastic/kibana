@@ -97,9 +97,7 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
-      presentation: message.presentation,
       reader: message.reader,
-      replacements: message.replacements,
       role: message.role,
       trace_data: {
         trace_id: message.traceData?.traceId,

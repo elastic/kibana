@@ -974,28 +974,5 @@
   ],
   "cloud-security-posture-settings": [
     "rules"
-  ],
-  "elastic-ai-assistant-prompts": [
-    "content",
-    "created_at",
-    "created_by",
-    "id",
-    "is_default",
-    "is_new_conversation_default",
-    "is_shared",
-    "name",
-    "prompt_type",
-    "updated_at",
-    "updated_by"
-  ],
-  "elastic-ai-assistant-anonymization-fields": [
-    "created_at",
-    "created_by",
-    "default_allow",
-    "default_allow_replacement",
-    "field_id",
-    "id",
-    "updated_at",
-    "updated_by"
   ]
 }

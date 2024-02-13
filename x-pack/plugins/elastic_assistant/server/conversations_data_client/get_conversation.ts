@@ -28,18 +28,19 @@ export const getConversation = async ({
   const filterByUser = user
     ? [
         {
-          bool: {
-            should: [
-              {
-                term: user.profile_uid
-                  ? {
-                      'user.id': { value: user.profile_uid },
-                    }
-                  : {
-                      'user.name': { value: user.username },
-                    },
+          nested: {
+            path: 'users',
+            query: {
+              bool: {
+                must: [
+                  {
+                    match: user.profile_uid
+                      ? { 'users.id': user.profile_uid }
+                      : { 'users.name': user.username },
+                  },
+                ],
               },
-            ],
+            },
           },
         },
       ]

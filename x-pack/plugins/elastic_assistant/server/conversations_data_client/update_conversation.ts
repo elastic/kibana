@@ -25,13 +25,8 @@ export interface UpdateConversationSchema {
     '@timestamp': string;
     content: string;
     reader?: Reader;
-    replacements?: Replacement;
     role: MessageRole;
     is_error?: boolean;
-    presentation?: {
-      delay?: number;
-      stream?: boolean;
-    };
     trace_data?: {
       transaction_id?: string;
       trace_id?: string;

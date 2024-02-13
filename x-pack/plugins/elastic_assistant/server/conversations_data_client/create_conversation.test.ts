@@ -61,9 +61,11 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   isDefault: false,
   updatedAt: '2024-01-28T04:20:02.394Z',
   timestamp: '2024-01-28T04:20:02.394Z',
-  user: {
-    name: 'test',
-  },
+  users: [
+    {
+      name: 'test',
+    },
+  ],
 });
 
 export const getSearchConversationMock =
@@ -98,10 +100,12 @@ export const getSearchConversationMock =
               model: 'test',
               provider: 'Azure OpenAI',
             },
-            user: {
-              id: '1111',
-              name: 'elastic',
-            },
+            users: [
+              {
+                id: '1111',
+                name: 'elastic',
+              },
+            ],
             replacements: undefined,
           },
         },

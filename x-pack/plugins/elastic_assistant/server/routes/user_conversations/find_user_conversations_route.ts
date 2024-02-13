@@ -52,7 +52,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `user.id:${currentUser?.profile_uid}${additionalFilter}`,
+            filter: `users:{ id: "${currentUser?.profile_uid}${additionalFilter}" }`,
             fields: query.fields,
           });
 

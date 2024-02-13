@@ -19,7 +19,7 @@ import { z } from 'zod';
 import { UUID, NonEmptyString, User } from '../conversations/common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;
-export const BulkActionSkipReason = z.literal('ANONYMIZATION_FIELD_NOT_MODIFIED');
+export const BulkActionSkipReason = z.literal('PROMPT_FIELD_NOT_MODIFIED');
 
 export type BulkActionSkipResult = z.infer<typeof BulkActionSkipResult>;
 export const BulkActionSkipResult = z.object({
@@ -28,27 +28,30 @@ export const BulkActionSkipResult = z.object({
   skip_reason: BulkActionSkipReason,
 });
 
-export type AnonymizationFieldDetailsInError = z.infer<typeof AnonymizationFieldDetailsInError>;
-export const AnonymizationFieldDetailsInError = z.object({
+export type PromptDetailsInError = z.infer<typeof PromptDetailsInError>;
+export const PromptDetailsInError = z.object({
   id: z.string(),
   name: z.string().optional(),
 });
 
-export type NormalizedAnonymizationFieldError = z.infer<typeof NormalizedAnonymizationFieldError>;
-export const NormalizedAnonymizationFieldError = z.object({
+export type NormalizedPromptError = z.infer<typeof NormalizedPromptError>;
+export const NormalizedPromptError = z.object({
   message: z.string(),
   status_code: z.number().int(),
   err_code: z.string().optional(),
-  anonymization_fields: z.array(AnonymizationFieldDetailsInError),
+  prompts: z.array(PromptDetailsInError),
 });
 
-export type AnonymizationFieldResponse = z.infer<typeof AnonymizationFieldResponse>;
-export const AnonymizationFieldResponse = z.object({
+export type PromptResponse = z.infer<typeof PromptResponse>;
+export const PromptResponse = z.object({
   id: UUID,
   timestamp: NonEmptyString.optional(),
-  field: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  name: z.string(),
+  promptType: z.string(),
+  content: z.string(),
+  isNewConversationDefault: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
+  isShared: z.boolean().optional(),
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
@@ -62,8 +65,8 @@ export const AnonymizationFieldResponse = z.object({
 
 export type BulkCrudActionResults = z.infer<typeof BulkCrudActionResults>;
 export const BulkCrudActionResults = z.object({
-  updated: z.array(AnonymizationFieldResponse),
-  created: z.array(AnonymizationFieldResponse),
+  updated: z.array(PromptResponse),
+  created: z.array(PromptResponse),
   deleted: z.array(z.string()),
   skipped: z.array(BulkActionSkipResult),
 });
@@ -81,45 +84,50 @@ export const BulkCrudActionResponse = z.object({
   success: z.boolean().optional(),
   status_code: z.number().int().optional(),
   message: z.string().optional(),
-  anonymization_fields_count: z.number().int().optional(),
+  prompts_count: z.number().int().optional(),
   attributes: z.object({
     results: BulkCrudActionResults,
     summary: BulkCrudActionSummary,
-    errors: z.array(NormalizedAnonymizationFieldError).optional(),
+    errors: z.array(NormalizedPromptError).optional(),
   }),
 });
 
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
 export const BulkActionBase = z.object({
   /**
-   * Query to filter anonymization fields
+   * Query to filter promps
    */
   query: z.string().optional(),
   /**
-   * Array of anonymization fields IDs
+   * Array of prompts IDs
    */
   ids: z.array(z.string()).min(1).optional(),
 });
 
-export type AnonymizationFieldCreateProps = z.infer<typeof AnonymizationFieldCreateProps>;
-export const AnonymizationFieldCreateProps = z.object({
-  field: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+export type PromptCreateProps = z.infer<typeof PromptCreateProps>;
+export const PromptCreateProps = z.object({
+  name: z.string(),
+  promptType: z.string().optional(),
+  content: z.string(),
+  isNewConversationDefault: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
+  isShared: z.boolean().optional(),
 });
 
-export type AnonymizationFieldUpdateProps = z.infer<typeof AnonymizationFieldUpdateProps>;
-export const AnonymizationFieldUpdateProps = z.object({
+export type PromptUpdateProps = z.infer<typeof PromptUpdateProps>;
+export const PromptUpdateProps = z.object({
   id: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  content: z.string().optional(),
+  isNewConversationDefault: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
+  isShared: z.boolean().optional(),
 });
 
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
 export const PerformBulkActionRequestBody = z.object({
   delete: BulkActionBase.optional(),
-  create: z.array(AnonymizationFieldCreateProps).optional(),
-  update: z.array(AnonymizationFieldUpdateProps).optional(),
+  create: z.array(PromptCreateProps).optional(),
+  update: z.array(PromptUpdateProps).optional(),
 });
 export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
 

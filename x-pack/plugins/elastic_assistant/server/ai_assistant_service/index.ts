@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
@@ -13,6 +13,8 @@ import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
 import { AssistantResourceNames } from '../types';
 import { AIAssistantConversationsDataClient } from '../conversations_data_client';
+import { AIAssistantPromtsDataClient } from '../promts_data_client';
+import { AIAssistantAnonymizationFieldsDataClient } from '../anonymization_fields_data_client';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -20,7 +22,9 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from './conversation_configuration_type';
+import { conversationsFieldMap } from '../conversations_data_client/conversations_configuration_type';
+import { assistantPromptsFieldMap } from '../promts_data_client/prompts_configuration_type';
+import { assistantAnonymizationFieldsFieldMap } from '../anonymization_fields_data_client/anonymization_fields_configuration_type';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -42,7 +46,9 @@ export interface CreateAIAssistantClientParams {
   currentUser: AuthenticatedUser | null;
 }
 
-export type CreateConversationsDataStream = (params: {
+export type CreateDataStream = (params: {
+  resource: 'conversations' | 'prompts' | 'anonymizationFields';
+  fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
 }) => DataStreamSpacesAdapter;
@@ -51,13 +57,27 @@ export class AIAssistantService {
   private initialized: boolean;
   private isInitializing: boolean = false;
   private conversationsDataStream: DataStreamSpacesAdapter;
+  private promptsDataStream: DataStreamSpacesAdapter;
+  private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
-    this.conversationsDataStream = this.createConversationsDataStream({
+    this.conversationsDataStream = this.createDataStream({
+      resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
+      fieldMap: conversationsFieldMap,
+    });
+    this.promptsDataStream = this.createDataStream({
+      resource: 'prompts',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: assistantPromptsFieldMap,
+    });
+    this.anonymizationFieldsDataStream = this.createDataStream({
+      resource: 'anonymizationFields',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: assistantAnonymizationFieldsFieldMap,
     });
 
     this.initPromise = this.initializeResources();
@@ -73,26 +93,23 @@ export class AIAssistantService {
     return this.initialized;
   }
 
-  private createConversationsDataStream: CreateConversationsDataStream = ({ kibanaVersion }) => {
-    const conversationsDataStream = new DataStreamSpacesAdapter(
-      this.resourceNames.aliases.conversations,
-      {
-        kibanaVersion,
-        totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-      }
-    );
-
-    conversationsDataStream.setComponentTemplate({
-      name: this.resourceNames.componentTemplate.conversations,
-      fieldMap: conversationsFieldMap,
+  private createDataStream: CreateDataStream = ({ resource, kibanaVersion, fieldMap }) => {
+    const newDataStream = new DataStreamSpacesAdapter(this.resourceNames.aliases[resource], {
+      kibanaVersion,
+      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
     });
 
-    conversationsDataStream.setIndexTemplate({
-      name: this.resourceNames.indexTemplate.conversations,
-      componentTemplateRefs: [this.resourceNames.componentTemplate.conversations],
+    newDataStream.setComponentTemplate({
+      name: this.resourceNames.componentTemplate[resource],
+      fieldMap,
     });
 
-    return conversationsDataStream;
+    newDataStream.setIndexTemplate({
+      name: this.resourceNames.indexTemplate[resource],
+      componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
+    });
+
+    return newDataStream;
   };
 
   private async initializeResources(): Promise<InitializationPromise> {
@@ -102,6 +119,18 @@ export class AIAssistantService {
       const esClient = await this.options.elasticsearchClientPromise;
 
       await this.conversationsDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
+
+      await this.promptsDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
+
+      await this.anonymizationFieldsDataStream.install({
         esClient,
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
@@ -120,18 +149,26 @@ export class AIAssistantService {
   private readonly resourceNames: AssistantResourceNames = {
     componentTemplate: {
       conversations: getResourceName('component-template-conversations'),
+      prompts: getResourceName('component-template-prompts'),
+      anonymizationFields: getResourceName('component-template-anonymization-fields'),
       kb: getResourceName('component-template-kb'),
     },
     aliases: {
       conversations: getResourceName('conversations'),
+      prompts: getResourceName('prompts'),
+      anonymizationFields: getResourceName('anonymization-fields'),
       kb: getResourceName('kb'),
     },
     indexPatterns: {
       conversations: getResourceName('conversations*'),
+      prompts: getResourceName('prompts*'),
+      anonymizationFields: getResourceName('anonymization-fields*'),
       kb: getResourceName('kb*'),
     },
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
+      prompts: getResourceName('index-template-prompts'),
+      anonymizationFields: getResourceName('index-template-anonymization-fields'),
       kb: getResourceName('index-template-kb'),
     },
     pipelines: {
@@ -139,9 +176,7 @@ export class AIAssistantService {
     },
   };
 
-  public async createAIAssistantDatastreamClient(
-    opts: CreateAIAssistantClientParams
-  ): Promise<AIAssistantConversationsDataClient | null> {
+  private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
     // Check if resources installation has succeeded
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
       opts.spaceId
@@ -185,6 +220,12 @@ export class AIAssistantService {
         );
       }
     }
+  }
+
+  public async createAIAssistantConversationsDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<AIAssistantConversationsDataClient | null> {
+    await this.checkResourcesInstallation(opts);
 
     return new AIAssistantConversationsDataClient({
       logger: this.options.logger,
@@ -192,6 +233,36 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
       indexPatternsResorceName: this.resourceNames.aliases.conversations,
+      currentUser: opts.currentUser,
+    });
+  }
+
+  public async createAIAssistantPromptsDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<AIAssistantPromtsDataClient | null> {
+    await this.checkResourcesInstallation(opts);
+
+    return new AIAssistantPromtsDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId: opts.spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResorceName: this.resourceNames.aliases.prompts,
+      currentUser: opts.currentUser,
+    });
+  }
+
+  public async createAIAssistantAnonymizationFieldsDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<AIAssistantAnonymizationFieldsDataClient | null> {
+    await this.checkResourcesInstallation(opts);
+
+    return new AIAssistantAnonymizationFieldsDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId: opts.spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResorceName: this.resourceNames.aliases.anonymizationFields,
       currentUser: opts.currentUser,
     });
   }
@@ -218,9 +289,24 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      let indexName = await this.conversationsDataStream.getInstalledSpaceName(spaceId);
-      if (!indexName) {
-        indexName = await this.conversationsDataStream.installSpace(spaceId);
+      let conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
+        spaceId
+      );
+      if (!conversationsIndexName) {
+        conversationsIndexName = await this.conversationsDataStream.installSpace(spaceId);
+      }
+
+      let promptsIndexName = await this.promptsDataStream.getInstalledSpaceName(spaceId);
+      if (!promptsIndexName) {
+        promptsIndexName = await this.promptsDataStream.installSpace(spaceId);
+      }
+
+      let anonymizationFieldsIndexName =
+        await this.anonymizationFieldsDataStream.getInstalledSpaceName(spaceId);
+      if (!anonymizationFieldsIndexName) {
+        anonymizationFieldsIndexName = await this.anonymizationFieldsDataStream.installSpace(
+          spaceId
+        );
       }
     } catch (error) {
       this.options.logger.error(

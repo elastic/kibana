@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { IIndexPatternString } from '../types';
+import { FieldMap } from '@kbn/data-stream-adapter';
 
 export const conversationsFieldMap: FieldMap = {
   '@timestamp': {
@@ -14,12 +12,17 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'user.id': {
+  users: {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'users.id': {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'user.name': {
+  'users.name': {
     type: 'keyword',
     array: false,
     required: false,
@@ -84,21 +87,6 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'messages.presentation': {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  'messages.presentation.delay': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'messages.presentation.stream': {
-    type: 'boolean',
-    array: false,
-    required: false,
-  },
   'messages.trace_data': {
     type: 'object',
     array: false,
@@ -145,18 +133,3 @@ export const conversationsFieldMap: FieldMap = {
     required: false,
   },
 } as const;
-
-export const getIndexTemplateAndPattern = (
-  context: string,
-  namespace?: string
-): IIndexPatternString => {
-  const concreteNamespace = namespace ? namespace : DEFAULT_NAMESPACE_STRING;
-  const pattern = `${context}`;
-  const patternWithNamespace = `${pattern}-${concreteNamespace}`;
-  return {
-    pattern: `${patternWithNamespace}*`,
-    basePattern: `${pattern}-*`,
-    name: `${patternWithNamespace}-000001`,
-    alias: `${patternWithNamespace}`,
-  };
-};

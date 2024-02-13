@@ -28,9 +28,9 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AssistantFeatures, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { AIAssistantConversationsDataClient } from './conversations_data_client';
-import { AIAssistantPromptsSOClient } from './saved_object/ai_assistant_prompts_so_client';
+import { AIAssistantPromtsDataClient } from './promts_data_client';
+import { AIAssistantAnonymizationFieldsDataClient } from './anonymization_fields_data_client';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
-import { AIAssistantAnonymizationFieldsSOClient } from './saved_object/ai_assistant_anonymization_fields_so_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -99,8 +99,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
-  getAIAssistantPromptsSOClient: () => AIAssistantPromptsSOClient;
-  getAIAssistantAnonymizationFieldsSOClient: () => AIAssistantAnonymizationFieldsSOClient;
+  getAIAssistantPromptsDataClient: () => Promise<AIAssistantPromtsDataClient | null>;
+  getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantAnonymizationFieldsDataClient | null>;
   telemetry: AnalyticsServiceSetup;
 }
 /**
@@ -132,18 +132,26 @@ export interface InitAssistantResult {
 export interface AssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    prompts: string;
+    anonymizationFields: string;
     kb: string;
   };
   indexTemplate: {
     conversations: string;
+    prompts: string;
+    anonymizationFields: string;
     kb: string;
   };
   aliases: {
     conversations: string;
+    prompts: string;
+    anonymizationFields: string;
     kb: string;
   };
   indexPatterns: {
     conversations: string;
+    prompts: string;
+    anonymizationFields: string;
     kb: string;
   };
   pipelines: {

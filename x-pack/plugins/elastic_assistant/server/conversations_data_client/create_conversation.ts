@@ -29,13 +29,8 @@ export interface CreateMessageSchema {
     '@timestamp': string;
     content: string;
     reader?: Reader;
-    replacements?: Replacement;
     role: MessageRole;
     is_error?: boolean;
-    presentation?: {
-      delay?: number;
-      stream?: boolean;
-    };
     trace_data?: {
       transaction_id?: string;
       trace_id?: string;
@@ -51,10 +46,10 @@ export interface CreateMessageSchema {
   is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
   replacements?: Replacement;
-  user: {
+  users: Array<{
     id?: string;
     name?: string;
-  };
+  }>;
   updated_at?: string;
   namespace: string;
 }
@@ -116,10 +111,12 @@ export const transformToCreateScheme = (
   return {
     '@timestamp': createdAt,
     created_at: createdAt,
-    user: {
-      id: user.profile_uid,
-      name: user.username,
-    },
+    users: [
+      {
+        id: user.profile_uid,
+        name: user.username,
+      },
+    ],
     title,
     api_config: {
       connector_id: apiConfig?.connectorId,

@@ -71,7 +71,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: './crud_prompts_route.schema.yaml#/components/schemas/PromptResponse'
+                      $ref: './bulk_crud_prompts_route.schema.yaml#/components/schemas/PromptResponse'
                 required:
                   - page
                   - perPage
@@ -98,7 +98,7 @@ components:
       enum:
         - 'created_at'
         - 'is_default'
-        - 'title'
+        - 'name'
         - 'updated_at'
 
     SortOrder:

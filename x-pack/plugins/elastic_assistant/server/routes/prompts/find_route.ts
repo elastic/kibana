@@ -44,7 +44,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsSOClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           const result = await dataClient?.findPrompts({
             perPage: query.per_page,

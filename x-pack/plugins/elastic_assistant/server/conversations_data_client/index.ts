@@ -20,13 +20,13 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { IIndexPatternString } from '../types';
 import { ConversationDataWriter } from './conversations_data_writer';
-import { getIndexTemplateAndPattern } from '../ai_assistant_service/conversation_configuration_type';
 import { createConversation } from './create_conversation';
 import { findConversations } from './find_conversations';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
+import { getIndexTemplateAndPattern } from '../lib/data_client/helper';
 
 export interface AIAssistantConversationsDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;

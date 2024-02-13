@@ -16,10 +16,8 @@ import {
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { AIAssistantPromptsSOClient } from '../saved_object/ai_assistant_prompts_so_client';
 import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
-import { AIAssistantAnonymizationFieldsSOClient } from '../saved_object/ai_assistant_anonymization_fields_so_client';
 
 export interface IRequestContextFactory {
   create(
@@ -83,29 +81,27 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       telemetry: core.analytics,
 
-      getAIAssistantPromptsSOClient: memoize(() => {
-        const username =
-          startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return new AIAssistantPromptsSOClient({
-          logger: options.logger,
-          user: username,
-          savedObjectsClient: coreContext.savedObjects.client,
+      getAIAssistantPromptsDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createAIAssistantPromptsDataClient({
+          spaceId: getSpaceId(),
+          logger: this.logger,
+          currentUser,
         });
       }),
 
-      getAIAssistantAnonymizationFieldsSOClient: memoize(() => {
-        const username =
-          startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return new AIAssistantAnonymizationFieldsSOClient({
-          logger: options.logger,
-          user: username,
-          savedObjectsClient: coreContext.savedObjects.client,
+      getAIAssistantAnonymizationFieldsDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
+          spaceId: getSpaceId(),
+          logger: this.logger,
+          currentUser,
         });
       }),
 
       getAIAssistantConversationsDataClient: memoize(async () => {
         const currentUser = getCurrentUser();
-        return this.assistantService.createAIAssistantDatastreamClient({
+        return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,

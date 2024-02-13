@@ -146,7 +146,7 @@ describe('AI Assistant Service', () => {
     });
   });
 
-  describe('createAIAssistantDatastreamClient()', () => {
+  describe('createAIAssistantConversationsDataClient()', () => {
     let assistantService: AIAssistantService;
     beforeEach(async () => {
       (AIAssistantConversationsDataClient as jest.Mock).mockImplementation(
@@ -168,7 +168,7 @@ describe('AI Assistant Service', () => {
         async () => assistantService.isInitialized() === true
       );
 
-      await assistantService.createAIAssistantDatastreamClient({
+      await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
@@ -204,7 +204,7 @@ describe('AI Assistant Service', () => {
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
-      const result = await assistantService.createAIAssistantDatastreamClient({
+      const result = await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
@@ -263,12 +263,12 @@ describe('AI Assistant Service', () => {
 
       // call createAIAssistantConversationsDataClient at the same time which will trigger the retries
       const result = await Promise.all([
-        assistantService.createAIAssistantDatastreamClient({
+        assistantService.createAIAssistantConversationsDataClient({
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
         }),
-        assistantService.createAIAssistantDatastreamClient({
+        assistantService.createAIAssistantConversationsDataClient({
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
@@ -334,7 +334,7 @@ describe('AI Assistant Service', () => {
         async () => assistantService.isInitialized() === true
       );
 
-      const result = await assistantService.createAIAssistantDatastreamClient({
+      const result = await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
@@ -400,7 +400,7 @@ describe('AI Assistant Service', () => {
           await new Promise((r) => setTimeout(r, delayMs));
         }
 
-        return assistantService.createAIAssistantDatastreamClient({
+        return assistantService.createAIAssistantConversationsDataClient({
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
@@ -478,7 +478,7 @@ describe('AI Assistant Service', () => {
           await new Promise((r) => setTimeout(r, delayMs));
         }
 
-        return assistantService.createAIAssistantDatastreamClient({
+        return assistantService.createAIAssistantConversationsDataClient({
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
@@ -525,7 +525,7 @@ describe('AI Assistant Service', () => {
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
-      const result = await assistantService.createAIAssistantDatastreamClient({
+      const result = await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'test',
         currentUser: mockUser1,
@@ -578,7 +578,7 @@ describe('AI Assistant Service', () => {
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
-      const result = await assistantService.createAIAssistantDatastreamClient({
+      const result = await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'test',
         currentUser: mockUser1,
@@ -633,7 +633,7 @@ describe('AI Assistant Service', () => {
         async () => assistantService.isInitialized() === true
       );
 
-      const result = await assistantService.createAIAssistantDatastreamClient({
+      const result = await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'test',
         currentUser: mockUser1,
@@ -780,7 +780,7 @@ describe('AI Assistant Service', () => {
         async () => assistantService.isInitialized() === true
       );
 
-      await assistantService.createAIAssistantDatastreamClient({
+      await assistantService.createAIAssistantConversationsDataClient({
         logger,
         spaceId: 'default',
         currentUser: mockUser1,

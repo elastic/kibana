@@ -26,10 +26,10 @@ import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { postEvaluateRoute } from './evaluate/post_evaluate';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
-import { createPromptRoute } from './prompts/create_route';
-import { updatePromptRoute } from './prompts/update_route';
-import { deletePromptRoute } from './prompts/delete_route';
+import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
+import { bulkActionAnonymizationFieldsRoute } from './anonimization_fields/bulk_actions_route';
+import { findAnonymizationFieldsRoute } from './anonimization_fields/find_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -70,8 +70,10 @@ export const registerRoutes = (
   postEvaluateRoute(router, getElserId);
 
   // Prompts
-  createPromptRoute(router);
+  bulkPromptsRoute(router, logger);
   findPromptsRoute(router, logger);
-  updatePromptRoute(router);
-  deletePromptRoute(router);
+
+  // Anonymization Fields
+  bulkActionAnonymizationFieldsRoute(router, logger);
+  findAnonymizationFieldsRoute(router, logger);
 };

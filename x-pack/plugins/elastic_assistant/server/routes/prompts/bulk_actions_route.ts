@@ -10,25 +10,25 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import {
-  AnonymizationFieldResponse,
-  AnonymizationFieldUpdateProps,
+  PromptResponse,
   BulkActionSkipResult,
   BulkCrudActionResponse,
   BulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+  PromptUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
-import { getUpdateScript } from '../../anonymization_fields_data_client/helpers';
+import { getUpdateScript } from '../../promts_data_client/helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -50,8 +50,8 @@ const buildBulkResponse = (
     skipped = [],
   }: {
     errors?: BulkOperationError[];
-    updated?: AnonymizationFieldResponse[];
-    created?: AnonymizationFieldResponse[];
+    updated?: PromptResponse[];
+    created?: PromptResponse[];
     deleted?: string[];
     skipped?: BulkActionSkipResult[];
   }
@@ -92,21 +92,18 @@ const buildBulkResponse = (
 
   const responseBody: BulkCrudActionResponse = {
     success: true,
-    anonymization_fields_count: summary.total,
+    prompts_count: summary.total,
     attributes: { results, summary },
   };
 
   return response.ok({ body: responseBody });
 };
 
-export const bulkActionAnonymizationFieldsRoute = (
-  router: ElasticAssistantPluginRouter,
-  logger: Logger
-) => {
+export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+      path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
         timeout: {
@@ -149,23 +146,22 @@ export const bulkActionAnonymizationFieldsRoute = (
               statusCode: 401,
             });
           }
-          const dataClient =
-            await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findAnonymizationFields({
+            const result = await dataClient?.findPrompts({
               perPage: 100,
               page: 1,
               filter: `user.id:${authenticatedUser?.profile_uid} AND (${body.create
-                .map((c) => `field:${c.field}`)
+                .map((c) => `name:${c.name}`)
                 .join(' OR ')})`,
-              fields: ['field'],
+              fields: ['name'],
             });
             if (result?.data != null && result.data.length > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `anonymization for field: "${result.data
-                  .map((c) => c.field)
+                body: `prompt with name: "${result.data
+                  .map((c) => c.name)
                   .join(',')}" already exists`,
               });
             }
@@ -183,18 +179,18 @@ export const bulkActionAnonymizationFieldsRoute = (
             documentsToCreate: body.create,
             documentsToDelete: body.delete?.ids,
             documentsToUpdate: body.update,
-            getUpdateScript: (document: AnonymizationFieldUpdateProps, updatedAt: string) =>
-              getUpdateScript({ anonymizationField: document, updatedAt, isPatch: false }),
+            getUpdateScript: (document: PromptUpdateProps, updatedAt: string) =>
+              getUpdateScript({ prompt: document, updatedAt, isPatch: false }),
             authenticatedUser,
           });
 
-          const created = await dataClient?.findAnonymizationFields({
+          const created = await dataClient?.findPrompts({
             page: 1,
             perPage: 1000,
             filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
             fields: ['id'],
           });
-          const updated = await dataClient?.findAnonymizationFields({
+          const updated = await dataClient?.findPrompts({
             page: 1,
             perPage: 1000,
             filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),

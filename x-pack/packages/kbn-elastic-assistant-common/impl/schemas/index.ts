@@ -36,6 +36,3 @@ export * from './actions_connector/post_actions_connector_execute_route.gen';
 
 // KB Schemas
 export * from './knowledge_base/crud_kb_route.gen';
-
-// Prompts Schemas
-export * from './prompts/crud_prompts_route.gen';

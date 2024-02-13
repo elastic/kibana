@@ -134,7 +134,7 @@ components:
         - id
         - title
         - createdAt
-        - user
+        - users
         - namespace
         - apiConfig
       properties:
@@ -155,8 +155,10 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Replacement'
-        user:
-          $ref: '#/components/schemas/User'
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
         messages:
           type: array
           items:
