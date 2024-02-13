@@ -118,6 +118,7 @@ describe('saved search embeddable', () => {
       timeRange: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
+      headerRowHeight: 5,
       rowsPerPage: 50,
       sampleSize: 250,
     };
@@ -190,6 +191,11 @@ describe('saved search embeddable', () => {
     searchProps.onUpdateRowHeight!(40);
     await waitOneTick();
     expect(searchProps.rowHeightState).toEqual(40);
+
+    expect(searchProps.headerRowHeightState).toEqual(5);
+    searchProps.onUpdateHeaderRowHeight!(3);
+    await waitOneTick();
+    expect(searchProps.headerRowHeightState).toEqual(3);
 
     expect(searchProps.rowsPerPageState).toEqual(50);
     searchProps.onUpdateRowsPerPage!(100);
