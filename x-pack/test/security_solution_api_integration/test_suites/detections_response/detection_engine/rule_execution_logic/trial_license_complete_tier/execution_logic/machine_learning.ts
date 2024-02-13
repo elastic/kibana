@@ -34,9 +34,6 @@ import {
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   executeSetupModuleRequest,
   forceStartDatafeeds,
   getOpenAlerts,
@@ -44,6 +41,11 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
