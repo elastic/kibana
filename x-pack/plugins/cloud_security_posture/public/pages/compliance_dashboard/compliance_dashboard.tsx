@@ -311,9 +311,6 @@ const TabContent = ({
               isIntegrationInstalled={setupStatus !== 'not-installed'}
             />
           </Route>
-
-          {/* Redirect to default cspm dashboard if no match */}
-          {/* <Route path="*" render={() => <Redirect to={cloudPosturePages.cspm_dashboard.path} />} />*/}
         </Routes>
       </div>
     </CloudPosturePage>
