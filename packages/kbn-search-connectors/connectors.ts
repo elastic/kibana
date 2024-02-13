@@ -75,6 +75,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'github',
   },
   {
+    iconPath: 'gmail.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['gmail', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.gmail.name', {
+      defaultMessage: 'Gmail',
+    }),
+    serviceType: 'gmail',
+  },
+  {
     iconPath: 'google_cloud_storage.svg',
     isBeta: false,
     isNative: true,
@@ -207,6 +217,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'OneDrive',
     }),
     serviceType: 'onedrive',
+  },
+  {
+    iconPath: 'outlook.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['outlook', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.outlook.name', {
+      defaultMessage: 'Outlook',
+    }),
+    serviceType: 'outlook',
   },
   {
     iconPath: 's3.svg',
