@@ -19,7 +19,6 @@ import { DatasetsSelectorStateMachineDependencies } from './types';
 
 export const useDatasetSelector = ({
   initialContext,
-  onDataViewSelection,
   onDataViewsSearch,
   onDataViewsSort,
   onIntegrationsLoadMore,
@@ -36,7 +35,6 @@ export const useDatasetSelector = ({
   const datasetsSelectorStateService = useInterpret(() =>
     createDatasetsSelectorStateMachine({
       initialContext,
-      onDataViewSelection,
       onDataViewsSearch,
       onDataViewsSort,
       onIntegrationsLoadMore,
@@ -101,12 +99,16 @@ export const useDatasetSelector = ({
   );
 
   const selectDataset = useCallback<DatasetSelectionHandler>(
-    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_DATASET', dataset }),
+    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_DATASET', selection: dataset }),
     [datasetsSelectorStateService]
   );
 
   const selectDataView = useCallback<DataViewSelectionHandler>(
-    (dataView) => datasetsSelectorStateService.send({ type: 'SELECT_DATA_VIEW', dataView }),
+    (dataViewDescriptor) =>
+      datasetsSelectorStateService.send({
+        type: 'SELECT_DATA_VIEW',
+        selection: dataViewDescriptor,
+      }),
     [datasetsSelectorStateService]
   );
 

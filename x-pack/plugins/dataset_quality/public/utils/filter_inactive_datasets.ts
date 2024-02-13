@@ -6,20 +6,21 @@
  */
 
 import { DataStreamStat } from '../../common/data_streams_stats';
+import { getDefaultTimeRange } from './default_timerange';
 
 interface FilterInactiveDatasetsOptions {
   datasets: DataStreamStat[];
-  timeRange: {
+  timeRange?: {
     from: string;
     to: string;
   };
 }
 
-export const filterInactiveDatasets = (options: FilterInactiveDatasetsOptions) => {
-  const {
-    datasets,
-    timeRange: { from, to },
-  } = options;
+export const filterInactiveDatasets = ({
+  datasets,
+  timeRange = getDefaultTimeRange(),
+}: FilterInactiveDatasetsOptions) => {
+  const { from, to } = timeRange;
 
   const startDate = new Date(from).getTime();
   const endDate = new Date(to).getTime();
