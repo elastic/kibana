@@ -75,18 +75,22 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
 
         // FIND agents by policy_name
         const policyNamePattern = /policy_name:([^ ]+)/;
-        const policyNameMatches = query.kuery.match(policyNamePattern);
-        const policyIds = policyNameMatches?.map((match: string) => match.split(':')[1]);
-        const kueryWithPolicy = agentPolicies?.filter((policy) =>
-          policy.name.toLowerCase().includes(policyIds?.[0]?.toLowerCase())
-        );
         let kuery = query.kuery;
-        if (kueryWithPolicy?.length) {
-          kuery =
-            kuery.slice(0, -1) +
-            ' or ' +
-            kueryWithPolicy.map((p) => `policy_id:${p.id}`).join(' or ') +
-            ')';
+        const policyNameMatches: string[] | null = kuery.match(policyNamePattern);
+
+        if (policyNameMatches?.length) {
+          const [policyId] = policyNameMatches.map((match: string) => match.split(':')[1]);
+          const kueryWithPolicy = agentPolicies?.filter((policy) =>
+            policy.name.toLowerCase().includes(policyId?.toLowerCase())
+          );
+          if (kueryWithPolicy?.length) {
+            kuery =
+              // remove the ) from the end of the kuery
+              kuery.slice(0, -1) +
+              ' or ' +
+              kueryWithPolicy.map((p) => `policy_id:${p.id}`).join(' or ') +
+              ')';
+          }
         }
 
         const agentPolicyById = mapKeys(agentPolicies, 'id');
