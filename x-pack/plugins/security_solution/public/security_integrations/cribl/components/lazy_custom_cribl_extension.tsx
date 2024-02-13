@@ -6,12 +6,8 @@
  */
 import type { PackagePolicyReplaceDefineStepExtensionComponent } from '@kbn/fleet-plugin/public/types';
 import { lazy } from 'react';
-import { CustomCriblForm } from './custom_cribl_form';
 
 export const LazyCustomCriblExtension = lazy<PackagePolicyReplaceDefineStepExtensionComponent>(
-  async () => {
-    return {
-      default: CustomCriblForm,
-    };
-  }
+  async () =>
+    import('./custom_cribl_form').then(({ CustomCriblForm }) => ({ default: CustomCriblForm }))
 );
