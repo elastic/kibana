@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import type { IHashedCache } from '../../../../common/hashed_cache';
 import { SortOrder } from '../../../../common/latest';
 
@@ -15,7 +15,7 @@ export interface DataViewsSearchParams {
 }
 
 export interface WithCache {
-  cache: IHashedCache<DataViewsSearchParams, DataViewListItem[]>;
+  cache: IHashedCache<DataViewsSearchParams, DataViewDescriptor[]>;
 }
 
 export interface WithSearch {
@@ -23,8 +23,8 @@ export interface WithSearch {
 }
 
 export interface WithDataViews {
-  dataViewsSource: DataViewListItem[];
-  dataViews: DataViewListItem[];
+  dataViewsSource: DataViewDescriptor[];
+  dataViews: DataViewDescriptor[];
 }
 
 export interface WithNullishDataViews {
@@ -87,10 +87,6 @@ export type DataViewsEvent =
       type: 'RELOAD_DATA_VIEWS';
     }
   | {
-      type: 'SELECT_DATA_VIEW';
-      dataView: DataViewListItem;
-    }
-  | {
       type: 'SEARCH_DATA_VIEWS';
       search: DataViewsSearchParams;
     }
@@ -98,4 +94,4 @@ export type DataViewsEvent =
       type: 'SORT_DATA_VIEWS';
       search: DataViewsSearchParams;
     }
-  | DoneInvokeEvent<DataViewListItem[] | Error>;
+  | DoneInvokeEvent<DataViewDescriptor[] | Error>;
