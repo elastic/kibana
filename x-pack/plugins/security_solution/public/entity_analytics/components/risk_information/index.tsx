@@ -6,6 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import styled from 'styled-components';
 import {
   EuiBasicTable,
   EuiButton,
@@ -37,6 +38,12 @@ import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
+
+const SpacedOrderedList = styled.ol`
+  li {
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
+  }
+`;
 
 interface RiskLevelTableItem {
   range?: string;
@@ -225,7 +232,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
               />
             </h3>
           </EuiTitle>
-          <ol>
+          <SpacedOrderedList>
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep1"
@@ -256,7 +263,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 defaultMessage="Maps the entity risk label based on the normalized risk score."
               />
             </li>
-          </ol>
+          </SpacedOrderedList>
         </EuiText>
         <EuiSpacer />
         <EuiTitle size="s">
