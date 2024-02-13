@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { Readable } from 'stream';
 import mimeType from 'mime';
-import cuid from 'cuid';
+import { createId } from '@paralleldrive/cuid2';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -129,7 +129,7 @@ export class FileClientImpl implements FileClient {
   public async create<M = unknown>({ id, metadata }: CreateArgs): Promise<File<M>> {
     const serializedMetadata = serializeJSON({ ...metadata, mimeType: metadata.mime });
     const result = await this.metadataClient.create({
-      id: id || cuid(),
+      id: id || createId(),
       metadata: {
         ...createDefaultFileAttributes(),
         ...serializedMetadata,

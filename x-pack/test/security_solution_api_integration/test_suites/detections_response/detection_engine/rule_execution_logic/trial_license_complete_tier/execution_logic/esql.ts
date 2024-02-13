@@ -15,17 +15,19 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
   getPreviewAlerts,
   previewRule,
-  createRule,
   getOpenAlerts,
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
   patchRule,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
