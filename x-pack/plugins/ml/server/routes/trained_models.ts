@@ -12,7 +12,7 @@ import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -57,8 +57,8 @@ export function filterForEnabledFeatureModels<
   return filteredModels;
 }
 
-export const getInferenceServicesProvider = (client: IScopedClusterClient) => {
-  return async function getInferenceServices(
+export const populateInferenceServicesProvider = (client: IScopedClusterClient) => {
+  return async function populateInferenceServices(
     trainedModels: TrainedModelConfigResponse[],
     asInternal: boolean = false
   ) {
@@ -87,9 +87,9 @@ export const getInferenceServicesProvider = (client: IScopedClusterClient) => {
         }
       }
     } catch (e) {
-      if (!asInternal) {
-        // retry with internal user to get an indicator if models has associated inference services, withont mentioning the names
-        await getInferenceServices(trainedModels, true);
+      if (!asInternal && e.statusCode === 403) {
+        // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
+        await populateInferenceServices(trainedModels, true);
       }
       mlLog.debug(e);
     }
@@ -146,8 +146,8 @@ export function trainedModelsRoutes(
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];
 
-          const getInferenceServices = getInferenceServicesProvider(client);
-          await getInferenceServices(result, false);
+          const populateInferenceServices = populateInferenceServicesProvider(client);
+          await populateInferenceServices(result, false);
 
           try {
             if (withPipelines) {
