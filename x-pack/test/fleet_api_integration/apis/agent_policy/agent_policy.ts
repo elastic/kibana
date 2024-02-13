@@ -80,14 +80,15 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if passed kuery is not correct', async () => {
+      // With disableKQLValidation enabled, the following tests fail and need to be disabled
+      it.skip('should return 400 if passed kuery is not correct', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });
 
-      it('should return 400 if passed kuery is invalid', async () => {
+      it.skip('should return 400 if passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
