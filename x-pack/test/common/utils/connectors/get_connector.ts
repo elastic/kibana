@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import type SuperTest from 'supertest';
 import { getSpaceUrlPrefix } from '../get_space_prefix';
 
@@ -20,7 +20,7 @@ export async function getConnector(
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   connectorId: string,
   { spaceId = 'default' } = {}
-): Promise<Connector> {
+): Promise<ConnectorResponse> {
   const response = await supertest
     .get(`${getSpaceUrlPrefix(spaceId)}/api/actions/connector/${connectorId}`)
     .set('kbn-xsrf', 'foo')
