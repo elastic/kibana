@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -856,7 +856,12 @@ export const LensTopNavMenu = ({
 
   const onSavedQueryUpdatedWrapped = useCallback(
     (newSavedQuery) => {
-      const savedQueryFilters = newSavedQuery.attributes.filters || [];
+      // If the user tries to load the same saved query that is already loaded,
+      // we will receive the same object reference which was previously frozen
+      // by Redux Toolkit. `filterManager.setFilters` will then try to modify
+      // the query's filters, which will throw an error. To avoid this, we need
+      // to clone the filters before passing them to `filterManager.setFilters`.
+      const savedQueryFilters = cloneDeep(newSavedQuery.attributes.filters || []);
       const globalFilters = data.query.filterManager.getGlobalFilters();
       data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
       dispatchSetState({
