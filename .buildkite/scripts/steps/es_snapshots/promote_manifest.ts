@@ -18,6 +18,7 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
       throw Error('Manifest URL missing');
     }
 
+    const mainCWD = process.cwd();
     const tempDir = fs.mkdtempSync('snapshot-promotion');
     process.chdir(tempDir);
 
@@ -35,15 +36,12 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
 
     fs.writeFileSync('manifest-permanent.json', manifestPermanentJson);
 
-    const currentPath = execSync('pwd', { encoding: 'utf-8' }).trim();
-    console.log('Current working directory:', currentPath);
-
     execSync(
       `
       set -euo pipefail
-      .buildkite/scripts/common/activate_service_account.sh ${bucket}
-      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
-      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_PERMANENT}
+      ${mainCWD}/.buildkite/scripts/common/activate_service_account.sh ${bucket}
+      ${mainCWD}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
+      ${mainCWD}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_PERMANENT}
       cp manifest.json manifest-latest-verified.json
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
