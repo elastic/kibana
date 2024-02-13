@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { Query } from '@kbn/es-query';
+import { Query, Filter } from '@kbn/es-query';
 import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,6 +39,11 @@ import {
   LensFieldFormat,
 } from './helpers';
 
+interface ChartOptions {
+  seriesType?: SeriesType;
+  interval?: string;
+}
+
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
   searchConfiguration: SerializedSearchSourceFields;
@@ -47,7 +52,8 @@ interface RuleConditionChartProps {
   error?: IErrorObject;
   timeRange: TimeRange;
   annotations?: EventAnnotationConfig[];
-  seriesType?: SeriesType;
+  chartOptions?: ChartOptions;
+  additionalFilters?: Filter[];
 }
 
 const defaultQuery: Query = {
@@ -63,7 +69,8 @@ export function RuleConditionChart({
   error,
   annotations,
   timeRange,
-  seriesType,
+  chartOptions: { seriesType, interval } = {},
+  additionalFilters = [],
 }: RuleConditionChartProps) {
   const {
     services: { lens },
@@ -76,6 +83,7 @@ export function RuleConditionChart({
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
+  const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
@@ -231,7 +239,7 @@ export function RuleConditionChart({
       buckets: {
         type: 'date_histogram',
         params: {
-          interval: `${timeSize}${timeUnit}`,
+          interval: interval || `${timeSize}${timeUnit}`,
         },
       },
       seriesType: seriesType ? seriesType : 'bar',
@@ -295,6 +303,7 @@ export function RuleConditionChart({
     formula,
     formulaAsync.value,
     groupBy,
+    interval,
     metrics,
     threshold,
     thresholdReferenceLine,
@@ -336,6 +345,7 @@ export function RuleConditionChart({
       </div>
     );
   }
+
   return (
     <div>
       <lens.EmbeddableComponent
@@ -346,7 +356,7 @@ export function RuleConditionChart({
         attributes={attributes}
         disableTriggers={true}
         query={(searchConfiguration.query as Query) || defaultQuery}
-        filters={searchConfiguration.filter}
+        filters={filters}
       />
     </div>
   );
