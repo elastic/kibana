@@ -12,7 +12,11 @@ import { isEqual } from 'lodash';
 
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
-import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
+import {
+  defaultFleetErrorHandler,
+  FleetNotFoundError,
+  FleetServerHostUnauthorizedError,
+} from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import {
   createFleetServerHost,
@@ -36,13 +40,24 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
-  const serverlessDefaultFleetServerHost = await getFleetServerHost(
-    soClient,
-    SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
-  );
-  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
+  async function attempt(nAttempts: number) {
+    try {
+      return await getFleetServerHost(soClient, SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        if (nAttempts > 0) {
+          attempt(nAttempts - 1);
+        } else {
+          throw new FleetNotFoundError(e.message);
+        }
+      }
+    }
+  }
+
+  const serverlessDefaultFleetServerHost = await attempt(3);
+  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost?.host_urls)) {
     throw new FleetServerHostUnauthorizedError(
-      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
+      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost?.host_urls}`
     );
   }
 }
