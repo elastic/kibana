@@ -14,7 +14,7 @@ import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common
 
 interface TableItem {
   category: string;
-  count: number;
+  count: number | undefined;
   score: number;
 }
 
