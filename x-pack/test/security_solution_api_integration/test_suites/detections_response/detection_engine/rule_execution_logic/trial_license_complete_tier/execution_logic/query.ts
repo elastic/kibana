@@ -50,12 +50,8 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 import {
   createExceptionList,
   createExceptionListItem,
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   getOpenAlerts,
   getPreviewAlerts,
-  getRuleForAlertTesting,
   getSimpleRule,
   previewRule,
   setAlertStatus,
@@ -65,6 +61,12 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   dataGeneratorFactory,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -296,8 +298,8 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('important');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('very_important');
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
       });
     });
 

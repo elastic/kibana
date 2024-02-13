@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -36,38 +36,7 @@ export function useDeleteSlo() {
       }
     },
     {
-      onMutate: async (slo) => {
-        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
-
-        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
-          queryKey: sloKeys.lists(),
-          exact: false,
-        });
-        const [queryKey, previousData] = queriesData?.at(0) ?? [];
-
-        // taking into account partitioned slo
-        const matchingSloCount =
-          previousData?.results?.filter((result) => result.id === slo.id)?.length ?? 0;
-
-        const optimisticUpdate = {
-          page: previousData?.page ?? 1,
-          perPage: previousData?.perPage ?? 25,
-          total: previousData?.total ? previousData.total - matchingSloCount : 0,
-          results: previousData?.results?.filter((result) => result.id !== slo.id) ?? [],
-        };
-
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
-
-        return { previousData, queryKey };
-      },
-      // If the mutation fails, use the context returned from onMutate to roll back
       onError: (error, { name }, context) => {
-        if (context?.previousData && context?.queryKey) {
-          queryClient.setQueryData(context.queryKey, context.previousData);
-        }
-
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
             defaultMessage: 'Failed to delete {name}',
@@ -76,6 +45,8 @@ export function useDeleteSlo() {
         });
       },
       onSuccess: (_data, { name }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
             defaultMessage: 'Deleted {name}',
