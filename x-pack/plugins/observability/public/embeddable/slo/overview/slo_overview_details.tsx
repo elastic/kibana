@@ -78,7 +78,7 @@ export function SloOverviewDetails({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="o11ySloOverviewDetailsCloseButton" onClick={onClose} fill>
+            <EuiButton data-test-subj="o11ySloOverviewDetailsCloseButton" onClick={onClose}>
               {i18n.translate('xpack.observability.sloOverviewDetails.button.closeLabel', {
                 defaultMessage: 'Close',
               })}
@@ -86,6 +86,7 @@ export function SloOverviewDetails({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               onClick={() => {
                 const { sloDetailsUrl } = getSloFormattedSummary(slo!, uiSettings, basePath);
                 navigateToUrl(sloDetailsUrl);
