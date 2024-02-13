@@ -49,7 +49,7 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         if (nAttempts > 0) {
-          await attempt(nAttempts - 1);
+          setTimeout(async () => await attempt(nAttempts - 1), 1000);
         } else {
           throw new FleetNotFoundError(
             `Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} not found in saved objects: ${e.message}`

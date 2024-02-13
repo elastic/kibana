@@ -184,7 +184,7 @@ async function validateOutputServerless(
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         if (nAttempts > 0) {
-          await attempt(nAttempts - 1);
+          setTimeout(async () => await attempt(nAttempts - 1), 1000);
         } else {
           throw Boom.badRequest(
             `Output id ${SERVERLESS_DEFAULT_OUTPUT_ID} not found in saved objects: ${e.message}`
