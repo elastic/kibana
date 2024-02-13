@@ -55,7 +55,11 @@ export const Chat = () => {
     resetField,
     handleSubmit,
   } = useForm<ChatForm>();
-  const { messages, append } = useChat({
+  const {
+    messages,
+    append,
+    stop: stopRequest,
+  } = useChat({
     api: async (request: RequestInit) => {
       const response = await services.http.post('/internal/enterprise_search/ai_playground/chat', {
         ...request,
@@ -125,18 +129,31 @@ export const Chat = () => {
                   <QuestionInput
                     value={field.value}
                     onChange={field.onChange}
+                    isDisabled={isSubmitting}
                     button={
-                      <EuiButtonIcon
-                        aria-label={i18n.translate('aiPlayground.chat.sendButtonAriaLabel', {
-                          defaultMessage: 'Send a question',
-                        })}
-                        display={isValid ? 'base' : 'empty'}
-                        size="s"
-                        type="submit"
-                        isLoading={isSubmitting}
-                        isDisabled={!isValid}
-                        iconType={TelegramIcon}
-                      />
+                      isSubmitting ? (
+                        <EuiButtonIcon
+                          aria-label={i18n.translate('aiPlayground.chat.stopButtonAriaLabel', {
+                            defaultMessage: 'Stop request',
+                          })}
+                          display="base"
+                          size="s"
+                          iconType="stop"
+                          onClick={stopRequest}
+                        />
+                      ) : (
+                        <EuiButtonIcon
+                          aria-label={i18n.translate('aiPlayground.chat.sendButtonAriaLabel', {
+                            defaultMessage: 'Send a question',
+                          })}
+                          display={isValid ? 'base' : 'empty'}
+                          size="s"
+                          type="submit"
+                          isLoading={isSubmitting}
+                          isDisabled={!isValid}
+                          iconType={TelegramIcon}
+                        />
+                      )
                     }
                   />
                 )}
