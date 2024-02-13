@@ -82,7 +82,7 @@ export const useTogglePanel = ({
   const stepIdFromHash = detailName.split('#')[1];
   const spaceId = useSpaceId();
 
-  const OnboardingStorageObject = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
+  const onboardingStorage = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
   const {
     getAllFinishedStepsFromStorage,
     getActiveProductsFromStorage,
@@ -93,7 +93,7 @@ export const useTogglePanel = ({
     removeExpandedCardStepFromStorage,
     resetAllExpandedCardStepsToStorage,
     getAllExpandedCardStepsFromStorage,
-  } = OnboardingStorageObject;
+  } = onboardingStorage;
 
   const finishedStepsInitialStates = useMemo(
     () =>
@@ -130,11 +130,11 @@ export const useTogglePanel = ({
 
   const expandedCardsInitialStates: ExpandedCardSteps = useMemo(() => {
     if (stepIdFromHash) {
-      syncExpandedCardStepsToStorageFromURL(OnboardingStorageObject, stepIdFromHash);
+      syncExpandedCardStepsToStorageFromURL(onboardingStorage, stepIdFromHash);
     }
 
     return getAllExpandedCardStepsFromStorage();
-  }, [OnboardingStorageObject, getAllExpandedCardStepsFromStorage, stepIdFromHash]);
+  }, [onboardingStorage, getAllExpandedCardStepsFromStorage, stepIdFromHash]);
 
   const onStepClicked: OnStepClicked = useCallback(
     ({ stepId, cardId, isExpanded }) => {

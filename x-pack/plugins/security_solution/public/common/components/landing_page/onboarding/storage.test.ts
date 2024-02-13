@@ -30,10 +30,7 @@ import { ProductLine } from './configs';
 
 jest.mock('../../../lib/local_storage');
 
-describe.each([
-  ['test'],
-  //  [undefined]
-])('useStorage - spaceId: %s', (spaceId) => {
+describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => {
   const mockStorage = storage as unknown as MockStorage;
   const onboardingStorage = new OnboardingStorage(spaceId);
   const onboardingSteps = [
