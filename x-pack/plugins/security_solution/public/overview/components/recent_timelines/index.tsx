@@ -9,6 +9,7 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SortFieldTimeline, TimelineType } from '../../../../common/api/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import {
@@ -44,6 +45,10 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   );
   const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
   const { navigateToApp } = useKibana().services.application;
   const onOpenTimeline: OnOpenTimeline = useCallback(
@@ -53,9 +58,10 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
         timelineId,
         updateIsLoading,
         updateTimeline,
+        useDiscoverComponentsInTimeline,
       });
     },
-    [updateIsLoading, updateTimeline]
+    [updateIsLoading, updateTimeline, useDiscoverComponentsInTimeline]
   );
 
   const goToTimelines = useCallback(

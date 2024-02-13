@@ -22,6 +22,7 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store';
@@ -192,7 +193,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   };
 
   const [
-    isQueryLoading,
+    queryLoadingState,
     { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
@@ -209,6 +210,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     startDate: start,
     timerangeKind,
   });
+
+  const isQueryLoading = useMemo(
+    () =>
+      queryLoadingState === DataLoadingState.loading ||
+      queryLoadingState === DataLoadingState.loadingMore,
+    [queryLoadingState]
+  );
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });

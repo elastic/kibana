@@ -13,9 +13,14 @@ import {
 } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export const useTimelineClick = () => {
   const dispatch = useDispatch();
+
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
 
   const handleTimelineClick = useCallback(
     (timelineId: string, onError: TimelineErrorCallback, graphEventId?: string) => {
@@ -31,9 +36,10 @@ export const useTimelineClick = () => {
           isLoading: boolean;
         }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
         updateTimeline: dispatchUpdateTimeline(dispatch),
+        useDiscoverComponentsInTimeline,
       });
     },
-    [dispatch]
+    [dispatch, useDiscoverComponentsInTimeline]
   );
 
   return handleTimelineClick;

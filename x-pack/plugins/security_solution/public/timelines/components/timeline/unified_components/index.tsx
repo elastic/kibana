@@ -81,7 +81,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
 
     .unifiedFieldListSidebar__group {
       .euiFlexItem:last-child {
-        padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS};
+        /* padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS}; */
       }
       .unifiedFieldListSidebar__list {
         padding-left: 0px;

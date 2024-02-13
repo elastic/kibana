@@ -24,6 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -61,6 +62,7 @@ import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
+import { defaultUdtHeaders } from '../unified_components/default_headers';
 const QueryTabHeaderContainer = styled.div`
   width: 100%;
 `;
@@ -265,14 +267,19 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   useEffect(() => {
     dispatch(
       timelineActions.initializeTimelineSettings({
         filterManager,
         id: timelineId,
+        defaultColumns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
       })
     );
-  }, [dispatch, filterManager, timelineId]);
+  }, [dispatch, filterManager, timelineId, useDiscoverComponentsInTimeline]);
 
   const [
     isQueryLoading,

@@ -23,6 +23,9 @@ import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
 
   const isEsqlTabDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
@@ -42,10 +45,11 @@ export const useInitTimelineFromUrlParam = () => {
             dispatch(timelineActions.updateIsLoading(status)),
           updateTimeline: dispatchUpdateTimeline(dispatch),
           savedSearchId: initialState.savedSearchId,
+          useDiscoverComponentsInTimeline,
         });
       }
     },
-    [dispatch, isEsqlTabDisabled]
+    [dispatch, useDiscoverComponentsInTimeline, isEsqlTabDisabled]
   );
 
   useEffect(() => {

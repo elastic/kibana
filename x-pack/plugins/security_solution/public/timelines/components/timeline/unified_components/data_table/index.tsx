@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { type EuiDataGridControlColumn, type EuiDataGridCustomBodyProps } from '@elastic/eui';
 import React, { memo, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -19,13 +18,11 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AvailableRowRendererCount } from '../../../../../../common/api/timeline';
 import { getAllFieldsByName } from '../../../../../common/containers/source';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
@@ -45,11 +42,10 @@ import { getFormattedFields } from '../../body/renderers/get_formatted_fields';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
-import CustomGridBodyControls from './render_custom_body';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
-import { useControlColumns } from './use_control_columns';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/get_sourcerer_data_view';
+import { defaultUdtHeaders } from '../default_headers';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -146,6 +142,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         columns: columnSettings,
       };
     }, [columns]);
+
     const defaultColumnIds = useMemo(() => columns.map((c) => c.id), [columns]);
 
     // const [notesMap, setNotesMap] = useState<NotesMap>({});
@@ -209,48 +206,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         }),
       [events, dataView]
     );
-
-    // /////////// ROW RENDERERS START ///////////////
-
-    const enabledRowRenderers = useMemo(() => {
-      if (!excludedRowRendererIds) return rowRenderers;
-      if (excludedRowRendererIds.length === AvailableRowRendererCount) {
-        return [];
-      }
-
-      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-    }, [excludedRowRendererIds, rowRenderers]);
-
-    const getRowRendererBody = useCallback(
-      ({
-        Cell,
-        visibleRowData,
-        visibleColumns,
-        setCustomGridBodyProps,
-      }: EuiDataGridCustomBodyProps) => (
-        <CustomGridBodyControls
-          unifiedDataTableRows={tableRows}
-          Cell={Cell}
-          visibleColumns={visibleColumns}
-          visibleRowData={visibleRowData}
-          setCustomGridBodyProps={setCustomGridBodyProps}
-          enabledRowRenderers={enabledRowRenderers}
-          timelineId={timelineId}
-        />
-      ),
-      [tableRows, enabledRowRenderers, timelineId]
-    );
-
-    const { leadingControlColumns, expandedRowTrailingColumns } = useControlColumns({
-      enabledRowRenderers,
-      expandedDoc,
-      gridRows: tableRows,
-      refetch,
-      timelineId,
-      trGroupRef,
-    });
-
-    // ////////////// START FLYOUT DETAILS ////////////////
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
@@ -339,7 +294,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           onSort(newState.sort);
         } else {
           const columnsStates = newState.columns.map((columnId) =>
-            getUnifiedDataTableColumnHeader(columnId, defaultHeaders)
+            getUnifiedDataTableColumnHeader(columnId, defaultUdtHeaders)
           );
           dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
         }
@@ -470,6 +425,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             columns={defaultColumnIds}
             expandedDoc={expandedDoc}
             dataView={dataView}
+            showColumnTokens={true}
             loadingState={dataLoadingState}
             onFilter={onAddFilter as DocViewFilterFn}
             onResize={onResizeDataGrid}
@@ -494,10 +450,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
             renderDocumentView={() => <></>}
-            externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
-            externalAdditionalControls={additionalControls}
-            trailingControlColumns={expandedRowTrailingColumns}
-            renderCustomGridBody={getRowRendererBody}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
             useNewFieldsApi={true}
@@ -508,6 +460,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             configRowHeight={3}
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
+            externalAdditionalControls={additionalControls}
           />
           {showExpandedDetails && (
             <DetailsPanel
@@ -535,4 +488,4 @@ export const TimelineDataTable: React.FC<CommonDataTableProps> = memo((props) =>
 });
 
 // eslint-disable-next-line import/no-default-export
-export default TimelineDataTable;
+export { TimelineDataTable as default };

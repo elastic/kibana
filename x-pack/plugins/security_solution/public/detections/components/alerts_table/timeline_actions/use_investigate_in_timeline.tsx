@@ -18,6 +18,7 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -34,6 +35,8 @@ import { getField } from '../../../../helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { defaultUdtHeaders } from '../../../../timelines/components/timeline/unified_components/default_headers';
+import { defaultHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -153,6 +156,10 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   const createTimeline = useCallback(
     ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
       clearActiveTimeline();
@@ -164,6 +171,7 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
+          columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
           filterManager,
           indexNames: timeline.indexNames ?? [],
           show: true,
@@ -172,7 +180,13 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       })();
     },
-    [dispatch, filterManager, updateTimelineIsLoading, clearActiveTimeline]
+    [
+      dispatch,
+      filterManager,
+      updateTimelineIsLoading,
+      clearActiveTimeline,
+      useDiscoverComponentsInTimeline,
+    ]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {

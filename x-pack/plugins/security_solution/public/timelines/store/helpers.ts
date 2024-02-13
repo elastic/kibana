@@ -1456,7 +1456,7 @@ export const setInitializeTimelineSettings = ({
 }: InitializeTimelineParams): TimelineById => {
   const timeline = timelineById[id];
 
-  return !timeline?.initialized
+  const result = !timeline?.initialized
     ? {
         ...timelineById,
         [id]: {
@@ -1480,6 +1480,8 @@ export const setInitializeTimelineSettings = ({
           ...timelineSettingsProps,
         },
       };
+
+  return result;
 };
 
 interface ApplyDeltaToTableColumnWidth {

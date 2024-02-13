@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { updateIsLoading } from '../../../../timelines/store/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -49,6 +50,10 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const { addError } = useAppToasts();
   const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
+  );
+
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
   );
 
   const isEql = useRef(false);
@@ -205,10 +210,11 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
             isLoading: boolean;
           }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
           updateTimeline: dispatchUpdateTimeline(dispatch),
+          useDiscoverComponentsInTimeline,
         });
       }
     },
-    [dispatch, onOpenTimeline, selectedTimeline]
+    [dispatch, onOpenTimeline, selectedTimeline, useDiscoverComponentsInTimeline]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

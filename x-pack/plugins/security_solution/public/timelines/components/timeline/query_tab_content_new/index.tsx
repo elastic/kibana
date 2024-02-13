@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlyoutHeader, EuiBadge } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -22,10 +18,10 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store';
-import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -51,6 +47,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { UnifiedTimelineComponent } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
+import { defaultHeaders } from '../body/column_headers/default_headers';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -68,10 +65,6 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   display: flex;
   flex-direction: column;
 `;
-
-
-
-
 
 const SourcererFlex = styled(EuiFlexItem)`
   align-items: flex-end;
@@ -102,14 +95,11 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   deepEqual(prevProps.filters, nextProps.filters);
 
 interface OwnProps {
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
-
 export type Props = OwnProps & PropsFromRedux;
-
 
 export const NewQueryTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -228,14 +218,19 @@ export const NewQueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   useEffect(() => {
     dispatch(
       timelineActions.initializeTimelineSettings({
         filterManager,
         id: timelineId,
+        defaultColumns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
       })
     );
-  }, [dispatch, filterManager, timelineId]);
+  }, [dispatch, filterManager, timelineId, useDiscoverComponentsInTimeline]);
 
   const [
     dataLoadingState,
@@ -274,7 +269,6 @@ export const NewQueryTabContentComponent: React.FC<Props> = ({
     });
   }, [events, pageInfo.activePage]);
 
-
   useEffect(() => {
     dispatch(
       timelineActions.updateIsLoading({
@@ -283,7 +277,6 @@ export const NewQueryTabContentComponent: React.FC<Props> = ({
       })
     );
   }, [isSourcererLoading, timelineId, dispatch, dataLoadingState, isQueryLoading]);
-
 
   const header = useMemo(
     () => (

@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
@@ -31,6 +32,7 @@ import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_ful
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { TimelineTour } from './tour';
+import { defaultUdtHeaders } from './unified_components/default_headers';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -69,6 +71,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   timelineId,
 }) => {
   const dispatch = useDispatch();
+
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
@@ -118,7 +125,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: defaultHeaders,
+          columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
