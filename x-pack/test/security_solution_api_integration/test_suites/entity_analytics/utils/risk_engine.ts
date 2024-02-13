@@ -35,7 +35,7 @@ import {
   countDownTest,
   waitFor,
   routeWithNamespace,
-} from '../../detections_response/utils';
+} from '../../../../common/utils/security_solution';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   const {
