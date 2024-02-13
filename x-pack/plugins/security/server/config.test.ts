@@ -1492,75 +1492,6 @@ describe('config schema', () => {
     });
   });
 
-  describe('roleManagementEnabled', () => {
-    it('should not allow xpack.security.roleManagementEnabled to be configured outside of the serverless context', () => {
-      expect(() =>
-        ConfigSchema.validate(
-          {
-            roleManagementEnabled: false,
-          },
-          { serverless: false }
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[roleManagementEnabled]: a value wasn't expected to be present"`
-      );
-    });
-
-    it('should allow xpack.security.roleManagementEnabled to be configured inside of the serverless context', () => {
-      expect(
-        ConfigSchema.validate(
-          {
-            roleManagementEnabled: false,
-          },
-          { serverless: true }
-        ).roleManagementEnabled
-      ).toEqual(false);
-    });
-
-    describe('session', () => {
-      it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
-        expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
-          '[session.cleanupInterval]: the value must be greater or equal to 10 seconds.'
-        );
-      });
-
-      it('should throw error if xpack.security.session.concurrentSessions.maxSessions is less than 1 or greater than 1000', () => {
-        expect(() =>
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: -1 } } })
-        ).toThrow(
-          '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
-        );
-
-        expect(() =>
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 0 } } })
-        ).toThrow(
-          '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
-        );
-
-        expect(() =>
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 1001 } } })
-        ).toThrow(
-          '[session.concurrentSessions.maxSessions]: Value must be equal to or lower than [1000].'
-        );
-      });
-
-      it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
-        expect(
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session
-        ).toMatchInlineSnapshot(`
-        Object {
-          "cleanupInterval": "PT1H",
-          "concurrentSessions": Object {
-            "maxSessions": 3,
-          },
-          "idleTimeout": "P3D",
-          "lifespan": "P30D",
-        }
-      `);
-      });
-    });
-  });
-
   describe('ui', () => {
     it('should not allow xpack.security.ui.* to be configured outside of the serverless context', () => {
       expect(() =>
@@ -1594,38 +1525,64 @@ describe('config schema', () => {
         }
       `);
     });
+  });
 
-    describe('session', () => {
-      it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
-        expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
-          '[session.cleanupInterval]: the value must be greater or equal to 10 seconds.'
-        );
-      });
+  describe('roleManagementEnabled', () => {
+    it('should not allow xpack.security.roleManagementEnabled to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[roleManagementEnabled]: a value wasn't expected to be present"`
+      );
+    });
 
-      it('should throw error if xpack.security.session.concurrentSessions.maxSessions is less than 1 or greater than 1000', () => {
-        expect(() =>
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: -1 } } })
-        ).toThrow(
-          '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
-        );
+    it('should allow xpack.security.roleManagementEnabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: true }
+        ).roleManagementEnabled
+      ).toEqual(false);
+    });
+  });
 
-        expect(() =>
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 0 } } })
-        ).toThrow(
-          '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
-        );
+  describe('session', () => {
+    it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
+      expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
+        '[session.cleanupInterval]: the value must be greater or equal to 10 seconds.'
+      );
+    });
 
-        expect(() =>
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 1001 } } })
-        ).toThrow(
-          '[session.concurrentSessions.maxSessions]: Value must be equal to or lower than [1000].'
-        );
-      });
+    it('should throw error if xpack.security.session.concurrentSessions.maxSessions is less than 1 or greater than 1000', () => {
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: -1 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+      );
 
-      it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
-        expect(
-          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session
-        ).toMatchInlineSnapshot(`
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 0 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 1001 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or lower than [1000].'
+      );
+    });
+
+    it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
+      expect(ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session)
+        .toMatchInlineSnapshot(`
         Object {
           "cleanupInterval": "PT1H",
           "concurrentSessions": Object {
@@ -1635,71 +1592,71 @@ describe('config schema', () => {
           "lifespan": "P30D",
         }
       `);
-      });
     });
   });
+});
 
-  describe('createConfig()', () => {
-    it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
-      const mockRandomBytes = jest.requireMock('crypto').randomBytes;
-      mockRandomBytes.mockReturnValue('ab'.repeat(16));
+describe('createConfig()', () => {
+  it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
+    const mockRandomBytes = jest.requireMock('crypto').randomBytes;
+    mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-      const logger = loggingSystemMock.create().get();
-      const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
-        isTLSEnabled: true,
-      });
-      expect(config.encryptionKey).toEqual('ab'.repeat(16));
+    const logger = loggingSystemMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
+      isTLSEnabled: true,
+    });
+    expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
-      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.",
         ],
       ]
     `);
-    });
+  });
 
-    it('should log a warning if SSL is not configured', async () => {
-      const logger = loggingSystemMock.create().get();
-      const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: false });
-      expect(config.secureCookies).toEqual(false);
+  it('should log a warning if SSL is not configured', async () => {
+    const logger = loggingSystemMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: false });
+    expect(config.secureCookies).toEqual(false);
 
-      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Session cookies will be transmitted over insecure connections. This is not recommended.",
                           ],
                         ]
                 `);
+  });
+
+  it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
+    const logger = loggingSystemMock.create().get();
+    const config = createConfig(ConfigSchema.validate({ secureCookies: true }), logger, {
+      isTLSEnabled: false,
     });
+    expect(config.secureCookies).toEqual(true);
 
-    it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-      const logger = loggingSystemMock.create().get();
-      const config = createConfig(ConfigSchema.validate({ secureCookies: true }), logger, {
-        isTLSEnabled: false,
-      });
-      expect(config.secureCookies).toEqual(true);
-
-      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
                           ],
                         ]
                 `);
-    });
+  });
 
-    it('should log a warning if both concurrent sessions limit and HTTP authentication are configured', async () => {
-      const logger = loggingSystemMock.create();
-      const config = createConfig(
-        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }),
-        logger.get(),
-        { isTLSEnabled: true }
-      );
-      expect(config.session.concurrentSessions?.maxSessions).toBe(3);
-      expect(config.authc.http.enabled).toBe(true);
+  it('should log a warning if both concurrent sessions limit and HTTP authentication are configured', async () => {
+    const logger = loggingSystemMock.create();
+    const config = createConfig(
+      ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }),
+      logger.get(),
+      { isTLSEnabled: true }
+    );
+    expect(config.session.concurrentSessions?.maxSessions).toBe(3);
+    expect(config.authc.http.enabled).toBe(true);
 
-      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.",
@@ -1707,45 +1664,45 @@ describe('config schema', () => {
       ]
     `);
 
-      loggingSystemMock.clear(logger);
+    loggingSystemMock.clear(logger);
 
-      const configWithoutHTTPAuth = createConfig(
+    const configWithoutHTTPAuth = createConfig(
+      ConfigSchema.validate({
+        session: { concurrentSessions: { maxSessions: 3 } },
+        authc: { http: { enabled: false } },
+      }),
+      logger.get(),
+      { isTLSEnabled: true }
+    );
+    expect(configWithoutHTTPAuth.session.concurrentSessions?.maxSessions).toBe(3);
+    expect(configWithoutHTTPAuth.authc.http.enabled).toBe(false);
+
+    expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  });
+
+  it('should set xpack.security.secureCookies if SSL is configured', async () => {
+    const logger = loggingSystemMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: true });
+    expect(config.secureCookies).toEqual(true);
+
+    expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+  });
+
+  it('transforms legacy `authc.providers` into new format', () => {
+    const logger = loggingSystemMock.create().get();
+
+    expect(
+      createConfig(
         ConfigSchema.validate({
-          session: { concurrentSessions: { maxSessions: 3 } },
-          authc: { http: { enabled: false } },
+          authc: {
+            providers: ['saml', 'basic'],
+            saml: { realm: 'saml-realm' },
+          },
         }),
-        logger.get(),
+        logger,
         { isTLSEnabled: true }
-      );
-      expect(configWithoutHTTPAuth.session.concurrentSessions?.maxSessions).toBe(3);
-      expect(configWithoutHTTPAuth.authc.http.enabled).toBe(false);
-
-      expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
-    });
-
-    it('should set xpack.security.secureCookies if SSL is configured', async () => {
-      const logger = loggingSystemMock.create().get();
-      const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: true });
-      expect(config.secureCookies).toEqual(true);
-
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
-    });
-
-    it('transforms legacy `authc.providers` into new format', () => {
-      const logger = loggingSystemMock.create().get();
-
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: {
-              providers: ['saml', 'basic'],
-              saml: { realm: 'saml-realm' },
-            },
-          }),
-          logger,
-          { isTLSEnabled: true }
-        ).authc
-      ).toMatchInlineSnapshot(`
+      ).authc
+    ).toMatchInlineSnapshot(`
       Object {
         "http": Object {
           "autoSchemesEnabled": true,
@@ -1791,94 +1748,94 @@ describe('config schema', () => {
         ],
       }
     `);
-    });
+  });
 
-    it('does not automatically set `authc.selector.enabled` to `true` if legacy `authc.providers` format is used', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: { providers: ['saml', 'basic'], saml: { realm: 'saml-realm' } },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).authc.selector.enabled
-      ).toBe(false);
+  it('does not automatically set `authc.selector.enabled` to `true` if legacy `authc.providers` format is used', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: { providers: ['saml', 'basic'], saml: { realm: 'saml-realm' } },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(false);
 
-      // But keep it as `true` if it's explicitly set.
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: {
-              selector: { enabled: true },
-              providers: ['saml', 'basic'],
-              saml: { realm: 'saml-realm' },
-            },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).authc.selector.enabled
-      ).toBe(true);
-    });
+    // But keep it as `true` if it's explicitly set.
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            selector: { enabled: true },
+            providers: ['saml', 'basic'],
+            saml: { realm: 'saml-realm' },
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(true);
+  });
 
-    it('does not automatically set `authc.selector.enabled` to `true` if less than 2 providers must be shown there', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: {
-              providers: {
-                basic: { basic1: { order: 0 } },
-                saml: {
-                  saml1: { order: 1, realm: 'saml1', showInSelector: false },
-                  saml2: { enabled: false, order: 2, realm: 'saml2' },
-                },
+  it('does not automatically set `authc.selector.enabled` to `true` if less than 2 providers must be shown there', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: {
+                saml1: { order: 1, realm: 'saml1', showInSelector: false },
+                saml2: { enabled: false, order: 2, realm: 'saml2' },
               },
             },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).authc.selector.enabled
-      ).toBe(false);
-    });
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(false);
+  });
 
-    it('automatically set `authc.selector.enabled` to `true` if more than 1 provider must be shown there', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: {
-              providers: {
-                basic: { basic1: { order: 0 } },
-                saml: { saml1: { order: 1, realm: 'saml1' }, saml2: { order: 2, realm: 'saml2' } },
+  it('automatically set `authc.selector.enabled` to `true` if more than 1 provider must be shown there', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: { saml1: { order: 1, realm: 'saml1' }, saml2: { order: 2, realm: 'saml2' } },
+            },
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(true);
+  });
+
+  it('indicates which providers have the access agreement enabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 3 } },
+              saml: {
+                saml1: { order: 2, realm: 'saml1', accessAgreement: { message: 'foo' } },
+                saml2: { order: 1, realm: 'saml2' },
+              },
+              oidc: {
+                oidc1: { order: 0, realm: 'oidc1', accessAgreement: { message: 'foo' } },
+                oidc2: { order: 4, realm: 'oidc2' },
               },
             },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).authc.selector.enabled
-      ).toBe(true);
-    });
-
-    it('indicates which providers have the access agreement enabled', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: {
-              providers: {
-                basic: { basic1: { order: 3 } },
-                saml: {
-                  saml1: { order: 2, realm: 'saml1', accessAgreement: { message: 'foo' } },
-                  saml2: { order: 1, realm: 'saml2' },
-                },
-                oidc: {
-                  oidc1: { order: 0, realm: 'oidc1', accessAgreement: { message: 'foo' } },
-                  oidc2: { order: 4, realm: 'oidc2' },
-                },
-              },
-            },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).authc.sortedProviders
-      ).toMatchInlineSnapshot(`
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.sortedProviders
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "hasAccessAgreement": true,
@@ -1912,24 +1869,24 @@ describe('config schema', () => {
         },
       ]
     `);
-    });
+  });
 
-    it('correctly sorts providers based on the `order`', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            authc: {
-              providers: {
-                basic: { basic1: { order: 3 } },
-                saml: { saml1: { order: 2, realm: 'saml1' }, saml2: { order: 1, realm: 'saml2' } },
-                oidc: { oidc1: { order: 0, realm: 'oidc1' }, oidc2: { order: 4, realm: 'oidc2' } },
-              },
+  it('correctly sorts providers based on the `order`', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 3 } },
+              saml: { saml1: { order: 2, realm: 'saml1' }, saml2: { order: 1, realm: 'saml2' } },
+              oidc: { oidc1: { order: 0, realm: 'oidc1' }, oidc2: { order: 4, realm: 'oidc2' } },
             },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).authc.sortedProviders
-      ).toMatchInlineSnapshot(`
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.sortedProviders
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "hasAccessAgreement": false,
@@ -1963,20 +1920,20 @@ describe('config schema', () => {
         },
       ]
     `);
-    });
+  });
 
-    it('creates a default audit appender when audit logging is enabled', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            audit: {
-              enabled: true,
-            },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).audit.appender
-      ).toMatchInlineSnapshot(`
+  it('creates a default audit appender when audit logging is enabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          audit: {
+            enabled: true,
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).audit.appender
+    ).toMatchInlineSnapshot(`
       Object {
         "fileName": "/mock/kibana/logs/path/audit.log",
         "layout": Object {
@@ -1993,36 +1950,36 @@ describe('config schema', () => {
         "type": "rolling-file",
       }
     `);
-    });
+  });
 
-    it('does not create a default audit appender when audit logging is disabled', () => {
-      expect(
-        createConfig(
-          ConfigSchema.validate({
-            audit: {
-              enabled: false,
-            },
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: true }
-        ).audit.appender
-      ).toBeUndefined();
-    });
-
-    it('accepts an audit appender', () => {
-      expect(
+  it('does not create a default audit appender when audit logging is disabled', () => {
+    expect(
+      createConfig(
         ConfigSchema.validate({
           audit: {
-            appender: {
-              type: 'file',
-              fileName: '/path/to/file.txt',
-              layout: {
-                type: 'json',
-              },
+            enabled: false,
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).audit.appender
+    ).toBeUndefined();
+  });
+
+  it('accepts an audit appender', () => {
+    expect(
+      ConfigSchema.validate({
+        audit: {
+          appender: {
+            type: 'file',
+            fileName: '/path/to/file.txt',
+            layout: {
+              type: 'json',
             },
           },
-        }).audit.appender
-      ).toMatchInlineSnapshot(`
+        },
+      }).audit.appender
+    ).toMatchInlineSnapshot(`
       Object {
         "fileName": "/path/to/file.txt",
         "layout": Object {
@@ -2031,466 +1988,461 @@ describe('config schema', () => {
         "type": "file",
       }
     `);
-    });
+  });
 
-    it('rejects an appender if not fully configured', () => {
-      expect(() =>
-        ConfigSchema.validate({
-          audit: {
-            // no layout configured
-            appender: {
-              type: 'file',
-              path: '/path/to/file.txt',
-            },
+  it('rejects an appender if not fully configured', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          // no layout configured
+          appender: {
+            type: 'file',
+            path: '/path/to/file.txt',
           },
-        })
-      ).toThrow(
-        '[audit.appender.1.layout]: expected at least one defined value but got [undefined]'
-      );
-    });
+        },
+      })
+    ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
+  });
 
-    describe('#getExpirationTimeouts', () => {
-      function createMockConfig(config: Record<string, any> = {}) {
-        return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
-          isTLSEnabled: false,
-        });
-      }
+  describe('#getExpirationTimeouts', () => {
+    function createMockConfig(config: Record<string, any> = {}) {
+      return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
+        isTLSEnabled: false,
+      });
+    }
 
-      it('returns default values if neither global nor provider specific settings are set', async () => {
-        expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+    it('returns default values if neither global nor provider specific settings are set', async () => {
+      expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "P30D",
         }
       `);
-      });
+    });
 
-      it('correctly handles explicitly disabled global settings', async () => {
-        expect(
-          createMockConfig({
-            session: { idleTimeout: null, lifespan: null },
-          }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
-        ).toMatchInlineSnapshot(`
+    it('correctly handles explicitly disabled global settings', async () => {
+      expect(
+        createMockConfig({
+          session: { idleTimeout: null, lifespan: null },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": null,
         }
       `);
 
-        expect(
-          createMockConfig({
-            session: { idleTimeout: 0, lifespan: 0 },
-          }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
-        ).toMatchInlineSnapshot(`
+      expect(
+        createMockConfig({
+          session: { idleTimeout: 0, lifespan: 0 },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": null,
         }
       `);
-      });
+    });
 
-      it('falls back to the global settings if provider does not override them', async () => {
-        expect(
-          createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
-            type: 'basic',
-            name: 'basic1',
-          })
-        ).toMatchInlineSnapshot(`
+    it('falls back to the global settings if provider does not override them', async () => {
+      expect(
+        createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
+          type: 'basic',
+          name: 'basic1',
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.123S",
           "lifespan": "P30D",
         }
       `);
 
-        expect(
-          createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
-            type: 'basic',
-            name: 'basic1',
-          })
-        ).toMatchInlineSnapshot(`
+      expect(
+        createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
+          type: 'basic',
+          name: 'basic1',
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT0.456S",
         }
       `);
 
-        expect(
-          createMockConfig({
-            session: { idleTimeout: 123, lifespan: 456 },
-          }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
-        ).toMatchInlineSnapshot(`
+      expect(
+        createMockConfig({
+          session: { idleTimeout: 123, lifespan: 456 },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
           Object {
             "idleTimeout": "PT0.123S",
             "lifespan": "PT0.456S",
           }
         `);
-      });
+    });
 
-      it('falls back to the global settings if provider is not known or is undefined', async () => {
-        [{ type: 'some type', name: 'some name' }, undefined].forEach((provider) => {
-          expect(
-            createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts(
-              provider
-            )
-          ).toMatchInlineSnapshot(`
+    it('falls back to the global settings if provider is not known or is undefined', async () => {
+      [{ type: 'some type', name: 'some name' }, undefined].forEach((provider) => {
+        expect(
+          createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts(
+            provider
+          )
+        ).toMatchInlineSnapshot(`
           Object {
             "idleTimeout": "PT0.123S",
             "lifespan": "P30D",
           }
         `);
 
-          expect(
-            createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
-          ).toMatchInlineSnapshot(`
+        expect(
+          createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
+        ).toMatchInlineSnapshot(`
           Object {
             "idleTimeout": "P3D",
             "lifespan": "PT0.456S",
           }
         `);
 
-          expect(
-            createMockConfig({
-              session: { idleTimeout: 123, lifespan: 456 },
-            }).session.getExpirationTimeouts(provider)
-          ).toMatchInlineSnapshot(`
+        expect(
+          createMockConfig({
+            session: { idleTimeout: 123, lifespan: 456 },
+          }).session.getExpirationTimeouts(provider)
+        ).toMatchInlineSnapshot(`
           Object {
             "idleTimeout": "PT0.123S",
             "lifespan": "PT0.456S",
           }
         `);
-        });
       });
+    });
 
-      it('uses provider overrides if specified (only idle timeout)', async () => {
-        const configWithoutGlobal = createMockConfig({
-          authc: {
-            providers: {
-              basic: { basic1: { order: 0, session: { idleTimeout: 321 } } },
-              saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 332211 } } },
-            },
+    it('uses provider overrides if specified (only idle timeout)', async () => {
+      const configWithoutGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 332211 } } },
           },
-          session: { idleTimeout: null },
-        });
-        expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+        },
+        session: { idleTimeout: null },
+      });
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "P30D",
         }
       `);
-        expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "P30D",
         }
       `);
 
-        const configWithGlobal = createMockConfig({
-          authc: {
-            providers: {
-              basic: { basic1: { order: 0, session: { idleTimeout: 321 } } },
-              saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 332211 } } },
-            },
+      const configWithGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 332211 } } },
           },
-          session: { idleTimeout: 123 },
-        });
-        expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+        },
+        session: { idleTimeout: 123 },
+      });
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "P30D",
         }
       `);
-        expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "P30D",
         }
       `);
-      });
+    });
 
-      it('uses provider overrides if specified (only lifespan)', async () => {
-        const configWithoutGlobal = createMockConfig({
-          authc: {
-            providers: {
-              basic: { basic1: { order: 0, session: { lifespan: 654 } } },
-              saml: { saml1: { order: 1, realm: 'saml-realm', session: { lifespan: 665544 } } },
-            },
+    it('uses provider overrides if specified (only lifespan)', async () => {
+      const configWithoutGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { lifespan: 654 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { lifespan: 665544 } } },
           },
-          session: { lifespan: null },
-        });
-        expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+        },
+        session: { lifespan: null },
+      });
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);
-        expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT11M5.544S",
         }
       `);
 
-        const configWithGlobal = createMockConfig({
-          authc: {
-            providers: {
-              basic: { basic1: { order: 0, session: { lifespan: 654 } } },
-              saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 665544 } } },
-            },
+      const configWithGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { lifespan: 654 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 665544 } } },
           },
-          session: { lifespan: 456 },
-        });
-        expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+        },
+        session: { lifespan: 456 },
+      });
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);
-        expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT11M5.544S",
           "lifespan": "PT0.456S",
         }
       `);
-      });
+    });
 
-      it('uses provider overrides if specified (both idle timeout and lifespan)', async () => {
-        const configWithoutGlobal = createMockConfig({
-          authc: {
-            providers: {
-              basic: { basic1: { order: 0, session: { idleTimeout: 321, lifespan: 654 } } },
-              saml: {
-                saml1: {
-                  order: 1,
-                  realm: 'saml-realm',
-                  session: { idleTimeout: 332211, lifespan: 665544 },
-                },
+    it('uses provider overrides if specified (both idle timeout and lifespan)', async () => {
+      const configWithoutGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321, lifespan: 654 } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 332211, lifespan: 665544 },
               },
             },
           },
-          session: { idleTimeout: null, lifespan: null },
-        });
-        expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+        },
+        session: { idleTimeout: null, lifespan: null },
+      });
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "PT0.654S",
         }
       `);
-        expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "PT11M5.544S",
         }
       `);
 
-        const configWithGlobal = createMockConfig({
-          authc: {
-            providers: {
-              basic: { basic1: { order: 0, session: { idleTimeout: 321, lifespan: 654 } } },
-              saml: {
-                saml1: {
-                  order: 1,
-                  realm: 'saml-realm',
-                  session: { idleTimeout: 332211, lifespan: 665544 },
-                },
+      const configWithGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321, lifespan: 654 } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 332211, lifespan: 665544 },
               },
             },
           },
-          session: { idleTimeout: 123, lifespan: 456 },
-        });
-        expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
+        },
+        session: { idleTimeout: 123, lifespan: 456 },
+      });
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "PT0.654S",
         }
       `);
-        expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "PT11M5.544S",
         }
       `);
-      });
+    });
 
-      it('uses provider overrides if disabled (both idle timeout and lifespan)', async () => {
-        const config = createMockConfig({
+    it('uses provider overrides if disabled (both idle timeout and lifespan)', async () => {
+      const config = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: null, lifespan: null } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 0, lifespan: 0 },
+              },
+            },
+          },
+        },
+        session: { idleTimeout: 123, lifespan: 456 },
+      });
+      expect(config.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+      expect(config.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+    });
+
+    it('properly handles config for the anonymous provider', async () => {
+      expect(
+        createMockConfig({
           authc: {
             providers: {
-              basic: { basic1: { order: 0, session: { idleTimeout: null, lifespan: null } } },
-              saml: {
-                saml1: {
-                  order: 1,
-                  realm: 'saml-realm',
-                  session: { idleTimeout: 0, lifespan: 0 },
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
                 },
               },
             },
           },
-          session: { idleTimeout: 123, lifespan: 456 },
-        });
-        expect(config.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-          .toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": null,
-          "lifespan": null,
-        }
-      `);
-        expect(config.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-          .toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": null,
-          "lifespan": null,
-        }
-      `);
-      });
-
-      it('properly handles config for the anonymous provider', async () => {
-        expect(
-          createMockConfig({
-            authc: {
-              providers: {
-                anonymous: {
-                  anonymous1: {
-                    order: 0,
-                    credentials: { username: 'some-user', password: 'some-pass' },
-                  },
-                },
-              },
-            },
-          }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
-        ).toMatchInlineSnapshot(`
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": "P30D",
         }
       `);
 
-        expect(
-          createMockConfig({
-            authc: {
-              providers: {
-                anonymous: {
-                  anonymous1: {
-                    order: 0,
-                    credentials: { username: 'some-user', password: 'some-pass' },
-                  },
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
                 },
               },
             },
-            session: { idleTimeout: 0, lifespan: null },
-          }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
-        ).toMatchInlineSnapshot(`
+          },
+          session: { idleTimeout: 0, lifespan: null },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": null,
         }
       `);
 
-        expect(
-          createMockConfig({
-            authc: {
-              providers: {
-                anonymous: {
-                  anonymous1: {
-                    order: 0,
-                    credentials: { username: 'some-user', password: 'some-pass' },
-                    session: { idleTimeout: 0, lifespan: null },
-                  },
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                  session: { idleTimeout: 0, lifespan: null },
                 },
               },
             },
-          }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
-        ).toMatchInlineSnapshot(`
+          },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": null,
         }
       `);
 
-        expect(
-          createMockConfig({
-            authc: {
-              providers: {
-                anonymous: {
-                  anonymous1: {
-                    order: 0,
-                    credentials: { username: 'some-user', password: 'some-pass' },
-                    session: { idleTimeout: 321, lifespan: 546 },
-                  },
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                  session: { idleTimeout: 321, lifespan: 546 },
                 },
               },
             },
-            session: { idleTimeout: null, lifespan: 0 },
-          }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
-        ).toMatchInlineSnapshot(`
+          },
+          session: { idleTimeout: null, lifespan: 0 },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "PT0.546S",
         }
       `);
 
-        expect(
-          createMockConfig({
-            authc: {
-              providers: {
-                anonymous: {
-                  anonymous1: {
-                    order: 0,
-                    credentials: { username: 'some-user', password: 'some-pass' },
-                    session: { idleTimeout: 321, lifespan: 546 },
-                  },
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                  session: { idleTimeout: 321, lifespan: 546 },
                 },
               },
             },
-            session: { idleTimeout: 123, lifespan: 456 },
-          }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
-        ).toMatchInlineSnapshot(`
+          },
+          session: { idleTimeout: 123, lifespan: 456 },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "PT0.546S",
         }
       `);
-      });
+    });
+  });
+
+  describe('Global Access Agreement', () => {
+    it('should require `message` for globally configured `accessAgreement`', () => {
+      expect(() => {
+        createConfig(
+          ConfigSchema.validate({
+            accessAgreement: {},
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: true }
+        );
+      }).toThrow('[accessAgreement.message]: expected value of type [string] but got [undefined]');
     });
 
-    describe('Global Access Agreement', () => {
-      it('should require `message` for globally configured `accessAgreement`', () => {
-        expect(() => {
-          createConfig(
-            ConfigSchema.validate({
-              accessAgreement: {},
-            }),
-            loggingSystemMock.create().get(),
-            { isTLSEnabled: true }
-          );
-        }).toThrow(
-          '[accessAgreement.message]: expected value of type [string] but got [undefined]'
-        );
-      });
-
-      it('should accept string `message` for globally configured `accessAgreement`', () => {
-        expect(
-          createConfig(
-            ConfigSchema.validate({
-              accessAgreement: { message: 'Foo' },
-            }),
-            loggingSystemMock.create().get(),
-            { isTLSEnabled: true }
-          )?.accessAgreement?.message
-        ).toEqual('Foo');
-      });
+    it('should accept string `message` for globally configured `accessAgreement`', () => {
+      expect(
+        createConfig(
+          ConfigSchema.validate({
+            accessAgreement: { message: 'Foo' },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: true }
+        )?.accessAgreement?.message
+      ).toEqual('Foo');
     });
   });
 });
