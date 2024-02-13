@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
-  getVirtualVersionMap: jest.fn(() => ({ a: '10.0.0', b: '10.1.0' })),
-}));
-
 import {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { getVirtualVersionMapMock } from '../zdt/utils/check_version_compatibility.test.mocks';
 import {
   buildActiveMappings,
   diffMappings,
@@ -23,9 +18,6 @@ import {
 } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
-  beforeEach(() => {
-    getVirtualVersionMapMock.mockReset().mockReturnValueOnce({ type1: '10.0.0', type2: '10.3.0' });
-  });
   test('creates a strict mapping', () => {
     const mappings = buildActiveMappings({});
     expect(mappings.dynamic).toEqual('strict');
