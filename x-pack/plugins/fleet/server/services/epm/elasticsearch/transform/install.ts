@@ -712,20 +712,6 @@ async function handleTransformInstall({
 }): Promise<TransformEsAssetReference> {
   let isUnauthorizedAPIKey = false;
   try {
-    // @TODO: remove
-    console.log(
-      `--@@{
-      transform_id: transform.installationName,
-      defer_validation: true,
-      body: transform.content,
-    }\n`,
-      secondaryAuth ? { ...secondaryAuth } : undefined,
-      JSON.stringify({
-        transform_id: transform.installationName,
-        defer_validation: true,
-        body: transform.content,
-      })
-    );
     await retryTransientEsErrors(
       () =>
         // defer_validation: true on put if the source index is not available
@@ -743,8 +729,6 @@ async function handleTransformInstall({
     );
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
-    // @TODO: remove
-    console.log(`--@@err`, err);
     const isResponseError = err instanceof errors.ResponseError;
     isUnauthorizedAPIKey =
       isResponseError &&
@@ -789,10 +773,8 @@ async function handleTransformInstall({
     }
   }
 
-  // @TODO: remove
-  console.log(`--@@transform.content.settings`, JSON.stringify(transform.content.settings));
   if (startTransform === false || transform.content?.settings?.unattended === true) {
-    // if transform was not set to start automatically in yml config,
+    // if transform was not set to start automatically in yml config, or if unattended
     // we need to check using _stats if the transform had insufficient permissions
     try {
       const transformStats = await retryTransientEsErrors(

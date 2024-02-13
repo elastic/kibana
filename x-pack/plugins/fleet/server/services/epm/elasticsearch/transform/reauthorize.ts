@@ -174,8 +174,6 @@ export async function handleTransformReauthorizeAndStart({
     authorizedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
   }
 
-  // @TODO: remove
-  console.log(`--@@authorizedTransforms`, authorizedTransforms);
   const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
   const esReferences = so.attributes.installed_es ?? [];
 
