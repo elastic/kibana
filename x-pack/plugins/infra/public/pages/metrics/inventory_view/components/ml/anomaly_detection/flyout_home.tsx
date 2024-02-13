@@ -17,8 +17,9 @@ import moment from 'moment';
 import { EuiTabs } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
+import { LicensePromptTrial, useLinkProps } from '@kbn/observability-shared-plugin/public';
+// TODO
+// import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
   MissingResultsPrivilegesPrompt,
@@ -79,7 +80,30 @@ export const FlyoutHome = (props: Props) => {
   });
 
   if (!hasInfraMLCapabilities) {
-    return <SubscriptionSplashPrompt />;
+    return (
+      <>
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                defaultMessage="Machine Learning anomaly detection"
+                id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiSpacer size="l" />
+          <LicensePromptTrial
+            text={i18n.translate('xpack.infra.ml.anomalyFlyout.licensePrompt', {
+              defaultMessage:
+                "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your infrastructure with the aid of machine learning.",
+            })}
+            data-test-subj="infraLicensePromptStartTrialButton"
+          />
+        </EuiFlyoutBody>
+      </>
+    );
   } else if (!hasInfraMLReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
   } else if (hostSetupStatus.type === 'initializing' || k8sSetupStatus.type === 'initializing') {
@@ -108,14 +132,16 @@ export const FlyoutHome = (props: Props) => {
 
         <EuiTabs>
           <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
-            Jobs
+            {i18n.translate('xpack.infra.flyoutHome.jobsTabLabel', { defaultMessage: 'Jobs' })}
           </EuiTab>
           <EuiTab
             isSelected={tab === 'anomalies'}
             onClick={() => setTab('anomalies')}
             data-test-subj="anomalyFlyoutAnomaliesTab"
           >
-            Anomalies
+            {i18n.translate('xpack.infra.flyoutHome.anomaliesTabLabel', {
+              defaultMessage: 'Anomalies',
+            })}
           </EuiTab>
         </EuiTabs>
 
@@ -157,7 +183,11 @@ export const FlyoutHome = (props: Props) => {
                 </>
               )}
               <EuiText>
-                <h4>Create ML Jobs</h4>
+                <h4>
+                  {i18n.translate('xpack.infra.flyoutHome.createMLJobsLabel', {
+                    defaultMessage: 'Create ML Jobs',
+                  })}
+                </h4>
                 <p>
                   <FormattedMessage
                     defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
