@@ -208,7 +208,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
-    // TODO:PT Refactor internal/external state into the `useWithArtifactSucmitData()` hook
+    // TODO:PT Refactor internal/external state into the `useWithArtifactSubmitData()` hook
     const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
       IHttpFetchError | undefined
@@ -350,6 +350,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             cancelButton={cancelButton}
             onSuccess={confirmModalOnSuccess}
             onCancel={() => setShowConfirmModal(false)}
+            data-test-subj="artifactConfirmModal"
           />
         );
       }
