@@ -179,13 +179,26 @@ async function validateOutputServerless(
   // API integration tests have been flaky due to the request to get the default
   // output, this function adds retry logic.
   async function attempt(nAttempts: number) {
+    const logger = appContextService.getLogger();
     try {
       return await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         if (nAttempts > 0) {
-          setTimeout(async () => await attempt(nAttempts - 1), 1000);
+          logger.warn(
+            `----> Retrying retrieving output id ${SERVERLESS_DEFAULT_OUTPUT_ID} from saved objects (${
+              4 - nAttempts
+            }/3)`
+          );
+          await new Promise((r) => setTimeout(r, 1000));
+          await attempt(nAttempts - 1);
         } else {
+          const res = await outputService.list(soClient);
+          logger.warn(
+            `----> Could not retrieve output id ${SERVERLESS_DEFAULT_OUTPUT_ID} from saved objects; found: ${res.items.map(
+              (o) => [o.id, o.hosts]
+            )}`
+          );
           throw Boom.badRequest(
             `Output id ${SERVERLESS_DEFAULT_OUTPUT_ID} not found in saved objects: ${e.message}`
           );
