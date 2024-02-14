@@ -661,15 +661,15 @@ describe('validation logic', () => {
 
   describe('keep', () => {
     testErrorsAndWarnings('from index | keep ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`,
+      `SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found \"<EOF>\"`,
     ]);
     testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | keep `stringField`, `numberField`, `dateField`', []);
     testErrorsAndWarnings('from index | keep 4.5', [
       "SyntaxError: token recognition error at: '4'",
       "SyntaxError: token recognition error at: '5'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '.'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "."',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
@@ -704,18 +704,27 @@ describe('validation logic', () => {
         'Field [unsupported_field] cannot be retrieved, it is unsupported or not indexed; returning null',
       ]
     );
+
+    testErrorsAndWarnings(
+      `FROM index | STATS ROUND(AVG(numberField * 1.5)), COUNT(*), MIN(numberField * 10) | KEEP \`MIN(numberField * 10)\``,
+      []
+    );
+    testErrorsAndWarnings(
+      `FROM index | STATS COUNT(*), MIN(numberField * 10), MAX(numberField)| KEEP \`COUNT(*)\``,
+      []
+    );
   });
 
   describe('drop', () => {
     testErrorsAndWarnings('from index | drop ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`,
+      `SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found \"<EOF>\"`,
     ]);
     testErrorsAndWarnings('from index | drop stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | drop 4.5', [
       "SyntaxError: token recognition error at: '4'",
       "SyntaxError: token recognition error at: '5'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '.'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "."',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
@@ -744,6 +753,14 @@ describe('validation logic', () => {
       [],
       ['Drop [@timestamp] will remove all time filters to the search results']
     );
+    testErrorsAndWarnings(
+      `FROM index | STATS ROUND(AVG(numberField * 1.5)), COUNT(*), MIN(numberField * 10) | DROP \`MIN(numberField * 10)\``,
+      []
+    );
+    testErrorsAndWarnings(
+      `FROM index | STATS COUNT(*), MIN(numberField * 10), MAX(numberField)| DROP \`COUNT(*)\``,
+      []
+    );
   });
 
   describe('mv_expand', () => {
@@ -766,21 +783,21 @@ describe('validation logic', () => {
   });
 
   describe('rename', () => {
-    testErrorsAndWarnings('from a_index | rename', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+    testErrorsAndWarnings('from a_index |rename', [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a_index | rename stringField', [
-      'SyntaxError: expected {DOT, AS} but found "<EOF>"',
+    testErrorsAndWarnings('from a_index |rename stringField', [
+      'SyntaxError: expected {DOT, QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN, AS} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a_index | rename a', [
-      'SyntaxError: expected {DOT, AS} but found "<EOF>"',
+    testErrorsAndWarnings('from a_index |rename a', [
+      'SyntaxError: expected {DOT, QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN, AS} but found "<EOF>"',
       'Unknown column [a]',
     ]);
-    testErrorsAndWarnings('from a_index | rename stringField as', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+    testErrorsAndWarnings('from a_index |rename stringField as', [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a_index | rename missingField as', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+    testErrorsAndWarnings('from a_index |rename missingField as', [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from a_index | rename stringField as b', []);
@@ -801,8 +818,8 @@ describe('validation logic', () => {
       'from a_index | stats avg(numberField) | rename `avg(numberField)` as avg0',
       []
     );
-    testErrorsAndWarnings('from a_index | eval numberField + 1 | rename `numberField + 1` as ', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+    testErrorsAndWarnings('from a_index |eval numberField + 1 | rename `numberField + 1` as ', [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a_index | rename s* as strings', [
       'Using wildcards (*) in RENAME is not allowed [s*]',
@@ -1875,6 +1892,12 @@ describe('validation logic', () => {
         }
       }
     }
+    testErrorsAndWarnings(
+      `FROM index
+    | EVAL numberField * 3.281
+    | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
+      []
+    );
   });
 
   describe('sort', () => {
@@ -1906,6 +1929,8 @@ describe('validation logic', () => {
         `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
       ]);
     }
+    testErrorsAndWarnings(`row a = 1 | stats COUNT(*) | sort \`COUNT(*)\``, []);
+    testErrorsAndWarnings(`ROW a = 1 | STATS couNt(*) | SORT \`couNt(*)\``, []);
   });
 
   describe('enrich', () => {
@@ -1954,11 +1979,11 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a_index | enrich _unknown:policy`, [
       'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-    testErrorsAndWarnings(`from a_index | enrich missing-policy `, [
+    testErrorsAndWarnings(`from a_index |enrich missing-policy `, [
       'Unknown policy [missing-policy]',
     ]);
-    testErrorsAndWarnings(`from a_index | enrich policy on `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+    testErrorsAndWarnings(`from a_index |enrich policy on `, [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a_index | enrich policy on b `, ['Unknown column [b]']);
     testErrorsAndWarnings(`from a_index | enrich policy on stringField with `, [
@@ -1967,8 +1992,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 `, [
       'Unknown column [var0]',
     ]);
-    testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 = `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+    testErrorsAndWarnings(`from a_index |enrich policy on numberField with var0 = `, [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 = c `, [
@@ -1979,8 +2004,8 @@ describe('validation logic', () => {
     // testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 = stringField `, [
     //   `Unknown column [stringField]`,
     // ]);
-    testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 = , `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at ','",
+    testErrorsAndWarnings(`from a_index |enrich policy on numberField with var0 = , `, [
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found ","',
       'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [var0]',
     ]);
@@ -1997,9 +2022,9 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(
-      `from a_index | enrich policy on stringField with var0 = otherField, var1 = `,
+      `from a_index |enrich policy on numberField with var0 = otherField, var1 = `,
       [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
+        'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
         'Unknown column [var1]',
       ]
     );
