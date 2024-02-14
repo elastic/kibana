@@ -9,7 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -270,11 +277,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             newField: 20,
           },
         });
-        await PageObjects.common.sleep(500);
         await PageObjects.lens.waitForField('oldField');
         await queryBar.setQuery('oldField: 20');
         await queryBar.submitQuery();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.lens.waitForField('newField');
       });
     });

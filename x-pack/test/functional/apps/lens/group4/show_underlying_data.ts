@@ -8,7 +8,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'discover']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
@@ -16,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176828
-  describe.skip('show underlying data', () => {
+  describe('show underlying data', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -155,6 +161,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
