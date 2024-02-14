@@ -76,7 +76,8 @@ export const nextActionMap = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
-  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
+  hashToVersionMap: Record<string, string>
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -95,6 +96,7 @@ export const nextActionMap = (
         sourceIndex: sourceIndex.value,
         sourceMappings: sourceIndexMappings.value,
         targetMappings: targetIndexMappings,
+        hashToVersionMap,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -208,6 +210,7 @@ export const nextActionMap = (
       Actions.checkTargetMappings({
         actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
+        hashToVersionMap,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({
@@ -312,14 +315,16 @@ export const next = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
-  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
+  hashToVersionMap: Record<string, string>
 ) => {
   const map = nextActionMap(
     client,
     transformRawDocs,
     readyToReindex,
     doneReindexing,
-    updateRelocationAliases
+    updateRelocationAliases,
+    hashToVersionMap
   );
   return (state: State) => {
     const delay = createDelayFn(state);

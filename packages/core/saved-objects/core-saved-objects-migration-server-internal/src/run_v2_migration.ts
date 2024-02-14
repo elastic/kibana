@@ -45,6 +45,8 @@ export interface RunV2MigrationOpts {
   typeRegistry: ISavedObjectTypeRegistry;
   /** The map of indices => types to use as a default / baseline state */
   defaultIndexTypesMap: IndexTypesMap;
+  /** A map that holds [last md5 used => modelVersion] for each of the SO types */
+  hashToVersionMap: Record<string, string>;
   /** Logger to use for migration output */
   logger: Logger;
   /** The document migrator to use to convert the document */
@@ -139,6 +141,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           kibanaVersion: options.kibanaVersion,
           mustRelocateDocuments,
           indexTypesMap,
+          hashToVersionMap: options.hashToVersionMap,
           waitForMigrationCompletion: options.waitForMigrationCompletion,
           targetIndexMappings: buildActiveMappings(
             indexMap[indexName]?.typeMappings ?? {}, // a migrator's index might no longer have any associated types to it,

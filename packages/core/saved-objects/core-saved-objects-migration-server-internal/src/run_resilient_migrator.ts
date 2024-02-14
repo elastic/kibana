@@ -51,6 +51,7 @@ export interface RunResilientMigratorParams {
   mustRelocateDocuments: boolean;
   indexTypesMap: IndexTypesMap;
   targetIndexMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
   preMigrationScript?: string;
   readyToReindex: WaitGroup<void>;
   doneReindexing: WaitGroup<void>;
@@ -78,6 +79,7 @@ export async function runResilientMigrator({
   mustRelocateDocuments,
   indexTypesMap,
   targetIndexMappings,
+  hashToVersionMap,
   logger,
   preMigrationScript,
   readyToReindex,
@@ -117,7 +119,8 @@ export async function runResilientMigrator({
       transformRawDocs,
       readyToReindex,
       doneReindexing,
-      updateRelocationAliases
+      updateRelocationAliases,
+      hashToVersionMap
     ),
     model,
     abort: async (state?: State) => {

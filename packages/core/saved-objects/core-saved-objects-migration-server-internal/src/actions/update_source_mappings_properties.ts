@@ -22,6 +22,7 @@ export interface UpdateSourceMappingsPropertiesParams {
   sourceIndex: string;
   sourceMappings: IndexMapping;
   targetMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
 }
 
 /**
@@ -33,12 +34,13 @@ export const updateSourceMappingsProperties = ({
   sourceIndex,
   sourceMappings,
   targetMappings,
+  hashToVersionMap,
 }: UpdateSourceMappingsPropertiesParams): TaskEither.TaskEither<
   RetryableEsClientError | IncompatibleMappingException,
   'update_mappings_succeeded'
 > => {
   return pipe(
-    diffMappings(sourceMappings, targetMappings),
+    diffMappings(sourceMappings, targetMappings, hashToVersionMap),
     TaskEither.fromPredicate(
       (changes) => !!changes,
       () => 'update_mappings_succeeded' as const

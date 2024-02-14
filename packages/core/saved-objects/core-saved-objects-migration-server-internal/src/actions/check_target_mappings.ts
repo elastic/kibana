@@ -15,6 +15,7 @@ import { getUpdatedTypes } from '../core/build_active_mappings';
 export interface CheckTargetMappingsParams {
   actualMappings?: IndexMapping;
   expectedMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
 }
 
 /** @internal */
@@ -35,6 +36,7 @@ export const checkTargetMappings =
   ({
     actualMappings,
     expectedMappings,
+    hashToVersionMap,
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
     ActualMappingsIncomplete | ComparedMappingsChanged,
     ComparedMappingsMatch
@@ -50,6 +52,7 @@ export const checkTargetMappings =
     const updatedTypes = getUpdatedTypes({
       actual: actualMappings,
       expected: expectedMappings,
+      hashToVersionMap,
     });
 
     if (updatedTypes.length) {

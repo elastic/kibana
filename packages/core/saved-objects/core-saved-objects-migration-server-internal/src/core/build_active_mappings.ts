@@ -16,7 +16,6 @@ import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import * as HASH_TO_VERSION_MAP from './hash_to_version_map.json';
 
 /**
  * Creates an index mapping with the core properties required by saved object
@@ -45,7 +44,11 @@ export function buildActiveMappings(
  * match our expectations, we don't require a migration. This allows ES to tack on additional mappings that Kibana
  * doesn't know about or expect, without triggering continual migrations.
  */
-export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
+export function diffMappings(
+  actual: IndexMapping,
+  expected: IndexMapping,
+  hashToVersionMap: Record<string, string>
+) {
   if (actual.dynamic !== expected.dynamic) {
     return { changedProp: 'dynamic' };
   }
@@ -56,7 +59,8 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
 
   const changedProp = findChangedProp(
     actual._meta.migrationMappingPropertyHashes,
-    expected._meta!.migrationMappingPropertyHashes
+    expected._meta!.migrationMappingPropertyHashes,
+    hashToVersionMap
   );
 
   return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
@@ -69,9 +73,11 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
 export const getUpdatedTypes = ({
   actual,
   expected,
+  hashToVersionMap,
 }: {
   actual: IndexMapping;
   expected: IndexMapping;
+  hashToVersionMap: Record<string, string>;
 }): string[] => {
   if (!actual._meta?.migrationMappingPropertyHashes) {
     return Object.keys(expected._meta!.migrationMappingPropertyHashes!);
@@ -79,14 +85,21 @@ export const getUpdatedTypes = ({
 
   const updatedTypes = Object.keys(expected._meta!.migrationMappingPropertyHashes!).filter(
     (type) => {
-      const actualHashOrVersion = actual._meta!.migrationMappingPropertyHashes![type];
-      const expectedVersion = expected._meta!.migrationMappingPropertyHashes![type];
-      return isTypeUpdated(type, actualHashOrVersion, expectedVersion);
+      const indexHashOrVersion = actual._meta!.migrationMappingPropertyHashes![type];
+      const appVersion = expected._meta!.migrationMappingPropertyHashes![type];
+      return isTypeUpdated({ type, indexHashOrVersion, appVersion, hashToVersionMap });
     }
   );
 
   return updatedTypes;
 };
+
+interface HashToVersionMapParams {
+  type: string;
+  indexHashOrVersion: string;
+  appVersion: string;
+  hashToVersionMap: Record<string, string>;
+}
 
 /**
  *
@@ -95,19 +108,28 @@ export const getUpdatedTypes = ({
  * @param appVersion The expected "level" of the saved object, according to the current Kibana version
  * @returns True if the type has changed since Kibana was last started
  */
-function isTypeUpdated(type: string, indexHashOrVersion: string, appVersion: string): boolean {
-  const indexEquivalentVersion = (HASH_TO_VERSION_MAP as Record<string, string>)[
-    `${type}|${indexHashOrVersion}`
-  ];
-
+function isTypeUpdated({
+  type,
+  indexHashOrVersion,
+  appVersion,
+  hashToVersionMap,
+}: HashToVersionMapParams): boolean {
+  const indexEquivalentVersion = hashToVersionMap[`${type}|${indexHashOrVersion}`];
   return indexHashOrVersion !== appVersion && indexEquivalentVersion !== appVersion;
 }
 
 // If something exists in actual, but is missing in expected, we don't
 // care, as it could be a disabled plugin, etc, and keeping stale stuff
 // around is better than migrating unecessesarily.
-function findChangedProp(actual: any, expected: any) {
-  return Object.keys(expected).find((type) => isTypeUpdated(type, actual[type], expected[type]));
+function findChangedProp(actual: any, expected: any, hashToVersionMap: Record<string, string>) {
+  return Object.keys(expected).find((type) =>
+    isTypeUpdated({
+      type,
+      indexHashOrVersion: actual[type],
+      appVersion: expected[type],
+      hashToVersionMap,
+    })
+  );
 }
 
 /**
