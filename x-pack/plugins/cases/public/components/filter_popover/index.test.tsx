@@ -15,6 +15,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { FilterPopover } from '.';
 
 // FLAKY: https://github.com/elastic/kibana/issues/176679
+// FLAKY: https://github.com/elastic/kibana/issues/176680
 describe.skip('FilterPopover ', () => {
   let appMockRender: AppMockRenderer;
   const onSelectedOptionsChanged = jest.fn();
