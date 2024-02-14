@@ -49,30 +49,35 @@ export function useCreateSlo() {
 
         const sloEditUrl = http.basePath.prepend(paths.observability.sloEdit(data.id));
 
-        toasts.addSuccess({
-          title: toMountPoint(
-            <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
-              <FormattedMessage
-                id={'xpack.observability.slo.create.successNotification'}
-                defaultMessage={'Successfully created {name}.\n {editSLO}'}
-                values={{
-                  name: slo.name,
-                  editSLO: (
-                    <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
-                      {i18n.translate('xpack.observability.useCreateSlo.editSLOLinkLabel', {
-                        defaultMessage: 'Edit SLO',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </RedirectAppLinks>,
-            {
-              i18n: i18nStart,
-              theme,
-            }
-          ),
-        });
+        toasts.addSuccess(
+          {
+            title: toMountPoint(
+              <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
+                <FormattedMessage
+                  id={'xpack.observability.slo.create.successNotification'}
+                  defaultMessage={'Successfully created {name}.\n {editSLO}'}
+                  values={{
+                    name: slo.name,
+                    editSLO: (
+                      <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
+                        {i18n.translate('xpack.observability.useCreateSlo.editSLOLinkLabel', {
+                          defaultMessage: 'Edit SLO',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </RedirectAppLinks>,
+              {
+                i18n: i18nStart,
+                theme,
+              }
+            ),
+          },
+          {
+            toastLifeTimeMs: 30000,
+          }
+        );
       },
       onError: (error, { slo }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
