@@ -6,11 +6,9 @@
  */
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import {
-  allowedExperimentalValues,
-  type ExperimentalFeatures,
-} from '@kbn/security-solution-plugin/common';
-import { AlertSuppressionCamel } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { allowedExperimentalValues } from '../../../../../common';
+import { type ExperimentalFeatures } from '../../../../../common';
+import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface IsAlertSuppressionActiveParams {
   licensing: LicensingPluginSetup;
