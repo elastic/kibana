@@ -113,7 +113,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,kibana_sample_data_flights');
-        await common.clearAllToasts();
         await dashboard.clearUnsavedChanges();
       });
 
