@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     }
 
-    describe.only(`update field list test`, () => {
+    describe(`update field list test`, () => {
       before(async () => {
         await es.transport.request({
           path: '/field-update-test/_doc',

@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the open button for a compatible saved visualization with a lucene query', async () => {
-      // Make the breakdown dimention contribute to filters again
+      // Make the breakdown dimension contribute to filters again
       await PageObjects.lens.openDimensionEditor(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
       );
@@ -162,7 +162,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
