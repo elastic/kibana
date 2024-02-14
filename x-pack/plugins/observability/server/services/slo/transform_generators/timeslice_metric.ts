@@ -15,7 +15,7 @@ import {
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { getElastichsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
+import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -61,7 +61,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
                 },
               },
             },
-            getElastichsearchQueryOrThrow(indicator.params.filter),
+            getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },
       },

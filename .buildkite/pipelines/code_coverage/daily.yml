@@ -25,5 +25,5 @@ steps:
     depends_on:
       - jest
       - jest-integration
-    timeout_in_minutes: 30
+    timeout_in_minutes: 50
     key: ingest

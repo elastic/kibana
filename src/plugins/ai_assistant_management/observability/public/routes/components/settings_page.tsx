@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { useAppContext } from '../../hooks/use_app_context';
@@ -15,10 +15,12 @@ import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 import type { TabsRt } from '../config';
+import { SearchConnectorTab } from './search_connector_tab';
 export function SettingsPage() {
   const {
     application: { navigateToApp },
     serverless,
+    enterpriseSearch,
     setBreadcrumbs,
   } = useAppContext();
 
@@ -60,7 +62,7 @@ export function SettingsPage() {
     }
   }, [navigateToApp, serverless, setBreadcrumbs]);
 
-  const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element }> = [
+  const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element; disabled?: boolean }> = [
     {
       id: 'settings',
       name: i18n.translate('aiAssistantManagementObservability.settingsPage.settingsLabel', {
@@ -75,16 +77,20 @@ export function SettingsPage() {
       }),
       content: <KnowledgeBaseTab />,
     },
+    {
+      id: 'search_connector',
+      name: i18n.translate('aiAssistantManagementObservability.settingsPage.searchConnector', {
+        defaultMessage: 'Search Connectors',
+      }),
+      content: <SearchConnectorTab />,
+      disabled: enterpriseSearch == null,
+    },
   ];
 
-  const [selectedTabId, setSelectedTabId] = useState<TabsRt>(
-    tab ? tabs.find((t) => t.id === tab)?.id : tabs[0].id
-  );
-
+  const selectedTabId = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
 
   const onSelectedTabChanged = (id: TabsRt) => {
-    setSelectedTabId(id);
     router.push('/', { path: '/', query: { tab: id } });
   };
 
@@ -101,16 +107,18 @@ export function SettingsPage() {
       <EuiSpacer size="m" />
 
       <EuiTabs data-test-subj="settingsPageTabs">
-        {tabs.map((t, index) => (
-          <EuiTab
-            key={index}
-            data-test-subj={`settingsPageTab-${t.id}`}
-            onClick={() => onSelectedTabChanged(t.id)}
-            isSelected={t.id === selectedTabId}
-          >
-            {t.name}
-          </EuiTab>
-        ))}
+        {tabs
+          .filter((t) => !t.disabled)
+          .map((t, index) => (
+            <EuiTab
+              key={index}
+              data-test-subj={`settingsPageTab-${t.id}`}
+              onClick={() => onSelectedTabChanged(t.id)}
+              isSelected={t.id === selectedTabId}
+            >
+              {t.name}
+            </EuiTab>
+          ))}
       </EuiTabs>
 
       <EuiSpacer size="l" />
