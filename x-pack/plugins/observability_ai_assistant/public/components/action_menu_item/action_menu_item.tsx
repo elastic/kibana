@@ -47,15 +47,15 @@ export function ObservabilityAIAssistantActionMenuItem() {
     };
   }, []);
 
-  const time = plugins.start.data.query.timefilter.timefilter.getTime();
+  const { from, to } = plugins.start.data.query.timefilter.timefilter.getTime();
   useEffect(() => {
-    const start = datemath.parse(time.from)?.format();
-    const end = datemath.parse(time.to)?.format();
+    const start = datemath.parse(from)?.format();
+    const end = datemath.parse(to)?.format();
 
     return service.setScreenContext({
       screenDescription: `The user is looking at ${window.location.href}. The current time range is ${start} - ${end}.`,
     });
-  }, [service, time]);
+  }, [service, from, to]);
 
   if (!service.isEnabled()) {
     return null;
