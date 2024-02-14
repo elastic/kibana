@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
@@ -113,17 +114,29 @@ export const Chat = () => {
           grow={2}
           css={{
             borderRight: euiTheme.border.thin,
-            padding: euiTheme.size.l,
+            paddingTop: euiTheme.size.l,
+            paddingBottom: euiTheme.size.l,
           }}
         >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column" className="eui-fullHeight">
+            {/*// Set scroll at the border of parent element*/}
+            <EuiFlexItem
+              grow={1}
+              className="eui-yScroll"
+              css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
+              tabIndex={0}
+            >
               <MessageList messages={chatMessages} />
             </EuiFlexItem>
 
-            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem
+              grow={false}
+              css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
+            >
+              <EuiHorizontalRule margin="none" />
 
-            <EuiFlexItem grow={false}>
+              <EuiSpacer size="m" />
+
               <Controller
                 name={ChatFormFields.question}
                 control={control}
