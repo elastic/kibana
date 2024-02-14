@@ -32,6 +32,12 @@ describe('SettingsTab', () => {
           ],
           selectConnector: selectConnectorMock,
         }),
+        useUserPreferredLanguage: () => ({
+          LANGUAGE_OPTIONS: [{ label: 'English' }],
+          selectedLanguage: 'English',
+          selectLanguage: () => {},
+          getPreferredLanguage: () => 'English',
+        }),
       },
     });
   });
