@@ -46,7 +46,8 @@ import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
-import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common/model';
+import type { AuthenticatedUser } from '../../../../common';
+import type { ApiKey, RestApiKey } from '../../../../common/model';
 import type { QueryApiKeyResult } from '../../../../server/routes/api_keys';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
@@ -95,7 +96,7 @@ const useAsyncTable = (): UseAsyncTableResult => {
 
   useEffect(() => {
     fetchApiKeys();
-  }, [query, from, pageSize]);
+  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     state,
@@ -946,7 +947,6 @@ interface AggregationResponse<V> {
   sum_other_doc_count: number;
 }
 export interface ApiKeyAggregations {
-  invalidated: AggregationResponse<any>;
   usernames: AggregationResponse<string>;
   types: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
   expired: { doc_count: number };
