@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useMemo } from 'react';
 
 export interface UseComparisonFieldsProps {
-  dataView: DataView;
+  dataView?: DataView;
   selectedFieldNames: string[];
   showAllFields: boolean;
 }
@@ -24,11 +24,11 @@ export const useComparisonFields = ({
     let fields: string[] = [];
 
     if (showAllFields) {
-      if (dataView.timeFieldName) {
+      if (dataView?.timeFieldName) {
         fields.push(dataView.timeFieldName);
       }
 
-      dataView.fields
+      dataView?.fields
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
         .forEach((field) => {
           if (field.name !== dataView.timeFieldName) {
@@ -40,7 +40,7 @@ export const useComparisonFields = ({
     }
 
     return fields;
-  }, [dataView.fields, dataView.timeFieldName, selectedFieldNames, showAllFields]);
+  }, [dataView?.fields, dataView?.timeFieldName, selectedFieldNames, showAllFields]);
 
   return comparisonFields;
 };

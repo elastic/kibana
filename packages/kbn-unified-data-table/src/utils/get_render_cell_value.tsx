@@ -127,8 +127,9 @@ export const getRenderCellValueFn = ({
         closePopover,
       });
     }
+    console.log({ row, useTopLevelObjectColumns, columnId });
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (field?.type === '_source' || useTopLevelObjectColumns || columnId === '_source') {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}

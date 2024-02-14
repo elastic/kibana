@@ -239,7 +239,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         }
       });
       setImportText(value);
-
       setImportConverted(values);
     },
     [setImportText, setImportConverted]
@@ -330,16 +329,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               defaultMessage: 'Discover - Search not yet saved',
             })}
       </h1>
-      <TopNavMemoized
-        savedQuery={savedQuery}
-        stateContainer={stateContainer}
-        updateQuery={stateContainer.actions.onUpdateQuery}
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
-        onFieldEdited={onFieldEdited}
-        isLoading={isLoading}
-        onCancelClick={onCancelClick}
-      />
+      {dataView && (
+        <TopNavMemoized
+          savedQuery={savedQuery}
+          stateContainer={stateContainer}
+          updateQuery={stateContainer.actions.onUpdateQuery}
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          textBasedLanguageModeWarning={textBasedLanguageModeWarning}
+          onFieldEdited={onFieldEdited}
+          isLoading={isLoading}
+          onCancelClick={onCancelClick}
+        />
+      )}
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <div
           ref={setSidebarContainer}
@@ -398,13 +399,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                     <EuiModalFooter>
                       <EuiButton
                         onClick={() => {
+                          stateContainer.actions.setDataView(undefined);
                           stateContainer.dataState.data$.documents$.next({
                             fetchStatus: FetchStatus.LOADING,
+                          });
+                          stateContainer.dataState.data$.totalHits$.next({
+                            fetchStatus: FetchStatus.COMPLETE,
+                            result: importConverted.length,
                           });
                           stateContainer.dataState.data$.documents$.next({
                             fetchStatus: FetchStatus.COMPLETE,
                             result: (importConverted || []).map((v, index) => ({
-                              id: index,
+                              id: String(index),
                               raw: typeof v === 'object' ? v : { message: v },
                               flattened: typeof v === 'object' ? v : { message: v },
                             })),

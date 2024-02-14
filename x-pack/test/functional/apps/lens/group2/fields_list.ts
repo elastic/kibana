@@ -267,12 +267,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           method: 'POST',
           body: {
             '@timestamp': new Date().toISOString(),
-            oldField: 10,
+            oldField: 20,
             newField: 20,
           },
         });
         await PageObjects.lens.waitForField('oldField');
-        await queryBar.setQuery('oldField: 10');
+        await queryBar.setQuery('oldField: 20');
         await queryBar.submitQuery();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.waitForField('newField');

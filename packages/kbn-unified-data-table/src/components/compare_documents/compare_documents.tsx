@@ -88,6 +88,7 @@ const CompareDocuments = ({
     getDocById,
     setSelectedDocs,
   });
+  console.log({ comparisonFields, comparisonColumns });
   const comparisonColumnVisibility: EuiDataGridColumnVisibility = useMemo(
     () => ({
       visibleColumns: comparisonColumns.map(({ id }) => id),

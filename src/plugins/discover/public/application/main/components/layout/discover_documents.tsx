@@ -127,29 +127,19 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [
-    query,
-    sort,
-    rowHeight,
-    headerRowHeight,
-    rowsPerPage,
-    grid,
-    columns,
-    index,
-    sampleSizeState,
-  ] = useAppStateSelector((state) => {
-    return [
-      state.query,
-      state.sort,
-      state.rowHeight,
-      state.headerRowHeight,
-      state.rowsPerPage,
-      state.grid,
-      state.columns,
-      state.index,
-      state.sampleSize,
-    ];
-  });
+  const [query, sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState] =
+    useAppStateSelector((state) => {
+      return [
+        state.query,
+        state.sort,
+        state.rowHeight,
+        state.headerRowHeight,
+        state.rowsPerPage,
+        state.grid,
+        state.columns,
+        state.sampleSize,
+      ];
+    });
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -177,7 +167,6 @@ function DiscoverDocumentsComponent({
   // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
-  const isDataViewLoading = !isTextBasedQuery && dataView?.id && index !== dataView.id;
   const isEmptyDataResult =
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => {
@@ -362,7 +351,7 @@ function DiscoverDocumentsComponent({
     [search, setSearch, viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
-  if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
+  if (isEmptyDataResult && isDataLoading) {
     return (
       <div className="dscDocuments__loading">
         <EuiText size="xs" color="subdued">

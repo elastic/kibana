@@ -55,6 +55,7 @@ export function SourceDocument({
         maxEntries
       )
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+  console.log(pairs);
 
   return (
     <EuiDescriptionList
@@ -93,11 +94,13 @@ function getTopLevelObjectPairs(
   dataView?: DataView,
   shouldShowFieldHandler?: ShouldShowFieldInTableHandler
 ) {
+  console.log(row);
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
+  console.log(sourcePairs);
   Object.entries(innerColumns).forEach(([key, values]) => {
     const subField = dataView?.getFieldByName(key);
     const displayKey = dataView?.fields.getByName

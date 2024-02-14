@@ -29,7 +29,7 @@ import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
 
 export interface UseComparisonCellValueProps {
-  dataView: DataView;
+  dataView?: DataView;
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocs: string[];
@@ -180,7 +180,7 @@ const InnerCellValue = ({
   setCellProps,
 }: InnerCellValueProps) => {
   const fieldName = comparisonFields[rowIndex];
-  const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
+  const field = useMemo(() => dataView?.fields.getByName(fieldName), [dataView?.fields, fieldName]);
   const doc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
   const base = comparisonBaseDoc?.[fieldName];
   const comparison = doc?.flattened[fieldName];
@@ -233,7 +233,7 @@ const InnerCellValue = ({
             doc.raw,
             fieldFormats,
             dataView,
-            dataView.getFieldByName(fieldName)
+            dataView?.getFieldByName(fieldName)
           ),
         }}
         css={{ whiteSpace: 'pre-wrap' }}

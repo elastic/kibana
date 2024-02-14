@@ -305,51 +305,50 @@ export const UnifiedHistogramLayout = ({
       : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
-  if (!dataView) {
-    return null;
-  }
 
   return (
     <>
       <InPortal node={topPanelNode}>
-        <ChartMemoized
-          abortController={abortController}
-          isChartAvailable={isChartAvailable}
-          className={chartClassName}
-          services={services}
-          dataView={dataView}
-          query={query}
-          filters={filters}
-          timeRange={timeRange}
-          relativeTimeRange={relativeTimeRange}
-          request={request}
-          hits={hits}
-          currentSuggestion={usedSuggestion}
-          isChartLoading={isChartLoading}
-          allSuggestions={allSuggestions}
-          isPlainRecord={isPlainRecord}
-          chart={chart}
-          breakdown={breakdown}
-          renderCustomChartToggleActions={renderCustomChartToggleActions}
-          appendHistogram={chartSpacer}
-          disableAutoFetching={disableAutoFetching}
-          disableTriggers={disableTriggers}
-          disabledActions={disabledActions}
-          input$={input$}
-          onChartHiddenChange={onChartHiddenChange}
-          onTimeIntervalChange={onTimeIntervalChange}
-          onBreakdownFieldChange={onBreakdownFieldChange}
-          onSuggestionChange={onSuggestionChange}
-          onTotalHitsChange={onTotalHitsChange}
-          onChartLoad={onChartLoad}
-          onFilter={onFilter}
-          onBrushEnd={onBrushEnd}
-          lensAdapters={lensAdapters}
-          lensEmbeddableOutput$={lensEmbeddableOutput$}
-          isOnHistogramMode={isOnHistogramMode}
-          histogramQuery={histogramQuery}
-          withDefaultActions={withDefaultActions}
-        />
+        {dataView && (
+          <ChartMemoized
+            abortController={abortController}
+            isChartAvailable={isChartAvailable}
+            className={chartClassName}
+            services={services}
+            dataView={dataView}
+            query={query}
+            filters={filters}
+            timeRange={timeRange}
+            relativeTimeRange={relativeTimeRange}
+            request={request}
+            hits={hits}
+            currentSuggestion={usedSuggestion}
+            isChartLoading={isChartLoading}
+            allSuggestions={allSuggestions}
+            isPlainRecord={isPlainRecord}
+            chart={chart}
+            breakdown={breakdown}
+            renderCustomChartToggleActions={renderCustomChartToggleActions}
+            appendHistogram={chartSpacer}
+            disableAutoFetching={disableAutoFetching}
+            disableTriggers={disableTriggers}
+            disabledActions={disabledActions}
+            input$={input$}
+            onChartHiddenChange={onChartHiddenChange}
+            onTimeIntervalChange={onTimeIntervalChange}
+            onBreakdownFieldChange={onBreakdownFieldChange}
+            onSuggestionChange={onSuggestionChange}
+            onTotalHitsChange={onTotalHitsChange}
+            onChartLoad={onChartLoad}
+            onFilter={onFilter}
+            onBrushEnd={onBrushEnd}
+            lensAdapters={lensAdapters}
+            lensEmbeddableOutput$={lensEmbeddableOutput$}
+            isOnHistogramMode={isOnHistogramMode}
+            histogramQuery={histogramQuery}
+            withDefaultActions={withDefaultActions}
+          />
+        )}
       </InPortal>
       <InPortal node={mainPanelNode}>
         {React.isValidElement(children)
