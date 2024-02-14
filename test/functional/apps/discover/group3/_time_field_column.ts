@@ -405,7 +405,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['bytes', 'extension']);
+            expect(await docTable.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
 
             // with selected columns and @timestamp
             await PageObjects.discover.loadSavedSearch(
