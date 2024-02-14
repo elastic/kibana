@@ -46,21 +46,20 @@ export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ even
       {eventCategories.length > 0 && (
         <>
           <EuiSpacer size="s" />
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                defaultMessage="Event category"
+                id="xpack.securitySolution.flyout.right.eventCategoryText"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFlexGroup
             responsive={false}
             gutterSize="s"
             data-test-subj={EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID}
           >
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    defaultMessage="Event category: "
-                    id="xpack.securitySolution.flyout.right.eventCategoryText"
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
             {eventCategories.map((category, idx) => (
               <EuiFlexItem grow={false} key={`event-category-${category}`}>
                 <EuiToolTip content={getEcsAllowedValueDescription('event.category', category)}>

@@ -78,7 +78,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab: React.FC = memo(() => {
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
-  const eventKind = getField(getFieldsData('event.kind'));
+  const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
@@ -88,12 +88,12 @@ export const InsightsTab: React.FC = memo(() => {
   // non-alert: entities, prevalence
   const buttonGroup = useMemo(
     () =>
-      eventKind === EventKind.signal
+      isEventKindSignal
         ? insightsButtons
         : insightsButtons.filter(
             (tab) => tab.id === ENTITIES_TAB_ID || tab.id === PREVALENCE_TAB_ID
           ),
-    [eventKind]
+    [isEventKindSignal]
   );
 
   const onChangeCompressed = useCallback(
@@ -118,12 +118,9 @@ export const InsightsTab: React.FC = memo(() => {
     <>
       <EuiButtonGroup
         color="primary"
-        name="coarsness"
         legend={i18n.translate(
           'xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel',
-          {
-            defaultMessage: 'Insights options',
-          }
+          { defaultMessage: 'Insights options' }
         )}
         options={buttonGroup}
         idSelected={activeInsightsId}
@@ -131,6 +128,7 @@ export const InsightsTab: React.FC = memo(() => {
         buttonSize="compressed"
         isFullWidth
         data-test-subj={INSIGHTS_TAB_BUTTON_GROUP_TEST_ID}
+        style={!isEventKindSignal ? { maxWidth: 300 } : undefined}
       />
       <EuiSpacer size="m" />
       {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}

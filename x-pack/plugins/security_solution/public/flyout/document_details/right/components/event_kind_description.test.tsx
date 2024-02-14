@@ -48,9 +48,7 @@ describe('<EventKindDescription />', () => {
         getFieldsData: mockGetFieldsData,
       });
 
-      expect(getByTestId(EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID)).toHaveTextContent(
-        'Event category: behavior'
-      );
+      expect(getByTestId(EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID)).toHaveTextContent('behavior');
     });
 
     it('should render event category for multiple categories', () => {
@@ -66,7 +64,7 @@ describe('<EventKindDescription />', () => {
       });
 
       expect(getByTestId(EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID)).toHaveTextContent(
-        'Event category: session,authentication'
+        'session,authentication'
       );
     });
 
