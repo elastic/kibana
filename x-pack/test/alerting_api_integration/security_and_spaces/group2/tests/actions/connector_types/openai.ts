@@ -258,7 +258,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             .post(`/api/actions/connector/${genAiActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
-              llmType: 'openai',
               params: { subAction: 'invalidAction' },
             })
             .expect(200);
@@ -298,7 +297,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${genAiActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
-                llmType: 'openai',
                 params: {
                   subAction: 'test',
                   subActionParams: {
@@ -327,7 +325,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
                 .auth('global_read', 'global_read-password')
                 .set('kbn-xsrf', 'foo')
                 .send({
-                  llmType: 'openai',
                   params: {
                     subAction: 'getDashboard',
                     subActionParams: {
@@ -406,7 +403,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               .post(`${getUrlPrefix('space1')}/api/actions/connector/${genAiActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
-                llmType: 'openai',
                 params: {
                   subAction: 'getDashboard',
                   subActionParams: {
@@ -477,7 +473,6 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${genAiActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
-                llmType: 'openai',
                 params: {
                   subAction: 'test',
                   subActionParams: {
