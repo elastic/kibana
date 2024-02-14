@@ -16,7 +16,6 @@ import type {
 } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import {
@@ -43,7 +42,6 @@ export interface ObservabilitySharedStart {
   setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
-  observability: ObservabilityPublicPluginsStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;

@@ -15,7 +15,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import {
   AllDatasetsLocatorDefinition,
   ObservabilityLogsExplorerLocators,

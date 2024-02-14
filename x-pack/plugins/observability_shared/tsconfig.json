@@ -41,7 +41,6 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/core-chrome-browser",
-    "@kbn/observability-plugin"
   ],
   "exclude": ["target/**/*"]
 }
