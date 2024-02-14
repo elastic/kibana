@@ -7,7 +7,7 @@
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { isArray, pick, remove } from 'lodash';
-import { filter, lastValueFrom, map, toArray } from 'rxjs';
+import { concatMap, filter, lastValueFrom, map, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
@@ -229,12 +229,13 @@ export class KibanaClient {
           )
         ).data
       ).pipe(
-        map(
-          (line) =>
-            JSON.parse(line) as
-              | ChatCompletionChunkEvent
-              | ChatCompletionErrorEvent
-              | BufferFlushEvent
+        concatMap((buffer: Buffer) =>
+          buffer
+            .toString('utf-8')
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent)
         ),
         filter(
           (line): line is ChatCompletionChunkEvent | ChatCompletionErrorEvent =>
@@ -317,7 +318,14 @@ export class KibanaClient {
             )
           ).data
         ).pipe(
-          map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+          concatMap((buffer: Buffer) =>
+            buffer
+              .toString('utf-8')
+              .split('\n')
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent)
+          ),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
