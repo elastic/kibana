@@ -119,7 +119,6 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     toReturn.createdSignalsCount >= tuple.maxSignals;
 
   // TODO validate warning cases
-  console.log('alertsWereTruncated', alertsWereTruncated);
   return {
     ...bulkCreateResult,
     alertsWereTruncated,

@@ -169,7 +169,6 @@ export const eqlExecutor = async ({
         result.warningMessages.push(getMaxSignalsWarning());
       }
     }
-    console.log(result.warningMessages, 'result.warningMessages');
 
     return result;
   });
