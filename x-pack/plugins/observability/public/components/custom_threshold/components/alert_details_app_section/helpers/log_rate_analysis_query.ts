@@ -7,17 +7,15 @@
 
 import { get } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Aggregators, GroupBy } from '../../../../../../common/custom_threshold_rule/types';
+import { getGroupFilters } from '../../helpers/get_group';
+import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
 import { buildEsQuery } from '../../../../../utils/build_es_query';
 import type { TopAlert } from '../../../../../typings/alerts';
 import type { CustomThresholdRuleTypeParams } from '../../../types';
 import type { CustomThresholdExpressionMetric } from '../../../../../../common/custom_threshold_rule/types';
+import type { Group } from '../../types';
 
-const getKuery = (
-  metrics: CustomThresholdExpressionMetric[],
-  filter?: string,
-  groupBy?: GroupBy
-) => {
+const getKuery = (metrics: CustomThresholdExpressionMetric[], filter?: string) => {
   let query = '';
   const isOneCountConditionWithFilter =
     metrics.length === 1 && metrics[0].aggType === 'count' && metrics[0].filter;
@@ -28,12 +26,6 @@ const getKuery = (
     query = `(${metrics[0].filter!})`;
   } else if (filter) {
     query = `(${filter})`;
-  }
-
-  if (groupBy) {
-    groupBy.forEach(({ field, value }) => {
-      query += ` and ${field}: ${value}`;
-    });
   }
 
   return query;
@@ -52,10 +44,12 @@ export const getLogRateAnalysisEQQuery = (
     return;
   }
 
-  const groupBy: GroupBy | undefined = get(alert, 'fields["kibana.alert.group"]');
+  const group: Group[] | undefined = get(alert, 'fields["kibana.alert.group"]');
   const optionalFilter: string | undefined = get(params.searchConfiguration, 'query.query');
+  const groupByFilters = getGroupFilters(group);
   const boolQuery = buildEsQuery({
-    kuery: getKuery(params.criteria[0].metrics, optionalFilter, groupBy),
+    kuery: getKuery(params.criteria[0].metrics, optionalFilter),
+    filters: groupByFilters,
   });
 
   return boolQuery;
