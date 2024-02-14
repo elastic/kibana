@@ -100,11 +100,13 @@ gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 
 echo "--- Validate CDN assets"
 CDN_DESTINATION="https://kibana-cdn.gcp.qa.cld.elstc.co/$GIT_ABBREV_COMMIT"
-for CDN_ASSET in kibana-8.13.0-SNAPSHOT-cdn-assets/**/*
+cd $CDN_ASSETS_FOLDER
+for CDN_ASSET in "**/*"
 do
-  echo -n "Testing $entry..."
+  echo -n "Testing $CDN_ASSET..."
   curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$CDN_DESTINATION/$CDN_ASSET"
 done
+cd -
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
