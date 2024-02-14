@@ -16,7 +16,6 @@
       "kibanaReact",
       "triggersActionsUi"
     ],
-    "runtimePluginDependencies": [],
     "extraPublicDirs": [
       "public/common"
     ]

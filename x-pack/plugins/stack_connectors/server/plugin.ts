@@ -14,7 +14,6 @@ import {
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { StackConnectorsConfigType } from '../common/types';
-
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }

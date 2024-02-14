@@ -8,10 +8,6 @@
 import { EuiIconProps } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-export interface ObsAIAssistantActionParams {
-  message: string;
-}
-
 export interface EmailActionParams {
   to: string[];
   cc: string[];
