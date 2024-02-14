@@ -225,10 +225,10 @@ export const validateKuery = (
 ) => {
   let isValid = true;
   let error: string | undefined;
-  const { disableKQLValidation } = appContextService.getExperimentalFeatures();
+  const { enableStrictKQLValidation } = appContextService.getExperimentalFeatures();
 
-  // Skip validation when disableKQLValidation is enabled
-  if (disableKQLValidation) {
+  // Skip validation when enableStrictKQLValidation is disabled
+  if (!enableStrictKQLValidation) {
     return { isValid, error };
   }
   if (!kuery) {

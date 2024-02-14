@@ -514,7 +514,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 describe('validateKuery validates real kueries', () => {
   beforeEach(() => {
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-      disableKQLValidation: false,
+      enableStrictKQLValidation: true,
     });
   });
   afterEach(() => {
@@ -845,10 +845,10 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.error).toEqual(`KQLSyntaxError: Invalid key`);
     });
   });
-  describe('Feature flag disableKQLValidation', () => {
+  describe('Feature flag enableStrictKQLValidation', () => {
     beforeEach(() => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        disableKQLValidation: true,
+        enableStrictKQLValidation: false,
       });
     });
 
