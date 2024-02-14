@@ -154,7 +154,7 @@ export const builtinFunctions: FunctionDefinition[] = [
               type: 'warning' as const,
               code: 'moduleByZero',
               text: i18n.translate('monaco.esql.divide.warning.zeroModule', {
-                defaultMessage: 'Module by zero can return null value: {left}/{right}',
+                defaultMessage: 'Module by zero can return null value: {left}%{right}',
                 values: {
                   left: left.text,
                   right: right.value,
