@@ -10,6 +10,8 @@ import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { sortBy, uniqBy } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
@@ -29,6 +31,9 @@ interface FleetTransformMetadata {
   run_as_kibana_system?: boolean;
   transformId: string;
 }
+
+const isErrorResponse = (arg: unknown): arg is ErrorResponseBase =>
+  isPopulatedObject(arg, ['error']);
 
 async function reauthorizeAndStartTransform({
   esClient,
@@ -70,9 +75,10 @@ async function reauthorizeAndStartTransform({
     );
 
     // Transform can already be started even without sufficient permission if 'unattended: true'
-    // So we are just catching that special case, and showcase on the UI
+    // So we are just catching that special case to showcase in the UI
+    // If unattended, calling _start will return a successful response, but with the error message in the body
     if (
-      startedTransform &&
+      isErrorResponse(startedTransform) &&
       startedTransform.status === 409 &&
       Array.isArray(startedTransform.error?.root_cause) &&
       startedTransform.error.root_cause[0]?.reason?.includes('already started')
@@ -109,7 +115,7 @@ export async function handleTransformReauthorizeAndStart({
   if (!secondaryAuth) {
     throw Error(
       'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms. ' +
-      'This could be because security is not enabled, or API key cannot be generated.'
+        'This could be because security is not enabled, or API key cannot be generated.'
     );
   }
 
