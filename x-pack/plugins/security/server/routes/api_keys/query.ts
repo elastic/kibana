@@ -74,19 +74,33 @@ export function defineQueryApiKeysRoute({
         }
 
         const queryResponse = await esClient.asCurrentUser.security.queryApiKeys(request.body);
-        const fullAggResponse = await esClient.asCurrentUser.security.queryApiKeys({
-          size: 0,
-          //@ts-ignore
-          aggs: {
-            usernames: {
-              composite: {
-                sources: [{ username: { terms: { field: 'username' } } }],
+
+        const transportResponse = await esClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '/_security/_query/api_key',
+          body: {
+            size: 0,
+            aggs: {
+              usernames: {
+                terms: {
+                  field: 'username',
+                },
+              },
+              type: {
+                terms: {
+                  field: 'type',
+                },
+              },
+              invalidated: {
+                terms: {
+                  field: 'invalidated',
+                },
               },
             },
           },
         });
 
-        console.log({ fullAggResponse, queryResponse });
+        console.log(JSON.stringify(transportResponse, null, 2));
 
         const validKeys = queryResponse.api_keys.filter(({ invalidated }) => !invalidated);
 
@@ -100,6 +114,85 @@ export function defineQueryApiKeysRoute({
               clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
             canManageApiKeys: clusterPrivileges.manage_api_key,
             canManageOwnApiKeys: clusterPrivileges.manage_own_api_key,
+          },
+        });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
+  );
+  router.post(
+    {
+      path: '/internal/security/api_key/_query_aggs',
+      validate: false,
+      options: {
+        access: 'internal',
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const esClient = (await context.core).elasticsearch.client;
+        const authenticationService = getAuthenticationService();
+
+        const [{ cluster: clusterPrivileges }, areApiKeysEnabled, areCrossClusterApiKeysEnabled] =
+          await Promise.all([
+            esClient.asCurrentUser.security.hasPrivileges({
+              body: {
+                cluster: [
+                  'manage_security',
+                  'read_security',
+                  'manage_api_key',
+                  'manage_own_api_key',
+                ],
+              },
+            }),
+            authenticationService.apiKeys.areAPIKeysEnabled(),
+            authenticationService.apiKeys.areCrossClusterAPIKeysEnabled(),
+          ]);
+
+        if (!areApiKeysEnabled) {
+          return response.notFound({
+            body: {
+              message:
+                "API keys are disabled in Elasticsearch. To use API keys enable 'xpack.security.authc.api_key.enabled' setting.",
+            },
+          });
+        }
+
+        const transportResponse = await esClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '/_security/_query/api_key',
+          body: {
+            size: 0,
+            aggs: {
+              usernames: {
+                terms: {
+                  field: 'username',
+                },
+              },
+              types: {
+                terms: {
+                  field: 'type',
+                },
+              },
+              invalidated: {
+                terms: {
+                  field: 'invalidated',
+                },
+              },
+              expired: {
+                filter: {
+                  range: { expiration: { lte: 'now/m' } },
+                },
+              },
+            },
+          },
+        });
+
+        return response.ok<QueryApiKeyResult>({
+          body: {
+            // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
+            aggregations: transportResponse.aggregations,
           },
         });
       } catch (error) {

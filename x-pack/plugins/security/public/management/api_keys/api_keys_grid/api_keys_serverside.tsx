@@ -118,7 +118,12 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
   const authc = useAuthentication();
 
   const [state, queryApiKeysFn] = useAsyncFn(
-    () => Promise.all([new APIKeysAPIClient(services.http).queryApiKeys(), authc.getCurrentUser()]),
+    () =>
+      Promise.all([
+        new APIKeysAPIClient(services.http).queryApiKeys(),
+        new APIKeysAPIClient(services.http).queryApiKeyAggregations(),
+        authc.getCurrentUser(),
+      ]),
     [services.http]
   );
 
@@ -184,7 +189,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
     );
   }
 
-  const [_, currentUser] = state.value && state.value;
+  const [_, { aggregations }, currentUser] = state.value && state.value;
 
   const pagination = {
     pageIndex: from / pageSize,
@@ -192,7 +197,6 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
     totalItemCount: requestState.total,
     pageSizeOptions: [25, 50, 100],
   };
-
   return (
     <>
       <Route path="/create">
@@ -317,6 +321,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
                 pagination={pagination}
                 onTableChange={onTableChange}
                 onSearchChange={onSearchChange}
+                aggregations={aggregations}
               />
             )}
           </InvalidateProvider>
@@ -405,6 +410,7 @@ export interface ApiKeysTableProps {
   onTableChange: any;
   pagination: any;
   onSearchChange: any;
+  aggregations: ApiKeyAggregations;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -421,15 +427,15 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   onTableChange,
   pagination,
   onSearchChange,
+  aggregations,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
-  const { categorizedApiKeys, typeFilters, usernameFilters, expiredFilters } = useMemo(
-    () => categorizeApiKeys(apiKeys),
-    [apiKeys]
-  );
+  const { typeFilters, usernameFilters, hasInvalidatedFilters, expired } =
+    categorizeAggregations(aggregations);
+  const expiredFilters = [];
 
   const deletable = (item: CategorizedApiKey) =>
     canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
@@ -462,7 +468,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     }
   );
 
-  if (canManageApiKeys || usernameFilters.length > 1) {
+  if (canManageApiKeys || usernameFilters.size > 1) {
     columns.push({
       field: 'username',
       name: (
@@ -542,25 +548,25 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   const filters: SearchFilterConfig[] = [];
 
-  if (typeFilters.length > 1) {
+  if (typeFilters.size > 1) {
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <TypesFilterButton types={typeFilters} query={query} onChange={onChange} />
+        <TypesFilterButton types={[...typeFilters]} query={query} onChange={onChange} />
       ),
     });
   }
 
-  if (usernameFilters.length > 1) {
+  if (usernameFilters.size > 1) {
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <UsersFilterButton usernames={usernameFilters} query={query} onChange={onChange} />
+        <UsersFilterButton usernames={[...usernameFilters]} query={query} onChange={onChange} />
       ),
     });
   }
 
-  if (expiredFilters.length > 1) {
+  if (expired > 0) {
     filters.push({
       type: 'field_value_toggle_group',
       field: 'expired',
@@ -669,7 +675,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       <EuiSpacer />
 
       <EuiBasicTable
-        items={categorizedApiKeys}
+        // @ts-ignore
+        items={apiKeys}
         itemId="id"
         columns={columns}
         loading={loading}
@@ -685,6 +692,42 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         }
         isSelectable={canManageOwnApiKeys}
       />
+    </>
+  );
+};
+
+export interface ExpiredFilterButtonProps {
+  query: Query;
+  onChange?: (query: Query) => void;
+}
+
+export const ExpiredFilterButton: FunctionComponent<ExpiredFilterButtonProps> = ({
+  query,
+  onChange,
+}) => {
+  if (!onChange) {
+    return null;
+  }
+  return (
+    <>
+      <EuiFilterButton
+        iconType="user"
+        iconSide="left"
+        hasActiveFilters={query.hasSimpleFieldClause('type', 'rest')}
+        onClick={() =>
+          onChange(
+            query.hasSimpleFieldClause('type', 'rest')
+              ? query.removeSimpleFieldClauses('type')
+              : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'rest')
+          )
+        }
+        withNext={types.includes('cross_cluster') || types.includes('managed')}
+      >
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.activeFilter"
+          defaultMessage="Active"
+        />
+      </EuiFilterButton>
     </>
   );
 };
@@ -1031,3 +1074,34 @@ export function getApiKeyType(apiKey: ApiKey) {
     ? 'managed'
     : apiKey.type;
 }
+
+interface AggregationResponse<V> {
+  buckets: Array<{ key: V; doc_count: number }>;
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+}
+export interface ApiKeyAggregations {
+  invalidated: AggregationResponse<any>;
+  usernames: AggregationResponse<string>;
+  types: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
+  expired: { doc_count: number };
+}
+
+export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) => {
+  const { invalidated, usernames, types, expired } = aggregationResponse;
+  const typeFilters: Set<CategorizedApiKey['type']> = new Set();
+  const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
+
+  types.buckets.forEach((type) => {
+    typeFilters.add(type.key);
+  });
+  usernames.buckets.forEach((username) => {
+    usernameFilters.add(username.key);
+  });
+  return {
+    hasInvalidatedFilters: invalidated.buckets.length,
+    typeFilters,
+    usernameFilters,
+    expired: expired.doc_count,
+  };
+};

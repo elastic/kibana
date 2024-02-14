@@ -38,6 +38,10 @@ export class APIKeysAPIClient {
     });
   }
 
+  public async queryApiKeyAggregations() {
+    return await this.http.post<any>(`${apiKeysUrl}/_query_aggs`, {});
+  }
+
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
     return await this.http.post<InvalidateApiKeysResponse>(`${apiKeysUrl}/invalidate`, {
       body: JSON.stringify({ apiKeys, isAdmin }),
