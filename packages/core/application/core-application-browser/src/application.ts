@@ -111,7 +111,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
    *
    * @default ['globalSearch', 'sideNav']
-   * unless its status is marked as `inaccessible`.
+   * unless the status is marked as `inaccessible`.
    */
   visibleIn?: AppDeepLinkLocations[];
 
