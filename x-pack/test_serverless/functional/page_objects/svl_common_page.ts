@@ -40,7 +40,18 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       await alert.accept();
     }
     log.debug(`browser: wait for resource page to be loaded`);
-    await find.byCssSelector('body > pre', 5000);
+    // TODO: temporary solution while we don't migrate all functional tests to SAML auth
+    // On CI sometimes we are redirected to cloud login page, in this case we skip cleanup
+    const isOnBootstrap = await find.existsByDisplayedByCssSelector('body > pre', 5000);
+    if (!isOnBootstrap) {
+      const currentUrl = await browser.getCurrentUrl();
+      log.debug(`current url: ${currentUrl}`);
+      if (!currentUrl.includes(deployment.getHostPort())) {
+        log.debug('Skipping browser state cleanup');
+        return;
+      }
+    }
+
     log.debug(`browser: delete all the cookies`);
     await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
       await browser.deleteAllCookies();
