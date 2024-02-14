@@ -43,7 +43,8 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
     documentation: {
       value: buildFunctionDocumentation(fullSignatures),
     },
-    sortText: 'C',
+    // agg functgions have priority over everything else
+    sortText: fn.type === 'agg' ? '1A' : 'C',
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };
@@ -139,7 +140,7 @@ export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandD
     insertText: getSafeInsertText(label, { dashSupported: true }),
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.sourceDefinition', {
-      defaultMessage: `Input table`,
+      defaultMessage: `Index`,
     }),
     sortText: 'A',
   }));
@@ -155,7 +156,7 @@ export const buildConstantsDefinitions = (
     detail:
       detail ??
       i18n.translate('monaco.esql.autocomplete.constantDefinition', {
-        defaultMessage: `User defined variable`,
+        defaultMessage: `Constant`,
       }),
     sortText: 'A',
   }));
@@ -215,7 +216,7 @@ export const buildOptionDefinition = (
     insertText: option.name,
     kind: 21,
     detail: option.description,
-    sortText: 'D',
+    sortText: '1',
   };
   if (isAssignType || option.signature.params.length) {
     completeItem.insertText = isAssignType ? `${option.name} = $0` : `${option.name} $0`;

@@ -42,7 +42,7 @@ import {
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 
-function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
+export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
