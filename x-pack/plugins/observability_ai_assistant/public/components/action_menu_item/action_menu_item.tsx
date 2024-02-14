@@ -51,7 +51,6 @@ export function ObservabilityAIAssistantActionMenuItem() {
   useEffect(() => {
     const start = datemath.parse(time.from)?.format();
     const end = datemath.parse(time.to)?.format();
-    console.log(start, end);
 
     return service.setScreenContext({
       screenDescription: `The user is looking at ${window.location.href}. The current time range is ${start} - ${end}.`,
