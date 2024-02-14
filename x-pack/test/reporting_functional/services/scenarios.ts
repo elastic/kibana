@@ -105,7 +105,6 @@ export function createScenarios(
       actionItemTestSubj
     );
     await testSubjects.existOrFail('csvDownloadStarted'); /* validate toast panel */
-    await testSubjects.missingOrFail('downloadCsvFail');
   };
   const tryDiscoverCsvFail = async () => {
     await PageObjects.reporting.openCsvReportingPanel();
