@@ -16,7 +16,7 @@ import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
-import { MonacoEditor } from './monaco/MonacoEditor';
+import { MonacoEditor } from './monaco/monaco_editor';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
