@@ -179,7 +179,7 @@ export interface SavedObjectsType<Attributes = any> {
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
 
   /**
-   * Allows to opt-in to the new model version API.
+   * Allows to opt-in to the model version API.
    *
    * Must be a valid semver version (with the patch version being necessarily 0)
    *
