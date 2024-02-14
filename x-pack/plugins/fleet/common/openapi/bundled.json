@@ -8309,7 +8309,7 @@
                   "type": "string"
                 },
                 "when": {
-                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
+                  "description": "Deprecated, the Kafka output no longer supports conditional topics.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8824,7 +8824,7 @@
                   "type": "string"
                 },
                 "when": {
-                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
+                  "description": "Deprecated, the Kafka output no longer supports conditional topics.",
                   "type": "object",
                   "properties": {
                     "type": {
