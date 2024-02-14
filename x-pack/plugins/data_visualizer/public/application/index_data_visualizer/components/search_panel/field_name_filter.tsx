@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Option, MultiSelectPicker } from '../../../common/components/multi_select_picker';
-import { OverallStats } from '../../types/overall_stats';
+import type { Option } from '../../../common/components/multi_select_picker';
+import { MultiSelectPicker } from '../../../common/components/multi_select_picker';
+import type { OverallStats } from '../../types/overall_stats';
 
 interface Props {
   overallStats: OverallStats;

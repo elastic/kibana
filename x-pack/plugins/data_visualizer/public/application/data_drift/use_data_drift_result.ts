@@ -10,12 +10,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   MappingRuntimeFields,
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -24,7 +24,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
@@ -43,18 +43,17 @@ import {
   DATA_COMPARISON_TYPE,
 } from './constants';
 
-import {
+import type {
   NumericDriftData,
   CategoricalDriftData,
   Range,
-  FETCH_STATUS,
   Result,
-  isNumericDriftData,
   Feature,
   DataDriftField,
   TimeRange,
   ComparisonHistogram,
 } from './types';
+import { FETCH_STATUS, isNumericDriftData } from './types';
 import { isFulfilled, isRejected } from '../common/util/promise_all_settled_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
 import type { FieldVisConfig } from '../../types';

@@ -8,10 +8,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
 import type { DataVisualizerGridEmbeddableInput } from './types';
-import {
-  DataVisualizerTable,
-  ItemIdToExpandedRowMap,
-} from '../../../common/components/stats_table';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
+import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
 import type { DataVisualizerTableState } from '../../../../../common/types';

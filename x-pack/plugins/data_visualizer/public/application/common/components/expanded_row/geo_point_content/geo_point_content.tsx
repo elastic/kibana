@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import { Feature, Point } from 'geojson';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
 import { EmbeddedMapComponent } from '../../embedded_map';

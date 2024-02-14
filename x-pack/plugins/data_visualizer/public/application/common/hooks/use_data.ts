@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { Dictionary } from '@kbn/ml-url-state';
-import { Moment } from 'moment';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Dictionary } from '@kbn/ml-url-state';
+import type { Moment } from 'moment';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { buildEsQuery, Query } from '@kbn/es-query';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useDataDriftStateManagerContext } from '../../data_drift/use_state_manager';
 import type { InitialSettings } from '../../data_drift/use_data_drift_result';

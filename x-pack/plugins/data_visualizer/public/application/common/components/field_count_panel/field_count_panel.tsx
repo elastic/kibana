@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiBreakpoint } from '@elastic/eui';
 import {

@@ -43,7 +43,7 @@ import type { OverallStatsSearchStrategyParams } from '../../../../common/types/
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
-import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
+import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../constants/index_data_visualizer_viewer';
 
 const defaults = getDefaultPageState();

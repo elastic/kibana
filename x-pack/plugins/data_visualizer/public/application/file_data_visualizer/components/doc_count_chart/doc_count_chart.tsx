@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public';
 import moment, { type Moment } from 'moment';

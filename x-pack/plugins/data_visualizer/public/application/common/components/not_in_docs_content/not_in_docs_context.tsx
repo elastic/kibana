@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';

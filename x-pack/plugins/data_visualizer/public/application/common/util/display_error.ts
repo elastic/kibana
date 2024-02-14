@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 
 export function displayError(toastNotifications: ToastsStart, index: string, err: any) {
