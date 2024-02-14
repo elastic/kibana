@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
+import { getDateISORange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import {
   DataStreamDetails,
   DataStreamStatServiceResponse,
@@ -314,7 +314,7 @@ export const createDatasetQualityControllerStateMachine = ({
           datasetQuery: context.filters.query,
         }),
       loadDegradedDocs: (context) => {
-        const { start, end } = getDateRange(context.filters.timeRange);
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           type: context.type as GetDataStreamsStatsQuery['type'],
