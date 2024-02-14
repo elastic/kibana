@@ -27,6 +27,7 @@ import {
 import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
+import type { EcsRiskScore } from '../../../../common/entity_analytics/risk_engine';
 import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
 import { createTransform, getLatestTransformId } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
@@ -203,5 +204,66 @@ export class RiskScoreDataClient {
         }),
       { logger: this.options.logger }
     );
+  }
+
+  public async getRiskScoresFromTimestamp({
+    from,
+    size,
+    namespace,
+  }: {
+    from: string;
+    size: number;
+    namespace: string;
+  }): Promise<EcsRiskScore[]> {
+    const esClient = this.options.esClient;
+    const index = getRiskScoreLatestIndex(namespace);
+    const response = await esClient.search<EcsRiskScore>({
+      index,
+      body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: from,
+            },
+          },
+        },
+      },
+      size,
+      sort: ['@timestamp'],
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source)
+      .filter((riskScore): riskScore is EcsRiskScore => riskScore !== undefined);
+  }
+
+  public async getRiskScoresByIdentifiers(
+    identifiers: Array<{ id_field: string; id_value: string }>,
+    namespace: string
+  ): Promise<EcsRiskScore[]> {
+    const esClient = this.options.esClient;
+    const index = getRiskScoreLatestIndex(namespace);
+    const response = await esClient.search<EcsRiskScore>({
+      index,
+      body: {
+        query: {
+          bool: {
+            should: identifiers.map((identifier) => ({
+              bool: {
+                must: [
+                  { match: { [identifier.id_field]: identifier.id_value } },
+                  { exists: { field: identifier.id_field } },
+                ],
+              },
+            })),
+          },
+        },
+      },
+      size: identifiers.length,
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source)
+      .filter((riskScore): riskScore is EcsRiskScore => riskScore !== undefined);
   }
 }
