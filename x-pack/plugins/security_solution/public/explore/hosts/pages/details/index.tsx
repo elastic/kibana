@@ -69,7 +69,7 @@ import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
@@ -309,7 +309,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />
