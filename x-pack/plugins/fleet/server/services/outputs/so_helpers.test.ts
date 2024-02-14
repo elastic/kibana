@@ -165,4 +165,34 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
       });
     });
   });
+
+  describe('Changing a kafka output to logstash', () => {
+    it('it should work', () => {
+      const updateData = {
+        ...ORIGINAL_LOGSTASH_OUTPUT,
+        ssl: JSON.stringify(ORIGINAL_LOGSTASH_OUTPUT.ssl),
+        //  Remove kafka field as done by the output service
+        password: null,
+      };
+
+      patchUpdateDataWithRequireEncryptedAADFields(updateData as any, ORIGINAL_KAFKA_OUTPUT);
+      expect(updateData).toMatchInlineSnapshot(`
+        Object {
+          "allow_edit": Array [
+            "hosts",
+          ],
+          "password": null,
+          "secrets": Object {
+            "ssl": Object {
+              "key": Object {
+                "id": "secretref",
+              },
+            },
+          },
+          "ssl": "{\\"certificate\\":\\"testcertificate\\"}",
+          "type": "logstash",
+        }
+      `);
+    });
+  });
 });
