@@ -779,284 +779,54 @@ This will allow us to retrieve all rules that originate from an external source,
 
 - **Create Rules** - `POST /rules` and **Bulk Create Rules** - `POST /rules/_bulk_create`:
 
-Currently, we don't support the `immutable` field in any of the endpoints' request parameters (except for the Import endpoint). We shouldn't support the `prebuilt` field either, because this value should be controlled by the app on the server side, and not by users.
+Currently, we don't support the `immutable` field in any of the endpoints' request parameters (except for the Import endpoint). We shouldn't support the `external_source` field either, because this value should be controlled by the app on the server side, and not by users.
 
 This is so because we will never want users to be able to create their own prebuilt rules, only install them, import them, and customize them. Also, a prebuilt rule should always be able to be compared to a `security-rule` asset distributed by Fleet, and receive updates from it, which would not be possible if a user creates its own prebuilt rules.
 
-Specifically, these two endpoints should be able to create only custom rules which means their `params` will look like:
-
-```ts
-// [PSEUDOCODE]
-{
-  immutable: false,
-  // prebuilt should not be in the created rule object,
-  // since this endpoint should only create custom rules
-}
-```
-
-Both endpoints used the already discussed `createRules` method to create rules. The only changes needed for both are explicitly passing the new `isPrebuilt` argument as `false`:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/create_rule/route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/create_rule/route.ts)_
-
-```ts
-// [... file continues above ...]
-
-export const createRuleRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
-): void => {
-  router.versioned
-    .post({
-      access: 'public',
-      path: DETECTION_ENGINE_RULES_URL,
-      // [...]
-    })
-    .addVersion(
-      {
-        // [...]
-      },
-      async (context, request, response): Promise<IKibanaResponse<CreateRuleResponse>> => {
-        // [...]
-        try {
-           // [...]
-
-          const createdRule = await createRules({
-            rulesClient,
-            params: request.body,
-            isPrebuilt: false, // <-------- explicitly pass isPrebuilt: false
-          });
-
-
-// [... file continues below ...]
-```
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts)_
-
-```ts
-export const bulkCreateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  // [...]
-) => {
-  router.versioned
-    .post({
-      access: 'public',
-      path: DETECTION_ENGINE_RULES_BULK_CREATE,
-      // [...]
-    })
-    .addVersion(
-      {
-        // [...]
-      },
-      async (context, request, response): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
-        // [...]
-        const createdRule = await createRules({
-          rulesClient,
-          params: payloadRule,
-          isPrebuilt: false, // <-------- explicitly pass isPrebuilt: false
-        });
-```
-
 - **Rule Management Filters** - `GET /rules/_rule_management_filters` (Internal):
 
-This endpoint currently depends on rules `alert.attributes.params.immutable` to fetch number of custom rules and number of prebuilt rules. We need to adapt its logic to rely on new `alert.attributes.params.prebuilt` field, with fallback to the original, for backwards compatibility.
+This endpoint currently depends on rules `alert.attributes.params.immutable` to fetch number of custom rules and number of prebuilt rules. We need to adapt its logic to rely on new `alert.attributes.params.external_source` field, with fallback to the original, for backwards compatibility.
 
 Specifically, the endpoint handler uses the [`findRules` utility](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/search/find_rules.ts) to fetch rules based on their `immutable` param.
 
-This needs to be changed so that we rely on the `prebuilt` param, but fallback to `immutable` if that parameter doesn't exist - i.e., in the case of non-migrated-on-write rules. We need to modify the KQL queries in a similar way to the already described:
+This needs to be changed so that we rely on the `external_source` param, but fallback to `immutable` if that parameter doesn't exist - i.e., in the case of non-migrated-on-write rules. We need to modify the KQL queries in a similar way to the already described in the section `KQL filters and the convertRulesFilterToKQL`.
 
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts)_
+We need to modify the `x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts` file; specifically the `fetchRulesCount` function, which contains the KQL query filters that should be updated.
 
-```ts
-// [... file continues above ...]
-
-async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
-  const [prebuiltRules, customRules] = await Promise.all([
-    findRules({
-      ...DEFAULT_FIND_RULES_COUNT_PARAMS,
-      rulesClient,
-      filter: `${KQL_FILTER_PREBUILT_RULES} OR ${KQL_FILTER_IMMUTABLE_RULES}`,
-    }),
-    findRules({
-      ...DEFAULT_FIND_RULES_COUNT_PARAMS,
-      rulesClient,
-      filter: `${KQL_FILTER_CUSTOM_RULES} OR ${KQL_FILTER_MUTABLE_RULES}`,
-    }),
-  ]);
-
-  return {
-    prebuilt: prebuiltRules.total,
-    custom: customRules.total,
-  };
-}
-// [... file continues below ...]
-```
-
-The constants `KQL_FILTER_PREBUILT_RULES`, `KQL_FILTER_IMMUTABLE_RULES`,`KQL_FILTER_CUSTOM_RULES` and `KQL_FILTER_MUTABLE_RULES` are imported from `x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts`.
+_See Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts)_
 
 - **Coverage Overview** - `/rules_coverage_overview` (Internal): This endpoint is called to retrieve the data that populates the MITRE Coverage Overview table, and currently depends on the `immutable` field to fetch the user's installed rules.
 
-Similarly to what was described in the previous endpoint, we should update the logic so that we rely on the `prebuilt` param, but fallback to `immutable` if that parameter doesn't exist - i.e., in the case of non-migrated-on-write rules.
+Similarly to what was described in the previous endpoint, we should update the logic so that we rely on the `external_source` param, but fallback to `immutable` if that parameter doesn't exist - i.e., in the case of non-migrated-on-write rules.
 
 This endpoint handler also uses the [`findRules` utility](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/search/find_rules.ts) to fetch rules, but the KQL filter that is passed to that utility is created by the reusable [`convertRulesFilterToKQL` utility function](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts):
 
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/handle_coverage_overview_request.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/handle_coverage_overview_request.ts)_
+_See Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/handle_coverage_overview_request.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/handle_coverage_overview_request.ts)_
 
-```ts
-// [... file continues above...]
-
-export async function handleCoverageOverviewRequest({
-  params: { filter },
-  deps: { rulesClient },
-}: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
-  const activitySet = new Set(filter?.activity);
-  const kqlFilter = convertRulesFilterToKQL({
-    filter: filter?.search_term,
-    showCustomRules: filter?.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
-    showElasticRules: filter?.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
-    enabled: getIsEnabledFilter(activitySet),
-  });
-
-  const rules = await findRules({
-    rulesClient,
-    filter: kqlFilter,
-    fields: ['name', 'enabled', 'params.threat'],
-    page: 1,
-    perPage: 10000,
-    sortField: undefined,
-    sortOrder: undefined,
-  });
-
-  // [... file continues below...]
-```
-
-We therefore need to modify the `convertRulesFilterToKQL` utility logic as was described in the section above: [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
+Therefor, it is enough to modify the `convertRulesFilterToKQL` utility logic as was described in the section above: [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
 
 ### Prebuilt Rules endpoints
 
 - [**(LEGACY) Get Prebuilt Rules and Timeline Status** - `/rules/prepackaged/_status`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts)
 
-This currently depends on rules `alert.attributes.params.immutable` to fetch the number of custom rules and number of prebuilt rules. We need to adapt this filters to rely on new `alert.attributes.params.prebuilt` field, with fallback to the original, for backwards compatibility:
+This currently depends on rules `alert.attributes.params.immutable` to fetch the number of custom rules and number of prebuilt rules. We need to adapt these filters used in the `findRules` method used in the endpoint handler to rely on new `alert.attributes.params.external_source` field, with fallback to the original, for backwards compatibility:
 
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts)_
+_See Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts)_
 
-```ts
-// [... file continues above...]
+As explained above, this endpoint fetches the installed prebuilt rules, as well, using the `getExistingPrepackagedRules` reusable utility. This function needs to be modified as well to update its KQL query filters:
 
-export const getPrebuiltRulesAndTimelinesStatusRoute = (
-  router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
-) => {
-  router.versioned
-    .get({
-      access: 'public',
-      path: PREBUILT_RULES_STATUS_URL,
-      // [...]
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-      },
-      async (context, request, response) => {
+_See source for `getExistingPrepackagedRules`: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/search/get_existing_prepackaged_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/search/get_existing_prepackaged_rules.ts)_
 
-          // [...]
-
-          const customRules = await findRules({
-            rulesClient,
-            perPage: 1,
-            page: 1,
-            sortField: 'enabled',
-            sortOrder: 'desc',
-            filter: `${KQL_FILTER_PREBUILT_RULES} OR ${KQL_FILTER_IMMUTABLE_RULES}`,
-            fields: undefined,
-          });
-
-          const installedPrebuiltRules = rulesToMap(
-            await getExistingPrepackagedRules({ rulesClient }) // needs modifying as well
-          );
-
-// [... file continues below...]
-```
-
-As explained above, this endpoint fetches the installed prebuilt rules, as well, using the `getExistingPrepackagedRules` reusable utility. This function needs to be modified as well:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/search/get_existing_prepackaged_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/search/get_existing_prepackaged_rules.ts)_
-
-```ts
-[... file continues above...]
-
-export const getExistingPrepackagedRules = async ({
-  rulesClient,
-}: {
-  rulesClient: RulesClient;
-}): Promise<RuleAlertType[]> => {
-  return getRules({
-    rulesClient,
-    filter: `${KQL_FILTER_PREBUILT_RULES} OR ${KQL_FILTER_IMMUTABLE_RULES}`,
-  });
-};
-```
-
-- [**Get Prebuilt Rules Status** - `GET /prebuilt_rules/status` (Internal)](https://github.com/elastic/kibana/blob/test-serverless-env-test-deployment/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts)
+- [**Get Prebuilt Rules Status** - `GET /prebuilt_rules/status` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts)
 
 Uses `IPrebuiltRuleObjectsClient` to retrieve instances of prebuilt rules according to the `immutable` field. The Prebuilt Rule Objects client fetches prebuilt rules using the `getExistingPrepackagedRules` function mentioned above, so modifying it as described above will suffice:
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client.ts)_
-
-```ts
-// [... file continues above...]
-
-export const createPrebuiltRuleObjectsClient = (
-  rulesClient: RulesClient
-): IPrebuiltRuleObjectsClient => {
-  return {
-    fetchAllInstalledRules: (): Promise<RuleResponse[]> => {
-      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
-        const rulesData = await getExistingPrepackagedRules({ rulesClient });
-        const rules = rulesData.map((rule) => internalRuleToAPIResponse(rule));
-        return rules;
-      });
-    },
-
-// [... file continues below...]
-```
 
 - [**(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts)
 
 This endpoint fetches the installed prebuilt rules using the `getExistingPrepackagedRules` reusable utility, as well:
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts)_
-
-```ts
-// [... file continues above...]
-
-export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
-  router.versioned
-    .put({
-      path: PREBUILT_RULES_URL,
-      // [...]
-    })
-    .addVersion(
-      // [...]
-      async (context, _, response) => {
-        const siemResponse = buildSiemResponse(response);
-
-        try {
-          const rulesClient = (await context.alerting).getRulesClient();
-
-          const validated = await createPrepackagedRules(/* [...] */)
-
-      // [...]
-
-
-export const createPrepackagedRules = async (
-  // [...]
-  ): Promise<InstallPrebuiltRulesAndTimelinesResponse | null> => {
-  // [...]
-
-  const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
-
-// [... file continues below ...]
-```
 
 Therefore, modifying the `getExistingPrepackagedRules` function as described above will suffice.
 
