@@ -25,6 +25,9 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
       validate: {
         params: validateParams,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handleRouteErrors(async (context, request, response) => {
       const { savedObjectsClient, uiSettingsClient } = await context.infra;
@@ -38,7 +41,7 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
         return response.ok({
           body: InfraGetCustomDashboardsResponseBodyRT.encode({
             assetType: params.assetType,
-            dashboardSavedObjectIdList: [],
+            dashboardIdList: [],
             kuery: undefined,
           }),
         });

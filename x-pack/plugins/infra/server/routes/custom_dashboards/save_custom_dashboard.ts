@@ -28,6 +28,9 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
       validate: {
         body: validatePayload,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handleRouteErrors(async (context, request, response) => {
       const { savedObjectsClient, uiSettingsClient } = await context.infra;

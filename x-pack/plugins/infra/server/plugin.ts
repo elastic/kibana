@@ -269,8 +269,9 @@ export class InfraServerPlugin
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
       async (context, request) => {
-        const savedObjectsClient = (await context.core).savedObjects.client;
-        const uiSettingsClient = (await context.core).uiSettings.client;
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const uiSettingsClient = coreContext.uiSettings.client;
         const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
           request,

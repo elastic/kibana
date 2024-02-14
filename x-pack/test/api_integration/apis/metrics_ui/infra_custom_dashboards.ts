@@ -54,14 +54,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.be.eql({
           assetType: 'host',
-          dashboardSavedObjectIdList: [],
+          dashboardIdList: [],
         });
       });
 
       it('responds with the custom dashboard configuration for a given asset type when it exists', async () => {
         const customDashboard: InfraCustomDashboard = {
           assetType: 'host',
-          dashboardSavedObjectIdList: ['123'],
+          dashboardIdList: ['123'],
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
           assetType: 'host',
-          dashboardSavedObjectIdList: ['123'],
+          dashboardIdList: ['123'],
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: false,
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('responds with an error when trying to update a custom dashboard for unsupported asset type', async () => {
         const payload = {
           assetType: 'unsupported-asset-type',
-          dashboardSavedObjectIdList: ['123'],
+          dashboardIdList: ['123'],
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('creates a new dashboard configuration when saving for the first time', async () => {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
           assetType: 'host',
-          dashboardSavedObjectIdList: ['123'],
+          dashboardIdList: ['123'],
         };
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
@@ -143,14 +143,14 @@ export default function ({ getService }: FtrProviderContext) {
           type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
           attributes: {
             assetType: 'host',
-            dashboardSavedObjectIdList: ['123'],
+            dashboardIdList: ['123'],
           },
           overwrite: true,
         });
 
         const payload: InfraSaveCustomDashboardsRequestPayload = {
           assetType: 'host',
-          dashboardSavedObjectIdList: ['123', '456'],
+          dashboardIdList: ['123', '456'],
         };
         const updateResponse = await supertest
           .post(`${CUSTOM_DASHBOARDS_API_URL}`)

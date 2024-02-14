@@ -12,11 +12,11 @@ import type {
   InfraCustomDashboardAssetType,
 } from '../../../../common/custom_dashboards';
 
-export async function findCustomDashboard(
+export function findCustomDashboard(
   assetType: InfraCustomDashboardAssetType,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return await savedObjectsClient.find<InfraCustomDashboard>({
+  return savedObjectsClient.find<InfraCustomDashboard>({
     type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
     search: assetType,
     searchFields: ['assetType'] as [keyof InfraCustomDashboard],

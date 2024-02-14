@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/server';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 
@@ -13,6 +14,10 @@ export async function checkCustomDashboardsEnabled(uiSettingsClient: IUiSettings
   const isEnabled = await uiSettingsClient.get(enableInfrastructureAssetCustomDashboards);
 
   if (!isEnabled) {
-    throw Boom.forbidden('Custom dashboards are not enabled');
+    throw Boom.forbidden(
+      i18n.translate('xpack.infra.routes.customDashboards', {
+        defaultMessage: 'Custom dashboards are not enabled',
+      })
+    );
   }
 }

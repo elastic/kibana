@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-/**
- * For now we have only one asset type.
- * In the future it can be changed to 'host' | 'container' | 'pod' | ...
- */
-export type InfraCustomDashboardAssetType = 'host';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+
+export type InfraCustomDashboardAssetType = InventoryItemType;
 
 export interface InfraCustomDashboard {
-  dashboardSavedObjectIdList: string[];
+  dashboardIdList: string[];
   assetType: InfraCustomDashboardAssetType;
   kuery?: string;
 }

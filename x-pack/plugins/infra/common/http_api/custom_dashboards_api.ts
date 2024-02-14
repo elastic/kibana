@@ -5,21 +5,17 @@
  * 2.0.
  */
 
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import * as rt from 'io-ts';
 
 const AssetTypeRT = rt.type({
-  /**
-   * For now we have only one asset type, so it's a literal type.
-   * In the future it can be changed to a union type:
-   * `rt.union([rt.literal('host'), rt.literal('container'), rt.literal('pod')])`
-   */
-  assetType: rt.literal('host'),
+  assetType: ItemTypeRT,
 });
 
 const CustomDashboardRT = rt.intersection([
   AssetTypeRT,
   rt.type({
-    dashboardSavedObjectIdList: rt.array(rt.string),
+    dashboardIdList: rt.array(rt.string),
   }),
   rt.partial({
     kuery: rt.string,

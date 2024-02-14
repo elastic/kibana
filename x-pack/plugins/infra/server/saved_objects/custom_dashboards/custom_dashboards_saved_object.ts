@@ -13,12 +13,12 @@ import { InfraCustomDashboard } from '../../../common/custom_dashboards';
 export const INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'infra-custom-dashboards';
 
 const properties: Record<keyof InfraCustomDashboard, SavedObjectsFieldMapping> = {
-  dashboardSavedObjectIdList: { type: 'keyword' },
+  dashboardIdList: { type: 'keyword' },
   assetType: { type: 'keyword' },
   kuery: { type: 'text' },
 };
 const createSchema: Record<keyof InfraCustomDashboard, Type<any>> = {
-  dashboardSavedObjectIdList: schema.arrayOf(schema.string()),
+  dashboardIdList: schema.arrayOf(schema.string()),
   assetType: schema.string(),
   kuery: schema.maybe(schema.string()),
 };
