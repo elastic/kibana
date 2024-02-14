@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

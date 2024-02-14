@@ -31,11 +31,11 @@ import {
   createIngestPipelineSchema,
   modelDownloadsQuery,
 } from './schemas/inference_schema';
-import {
+import type {
   InferenceAPIConfigResponse,
   PipelineDefinition,
-  type TrainedModelConfigResponse,
 } from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';

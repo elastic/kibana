@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { debounce } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';

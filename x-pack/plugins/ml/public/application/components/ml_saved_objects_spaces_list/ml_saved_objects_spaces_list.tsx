@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
-import {
-  ML_JOB_SAVED_OBJECT_TYPE,
-  SavedObjectResult,
-  MlSavedObjectType,
-} from '../../../../common/types/saved_objects';
+import type { SavedObjectResult, MlSavedObjectType } from '../../../../common/types/saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 

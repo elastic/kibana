@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
@@ -28,7 +21,8 @@ import {
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
+import type { TimeBucketsInterval } from '../../../common/time_buckets';
+import { type TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 

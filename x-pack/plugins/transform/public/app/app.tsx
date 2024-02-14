@@ -12,11 +12,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { SECTION_SLUG } from './common/constants';
-import { AppDependencies } from './app_dependencies';
+import type { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';

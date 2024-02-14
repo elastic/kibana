@@ -15,11 +15,11 @@ import {
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 

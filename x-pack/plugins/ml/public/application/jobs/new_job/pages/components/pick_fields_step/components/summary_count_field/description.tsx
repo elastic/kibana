@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, FC } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
-import { Validation } from '../../../../../common/job_validator';
+import type { Validation } from '../../../../../common/job_validator';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {

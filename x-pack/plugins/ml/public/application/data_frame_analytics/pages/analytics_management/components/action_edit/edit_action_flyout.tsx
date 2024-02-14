@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -38,13 +39,11 @@ import {
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import {
-  memoryInputValidator,
-  MemoryInputValidatorResult,
-} from '../../../../../../../common/util/validators';
+import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
+import { memoryInputValidator } from '../../../../../../../common/util/validators';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
-import { EditAction } from './use_edit_action';
+import type { EditAction } from './use_edit_action';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;

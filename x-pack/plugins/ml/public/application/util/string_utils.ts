@@ -15,7 +15,7 @@ import { escapeKuery } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlCustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { DataGridItem } from '@kbn/ml-data-grid';
-import { Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 // Replaces all instances of dollar delimited tokens in the specified String
 // with corresponding values from the supplied object, optionally

@@ -14,7 +14,7 @@ import {
   BASIC_NUMERICAL_TYPES,
   EXTENDED_NUMERICAL_TYPES,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
 

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import { MlCoreSetup } from '../plugin';
+import type { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
+import type { SwimLaneDrilldownContext } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';

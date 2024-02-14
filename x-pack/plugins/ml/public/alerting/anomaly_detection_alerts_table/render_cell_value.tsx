@@ -10,7 +10,8 @@ import React, { type ReactNode } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
-import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
 import {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { BucketSpanEstimatorData } from '../../../common/types/job_service';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { BucketSpanEstimatorData } from '../../../common/types/job_service';
 
 export function estimateBucketSpanFactory({
   asCurrentUser,

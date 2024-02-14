@@ -10,7 +10,7 @@ import type {
   AggregationsCustomCategorizeTextAnalyzer,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { createCategorizeQuery } from './create_categorize_query';
 

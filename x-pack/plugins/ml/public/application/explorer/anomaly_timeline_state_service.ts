@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, of, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, of, Subscription } from 'rxjs';
 import {
   switchMap,
   map,
@@ -22,7 +23,7 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
   ExplorerJob,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiTableSortingType,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,

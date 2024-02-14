@@ -16,12 +16,8 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 
-import {
-  DocumentCountStats,
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-  DocumentStatsSearchStrategyParams,
-} from '../get_document_stats';
+import type { DocumentCountStats, DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -19,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { KibanaObjectUi } from '../page';
+import type { KibanaObjectUi } from '../page';
 
 export interface KibanaObjectItemProps {
   objectType: string;

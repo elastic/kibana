@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {

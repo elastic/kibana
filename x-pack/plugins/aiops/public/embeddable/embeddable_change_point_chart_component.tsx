@@ -8,12 +8,8 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import React from 'react';
-import {
-  EmbeddableFactory,
-  EmbeddableOutput,
-  EmbeddableRoot,
-  useEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRoot, useEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
   type ChangePointDetectionViewType,

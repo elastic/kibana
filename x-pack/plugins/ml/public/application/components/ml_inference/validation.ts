@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
-import { InferenceModelTypes } from './types';
+import type { InferenceModelTypes } from './types';
 import type { AddInferencePipelineFormErrors } from './types';
 
 const INVALID_PIPELINE_NAME_ERROR = i18n.translate(

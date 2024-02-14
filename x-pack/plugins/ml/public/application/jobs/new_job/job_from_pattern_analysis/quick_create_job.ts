@@ -8,7 +8,7 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';

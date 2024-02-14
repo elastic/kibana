@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isRuntimeField } from '@kbn/ml-runtime-field-utils';
 import { TRANSFORM_STATE } from '../constants';

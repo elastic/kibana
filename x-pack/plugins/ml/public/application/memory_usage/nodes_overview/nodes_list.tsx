@@ -4,29 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
+import type { ModelsBarStats } from '../../components/stats_bar';
+import { StatsBar } from '../../components/stats_bar';
+import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ExpandedRow } from './expanded_row';
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { ListingPageUrlState } from '../../../../common/types/common';
+import type { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useRefresh } from '../../routing/use_refresh';
 

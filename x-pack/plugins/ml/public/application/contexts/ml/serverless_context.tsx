@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useContext, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {

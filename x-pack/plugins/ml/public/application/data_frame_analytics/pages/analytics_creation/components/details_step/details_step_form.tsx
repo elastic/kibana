@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +15,7 @@ import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_da
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';

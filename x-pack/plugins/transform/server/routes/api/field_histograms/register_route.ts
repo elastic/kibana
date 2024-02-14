@@ -7,12 +7,11 @@
 
 import { addInternalBasePath } from '../../../../common/constants';
 
-import { dataViewTitleSchema, DataViewTitleSchema } from '../../../../common/api_schemas/common';
-import {
-  fieldHistogramsRequestSchema,
-  FieldHistogramsRequestSchema,
-} from '../../../../common/api_schemas/field_histograms';
-import { RouteDependencies } from '../../../types';
+import type { DataViewTitleSchema } from '../../../../common/api_schemas/common';
+import { dataViewTitleSchema } from '../../../../common/api_schemas/common';
+import type { FieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
+import { fieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
+import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 

@@ -14,7 +14,10 @@ import {
 
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 
-import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 
 import { getViewLinkStatus } from './get_view_link_status';
 import { viewActionButtonText, ViewButton } from './view_button';

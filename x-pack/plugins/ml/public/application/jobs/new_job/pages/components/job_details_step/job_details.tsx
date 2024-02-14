@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WizardNav } from '../wizard_nav';
 import { JobIdInput } from './components/job_id';
 import { JobDescriptionInput } from './components/job_description';
 import { GroupsInput } from './components/groups';
-import { WIZARD_STEPS, StepProps } from '../step_types';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { AdvancedSection } from './components/advanced_section';
 import { AdditionalSection } from './components/additional_section';

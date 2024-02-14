@@ -18,15 +18,17 @@ import type { AnomalyDetectorService } from '../application/services/anomaly_det
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
+import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
-import { MlResultsService } from '../application/services/results_service';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+} from './constants';
+import type { MlResultsService } from '../application/services/results_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlFieldFormatService } from '../application/services/field_format_service';
 import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';

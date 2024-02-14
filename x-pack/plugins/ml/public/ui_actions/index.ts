@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
@@ -16,7 +16,7 @@ import {
   createCategorizationADJobAction,
   createCategorizationADJobTrigger,
 } from './open_create_categorization_job_action';
-import { MlPluginStart, MlStartDependencies } from '../plugin';
+import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import {
   entityFieldSelectionTrigger,

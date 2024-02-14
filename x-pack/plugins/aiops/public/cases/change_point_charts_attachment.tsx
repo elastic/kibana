@@ -6,14 +6,15 @@
  */
 
 import { memoize } from 'lodash';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React, { FC } from 'react';
-import { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FC } from 'react';
+import React from 'react';
+import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import { EmbeddableChangePointChartProps } from '../embeddable';
+import type { EmbeddableChangePointChartProps } from '../embeddable';
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<EmbeddableChangePointChartProps>) => {

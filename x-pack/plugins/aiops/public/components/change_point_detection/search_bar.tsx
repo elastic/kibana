@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
 import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';

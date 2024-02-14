@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
@@ -23,7 +24,10 @@ import {
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { useMlApiContext } from '../../../../../../contexts/kibana';
-import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  CombinedJob,
+  Datafeed,
+} from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';

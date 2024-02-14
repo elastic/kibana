@@ -19,15 +19,15 @@ import {
   canDeleteIndex,
 } from '../../services/analytics_service';
 
-import {
-  isDataFrameAnalyticsRunning,
+import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
+import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
-import { JobType } from '../../../../../../../common/types/saved_objects';
+import type { JobType } from '../../../../../../../common/types/saved_objects';
 
 import { getDestinationIndex } from '../../../../common/get_destination_index';
 

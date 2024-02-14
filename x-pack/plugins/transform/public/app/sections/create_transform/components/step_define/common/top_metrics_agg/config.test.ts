@@ -6,7 +6,7 @@
  */
 
 import { getTopMetricsAggConfig } from './config';
-import { PivotAggsConfigTopMetrics } from './types';
+import type { PivotAggsConfigTopMetrics } from './types';
 
 describe('top metrics agg config', () => {
   let config: PivotAggsConfigTopMetrics;

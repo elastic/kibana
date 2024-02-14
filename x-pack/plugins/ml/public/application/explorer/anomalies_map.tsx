@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,15 +17,15 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
+import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-  VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
-import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { useMlKibana } from '../contexts/kibana';

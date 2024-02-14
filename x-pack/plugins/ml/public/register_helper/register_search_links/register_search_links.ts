@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { AppUpdater } from '@kbn/core/public';
 import { getDeepLinks } from './search_deep_links';

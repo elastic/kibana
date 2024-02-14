@@ -9,13 +9,13 @@ import { difference, without } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { ToastsStart } from '@kbn/core/public';
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { ToastsStart } from '@kbn/core/public';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { mlJobService } from '../../services/job_service';
 
 import { createTimeSeriesJobData } from './timeseriesexplorer_utils';
-import { GetJobSelection } from '../../contexts/ml/use_job_selection_flyout';
+import type { GetJobSelection } from '../../contexts/ml/use_job_selection_flyout';
 
 /**
  * FIXME validator should not have any side effects like the global state update

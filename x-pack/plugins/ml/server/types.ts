@@ -22,7 +22,7 @@ import type {
 } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';

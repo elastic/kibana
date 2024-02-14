@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChartSizeArray } from '@elastic/charts';
+import type { ChartSizeArray } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
 export const CHART_DIRECTION = {

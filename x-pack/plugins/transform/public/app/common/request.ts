@@ -23,21 +23,23 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
-import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
+import type {
+  DateHistogramAgg,
+  HistogramAgg,
+  TermsAgg,
+} from '../../../common/types/pivot_group_by';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
+import type { GroupByConfigWithUiSupport, PivotAggsConfig, PivotGroupByConfig } from '.';
 import {
   getEsAggFromAggConfig,
   getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
-  GroupByConfigWithUiSupport,
-  PivotAggsConfig,
-  PivotGroupByConfig,
 } from '.';
 
 export interface SimpleQuery {

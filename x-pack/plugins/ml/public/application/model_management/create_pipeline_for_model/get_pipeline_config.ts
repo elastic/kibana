@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { InferecePipelineCreationState } from './state';
 
 export function getPipelineConfig(state: InferecePipelineCreationState): estypes.IngestPipeline {

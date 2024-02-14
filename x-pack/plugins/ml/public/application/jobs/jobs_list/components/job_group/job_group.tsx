@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 

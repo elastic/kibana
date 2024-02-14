@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { GeoJobCreator } from '../../../../../common/job_creator';
+import type { GeoJobCreator } from '../../../../../common/job_creator';
 import { GeoField } from '../geo_field';
 import { GeoMapExamples } from './geo_map_examples';
 import { useMlKibana } from '../../../../../../../contexts/kibana';

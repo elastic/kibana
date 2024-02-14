@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BasicValidations } from './job_validator';
-import { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { BasicValidations } from './job_validator';
+import type { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
   ALLOWED_DATA_UNITS,
   JOB_ID_MAX_LENGTH,
 } from '../../../../../../common/constants/validation';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { ValidationResults } from '../../../../../../common/util/job_utils';
+import type { ValidationResults } from '../../../../../../common/util/job_utils';
 
 export function populateValidationMessages(
   validationResults: ValidationResults,

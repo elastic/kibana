@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 declare const ValidateJob: FC<{
   getJobConfig: any;
   getDuration: any;

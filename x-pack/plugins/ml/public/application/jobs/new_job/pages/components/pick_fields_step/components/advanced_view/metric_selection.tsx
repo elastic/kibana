@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useState, useEffect } from 'react';
 
 import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { MetricSelector } from './metric_selector';
-import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { DetectorList } from './detector_list';
-import { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
+import type { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
 
 interface Props {
   setIsValid: (na: boolean) => void;

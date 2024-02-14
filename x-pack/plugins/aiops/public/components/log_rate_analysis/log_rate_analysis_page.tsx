@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';

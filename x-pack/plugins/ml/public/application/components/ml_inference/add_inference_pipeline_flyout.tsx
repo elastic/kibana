@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiFlyout,
@@ -19,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import { ModelItem } from '../../model_management/models_list';
+import type { ModelItem } from '../../model_management/models_list';
 import type { AddInferencePipelineSteps } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 import { AddInferencePipelineFooter } from '../shared';

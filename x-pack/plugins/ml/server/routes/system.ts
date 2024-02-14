@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { RouteInitialization, SystemRouteDeps } from '../types';
+import type { RouteInitialization, SystemRouteDeps } from '../types';
 import { getMlNodeCount } from '../lib/node_utils';
 
 /**

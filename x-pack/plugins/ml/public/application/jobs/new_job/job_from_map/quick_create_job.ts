@@ -24,7 +24,8 @@ import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/
 import type { JobCreatorType } from '../common/job_creator';
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import { getJobsItemsFromEmbeddable } from './utils';
-import { QuickJobCreatorBase, CreateState } from '../job_from_dashboard';
+import type { CreateState } from '../job_from_dashboard';
+import { QuickJobCreatorBase } from '../job_from_dashboard';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 interface VisDescriptor {

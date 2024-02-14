@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
@@ -17,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
+import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { TimeIntervalControl } from '../time_interval_control';

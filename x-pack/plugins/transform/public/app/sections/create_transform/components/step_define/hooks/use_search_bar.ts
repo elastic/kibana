@@ -13,14 +13,10 @@ import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { getTransformConfigQuery } from '../../../../../common';
 
-import {
-  StepDefineExposedState,
-  QUERY_LANGUAGE_KUERY,
-  QUERY_LANGUAGE_LUCENE,
-  QUERY_LANGUAGE,
-} from '../common';
+import type { StepDefineExposedState, QUERY_LANGUAGE } from '../common';
+import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../common';
 
-import { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineFormProps } from '../step_define_form';
 
 export const useSearchBar = (
   defaults: StepDefineExposedState,

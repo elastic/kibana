@@ -6,7 +6,7 @@
  */
 
 import { each, find, get, filter } from 'lodash';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { Job } from '../../../../common/types/anomaly_detection_jobs';

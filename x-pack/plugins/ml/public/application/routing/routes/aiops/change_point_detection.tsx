@@ -7,11 +7,12 @@
 
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { MlRoute } from '../..';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';

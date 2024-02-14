@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,

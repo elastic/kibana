@@ -1000,6 +1000,20 @@ module.exports = {
     },
 
     /**
+     * ML overrides
+     */
+    {
+      files: [
+        'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides. These rules below are maintained and owned by
      * the people within the security-detection-engine team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, Filter } from '@kbn/es-query';
+import type { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { createMergedEsQuery } from '../../application/utils/search_utils';

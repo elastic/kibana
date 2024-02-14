@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { map } from 'rxjs/operators';
 import { pick } from 'lodash';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -25,7 +26,8 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { type Observable } from 'rxjs';
 import { DataSourceContext } from '../../hooks/use_data_source';
-import { AiopsAppContext, AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { PageHeader } from '../page_header';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';

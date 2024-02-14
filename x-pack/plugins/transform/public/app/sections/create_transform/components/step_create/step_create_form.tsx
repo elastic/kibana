@@ -37,7 +37,7 @@ import { useCreateTransform, useGetTransformStats, useStartTransforms } from '..
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import {
+import type {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';

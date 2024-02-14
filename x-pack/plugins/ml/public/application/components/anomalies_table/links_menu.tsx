@@ -8,7 +8,8 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from '@kbn/rison';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -52,11 +53,8 @@ import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import {
-  escapeDoubleQuotes,
-  getDateFormatTz,
-  SourceIndicesWithGeoFields,
-} from '../../explorer/explorer_utils';
+import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
+import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';

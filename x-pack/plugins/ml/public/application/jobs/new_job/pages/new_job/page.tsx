@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, Fragment, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,7 +34,8 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useDataSource } from '../../../../contexts/ml';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';

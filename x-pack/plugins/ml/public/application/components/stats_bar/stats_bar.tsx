@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { Stat, StatsBarStat } from './stat';
+import type { StatsBarStat } from './stat';
+import { Stat } from './stat';
 
 interface Stats {
   total: StatsBarStat;

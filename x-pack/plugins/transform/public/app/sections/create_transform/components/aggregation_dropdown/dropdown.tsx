@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionsListProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionsListProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 interface Props {
   options: EuiComboBoxOptionOption[];

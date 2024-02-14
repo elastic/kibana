@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -48,19 +49,22 @@ import {
   getKqlQueryValues,
   DEFAULT_QUERY_LANG,
 } from './components/explorer_query_bar/explorer_query_bar';
+import type {
+  OverallSwimlaneData,
+  AppStateSelectedCells,
+  SourceIndicesWithGeoFields,
+} from './explorer_utils';
 import {
   getDateFormatTz,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
-  OverallSwimlaneData,
-  AppStateSelectedCells,
   getDataViewsAndIndicesWithGeoFields,
-  SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
-import { FILTER_ACTION, FilterAction } from './explorer_constants';
+import type { FilterAction } from './explorer_constants';
+import { FILTER_ACTION } from './explorer_constants';
 // Explorer Charts
 // @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';

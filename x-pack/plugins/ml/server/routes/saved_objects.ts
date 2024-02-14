@@ -7,7 +7,7 @@
 
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
 import {
   updateJobsSpaces,

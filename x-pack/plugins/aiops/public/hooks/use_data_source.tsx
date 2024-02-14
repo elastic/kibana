@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useCallback, useContext, useEffect, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

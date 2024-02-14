@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import moment from 'moment-timezone';
 
 import { EuiProgress, EuiTabbedContent } from '@elastic/eui';
@@ -14,8 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 
-import { DataFrameAnalyticsListRow } from './common';
-import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
+import type { DataFrameAnalyticsListRow } from './common';
+import type { SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 
 import { getDataFrameAnalyticsProgressPhase } from './common';

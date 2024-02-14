@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -17,7 +18,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 
 import { MlPage } from '../components/ml_page';
-import { MlPages } from '../../locator';
+import type { MlPages } from '../../locator';
 import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional

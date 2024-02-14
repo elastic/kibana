@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MODEL_STATE, ModelState } from '@kbn/ml-trained-models-utils';
-import { EuiHealthProps } from '@elastic/eui';
+import type { ModelState } from '@kbn/ml-trained-models-utils';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import type { EuiHealthProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const getModelStateColor = (

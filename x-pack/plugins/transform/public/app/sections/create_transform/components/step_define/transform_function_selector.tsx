@@ -9,7 +9,8 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import { TRANSFORM_FUNCTION, TransformFunction } from '../../../../../../common/constants';
+import type { TransformFunction } from '../../../../../../common/constants';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 interface TransformFunctionSelectorProps {
   selectedFunction: TransformFunction;

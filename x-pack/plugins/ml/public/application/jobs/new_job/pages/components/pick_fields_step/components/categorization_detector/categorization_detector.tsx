@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CountCard, HighCountCard, RareCard } from './detector_cards';
 
 export const CategorizationDetector: FC = () => {

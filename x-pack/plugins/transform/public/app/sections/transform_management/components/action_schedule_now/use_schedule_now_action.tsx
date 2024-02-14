@@ -11,7 +11,7 @@ import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { useTransformCapabilities } from '../../../../hooks';
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useScheduleNowTransforms } from '../../../../hooks';
 
 import {

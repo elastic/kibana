@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiSearchBar,
-  EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
 import {
@@ -26,20 +27,18 @@ import { usePermissionCheck } from '../../../../../capabilities/check_capabiliti
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
-import {
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-  ItemIdToExpandedRowMap,
-} from './common';
+import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
+import { DataFrameAnalyticsListColumn } from './common';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import type { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 

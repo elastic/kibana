@@ -7,9 +7,9 @@
 
 import { cloneDeep } from 'lodash';
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 import { isValidTimeField, validateTimeRange } from './validate_time_range';
 

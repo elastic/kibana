@@ -7,7 +7,8 @@
 
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
+import { API_ACTION_NAME } from './log_rate_analysis/actions';
 
 interface StreamState {
   ccsWarning: boolean;

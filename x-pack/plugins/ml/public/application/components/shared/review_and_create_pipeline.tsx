@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiAccordion,
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { useMlKibana } from '../../contexts/kibana';
 import { ReindexWithPipeline } from '../ml_inference/components/reindex_with_pipeline';
 

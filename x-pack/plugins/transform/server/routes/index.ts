@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 import { registerRoute as registerFieldHistogramsRoute } from './api/field_histograms/register_route';
 import { registerRoute as registerAuditMessagesRoute } from './api/audit_messages/register_route';

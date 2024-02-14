@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TrainedModelStat } from '../../../../common/types/trained_models';
 import type { ManagementListResponse } from '../../../../common/types/management';

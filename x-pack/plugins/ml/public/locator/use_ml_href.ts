@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DependencyList } from 'react';
-import { MlPluginSetup } from '..';
-import { MlLocatorParams } from '../../common/types/locator';
+import type { DependencyList } from 'react';
+import type { MlPluginSetup } from '..';
+import type { MlLocatorParams } from '../../common/types/locator';
 
 /**
  * Provides a URL to ML plugin page

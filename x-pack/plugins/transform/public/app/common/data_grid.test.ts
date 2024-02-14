@@ -7,7 +7,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { getPreviewTransformRequestBody, SimpleQuery } from '.';
+import type { SimpleQuery } from '.';
+import { getPreviewTransformRequestBody } from '.';
 import { getIndexDevConsoleStatement, getTransformPreviewDevConsoleStatement } from './data_grid';
 
 describe('Transform: Data Grid', () => {

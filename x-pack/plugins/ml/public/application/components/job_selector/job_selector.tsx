@@ -21,14 +21,11 @@ import './_index.scss';
 
 import { useStorage } from '@kbn/ml-local-storage';
 import { ML_PAGES } from '../../../locator';
-import { Dictionary } from '../../../../common/types/common';
+import type { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
-import {
-  BADGE_LIMIT,
-  JobSelectorFlyoutContent,
-  JobSelectorFlyoutProps,
-} from './job_selector_flyout';
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { JobSelectorFlyoutProps } from './job_selector_flyout';
+import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
 

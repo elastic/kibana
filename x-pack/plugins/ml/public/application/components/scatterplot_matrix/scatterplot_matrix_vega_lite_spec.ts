@@ -9,13 +9,14 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
-import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
+import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
+import type { LegendType } from '../vega_chart/common';
+import { LEGEND_TYPES } from '../vega_chart/common';
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 

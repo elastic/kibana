@@ -7,11 +7,8 @@
 
 import { BehaviorSubject, combineLatest, EMPTY, type Observable, Subscription } from 'rxjs';
 import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
-import {
-  DataPublicPluginStart,
-  isRunningResponse,
-  TimefilterContract,
-} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
@@ -35,7 +32,7 @@ import {
   ML_ALERT_TYPES,
 } from '../../../../common/constants/alerts';
 import { StateService } from '../../services/state_service';
-import { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
+import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
 
 export interface AnomalyDetectionAlert {
   id: string;

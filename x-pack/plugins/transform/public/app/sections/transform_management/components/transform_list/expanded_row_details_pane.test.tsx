@@ -8,7 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { ExpandedRowDetailsPane, Section, SectionConfig } from './expanded_row_details_pane';
+import type { SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, Section } from './expanded_row_details_pane';
 
 const section: SectionConfig = {
   title: 'the-section-title',

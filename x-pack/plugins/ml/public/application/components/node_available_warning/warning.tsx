@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
-import { EuiCallOut, EuiLink, EuiSpacer, EuiCallOutProps } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   TRIAL_MAX_RAM_FOR_ML_NODES,

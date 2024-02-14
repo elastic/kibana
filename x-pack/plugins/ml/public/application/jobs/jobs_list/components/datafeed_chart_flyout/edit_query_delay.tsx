@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,7 +20,7 @@ import {
 
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
 const tooltipContent = i18n.translate(
   'xpack.ml.jobsList.datafeedChart.editQueryDelay.tooltipContent',

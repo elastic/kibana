@@ -9,8 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { TransformListRow } from '../../../../common';
-import { StopActionName, StopActionNameProps } from './stop_action_name';
+import type { TransformListRow } from '../../../../common';
+import type { StopActionNameProps } from './stop_action_name';
+import { StopActionName } from './stop_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 

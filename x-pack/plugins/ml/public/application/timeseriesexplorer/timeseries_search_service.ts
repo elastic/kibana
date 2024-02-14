@@ -8,7 +8,7 @@
 import { each, find, get, filter } from 'lodash';
 import type { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ml } from '../services/ml_api_service';
@@ -18,8 +18,8 @@ import {
 } from '../../../common/util/job_utils';
 import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
-import { ModelPlotOutput } from '../services/results_service/result_service_rx';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { ModelPlotOutput } from '../services/results_service/result_service_rx';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
 function getMetricData(
   job: Job,

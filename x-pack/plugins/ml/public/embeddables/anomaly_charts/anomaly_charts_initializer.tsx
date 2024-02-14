@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,7 +21,7 @@ import {
   EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AnomalyChartsEmbeddableInput } from '..';
+import type { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;

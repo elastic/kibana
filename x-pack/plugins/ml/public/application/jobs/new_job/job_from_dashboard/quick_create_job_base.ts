@@ -20,7 +20,7 @@ import type { ErrorType } from '@kbn/ml-error-utils';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 

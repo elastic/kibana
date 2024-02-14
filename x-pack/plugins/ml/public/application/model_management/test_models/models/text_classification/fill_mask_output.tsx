@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiHorizontalRule } from '@elastic/eui';
 

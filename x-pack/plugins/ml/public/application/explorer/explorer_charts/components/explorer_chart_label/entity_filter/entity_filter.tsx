@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ML_ENTITY_FIELD_OPERATIONS, MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
 import './_entity_filter.scss';
 

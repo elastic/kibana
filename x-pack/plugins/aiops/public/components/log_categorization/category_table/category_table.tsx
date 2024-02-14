@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
+import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiTableSelectionType,
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonIcon,
@@ -21,8 +21,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
 import moment from 'moment';

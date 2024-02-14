@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Component, FC, ReactNode, useCallback, useContext } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { Component, useCallback, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import { cloneDeep } from 'lodash';
 
 import {
@@ -26,7 +27,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import { CommonProps } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
@@ -34,11 +35,11 @@ import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
 } from '../../../../../common/constants/annotations';
-import {
-  annotationsRefreshed,
+import type {
   AnnotationState,
   AnnotationUpdatesService,
 } from '../../../services/annotations_service';
+import { annotationsRefreshed } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 import { ml } from '../../../services/ml_api_service';

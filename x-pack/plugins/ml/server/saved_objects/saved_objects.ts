@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';

@@ -11,11 +11,8 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/app';
-import {
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-  SingleMetricViewerEmbeddableInput,
-  SingleMetricViewerEmbeddableServices,
-} from '..';
+import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerEmbeddableServices } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';

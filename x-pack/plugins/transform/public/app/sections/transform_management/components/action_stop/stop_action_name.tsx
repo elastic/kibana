@@ -9,7 +9,7 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
-import { TransformCapabilities } from '../../../../../../common/types/capabilities';
+import type { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import {
   isTransformListRowWithStats,
   missingTransformStats,
@@ -18,7 +18,7 @@ import { createNoStatsTooltipMessage } from '../../../../../../common/utils/crea
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 import { useTransformCapabilities } from '../../../../hooks';
 
 export const stopActionNameText = i18n.translate(
