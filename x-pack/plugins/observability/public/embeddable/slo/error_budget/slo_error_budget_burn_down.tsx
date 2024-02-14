@@ -16,7 +16,6 @@ import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historic
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
 
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
-
 import { EmbeddableSloProps } from './types';
 
 export function SloErrorBudget({

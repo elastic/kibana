@@ -52,7 +52,9 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
-  const { uiSettings, embeddable } = useKibana().services;
+  const { uiSettings, embeddable, executionContext } = useKibana().services;
+  const executionContextName = executionContext.get().name;
+  const isDashboardContext = executionContextName === 'dashboards';
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
@@ -130,15 +132,17 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
                   </EuiTitle>
                 </EuiFlexItem>
 
-                <EuiFlexGroup justifyContent="flexEnd" wrap>
-                  {isMouseOver && (
-                    <EuiFlexItem grow={false}>
-                      <ErrorBudgetActions
-                        setDashboardAttachmentReady={setDashboardAttachmentReady}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                {!isDashboardContext && (
+                  <EuiFlexGroup justifyContent="flexEnd" wrap>
+                    {isMouseOver && (
+                      <EuiFlexItem grow={false}>
+                        <ErrorBudgetActions
+                          setDashboardAttachmentReady={setDashboardAttachmentReady}
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
