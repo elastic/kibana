@@ -2323,7 +2323,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
+              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,

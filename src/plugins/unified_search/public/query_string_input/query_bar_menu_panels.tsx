@@ -25,8 +25,8 @@ import {
   toggleFilterNegated,
   pinFilter,
   unpinFilter,
-  compareFilters,
   COMPARE_ALL_OPTIONS,
+  compareFilters,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -140,6 +140,10 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.options.filterLanguageLabel', {
       defaultMessage: 'Filter language',
     }),
+  getQuickFiltersLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.quickFiltersLabel', {
+      defaultMessage: 'Quick filters',
+    }),
 };
 
 export enum QueryBarMenuPanel {
@@ -151,8 +155,14 @@ export enum QueryBarMenuPanel {
   selectLanguage = 'selectLanguage',
 }
 
+export interface AdditionalQueryBarMenuItems {
+  items?: EuiContextMenuPanelItemDescriptor[];
+  panels?: EuiContextMenuPanelDescriptor[];
+}
+
 export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItems;
   savedQuery?: SavedQuery;
   language: string;
   dateRangeFrom?: string;
@@ -180,6 +190,7 @@ export interface QueryBarMenuPanelsProps {
 
 export function useQueryBarMenuPanels({
   filters,
+  additionalQueryBarMenuItems,
   savedQuery,
   language,
   dateRangeFrom,
@@ -373,7 +384,7 @@ export function useQueryBarMenuPanels({
       panel: QueryBarMenuPanel.loadQuery,
       icon: 'filter',
       'data-test-subj': 'saved-query-management-load-button',
-      disabled: !hasSavedQueries,
+      disabled: !hasSavedQueries || !Boolean(manageFilterSetComponent),
     },
     {
       name: savedQuery ? strings.getSaveAsNewFilterSetLabel() : strings.getSaveFilterSetLabel(),
@@ -412,6 +423,11 @@ export function useQueryBarMenuPanels({
       { isSeparator: true }
     );
   }
+
+  if (showFilterBar && additionalQueryBarMenuItems.items?.length) {
+    items.push(...[...additionalQueryBarMenuItems.items, { isSeparator: true } as const]);
+  }
+
   // saved queries actions are only shown when the showQueryInput and showFilterBar is true
   if (showQueryInput && showFilterBar) {
     items.push(...queryAndFiltersRelatedPanels);
@@ -555,7 +571,14 @@ export function useQueryBarMenuPanels({
         />
       ),
     },
-  ];
+    {
+      id: 4,
+      title: strings.getLoadCurrentFilterSetLabel(),
+      width: 400,
+      content: <div>{manageFilterSetComponent}</div>,
+    },
+    ...(additionalQueryBarMenuItems.panels ?? []),
+  ] as EuiContextMenuPanelDescriptor[];
 
   if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
     panels = panels.map((panel) => ({
