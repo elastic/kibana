@@ -29,7 +29,7 @@ interface Props {
 export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
     services: { storage },
-    config: { isMonacoEnabled },
+    config: { isMonacoEnabled } = {},
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
