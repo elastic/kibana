@@ -31,10 +31,10 @@ if [ -z "$type" ] || [ -z "$id_value" ] || [ -z "$criticality_level" ] || [ -z "
 fi
 
 case "$criticality_level" in
-    very_important|important|normal|not_important)
+    extreme_impact|high_impact|medium_impact|low_impact)
         ;;
     *)
-        echo "Invalid criticality_level. Must be one of very_important, important, normal, not_important."
+        echo "Invalid criticality_level. Must be one of extreme_impact, high_impact, medium_impact, low_impact."
         exit 1
         ;;
 esac
