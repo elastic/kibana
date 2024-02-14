@@ -13,7 +13,7 @@ import {
 
 import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
-import { deleteAllAlerts } from '../../../utils';
+import { deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
