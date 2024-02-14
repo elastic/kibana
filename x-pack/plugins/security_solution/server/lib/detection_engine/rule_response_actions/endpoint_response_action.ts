@@ -43,7 +43,7 @@ export const endpointResponseAction = async (
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     errors.push(
-      `attempt to isolate host [${endpointIds.join(', ')}] returned error: ${err.message}`
+      `attempt to [${command}] host IDs [${endpointIds.join(', ')}] returned error: ${err.message}`
     );
 
     return Promise.resolve();
