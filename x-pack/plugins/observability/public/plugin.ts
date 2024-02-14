@@ -103,7 +103,7 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
-      observability: {
+      observability?: {
         enabled: boolean;
       };
     };
