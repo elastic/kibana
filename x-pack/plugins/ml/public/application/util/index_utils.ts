@@ -22,6 +22,7 @@ export async function getDataViewNames(dataViewsService: DataViewsContract) {
  * @param name - The name or index pattern of the data view.
  * @param job - Optional job object.
  * @returns The data view ID or null if it doesn't exist.
+ * @deprecated Use `indexServiceFactory:getDataViewIdFromName()` instead.
  */
 export async function getDataViewIdFromName(
   dataViewsService: DataViewsContract,
@@ -45,6 +46,9 @@ export async function getDataViewIdFromName(
   return dataView.id ?? dataView.getIndexPattern();
 }
 
+/**
+ * @deprecated Use `indexServiceFactory:getDataViewById()` instead.
+ */
 export function getDataViewById(
   dataViewsService: DataViewsContract,
   id: string
