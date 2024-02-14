@@ -82,7 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
-    describe('with logs only', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176967
+    describe.skip('with logs only', () => {
       before(async () => {
         await synthtrace.index(
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
