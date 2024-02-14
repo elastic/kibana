@@ -5,40 +5,18 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import type { RouteDefinitionParams } from '..';
-import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-/**
- * Response of Kibana Query API keys endpoint.
- */
-export interface QueryApiKeyResult {
-  apiKeys: ApiKey[];
-  canManageCrossClusterApiKeys: boolean;
-  canManageApiKeys: boolean;
-  canManageOwnApiKeys: boolean;
-  count: number;
-  total: number;
-}
-
-export function defineQueryApiKeysRoute({
+export function defineQueryApiKeysAggregationsRoute({
   router,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/api_key/_query',
-      validate: {
-        body: schema.object({
-          query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          size: schema.maybe(schema.number()),
-          sort: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          from: schema.maybe(schema.number()),
-        }),
-      },
+      path: '/internal/security/api_key/_query_aggs',
+      validate: false,
       options: {
         access: 'internal',
       },
@@ -73,20 +51,40 @@ export function defineQueryApiKeysRoute({
           });
         }
 
-        const queryResponse = await esClient.asCurrentUser.security.queryApiKeys(request.body);
+        const transportResponse = await esClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '/_security/_query/api_key',
+          body: {
+            size: 0,
+            aggs: {
+              usernames: {
+                terms: {
+                  field: 'username',
+                },
+              },
+              types: {
+                terms: {
+                  field: 'type',
+                },
+              },
+              invalidated: {
+                terms: {
+                  field: 'invalidated',
+                },
+              },
+              expired: {
+                filter: {
+                  range: { expiration: { lte: 'now/m' } },
+                },
+              },
+            },
+          },
+        });
 
-        const validKeys = queryResponse.api_keys.filter(({ invalidated }) => !invalidated);
-
-        return response.ok<QueryApiKeyResult>({
+        return response.ok<any>({
           body: {
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
-            apiKeys: validKeys,
-            total: queryResponse.total,
-            count: queryResponse.count,
-            canManageCrossClusterApiKeys:
-              clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
-            canManageApiKeys: clusterPrivileges.manage_api_key,
-            canManageOwnApiKeys: clusterPrivileges.manage_own_api_key,
+            aggregations: transportResponse.aggregations,
           },
         });
       } catch (error) {

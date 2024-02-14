@@ -30,7 +30,7 @@ import {
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -68,7 +68,7 @@ interface UseAsyncTableResult {
 }
 
 const useAsyncTable = (): UseAsyncTableResult => {
-  const [state, setState] = useState<QueryApiKeyResult>({});
+  const [state, setState] = useState<QueryApiKeyResult>({} as QueryApiKeyResult);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<QueryContainer>({});
   const [from, setFrom] = useState<number>(0);
@@ -88,8 +88,6 @@ const useAsyncTable = (): UseAsyncTableResult => {
       const response = await new APIKeysAPIClient(services.http).queryApiKeys(requestBody);
 
       setState(response);
-    } catch (error) {
-      console.error('Error fetching API keys:', error);
     } finally {
       setIsLoading(false);
     }
@@ -154,12 +152,12 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
     if (!args.error) {
-      try {
-        console.log(EuiSearchBar.Query.parse(args.queryText));
-      } catch (e) {
-        console.log(e);
-        throw e;
-      }
+      // try {
+      //   console.log(EuiSearchBar.Query.parse(args.queryText));
+      // } catch (e) {
+      //   console.log(e);
+      //   throw e;
+      // }
       const queryContainer = EuiSearchBar.Query.toESQuery(args.query);
       setQuery(queryContainer);
     }
@@ -433,9 +431,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
-  const { typeFilters, usernameFilters, hasInvalidatedFilters, expired } =
-    categorizeAggregations(aggregations);
-  const expiredFilters = [];
+  const { typeFilters, usernameFilters, expired } = categorizeAggregations(aggregations);
 
   const deletable = (item: CategorizedApiKey) =>
     canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
@@ -557,6 +553,29 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     });
   }
 
+  if (expired > 0) {
+    filters.push({
+      type: 'field_value_toggle_group',
+      field: 'expiration',
+      items: [
+        {
+          value: 'now+1m/m',
+          name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
+            defaultMessage: 'Active',
+          }),
+          operator: 'gt',
+        },
+        {
+          value: 'now',
+          name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
+            defaultMessage: 'Expired',
+          }),
+          operator: 'lte',
+        },
+      ],
+    });
+  }
+
   if (usernameFilters.size > 1) {
     filters.push({
       type: 'custom_component',
@@ -566,90 +585,13 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     });
   }
 
-  if (expired > 0) {
-    filters.push({
-      type: 'field_value_toggle_group',
-      field: 'expired',
-      items: [
-        {
-          value: false,
-          name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
-            defaultMessage: 'Active',
-          }),
-        },
-        {
-          value: true,
-          name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
-            defaultMessage: 'Expired',
-          }),
-        },
-      ],
-    });
-  }
-
   return (
     <>
-      {/* <EuiInMemoryTable
-        items={categorizedApiKeys}
-        itemId="id"
-        columns={columns}
-        search={
-          categorizedApiKeys.length > 0
-            ? {
-                toolsLeft: selectedItems.length ? (
-                  <EuiButton
-                    onClick={() => onDelete(selectedItems)}
-                    color="danger"
-                    iconType="trash"
-                    data-test-subj="bulkInvalidateActionButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
-                      defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
-                      values={{
-                        count: selectedItems.length,
-                      }}
-                    />
-                  </EuiButton>
-                ) : undefined,
-                box: {
-                  incremental: true,
-                },
-                filters,
-              }
-            : undefined
-        }
-        sorting={{
-          sort: {
-            field: 'creation',
-            direction: 'desc',
-          },
-        }}
-        selection={
-          readOnly
-            ? undefined
-            : {
-                selectable: deletable,
-                onSelectionChange: setSelectedItems,
-              }
-        }
-        pagination={{
-          initialPageSize: 10,
-          pageSizeOptions: [10, 25, 50],
-        }}
-        loading={loading}
-        isSelectable={canManageOwnApiKeys}
-      /> */}
-
       <EuiSearchBar
         defaultQuery={initialQuery}
         box={{
           placeholder: 'Search...',
           incremental: true,
-          // schema: {
-          //   strict: true,
-
-          // }
         }}
         filters={filters}
         onChange={onSearchChange}
@@ -692,42 +634,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         }
         isSelectable={canManageOwnApiKeys}
       />
-    </>
-  );
-};
-
-export interface ExpiredFilterButtonProps {
-  query: Query;
-  onChange?: (query: Query) => void;
-}
-
-export const ExpiredFilterButton: FunctionComponent<ExpiredFilterButtonProps> = ({
-  query,
-  onChange,
-}) => {
-  if (!onChange) {
-    return null;
-  }
-  return (
-    <>
-      <EuiFilterButton
-        iconType="user"
-        iconSide="left"
-        hasActiveFilters={query.hasSimpleFieldClause('type', 'rest')}
-        onClick={() =>
-          onChange(
-            query.hasSimpleFieldClause('type', 'rest')
-              ? query.removeSimpleFieldClauses('type')
-              : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'rest')
-          )
-        }
-        withNext={types.includes('cross_cluster') || types.includes('managed')}
-      >
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.activeFilter"
-          defaultMessage="Active"
-        />
-      </EuiFilterButton>
     </>
   );
 };
@@ -964,7 +870,7 @@ export const ApiKeyStatus: FunctionComponent<ApiKeyStatusProps> = ({ expiration 
 };
 
 export interface ApiKeyBadgeProps {
-  type: CategorizedApiKeyType;
+  type: 'rest' | 'cross_cluster' | 'managed';
 }
 
 export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
@@ -1034,47 +940,6 @@ export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
   expired: boolean;
 };
 
-/**
- * Categorizes API keys by type (with Kibana system API keys given its own dedicated `managed` type)
- * and determines applicable filter values.
- */
-export function categorizeApiKeys(apiKeys: ApiKey[]) {
-  const categorizedApiKeys: CategorizedApiKey[] = [];
-  const typeFilters: Set<CategorizedApiKey['type']> = new Set();
-  const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
-  const expiredFilters: Set<CategorizedApiKey['expired']> = new Set();
-
-  apiKeys.forEach((apiKey) => {
-    const type = getApiKeyType(apiKey);
-    const expired = apiKey.expiration ? Date.now() > apiKey.expiration : false;
-
-    typeFilters.add(type);
-    usernameFilters.add(apiKey.username);
-    expiredFilters.add(expired);
-
-    categorizedApiKeys.push({ ...apiKey, type, expired } as CategorizedApiKey);
-  });
-
-  return {
-    categorizedApiKeys,
-    typeFilters: [...typeFilters],
-    usernameFilters: [...usernameFilters],
-    expiredFilters: [...expiredFilters],
-  };
-}
-
-export type CategorizedApiKeyType = ReturnType<typeof getApiKeyType>;
-
-/**
- * Determines API key type the way it is presented in the UI with Kibana system API keys given its own dedicated `managed` type.
- */
-export function getApiKeyType(apiKey: ApiKey) {
-  return apiKey.type === 'rest' &&
-    (apiKey.metadata?.managed || apiKey.name.indexOf('Alerting: ') === 0)
-    ? 'managed'
-    : apiKey.type;
-}
-
 interface AggregationResponse<V> {
   buckets: Array<{ key: V; doc_count: number }>;
   doc_count_error_upper_bound: number;
@@ -1088,7 +953,7 @@ export interface ApiKeyAggregations {
 }
 
 export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) => {
-  const { invalidated, usernames, types, expired } = aggregationResponse;
+  const { usernames, types, expired } = aggregationResponse;
   const typeFilters: Set<CategorizedApiKey['type']> = new Set();
   const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
 
@@ -1099,7 +964,6 @@ export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) 
     usernameFilters.add(username.key);
   });
   return {
-    hasInvalidatedFilters: invalidated.buckets.length,
     typeFilters,
     usernameFilters,
     expired: expired.doc_count,

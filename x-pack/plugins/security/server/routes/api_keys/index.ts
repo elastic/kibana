@@ -11,6 +11,7 @@ import { defineGetApiKeysRoutes } from './get';
 import { defineHasApiKeysRoutes } from './has_active';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { defineQueryApiKeysRoute } from './query';
+import { defineQueryApiKeysAggregationsRoute } from './query_aggregations';
 import { defineUpdateApiKeyRoutes } from './update';
 import type { RouteDefinitionParams } from '..';
 
@@ -32,4 +33,5 @@ export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
   defineQueryApiKeysRoute(params);
+  defineQueryApiKeysAggregationsRoute(params);
 }
