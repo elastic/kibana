@@ -31,8 +31,7 @@
       "taskManager",
       "triggersActionsUi",
       "usageCollection",
-      "bfetch",
-      "serverless"
+      "bfetch"
     ],
     "optionalPlugins": [
       "cloud",
