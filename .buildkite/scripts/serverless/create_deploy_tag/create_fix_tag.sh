@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "--- Verify $BUILDKITE_COMMIT exists in $BUILDKITE_BRANCH"
+echo "--- Verify $BUILDKITE_COMMIT exists in origin/$BUILDKITE_BRANCH"
 # Step 1: Check if the commit is in the specific named branch
 if git merge-base --is-ancestor $BUILDKITE_COMMIT origin/$BUILDKITE_BRANCH; then
     echo "Commit $BUILDKITE_COMMIT is part of the $BUILDKITE_BRANCH branch"
