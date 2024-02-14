@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   getFunctionDefinition,
   isAssignment,
-  isAssignmentComplete,
   isColumnItem,
   isFunctionItem,
   isLiteralItem,

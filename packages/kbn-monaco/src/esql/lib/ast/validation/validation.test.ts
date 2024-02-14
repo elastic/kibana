@@ -1488,11 +1488,9 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a_index | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
-      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [=] of type [void]",
     ]);
     testErrorsAndWarnings('from a_index | stats numberField=5 by ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
-      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [=] of type [void]",
     ]);
     testErrorsAndWarnings('from a_index | stats avg(numberField) by wrongField', [
       'Unknown column [wrongField]',
@@ -1552,27 +1550,82 @@ describe('validation logic', () => {
       `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
     ]);
     testErrorsAndWarnings('from a_index | stats numberField + 1', [
-      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
+      'At least one aggregation function required in [STATS], found [numberField+1]',
     ]);
 
     for (const nesting of [1, 2, 3, 4]) {
-      const moreBuiltinWrapping = Array(nesting).fill('+ 1').join('');
+      const moreBuiltinWrapping = Array(nesting).fill('+1').join('');
       testErrorsAndWarnings(`from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
       testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
       testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + numberField`, [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+        `At least one aggregation function required in [STATS], found [5${moreBuiltinWrapping}+numberField]`,
       ]);
       testErrorsAndWarnings(`from a_index | stats 5 + numberField ${moreBuiltinWrapping}`, [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+        `At least one aggregation function required in [STATS], found [5+numberField${moreBuiltinWrapping}]`,
       ]);
+      testErrorsAndWarnings(
+        `from a_index | stats 5 + numberField ${moreBuiltinWrapping}, var0 = sum(numberField)`,
+        [
+          `At least one aggregation function required in [STATS], found [5+numberField${moreBuiltinWrapping}]`,
+        ]
+      );
+      const evalFnWrapping = Array(nesting).fill('round(').join('');
+      const closingWrapping = Array(nesting).fill(')').join('');
+      // stress test the validation of the nesting check here
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} sum(numberField) ${closingWrapping}`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} sum(numberField) ${closingWrapping} + ${evalFnWrapping} sum(numberField) ${closingWrapping}`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}`,
+        [
+          `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
+        ]
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}, var0 = sum(numberField)`,
+        [
+          `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
+        ]
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats var0 = ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}, var1 = sum(numberField)`,
+        [
+          `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
+        ]
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} sum(numberField + numberField) ${closingWrapping}`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping} + ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats sum(${evalFnWrapping} numberField ${closingWrapping} )`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | stats sum(${evalFnWrapping} numberField ${closingWrapping} ) + sum(${evalFnWrapping} numberField ${closingWrapping} )`,
+        []
+      );
     }
 
     testErrorsAndWarnings('from a_index | stats 5 + numberField + 1', [
-      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+      'At least one aggregation function required in [STATS], found [5+numberField+1]',
     ]);
 
     testErrorsAndWarnings('from a_index | stats numberField + 1 by ipField', [
-      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
+      'At least one aggregation function required in [STATS], found [numberField+1]',
     ]);
 
     testErrorsAndWarnings(
@@ -1587,6 +1640,14 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a_index | stats var0 = avg(numberField), count(*)', []);
     testErrorsAndWarnings('from a_index | stats var0 = avg(fn(number)), count(*)', [
       'Unknown function [fn]',
+    ]);
+
+    // test all not allowed combinations
+    testErrorsAndWarnings('from a_index | STATS sum( numberField ) + abs( numberField ) ', [
+      'Cannot combine aggregation and non-aggregation values in [STATS], found [sum(numberField)+abs(numberField)]',
+    ]);
+    testErrorsAndWarnings('from a_index | STATS abs( numberField + sum( numberField )) ', [
+      'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(numberField+sum(numberField))]',
     ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
