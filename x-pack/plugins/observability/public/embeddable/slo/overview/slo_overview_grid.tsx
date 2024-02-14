@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { MetricDatum } from '@elastic/charts/dist/chart_types/metric/specs';
-import { SloOverviewDetails } from './slo_overview_details';
+import { SloOverviewDetails } from '../common/slo_overview_details';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';

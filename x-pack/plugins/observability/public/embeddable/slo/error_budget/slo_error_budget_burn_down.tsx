@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
 
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
 import { EmbeddableSloProps } from './types';
+import { SloOverviewDetails } from '../common/slo_overview_details'; // TODO change to slo_details
 
 export function SloErrorBudget({
   sloId,
@@ -25,7 +26,7 @@ export function SloErrorBudget({
   reloadSubject,
 }: EmbeddableSloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -104,7 +105,7 @@ export function SloErrorBudget({
     <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup justifyContent="flexEnd" wrap>
         <EuiFlexItem grow={false}>
-          <EuiLink data-test-subj="o11ySloErrorBudgetLink" onClick={() => {}}>
+          <EuiLink data-test-subj="o11ySloErrorBudgetLink" onClick={() => { setSelectedSlo(slo)}}>
             {slo.name}
           </EuiLink>
         </EuiFlexItem>
@@ -117,6 +118,8 @@ export function SloErrorBudget({
           slo={slo!}
         />
       </EuiFlexGroup>
+
+      <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </div>
   );
 }
