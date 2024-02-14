@@ -6,16 +6,12 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { keys, mapValues } from 'lodash';
+import { keys } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { isOk, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskManagerMetric } from '../task_events';
-import {
-  unflattenObject,
-  getTaskTypeGroup,
-  type SerializedHistogram,
-  SimpleHistogram,
-} from './lib';
+import { getTaskTypeGroup, type SerializedHistogram, SimpleHistogram } from './lib';
 import { TaskManagerMetrics } from './task_metrics_collector';
 import { ITaskMetricsAggregator } from './types';
 
@@ -23,6 +19,7 @@ const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
 
 const OVERDUE_BY_KEY = 'overdue_by';
+const OVERDUE_BY_VALUES_KEY = 'overdue_by_values';
 
 enum TaskOverdueMetricKeys {
   OVERALL = 'overall',
@@ -31,6 +28,7 @@ enum TaskOverdueMetricKeys {
 
 interface TaskOverdueHistogram extends JsonObject {
   [OVERDUE_BY_KEY]: SerializedHistogram;
+  [OVERDUE_BY_VALUES_KEY]: number[];
 }
 export interface TaskOverdueMetric extends JsonObject {
   [TaskOverdueMetricKeys.OVERALL]: TaskOverdueHistogram;
@@ -45,18 +43,26 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
   public initialMetric(): TaskOverdueMetric {
     return {
       by_type: {},
-      overall: { overdue_by: { counts: [], values: [] } },
+      overall: {
+        overdue_by: { counts: [], values: [] },
+        overdue_by_values: [],
+      },
     };
   }
 
   public collect(): TaskOverdueMetric {
+    const result = this.initialMetric();
     if (keys(this.histograms).length === 0) {
-      return {
-        by_type: {},
-        overall: { overdue_by: { counts: [], values: [] } },
-      };
+      return result;
     }
-    return unflattenObject(mapValues(this.histograms, (hist) => hist.serialize()));
+
+    for (const prop of Object.keys(this.histograms)) {
+      const hist = this.histograms[prop];
+      set(result, prop, hist.serialize());
+      set(result, `${prop}_values`, hist.getAllValues());
+    }
+
+    return result;
   }
 
   public reset() {
