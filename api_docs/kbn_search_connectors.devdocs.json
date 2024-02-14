@@ -767,18 +767,10 @@
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
             "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.OptimisticConcurrency",
-            "text": "OptimisticConcurrency"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
             "section": "def-common.Connector",
             "text": "Connector"
           },
-          "> | undefined>"
+          " | undefined>"
         ],
         "path": "packages/kbn-search-connectors/lib/fetch_connectors.ts",
         "deprecated": false,
@@ -3377,6 +3369,52 @@
             "label": "sync_now",
             "description": [],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ConnectorAPIListConnectorsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorAPIListConnectorsResponse",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connectors_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorAPIListConnectorsResponse.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connectors_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorAPIListConnectorsResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.Connector",
+                "text": "Connector"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-search-connectors/types/connectors_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
