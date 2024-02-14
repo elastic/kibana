@@ -71,10 +71,6 @@ function saveDatafeed(datafeedConfig, job) {
   });
 }
 
-export async function loadDataViewListItems(dataViewsService) {
-  return (await dataViewsService.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
-}
-
 function extractDescription(job, newJobData) {
   const description = newJobData.description;
   if (newJobData.description !== job.description) {

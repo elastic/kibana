@@ -45,6 +45,11 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
         return dataViewsService.create({});
       }
     },
+    async loadDataViewListItems() {
+      return (await dataViewsService.getIdsWithTitle()).sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+    },
   };
 }
 
