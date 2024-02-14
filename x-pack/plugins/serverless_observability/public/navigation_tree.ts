@@ -200,7 +200,6 @@ export const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               title: 'Overview',
-              renderAs: 'item',
               id: 'synthetics-overview',
               link: 'synthetics:overview',
               breadcrumbStatus: 'hidden',
@@ -208,21 +207,18 @@ export const navigationTree: NavigationTreeDefinition = {
             {
               link: 'synthetics:management',
               title: 'Monitors',
-              renderAs: 'item',
               id: 'synthetics-management',
               breadcrumbStatus: 'hidden',
             },
             {
               link: 'synthetics:certificates',
               title: 'TLS Certificates',
-              renderAs: 'item',
               id: 'synthetics-certificates',
               breadcrumbStatus: 'hidden',
             },
             {
               link: 'synthetics:settings',
               title: 'Settings',
-              renderAs: 'item',
               id: 'synthetics-settings',
               breadcrumbStatus: 'hidden',
             },
