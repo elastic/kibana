@@ -848,6 +848,8 @@
       "@kbn/flot-charts/*": ["packages/kbn-flot-charts/*"],
       "@kbn/foo-plugin": ["x-pack/test/ui_capabilities/common/plugins/foo_plugin"],
       "@kbn/foo-plugin/*": ["x-pack/test/ui_capabilities/common/plugins/foo_plugin/*"],
+      "@kbn/formatters": ["packages/kbn-formatters"],
+      "@kbn/formatters/*": ["packages/kbn-formatters/*"],
       "@kbn/ftr-apis-plugin": ["src/plugins/ftr_apis"],
       "@kbn/ftr-apis-plugin/*": ["src/plugins/ftr_apis/*"],
       "@kbn/ftr-common-functional-services": ["packages/kbn-ftr-common-functional-services"],
