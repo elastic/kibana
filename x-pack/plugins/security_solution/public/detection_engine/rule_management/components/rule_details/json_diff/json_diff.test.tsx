@@ -132,6 +132,13 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       },
     } as const;
 
+    const testExceptionListItem = {
+      id: 'acbbbd86-7973-40a4-bc83-9e926c7f1e59',
+      list_id: '1e51e9b9-b7c0-4a11-8785-55f740b9938a',
+      type: 'rule_default',
+      namespace_type: 'single',
+    } as const;
+
     const oldRule: RuleResponse = {
       ...savedRuleMock,
       version: 1,
@@ -143,21 +150,31 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       version: 2,
     };
 
-    /* Case: rule update doesn't have the "actions" property */
-    const { rerender } = render(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule }} />);
+    /* Case: rule update doesn't have "actions" or "exception_list" properties */
+    const { rerender } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
     expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
 
-    /* Case: rule update has "actions" equal to an empty array */
-    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, actions: [] }} />);
-    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
-
-    /* Case: rule update has an action */
+    /* Case: rule update has "actions" and "exception_list" equal to empty arrays */
     rerender(
       <RuleDiffTab
         oldRule={{ ...oldRule }}
-        newRule={{ ...newRule, actions: [{ ...testAction, id: 'my-other-action' }] }}
+        newRule={{ ...newRule, actions: [], exceptions_list: [] }}
+      />
+    );
+    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
+
+    /* Case: rule update has an action and an exception list item */
+    rerender(
+      <RuleDiffTab
+        oldRule={{ ...oldRule }}
+        newRule={{
+          ...newRule,
+          actions: [{ ...testAction, id: 'my-other-action' }],
+          exceptions_list: [testExceptionListItem],
+        }}
       />
     );
     expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
   });
+
 });
