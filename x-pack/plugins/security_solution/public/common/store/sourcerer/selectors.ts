@@ -6,9 +6,10 @@
  */
 import { createSelector } from 'reselect';
 import type { State } from '../types';
-import type { SourcererModel, SourcererScopeName } from './model';
+import type { SourcererModel } from './model';
+import { SourcererScopeName } from './model';
 
-const SOURCERER_SCOPE_MAX_SIZE = 4;
+const SOURCERER_SCOPE_MAX_SIZE = Object.keys(SourcererScopeName).length;
 
 const selectSourcerer = (state: State): SourcererModel => state.sourcerer;
 
