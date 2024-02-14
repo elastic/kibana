@@ -29,7 +29,7 @@ export const TRIGGER_SUGGESTION_COMMAND = {
 };
 
 function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
-  return shouldBeQuotedText(text, options) ? `\`${text}\`` : text;
+  return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
 }
 
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {

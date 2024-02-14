@@ -445,7 +445,7 @@ export function columnExists(
     return { hit: true, nameHit: column.name };
   }
   if (column.quoted) {
-    const trimmedName = column.name.replace(/\s/g, '');
+    const trimmedName = column.name.replace(/`/g, '``').replace(/\s/g, '');
     if (variables.has(trimmedName)) {
       return { hit: true, nameHit: trimmedName };
     }
