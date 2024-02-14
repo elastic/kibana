@@ -124,6 +124,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
             });
           });
+
+          describe('without a time field', () => {
+            beforeEach(async () => {
+              await PageObjects.discover.createAdHocDataView('logs*', false);
+              await PageObjects.discover.waitUntilSearchingHasFinished();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+            });
+
+            it('should render initial columns correctly', async () => {
+              expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
+
+              await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp']);
+              });
+
+              await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
+              });
+            });
+
+            it('should render selected columns correctly', async () => {
+              await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+              await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
+              });
+
+              await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql([
+                  'bytes',
+                  'extension',
+                  '@timestamp',
+                ]);
+              });
+
+              await dataGrid.clickMoveColumnLeft('@timestamp');
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql([
+                  'bytes',
+                  '@timestamp',
+                  'extension',
+                ]);
+              });
+
+              await dataGrid.clickMoveColumnLeft('@timestamp');
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql([
+                  '@timestamp',
+                  'bytes',
+                  'extension',
+                ]);
+              });
+
+              await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
+              });
+            });
+          });
         });
       });
     });
