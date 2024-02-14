@@ -68,6 +68,15 @@ export interface ChromeNavLink {
 
   /**
    * List of locations where the nav link should be visible.
+   *
+   * Accepts the following values:
+   * - "globalSearch": the link will appear in the global search bar
+   * - "home": the link will appear on the Kibana home page
+   * - "kibanaOverview": the link will appear in the Kibana overview page
+   * - "sideNav": the link will appear in the side navigation.
+   *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
+   *
+   * @default ['globalSearch']
    */
   readonly visibleIn: AppDeepLinkLocations[];
 }

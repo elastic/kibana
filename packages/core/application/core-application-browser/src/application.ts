@@ -101,7 +101,16 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   status?: AppStatus;
 
   /**
-   * Optional list of locations where the app is visible. By default the app is visible everywhere (`['globalSearch', 'sideNav']`)
+   * Optional list of locations where the app is visible.
+   *
+   * Accepts the following values:
+   * - "globalSearch": the link will appear in the global search bar
+   * - "home": the link will appear on the Kibana home page
+   * - "kibanaOverview": the link will appear in the Kibana overview page
+   * - "sideNav": the link will appear in the side navigation.
+   *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
+   *
+   * @default ['globalSearch', 'sideNav']
    * unless its status is marked as `inaccessible`.
    */
   visibleIn?: AppDeepLinkLocations[];
