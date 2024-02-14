@@ -151,7 +151,7 @@ const defaultProps = {
 };
 
 const renderFilterEditor = async (propsOverrides?: Partial<FilterEditorProps>) => {
-  const rtlRender = render(<FilterEditor {...defaultProps} {...propsOverrides} />, {
+  render(<FilterEditor {...defaultProps} {...propsOverrides} />, {
     wrapper: ({ children }) => (
       <I18nProvider>
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -162,64 +162,59 @@ const renderFilterEditor = async (propsOverrides?: Partial<FilterEditorProps>) =
   await waitFor(() => {
     expect(screen.getByRole('combobox', { name: /select operator/i })).toBeInTheDocument();
   });
+};
 
-  const getFilterBadgeTextContent = () => screen.getByTestId('filter-preview').textContent;
+const getFilterBadgeTextContent = () => screen.getByTestId('filter-preview').textContent;
 
-  const getMultiValuesParamsValue = () => {
-    const mainNode = screen.queryByTestId('filterParams');
-    if (!mainNode) {
-      throw new Error('Node has not been found');
-    }
+const getMultiValuesParamsValue = () => {
+  const mainNode = screen.queryByTestId('filterParams');
+  if (!mainNode) {
+    throw new Error('Node has not been found');
+  }
 
-    const filterPills = within(mainNode).queryAllByTestId('euiComboBoxPill');
-    if (filterPills.length === 0) {
-      return '';
-    } else {
-      return filterPills.map((pill) => pill.textContent);
-    }
-  };
+  const filterPills = within(mainNode).queryAllByTestId('euiComboBoxPill');
+  if (filterPills.length === 0) {
+    return '';
+  } else {
+    return filterPills.map((pill) => pill.textContent);
+  }
+};
 
-  const getSingleParamValue = () => {
-    return (screen.getByRole('spinbutton', { name: /enter a value/i }) as HTMLInputElement).value;
-  };
+const getSingleParamValue = () => {
+  return (screen.getByRole('spinbutton', { name: /enter a value/i }) as HTMLInputElement).value;
+};
 
-  const getBetweenParamsValue = () => {
-    const mainNode = screen.queryByTestId('filterParams');
-    if (!mainNode) {
-      throw new Error('Node has not been found');
-    }
-    return (within(mainNode).getAllByRole('spinbutton') as HTMLInputElement[])
-      .map((el) => el.value)
-      .join(',');
-  };
+const getBetweenParamsValue = () => {
+  const mainNode = screen.queryByTestId('filterParams');
+  if (!mainNode) {
+    throw new Error('Node has not been found');
+  }
+  return (within(mainNode).getAllByRole('spinbutton') as HTMLInputElement[])
+    .map((el) => el.value)
+    .join(',');
+};
 
-  const chooseOperator = (operator: string) => {
-    fireEvent.click(screen.getByRole('combobox', { name: /select operator/i }));
-    fireEvent.click(screen.getByRole('option', { name: operator }));
-  };
-  return {
-    ...rtlRender,
-    getBetweenParamsValue,
-    getSingleParamValue,
-    getFilterBadgeTextContent,
-    getMultiValuesParamsValue,
-    chooseOperator,
-  };
+const chooseOperator = (operator: string) => {
+  fireEvent.click(screen.getByRole('combobox', { name: /select operator/i }));
+  fireEvent.click(screen.getByRole('option', { name: operator }));
+};
+
+const waitForComboboxToBeClosed = () => {
+  waitFor(() => {
+    expect(
+      screen.queryByRole('listbox', { name: 'Choose from the following options' })
+    ).not.toBeInTheDocument();
+  });
 };
 
 describe('Preserving or clearing value on operator change', () => {
   describe('preserves value with no change', () => {
     afterEach(() => {
       // close combobox to prevent "memory leak" warning
-      waitFor(() => {
-        expect(
-          screen.queryByRole('listbox', { name: 'Choose from the following options' })
-        ).not.toBeInTheDocument();
-      });
+      waitForComboboxToBeClosed();
     });
     it('is <-> is not', async () => {
-      const { chooseOperator, getSingleParamValue, getFilterBadgeTextContent } =
-        await renderFilterEditor();
+      await renderFilterEditor();
       chooseOperator('is not');
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('NOT price: 23');
@@ -229,10 +224,10 @@ describe('Preserving or clearing value on operator change', () => {
     });
     it('is one of <-> is not one of', async () => {
       const filterValues = ['23', '48', '89'];
-      const { chooseOperator, getMultiValuesParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsOneOf(filterValues),
-        });
+
+      await renderFilterEditor({
+        filter: filterIsOneOf(filterValues),
+      });
       chooseOperator('is not one of');
       expect(getMultiValuesParamsValue()).toEqual(filterValues);
       expect(getFilterBadgeTextContent()).toBe('NOT price: is one of 23, 48, 89');
@@ -241,10 +236,9 @@ describe('Preserving or clearing value on operator change', () => {
       expect(getFilterBadgeTextContent()).toBe('price: is one of 23, 48, 89');
     });
     it('is between <-> is not between', async () => {
-      const { chooseOperator, getBetweenParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsBetween({ gte: '20', lt: '30' }),
-        });
+      await renderFilterEditor({
+        filter: filterIsBetween({ gte: '20', lt: '30' }),
+      });
       chooseOperator('is not between');
       expect(getBetweenParamsValue()).toEqual('20,30');
       expect(getFilterBadgeTextContent()).toBe('NOT price: 20 to 30');
@@ -254,19 +248,17 @@ describe('Preserving or clearing value on operator change', () => {
     });
 
     it('less than -> between', async () => {
-      const { chooseOperator, getBetweenParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterLessThan,
-        });
+      await renderFilterEditor({
+        filter: filterLessThan,
+      });
       chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual(',30');
       expect(getFilterBadgeTextContent()).toBe('price: < 30');
     });
     it('greater than ->  is between', async () => {
-      const { chooseOperator, getBetweenParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterGreaterOrEqual,
-        });
+      await renderFilterEditor({
+        filter: filterGreaterOrEqual,
+      });
       chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual('20,');
       expect(getFilterBadgeTextContent()).toBe('price: ≥ 20');
@@ -275,8 +267,7 @@ describe('Preserving or clearing value on operator change', () => {
 
   describe('clears value', () => {
     it('is <-> exists', async () => {
-      const { chooseOperator, getFilterBadgeTextContent, getSingleParamValue } =
-        await renderFilterEditor();
+      await renderFilterEditor();
       chooseOperator('exists');
       expect(getFilterBadgeTextContent()).toBe('price: exists');
       chooseOperator('is');
@@ -284,7 +275,7 @@ describe('Preserving or clearing value on operator change', () => {
       expect(getFilterBadgeTextContent()).toBe('price: 0');
     });
     it('is one of -> is between', async () => {
-      const { chooseOperator, getMultiValuesParamsValue } = await renderFilterEditor({
+      await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
       chooseOperator('is one of');
@@ -292,23 +283,21 @@ describe('Preserving or clearing value on operator change', () => {
       expect(screen.queryByTestId('filter-preview')).not.toBeInTheDocument();
     });
     it('is between -> is', async () => {
-      const { chooseOperator, getSingleParamValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsBetween({ gte: '20', lt: '30' }),
-        });
+      await renderFilterEditor({
+        filter: filterIsBetween({ gte: '20', lt: '30' }),
+      });
       chooseOperator('is');
       expect(getSingleParamValue()).toEqual('');
       expect(getFilterBadgeTextContent()).toBe('price: 0');
     });
     it('is -> is between', async () => {
-      const { chooseOperator, getBetweenParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor();
+      await renderFilterEditor();
       chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual(',');
       expect(getFilterBadgeTextContent()).toBe('price: -');
     });
     it('is between -> is one of', async () => {
-      const { chooseOperator, getMultiValuesParamsValue } = await renderFilterEditor({
+      await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
       chooseOperator('is one of');
@@ -319,52 +308,45 @@ describe('Preserving or clearing value on operator change', () => {
 
   describe('converts and partially preserves value', () => {
     it('is -> is one of', async () => {
-      const { chooseOperator, getMultiValuesParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor();
+      await renderFilterEditor();
       chooseOperator('is one of');
       expect(getMultiValuesParamsValue()).toEqual(['23']);
       expect(getFilterBadgeTextContent()).toBe('price: is one of 23');
     });
     it('is -> is not one of', async () => {
-      const { chooseOperator, getMultiValuesParamsValue, getFilterBadgeTextContent } =
-        await renderFilterEditor();
+      await renderFilterEditor();
       chooseOperator('is not one of');
       expect(getMultiValuesParamsValue()).toEqual(['23']);
       expect(getFilterBadgeTextContent()).toBe('NOT price: is one of 23');
     });
     it('is one of -> is', async () => {
-      const { chooseOperator, getSingleParamValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsOneOf(['23', '48', '89']),
-        });
+      await renderFilterEditor({
+        filter: filterIsOneOf(['23', '48', '89']),
+      });
       chooseOperator('is');
-      // check the input type  - if it's a range input, pills or text input! do not destructure
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('price: 23');
     });
     it('is one of -> is not', async () => {
-      const { chooseOperator, getSingleParamValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsOneOf(['23', '48', '89']),
-        });
+      await renderFilterEditor({
+        filter: filterIsOneOf(['23', '48', '89']),
+      });
       chooseOperator('is not');
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('NOT price: 23');
     });
     it('is between -> less than', async () => {
-      const { chooseOperator, getSingleParamValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsBetween({ gte: '20', lt: '30' }),
-        });
+      await renderFilterEditor({
+        filter: filterIsBetween({ gte: '20', lt: '30' }),
+      });
       chooseOperator('less than');
       expect(getSingleParamValue()).toEqual('30');
       expect(getFilterBadgeTextContent()).toBe('price: < 30');
     });
     it('is between -> greater than', async () => {
-      const { chooseOperator, getSingleParamValue, getFilterBadgeTextContent } =
-        await renderFilterEditor({
-          filter: filterIsBetween({ gte: '20', lt: '30' }),
-        });
+      await renderFilterEditor({
+        filter: filterIsBetween({ gte: '20', lt: '30' }),
+      });
       chooseOperator('greater or equal');
       expect(getSingleParamValue()).toEqual('20');
       expect(getFilterBadgeTextContent()).toBe('price: ≥ 20');
