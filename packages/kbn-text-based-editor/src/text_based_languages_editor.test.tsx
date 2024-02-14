@@ -102,6 +102,16 @@ describe('TextBasedLanguagesEditor', () => {
     );
   });
 
+  it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideTimeFilterInfo: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(component.find('[data-test-subj="TextBasedLangEditor-date-info"]').length).toBe(0);
+  });
+
   it('should render the date info with @timestamp found if detectTimestamp is true', async () => {
     const newProps = {
       ...props,
