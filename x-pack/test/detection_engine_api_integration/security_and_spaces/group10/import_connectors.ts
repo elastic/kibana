@@ -8,10 +8,16 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { combineToNdJson, deleteAllRules, getCustomQueryRuleParams } from '../../../utils';
-import { createConnector, deleteConnector, getConnector } from '../../../utils/connectors';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  createConnector,
+  deleteConnector,
+  getConnector,
+} from '../../../security_solution_api_integration/test_suites/detections_response/utils/connectors';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { deleteAllRules } from '../../utils';
+import { combineToNdJson } from '../../../security_solution_api_integration/test_suites/detections_response/utils';
 
+// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
