@@ -118,7 +118,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.riskInputColumn"
-            defaultMessage="Risk input"
+            defaultMessage="Risk contribution"
           />
         ),
         truncateText: true,

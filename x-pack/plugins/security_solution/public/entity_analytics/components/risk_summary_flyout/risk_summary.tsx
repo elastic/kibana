@@ -140,7 +140,8 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           <h3>
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.title"
-              defaultMessage="Risk summary"
+              defaultMessage="{entity} risk summary"
+              values={{ entity: isUserRiskData(riskData) ? 'User' : 'Host' }}
             />
           </h3>
         </EuiTitle>
@@ -178,7 +179,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           title: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.riskInputs"
-              defaultMessage="Risk inputs"
+              defaultMessage="View risk contributions"
             />
           ),
           link: {
