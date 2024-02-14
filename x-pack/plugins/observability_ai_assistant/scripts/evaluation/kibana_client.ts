@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { pick, remove } from 'lodash';
+import { isArray, pick, remove } from 'lodash';
 import { filter, lastValueFrom, map, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -22,7 +22,7 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
-import { FunctionDefinition } from '../../common/types';
+import { FunctionDefinition, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
@@ -36,11 +36,21 @@ import { EvaluationResult } from './types';
 type InnerMessage = Message['message'];
 type StringOrMessageList = string | InnerMessage[];
 
+interface Options {
+  screenContexts?: ObservabilityAIAssistantScreenContext[];
+}
+
+type CompleteFunction = (
+  ...args:
+    | [StringOrMessageList]
+    | [StringOrMessageList, Options]
+    | [string, StringOrMessageList]
+    | [string, StringOrMessageList, Options]
+) => Promise<{ conversationId?: string; messages: InnerMessage[] }>;
+
 export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
-  complete: (
-    ...args: [StringOrMessageList] | [string, InnerMessage[]]
-  ) => Promise<{ conversationId?: string; messages: InnerMessage[] }>;
+  complete: CompleteFunction;
 
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[] },
@@ -254,12 +264,36 @@ export class KibanaClient {
         return chat('chat', { messages, functions: functionDefinitions });
       },
       complete: async (...args) => {
-        const messagesArg = args.length === 1 ? args[0] : args[1];
-        const conversationId = args.length === 1 ? undefined : args[0];
+        let messagesArg: StringOrMessageList;
+        let conversationId: string | undefined;
+        let options: Options = {};
+
+        function isMessageList(arg: any): arg is StringOrMessageList {
+          return isArray(arg) || typeof arg === 'string';
+        }
+
+        // | [StringOrMessageList]
+        // | [StringOrMessageList, Options]
+        // | [string, StringOrMessageList]
+        // | [string, StringOrMessageList, Options]
+        if (args.length === 1) {
+          messagesArg = args[0];
+        } else if (args.length === 2 && !isMessageList(args[1])) {
+          messagesArg = args[0];
+          options = args[1];
+        } else if (args.length === 2 && typeof args[0] === 'string' && isMessageList(args[1])) {
+          conversationId = args[0];
+          messagesArg = args[1];
+        } else if (args.length === 3) {
+          conversationId = args[0];
+          messagesArg = args[1];
+          options = args[2];
+        }
+
         const { contextDefinitions } = await getFunctions();
         const messages = [
           getAssistantSetupMessage({ contexts: contextDefinitions }),
-          ...getMessages(messagesArg).map((msg) => ({
+          ...getMessages(messagesArg!).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
@@ -272,6 +306,7 @@ export class KibanaClient {
                 pathname: '/internal/observability_ai_assistant/chat/complete',
               }),
               {
+                screenContexts: options.screenContexts || [],
                 conversationId,
                 messages,
                 connectorId,
