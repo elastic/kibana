@@ -20,9 +20,16 @@ export interface EntityStoreEntity {
     }>;
     name: string;
     os?: {
-      platform?: string[];
-      version?: string[];
+      platform?: string;
+      version?: string;
+      name?: string;
+      full?: string;
+      family?: string;
+      kernel?: string;
+      type?: string;
+      variant?: string;
     };
+    os_seen_at?: string;
     risk?: {
       calculated_level?: string;
       calculated_score?: number;

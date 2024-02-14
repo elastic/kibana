@@ -74,22 +74,22 @@ const startEntityStoreTransform = async (client: ElasticsearchClient) => {
   }
 };
 
-const stopEntityStoreTransform = async (client: ElasticsearchClient) => {
-  try {
-    return await client.transform.stopTransform({
-      transform_id: ENTITY_COMPOSITES_TRANSFORM_ID,
-    });
-  } catch (error) {
-    throw new Error(`Error stopping entity store transform: ${error}`);
-  }
-};
+// const stopEntityStoreTransform = async (client: ElasticsearchClient) => {
+//   try {
+//     return await client.transform.stopTransform({
+//       transform_id: ENTITY_COMPOSITES_TRANSFORM_ID,
+//     });
+//   } catch (error) {
+//     throw new Error(`Error stopping entity store transform: ${error}`);
+//   }
+// };
 
-const deleteEntityStoreTransform = async (client: ElasticsearchClient) => {
-  try {
-    return await client.transform.deleteTransform({
-      transform_id: ENTITY_COMPOSITES_TRANSFORM_ID,
-    });
-  } catch (error) {
-    throw new Error(`Error deleting entity store transform: ${error}`);
-  }
-};
+// const deleteEntityStoreTransform = async (client: ElasticsearchClient) => {
+//   try {
+//     return await client.transform.deleteTransform({
+//       transform_id: ENTITY_COMPOSITES_TRANSFORM_ID,
+//     });
+//   } catch (error) {
+//     throw new Error(`Error deleting entity store transform: ${error}`);
+//   }
+// };

@@ -80,7 +80,7 @@ export const registerEntityStoreTask = ({
       });
       const assetCriticalityService = assetCriticalityServiceFactory({
         assetCriticalityDataClient,
-        experimentalFeatures,
+        uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       });
       const entityStoreDataClient = new EntityStoreDataClient({
         logger,

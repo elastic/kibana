@@ -41,7 +41,18 @@ export interface UpdateEntityStoreResponse {
     lastProcessedCriticalityId?: string;
   };
 }
-
+interface OSInformation {
+  Ext: {
+    variant: string;
+  };
+  kernel: string;
+  name: string;
+  family: string;
+  type: string;
+  version: string;
+  platform: string;
+  full: string;
+}
 interface CompositeDocument {
   id: string;
   '@timestamp': string;
@@ -55,6 +66,8 @@ interface CompositeDocument {
   }>;
   first_doc_timestamp: string;
   last_doc_timestamp: string;
+  latest_os_timestamp: string;
+  latest_os: OSInformation;
 }
 
 interface CompositeHit {
@@ -70,6 +83,8 @@ interface CompositeHit {
     }>;
     first_doc_timestamp: string;
     last_doc_timestamp: string;
+    latest_os_timestamp: string;
+    latest_os: OSInformation;
   };
 }
 
@@ -289,6 +304,8 @@ async function getNextEntityComposites({
         ip_history: src.entity.ip_history,
         first_doc_timestamp: src.entity.first_doc_timestamp,
         last_doc_timestamp: src.entity.last_doc_timestamp,
+        latest_os_timestamp: src.entity.latest_os_timestamp,
+        latest_os: src.entity.latest_os,
       };
     });
 }
@@ -328,6 +345,18 @@ async function getNextAssetCriticalities({
   return criticalities.slice(lastProcessedIndex + 1);
 }
 
+function compareTimestamps(a: string, b: string) {
+  return moment(a).diff(moment(b));
+}
+
+function isTimestampBefore(a: string, b: string) {
+  return compareTimestamps(a, b) < 0;
+}
+
+function isTimestampAfter(a: string, b: string) {
+  return compareTimestamps(a, b) > 0;
+}
+
 function groupAndCombineCompositesByHostName(
   composites: CompositeDocument[]
 ): Record<string, CompositeDocument> {
@@ -342,6 +371,8 @@ function groupAndCombineCompositesByHostName(
         first_doc_timestamp: firstDocTimestamp,
         last_doc_timestamp: lastDocTimestamp,
         host,
+        latest_os_timestamp: latestOsTimestamp,
+        latest_os: latestOs,
       } = composite;
 
       if (!combinedDoc.host) {
@@ -350,12 +381,26 @@ function groupAndCombineCompositesByHostName(
 
       combinedDoc.ip_history = [...(combinedDoc.ip_history || []), ...ipHistory];
 
-      if (!combinedDoc.first_doc_timestamp || firstDocTimestamp < combinedDoc.first_doc_timestamp) {
+      if (
+        !combinedDoc.first_doc_timestamp ||
+        isTimestampBefore(firstDocTimestamp, combinedDoc.first_doc_timestamp)
+      ) {
         combinedDoc.first_doc_timestamp = firstDocTimestamp;
       }
 
-      if (!combinedDoc.last_doc_timestamp || lastDocTimestamp > combinedDoc.last_doc_timestamp) {
+      if (
+        !combinedDoc.last_doc_timestamp ||
+        isTimestampAfter(lastDocTimestamp, combinedDoc.last_doc_timestamp)
+      ) {
         combinedDoc.last_doc_timestamp = lastDocTimestamp;
+      }
+
+      if (
+        !combinedDoc.latest_os_timestamp ||
+        isTimestampAfter(latestOsTimestamp, combinedDoc.latest_os_timestamp)
+      ) {
+        combinedDoc.latest_os_timestamp = latestOsTimestamp;
+        combinedDoc.latest_os = latestOs;
       }
 
       return combinedDoc;
@@ -395,6 +440,8 @@ function buildEntityFromComposite(
       ...(assetCriticalityRecord
         ? { asset: { criticality: assetCriticalityRecord.criticality_level } }
         : {}),
+      ...(composite.latest_os_timestamp ? { os_seen_at: composite.latest_os_timestamp } : {}),
+      ...(composite.latest_os ? { os: composite.latest_os } : {}),
     },
   };
 }
