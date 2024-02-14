@@ -112,6 +112,12 @@ export const allowedExperimentalValues = Object.freeze({
   expandableEventFlyoutEnabled: false,
 
   /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: true,
+  /*
+
+  /**
    * Enables new Set of filters on the Alerts page.
    */
   alertsPageFiltersEnabled: true,

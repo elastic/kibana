@@ -46,7 +46,16 @@ const renderHeaderActions = (contextValue: RightPanelContext) =>
   );
 
 describe('<HeaderAction />', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: '?',
+      },
+    });
+  });
+
   beforeEach(() => {
+    window.location.search = '?';
     jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(alertUrl);
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
   });
@@ -55,12 +64,7 @@ describe('<HeaderAction />', () => {
     it('should render share button in the title and copy the the value to clipboard if document is an alert', () => {
       const syncedFlyoutState = 'flyoutState';
       const query = `?${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}`;
-
-      Object.defineProperty(window, 'location', {
-        value: {
-          search: query,
-        },
-      });
+      window.location.search = query;
 
       const { getByTestId } = renderHeaderActions(mockContextValue);
       const shareButton = getByTestId(SHARE_BUTTON_TEST_ID);
@@ -70,6 +74,20 @@ describe('<HeaderAction />', () => {
 
       expect(copyToClipboard).toHaveBeenCalledWith(
         `${alertUrl}&${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}`
+      );
+    });
+
+    it('should copy the timelineFlyout key to clipboard if the normal and timeline flyouts are open', () => {
+      const syncedFlyoutState = 'flyoutState';
+      const syncedTimelineFlyoutState = 'timelineFlyoutState';
+      const query = `?${URL_PARAM_KEY.eventFlyout}=${syncedFlyoutState}&${URL_PARAM_KEY.timelineFlyout}=${syncedTimelineFlyoutState}`;
+      window.location.search = query;
+
+      const { getByTestId } = renderHeaderActions(mockContextValue);
+      fireEvent.click(getByTestId(SHARE_BUTTON_TEST_ID));
+
+      expect(copyToClipboard).toHaveBeenCalledWith(
+        `${alertUrl}&${URL_PARAM_KEY.timelineFlyout}=${syncedTimelineFlyoutState}`
       );
     });
 

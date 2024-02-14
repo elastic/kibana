@@ -39,7 +39,17 @@ export const HeaderActions: VFC = memo(() => {
 
   const modifier = (value: string) => {
     const query = new URLSearchParams(window.location.search);
-    return `${value}&${URL_PARAM_KEY.eventFlyout}=${query.get(URL_PARAM_KEY.eventFlyout)}`;
+
+    // This logic handles copying the correct value from the url when sharing the alert.
+    // If the url contains timelineFlyout parameter and its value is not empty, we know the timeline flyout is rendered.
+    // As it is always on top of the normal flyout, we know the user is clicking the share button from the timeline flyout.
+    const urlParam =
+      query.has(URL_PARAM_KEY.timelineFlyout) && query.get(URL_PARAM_KEY.timelineFlyout) !== '()'
+        ? URL_PARAM_KEY.timelineFlyout
+        : URL_PARAM_KEY.eventFlyout;
+
+    // we always save under the flyout url param, even for the timeline flyout
+    return `${value}&${urlParam}=${query.get(urlParam)}`;
   };
 
   const { showAssistant, promptContextId } = useAssistant({

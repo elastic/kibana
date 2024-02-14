@@ -90,8 +90,30 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
 ];
 
+/**
+ * Flyout used for the Security Solution application
+ * We set the z-index to 999 to ensure it is always rendered behind Timeline
+ */
 export const SecuritySolutionFlyout = memo(() => (
-  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
+  <ExpandableFlyout
+    registeredPanels={expandableFlyoutDocumentsPanels}
+    paddingSize="none"
+    customStyles={{ 'z-index': 999 }}
+  />
 ));
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
+
+/**
+ * Flyout used in Timeline
+ * We set the z-index to 1001 to ensure it is always rendered above Timeline
+ */
+export const TimelineFlyout = memo(() => (
+  <ExpandableFlyout
+    registeredPanels={expandableFlyoutDocumentsPanels}
+    paddingSize="none"
+    customStyles={{ 'z-index': 1001 }}
+  />
+));
+
+TimelineFlyout.displayName = 'TimelineFlyout';
