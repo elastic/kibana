@@ -58,7 +58,6 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
-        actionParams.subAction &&
         actionParams.subAction !== 'closeIncident' &&
         !actionParams.subActionParams.incident.short_description?.length
       ) {
@@ -66,7 +65,6 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
       }
 
       if (
-        actionParams.subAction &&
         actionParams.subAction === 'closeIncident' &&
         !actionParams?.subActionParams?.incident?.correlation_id?.length
       ) {
