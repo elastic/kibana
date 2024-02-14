@@ -449,8 +449,11 @@ export class TimeSeriesExplorer extends React.Component {
               );
 
               if (
-                focusRange === undefined &&
-                this.previousSelectedForecastId !== this.props.selectedForecastId
+                // If the user's focus range is not defined (i.e. no 'zoom' parameter restored from the appState URL),
+                // then calculate the default focus range to use
+                zoom === undefined &&
+                (focusRange === undefined ||
+                  this.previousSelectedForecastId !== this.props.selectedForecastId)
               ) {
                 focusRange = calculateDefaultFocusRange(
                   autoZoomDuration,
