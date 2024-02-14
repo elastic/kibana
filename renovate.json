@@ -649,6 +649,23 @@
         "Team:Monitoring"
       ],
       "enabled": true
+    },
+    {
+      "groupName": "AlertingEmails",
+      "matchPackageNames": [
+        "nodemailer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor"
+      ],
+      "enabled": true
     }
   ]
 }
