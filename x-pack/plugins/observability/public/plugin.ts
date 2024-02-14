@@ -102,7 +102,7 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
-      observability: {
+      observability?: {
         enabled: boolean;
       };
     };
@@ -158,6 +158,7 @@ export interface ObservabilityPublicPluginsStart {
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
   presentationUtil?: PresentationUtilPluginStart;
+  theme: CoreStart['theme'];
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

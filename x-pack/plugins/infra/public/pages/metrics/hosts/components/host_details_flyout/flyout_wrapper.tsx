@@ -33,7 +33,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
         },
       }}
       tabs={commonFlyoutTabs}
-      links={['apmServices', 'nodeDetails']}
+      links={['nodeDetails']}
       renderMode={{
         mode: 'flyout',
         closeFlyout,
