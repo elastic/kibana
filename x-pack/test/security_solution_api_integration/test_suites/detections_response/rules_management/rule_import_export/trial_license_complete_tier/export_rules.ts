@@ -164,8 +164,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export exactly two rules given two rules', async () => {
-        await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'rule-1' }));
-        await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'rule-2' }));
+        const ruleToExport1 = getCustomQueryRuleParams({ rule_id: 'rule-1' });
+        const ruleToExport2 = getCustomQueryRuleParams({ rule_id: 'rule-2' });
+
+        await createRule(supertest, log, ruleToExport1);
+        await createRule(supertest, log, ruleToExport2);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -180,8 +183,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect([exportedRule1, exportedRule2]).toEqual(
           expect.arrayContaining([
-            expect.objectContaining(getCustomQueryRuleParams({ rule_id: 'rule-1' })),
-            expect.objectContaining(getCustomQueryRuleParams({ rule_id: 'rule-2' })),
+            expect.objectContaining(ruleToExport1),
+            expect.objectContaining(ruleToExport2),
           ])
         );
       });
