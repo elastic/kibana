@@ -8,6 +8,7 @@
 
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { ElasticsearchConfig } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export class EsLegacyConfigService {
   /**
@@ -25,11 +26,17 @@ export class EsLegacyConfigService {
    */
   private configSub?: Subscription;
 
-  setup(config$: Observable<ElasticsearchConfig>) {
+  /**
+   * URL to cloud instance of elasticsearch if available
+   */
+  private cloudUrl?: string;
+
+  setup(config$: Observable<ElasticsearchConfig>, cloud?: CloudSetup) {
     this.config$ = config$;
     this.configSub = this.config$.subscribe((config) => {
       this.config = config;
     });
+    this.cloudUrl = cloud?.elasticsearchUrl;
   }
 
   stop() {
@@ -48,5 +55,9 @@ export class EsLegacyConfigService {
     }
 
     return this.config;
+  }
+
+  getCloudUrl(): string | undefined {
+    return this.cloudUrl;
   }
 }
