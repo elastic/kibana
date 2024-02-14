@@ -59,7 +59,7 @@ export type ApmLinkId =
   | 'settings'
   | 'storage-explorer';
 
-export type SyntheticsLinkId = 'overview' | 'management' | 'settings';
+export type SyntheticsLinkId = 'overview' | 'management' | 'settings' | 'certificates';
 
 export type LinkId =
   | LogsLinkId

@@ -213,6 +213,13 @@ export const navigationTree: NavigationTreeDefinition = {
               breadcrumbStatus: 'hidden',
             },
             {
+              link: 'synthetics:certificates',
+              title: 'TLS Certificates',
+              renderAs: 'item',
+              id: 'synthetics-certificates',
+              breadcrumbStatus: 'hidden',
+            },
+            {
               link: 'synthetics:settings',
               title: 'Settings',
               renderAs: 'item',
