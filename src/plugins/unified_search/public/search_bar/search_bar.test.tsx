@@ -100,6 +100,7 @@ function wrapSearchBarInContext(testProps: any) {
         savedQueries: {
           findSavedQueries: () =>
             Promise.resolve({
+              total: 1,
               queries: [
                 {
                   id: 'testwewe',
@@ -115,6 +116,7 @@ function wrapSearchBarInContext(testProps: any) {
                 },
               ],
             }),
+          getSavedQueryCount: jest.fn(),
         },
       },
       dataViewEditor: dataViewEditorMock,

@@ -6,16 +6,20 @@
  */
 /* eslint-disable max-classes-per-file*/
 
-import type { ErrorObject, ValidateFunction } from 'ajv';
-import { keyBy } from 'lodash';
-import type {
+import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
+import dedent from 'dedent';
+import { compact, keyBy } from 'lodash';
+import {
   ContextDefinition,
   ContextRegistry,
   FunctionResponse,
+  FunctionVisibility,
   Message,
+  ObservabilityAIAssistantScreenContext,
+  RegisterContextDefinition,
 } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
-import type { FunctionHandler, FunctionHandlerRegistry } from '../types';
+import type { FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
 
 export class FunctionArgsValidationError extends Error {
   constructor(public readonly errors: ErrorObject[]) {
@@ -23,12 +27,64 @@ export class FunctionArgsValidationError extends Error {
   }
 }
 
+const ajv = new Ajv({
+  strict: false,
+});
+
 export class ChatFunctionClient {
-  constructor(
-    private readonly contextRegistry: ContextRegistry,
-    private readonly functionRegistry: FunctionHandlerRegistry,
-    private readonly validators: Map<string, ValidateFunction>
-  ) {}
+  private readonly contextRegistry: ContextRegistry = new Map();
+  private readonly functionRegistry: FunctionHandlerRegistry = new Map();
+  private readonly validators: Map<string, ValidateFunction> = new Map();
+
+  constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContext[]) {
+    const allData = compact(screenContexts.flatMap((context) => context.data));
+
+    if (allData.length) {
+      this.registerFunction(
+        {
+          name: 'get_data_on_screen',
+          contexts: ['core'],
+          description: dedent(`Get data that is on the screen:
+            ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
+          `),
+          visibility: FunctionVisibility.AssistantOnly,
+          parameters: {
+            type: 'object',
+            additionalProperties: false,
+            additionalItems: false,
+            properties: {
+              data: {
+                type: 'array',
+                description:
+                  'The pieces of data you want to look at it. You can request one, or multiple',
+                items: {
+                  type: 'string',
+                  enum: allData.map((data) => data.name),
+                },
+                additionalItems: false,
+                additionalProperties: false,
+              },
+            },
+            required: ['data' as const],
+          },
+        },
+        async ({ arguments: { data: dataNames } }) => {
+          return {
+            content: allData.filter((data) => dataNames.includes(data.name)),
+          };
+        }
+      );
+    }
+  }
+
+  registerFunction: RegisterFunction = (definition, respond) => {
+    this.validators.set(definition.name, ajv.compile(definition.parameters));
+    this.functionRegistry.set(definition.name, { definition, respond });
+  };
+
+  registerContext: RegisterContextDefinition = (context) => {
+    this.contextRegistry.set(context.name, context);
+  };
 
   private validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
@@ -89,6 +145,9 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.respond({ arguments: parsedArguments, messages, connectorId }, signal);
+    return await fn.respond(
+      { arguments: parsedArguments, messages, connectorId, screenContexts: this.screenContexts },
+      signal
+    );
   }
 }

@@ -41,7 +41,12 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, true);
+      expect(onSubmit).toBeCalledWith(
+        {
+          defaultValue: false,
+        },
+        true
+      );
     });
   });
 

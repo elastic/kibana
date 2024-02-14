@@ -22,25 +22,22 @@ import type {
   TypedLensByValueInput,
   InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   VisualizeESQLFunctionArguments,
   VisualizeESQLUserIntention,
 } from '../../common/functions/visualize_esql';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from '../context/observability_ai_assistant_multipane_flyout_provider';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '../types';
-import {
-  type ChatActionClickHandler,
-  ChatActionClickType,
-  ChatFlyoutSecondSlotHandler,
-} from '../components/chat/types';
+import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
 
 interface VisualizeLensResponse {
   content: DatatableColumn[];
@@ -63,12 +60,6 @@ interface VisualizeESQLProps {
    * If not given, the embeddable gets them from the suggestions api
    */
   userOverrides?: unknown;
-  /** Optional, should be passed if the embeddable is rendered in a flyout
-   * If not given, the inline editing push flyout won't open
-   * The code will be significantly improved,
-   * if this is addressed https://github.com/elastic/eui/issues/7443
-   */
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   /** User's preferation chart type as it comes from the model */
   preferredChartType?: string;
 }
@@ -85,7 +76,6 @@ export function VisualizeESQL({
   query,
   onActionClick,
   userOverrides,
-  chatFlyoutSecondSlotHandler,
   preferredChartType,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
@@ -95,10 +85,10 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return dataViews.create({
-      title: indexPattern,
-    });
+    return getESQLAdHocDataview(indexPattern, dataViews);
   }, [indexPattern]);
+
+  const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(
@@ -316,7 +306,6 @@ export function registerVisualizeQueryRenderFunction({
       arguments: { query, userOverrides, intention },
       response,
       onActionClick,
-      chatFlyoutSecondSlotHandler,
     }: Parameters<RenderFunction<VisualizeESQLFunctionArguments, {}>>[0]) => {
       const { content } = response as VisualizeLensResponse;
 
@@ -361,16 +350,17 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
+      const trimmedQuery = query.trim();
+
       return (
         <VisualizeESQL
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}
           columns={content}
-          query={query}
+          query={trimmedQuery}
           onActionClick={onActionClick}
           userOverrides={userOverrides}
-          chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
           preferredChartType={preferredChartType}
         />
       );
