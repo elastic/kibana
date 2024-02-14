@@ -306,7 +306,7 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
                 onDelete={(apiKeysToDelete) =>
                   invalidateApiKeyPrompt(
                     apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                    queryApiKeysFn
+                    fetchApiKeys
                   )
                 }
                 currentUser={currentUser}
