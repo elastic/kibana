@@ -14,7 +14,6 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
   PostEvaluateRequestBodyInput,
   PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
@@ -70,12 +69,6 @@ export const getPostEvaluateRequest = ({
   });
 
 export const getCurrentUserFindRequest = () =>
-  requestMock.create({
-    method: 'get',
-    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
-  });
-
-export const getFindRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,

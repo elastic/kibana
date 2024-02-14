@@ -34,10 +34,12 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   isDefault: false,
   updatedAt: Date.now().toLocaleString(),
   timestamp: Date.now().toLocaleString(),
-  user: {
-    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-    name: 'elastic',
-  },
+  users: [
+    {
+      id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      name: 'elastic',
+    },
+  ],
 });
 
 export const getDeleteConversationOptionsMock = (): DeleteConversationParams => ({

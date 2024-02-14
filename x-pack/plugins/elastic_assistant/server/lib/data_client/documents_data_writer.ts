@@ -246,7 +246,6 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
   private buildBulkOperations = async <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
   ): Promise<BulkOperationContainer[]> => {
-    const changedAt = new Date().toISOString();
     const documentCreateBody =
       params.authenticatedUser && params.documentsToCreate
         ? params.documentsToCreate.flatMap((document) => [

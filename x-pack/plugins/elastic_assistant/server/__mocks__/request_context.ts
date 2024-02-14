@@ -31,8 +31,8 @@ export const createMockClients = () => {
       logger: loggingSystemMock.createLogger(),
       telemetry: coreMock.createSetup().analytics,
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
-      getAIAssistantPromptsSOClient: jest.fn(),
-      getAIAssistantAnonymizationFieldsSOClient: jest.fn(),
+      getAIAssistantPromptsDataClient: jest.fn(),
+      getAIAssistantAnonymizationFieldsDataClient: jest.fn(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
     },
@@ -95,8 +95,8 @@ const createElasticAssistantRequestContextMock = (
     > &
       (() => Promise<AIAssistantConversationsDataClient | null>),
 
-    getAIAssistantPromptsSOClient: jest.fn(),
-    getAIAssistantAnonymizationFieldsSOClient: jest.fn(),
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn(),
+    getAIAssistantPromptsDataClient: jest.fn(),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),
