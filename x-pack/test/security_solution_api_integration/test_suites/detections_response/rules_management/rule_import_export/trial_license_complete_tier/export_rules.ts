@@ -26,8 +26,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
 
   describe('@ess @brokenInServerless @skipInQA export_rules', () => {
     describe('exporting rules', () => {
