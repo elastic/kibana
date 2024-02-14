@@ -11,6 +11,7 @@ import { refreshAlertPageFilter, selectFirstPageAlerts } from '../../../../../ta
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
@@ -36,14 +37,6 @@ describe(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-
-      // Login into accounts so that they got activated and visible in user profiles list
-      login(ROLES.t1_analyst);
-      login(ROLES.t2_analyst);
-      login(ROLES.t3_analyst);
-      login(ROLES.soc_manager);
-      login(ROLES.detections_admin);
-      login(ROLES.platform_engineer);
     });
 
     after(() => {
@@ -51,9 +44,10 @@ describe(
     });
 
     beforeEach(() => {
-      loadPageAs(ALERTS_URL);
+      login();
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'new custom rule' }));
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
