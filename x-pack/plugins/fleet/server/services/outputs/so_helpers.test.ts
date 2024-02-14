@@ -7,7 +7,27 @@
 
 import type { Output } from '../../../common/types';
 
-import { patchUpdateDataWithRequireEncryptedAADFields } from './so_helpers';
+import {
+  patchUpdateDataWithRequireEncryptedAADFields,
+  _getFieldsToIncludeEncryptedSO,
+} from './so_helpers';
+
+describe(`_getFieldsToIncludeEncryptedSO`, () => {
+  it('should return the list of field included in AAD and encrypted fields', () => {
+    expect(_getFieldsToIncludeEncryptedSO()).toMatchInlineSnapshot(`
+      Array [
+        "ssl",
+        "password",
+        "service_token",
+        "shipper",
+        "allow_edit",
+        "broker_ack_reliability",
+        "broker_buffer_size",
+        "channel_buffer_size",
+      ]
+    `);
+  });
+});
 
 describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
   const ORIGINAL_LOGSTASH_OUTPUT = {
@@ -36,178 +56,47 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
     },
   } as Output;
   describe('With logstash output', () => {
-    describe('when allow_edit is updated', () => {
-      it('it should update ssl and secrets field with original ones if no new values are provided', () => {
+    describe('when a included in AAD field is updated (allow_edit)', () => {
+      it('it should include other AAD field and encrypted field if no new values are provided', () => {
         const updateData = {
           allow_edit: ['ssl'],
         };
 
         patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_LOGSTASH_OUTPUT);
         expect(updateData).toMatchInlineSnapshot(`
-                  Object {
-                    "allow_edit": Array [
-                      "ssl",
-                    ],
-                    "secrets": Object {
-                      "ssl": Object {
-                        "key": Object {
-                          "id": "secretref",
-                        },
-                      },
-                    },
-                    "ssl": "{\\"certificate\\":\\"testcertificate\\"}",
-                  }
-              `);
+          Object {
+            "allow_edit": Array [
+              "ssl",
+            ],
+            "ssl": Object {
+              "certificate": "testcertificate",
+            },
+          }
+        `);
       });
 
-      it('it should update ssl and secrets field with new values if provided', () => {
+      it('it update field with new values provided', () => {
         const updateData = {
           allow_edit: ['ssl'],
           ssl: JSON.stringify({ certificate: 'testcertificateupdate' }),
-          secrets: {
-            ssl: {
-              key: { id: 'secretupdate' },
-            },
-          },
         };
 
         patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_LOGSTASH_OUTPUT);
         expect(updateData).toMatchInlineSnapshot(`
-                  Object {
-                    "allow_edit": Array [
-                      "ssl",
-                    ],
-                    "secrets": Object {
-                      "ssl": Object {
-                        "key": Object {
-                          "id": "secretupdate",
-                        },
-                      },
-                    },
-                    "ssl": "{\\"certificate\\":\\"testcertificateupdate\\"}",
-                  }
-              `);
-      });
-    });
-
-    describe('when secrets are updated', () => {
-      it('it should update ssl and allow_edits field with original ones if no new value is provided', () => {
-        const updateData = {
-          secrets: {
-            ssl: {
-              key: { id: 'secretupdate' },
-            },
-          },
-        };
-
-        patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_LOGSTASH_OUTPUT);
-        expect(updateData).toMatchInlineSnapshot(`
-                  Object {
-                    "allow_edit": Array [
-                      "hosts",
-                    ],
-                    "secrets": Object {
-                      "ssl": Object {
-                        "key": Object {
-                          "id": "secretupdate",
-                        },
-                      },
-                    },
-                    "ssl": "{\\"certificate\\":\\"testcertificate\\"}",
-                  }
-              `);
-      });
-
-      it('it should update ssl and allow_edits field with new values if provided', () => {
-        const updateData = {
-          allow_edit: ['ssl'],
-          ssl: JSON.stringify({ certificate: 'testcertificateupdate' }),
-          secrets: {
-            ssl: {
-              key: { id: 'secretupdate' },
-            },
-          },
-        };
-
-        patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_LOGSTASH_OUTPUT);
-        expect(updateData).toMatchInlineSnapshot(`
-                  Object {
-                    "allow_edit": Array [
-                      "ssl",
-                    ],
-                    "secrets": Object {
-                      "ssl": Object {
-                        "key": Object {
-                          "id": "secretupdate",
-                        },
-                      },
-                    },
-                    "ssl": "{\\"certificate\\":\\"testcertificateupdate\\"}",
-                  }
-              `);
-      });
-    });
-
-    describe('when ssl is updated', () => {
-      it('it should update secrets and allow_edits field with original ones if no new value is provided', () => {
-        const updateData = {
-          ssl: JSON.stringify({
-            certificate: 'testcertificateupdate',
-          }),
-        };
-
-        patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_LOGSTASH_OUTPUT);
-        expect(updateData).toMatchInlineSnapshot(`
-                  Object {
-                    "allow_edit": Array [
-                      "hosts",
-                    ],
-                    "secrets": Object {
-                      "ssl": Object {
-                        "key": Object {
-                          "id": "secretref",
-                        },
-                      },
-                    },
-                    "ssl": "{\\"certificate\\":\\"testcertificateupdate\\"}",
-                  }
-              `);
-      });
-
-      it('it should update ssl and allow_edits field with new values if provided', () => {
-        const updateData = {
-          allow_edit: ['ssl'],
-          ssl: JSON.stringify({ certificate: 'testcertificateupdate' }),
-          secrets: {
-            ssl: {
-              key: { id: 'secretupdate' },
-            },
-          },
-        };
-
-        patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_LOGSTASH_OUTPUT);
-        expect(updateData).toMatchInlineSnapshot(`
-                  Object {
-                    "allow_edit": Array [
-                      "ssl",
-                    ],
-                    "secrets": Object {
-                      "ssl": Object {
-                        "key": Object {
-                          "id": "secretupdate",
-                        },
-                      },
-                    },
-                    "ssl": "{\\"certificate\\":\\"testcertificateupdate\\"}",
-                  }
-              `);
+          Object {
+            "allow_edit": Array [
+              "ssl",
+            ],
+            "ssl": "{\\"certificate\\":\\"testcertificateupdate\\"}",
+          }
+        `);
       });
     });
   });
 
   describe('With kafka output', () => {
-    describe('when allow_edit is updated', () => {
-      it('it should update password and secrets field with original ones if no new values are provided', () => {
+    describe('when a included in AAD field is updated (allow_edit)', () => {
+      it('it should include other AAD field and encrypted field if no new values are provided', () => {
         const updateData = {
           allow_edit: ['password'],
         };
@@ -219,23 +108,14 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
               "password",
             ],
             "password": "testpassword",
-            "secrets": Object {
-              "password": Object {
-                "id": "passwordref",
-              },
-            },
-            "ssl": undefined,
           }
         `);
       });
 
-      it('it should update ssl and secrets field with new values if provided', () => {
+      it('it update fields with new values provided', () => {
         const updateData = {
           allow_edit: ['password'],
           password: 'testupdate',
-          secrets: {
-            password: { id: 'secretupdate' },
-          },
         };
 
         patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_KAFKA_OUTPUT);
@@ -245,76 +125,16 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
               "password",
             ],
             "password": "testupdate",
-            "secrets": Object {
-              "password": Object {
-                "id": "secretupdate",
-              },
-            },
-            "ssl": undefined,
           }
         `);
       });
     });
 
-    describe('when secrets are updated', () => {
-      it('it should update password and allow_edits field with original ones if no new value is provided', () => {
-        const updateData = {
-          secrets: {
-            password: { id: 'secretupdate' },
-          },
-        };
-
-        patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_KAFKA_OUTPUT);
-        expect(updateData).toMatchInlineSnapshot(`
-          Object {
-            "allow_edit": Array [
-              "hosts",
-            ],
-            "password": "testpassword",
-            "secrets": Object {
-              "password": Object {
-                "id": "secretupdate",
-              },
-            },
-            "ssl": undefined,
-          }
-        `);
-      });
-
-      it('it should update password and allow_edits field with new values if provided', () => {
-        const updateData = {
-          password: 'passwordupdate',
-          secrets: {
-            password: { id: 'secretupdate' },
-          },
-        };
-
-        patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_KAFKA_OUTPUT);
-        expect(updateData).toMatchInlineSnapshot(`
-          Object {
-            "allow_edit": Array [
-              "hosts",
-            ],
-            "password": "passwordupdate",
-            "secrets": Object {
-              "password": Object {
-                "id": "secretupdate",
-              },
-            },
-            "ssl": undefined,
-          }
-        `);
-      });
-    });
-
-    describe('when password is updated', () => {
-      it('it should update password and allow_edits field with original ones if no new value is provided', () => {
+    describe('when a secret is updated (password)', () => {
+      it('it should include other AAD field and encrypted field if no new values are provided', () => {
         const updateData = {
           allow_edit: ['password'],
           password: 'testupdate',
-          secrets: {
-            password: { id: 'secretupdate' },
-          },
         };
 
         patchUpdateDataWithRequireEncryptedAADFields(updateData, ORIGINAL_KAFKA_OUTPUT);
@@ -324,17 +144,11 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
               "password",
             ],
             "password": "testupdate",
-            "secrets": Object {
-              "password": Object {
-                "id": "secretupdate",
-              },
-            },
-            "ssl": undefined,
           }
         `);
       });
 
-      it('it should update secrets and allow_edits field with new values if provided', () => {
+      it('it update fields with new values provided', () => {
         const updateData = {
           password: 'passwordupdate',
         };
@@ -346,11 +160,6 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
               "hosts",
             ],
             "password": "passwordupdate",
-            "secrets": Object {
-              "password": Object {
-                "id": "passwordref",
-              },
-            },
           }
         `);
       });
