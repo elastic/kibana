@@ -447,8 +447,9 @@ export class TimeSeriesExplorer extends React.Component {
                 stateUpdate.contextAggregationInterval,
                 bounds
               );
+
               if (
-                focusRange === undefined ||
+                focusRange === undefined &&
                 this.previousSelectedForecastId !== this.props.selectedForecastId
               ) {
                 focusRange = calculateDefaultFocusRange(
