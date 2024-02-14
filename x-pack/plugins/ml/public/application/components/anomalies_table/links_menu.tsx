@@ -98,7 +98,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const {
     services: { data, share, application, uiActions },
   } = kibana;
-  const mlIndexUtils = useMlIndexUtils();
+  const { getDataViewIdFromName } = useMlIndexUtils();
 
   const job = useMemo(() => {
     return mlJobService.getJob(props.anomaly.jobId);
@@ -106,7 +106,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const index = job.datafeed_config.indices[0];
-    const dataViewId = await mlIndexUtils.getDataViewIdFromName(index);
+    const dataViewId = await getDataViewIdFromName(index);
 
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
@@ -146,7 +146,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     const index = job.datafeed_config.indices[0];
-    const dataViewId = await mlIndexUtils.getDataViewIdFromName(index);
+    const dataViewId = await getDataViewIdFromName(index);
 
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
@@ -220,7 +220,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const getDataViewId = async () => {
       const index = job.datafeed_config.indices[0];
 
-      const dataViewId = await mlIndexUtils.getDataViewIdFromName(index, job);
+      const dataViewId = await getDataViewIdFromName(index, job);
 
       // If data view doesn't exist for some reasons
       if (!dataViewId && !unmounted) {
@@ -659,7 +659,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           // index configured in the datafeed. If a Kibana data view has not been created
           // for this index, then the user will see a warning message on the Discover tab advising
           // them that no matching data view has been configured.
-          const dataViewId = await mlIndexUtils.getDataViewIdFromName(index);
+          const dataViewId = await getDataViewIdFromName(index);
 
           // We should not redirect to Discover if data view doesn't exist
           if (!dataViewId) return;

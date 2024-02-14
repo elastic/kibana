@@ -115,7 +115,7 @@ export const Controls: FC<Props> = React.memo(
         application: { navigateToUrl, capabilities },
       },
     } = useMlKibana();
-    const mlIndexUtils = useMlIndexUtils();
+    const { getDataViewIdFromName } = useMlIndexUtils();
 
     const hasIngestPipelinesCapabilities =
       capabilities.management?.ingest?.ingest_pipelines === true;
@@ -139,7 +139,7 @@ export const Controls: FC<Props> = React.memo(
     const nodeType = selectedNode?.data('type');
 
     const onCreateJobClick = useCallback(async () => {
-      const dataViewId = await mlIndexUtils.getDataViewIdFromName(nodeLabel);
+      const dataViewId = await getDataViewIdFromName(nodeLabel);
 
       if (dataViewId !== null) {
         const path = await mlLocator.getUrl({

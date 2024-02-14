@@ -35,7 +35,7 @@ export const useResultsViewConfig = (jobId: string) => {
       data: { dataViews },
     },
   } = useMlKibana();
-  const mlIndexUtils = useMlIndexUtils();
+  const { getDataViewIdFromName } = useMlIndexUtils();
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
@@ -98,8 +98,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
           try {
             const destIndex = getDestinationIndex(jobConfigUpdate);
-            const destDataViewId =
-              (await mlIndexUtils.getDataViewIdFromName(destIndex)) ?? destIndex;
+            const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
             let fetchedDataView: DataView | undefined;
 
             try {
@@ -117,8 +116,7 @@ export const useResultsViewConfig = (jobId: string) => {
             if (fetchedDataView === undefined) {
               setNeedsDestDataView(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
-              const sourceDataViewId =
-                (await mlIndexUtils.getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
+              const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
                 fetchedDataView = await dataViews.get(sourceDataViewId);
               } catch (e) {
