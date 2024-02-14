@@ -8,6 +8,10 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  InventoryPageCallbacks,
+  InitializedInventoryPageState,
+} from '../../../../../observability_infra/inventory_page/state';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useInventoryMeta } from '../../hooks/use_inventory_meta';
 import { AwsEC2ToolbarItems } from './aws_ec2_toolbar_items';
@@ -23,9 +27,16 @@ import { ToolbarProps } from './types';
 interface Props {
   nodeType: InventoryItemType;
   currentTime: number;
+  inventoryPageCallbacks: InventoryPageCallbacks;
+  inventoryPageState: InitializedInventoryPageState;
 }
 
-export const Toolbar = ({ nodeType, currentTime }: Props) => {
+export const Toolbar = ({
+  nodeType,
+  currentTime,
+  inventoryPageCallbacks,
+  inventoryPageState,
+}: Props) => {
   const { sourceId } = useSourceContext();
   const { accounts, regions } = useInventoryMeta(sourceId, nodeType, currentTime);
 
@@ -33,7 +44,13 @@ export const Toolbar = ({ nodeType, currentTime }: Props) => {
     <ToolbarWrapper>
       {(props) => (
         <>
-          <ToolbarItems {...props} accounts={accounts} regions={regions} />
+          <ToolbarItems
+            {...props}
+            accounts={accounts}
+            regions={regions}
+            inventoryPageCallbacks={inventoryPageCallbacks}
+            inventoryPageState={inventoryPageState}
+          />
           <EuiFlexItem grow={true} />
         </>
       )}
@@ -42,7 +59,7 @@ export const Toolbar = ({ nodeType, currentTime }: Props) => {
 };
 
 export const ToolbarItems = (props: ToolbarProps) => {
-  switch (props.nodeType) {
+  switch (props.inventoryPageState.context.options.nodeType) {
     case 'awsEC2':
       return <AwsEC2ToolbarItems {...props} />;
     case 'awsRDS':

@@ -95,7 +95,7 @@ function getTabs({
   migrationToFleetAvailable: boolean;
   indicesAvailable: boolean;
 }) {
-  const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
+  const canReadMlJobs = true;
 
   const agentExplorerEnabled = core.uiSettings.get<boolean>(
     enableAgentExplorerView,

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { InitializedInventoryPageState } from '../../../../observability_infra/inventory_page/state';
+import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { useSnapshot } from '../hooks/use_snaphot';
-import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 
 interface RenderProps {
   reload: () => Promise<any>;
@@ -22,12 +21,20 @@ interface RenderProps {
 
 interface Props {
   render: React.FC<RenderProps>;
+  inventoryPageState: InitializedInventoryPageState;
 }
-export const SnapshotContainer = ({ render }: Props) => {
-  const { sourceId } = useSourceContext();
-  const { metric, groupBy, nodeType, accountId, region, view } = useWaffleOptionsContext();
-  const { currentTime } = useWaffleTimeContext();
-  const { filterQueryAsJson } = useWaffleFiltersContext();
+export const SnapshotContainer = ({ render, inventoryPageState }: Props) => {
+  const { sourceId, createDerivedIndexPattern } = useSourceContext();
+  const indexPattern = createDerivedIndexPattern();
+
+  const filterQueryAsJson = useMemo(
+    () =>
+      convertKueryToElasticSearchQuery(inventoryPageState.context.filter.expression, indexPattern),
+    [indexPattern, inventoryPageState.context.filter.expression]
+  );
+
+  const { metric, groupBy, nodeType, accountId, region, view } = inventoryPageState.context.options;
+  const { currentTime } = inventoryPageState.context.time;
   const {
     loading,
     nodes,

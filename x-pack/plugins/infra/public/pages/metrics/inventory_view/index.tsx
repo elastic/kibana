@@ -6,10 +6,16 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useActor } from '@xstate/react';
 import { css } from '@emotion/react';
+import { InventoryFiltersState, InventoryOptionsState } from '../../../../common/inventory_views';
+import {
+  InventoryPageTime,
+  useInventoryPageStateContext,
+} from '../../../observability_infra/inventory_page/state';
 import { FilterBar } from './components/filter_bar';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -26,6 +32,8 @@ import { NoRemoteCluster } from '../../../components/empty_states';
 
 export const SnapshotPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+  const inventoryPageStateService = useInventoryPageStateContext();
+  const [inventoryPageState, inventoryPageSend] = useActor(inventoryPageStateService);
 
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
@@ -37,6 +45,29 @@ export const SnapshotPage = () => {
   ]);
 
   const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+
+  const pageStateCallbacks = useMemo(() => {
+    return {
+      updateTime: (time: Partial<InventoryPageTime>) => {
+        inventoryPageSend({
+          type: 'TIME_CHANGED',
+          time,
+        });
+      },
+      updateOptions: (options: Partial<InventoryOptionsState>) => {
+        inventoryPageSend({
+          type: 'OPTIONS_CHANGED',
+          options,
+        });
+      },
+      updateFilter: (filter: Partial<InventoryFiltersState>) => {
+        inventoryPageSend({
+          type: 'FILTER_CHANGED',
+          filter,
+        });
+      },
+    };
+  }, [inventoryPageSend]);
 
   if (isLoading && !source) return <SourceLoadingPage />;
 
@@ -56,30 +87,49 @@ export const SnapshotPage = () => {
   return (
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
-        <MetricsPageTemplate
-          hasData={metricIndicesExist}
-          pageHeader={{
-            pageTitle: inventoryTitle,
-            rightSideItems: [<SavedViews />, <SurveySection />],
-          }}
-          pageSectionProps={{
-            contentProps: {
-              css: css`
-                ${fullHeightContentStyles};
-                padding-bottom: 0;
-              `,
-            },
-          }}
-        >
-          <SnapshotContainer
-            render={({ loading, nodes, reload, interval }) => (
-              <>
-                <FilterBar interval={interval} />
-                <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
-              </>
-            )}
-          />
-        </MetricsPageTemplate>
+        {inventoryPageState.matches('initialized') ? (
+          <MetricsPageTemplate
+            hasData={metricIndicesExist}
+            pageHeader={{
+              pageTitle: inventoryTitle,
+              rightSideItems: [
+                <SavedViews inventoryPageState={inventoryPageState} />,
+                <SurveySection />,
+              ],
+            }}
+            pageSectionProps={{
+              contentProps: {
+                css: css`
+                  ${fullHeightContentStyles};
+                  padding-bottom: 0;
+                `,
+              },
+            }}
+          >
+            <SnapshotContainer
+              inventoryPageState={inventoryPageState}
+              render={({ loading, nodes, reload, interval }) => (
+                <>
+                  <FilterBar
+                    interval={interval}
+                    inventoryPageState={inventoryPageState}
+                    inventoryPageCallbacks={pageStateCallbacks}
+                  />
+                  <LayoutView
+                    loading={loading}
+                    nodes={nodes}
+                    reload={reload}
+                    interval={interval}
+                    inventoryPageState={inventoryPageState}
+                    inventoryPageCallbacks={pageStateCallbacks}
+                  />
+                </>
+              )}
+            />
+          </MetricsPageTemplate>
+        ) : (
+          <></>
+        )}
       </div>
     </EuiErrorBoundary>
   );

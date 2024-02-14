@@ -38,6 +38,8 @@ import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { HostsPage } from './hosts';
+import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
+import { InventoryPageStateProvider } from '../../observability_infra/inventory_page/state';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -46,7 +48,9 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 export const InfrastructurePage = () => {
   const {
     observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+    inventoryViews,
   } = useKibanaContextForPlugin().services;
+  const urlStateStore = useKbnUrlStateStorageFromRouterContext();
   const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
@@ -105,7 +109,14 @@ export const InfrastructurePage = () => {
                     </HeaderMenuPortal>
                   )}
                   <Routes>
-                    <Route path={'/inventory'} component={SnapshotPage} />
+                    <Route path={'/inventory'}>
+                      <InventoryPageStateProvider
+                        inventoryViewsService={inventoryViews}
+                        urlStateStorage={urlStateStore}
+                      >
+                        <SnapshotPage />
+                      </InventoryPageStateProvider>
+                    </Route>
                     {config.featureFlags.metricsExplorerEnabled && (
                       <Route path={'/explorer'}>
                         <MetricsExplorerOptionsContainer>
