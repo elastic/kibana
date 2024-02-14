@@ -438,7 +438,7 @@ export const UnifiedDataTable = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const displayedColumns = getDisplayedColumns(columns, dataView);
+  const displayedColumns = getDisplayedColumns(columns);
   const defaultColumns = displayedColumns.includes('_source');
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
