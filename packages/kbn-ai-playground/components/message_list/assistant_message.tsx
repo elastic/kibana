@@ -9,16 +9,32 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { EuiComment, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiComment,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { Message as MessageType } from '../../types';
+import type { AIMessage as AIMessageType } from '../../types';
 
 import { CopyActionButton } from './copy_action_button';
+import { CitationsTable } from './citations_table';
 
-type AssistantMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
+type AssistantMessageProps = Pick<
+  AIMessageType,
+  'content' | 'createdAt' | 'citations' | 'retrievalDocs'
+>;
 
-export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, createdAt }) => {
+export const AssistantMessage: React.FC<AssistantMessageProps> = ({
+  content,
+  createdAt,
+  citations,
+  retrievalDocs,
+}) => {
   return (
     <EuiComment
       username={i18n.translate('aiPlayground.chat.message.assistant.username', {
@@ -52,9 +68,41 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, cre
         />
       }
     >
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('aiPlayground.chat.message.assistant.title', {
+              defaultMessage: 'Summary',
+            })}
+          </p>
+        </EuiTitle>
+        {!!retrievalDocs?.length && (
+          <EuiButtonEmpty>
+            {i18n.translate('aiPlayground.chat.message.assistant.retrievalDocButton', {
+              defaultMessage: '{count} {count, plural, one {document} other {documents}} retrieved',
+              values: { count: retrievalDocs.length },
+            })}
+          </EuiButtonEmpty>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{content}</p>
       </EuiText>
+      {!!citations?.length && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
+            <p>
+              {i18n.translate('aiPlayground.chat.message.assistant.citations.title', {
+                defaultMessage: 'Citations',
+              })}
+            </p>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <CitationsTable citations={citations} />
+        </>
+      )}
     </EuiComment>
   );
 };

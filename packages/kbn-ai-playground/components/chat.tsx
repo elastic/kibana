@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -21,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { useChat, UseChatHelpers } from '@elastic/ai-assist/dist/react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AIPlaygroundPluginStartDeps,
   ChatForm,
@@ -36,17 +38,7 @@ import { InstructionsField } from './instructions_field';
 import { IncludeCitationsField } from './include_citations_field';
 
 import { TelegramIcon } from './telegram_icon';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-
-const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>
-  messages.map(({ id, content, createdAt, role }) => ({
-    id,
-    content,
-    createdAt,
-    role: role === 'assistant' ? MessageRole.assistant : MessageRole.user,
-  }));
+import { transformFromChatMessages } from '../utils/transformToMessages';
 
 export const Chat = () => {
   const { euiTheme } = useEuiTheme();
@@ -81,8 +73,8 @@ export const Chat = () => {
       }),
   });
 
-  console.log(data)
-  
+  console.log(data);
+
   const onSubmit = async (data: ChatForm) => {
     await append(
       { content: data.question, role: 'human', createdAt: new Date() },
@@ -98,13 +90,17 @@ export const Chat = () => {
 
     resetField(ChatFormFields.question);
   };
-  const initialMessages = [
-    {
-      id: uuidv4(),
-      role: MessageRole.system,
-      content: 'You can start chat now',
-    },
-  ];
+  const chatMessages = useMemo(
+    () => [
+      {
+        id: uuidv4(),
+        role: MessageRole.system,
+        content: 'You can start chat now',
+      },
+      ...transformFromChatMessages(messages),
+    ],
+    [messages]
+  );
 
   return (
     <EuiForm
@@ -122,9 +118,7 @@ export const Chat = () => {
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={1}>
-              <MessageList
-                messages={[...initialMessages, ...transformFromChatMessages(messages)]}
-              />
+              <MessageList messages={chatMessages} />
             </EuiFlexItem>
 
             <EuiHorizontalRule margin="none" />

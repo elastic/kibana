@@ -23,6 +23,17 @@ export interface Message {
   role: MessageRole;
 }
 
+export interface Doc {
+  id: string;
+  content: string;
+}
+
+export interface AIMessage extends Message {
+  role: MessageRole.assistant;
+  citations: Doc[];
+  retrievalDocs: Doc[];
+}
+
 export enum ChatFormFields {
   question = 'question',
   citations = 'citations',
