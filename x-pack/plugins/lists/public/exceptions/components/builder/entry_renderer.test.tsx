@@ -1246,7 +1246,7 @@ describe('BuilderEntryItem', () => {
     );
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeTruthy();
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toEqual(
-      'A wildcard may be in value. Did you mean to use the MATCHES operator?'
+      "Use the 'MATCHES' operator when using wildcards. Info"
     );
   });
 });
