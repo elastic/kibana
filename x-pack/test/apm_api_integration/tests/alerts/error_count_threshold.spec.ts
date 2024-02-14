@@ -101,7 +101,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(() => synthtraceEsClient.clean());
 
-    describe('create rule without kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176948
+    describe.skip('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
       let actionId: string;
