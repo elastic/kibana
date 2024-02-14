@@ -521,7 +521,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.controlChangeCancel();
         }
 
-        await toasts.dismissAllToasts(); // dismiss "saved" toast, otherwise it could overlap save button for a next test
+        await toasts.dismissAll(); // dismiss "saved" toast, otherwise it could overlap save button for a next test
       });
 
       specs.forEach((spec, index) => {

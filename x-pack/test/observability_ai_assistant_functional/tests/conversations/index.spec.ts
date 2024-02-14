@@ -115,11 +115,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
 
             await retry.waitFor('Connector created toast', async () => {
-              const count = await toasts.getToastCount();
+              const count = await toasts.getCount();
               return count > 0;
             });
 
-            await toasts.dismissAllToasts();
+            await toasts.dismissAll();
           });
 
           it('creates a connector', async () => {
