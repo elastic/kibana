@@ -115,7 +115,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
           title={i18n.translate(
             'xpack.ml.management.jobsSpacesList.updateSpaces.alertWarning.title',
             {
-              defaultMessage: 'The selected job is associated with alerting rules.',
+              defaultMessage: 'The selected job is associated with alerting rules',
             }
           )}
         >
