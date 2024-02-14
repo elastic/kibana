@@ -15,48 +15,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
   EuiButton,
   useEuiTheme,
   EuiLink,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import { css as classNameCss } from '@emotion/css';
-
 import type { MonacoMessage } from './helpers';
+import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
 const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
-
-const getConstsByType = (type: 'error' | 'warning', count: number) => {
-  if (type === 'error') {
-    return {
-      color: 'danger',
-      message: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.errorCount', {
-        defaultMessage: '{count} {count, plural, one {error} other {errors}}',
-        values: { count },
-      }),
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.errorsTitle', {
-        defaultMessage: 'Errors',
-      }),
-    };
-  } else {
-    return {
-      color: 'warning',
-      message: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.warningCount', {
-        defaultMessage: '{count} {count, plural, one {warning} other {warnings}}',
-        values: { count },
-      }),
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.warningsTitle', {
-        defaultMessage: 'Warnings',
-      }),
-    };
-  }
-};
 
 export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: boolean }) {
   const { euiTheme } = useEuiTheme();
@@ -86,105 +55,6 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
         </EuiLink>
       </EuiFlexItem>
     </>
-  );
-}
-
-export function ErrorsWarningsPopover({
-  isPopoverOpen,
-  items,
-  type,
-  setIsPopoverOpen,
-  onErrorClick,
-  isSpaceReduced,
-}: {
-  isPopoverOpen: boolean;
-  items: MonacoMessage[];
-  type: 'error' | 'warning';
-  setIsPopoverOpen: (flag: boolean) => void;
-  onErrorClick: (error: MonacoMessage) => void;
-  isSpaceReduced?: boolean;
-}) {
-  const strings = getConstsByType(type, items.length);
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={type}
-            color={strings.color}
-            size="s"
-            onClick={() => {
-              setIsPopoverOpen(!isPopoverOpen);
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiText
-                size="xs"
-                color={strings.color}
-                css={css`
-                  &:hover {
-                    cursor: pointer;
-                    text-decoration: underline;
-                  }
-                `}
-                onClick={() => {
-                  setIsPopoverOpen(!isPopoverOpen);
-                }}
-              >
-                <p>{isSpaceReduced ? items.length : strings.message}</p>
-              </EuiText>
-            }
-            ownFocus={false}
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-          >
-            <div style={{ width: 500 }}>
-              <EuiPopoverTitle paddingSize="s">{strings.label}</EuiPopoverTitle>
-              <EuiDescriptionList>
-                {items.map((item, index) => {
-                  return (
-                    <EuiDescriptionListDescription
-                      key={index}
-                      className={classNameCss`
-                                &:hover {
-                                  cursor: pointer;
-                                }
-                              `}
-                      onClick={() => onErrorClick(item)}
-                    >
-                      <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup gutterSize="s" alignItems="center">
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type={type} color={strings.color} size="s" />
-                            </EuiFlexItem>
-                            <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
-                              {i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.lineNumber',
-                                {
-                                  defaultMessage: 'Line {lineNumber}',
-                                  values: { lineNumber: item.startLineNumber },
-                                }
-                              )}
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} className="TextBasedLangEditor_errorMessage">
-                          {item.message}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiDescriptionListDescription>
-                  );
-                })}
-              </EuiDescriptionList>
-            </div>
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
   );
 }
 
@@ -271,7 +141,7 @@ export const EditorFooter = memo(function EditorFooter({
             </EuiFlexItem>
           )}
           {errors && errors.length > 0 && (
-            <ErrorsWarningsPopover
+            <ErrorsWarningsFooterPopover
               isPopoverOpen={isErrorPopoverOpen}
               items={errors}
               type="error"
@@ -285,7 +155,7 @@ export const EditorFooter = memo(function EditorFooter({
             />
           )}
           {warnings && warnings.length > 0 && (
-            <ErrorsWarningsPopover
+            <ErrorsWarningsFooterPopover
               isPopoverOpen={isWarningPopoverOpen}
               items={warnings}
               type="warning"

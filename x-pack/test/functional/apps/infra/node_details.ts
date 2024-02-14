@@ -197,6 +197,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.metadataSectionCollapsibleExist();
             await pageObjects.assetDetails.alertsSectionCollapsibleExist();
             await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {

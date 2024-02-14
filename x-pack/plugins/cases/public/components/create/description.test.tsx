@@ -17,7 +17,8 @@ import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 import type { FormSchema } from '@kbn/index-management-plugin/public/shared_imports';
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175204
+describe.skip('Description', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;

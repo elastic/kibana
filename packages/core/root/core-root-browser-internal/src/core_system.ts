@@ -7,7 +7,6 @@
  */
 
 import { filter, firstValueFrom } from 'rxjs';
-import type { LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -112,8 +111,7 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
-    const logLevel: LogLevelId = injectedMetadata.env.mode.dev ? 'all' : 'warn';
-    this.loggingSystem = new BrowserLoggingSystem({ logLevel });
+    this.loggingSystem = new BrowserLoggingSystem(injectedMetadata.logging);
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
