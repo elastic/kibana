@@ -10,7 +10,7 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { ENTITY_STORE_INIT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import { routeWithNamespace } from '../../detections_response/utils';
+import { routeWithNamespace } from '../../../../common/utils/security_solution';
 
 export const entityStoreRouteHelpersFactory = (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
