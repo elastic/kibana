@@ -23,6 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
     await testSubjects.click('logsTab');
@@ -60,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('linkSnooze1h');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -99,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -130,7 +131,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('scheduler-saveSchedule');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -169,7 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -201,7 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated API key for 1 rule.');
       });
     });

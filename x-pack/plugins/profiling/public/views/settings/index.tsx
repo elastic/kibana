@@ -24,6 +24,7 @@ import {
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
   profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
@@ -47,7 +48,11 @@ const co2Settings = [
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
 ];
-const costSettings = [profilingAWSCostDiscountRate, profilingCostPervCPUPerHour];
+const costSettings = [
+  profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
+  profilingCostPervCPUPerHour,
+];
 const miscSettings = [profilingShowErrorFrames];
 
 export function Settings() {
@@ -106,30 +111,57 @@ export function Settings() {
                   'The Universal Profiling host agent can detect if your machine is running on AWS, Azure, or Google Cloud Platform.',
               }),
               subtitle: (
-                <FormattedMessage
-                  id="xpack.profiling.settings.co2.subtitle"
-                  defaultMessage="For machines running on AWS, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
-                  values={{
-                    regionalCarbonIntensityLink: (
-                      <EuiLink
-                        data-test-subj="profilingSettingsLink"
-                        href="https://ela.st/grid-datasheet"
-                        target="_blank"
-                      >
-                        {i18n.translate('xpack.profiling.settings.co2.subtitle.link', {
-                          defaultMessage: 'regional carbon intensity',
-                        })}
-                      </EuiLink>
-                    ),
-                    pue: (
-                      <strong>
-                        {i18n.translate('xpack.profiling.settings.co2.subtitle.pue', {
-                          defaultMessage: 'PUE',
-                        })}
-                      </strong>
-                    ),
-                  }}
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.profiling.settings.co2.aws.subtitle"
+                    defaultMessage="For machines running on AWS, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
+                    values={{
+                      regionalCarbonIntensityLink: (
+                        <EuiLink
+                          data-test-subj="profilingSettingsLink"
+                          href="https://ela.st/grid-datasheet"
+                          target="_blank"
+                        >
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.link', {
+                            defaultMessage: 'regional carbon intensity',
+                          })}
+                        </EuiLink>
+                      ),
+                      pue: (
+                        <strong>
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.pue', {
+                            defaultMessage: 'PUE',
+                          })}
+                        </strong>
+                      ),
+                    }}
+                  />
+                  <EuiSpacer size="xs" />
+                  <FormattedMessage
+                    id="xpack.profiling.settings.co2.azure.subtitle"
+                    defaultMessage="For machines running on Azure, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's Azure region and the current Azure data center {pue}."
+                    values={{
+                      regionalCarbonIntensityLink: (
+                        <EuiLink
+                          data-test-subj="profilingSettingsLink"
+                          href="https://ela.st/grid-datasheet"
+                          target="_blank"
+                        >
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.link', {
+                            defaultMessage: 'regional carbon intensity',
+                          })}
+                        </EuiLink>
+                      ),
+                      pue: (
+                        <strong>
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.pue', {
+                            defaultMessage: 'PUE',
+                          })}
+                        </strong>
+                      ),
+                    }}
+                  />
+                </>
               ),
               text: i18n.translate('xpack.profiling.settings.co2.text', {
                 defaultMessage:
@@ -146,16 +178,27 @@ export function Settings() {
               title: (
                 <FormattedMessage
                   id="xpack.profiling.settings.cost.title"
-                  defaultMessage="Universal Profiling sets the cost for AWS configurations using the {awsPriceList} for your EC2 instance type."
+                  defaultMessage="Universal Profiling uses the cost for AWS EC2 instances and Azure VMs using the {awsPriceList} and {azurePriceList} respectively."
                   values={{
                     awsPriceList: (
                       <EuiLink
-                        data-test-subj="profilingSettingsLink"
-                        href="https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/Welcome.html#Welcome_AWS_Price_List_Service"
+                        data-test-subj="profilingSettingsLinkAws"
+                        href="https://ela.st/aws-price-list"
                         target="_blank"
                       >
-                        {i18n.translate('xpack.profiling.settings.cost.subtitle.link', {
+                        {i18n.translate('xpack.profiling.settings.cost.subtitle.link.aws', {
                           defaultMessage: 'AWS price list',
+                        })}
+                      </EuiLink>
+                    ),
+                    azurePriceList: (
+                      <EuiLink
+                        data-test-subj="profilingSettingsLinkAzure"
+                        href="https://ela.st/azure-price-list"
+                        target="_blank"
+                      >
+                        {i18n.translate('xpack.profiling.settings.cost.subtitle.link.azure', {
+                          defaultMessage: 'Azure price list',
                         })}
                       </EuiLink>
                     ),
