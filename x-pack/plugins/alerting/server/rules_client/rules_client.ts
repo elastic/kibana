@@ -69,6 +69,8 @@ import {
   bulkUntrackAlerts,
   BulkUntrackBody,
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
+import { scheduleBackfill } from '../application/backfill/methods/schedule';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -180,6 +182,9 @@ export class RulesClient {
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
+
+  public scheduleBackfill = (params: ScheduleBackfillParams) =>
+    scheduleBackfill(this.context, params);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;

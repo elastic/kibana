@@ -27,6 +27,7 @@ import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
 import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -61,6 +62,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 

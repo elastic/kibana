@@ -320,6 +320,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a rule as part of a search operation.
 | `failure` | User is not authorized to search for rules.
 
+.2+| `rule_schedule_backfill`
+| `success` | User has accessed a rule as part of a backfill schedule operation.
+| `failure` | User is not authorized to access rule for backfill scheduling.
+
 .2+| `space_get`
 | `success` | User has accessed a space.
 | `failure` | User is not authorized to access a space.

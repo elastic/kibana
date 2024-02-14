@@ -32,6 +32,7 @@ import {
 import { ruleModelVersions } from './rule_model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
+export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
@@ -146,6 +147,34 @@ export function setupSavedObjects(
     mappings: maintenanceWindowMappings,
   });
 
+  savedObjects.registerType({
+    name: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: {
+      dynamic: false,
+      properties: {
+        // shape is defined in x-pack/plugins/alerting/server/data/ad_hoc_run/types/ad_hoc_run.ts
+        // TODO to allow invalidate api key task to query for backfill jobs still
+        // using the API key
+        // apiKeyId: {
+        //   type: 'keyword'
+        // },
+        createdAt: {
+          type: 'date',
+        },
+        // TODO to allow searching/filtering by status
+        // status: {
+        //   type: 'keyword'
+        // }
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: RULE_SAVED_OBJECT_TYPE,
@@ -157,5 +186,13 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: 'api_key_pending_invalidation',
     attributesToEncrypt: new Set(['apiKeyId']),
+  });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['apiKeyToUse']),
+    // attributesToIncludeInAAD: new Set(['enabled', 'start', 'duration', 'createdAt', 'spaceId', 'rule']),
+    attributesToExcludeFromAAD: new Set(['status', 'schedule']),
   });
 }

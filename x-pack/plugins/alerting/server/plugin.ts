@@ -77,7 +77,12 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { setupSavedObjects, getLatestRuleVersion, RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  setupSavedObjects,
+  getLatestRuleVersion,
+  RULE_SAVED_OBJECT_TYPE,
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
@@ -101,6 +106,7 @@ import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { BackfillClient } from './backfill_client/backfill_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -215,6 +221,7 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
+  private backfillClient?: BackfillClient;
   private nodeRoles: PluginInitializerContext['node']['roles'];
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -266,6 +273,10 @@ export class AlertingPlugin {
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
+
+    this.backfillClient = new BackfillClient({
+      logger: this.logger,
+    });
 
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
@@ -462,7 +473,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -507,6 +518,7 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      backfillClient: this.backfillClient!,
       uiSettings: core.uiSettings,
     });
 

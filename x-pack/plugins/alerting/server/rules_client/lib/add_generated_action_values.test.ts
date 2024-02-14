@@ -21,6 +21,7 @@ import { AlertingAuthorization } from '../../authorization';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
@@ -61,6 +62,7 @@ describe('addGeneratedActionValues()', () => {
     getAuthenticationAPIKey: jest.fn(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
+    backfillClient: backfillClientMock.create(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 

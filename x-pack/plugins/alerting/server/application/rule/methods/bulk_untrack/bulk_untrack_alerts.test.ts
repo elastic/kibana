@@ -22,6 +22,7 @@ import { AlertingAuthorization } from '../../../../authorization/alerting_author
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -60,6 +61,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
