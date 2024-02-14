@@ -196,18 +196,28 @@ export const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Synthetics',
           }),
           renderAs: 'accordion',
+          breadcrumbStatus: 'hidden',
           children: [
             {
+              title: 'Overview',
+              renderAs: 'item',
+              id: 'synthetics-overview',
               link: 'synthetics:overview',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/synthetics'));
-              },
+              breadcrumbStatus: 'hidden',
             },
             {
               link: 'synthetics:management',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/synthetics/monitors'));
-              },
+              title: 'Monitors',
+              renderAs: 'item',
+              id: 'synthetics-management',
+              breadcrumbStatus: 'hidden',
+            },
+            {
+              link: 'synthetics:settings',
+              title: 'Settings',
+              renderAs: 'item',
+              id: 'synthetics-settings',
+              breadcrumbStatus: 'hidden',
             },
           ],
         },
