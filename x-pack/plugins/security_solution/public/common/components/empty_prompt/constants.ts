@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-const PREFIX = 'securitySolutionAssignees';
-
-export const ASSIGNEES_SELECTABLE_TEST_ID = `${PREFIX}Selectable`;
-export const ASSIGNEES_APPLY_PANEL_TEST_ID = `${PREFIX}ApplyPanel`;
-export const ASSIGNEES_APPLY_BUTTON_TEST_ID = `${PREFIX}ApplyButton`;
+export const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?';

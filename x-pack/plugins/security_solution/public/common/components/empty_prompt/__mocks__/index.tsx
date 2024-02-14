@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-const PREFIX = 'securitySolutionAssignees';
+import React from 'react';
 
-export const ASSIGNEES_SELECTABLE_TEST_ID = `${PREFIX}Selectable`;
-export const ASSIGNEES_APPLY_PANEL_TEST_ID = `${PREFIX}ApplyPanel`;
-export const ASSIGNEES_APPLY_BUTTON_TEST_ID = `${PREFIX}ApplyButton`;
+export const EmptyPrompt = () => <div data-test-subj="empty-prompt" />;
