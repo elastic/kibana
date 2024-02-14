@@ -8,7 +8,7 @@
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../common/constants';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, UNCATEGORIZED } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
@@ -122,9 +122,13 @@ export const useDatasetQualityTable = () => {
       : filterInactiveDatasets({ datasets, timeRange });
 
     return integrations.length > 0
-      ? visibleDatasets.filter(
-          (dataset) => dataset.integration && integrations.includes(dataset.integration.name)
-        )
+      ? visibleDatasets.filter((dataset) => {
+          if (!dataset.integration && integrations.includes(UNCATEGORIZED)) {
+            return true;
+          }
+
+          return dataset.integration && integrations.includes(dataset.integration.name);
+        })
       : visibleDatasets;
   }, [showInactiveDatasets, datasets, timeRange, integrations]);
 
