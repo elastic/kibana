@@ -213,8 +213,11 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     addResultToValidation(
       validation,
       'entries',
-      'warnings',
-      <WildCardWithWrongOperatorCallout />,
+      'errors',
+      <>
+        <EuiSpacer size="s" />
+        <WildCardWithWrongOperatorCallout />
+      </>,
       true
     );
     validation.extraWarning = extraWarning;
