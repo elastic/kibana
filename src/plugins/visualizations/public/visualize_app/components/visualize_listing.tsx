@@ -388,9 +388,9 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            onClickTitle={(item) => {
-              tableViewProps.editItem?.(item);
-            }}
+            getOnClickTitle={(item) =>
+              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
+            }
             getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
               readOnly || (editor && 'onEdit' in editor)
                 ? undefined
