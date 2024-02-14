@@ -1484,7 +1484,7 @@ describe('validation logic', () => {
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a_index | stats numberField ', [
-      'expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
+      'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
     ]);
     testErrorsAndWarnings('from a_index | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',

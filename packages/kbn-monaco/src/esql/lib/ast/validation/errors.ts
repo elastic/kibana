@@ -89,7 +89,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
-            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type {givenType}',
+            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
           values: {
             command: out.command,
             type: out.type,
@@ -162,9 +162,10 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('monaco.esql.validation.unknowAggregateFunction', {
-          defaultMessage: '{command} expects an aggregate function, found [{value}]',
+          defaultMessage:
+            'Expected an aggregate function or group but got [{value}] of type [{type}]',
           values: {
-            command: out.command,
+            type: out.type,
             value: out.value,
           },
         }),
