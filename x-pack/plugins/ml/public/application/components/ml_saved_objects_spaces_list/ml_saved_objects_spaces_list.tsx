@@ -112,12 +112,15 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
         <EuiCallOut
           color="warning"
           iconType="warning"
-          title={i18n.translate('xpack.ml.management.jobsSpacesList.jobObjectNoun', {
-            defaultMessage: 'The selected job is associated with alerting rules.',
-          })}
+          title={i18n.translate(
+            'xpack.ml.management.jobsSpacesList.updateSpaces.alertWarning.title',
+            {
+              defaultMessage: 'The selected job is associated with alerting rules.',
+            }
+          )}
         >
           <FormattedMessage
-            id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
+            id="xpack.ml.management.jobsSpacesList.updateSpaces.alertWarning.body"
             defaultMessage="Moving this job to a different space may cause the alerts to stop working in the current space."
           />
         </EuiCallOut>

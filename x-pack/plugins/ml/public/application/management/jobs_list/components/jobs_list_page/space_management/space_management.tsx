@@ -24,8 +24,8 @@ import { useTableState } from '@kbn/ml-in-memory-table';
 import { useEnabledFeatures } from '../../../../../contexts/ml';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import {
-  ManagementListResponse,
-  ManagementItems,
+  type ManagementListResponse,
+  type ManagementItems,
   isAnomalyDetectionManagementItems,
 } from '../../../../../../../common/types/management';
 import { useManagementApiService } from '../../../../../services/ml_api_service/management';
