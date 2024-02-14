@@ -22,6 +22,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
+  const header = getPageObject('header');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -300,6 +301,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
 
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
       await refreshRulesList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
@@ -363,7 +368,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -387,8 +392,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
 
+      await testSubjects.click('confirmModalConfirmButton');
+      await header.waitUntilLoadingHasFinished();
+
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Disabled 1 rule');
       });
@@ -476,7 +484,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -929,7 +937,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
       );
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Rules notification successfully unsnoozed');
       });

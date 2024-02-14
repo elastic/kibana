@@ -72,8 +72,8 @@ describe('BedrockConnector', () => {
               Accept: '*/*',
               'Content-Type': 'application/json',
             },
-            host: 'bedrock.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-v2/invoke',
+            host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            path: '/model/anthropic.claude-v2:1/invoke',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -136,8 +136,8 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
               'x-amzn-bedrock-accept': '*/*',
             },
-            host: 'bedrock.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-v2/invoke-with-response-stream',
+            host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            path: '/model/anthropic.claude-v2:1/invoke-with-response-stream',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -166,12 +166,12 @@ describe('BedrockConnector', () => {
         await connector.invokeStream({
           messages: [
             {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
               role: 'system',
               content: 'Be a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'Hello world',
             },
             {
               role: 'assistant',
@@ -191,7 +191,47 @@ describe('BedrockConnector', () => {
           responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
             prompt:
-              '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+              'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+            max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+            temperature: 0.5,
+            stop_sequences: ['\n\nHuman:'],
+          }),
+        });
+      });
+
+      it('formats the system message as a user message for claude<2.1', async () => {
+        const modelOverride = 'anthropic.claude-v2';
+
+        await connector.invokeStream({
+          messages: [
+            {
+              role: 'system',
+              content: 'Be a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'Hello world',
+            },
+            {
+              role: 'assistant',
+              content: 'Hi, I am a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'What is 2+2?',
+            },
+          ],
+          model: modelOverride,
+        });
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          responseType: 'stream',
+          url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/invoke-with-response-stream`,
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({
+            prompt:
+              '\n\nHuman:Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
             max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
             temperature: 0.5,
             stop_sequences: ['\n\nHuman:'],
@@ -245,12 +285,12 @@ describe('BedrockConnector', () => {
         const response = await connector.invokeAI({
           messages: [
             {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
               role: 'system',
               content: 'Be a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'Hello world',
             },
             {
               role: 'assistant',
@@ -271,7 +311,7 @@ describe('BedrockConnector', () => {
           responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             prompt:
-              '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+              'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
             max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
             temperature: 0.5,
             stop_sequences: ['\n\nHuman:'],
@@ -319,7 +359,7 @@ describe('BedrockConnector', () => {
         ).toEqual(`API Error: Resource Not Found - Resource not found`);
       });
 
-      it('returns auhtorization error', () => {
+      it('returns authorization error', () => {
         const err = {
           response: {
             headers: {},
@@ -333,7 +373,27 @@ describe('BedrockConnector', () => {
 
         // @ts-expect-error expects an axios error as the parameter
         expect(connector.getResponseErrorMessage(err)).toEqual(
-          `Unauthorized API Error - The api key was invalid.`
+          `Unauthorized API Error: The api key was invalid.`
+        );
+      });
+
+      it('returns endpoint error', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 400,
+            statusText: 'Bad Request',
+            data: {
+              message: 'The requested operation is not recognized by the service.',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage(err)).toEqual(
+          `API Error: The requested operation is not recognized by the service.
+
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`
         );
       });
     });

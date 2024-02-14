@@ -140,6 +140,8 @@ export class LegacyAlertsClient<
     notifyOnActionGroupChange,
     flappingSettings,
     maintenanceWindowIds,
+    alertDelay,
+    ruleRunMetricsStore,
   }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
@@ -168,11 +170,14 @@ export class LegacyAlertsClient<
       flappingSettings,
       notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
+      alertDelay,
       processedAlertsNew,
       processedAlertsActive,
       trimmedAlertsRecovered,
-      processedAlertsRecoveredCurrent
+      processedAlertsRecoveredCurrent,
+      this.startedAtString
     );
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(alerts.delayedAlertsCount);
     alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
     this.processedAlerts.new = alerts.newAlerts;
@@ -203,11 +208,14 @@ export class LegacyAlertsClient<
     flappingSettings,
     notifyOnActionGroupChange,
     maintenanceWindowIds,
+    alertDelay,
   }: ProcessAndLogAlertsOpts) {
     this.processAlerts({
       notifyOnActionGroupChange,
       flappingSettings,
       maintenanceWindowIds,
+      alertDelay,
+      ruleRunMetricsStore,
     });
 
     this.logAlerts({

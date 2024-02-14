@@ -31,9 +31,9 @@ const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   return (
     <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
       {renderFieldPrefix && (
-        <strong data-test-subj="logExplorerDataTableMessageKey">{field}</strong>
+        <strong data-test-subj="logsExplorerDataTableMessageKey">{field}</strong>
       )}
-      <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
+      <span data-test-subj="logsExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
         {value}
       </span>
     </EuiText>
@@ -88,8 +88,14 @@ export const Content = ({
     return getShouldShowFieldHandler(dataViewFields, dataView, true);
   }, [dataView]);
 
+  const formattedRow = useMemo(() => {
+    return formatJsonDocumentForContent(row);
+  }, [row]);
+
   if (isDetails && !renderLogMessage) {
-    return <SourcePopoverContent row={row} columnId={columnId} closePopover={closePopover} />;
+    return (
+      <SourcePopoverContent row={formattedRow} columnId={columnId} closePopover={closePopover} />
+    );
   }
 
   return (
@@ -102,16 +108,50 @@ export const Content = ({
       ) : (
         <SourceDocument
           useTopLevelObjectColumns={false}
-          row={row}
+          row={formattedRow}
           dataView={dataView}
           columnId={columnId}
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
-          dataTestSubj="logExplorerCellDescriptionList"
+          dataTestSubj="logsExplorerCellDescriptionList"
           className="logsExplorerVirtualColumn__sourceDocument"
         />
       )}
     </span>
   );
+};
+
+const formatJsonDocumentForContent = (row: DataTableRecord) => {
+  const flattenedResult: DataTableRecord['flattened'] = {};
+  const rawFieldResult: DataTableRecord['raw']['fields'] = {};
+  const { raw, flattened } = row;
+  const { fields } = raw;
+
+  // We need 2 loops here for flattened and raw.fields. Flattened contains all fields,
+  // whereas raw.fields only contains certain fields excluding _ignored
+  for (const key in flattened) {
+    if (
+      !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => key.startsWith(prefix))
+    ) {
+      flattenedResult[key] = flattened[key];
+    }
+  }
+
+  for (const key in fields) {
+    if (
+      !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => key.startsWith(prefix))
+    ) {
+      rawFieldResult[key] = fields[key];
+    }
+  }
+
+  return {
+    ...row,
+    flattened: flattenedResult,
+    raw: {
+      ...raw,
+      fields: rawFieldResult,
+    },
+  };
 };

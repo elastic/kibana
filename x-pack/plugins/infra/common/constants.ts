@@ -21,6 +21,8 @@ export const TIEBREAKER_FIELD = '_doc';
 export const HOST_FIELD = 'host.name';
 export const CONTAINER_FIELD = 'container.id';
 export const POD_FIELD = 'kubernetes.pod.uid';
+export const CMDLINE_FIELD = 'system.process.cmdline';
+export const HOST_NAME_FIELD = 'host.name';
 
 export const O11Y_AAD_FIELDS = [
   'cloud.*',
@@ -30,3 +32,7 @@ export const O11Y_AAD_FIELDS = [
   'labels.*',
   'tags',
 ];
+
+export const LINK_TO_INVENTORY = '/app/metrics/link-to/inventory';
+export const METRICS_EXPLORER_URL = '/app/metrics/explorer';
+export const fifteenMinutesInMilliseconds = 15 * 60 * 1000;

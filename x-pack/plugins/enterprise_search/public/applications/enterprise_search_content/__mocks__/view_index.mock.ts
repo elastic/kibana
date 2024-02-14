@@ -42,6 +42,7 @@ export const apiIndex: ApiViewIndex = {
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: {
       foo: {
         default_value: '',
@@ -172,6 +173,7 @@ export const connectorIndex: ConnectorViewIndex = {
 export const crawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: {
       foo: {
         default_value: '',

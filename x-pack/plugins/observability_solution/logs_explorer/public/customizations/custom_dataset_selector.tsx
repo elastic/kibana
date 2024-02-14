@@ -6,7 +6,6 @@
  */
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
@@ -15,15 +14,15 @@ import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views'
 import { useEsql } from '../hooks/use_esql';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
-import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
+import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 interface CustomDatasetSelectorProps {
-  logExplorerControllerStateService: LogExplorerControllerStateService;
+  logsExplorerControllerStateService: LogsExplorerControllerStateService;
 }
 
-export const CustomDatasetSelector = withProviders(({ logExplorerControllerStateService }) => {
+export const CustomDatasetSelector = withProviders(({ logsExplorerControllerStateService }) => {
   const { datasetSelection, handleDatasetSelectionChange } = useDatasetSelection(
-    logExplorerControllerStateService
+    logsExplorerControllerStateService
   );
 
   const {
@@ -55,7 +54,6 @@ export const CustomDatasetSelector = withProviders(({ logExplorerControllerState
     isLoading: isLoadingDataViews,
     loadDataViews,
     reloadDataViews,
-    selectDataView,
     searchDataViews,
     sortDataViews,
   } = useDataViewsContext();
@@ -77,7 +75,6 @@ export const CustomDatasetSelector = withProviders(({ logExplorerControllerState
       isLoadingIntegrations={isLoadingIntegrations}
       isLoadingUncategorized={isLoadingUncategorized}
       isSearchingIntegrations={isSearchingIntegrations}
-      onDataViewSelection={selectDataView}
       onDataViewsReload={reloadDataViews}
       onDataViewsSearch={searchDataViews}
       onDataViewsSort={sortDataViews}
@@ -103,21 +100,19 @@ export default CustomDatasetSelector;
 export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
 };
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
     datasetsClient,
     dataViews,
-    discover,
-    logExplorerControllerStateService,
+    logsExplorerControllerStateService,
   }: CustomDatasetSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
-          <DataViewsProvider dataViewsService={dataViews} discoverService={discover}>
-            <Component logExplorerControllerStateService={logExplorerControllerStateService} />
+          <DataViewsProvider dataViewsService={dataViews}>
+            <Component logsExplorerControllerStateService={logsExplorerControllerStateService} />
           </DataViewsProvider>
         </DatasetsProvider>
       </IntegrationsProvider>

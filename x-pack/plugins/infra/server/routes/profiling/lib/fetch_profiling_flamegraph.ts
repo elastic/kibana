@@ -8,19 +8,36 @@
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { HOST_FIELD } from '../../../../common/constants';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { InfraProfilingFlamegraphRequestParams } from '../../../../common/http_api/profiling_api';
 
 export async function fetchProfilingFlamegraph(
-  { hostname, from, to }: InfraProfilingFlamegraphRequestParams,
+  { kuery, from, to }: InfraProfilingFlamegraphRequestParams,
   profilingDataAccess: ProfilingDataAccessPluginStart,
   coreRequestContext: CoreRequestHandlerContext
 ): Promise<BaseFlameGraph> {
+  const startSecs = from / 1000;
+  const endSecs = to / 1000;
+
   return await profilingDataAccess.services.fetchFlamechartData({
     core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
-    rangeFromMs: from,
-    rangeToMs: to,
-    kuery: `${HOST_FIELD} : "${hostname}"`,
+    totalSeconds: endSecs - startSecs,
+    query: {
+      bool: {
+        filter: [
+          ...kqlQuery(kuery),
+          {
+            range: {
+              ['@timestamp']: {
+                gte: String(startSecs),
+                lt: String(endSecs),
+                format: 'epoch_second',
+              },
+            },
+          },
+        ],
+      },
+    },
   });
 }

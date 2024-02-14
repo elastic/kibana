@@ -26,7 +26,7 @@ export function validateLogstashHost(val: string) {
   try {
     const url = new URL(`http://${val}`);
 
-    if (url.host !== val) {
+    if (url.host !== val.toLowerCase()) {
       return 'Invalid host';
     }
   } catch (err) {
@@ -65,6 +65,7 @@ const BaseSchema = {
   name: schema.string(),
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),
+  is_internal: schema.maybe(schema.boolean()),
   ca_sha256: schema.maybe(schema.string()),
   ca_trusted_fingerprint: schema.maybe(schema.string()),
   config_yaml: schema.maybe(schema.string()),

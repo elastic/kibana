@@ -7,15 +7,17 @@
 import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiSpacer, EuiTabbedContent, type EuiTabbedContentProps } from '@elastic/eui';
-import React from 'react';
-import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback } from 'react';
+import {
+  EmbeddableProfilingSearchBar,
+  ProfilingEmptyState,
+} from '@kbn/observability-shared-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
-import { DatePicker } from '../../date_picker/date_picker';
 import { useProfilingStatusData } from '../../hooks/use_profiling_status_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
@@ -23,12 +25,27 @@ import { ErrorPrompt } from './error_prompt';
 import { Threads } from './threads';
 import { DescriptionCallout } from './description_callout';
 import { Popover } from '../common/popover';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
 
 export function Profiling() {
   const { activeTabId } = useTabSwitcherContext();
+  const { dateRange, setDateRange } = useDatePickerContext();
+  const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
   const { error, loading, response } = useProfilingStatusData({
     isActive: activeTabId === ContentTabIds.PROFILING,
   });
+
+  const onSearchSubmit = useCallback(
+    ({ dateRange: range, query }) => {
+      setDateRange(range);
+      setCustomKuery(query);
+    },
+    [setCustomKuery, setDateRange]
+  );
+  const onSearchRefresh = useCallback(() => {
+    setDateRange(dateRange);
+  }, [dateRange, setDateRange]);
 
   const tabs: EuiTabbedContentProps['tabs'] = [
     {
@@ -39,7 +56,7 @@ export function Profiling() {
       content: (
         <>
           <EuiSpacer />
-          <Flamegraph />
+          <Flamegraph kuery={fullKuery} />
         </>
       ),
       append: (
@@ -75,7 +92,7 @@ export function Profiling() {
       content: (
         <>
           <EuiSpacer />
-          <Functions />
+          <Functions kuery={fullKuery} />
         </>
       ),
       append: (
@@ -111,7 +128,7 @@ export function Profiling() {
       content: (
         <>
           <EuiSpacer />
-          <Threads />
+          <Threads kuery={fullKuery} />
         </>
       ),
       append: (
@@ -150,7 +167,14 @@ export function Profiling() {
         <ProfilingEmptyState />
       ) : (
         <>
-          <DatePicker />
+          <EmbeddableProfilingSearchBar
+            kuery={customKuery}
+            rangeFrom={dateRange.from}
+            rangeTo={dateRange.to}
+            onQuerySubmit={onSearchSubmit}
+            onRefresh={onSearchRefresh}
+          />
+          <EuiSpacer />
           <DescriptionCallout />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </>

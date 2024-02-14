@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { addPanelMenuTrigger } from '../../triggers';
 
 const onAddPanelActionClick =
@@ -27,16 +27,14 @@ const onAddPanelActionClick =
   };
 
 export const getAddPanelActionMenuItems = (
+  api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
-  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void,
-  deleteEmbeddable: (embeddableId: string) => void,
   closePopover: () => void
 ) => {
   return (
     actions?.map((item) => {
       const context = {
-        createNewEmbeddable,
-        deleteEmbeddable,
+        embeddable: api,
         trigger: addPanelMenuTrigger,
       };
       const actionName = item.getDisplayName(context);

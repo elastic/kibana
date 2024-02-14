@@ -24,9 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useKibana } from '../../common/hooks/use_kibana';
+import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
+import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
+import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -51,7 +55,7 @@ interface RulesTableToolbarProps {
   selectedRules: CspBenchmarkRulesWithStates[];
   refetchRulesStates: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
-  currentEnabledDisabledItemsFilterState: string;
+  enabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
@@ -78,7 +82,7 @@ export const RulesTableHeader = ({
   selectedRules,
   refetchRulesStates,
   setEnabledDisabledItemsFilter,
-  currentEnabledDisabledItemsFilterState,
+  enabledDisabledItemsFilterState,
   setSelectAllRules,
   setSelectedRules,
 }: RulesTableToolbarProps) => {
@@ -92,26 +96,14 @@ export const RulesTableHeader = ({
     key: option,
     label: option,
   }));
-  const [isEnabledRulesFilterOn, setIsEnabledRulesFilterOn] = useState(false);
-  const [isDisabledRulesFilterOn, setisDisabledRulesFilterOn] = useState(false);
 
   const toggleEnabledRulesFilter = () => {
-    setIsEnabledRulesFilterOn(!isEnabledRulesFilterOn);
-    setisDisabledRulesFilterOn(
-      isDisabledRulesFilterOn && !isEnabledRulesFilterOn ? false : isDisabledRulesFilterOn
-    );
-    if (currentEnabledDisabledItemsFilterState === 'enabled')
-      setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilterState === 'enabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('enabled');
   };
 
   const toggleDisabledRulesFilter = () => {
-    setisDisabledRulesFilterOn(!isDisabledRulesFilterOn);
-    setIsEnabledRulesFilterOn(
-      isEnabledRulesFilterOn && !isDisabledRulesFilterOn ? false : isEnabledRulesFilterOn
-    );
-    if (currentEnabledDisabledItemsFilterState === 'disabled')
-      setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilterState === 'disabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('disabled');
   };
 
@@ -186,7 +178,7 @@ export const RulesTableHeader = ({
             <EuiFilterGroup>
               <EuiFilterButton
                 withNext
-                hasActiveFilters={isEnabledRulesFilterOn}
+                hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
                 onClick={toggleEnabledRulesFilter}
                 data-test-subj={RULES_ENABLED_FILTER}
               >
@@ -196,7 +188,7 @@ export const RulesTableHeader = ({
                 />
               </EuiFilterButton>
               <EuiFilterButton
-                hasActiveFilters={isDisabledRulesFilterOn}
+                hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
                 onClick={toggleDisabledRulesFilter}
                 data-test-subj={RULES_DISABLED_FILTER}
               >
@@ -280,6 +272,13 @@ const CurrentPageOfTotal = ({
     setIsPopoverOpen((e) => !e);
   };
 
+  const { data: rulesData } = useFetchDetectionRulesByTags(
+    getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
+    { match: 'any' }
+  );
+
+  const { notifications } = useKibana().services;
+
   const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {
     const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
@@ -295,6 +294,10 @@ const CurrentPageOfTotal = ({
       await postRequestChangeRulesState(state, bulkSelectedRules);
       await refetchRulesStates();
       await setIsPopoverOpen(false);
+      await showChangeBenchmarkRuleStatesSuccessToast(notifications, state !== 'mute', {
+        numberOfRules: bulkSelectedRules.length,
+        numberOfDetectionRules: rulesData?.total || 0,
+      });
     }
   };
   const changeCspRuleStateMute = async () => {

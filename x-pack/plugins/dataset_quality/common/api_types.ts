@@ -54,8 +54,9 @@ export const degradedDocsRt = rt.type({
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
-export const dataStreamDetailsRt = rt.type({
+export const dataStreamDetailsRt = rt.partial({
   createdOn: rt.number,
+  lastActivity: rt.number,
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
@@ -78,3 +79,13 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
 );
 
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
+
+export const dataStreamsEstimatedDataInBytesRT = rt.type({
+  estimatedDataInBytes: rt.number,
+});
+
+export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;
+
+export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
+  dataStreamsEstimatedDataInBytesRT
+);
