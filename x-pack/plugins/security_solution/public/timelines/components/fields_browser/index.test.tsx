@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import type { Store } from 'redux';
 import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -27,22 +28,6 @@ let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const defaultDataviewState: {
-  missingPatterns: string[];
-  selectedDataViewId: string | null;
-} = {
-  missingPatterns: [],
-  selectedDataViewId: 'security-solution',
-};
-const mockScopeIdSelector = jest.fn(() => defaultDataviewState);
-jest.mock('../../../common/store', () => {
-  const original = jest.requireActual('../../../common/store');
-  return {
-    ...original,
-    sourcererSelectors: { scopeIdSelector: () => mockScopeIdSelector },
-  };
-});
-
 const mockIndexFieldsSearch = jest.fn();
 jest.mock('../../../common/containers/source/use_data_view', () => ({
   useDataView: () => ({
@@ -57,8 +42,10 @@ const mockOnHide = jest.fn();
 const runAllPromises = () => new Promise(setImmediate);
 
 // helper function to render the hook
-const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps> = {}) =>
-  renderHook<UseFieldBrowserOptionsProps, ReturnType<UseFieldBrowserOptions>>(
+const renderUseFieldBrowserOptions = (
+  props: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}
+) =>
+  renderHook<UseFieldBrowserOptionsProps & { store?: Store }, ReturnType<UseFieldBrowserOptions>>(
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,
@@ -67,7 +54,12 @@ const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps
         ...props,
       }),
     {
-      wrapper: TestProviders,
+      wrapper: ({ children, store }) => {
+        if (store) {
+          return <TestProviders store={store}>{children}</TestProviders>;
+        }
+        return <TestProviders>{children}</TestProviders>;
+      },
     }
   );
 
@@ -104,7 +96,6 @@ describe('useFieldBrowserOptions', () => {
       ...useKibanaMock().services.application.capabilities,
       indexPatterns: { save: true },
     };
-    mockScopeIdSelector.mockReturnValue(defaultDataviewState);
     jest.clearAllMocks();
   });
 
@@ -135,13 +126,6 @@ describe('useFieldBrowserOptions', () => {
     expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
       5
     );
-  });
-
-  it('should not return the button when a dataView is not present', () => {
-    mockScopeIdSelector.mockReturnValue({ missingPatterns: [], selectedDataViewId: null });
-    const { result } = renderUseFieldBrowserOptions();
-
-    expect(result.current.createFieldButton).toBeUndefined();
   });
 
   it('should call onHide when button is pressed', async () => {

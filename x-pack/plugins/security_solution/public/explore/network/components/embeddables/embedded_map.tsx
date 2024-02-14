@@ -248,7 +248,6 @@ export const EmbeddedMapComponent = ({
     () => buildTimeRangeFilter(startDate, endDate),
     [startDate, endDate]
   );
-
   useEffect(() => {
     if (embeddable != null) {
       // pass time range as filter instead of via timeRange param

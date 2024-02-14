@@ -4,23 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
-import { mockIndexPattern, mockSourcererState } from '../mock';
+import { mockIndexPattern, mockSourcererState, TestProviders, createMockStore } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
-import { useDeepEqualSelector } from '../hooks/use_selector';
 import { renderHook } from '@testing-library/react-hooks';
 import { initialGroupingState } from './grouping/reducer';
 import { initialAnalyzerState } from '../../resolver/store/helpers';
 
 jest.mock('../hooks/use_selector');
-jest.mock('../lib/kibana', () => ({
-  KibanaServices: {
-    get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
-  },
-}));
+jest.mock('../lib/kibana', () => {
+  const original = jest.requireActual('../lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        upselling: {
+          ...original.useKibana().services.upselling,
+          featureUsage: {
+            ...original.useKibana().services.upselling.featureUsage,
+            hasShown: jest.fn(),
+          },
+        },
+      },
+    }),
+    KibanaServices: {
+      get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
+    },
+  };
+});
 jest.mock('../containers/source', () => ({
   useFetchIndex: () => [
     false,
@@ -28,6 +44,7 @@ jest.mock('../containers/source', () => ({
   ],
 }));
 
+// TODO: this is more of a hook test, a reducer is a pure function and should not need hooks and context to test.
 describe('createInitialState', () => {
   describe('sourcerer -> default -> indicesExist', () => {
     const mockPluginState = {} as Omit<
@@ -53,15 +70,13 @@ describe('createInitialState', () => {
         analyzer: initialAnalyzerState,
       }
     );
-    beforeEach(() => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
-    });
-    afterEach(() => {
-      (useDeepEqualSelector as jest.Mock).mockClear();
-    });
 
     test('indicesExist should be TRUE if patternList is NOT empty', async () => {
-      const { result } = renderHook(() => useSourcererDataView());
+      const { result } = renderHook(() => useSourcererDataView(), {
+        wrapper: ({ children }) => (
+          <TestProviders store={createMockStore(initState)}>{children}</TestProviders>
+        ),
+      });
       expect(result.current.indicesExist).toEqual(true);
     });
 
@@ -93,8 +108,11 @@ describe('createInitialState', () => {
           analyzer: initialAnalyzerState,
         }
       );
-      (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));
-      const { result } = renderHook(() => useSourcererDataView());
+      const { result } = renderHook(() => useSourcererDataView(), {
+        wrapper: ({ children }) => (
+          <TestProviders store={createMockStore(state)}>{children}</TestProviders>
+        ),
+      });
       expect(result.current.indicesExist).toEqual(false);
     });
   });
