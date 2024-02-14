@@ -38,7 +38,7 @@ export function ProfilingFlamegraph({
         return;
       }
       return callApmApi(
-        'GET /internal/apm/services/{serviceName}/transactions/flamegraph',
+        'GET /internal/apm/services/{serviceName}/profiling/transactions/flamegraph',
         {
           params: {
             path: { serviceName },

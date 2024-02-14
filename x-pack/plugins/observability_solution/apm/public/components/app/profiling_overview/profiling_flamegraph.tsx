@@ -46,7 +46,7 @@ export function ProfilingFlamegraph({
     (callApmApi) => {
       if (dataSource) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
+          'GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph',
           {
             params: {
               path: { serviceName },

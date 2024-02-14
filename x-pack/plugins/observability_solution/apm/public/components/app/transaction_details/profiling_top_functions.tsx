@@ -38,7 +38,7 @@ export function ProfilingTopNFunctions({
         return;
       }
       return callApmApi(
-        'GET /internal/apm/services/{serviceName}/transactions/functions',
+        'GET /internal/apm/services/{serviceName}/profiling/transactions/functions',
         {
           params: {
             path: { serviceName },

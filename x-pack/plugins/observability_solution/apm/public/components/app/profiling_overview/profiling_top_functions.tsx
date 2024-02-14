@@ -50,7 +50,7 @@ export function ProfilingTopNFunctions({
     (callApmApi) => {
       if (dataSource) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling/functions',
+          'GET /internal/apm/services/{serviceName}/profiling/hosts/functions',
           {
             params: {
               path: { serviceName },
