@@ -98,6 +98,14 @@ tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip
 gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
 gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 
+echo "--- Validate CDN assets"
+CDN_DESTINATION="https://kibana-cdn.gcp.qa.cld.elstc.co/$GIT_ABBREV_COMMIT"
+for CDN_ASSET in kibana-8.13.0-SNAPSHOT-cdn-assets/**/*
+do
+  echo -n "Testing $entry..."
+  curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$CDN_DESTINATION/$CDN_ASSET"
+done
+
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
