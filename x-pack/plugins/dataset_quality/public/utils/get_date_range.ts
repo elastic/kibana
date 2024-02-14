@@ -16,12 +16,37 @@ function getParsedDate(rawDate?: string, options = {}) {
   }
 }
 
-export function getDateRange({ from, to }: { from: string; to: string }) {
+function getRanges({ from, to }: { from: string; to: string }) {
   const start = getParsedDate(from);
   const end = getParsedDate(to, { roundUp: true });
 
+  if (!start || !end) {
+    throw new Error(`Invalid Dates: from: ${from}, to: ${to}`);
+  }
+
+  const startDate = start.toISOString();
+  const endDate = end.toISOString();
+
   return {
-    start: start!.toISOString(),
-    end: end!.toISOString(),
+    startDate,
+    endDate,
+  };
+}
+
+export function getDateRange({ from, to }: { from: string; to: string }) {
+  const { startDate, endDate } = getRanges({ from, to });
+
+  return {
+    startDate: new Date(startDate).getTime(),
+    endDate: new Date(endDate).getTime(),
+  };
+}
+
+export function getDateISORange({ from, to }: { from: string; to: string }) {
+  const { startDate, endDate } = getRanges({ from, to });
+
+  return {
+    startDate,
+    endDate,
   };
 }

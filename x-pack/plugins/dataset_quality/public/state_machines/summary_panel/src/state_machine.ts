@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { getDefaultTimeRange } from '../../../utils';
+import { getDateISORange } from '../../../utils';
 import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { defaultContext, MAX_RETRIES, RETRY_DELAY_IN_MS } from './defaults';
@@ -212,20 +212,23 @@ export const createDatasetsSummaryPanelStateMachine = ({
         return { percentages };
       },
       loadDatasetsActivity: async (_context) => {
-        const dataStreamsStats = await dataStreamStatsClient.getDataStreamsStats();
-        const activeDataStreams = filterInactiveDatasets({ datasets: dataStreamsStats });
+        const { dataStreamStats } = await dataStreamStatsClient.getDataStreamsStats();
+        const activeDataStreams = filterInactiveDatasets({ datasets: dataStreamStats });
         return {
-          total: dataStreamsStats.length,
+          total: dataStreamStats.length,
           active: activeDataStreams.length,
         };
       },
       loadEstimatedData: async (_context) => {
-        const { from: start, to: end } = getDefaultTimeRange();
+        const { startDate, endDate } = getDateISORange({
+          from: 'now-24h',
+          to: 'now',
+        });
         return dataStreamStatsClient.getDataStreamsEstimatedDataInBytes({
           query: {
             type: 'logs',
-            start,
-            end,
+            start: startDate,
+            end: endDate,
           },
         });
       },

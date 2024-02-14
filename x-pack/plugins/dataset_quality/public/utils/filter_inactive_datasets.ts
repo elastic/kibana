@@ -20,13 +20,12 @@ export const filterInactiveDatasets = ({
   datasets,
   timeRange = { from: 'now-24h', to: 'now' },
 }: FilterInactiveDatasetsOptions) => {
-  const { start, end } = getDateRange(timeRange);
-
-  const startDate = new Date(start).getTime();
-  const endDate = new Date(end).getTime();
+  const { startDate, endDate } = getDateRange(timeRange);
 
   return datasets.filter((dataset) =>
-    dataset.lastActivity ? isActive(dataset.lastActivity, startDate, endDate) : false
+    dataset.lastActivity
+      ? isActive(dataset.lastActivity, startDate as number, endDate as number)
+      : false
   );
 };
 
@@ -40,12 +39,9 @@ interface IsActiveDatasetOptions {
 
 export const isActiveDataset = (options: IsActiveDatasetOptions) => {
   const { lastActivity, timeRange } = options;
-  const { start, end } = getDateRange(timeRange);
+  const { startDate, endDate } = getDateRange(timeRange);
 
-  const startDate = new Date(start).getTime();
-  const endDate = new Date(end).getTime();
-
-  return isActive(lastActivity, startDate, endDate);
+  return isActive(lastActivity, startDate as number, endDate as number);
 };
 
 const isActive = (lastActivity: number, startDate: number, endDate: number) =>

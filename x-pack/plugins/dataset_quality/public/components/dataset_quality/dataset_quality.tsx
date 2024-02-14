@@ -62,7 +62,7 @@ const SummaryPanel = dynamic(() => import('./summary_panel/summary_panel'));
 
 function DatasetQuality() {
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
         <Header />
       </EuiFlexItem>
