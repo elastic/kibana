@@ -282,6 +282,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             .post(`/api/actions/connector/${bedrockActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
+              llmType: 'bedrock',
               params: { subAction: 'invalidAction' },
             })
             .expect(200);
@@ -326,6 +327,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${bedrockActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
+                llmType: 'bedrock',
                 params: {
                   subAction: 'test',
                   subActionParams: {
@@ -356,6 +358,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${bedrockActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
+                llmType: 'bedrock',
                 params: {
                   subAction: 'test',
                   subActionParams: {
@@ -380,6 +383,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${bedrockActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
+                llmType: 'bedrock',
                 params: {
                   subAction: 'invokeAI',
                   subActionParams: {
@@ -469,8 +473,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 .auth('global_read', 'global_read-password')
                 .set('kbn-xsrf', 'foo')
                 .send({
+                  llmType: 'bedrock',
                   params: {
-                    llmType: 'bedrock',
                     subAction: 'getDashboard',
                     subActionParams: {
                       dashboardId,
@@ -496,8 +500,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 .post(`/api/actions/connector/${bedrockActionId}/_execute`)
                 .set('kbn-xsrf', 'foo')
                 .send({
+                  llmType: 'bedrock',
                   params: {
-                    llmType: 'bedrock',
                     subAction: 'getDashboard',
                     subActionParams: {
                       dashboardId,
@@ -574,8 +578,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             .post(`/api/actions/connector/${bedrockActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
+              llmType: 'bedrock',
               params: {
-                llmType: 'bedrock',
                 subAction: 'test',
                 subActionParams: {
                   body: JSON.stringify(DEFAULT_BODY),
