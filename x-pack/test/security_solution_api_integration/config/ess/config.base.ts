@@ -82,7 +82,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'entityAnalyticsAssetCriticalityEnabled',
             'alertSuppressionForIndicatorMatchRuleEnabled',
             'alertSuppressionForEqlRuleEnabled',
           ])}`,

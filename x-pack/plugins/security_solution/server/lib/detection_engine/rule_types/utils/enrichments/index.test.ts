@@ -15,6 +15,7 @@ import { createAlert } from './__mocks__/alerts';
 import { isIndexExist } from './utils/is_index_exist';
 
 import { allowedExperimentalValues } from '../../../../../../common';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
@@ -73,7 +74,7 @@ const assetCriticalityHostResponse = [
   {
     fields: {
       id_value: ['host name 2'],
-      criticality_level: ['very_important'],
+      criticality_level: ['extremely_critical'],
     },
   },
   {
@@ -189,6 +190,11 @@ describe('enrichEvents', () => {
     // enable for asset criticality
     mockIsIndexExist.mockImplementation(() => true);
 
+    // enable asset criticality settings
+    alertServices.uiSettingsClient.get.mockImplementation((key) =>
+      Promise.resolve(key === ENABLE_ASSET_CRITICALITY_SETTING)
+    );
+
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
       services: alertServices,
@@ -200,10 +206,7 @@ describe('enrichEvents', () => {
         createAlert('2', createEntity('host', 'user name 1')),
       ],
       spaceId: 'default',
-      experimentalFeatures: {
-        ...allowedExperimentalValues,
-        entityAnalyticsAssetCriticalityEnabled: true,
-      },
+      experimentalFeatures: allowedExperimentalValues,
     });
 
     expect(enrichedEvents).toEqual([

@@ -5,44 +5,25 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiHealth, EuiText } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CRITICALITY_LEVEL_TITLE, CRITICALITY_LEVEL_DESCRIPTION } from './translations';
+import { CRITICALITY_LEVEL_TITLE } from './translations';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
 export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
-  very_important: '#E7664C',
-  important: '#D6BF57',
-  normal: '#54B399',
-  not_important: euiLightVars.euiColorMediumShade,
+  extreme_impact: '#E7664C',
+  high_impact: '#D6BF57',
+  medium_impact: '#54B399',
+  low_impact: euiLightVars.euiColorMediumShade,
 };
 
 export const AssetCriticalityBadge: React.FC<{
   criticalityLevel: CriticalityLevel;
-  withDescription?: boolean;
   style?: React.CSSProperties;
   className?: string;
   dataTestSubj?: string;
-}> = ({
-  criticalityLevel,
-  style,
-  dataTestSubj = 'asset-criticality-badge',
-  withDescription = false,
-  className,
-}) => {
-  const showDescription = withDescription ?? false;
-  const badgeContent = showDescription ? (
-    <>
-      <strong>{CRITICALITY_LEVEL_TITLE[criticalityLevel]}</strong>
-      <EuiText size="s" color="subdued">
-        <p>{CRITICALITY_LEVEL_DESCRIPTION[criticalityLevel]}</p>
-      </EuiText>
-    </>
-  ) : (
-    CRITICALITY_LEVEL_TITLE[criticalityLevel]
-  );
-
+}> = ({ criticalityLevel, style, dataTestSubj = 'asset-criticality-badge', className }) => {
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}
@@ -50,24 +31,22 @@ export const AssetCriticalityBadge: React.FC<{
       style={style}
       className={className}
     >
-      {badgeContent}
+      {CRITICALITY_LEVEL_TITLE[criticalityLevel]}
     </EuiHealth>
   );
 };
 
 export const AssetCriticalityBadgeAllowMissing: React.FC<{
   criticalityLevel?: CriticalityLevel;
-  withDescription?: boolean;
   style?: React.CSSProperties;
   dataTestSubj?: string;
   className?: string;
-}> = ({ criticalityLevel, style, dataTestSubj, withDescription, className }) => {
+}> = ({ criticalityLevel, style, dataTestSubj, className }) => {
   if (criticalityLevel) {
     return (
       <AssetCriticalityBadge
         criticalityLevel={criticalityLevel}
         dataTestSubj={dataTestSubj}
-        withDescription={withDescription}
         style={style}
         className={className}
       />
