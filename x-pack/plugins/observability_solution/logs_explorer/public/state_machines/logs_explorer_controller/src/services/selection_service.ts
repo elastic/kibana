@@ -5,59 +5,103 @@
  * 2.0.
  */
 
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
 import { Dataset } from '../../../../../common/datasets';
-import { SingleDatasetSelection } from '../../../../../common/dataset_selection';
+import {
+  isDataViewSelection,
+  isUnresolvedDatasetSelection,
+  SingleDatasetSelection,
+  UnresolvedDatasetSelection,
+} from '../../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
+import { redirectToDiscover } from './discover_service';
 
-interface LogsExplorerControllerUrlStateDependencies {
+interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;
+  discover: DiscoverStart;
 }
 
-export const validateSelection =
+export const initializeSelection =
   ({
     datasetsClient,
-  }: LogsExplorerControllerUrlStateDependencies): InvokeCreator<
+    discover,
+  }: LogsExplorerControllerSelectionServiceDeps): InvokeCreator<
     LogsExplorerControllerContext,
     LogsExplorerControllerEvent
   > =>
   (context) =>
   async (send) => {
-    const unresolvedIntegrationName =
-      context.datasetSelection.selection.dataset.parentIntegration?.name;
-    const unresolvedDatasetName = context.datasetSelection.selection.dataset.name;
-
-    if (context.datasetSelection.selectionType !== 'unresolved' || !unresolvedIntegrationName) {
-      return send('LISTEN_TO_CHANGES');
+    /**
+     * First validation.
+     * If the selection is a data view which is not of logs type, redirect to Discover.
+     */
+    if (
+      isDataViewSelection(context.datasetSelection) &&
+      context.datasetSelection.selection.dataView.isUnknownDataType()
+    ) {
+      return redirectToDiscover({ context, datasetSelection: context.datasetSelection, discover });
     }
 
-    try {
-      const { items } = await datasetsClient.findIntegrations({
-        nameQuery: unresolvedIntegrationName,
-      });
-
-      // There should only be one matching integration with the given name
-      // If no integration matches, skip the update and listen for user changes
-      const installedIntegration = items[0];
-      if (!installedIntegration) {
-        return send('LISTEN_TO_CHANGES');
-      }
-
-      // If no dataset matches the passed name for the retrieved integration,
-      // skip the update and listen for user changes
-      const targetDataset = installedIntegration.datasets.find(
-        (d) => d.name === unresolvedDatasetName
-      );
-      if (!targetDataset) {
-        return send('LISTEN_TO_CHANGES');
-      }
-
-      const dataset = Dataset.create(targetDataset, installedIntegration);
-      const datasetSelection = SingleDatasetSelection.create(dataset);
-
-      send({ type: 'UPDATE_DATASET_SELECTION', data: datasetSelection });
-    } catch (error) {
-      return send('DATASET_SELECTION_RESTORE_FAILURE');
+    /**
+     * Second validation.
+     * If the selection is a data view, initialize it.
+     */
+    if (isDataViewSelection(context.datasetSelection)) {
+      return send('INITIALIZE_DATA_VIEW');
     }
+
+    /**
+     * Third validation.
+     * If the selection is an unresolved dataset, perform a look up against integrations..
+     */
+    if (isUnresolvedDatasetSelection(context.datasetSelection)) {
+      try {
+        const selection = await lookupUnresolvedDatasetSelection(context.datasetSelection, {
+          datasetsClient,
+        });
+
+        if (selection !== null) {
+          return send({ type: 'INITIALIZE_DATASET', data: selection });
+        }
+      } catch {
+        return send('DATASET_SELECTION_RESTORE_FAILURE');
+      }
+    }
+
+    /**
+     * For any remaining case, initialize the current dataset selection
+     */
+    return send('INITIALIZE_DATASET');
   };
+
+const lookupUnresolvedDatasetSelection = async (
+  datasetSelection: UnresolvedDatasetSelection,
+  { datasetsClient }: Pick<LogsExplorerControllerSelectionServiceDeps, 'datasetsClient'>
+) => {
+  const nameQuery = datasetSelection.selection.dataset.parentIntegration?.name;
+
+  if (nameQuery) {
+    return null;
+  }
+
+  const { items } = await datasetsClient.findIntegrations({ nameQuery });
+
+  // There should only be one matching integration with the given name
+  // If no integration matches, skip the update and listen for user changes
+  const installedIntegration = items[0];
+  if (!installedIntegration) {
+    return null;
+  }
+
+  // If no dataset matches the passed name for the retrieved integration,
+  // skip the update and listen for user changes
+  const targetDataset = installedIntegration.datasets.find((d) => d.name === nameQuery);
+  if (!targetDataset) {
+    return null;
+  }
+
+  const dataset = Dataset.create(targetDataset, installedIntegration);
+  return SingleDatasetSelection.create(dataset);
+};
