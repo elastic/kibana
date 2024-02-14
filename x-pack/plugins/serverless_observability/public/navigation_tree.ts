@@ -199,26 +199,37 @@ export const navigationTree: NavigationTreeDefinition = {
           breadcrumbStatus: 'hidden',
           children: [
             {
-              title: 'Overview',
+              title: i18n.translate('xpack.severlessObservability.nav.synthetics.overviewItem', {
+                defaultMessage: 'Overview',
+              }),
               id: 'synthetics-overview',
               link: 'synthetics:overview',
               breadcrumbStatus: 'hidden',
             },
             {
               link: 'synthetics:management',
-              title: 'Monitors',
+              title: i18n.translate('xpack.severlessObservability.nav.synthetics.monitorsItem', {
+                defaultMessage: 'Monitors',
+              }),
               id: 'synthetics-management',
               breadcrumbStatus: 'hidden',
             },
             {
               link: 'synthetics:certificates',
-              title: 'TLS Certificates',
+              title: i18n.translate(
+                'xpack.severlessObservability.nav.synthetics.certificatesItem',
+                {
+                  defaultMessage: 'TLS Certificates',
+                }
+              ),
               id: 'synthetics-certificates',
               breadcrumbStatus: 'hidden',
             },
             {
               link: 'synthetics:settings',
-              title: 'Settings',
+              title: i18n.translate('xpack.severlessObservability.nav.synthetics.settingsItem', {
+                defaultMessage: 'Settings',
+              }),
               id: 'synthetics-settings',
               breadcrumbStatus: 'hidden',
             },
