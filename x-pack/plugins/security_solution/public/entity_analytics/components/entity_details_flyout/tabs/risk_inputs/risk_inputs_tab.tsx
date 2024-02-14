@@ -11,6 +11,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { ActionColumn } from '../../components/action_column';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
@@ -23,8 +25,8 @@ import {
   isUserRiskScore,
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
+
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
@@ -146,9 +148,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     [currentPage.index, currentPage.size, alertsData?.length]
   );
 
-  const isAssetCriticalityEnabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsAssetCriticalityEnabled'
-  );
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
 
   if (riskScoreError || riskAlertsError) {
     return (

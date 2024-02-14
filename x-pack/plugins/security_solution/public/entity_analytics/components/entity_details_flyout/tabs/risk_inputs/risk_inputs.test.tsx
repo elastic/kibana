@@ -20,11 +20,15 @@ jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-}));
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
 
 const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
 
@@ -75,7 +79,7 @@ describe('RiskInputsTab', () => {
   });
 
   it('Does not render the context section if enabled but no asset criticality', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseUiSetting.mockReturnValue([true]);
 
     const { queryByTestId } = render(
       <TestProviders>
@@ -87,7 +91,7 @@ describe('RiskInputsTab', () => {
   });
 
   it('Renders the context section if enabled and risks contains asset criticality', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseUiSetting.mockReturnValue([true]);
 
     const riskScorewWithAssetCriticality = {
       '@timestamp': '2021-08-19T16:00:00.000Z',
