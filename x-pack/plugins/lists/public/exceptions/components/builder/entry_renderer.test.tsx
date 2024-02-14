@@ -1214,39 +1214,4 @@ describe('BuilderEntryItem', () => {
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"] input').props().disabled
     ).toBeTruthy();
   });
-
-  it('shows the "wildcardWithIsOperatorWarning" if the operator is "IS" and there is a wildcard in the value', () => {
-    wrapper = mount(
-      <BuilderEntryItem
-        autocompleteService={autocompleteStartMock}
-        entry={{
-          correspondingKeywordField: undefined,
-          entryIndex: 0,
-          field: getField('event.category'),
-          id: '123',
-          nested: undefined,
-          operator: isOperator,
-          parent: undefined,
-          value: '1234*',
-        }}
-        httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
-        listType="endpoint_events"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
-        osTypes={['windows']}
-        showLabel={true}
-        isDisabled={false}
-      />
-    );
-    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeTruthy();
-    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toEqual(
-      "Use the 'MATCHES' operator when using wildcards. Info"
-    );
-  });
 });

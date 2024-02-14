@@ -40,7 +40,6 @@ const BOOLEAN_OPTIONS = [
 
 const SINGLE_SELECTION = { asPlainText: true };
 
-type Warning = string | React.ReactNode;
 interface AutocompleteFieldMatchProps {
   placeholder: string;
   selectedField: DataViewFieldBase | undefined;
@@ -55,8 +54,6 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
-  onWarning: (arg: boolean) => void;
-  warning?: Warning;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
@@ -73,8 +70,6 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   autocompleteService,
   onChange,
   onError,
-  onWarning,
-  warning,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
@@ -125,13 +120,6 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     [setError, onError]
   );
 
-  const handleWarning = useCallback(
-    (warn: Warning | undefined): void => {
-      onWarning(warn !== undefined);
-    },
-    [onWarning]
-  );
-
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     (): GetGenericComboBoxPropsReturn =>
       getGenericComboBoxProps<string>({
@@ -158,20 +146,18 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       if (searchVal !== '' && selectedField != null) {
         const err = paramIsValid(searchVal, selectedField, isRequired, touched);
         handleError(err);
-        handleWarning(warning);
 
         if (!err) handleSpacesWarning(searchVal);
         setSearchQuery(searchVal);
       }
     },
-    [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
+    [handleError, handleSpacesWarning, isRequired, selectedField, touched]
   );
 
   const handleCreateOption = useCallback(
     (option: string): boolean | undefined => {
       const err = paramIsValid(option, selectedField, isRequired, touched);
       handleError(err);
-      handleWarning(warning);
 
       if (err != null) {
         // Explicitly reject the user's input
@@ -183,16 +169,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       onChange(option);
       return undefined;
     },
-    [
-      isRequired,
-      onChange,
-      selectedField,
-      touched,
-      handleError,
-      handleSpacesWarning,
-      warning,
-      handleWarning,
-    ]
+    [isRequired, onChange, selectedField, touched, handleError, handleSpacesWarning]
   );
 
   const handleNonComboBoxInputChange = useCallback(
@@ -215,8 +192,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
     const err = paramIsValid(selectedValue, selectedField, isRequired, true);
     handleError(err);
-    handleWarning(warning);
-  }, [setIsTouched, handleError, selectedValue, selectedField, isRequired, handleWarning, warning]);
+  }, [setIsTouched, handleError, selectedValue, selectedField, isRequired]);
 
   const inputPlaceholder = useMemo((): string => {
     if (isLoading || isLoadingSuggestions) {
@@ -251,7 +227,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         isInvalid={selectedField != null && error != null}
         data-test-subj="valuesAutocompleteMatchLabel"
         fullWidth
-        helpText={warning || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
+        helpText={showSpacesWarning && i18n.FIELD_SPACE_WARNING}
       >
         <EuiComboBox
           placeholder={inputPlaceholder}
@@ -290,7 +266,6 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     handleSearchChange,
     handleValuesChange,
     setIsTouchedValue,
-    warning,
   ]);
 
   if (!isSuggestingValues && selectedField != null) {

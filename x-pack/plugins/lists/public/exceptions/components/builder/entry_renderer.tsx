@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiSpacer,
-  EuiText,
   useEuiPaddingSize,
 } from '@elastic/eui';
 import styled from 'styled-components';
@@ -360,19 +359,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
-  // show warning when a wildcard is detected with the IS operator
-  const getWildcardWithIsOperatorWarning = (): React.ReactNode => {
-    return (
-      <EuiText size="xs">
-        <FormattedMessage
-          id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
-          defaultMessage="Use the 'MATCHES' operator when using wildcards."
-        />{' '}
-        <EuiIconTip type="iInCircle" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
-      </EuiText>
-    );
-  };
-
   // show this when wildcard with matches operator
   const getEventFilterWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
@@ -397,10 +383,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     switch (type) {
       case OperatorTypeEnum.MATCH:
         const value = typeof entry.value === 'string' ? entry.value : undefined;
-        const fieldMatchWarning = /[*?]/.test(value ?? '')
-          ? getWildcardWithIsOperatorWarning()
-          : '';
-
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}
@@ -413,8 +395,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             indexPattern={indexPattern}
             onError={handleError}
-            onWarning={handleWarning}
-            warning={fieldMatchWarning}
             onChange={handleFieldMatchValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatch"
