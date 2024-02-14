@@ -20,6 +20,7 @@ import {
 } from '../definitions/types';
 import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
 
@@ -29,7 +30,9 @@ export const TRIGGER_SUGGESTION_COMMAND = {
 };
 
 function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
-  return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
+  return shouldBeQuotedText(text, options)
+    ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
+    : text;
 }
 
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
