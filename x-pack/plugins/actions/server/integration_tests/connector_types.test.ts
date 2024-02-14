@@ -77,9 +77,9 @@ describe('Connector type config checks', () => {
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
       const connectorType = actionTypeRegistry.get(connectorTypeId);
 
-      expect(connectorType.validate.config.schema.getSchema().describe()).toMatchSnapshot();
-      expect(connectorType.validate.secrets.schema.getSchema().describe()).toMatchSnapshot();
-      expect(connectorType.validate.params.schema.getSchema().describe()).toMatchSnapshot();
+      expect(connectorType?.validate.config.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(connectorType.validate.secrets.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(connectorType.validate.params.schema.getSchema!().describe()).toMatchSnapshot();
     });
   }
 });

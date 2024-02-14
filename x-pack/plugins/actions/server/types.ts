@@ -16,7 +16,7 @@ import {
   SavedObjectReference,
   Logger,
 } from '@kbn/core/server';
-import { Type } from '@kbn/config-schema';
+import { AnySchema } from 'joi';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -103,7 +103,10 @@ export type ExecutorType<
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
 export interface ValidatorType<T> {
-  schema: Type<T>;
+  schema: {
+    validate(value: unknown): T;
+    getSchema?: () => AnySchema;
+  };
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
