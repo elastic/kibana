@@ -63,12 +63,6 @@ export function getConnectorType(): ServerLogConnectorType {
         schema: ParamsSchema,
       },
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: schema.object({}, { defaultValue: {} }),
-      },
-    },
     executor,
   };
 }

@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
-import { ObjectType } from '@kbn/config-schema';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -78,12 +77,6 @@ export interface SubActionConnectorType<Config, Secrets> {
   schema: {
     config: Type<Config>;
     secrets: Type<Secrets>;
-  };
-  schemas?: {
-    params?: {
-      type: 'config-schema';
-      schema: ObjectType;
-    };
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;

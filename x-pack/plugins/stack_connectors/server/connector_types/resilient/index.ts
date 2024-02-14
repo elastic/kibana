@@ -71,12 +71,6 @@ export function getConnectorType(): ConnectorType<
         schema: ExecutorParamsSchema,
       },
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ExternalIncidentServiceConfigurationSchema,
-      },
-    },
     executor,
   };
 }

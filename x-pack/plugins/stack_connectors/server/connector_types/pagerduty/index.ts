@@ -166,12 +166,6 @@ export function getConnectorType(): PagerDutyConnectorType {
         schema: ParamsSchema,
       },
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ConfigSchema,
-      },
-    },
     executor,
   };
 }

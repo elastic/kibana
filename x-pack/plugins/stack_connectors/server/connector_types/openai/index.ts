@@ -17,7 +17,6 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { ObjectType } from '@kbn/config-schema';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,
@@ -35,12 +34,6 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,
-  },
-  schemas: {
-    params: {
-      type: 'config-schema',
-      schema: ConfigSchema as unknown as ObjectType,
-    },
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [

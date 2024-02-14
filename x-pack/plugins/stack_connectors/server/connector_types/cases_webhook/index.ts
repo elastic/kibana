@@ -57,12 +57,6 @@ export function getConnectorType(): ConnectorType<
       },
       connector: validate.connector,
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ExternalIncidentServiceConfigurationSchema,
-      },
-    },
     executor,
     supportedFeatureIds: [CasesConnectorFeatureId],
   };

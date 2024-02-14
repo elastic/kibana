@@ -245,12 +245,6 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       },
       connector: validateConnector,
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ConfigSchema,
-      },
-    },
     renderParameterTemplates,
     executor: curry(executor)({ publicBaseUrl }),
   };

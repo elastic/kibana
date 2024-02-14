@@ -28,12 +28,6 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
-  schemas: {
-    params: {
-      type: 'config-schema',
-      schema: ConfigSchema,
-    },
-  },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [GenerativeAIForSecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,

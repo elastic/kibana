@@ -31,12 +31,6 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
     config: SentinelOneConfigSchema,
     secrets: SentinelOneSecretsSchema,
   },
-  schemas: {
-    params: {
-      type: 'config-schema',
-      schema: SentinelOneConfigSchema,
-    },
-  },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,

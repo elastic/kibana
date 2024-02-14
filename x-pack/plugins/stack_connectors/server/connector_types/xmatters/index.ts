@@ -81,12 +81,6 @@ export function getConnectorType(): XmattersConnectorType {
       },
       connector: validateConnector,
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ConfigSchema,
-      },
-    },
     executor,
   };
 }

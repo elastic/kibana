@@ -32,12 +32,6 @@ export function getConnectorType(): D3SecurityConnectorType {
       config: D3SecurityConfigSchema,
       secrets: D3SecuritySecretsSchema,
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: D3SecurityConfigSchema,
-      },
-    },
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
     renderParameterTemplates,
   };

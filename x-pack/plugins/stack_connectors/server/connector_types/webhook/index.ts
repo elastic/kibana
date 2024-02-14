@@ -134,12 +134,6 @@ export function getConnectorType(): WebhookConnectorType {
         schema: ParamsSchema,
       },
     },
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ConfigSchema,
-      },
-    },
     renderParameterTemplates,
     executor,
   };

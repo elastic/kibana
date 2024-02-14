@@ -16,7 +16,7 @@ import {
   SavedObjectReference,
   Logger,
 } from '@kbn/core/server';
-import type { ObjectType } from '@kbn/config-schema';
+import { Type } from '@kbn/config-schema';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -102,11 +102,9 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-export interface ValidatorType<Type> {
-  schema: {
-    validate(value: unknown): Type;
-  };
-  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+export interface ValidatorType<T> {
+  schema: Type<T>;
+  customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
@@ -158,12 +156,6 @@ export interface ActionType<
   getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
-  schemas?: {
-    params?: {
-      type: 'config-schema';
-      schema: ObjectType;
-    };
-  };
 }
 
 export interface RawAction extends Record<string, unknown> {

@@ -30,12 +30,6 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
     id: OpsgenieConnectorTypeId,
     schema: { config: ConfigSchema, secrets: SecretsSchema },
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
-    schemas: {
-      params: {
-        type: 'config-schema',
-        schema: ConfigSchema,
-      },
-    },
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

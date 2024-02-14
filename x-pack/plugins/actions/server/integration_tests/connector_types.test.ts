@@ -76,16 +76,10 @@ describe('Connector type config checks', () => {
   for (const connectorTypeId of connectorTypes) {
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
       const connectorType = actionTypeRegistry.get(connectorTypeId);
-      if (!connectorType?.schemas?.params) {
-        throw new Error('schema.params is required for connector type:' + connectorTypeId);
-      }
-      const schemaType = connectorType.schemas.params.type;
-      if (schemaType === 'config-schema') {
-        // @ts-ignore-next-line getSchema() exists..
-        expect(connectorType.schemas.params.schema.getSchema().describe()).toMatchSnapshot();
-      } else {
-        throw new Error(`Support for ${schemaType} missing`);
-      }
+
+      expect(connectorType.validate.config.schema.getSchema().describe()).toMatchSnapshot();
+      expect(connectorType.validate.secrets.schema.getSchema().describe()).toMatchSnapshot();
+      expect(connectorType.validate.params.schema.getSchema().describe()).toMatchSnapshot();
     });
   }
 });
