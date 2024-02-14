@@ -54,9 +54,9 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
       message, consider whether it still makes sense to follow it up with another function call.
 
       ${
-        functions?.find((fn) => fn.name === 'recall')
-          ? `The "recall" function is ALWAYS used after a user question. Even if it was used before, your job is to answer the last user question,
-      even if the "recall" function was executed after that. Consider the tools you need to answer the user's question.`
+        functions?.find((fn) => fn.name === 'context')
+          ? `The "context" function is ALWAYS used after a user question. Even if it was used before, your job is to answer the last user question,
+      even if the "context" function was executed after that. Consider the tools you need to answer the user's question.`
           : ''
       }
       

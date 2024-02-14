@@ -9,6 +9,21 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
 
+export const AgentTypeSchemaLiteral = RESPONSE_ACTION_AGENT_TYPE.map((agentType) =>
+  schema.literal(agentType)
+);
+
+export const agentTypesSchema = {
+  schema: schema.oneOf(
+    // @ts-expect-error TS2769: No overload matches this call
+    AgentTypeSchemaLiteral
+  ),
+  options: {
+    minSize: 1,
+    maxSize: RESPONSE_ACTION_AGENT_TYPE.length,
+  },
+};
+
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
   endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
@@ -46,7 +61,7 @@ export const BaseActionRequestSchema = {
   agent_type: schema.maybe(
     schema.oneOf(
       // @ts-expect-error TS2769: No overload matches this call
-      RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType)),
+      AgentTypeSchemaLiteral,
       { defaultValue: 'endpoint' }
     )
   ),
