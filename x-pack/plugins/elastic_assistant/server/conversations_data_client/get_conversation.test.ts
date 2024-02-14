@@ -31,10 +31,12 @@ export const getConversationResponseMock = (): ConversationResponse => ({
     model: 'test',
     provider: 'Azure OpenAI',
   },
-  user: {
-    id: '1111',
-    name: 'elastic',
-  },
+  users: [
+    {
+      id: '1111',
+      name: 'elastic',
+    },
+  ],
   replacements: undefined,
 });
 
@@ -78,10 +80,12 @@ export const getSearchConversationMock =
               model: 'test',
               provider: 'Azure OpenAI',
             },
-            user: {
-              id: '1111',
-              name: 'elastic',
-            },
+            users: [
+              {
+                id: '1111',
+                name: 'elastic',
+              },
+            ],
             replacements: undefined,
           },
         },

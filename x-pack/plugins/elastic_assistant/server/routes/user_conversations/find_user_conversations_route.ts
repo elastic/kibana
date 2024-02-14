@@ -46,13 +46,13 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const currentUser = ctx.elasticAssistant.getCurrentUser();
 
-          const additionalFilter = query.filter ? `AND ${query.filter}` : '';
+          const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
           const result = await dataClient?.findConversations({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ id: "${currentUser?.profile_uid}${additionalFilter}" }`,
+            filter: `users:{ id: "${currentUser?.profile_uid}" }${additionalFilter}`,
             fields: query.fields,
           });
 

@@ -93,7 +93,7 @@ describe('DocumentsDataWriter', () => {
 
       expect(errors).toEqual([
         {
-          conversation: {
+          document: {
             id: '',
           },
           message: 'something went wrong',
@@ -174,7 +174,7 @@ describe('DocumentsDataWriter', () => {
 
         expect(errors).toEqual([
           {
-            conversation: {
+            document: {
               id: undefined,
             },
             message: 'something went wrong',

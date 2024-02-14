@@ -119,7 +119,7 @@ describe('AI Assistant Service', () => {
       );
 
       expect(assistantService.isInitialized()).toEqual(true);
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
 
       const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
       expect(componentTemplate.name).toEqual(
@@ -616,9 +616,7 @@ describe('AI Assistant Service', () => {
           mappings: {},
         },
       }));
-      clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(
-        new Error('fail index template')
-      );
+      clusterClient.indices.putIndexTemplate.mockRejectedValue(new Error('fail index template'));
 
       assistantService = new AIAssistantService({
         logger,
@@ -676,7 +674,7 @@ describe('AI Assistant Service', () => {
         'AI Assistant service initialized',
         async () => assistantService.isInitialized() === true
       );
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(5);
     });
 
     test('should retry updating index template for transient ES errors', async () => {
@@ -703,7 +701,7 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(5);
     });
 
     test('should retry updating index settings for existing indices for transient ES errors', async () => {
@@ -729,7 +727,7 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(5);
     });
 
     test('should retry updating index mappings for existing indices for transient ES errors', async () => {
@@ -755,7 +753,7 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(3);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(5);
     });
 
     test('should retry creating concrete index for transient ES errors', async () => {
@@ -791,7 +789,7 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(3);
+      expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(5);
     });
   });
 });

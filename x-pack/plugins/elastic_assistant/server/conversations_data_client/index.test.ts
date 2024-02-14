@@ -70,43 +70,36 @@ describe('AIAssistantConversationsDataClient', () => {
               created_at: '2024-01-25T01:32:37.649Z',
               messages: [
                 {
-                  presentation: {
-                    delay: 1000,
-                    stream: true,
-                  },
                   '@timestamp': '1/24/2024, 5:32:19 PM',
                   role: 'assistant',
                   reader: null,
                   is_error: null,
-                  replacements: null,
                   content:
                     'Go ahead and click the add connector button below to continue the conversation!',
                 },
                 {
-                  presentation: null,
                   '@timestamp': '1/24/2024, 5:32:37 PM',
                   role: 'assistant',
                   reader: null,
                   is_error: null,
-                  replacements: null,
                   content: 'Connector setup complete!',
                 },
                 {
-                  presentation: null,
                   '@timestamp': '1/24/2024, 5:34:50 PM',
                   role: 'assistant',
                   reader: null,
                   is_error: true,
-                  replacements: null,
                   content: 'An error occurred sending your message.',
                 },
               ],
               title: 'Alert summary',
               is_default: true,
-              user: {
-                name: 'elastic',
-                id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-              },
+              users: [
+                {
+                  name: 'elastic',
+                  id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+                },
+              ],
             },
           },
         ],
@@ -136,10 +129,6 @@ describe('AIAssistantConversationsDataClient', () => {
         {
           content:
             'Go ahead and click the add connector button below to continue the conversation!',
-          presentation: {
-            delay: 1000,
-            stream: true,
-          },
           role: 'assistant',
           timestamp: '1/24/2024, 5:32:19 PM',
         },
@@ -160,10 +149,12 @@ describe('AIAssistantConversationsDataClient', () => {
       timestamp: '2024-01-25T01:32:37.649Z',
       title: 'Alert summary',
       updatedAt: '2024-01-25T01:34:51.303Z',
-      user: {
-        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        name: 'elastic',
-      },
+      users: [
+        {
+          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+          name: 'elastic',
+        },
+      ],
     });
   });
 
@@ -203,9 +194,7 @@ describe('AIAssistantConversationsDataClient', () => {
             '@timestamp': '2019-12-13T16:40:33.400Z',
             content: 'test content',
             is_error: undefined,
-            presentation: undefined,
             reader: undefined,
-            replacements: undefined,
             role: 'user',
             trace_data: {
               trace_id: '1',

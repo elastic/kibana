@@ -225,7 +225,11 @@ export class AIAssistantService {
   public async createAIAssistantConversationsDataClient(
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantConversationsDataClient | null> {
-    await this.checkResourcesInstallation(opts);
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
 
     return new AIAssistantConversationsDataClient({
       logger: this.options.logger,
@@ -240,7 +244,11 @@ export class AIAssistantService {
   public async createAIAssistantPromptsDataClient(
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantPromtsDataClient | null> {
-    await this.checkResourcesInstallation(opts);
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
 
     return new AIAssistantPromtsDataClient({
       logger: this.options.logger,
@@ -255,7 +263,11 @@ export class AIAssistantService {
   public async createAIAssistantAnonymizationFieldsDataClient(
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantAnonymizationFieldsDataClient | null> {
-    await this.checkResourcesInstallation(opts);
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
 
     return new AIAssistantAnonymizationFieldsDataClient({
       logger: this.options.logger,

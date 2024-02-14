@@ -87,7 +87,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
 
@@ -97,7 +96,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
 
@@ -107,7 +105,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
-          telemetry: core.analytics,
         });
       }),
     };

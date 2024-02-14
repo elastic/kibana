@@ -86,9 +86,11 @@ export const getConversationMock = (
   createdAt: '2019-12-13T16:40:33.400Z',
   updatedAt: '2019-12-13T16:40:33.400Z',
   namespace: 'default',
-  user: {
-    name: 'elastic',
-  },
+  users: [
+    {
+      name: 'elastic',
+    },
+  ],
 });
 
 export const getQueryConversationParams = (

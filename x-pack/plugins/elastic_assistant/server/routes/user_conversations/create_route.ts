@@ -53,7 +53,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const result = await dataClient?.findConversations({
             perPage: 100,
             page: 1,
-            filter: `user.id:${authenticatedUser?.profile_uid} AND title:${request.body.title}`,
+            filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND title:${request.body.title}`,
             fields: ['title'],
           });
           if (result?.data != null && result.data.length > 0) {
