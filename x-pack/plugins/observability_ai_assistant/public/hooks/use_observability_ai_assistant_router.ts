@@ -7,7 +7,6 @@
 
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { ObservabilityAIAssistantRouter, ObservabilityAIAssistantRoutes } from '../routes/config';
 import { observabilityAIAssistantRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
@@ -21,15 +20,9 @@ interface StatefulObservabilityAIAssistantRouter extends ObservabilityAIAssistan
     path: T,
     ...params: TypeAsArgs<TypeOf<ObservabilityAIAssistantRoutes, T>>
   ): void;
-  navigateToConversationsApp<T extends PathsOf<ObservabilityAIAssistantRoutes>>(
-    path: T,
-    ...params: TypeAsArgs<TypeOf<ObservabilityAIAssistantRoutes, T>>
-  ): void;
 }
 
 export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssistantRouter {
-  const history = useHistory();
-
   const {
     services: {
       http,
@@ -47,43 +40,16 @@ export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssi
       ...observabilityAIAssistantRouter,
       push: (...args) => {
         const next = link(...args);
-
-        history.push(next);
-      },
-      navigateToConversationsApp: (path, ...args) => {
-        const [_, route, routeParam] = path.split('/');
-
-        const sanitized = routeParam.replace('{', '').replace('}', '');
-
-        const pathKey = args[0]?.path;
-
-        if (typeof pathKey !== 'object') {
-          return;
-        }
-
-        if (Object.keys(pathKey).length === 0) {
-          navigateToApp('observabilityAIAssistant', {
-            path: route,
-          });
-          return;
-        }
-
-        if (Object.keys(pathKey).length === 1) {
-          navigateToApp('observabilityAIAssistant', {
-            // @ts-expect-error
-            path: `${route}/${pathKey[sanitized]}`,
-          });
-          return;
-        }
+        navigateToApp('observabilityAIAssistant', { path: next, replace: false });
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
-        history.replace(next);
+        navigateToApp('observabilityAIAssistant', { path: next, replace: true });
       },
       link: (path, ...args) => {
         return http.basePath.prepend('/app/observabilityAIAssistant' + link(path, ...args));
       },
     }),
-    [history, navigateToApp, http.basePath]
+    [navigateToApp, http.basePath]
   );
 }

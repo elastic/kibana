@@ -185,12 +185,20 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         passed_findings_count: { type: 'long' },
         failed_findings_count: { type: 'long' },
       },
+      posture_management_stats_enabled_rules: {
+        posture_score: { type: 'long' },
+        benchmark_name: { type: 'keyword' },
+        benchmark_version: { type: 'keyword' },
+        passed_findings_count: { type: 'long' },
+        failed_findings_count: { type: 'long' },
+      },
       kspm_stats: {
         kubernetes_version: { type: 'keyword' },
         agents_count: { type: 'short' },
         nodes_count: { type: 'short' },
         pods_count: { type: 'short' },
       },
+      has_muted_rules: { type: 'boolean' },
     },
   },
   muted_rules_stats: {

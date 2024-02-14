@@ -58,6 +58,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
+import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -295,6 +296,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     panelsToggle,
   ]);
 
+  const isLoading =
+    documentState.fetchStatus === FetchStatus.LOADING ||
+    documentState.fetchStatus === FetchStatus.PARTIAL;
+
+  const onCancelClick = useCallback(() => {
+    stateContainer.dataState.cancel();
+    sendErrorMsg(stateContainer.dataState.data$.documents$);
+    sendErrorMsg(stateContainer.dataState.data$.main$);
+  }, [stateContainer.dataState]);
+
   return (
     <EuiPage
       className={classNames('dscPage', { 'dscPage--serverless': serverless })}
@@ -326,6 +337,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
+        isLoading={isLoading}
+        onCancelClick={onCancelClick}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <div
