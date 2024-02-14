@@ -18,9 +18,9 @@ import { buildSlo } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
-import { useFetchIndexPatternFields } from '../../hooks/slo/use_fetch_index_pattern_fields';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
+import { useCreateRule } from '../../hooks/use_create_rule';
 import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useKibana } from '../../utils/kibana_react';
@@ -40,9 +40,9 @@ jest.mock('../../hooks/use_fetch_data_views');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
+jest.mock('../../hooks/use_create_rule');
 jest.mock('../../hooks/slo/use_fetch_apm_suggestions');
 jest.mock('../../hooks/slo/use_capabilities');
-jest.mock('../../hooks/slo/use_fetch_index_pattern_fields');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -56,8 +56,8 @@ const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
+const useCreateRuleMock = useCreateRule as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
-const useFetchIndexPatternFieldsMock = useFetchIndexPatternFields as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockAddSuccess = jest.fn();
@@ -121,6 +121,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       unifiedSearch: {
         ui: {
           QueryStringInput: () => <div>Query String Input</div>,
+          SearchBar: () => <div>Search Bar</div>,
         },
         autocomplete: {
           hasQuerySuggestions: () => {},
@@ -134,8 +135,9 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
 };
 
 describe('SLO Edit Page', () => {
-  const mockCreate = jest.fn();
+  const mockCreate = jest.fn(() => Promise.resolve({ id: 'mock-slo-id' }));
   const mockUpdate = jest.fn();
+  const mockCreateRule = jest.fn();
 
   const history = createBrowserHistory();
 
@@ -158,19 +160,19 @@ describe('SLO Edit Page', () => {
       isLoading: false,
       data: ['some-index', 'index-2'],
     });
-    useFetchIndexPatternFieldsMock.mockReturnValue({
-      isLoading: false,
-      data: [
-        { name: 'field', type: 'date', aggregatable: false, searchable: false },
-        { name: 'field_text', type: 'text', aggregatable: true, searchable: true },
-      ],
-    });
 
     useCreateSloMock.mockReturnValue({
       isLoading: false,
       isSuccess: false,
       isError: false,
       mutateAsync: mockCreate,
+    });
+
+    useCreateRuleMock.mockReturnValue({
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      mutateAsync: mockCreateRule,
     });
 
     useUpdateSloMock.mockReturnValue({
@@ -403,7 +405,7 @@ describe('SLO Edit Page', () => {
     });
 
     describe('when submitting has completed successfully', () => {
-      it('navigates to the SLO List page when checkbox to create new rule is not checked', async () => {
+      it('navigates to the SLO List page', async () => {
         const slo = buildSlo();
 
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
@@ -422,52 +424,6 @@ describe('SLO Edit Page', () => {
         });
         await waitFor(() => {
           expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
-        });
-      });
-
-      it('navigates to the SLO Edit page when checkbox to create new rule is checked', async () => {
-        const slo = buildSlo();
-
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
-
-        const { getByTestId } = render(<SloEditPage />);
-
-        expect(getByTestId('sloFormSubmitButton')).toBeEnabled();
-
-        await waitFor(() => {
-          fireEvent.click(getByTestId('createNewRuleCheckbox'));
-          fireEvent.click(getByTestId('sloFormSubmitButton'));
-        });
-
-        await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(
-            mockBasePathPrepend(`${paths.observability.sloEdit(slo.id)}?create-rule=true`)
-          );
-        });
-      });
-
-      it('opens the Add Rule Flyout when visiting an existing SLO with search params set', async () => {
-        const slo = buildSlo();
-
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        jest.spyOn(Router, 'useLocation').mockReturnValue({
-          pathname: '/slos/123/edit',
-          search: 'create-rule=true',
-          state: '',
-          hash: '',
-        });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
-
-        const { getByTestId } = render(<SloEditPage />);
-
-        await waitFor(() => {
-          expect(getByTestId('add-rule-flyout')).toBeTruthy();
         });
       });
     });

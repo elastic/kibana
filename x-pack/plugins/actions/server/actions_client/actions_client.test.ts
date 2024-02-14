@@ -8,7 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../../common';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from '../types';
@@ -596,6 +600,9 @@ describe('create()', () => {
         proxyVerificationMode: 'full',
       },
       enableFooterInEmail: true,
+      microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+      microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+      microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     });
 
     const localActionTypeRegistryParams = {

@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import type { ThirdPartyAgentInfo } from '../../../../common/types';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
@@ -39,7 +40,7 @@ const getThirdPartyAgentInfo = (
       ) as ResponseActionAgentType,
     },
     host: {
-      name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+      name: getFieldValue({ category: 'host', field: 'host.name' }, eventData),
       os: {
         name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
         family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
@@ -74,17 +75,22 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const isEndpointHost = agentType === 'endpoint';
+  const isSentinelOneHost = agentType === 'sentinel_one';
   const showResponseActionsConsole = useWithShowResponder();
 
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
   const {
     data: hostInfo,
     isFetching,
     error,
-  } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
+  } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId && isEndpointHost) });
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
+    // v8.13 disabled for third-party agent alerts if the feature flag is not enabled
     if (!isEndpointHost) {
-      return [false, undefined];
+      return [isSentinelOneHost ? !isSentinelOneV1Enabled : true, undefined];
     }
 
     // Still loading host info
@@ -114,7 +120,14 @@ export const useResponderActionData = ({
     }
 
     return [false, undefined];
-  }, [isEndpointHost, isFetching, error, hostInfo?.host_status]);
+  }, [
+    isEndpointHost,
+    isSentinelOneHost,
+    isSentinelOneV1Enabled,
+    isFetching,
+    error,
+    hostInfo?.host_status,
+  ]);
 
   const handleResponseActionsClick = useCallback(() => {
     if (!isEndpointHost) {
@@ -125,7 +138,6 @@ export const useResponderActionData = ({
         capabilities: ['isolation'],
         hostName: agentInfoFromAlert.host.name,
         platform: agentInfoFromAlert.host.os.family,
-        lastCheckin: agentInfoFromAlert.lastCheckin,
       });
     }
     if (hostInfo) {

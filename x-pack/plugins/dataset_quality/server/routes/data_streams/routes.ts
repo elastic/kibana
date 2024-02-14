@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import Boom from '@hapi/boom';
+import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
   DataStreamStat,
@@ -21,6 +21,7 @@ import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getIntegrations } from './get_integrations';
+import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -70,7 +71,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
-      rangeRt,
+      t.partial(rangeRt.props),
       typeRt,
       t.partial({
         datasetQuery: t.string,
@@ -117,17 +118,48 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    try {
-      return await getDataStreamDetails({ esClient, dataStream });
-    } catch (e) {
-      if (e) {
-        if (e?.message?.indexOf('index_not_found_exception') > -1) {
-          throw Boom.notFound(`Data stream "${dataStream}" not found.`);
-        }
-      }
+    const [type, ...datasetQuery] = dataStream.split('-');
 
-      throw e;
-    }
+    const [dataStreamsStats, dataStreamDetails] = await Promise.all([
+      getDataStreamsStats({
+        esClient,
+        type: type as DataStreamType,
+        datasetQuery: datasetQuery.join('-'),
+      }),
+      getDataStreamDetails({ esClient, dataStream }),
+    ]);
+
+    return {
+      createdOn: dataStreamDetails?.createdOn,
+      lastActivity: dataStreamsStats.items?.[0]?.lastActivity,
+    };
+  },
+});
+
+const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/estimated_data',
+  params: t.type({
+    query: t.intersection([typeRt, rangeRt]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    estimatedDataInBytes: number;
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const estimatedDataInBytes = await getEstimatedDataInBytes({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      estimatedDataInBytes,
+    };
   },
 });
 
@@ -135,4 +167,5 @@ export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...dataStreamDetailsRoute,
+  ...estimatedDataInBytesRoute,
 };

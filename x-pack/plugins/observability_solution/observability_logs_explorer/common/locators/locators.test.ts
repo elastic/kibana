@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorParams,
   SingleDatasetLocatorParams,
@@ -36,7 +36,7 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await allDatasetsLocator.getLocation({});
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: '/?pageState=(datasetSelection:(selectionType:all),v:1)',
         state: {},
       });
@@ -51,7 +51,7 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await allDatasetsLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: '/?pageState=(datasetSelection:(selectionType:all),time:(from:now-30m,to:now),v:1)',
         state: {},
       });
@@ -68,7 +68,7 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await allDatasetsLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: '/?pageState=(datasetSelection:(selectionType:all),query:(language:kuery,query:foo),v:1)',
         state: {},
       });
@@ -86,23 +86,23 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await allDatasetsLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: '/?pageState=(datasetSelection:(selectionType:all),refreshInterval:(pause:!f,value:666),v:1)',
         state: {},
       });
     });
 
-    it('should allow specifiying columns', async () => {
+    it('should allow specifying columns', async () => {
       const params: AllDatasetsLocatorParams = {
-        columns: ['_source'],
+        columns: [{ field: '_source', type: 'document-field' }],
       };
 
       const { allDatasetsLocator } = await setup();
       const location = await allDatasetsLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?pageState=(columns:!((field:_source)),datasetSelection:(selectionType:all),v:1)`,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: '/?pageState=(columns:!((field:_source,type:document-field)),datasetSelection:(selectionType:all),v:1)',
         state: {},
       });
     });
@@ -147,7 +147,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:1)`,
         state: {},
       });
@@ -164,7 +164,7 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await singleDatasetLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),time:(from:now-30m,to:now),v:1)`,
         state: {},
       });
@@ -184,7 +184,7 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await singleDatasetLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),query:(language:kuery,query:foo),v:1)`,
         state: {},
       });
@@ -204,7 +204,7 @@ describe('Observability Logs Explorer Locators', () => {
       const location = await singleDatasetLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),refreshInterval:(pause:!f,value:666),v:1)`,
         state: {},
       });
@@ -214,15 +214,15 @@ describe('Observability Logs Explorer Locators', () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
-        columns: ['_source'],
+        columns: [{ field: '_source', type: 'document-field' }],
       };
 
       const { singleDatasetLocator } = await setup();
       const location = await singleDatasetLocator.getLocation(params);
 
       expect(location).toMatchObject({
-        app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?pageState=(columns:!((field:_source)),datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:1)`,
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(columns:!((field:_source,type:document-field)),datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:1)`,
         state: {},
       });
     });

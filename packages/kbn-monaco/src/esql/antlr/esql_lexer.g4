@@ -19,7 +19,6 @@ INLINESTATS : I N L I N E S T A T S     -> pushMode(EXPRESSION_MODE);
 KEEP : K E E P                          -> pushMode(PROJECT_MODE);
 LIMIT : L I M I T                       -> pushMode(EXPRESSION_MODE);
 MV_EXPAND : M V UNDERSCORE E X P A N D  -> pushMode(MVEXPAND_MODE);
-PROJECT : P R O J E C T                 -> pushMode(PROJECT_MODE);
 RENAME : R E N A M E                    -> pushMode(RENAME_MODE);
 ROW : R O W                             -> pushMode(EXPRESSION_MODE);
 SHOW : S H O W                          -> pushMode(SHOW_MODE);
@@ -138,6 +137,7 @@ RP : ')';
 TRUE : T R U E;
 
 EQ  : '==';
+CIEQ : '=~';
 NEQ : '!=';
 LT  : '<';
 LTE : '<=';
@@ -165,8 +165,12 @@ UNQUOTED_IDENTIFIER
     | (UNDERSCORE | ASPERAND) UNQUOTED_ID_BODY+
     ;
 
-QUOTED_IDENTIFIER
+fragment QUOTED_ID
     : BACKQUOTE BACKQUOTE_BLOCK+ BACKQUOTE
+    ;
+
+QUOTED_IDENTIFIER
+    : QUOTED_ID
     ;
 
 EXPR_LINE_COMMENT
@@ -217,7 +221,7 @@ FROM_WS
     : WS -> channel(HIDDEN)
     ;
 //
-// DROP, KEEP, PROJECT
+// DROP, KEEP
 //
 mode PROJECT_MODE;
 PROJECT_PIPE : PIPE -> type(PIPE), popMode;
@@ -228,17 +232,13 @@ fragment UNQUOTED_ID_BODY_WITH_PATTERN
     : (LETTER | DIGIT | UNDERSCORE | ASTERISK)
     ;
 
-UNQUOTED_ID_PATTERN
+fragment UNQUOTED_ID_PATTERN
     : (LETTER | ASTERISK) UNQUOTED_ID_BODY_WITH_PATTERN*
     | (UNDERSCORE | ASPERAND) UNQUOTED_ID_BODY_WITH_PATTERN+
     ;
 
-PROJECT_UNQUOTED_IDENTIFIER
-    : UNQUOTED_ID_PATTERN -> type(UNQUOTED_ID_PATTERN)
-    ;
-
-PROJECT_QUOTED_IDENTIFIER
-    : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
+ID_PATTERN
+    : (UNQUOTED_ID_PATTERN | QUOTED_ID)+
     ;
 
 PROJECT_LINE_COMMENT
@@ -263,13 +263,8 @@ RENAME_DOT: DOT -> type(DOT);
 
 AS : A S;
 
-RENAME_QUOTED_IDENTIFIER
-    : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
-    ;
-
-// use the unquoted pattern to let the parser invalidate fields with *
-RENAME_UNQUOTED_IDENTIFIER
-    : UNQUOTED_ID_PATTERN -> type(UNQUOTED_ID_PATTERN)
+RENAME_ID_PATTERN
+    : ID_PATTERN -> type(ID_PATTERN)
     ;
 
 RENAME_LINE_COMMENT
@@ -298,7 +293,8 @@ fragment ENRICH_POLICY_NAME_BODY
     : ~[\\/?"<>| ,#\t\r\n:]
     ;
 ENRICH_POLICY_NAME
-    : (LETTER | DIGIT) ENRICH_POLICY_NAME_BODY*
+    // allow prefix for the policy to specify its resolution
+    : (ENRICH_POLICY_NAME_BODY+ COLON)? ENRICH_POLICY_NAME_BODY+
     ;
 
 ENRICH_QUOTED_IDENTIFIER
@@ -330,8 +326,8 @@ ENRICH_FIELD_DOT: DOT -> type(DOT);
 
 ENRICH_FIELD_WITH : WITH -> type(WITH) ;
 
-ENRICH_FIELD_UNQUOTED_IDENTIFIER
-    : UNQUOTED_ID_PATTERN -> type(UNQUOTED_ID_PATTERN)
+ENRICH_FIELD_ID_PATTERN
+    : ID_PATTERN -> type(ID_PATTERN)
     ;
 
 ENRICH_FIELD_QUOTED_IDENTIFIER

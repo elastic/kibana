@@ -64,6 +64,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -117,7 +118,7 @@ import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
 import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
 
-import type { LensEmbeddableInput } from './embeddable';
+import type { LensByValueInput, LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
@@ -130,8 +131,13 @@ import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import {
+  CONTENT_ID,
+  LATEST_VERSION,
+  LensSavedObjectAttributes,
+} from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
 
 export type { SaveProps } from './app_plugin';
 
@@ -422,6 +428,21 @@ export class LensPlugin {
         return getTimeZone(core.uiSettings);
       },
       () => startServices().plugins.data.nowProvider.get()
+    );
+
+    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        const panel = {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+
+        return panel;
+      }
     );
 
     const getPresentationUtilContext = () =>

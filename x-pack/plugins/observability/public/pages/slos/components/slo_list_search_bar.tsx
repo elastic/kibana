@@ -9,22 +9,14 @@ import { EuiSelectableOption } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Filter } from '@kbn/es-query';
 import styled from 'styled-components';
-import { TagsFilter } from './common/tags_filter';
+import { useIsMutating } from '@tanstack/react-query';
+import { QuickFilters } from './common/quick_filters';
 import { useKibana } from '../../../utils/kibana_react';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/slo/constants';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { ObservabilityPublicPluginsStart } from '../../..';
-import { SearchState } from '../hooks/use_url_search_state';
-
-export interface Props {
-  query?: string;
-  filters?: Filter[];
-  loading: boolean;
-  initialState: SearchState;
-  onStateChange: (newState: Partial<SearchState>) => void;
-}
+import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
 export type SortDirection = 'asc' | 'desc';
@@ -37,10 +29,22 @@ export type Item<T> = EuiSelectableOption & {
 
 export type ViewMode = 'default' | 'compact';
 
-export function SloListSearchBar({ query, filters, loading, initialState, onStateChange }: Props) {
+export function SloListSearchBar() {
+  const { state, onStateChange: onChange } = useUrlSearchState();
+  const { kqlQuery, filters } = state;
+
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
+  const loading = isDeletingSlo;
+
   const { dataView } = useCreateDataView({
     indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   });
+
+  const onStateChange = (newState: Partial<SearchState>) => {
+    onChange({ page: 0, ...newState });
+  };
 
   const {
     unifiedSearch: {
@@ -49,7 +53,7 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
   } = useKibana<ObservabilityPublicPluginsStart>().services;
 
   return (
-    <Container>
+    <Container ref={containerRef}>
       <SearchBar
         appName="observability"
         placeholder={i18n.translate('xpack.observability.slo.list.search', {
@@ -58,7 +62,7 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={loading}
         renderQueryInputAppend={() => (
-          <TagsFilter initialState={initialState} loading={loading} onStateChange={onStateChange} />
+          <QuickFilters initialState={state} loading={loading} onStateChange={onStateChange} />
         )}
         filters={filters}
         onFiltersUpdated={(newFilters) => {
@@ -67,11 +71,12 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
         onQuerySubmit={({ query: value }) => {
           onStateChange({ kqlQuery: String(value?.query), lastRefresh: Date.now() });
         }}
-        query={{ query: String(query), language: 'kuery' }}
+        query={{ query: String(kqlQuery), language: 'kuery' }}
         showSubmitButton={true}
         showDatePicker={false}
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
+        saveQueryMenuVisibility="globally_managed"
       />
     </Container>
   );

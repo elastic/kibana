@@ -1040,6 +1040,18 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
           },
           {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/application.tsx"
           },
@@ -1080,18 +1092,6 @@
             "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
           },
@@ -1129,18 +1129,6 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
@@ -1164,6 +1152,22 @@
             "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
           },
@@ -1173,7 +1177,15 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+            "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
           },
           {
             "plugin": "ml",
@@ -2781,14 +2793,6 @@
             "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/render_app.tsx"
           },
@@ -3334,7 +3338,7 @@
         "label": "UrlTemplateEditor",
         "description": [],
         "signature": [
-          "({ height, value, variables, onChange, placeholder, onEditor, Editor, }: React.PropsWithChildren<",
+          "({ height, fitToContent, value, variables, onChange, placeholder, onEditor, Editor, }: React.PropsWithChildren<",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -3353,7 +3357,7 @@
             "id": "def-public.UrlTemplateEditor.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  height = 105,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
+            "label": "{\n  height = 105,\n  fitToContent,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -4547,6 +4551,20 @@
             "description": [],
             "signature": [
               "string | number | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.UrlTemplateEditorProps.fitToContent",
+            "type": "Object",
+            "tags": [],
+            "label": "fitToContent",
+            "description": [],
+            "signature": [
+              "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,

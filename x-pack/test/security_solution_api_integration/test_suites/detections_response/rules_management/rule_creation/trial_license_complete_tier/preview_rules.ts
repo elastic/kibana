@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteAllRules, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../../utils';
+import { getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 
 import {
   createUserAndRole,

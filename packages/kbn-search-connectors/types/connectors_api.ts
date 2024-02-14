@@ -8,6 +8,8 @@
 
 // TODO: delete this once ES client can be used for Connectors API
 
+import { ConnectorSyncJob, Connector } from './connectors';
+
 enum Result {
   created = 'created',
   updated = 'updated',
@@ -16,6 +18,20 @@ enum Result {
   no_op = 'noop',
 }
 
+export interface ConnectorAPIListConnectorsResponse {
+  count: number;
+  results: Connector[];
+}
+
 export interface ConnectorsAPIUpdateResponse {
   result: Result;
+}
+
+export interface ConnectorsAPISyncJobResponse {
+  count: number;
+  results: ConnectorSyncJob[];
+}
+
+export interface ConnectorSecretCreateResponse {
+  id: string;
 }

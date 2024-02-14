@@ -35,6 +35,7 @@ export const useWelcomeHeaderStyles = () => {
         fontSize: `${euiTheme.base * 2.125}px`,
         color: euiTheme.colors.title,
         fontWeight: euiTheme.font.weight.bold,
+        lineHeight: euiTheme.size.xxl,
       }),
       headerDescriptionStyles: css({
         fontSize: `${euiTheme.base}px`,
@@ -45,34 +46,17 @@ export const useWelcomeHeaderStyles = () => {
       headerContentStyles: css({
         width: `${CONTENT_WIDTH / 2}px`,
       }),
-      currentPlanWrapperStyles: css({
-        backgroundColor: euiTheme.colors.lightestShade,
-        borderRadius: '56px',
-        padding: `${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.m}`,
-        height: euiTheme.size.xl,
-      }),
-      currentPlanTextStyles: css({
-        fontSize: euiTheme.size.m,
-        fontWeight: euiTheme.font.weight.bold,
-        paddingRight: euiTheme.size.xs,
-      }),
-      projectFeaturesUrlStyles: css({
-        paddingLeft: euiTheme.size.xs,
-      }),
     };
   }, [
     euiTheme.base,
     euiTheme.colors.darkShade,
-    euiTheme.colors.lightestShade,
     euiTheme.colors.subduedText,
     euiTheme.colors.title,
     euiTheme.font.weight.bold,
     euiTheme.font.weight.regular,
     euiTheme.size.l,
-    euiTheme.size.m,
     euiTheme.size.s,
-    euiTheme.size.xl,
-    euiTheme.size.xs,
+    euiTheme.size.xxl,
   ]);
   return welcomeHeaderStyles;
 };
