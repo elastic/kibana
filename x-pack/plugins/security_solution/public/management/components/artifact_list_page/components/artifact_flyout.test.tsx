@@ -339,10 +339,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
               item: { ...lastProps.item, name: 'some name' },
               isValid: true,
               confirmModalLabels: {
-                title: 'hi',
+                title: 'title',
                 body: 'body',
-                confirmButton: 'Add',
-                cancelButton: 'Cancel',
+                confirmButton: 'add',
+                cancelButton: 'cancel',
               },
             });
           });
@@ -357,6 +357,16 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         });
         expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+        expect(renderResult.getByTestId('artifactConfirmModal-header').textContent).toEqual(
+          'title'
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal-body').textContent).toEqual('body');
+        expect(renderResult.getByTestId('artifactConfirmModal-submitButton').textContent).toEqual(
+          'add'
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal-cancelButton').textContent).toEqual(
+          'cancel'
+        );
       });
     });
   });
