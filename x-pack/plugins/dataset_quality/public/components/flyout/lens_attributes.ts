@@ -16,9 +16,9 @@ import {
 
 const defaultDataView = {
   id: `${DEFAULT_LOGS_DATA_VIEW}-id`,
+  title: DEFAULT_LOGS_DATA_VIEW,
   timeFieldName: '@timestamp',
 } as DataView;
-defaultDataView.setIndexPattern(DEFAULT_LOGS_DATA_VIEW);
 
 export function getLensAttributes(color: string, dataView: DataView = defaultDataView) {
   return {
