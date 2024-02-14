@@ -75,8 +75,8 @@ export const SMART_FALLBACK_FIELDS = {
 export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
 export const DEFAULT_ROWS_PER_PAGE = 100;
 
-// Content column filter options
-export const FILTER_FOR_CONTENT = [
+// List of prefixes which needs to be filtered out for Display in Content Column
+export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
   '_', // Filter fields like '_id', '_score'
   '@timestamp',
   'agent.',

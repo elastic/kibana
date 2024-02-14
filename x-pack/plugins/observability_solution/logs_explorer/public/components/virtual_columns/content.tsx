@@ -131,13 +131,17 @@ const formatJsonDocumentForContent = (row: DataTableRecord) => {
   // We need 2 loops here for flattened and raw.fields. Flattened contains all fields,
   // whereas raw.fields only contains certain fields excluding _ignored
   for (const key in flattened) {
-    if (!constants.FILTER_FOR_CONTENT.some((prefix) => key.startsWith(prefix))) {
+    if (
+      !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => key.startsWith(prefix))
+    ) {
       flattenedResult[key] = flattened[key];
     }
   }
 
   for (const key in fields) {
-    if (!constants.FILTER_FOR_CONTENT.some((prefix) => key.startsWith(prefix))) {
+    if (
+      !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => key.startsWith(prefix))
+    ) {
       rawFieldResult[key] = fields[key];
     }
   }
