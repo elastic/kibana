@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
 
-export function getElastichsearchQueryOrThrow(kuery: string | undefined = '') {
+export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
   try {
-    return toElasticsearchQuery(fromKueryExpression(kuery));
+    if (kqlQuerySchema.is(kuery)) {
+      return toElasticsearchQuery(fromKueryExpression(kuery));
+    } else {
+      return buildEsQuery(
+        undefined,
+        {
+          query: kuery?.kqlQuery,
+          language: 'kuery',
+        },
+        kuery?.filters
+      );
+    }
   } catch (err) {
     throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
   }
