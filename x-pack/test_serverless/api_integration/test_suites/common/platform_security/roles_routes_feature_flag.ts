@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe.only('security', function () {
+  describe('security', function () {
     describe('route access', () => {
       describe('roles', () => {
         describe('enabled', () => {
