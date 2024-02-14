@@ -37,7 +37,7 @@ pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -
 ```
 
 - [Necessary rule schema changes](#necessary-rule-schema-changes)
-  - [`prebuilt` and `immutable` fields](#prebuilt-and-immutable-fields)
+  - [`external_source` and `immutable` fields](#prebuilt-and-immutable-fields)
     - [`isCustomized` subfield](#iscustomized-subfield)
     - [`elasticUpdateDate` subfield](#elasticupdatedate-subfield)
   - [Changes needed in rule schema](#changes-needed-in-rule-schema)
@@ -302,7 +302,7 @@ export const BaseRuleParams = z.object({
 
 In the internal rule schema, there are two additional important reasons why we need to make sure that this value is optional:
 
-- When rules are executed, a call to the method `validateRuleTypeParams` is done, which is a method that validates the passed rule's parameters using the validators defined in `x-pack/plugins/security_solution/server/lib/detection_engine/rule_types`, within each of the rule query types files (for [EQL rules](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/create_eql_alert_type.ts#L27), for example). The validation is done based on the internal rule schema `BaseRulesParams` displayed above. Having `prebuilt` as a required fields would cause custom rules to fail on runtime.
+- When rules are executed, a call to the method `validateRuleTypeParams` is done, which is a method that validates the passed rule's parameters using the validators defined in `x-pack/plugins/security_solution/server/lib/detection_engine/rule_types`, within each of the rule query types files (for [EQL rules](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/create_eql_alert_type.ts#L27), for example). The validation is done based on the internal rule schema `BaseRulesParams` displayed above. Having `external_source` as a required field would cause custom rules to fail on runtime.
 - The Rule Client `update` method also calls the `validateRuleTypeParams` to validate the rule's params. Since the Rule Client's `update` method is used in our endpoint handlers, such as and `/rules/patch` and `/_bulk_actions`, these would fail when executed against a payload of custom rule.
 
 Additionally, the `PrebuiltRuleAsset` type needs to be updated to include the new `source_updated_at` date that will be progressively shipped with new versions of rules in the Elastic Prebuilt Rules package:
@@ -324,7 +324,7 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
 
 ### Deprecating the `immutable` field
 
-In order to mark the `immutable` field as deprecated, and making sure that our application and API users are aware that the field has been deprecated and replaced by the `prebuilt` field, we will communicate this change in three ways:
+In order to mark the `immutable` field as deprecated, and making sure that our application and API users are aware that the field has been deprecated and replaced by the `external_source` field, we will communicate this change in three ways:
 
 1. via updates to the documentation of all endpoints that return `RuleResponse` types
 2. via a deprecation warning in the OpenAPI schema, as detailed above
@@ -334,7 +334,7 @@ The `immutable` field will afterwards be actually removed from our API endpoint 
 
 Both the docs and the custom response header should communicate that the `immutable` field:
 
-- has been replaced by the `prebuilt` field and users should rely on that new field onwards
+- has been replaced by the `external_source` field and users should rely on that new field onwards
 - is maintained for backwards compatibility reasons only
 - will be removed after a specific date/release
 
@@ -515,16 +515,15 @@ All of the following endpoints either fetch the rule before updating it, or send
 
 This endpoint also includes a `dry_run` mode that is executed to evaluate preconditions and warn the user before executing the actual request. No migration logic should take place for dry run requests, i.e when `dry_run=true`, since we never write to ES when this parameter is set to `true`.
 
-For the **bulk edit** action, we can take advantage of the `ruleParamsModifier` to carry out the migration, regardless of the type of edit that is being performed. See implementation details in the below [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write) section.
+For the **bulk edit** action, we can take advantage of the `ruleParamsModifier` to carry out the migration, regardless of the type of edit that is being performed. See implementation details in the below [Bulk editing rules](#bulk-editing-rules) section.
 
 For the **duplicate** rule action:
 
-Since we will be creating a new rule on ES, we should create it with the new schema. Per definition, all duplicated rules will be `custom` rules. That means that for all rules -including prebuilt rules-, when duplicating, the `prebuilt` field will not be created on the newly created rule.
+Since we will be creating a new rule on ES, we should create it with the new schema. Per definition, all duplicated rules will be `custom` rules. That means that for all rules -including prebuilt rules-, when duplicating, the `external_source` field will not be created on the newly created rule.
 This action will not perform a migration-on-write of the original rule being duplicated for two reasons:
 
-- would violate the principle of least surprise for the endpoint
+- it would violate the principle of least surprise for the endpoint
 - the current implementation of the endpoint does not modify the original rule. This gives us no window of opportunity to migrate the rule and save to ES without adding performance overhead.
-- See implementation details below.
 
 All other type of actions should **not** perform migration-on-write:
 
@@ -740,6 +739,10 @@ The resulting values for `immutable` and `external_source` when calling these en
   </tbody>
 </table>
 
+As explained before, all these endpoints suffer from the tightly-coupled logic problem described in the section [`Problem with tightly coupled logic in our endpoints`](#problem-with-tightly-coupled-logic-in-our-endpoints).
+
+We should therefore create new CRUD methods as needed to uncouple them logically and cleanly apply migrations to them.
+
 ---
 
 #### Bulk editing rules
@@ -748,25 +751,23 @@ The endpoint **Bulk Actions** - `POST /rules/_bulk_action` has the same outputs 
 
 However, this endpoint has some specific details that should be mentioned.
 
-Firstly, when bulk editing rules, the migration should apply for the following use cases:
+Firstly, when bulk editing rules, the migration should be carried out for the following use cases:
   - Bulk adding or deleting index patterns
   - Bulk adding or deleting tags
   - Updating rule schedules
   - Adding rules actions
-  - Duplicating a rule (migration applied only to the new rule)
+  - Duplicating a rule (with the migration applied only to the new rule)
 
-Out of the actions mentioned above, the only use cases that should possibily result in the migration having a result of `external_source.isCustomized = true` are the first three:
+Out of the actions mentioned above, the only use cases that should possibly result in the migration having a result of `external_source.isCustomized = true` are the first three:
   - Bulk adding or deleting index patterns
   - Bulk adding or deleting tags
   - Updating rule schedules
 
-That is, updating a rule's actions or duplicating a rule should not be considered a customization of a prebuilt rule.
+That means that updating a rule's actions or duplicating a rule should not be considered a customization of a prebuilt rule.
 
 Secondly, in contrast with other endpoints, the migration for bulk editing rules needs to be carried within the Alerting Framework's `RuleClient` since we need to migrate the rule's `external_source` and `immutable` parameters before the `RuleClient` does the saving of the rule into Elasticsearch.
 
 This however, gives us the advantage that the `RuleClient` already includes logic to calculate if a rule's attributes or parameters have been modified from its initial values, so we can rely on that to calculate the `external_source.isCustomized` field during the update.
-
-Notice that here we are migrating the `ruleParams` in-place; the object is later used to save the updated rules into Elasticsearch.
 
 The `RulesClient` class has a `bulkEdit` method, which is called by our **Bulk Actions endpoint** `POST /rules/_bulk_action`. That method includes complex logic, but we can focus on the `updateRuleAttributesAndParamsInMemory` method, where the rule attributes and parameters are updated before being saved to ES. This function also calculates the booleans `isAttributesUpdateSkipped` and `isParamsUpdateSkipped` which we can leverage to calculate the new value of the `external_source.isCustomized` field in our params.
 
@@ -807,6 +808,10 @@ This will allow us to retrieve all rules that originate from an external source,
 Currently, we don't support the `immutable` field in any of the endpoints' request parameters (except for the Import endpoint). We shouldn't support the `external_source` field either, because this value should be controlled by the app on the server side, and not by users.
 
 This is so because we will never want users to be able to create their own prebuilt rules, only install them, import them, and customize them. Also, a prebuilt rule should always be able to be compared to a `security-rule` asset distributed by Fleet, and receive updates from it, which would not be possible if a user creates its own prebuilt rules.
+
+Again, as mentioned in the [`Problem with tightly coupled logic in our endpoints`](#problem-with-tightly-coupled-logic-in-our-endpoints) section, the `createRules` CRUD method used in these two endpoints is re-used in other unrelated use cases, like upgrading rules and importing rules. 
+
+Creating new methods for those unrelated actions should help clean the `createRules` method's interface and logic, and make sure it is only used in these two endpoints.
 
 - **Rule Management Filters** - `GET /rules/_rule_management_filters` (Internal):
 
@@ -901,7 +906,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
 
 To install a new prebuilt rule, this endpoint uses the [`createPrebuiltRules` method](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts), which in turn calls the [`createRules` method](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts).
 
-This endpoint suffers from the issue of tightly coupled logic explained above: using th `createRules` method for creating, importing and upgrading -in some cases- rules. We need to create a new CRUD method specifically for installing prebuilt rules, that extracts that responsibility out of the `createRules` method.
+This endpoint also suffers from the issue of tightly coupled logic explained above: using th `createRules` method for creating, importing and upgrading -in some cases- rules. We need to create a new CRUD method specifically for installing prebuilt rules, that extracts that responsibility out of the `createRules` method.
 
 - [**Review Rule Upgrade** - `POST /prebuilt_rules/upgrade/_review` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts)
 
@@ -915,122 +920,11 @@ This endpoint will require major changes to add the capability of letting users 
 
 The calculation of the value for the `external_source.isCustomized` field for the updated rule will depend on that logic as well, so its calculation will be explained in that section.
 
-Again, this endpoint suffers from tightly coupled logic: it uses the `upgradePrebuiltRules` method to actually upgrade the rules, but this method either patches existing rules -for the normal case-, or deletes an existing rule and recreates it if the rule underwent a type change, using the `patchRules` and `createRules` methods respectively. Decouple that logic by introducing a new CRUD method with a specific use case for upgrading prebuilt rule.
+Again, this endpoint suffers from tightly coupled logic explained in [`Problem with tightly coupled logic in our endpoints`](#problem-with-tightly-coupled-logic-in-our-endpoints): it uses the `upgradePrebuiltRules` method to actually upgrade the rules, but this method either patches existing rules -for the normal case-, or deletes an existing rule and recreates it if the rule underwent a type change, using the `patchRules` and `createRules` methods respectively. We should decouple that logic by introducing a new CRUD method with a specific use case for upgrading prebuilt rule.
 
 The changes in the `upgradePrebuiltRules` method need to take into account both paths. In the endpoint logic handler, when calculating if the rule was customized by the user, we will create a boolean called `isRuleCustomizedDuringUpgrade`, that we will pass as an argument to `upgradePrebuiltRules`:
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts)_
-
-```ts
-// [... file continues above ...]
-
-export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
-  router.versioned
-    .post({
-      access: 'internal',
-      path: PERFORM_RULE_UPGRADE_URL,
-      // [...]
-    })
-    .addVersion(
-      {
-        // [...]
-      },
-      async (context, request, response) => {
-        // [...]
-
-        try {
-          // [...]
-
-          // Endpoint will include logic for calculating which rule version should the current rule be upgraded to,
-          // as well as calculating the isRuleCustomizedDuringUpgrade boolean.
-          // Details explained further below in this document.
-
-          // Perform the upgrade, but pass in `isRuleCustomizedDuringUpgrade` as an argument
-          const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
-            rulesClient,
-            targetRules,
-            isRuleCustomizedDuringUpgrade
-          );
-          // [...]
-
-          return response.ok({ body });
-        } catch (err) {
-          // [...]
-        }
-      }
-    );
-};
-```
-
-And the `isRuleCustomizedDuringUpgrade` argument , which defaults to `false`, will be used as follows:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/upgrade_prebuilt_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/upgrade_prebuilt_rules.ts)_
-
-```ts
-// [... file continues above ...]
-
-export const upgradePrebuiltRules = async (
-  rulesClient: RulesClient,
-  rules: PrebuiltRuleAsset[],
-  isRuleCustomizedDuringUpgrade = false
-) => {
-  // [...]
-  return upgradeRule(rulesClient, rule, isRuleCustomizedDuringUpgrade);
-  // [...]
-}
-
-
-const upgradeRule = async (
-  rulesClient: RulesClient,
-  rule: PrebuiltRuleAsset
-  isRuleCustomizedDuringUpgrade: boolean
-): Promise<SanitizedRule<RuleParams>> => {
-  const existingRule = await readRules({
-    // [...]
-  });
-
-  // [...]
-
-  // Set the value to true if the rule was customized during
-  // the current update. Otherwise, take the existing value from
-  // the currently installed value. Default to false.
-  const isCustomized =
-    (isRuleCustomizedDuringUpgrade || existingRule.params.prebuilt?.isCustomized) ?? false;
-  const prebuilt = {
-    isCustomized,
-    elasticUpdateDate: rule.elasticUpdateDate,
-  }
-
-  if (rule.type !== existingRule.params.type) {
-    await deleteRules({
-      ruleId: existingRule.id,
-      rulesClient,
-    });
-
-    return createRules({
-      rulesClient,
-      isPrebuilt: true,
-      params: {
-        ...rule,
-        prebuilt,
-        // [...]
-      },
-    });
-  } else {
-    await patchRules({
-      rulesClient,
-      existingRule,
-      nextParams: {
-        ...rule,
-        prebuilt,
-        // [...]
-      },
-    });
-
-    // [...]
-  }
-};
-```
 
 ### Rule monitoring endpoints
 
@@ -1040,40 +934,9 @@ This endpoint uses the [Detection Engine Health Client (`IDetectionEngineHealthC
 
 The Detection Engine Health client receives as its parameter the [Rule Objects Health client (`IRuleObjectsHealthClient`)](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/rule_objects/rule_objects_health_client.ts), whose method `calculateClusterHealth` performs an aggregation on rule stats based on different rule attributes and parameters.
 
-This is done in the [`getRuleStatsAggregation` method](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/rule_objects/aggregations/rule_stats.ts), where an aggration is done over the `immutable` param. This needs to be updated to the new `prebuilt` param, with a fallback to `immutable`:
+This is done in the [`getRuleStatsAggregation` method](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/rule_objects/aggregations/rule_stats.ts), where an aggration is done over the `immutable` param. This needs to be updated to the new `external_source` param, with a fallback to `immutable`:
 
 _Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/rule_objects/aggregations/rule_stats.ts(https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/rule_objects/aggregations/rule_stats.ts)_
-
-```ts
-// [... file continues above ...]
-
-export const getRuleStatsAggregation = (): Record<
-  string,
-  estypes.AggregationsAggregationContainer
-> => {
-  const rulesByEnabled: estypes.AggregationsAggregationContainer = {
-    terms: {
-      field: 'alert.attributes.enabled',
-    },
-  };
-
-  return {
-    rulesByEnabled,
-    rulesByOrigin: {
-      terms: {
-        // TODO: How to make this aggregation by whether the `prebuilt` field exists and immutable as fallback?
-        field: `${PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD} or alert.attributes.params.immutable`,
-      },
-      aggs: {
-        rulesByEnabled,
-      },
-    },
-    // [... other aggrations ...]
-    },
-  };
-};
-// [... file continues below ...]
-```
 
 - **Detection Engine Health: Get Space Health** - `GET or POST /detection_engine/health/_space` (internal):
 
@@ -1123,64 +986,10 @@ Both of these methods use `internalRuleToAPIResponse` internally to transform ru
 
 Also, in order to allow the endpoint to export both custom **and** prebuilt rules, we need to update the logic and remove the checks that we currently do server-side in both of these methods, and which filter out prebuilt rules from the response payload:
 
-- **Bulk Actions** - `POST /rules/_bulk_action` with the **export action**
-- **Export Rules** - `POST /rules/_export`
+_Source for `getRulesFromObjects`: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_by_object_ids.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_by_object_ids.ts)_
 
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_by_object_ids.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_by_object_ids.ts)_
 
-```ts
-// [... file continues above ...]
-
-export const getRulesFromObjects = async (
-  rulesClient: RulesClient,
-  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
-  objects: Array<{ rule_id: string }>,
-  logger: Logger
-): Promise<RulesErrors> => {
-  const chunkedObjects = chunk(objects, 1024);
-  const filter = [...]
-  const rules = await findRules({[...]});
-
-  const alertsAndErrors = objects.map(({ rule_id: ruleId }) => {
-    const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
-    if (
-      matchingRule != null
-      && hasValidRuleType(matchingRule)
-      // && matchingRule.params.immutable !== true  <--- Check which should be removed
-    ) {
-      return {
-        statusCode: 200,
-        rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
-      };
-    } else {
-      return {
-        statusCode: 404,
-        missingRuleId: { rule_id: ruleId },
-      };
-    }
-  });
-
-// [... file continues below ...]
-```
-
-Notice that the **Bulk Actions** - `POST /rules/_bulk_action` does not perform a **dry run** in order to filter out prebuilt rules when the user runs an **export** action; this is the only check that is performed.
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts)_
-
-```ts
-// [... file continues above ...]
-export const getExportAll = async (
-  // [...]
-): Promise<{
-  rulesNdjson: string;
-  // [...]
-}> => {
-  // const ruleAlertTypes = await getNonPackagedRules({ rulesClient }); <---- current code
-  const allRules = await getRules({ rulesClient }); // <------ get all rules now
-  const rules = transformAlertsToRules(allRules);
-
-// [... file continues below ...]
-```
+_Source for `getExportAll`: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_all.ts)_
 
 ### Importing rules
 
@@ -1190,9 +999,9 @@ We want to handle the case of importing both migrated and non-migrated rules via
 
 Importing rules with `immutable: false` "should" be the only case for non-migrated rules (since `immutable: true` rules cannot currently be exported), but we should also handle the case of users manually modifying the values of rules in the `ndjson` file.
 
-If a user attempts to import a rule with `immutable: true` and missing `prebuilt` (or viceversa, a `prebuilt` field but no `immutable` field), then the most likely scenario is of a user trying to import Elastic prebuilt rules from a modified `ndjson` file. So we should consider these rules to be prebuilt and attempt to track them to rules in the Fleet package via their `rule_id` and continue to provide updates to them.
+If a user attempts to import a rule with `immutable: true` and missing `external_source` (or viceversa, a `external_source` field but no `immutable` field), then the most likely scenario is of a user trying to import Elastic prebuilt rules from a modified `ndjson` file. So we should consider these rules to be prebuilt and attempt to track them to rules in the Fleet package via their `rule_id` and continue to provide updates to them.
 
-Given the requirements described above, the following table shows the behaviour of our endpoint for a combination of `prebuilt` and `immutable` fields in the `ndjson` file that a user attempts to import:
+Given the requirements described above, the following table shows the behaviour of our endpoint for a combination of `external_source` and `immutable` fields in the `ndjson` file that a user attempts to import:
 
 <table>
   <thead>
@@ -1288,7 +1097,7 @@ Given the requirements described above, the following table shows the behaviour 
   </tbody>
 </table>
 
-If a user imports a prebuilt rule (where either the `prebuilt` or `immutable` fields are `true`), it will continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
+If a user imports a prebuilt rule (where either the `external_source` or `immutable` fields are `true`), it will continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
 
 With this migration strategy for the import endpoints we can guarantee backwards compatibility for all rules, and don't need to do additional changes to the export endpoints.
 
@@ -1400,7 +1209,7 @@ Endpoints that users will be able to use to modify rules are:
 
 The first four endpoints listed above **currently allow users to modify their Elastic prebuilt rules** as well, in (almost) all of their fields, and no difference is made between updating/patching prebuilt rules and custom rules in the docs. However, none of those four endpoints allow to change a prebuilt rule to a custom rule (or vice-versa) by changing the current `immutable` field (i.e. the field is maintained from the existing rule).
 
-> - **Will we want to allow users to modify (via API) a prebuilt rule to transform it into a Custom Rule, by modifying the `prebuilt` parameter?**
+> - **Will we want to allow users to modify (via API) a prebuilt rule to transform it into a Custom Rule, by modifying the `external_source` parameter?**
 >   - No. We want to keep the current endpoint logic where the `immutable` field for the updated value comes from the existing value of the rule. Allowing that modification would create issues with the corresponding `security_detection_engine` package rule, as it will clash with the modified rule if the `rule_id` is not modified as well. This requirement is therefore not needed anyway since will now offer users the option to customize a prebuilt rule, or alternatively, duplicate a prebuilt rule.
 
 The endpoint **Bulk Actions** - `POST /rules/_bulk_action` does provide validation in the endpoint logic itself: if a user attempts to edit prebuilt rule (`immutable: true`) the endpoint rejects that edit in two ways:
@@ -1441,7 +1250,7 @@ In both cases, the validation checks if the `immutable` param of the rule is `fa
 - Addition of rule schema migration logic (described above)
 - Calculation of `customized` field for each modified rule
 - Removal of the check that prevents modifying prebuilt rules. Customization should be possible for both prebuilt and custom rules, and for all bulk editing actions that are currently supported for custom rules.
-  - Remove check for whether the rules in the payload have an `immutable` value of `false` OR if the `BulkActionEditTypeEnum` is either `set_rule_actions` or `add_rule_actions`. Bulk editing should be possible for all rules (independently of their values for the `prebuilt` and now legacy `immutable` fields), and for all types of Bulk Action Edit Types:
+  - Remove check for whether the rules in the payload have an `immutable` value of `false` OR if the `BulkActionEditTypeEnum` is either `set_rule_actions` or `add_rule_actions`. Bulk editing should be possible for all rules (independently of their values for the `external_source` and now legacy `immutable` fields), and for all types of Bulk Action Edit Types:
   ```ts
   export const BulkActionEditType = z.enum([
     'add_tags',
