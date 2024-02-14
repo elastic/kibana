@@ -41,7 +41,7 @@ export interface ShareToSpaceFlyoutProps {
    */
   flyoutTitle?: string;
   /**
-   * Optional react component which can be sued to show a warning or additional information.
+   * Optional react component which can be used to show a warning or additional information.
    * The component will be rendered below the flyout title and above the flyout content.
    */
   additionalContent?: React.ReactElement;
