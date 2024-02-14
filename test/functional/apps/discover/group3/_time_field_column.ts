@@ -62,7 +62,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
               await retry.try(async () => {
-                expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp']);
+                expect(await dataGrid.getHeaderFields()).to.eql(
+                  hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document'] // legacy behaviour
+                );
               });
 
               await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
