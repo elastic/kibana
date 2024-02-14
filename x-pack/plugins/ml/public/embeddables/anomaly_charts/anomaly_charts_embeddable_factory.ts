@@ -104,7 +104,6 @@ export class AnomalyChartsEmbeddableFactory
         anomalyDetectorService,
         anomalyExplorerService,
         mlFieldFormatService,
-        mlIndexUtils,
         mlResultsService,
       },
     ];

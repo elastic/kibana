@@ -22,6 +22,7 @@ import {
 import { useMlKibana } from '../../contexts/kibana';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useMlIndexUtils } from '../../util/index_service';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
@@ -32,9 +33,9 @@ export const useResultsViewConfig = (jobId: string) => {
   const {
     services: {
       data: { dataViews },
-      mlServices: { mlIndexUtils },
     },
   } = useMlKibana();
+  const mlIndexUtils = useMlIndexUtils();
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);

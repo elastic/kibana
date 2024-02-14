@@ -61,6 +61,7 @@ import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 
@@ -95,14 +96,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const kibana = useMlKibana();
   const {
-    services: {
-      data,
-      share,
-      application,
-      uiActions,
-      mlServices: { mlIndexUtils },
-    },
+    services: { data, share, application, uiActions },
   } = kibana;
+  const mlIndexUtils = useMlIndexUtils();
 
   const job = useMemo(() => {
     return mlJobService.getJob(props.anomaly.jobId);

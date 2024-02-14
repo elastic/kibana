@@ -45,6 +45,7 @@ import {
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
+import { useMlIndexUtils } from '../../../../util/index_service';
 
 interface Props {
   details: Record<string, any>;
@@ -112,9 +113,9 @@ export const Controls: FC<Props> = React.memo(
       services: {
         share,
         application: { navigateToUrl, capabilities },
-        mlServices: { mlIndexUtils },
       },
     } = useMlKibana();
+    const mlIndexUtils = useMlIndexUtils();
 
     const hasIngestPipelinesCapabilities =
       capabilities.management?.ingest?.ingest_pipelines === true;

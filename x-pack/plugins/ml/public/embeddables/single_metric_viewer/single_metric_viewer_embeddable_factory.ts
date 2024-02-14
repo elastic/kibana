@@ -123,7 +123,6 @@ export class SingleMetricViewerEmbeddableFactory
         mlTimeSeriesSearchService,
         mlFieldFormatService,
         mlCapabilities,
-        mlIndexUtils,
       },
     ];
   }
