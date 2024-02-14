@@ -30,7 +30,7 @@ import { HttpLogic } from '../../../shared/http/http_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { handlePageChange } from '../../../shared/table_pagination';
-import { NEW_INDEX_PATH } from '../../routes';
+import { NEW_API_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { CannotConnect } from '../search_index/components/cannot_connect';
@@ -101,7 +101,7 @@ export const SearchIndices: React.FC = () => {
                 rightSideItems: isLoading
                   ? []
                   : [
-                      <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
+                      <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_API_PATH}>
                         <EuiButton
                           iconType="plusInCircle"
                           color="primary"
