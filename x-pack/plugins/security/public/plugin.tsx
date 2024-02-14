@@ -35,7 +35,6 @@ import { AuthenticationService } from './authentication';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
-import type { ManagementAppConfigType } from './management/management_service';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -74,7 +73,7 @@ export class SecurityPlugin
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService;
   private readonly securityLicenseService = new SecurityLicenseService();
-  private readonly managementService = new ManagementService();
+  private readonly managementService: ManagementService;
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
@@ -85,6 +84,9 @@ export class SecurityPlugin
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
     this.navControlService = new SecurityNavControlService(
       initializerContext.env.packageInfo.buildFlavor
+    );
+    this.managementService = new ManagementService(
+      this.initializerContext.config.get<ConfigType>()
     );
   }
 
@@ -137,7 +139,6 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
-        uiConfig: buildManagementServiceUiConfigs(this.config),
       });
     }
 
@@ -188,7 +189,6 @@ export class SecurityPlugin
     if (management) {
       this.managementService.start({
         capabilities: application.capabilities,
-        uiConfig: buildManagementServiceUiConfigs(this.config),
       });
     }
 
@@ -239,20 +239,4 @@ export interface SecurityPluginStart extends SecurityPluginStartWithoutDeprecate
    * @deprecated
    */
   uiApi: UiApi;
-}
-
-function buildManagementServiceUiConfigs(config: ConfigType): ManagementAppConfigType | undefined {
-  let result;
-  const ui = config.ui;
-  const roleManagementEnabled = config.roleManagementEnabled;
-
-  if (ui) {
-    result = { ...ui };
-  }
-
-  if (roleManagementEnabled) {
-    result = { ...result, roleManagementEnabled };
-  }
-
-  return result;
 }

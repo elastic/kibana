@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlManagementPage']);
   const browser = getService('browser');
   const retry = getService('retry');
 
@@ -18,12 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('smoke');
     before(async () => {
       // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page, displays the Roles card, and will navigate to the Roles UI', async () => {
@@ -34,9 +30,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let url = await browser.getCurrentUrl();
       expect(url).to.contain(`/management`);
 
-      await pageObjects.svlCommonPage.assertRoleManagementCardExists();
+      await pageObjects.svlManagementPage.assertRoleManagementCardExists();
 
-      await pageObjects.svlCommonPage.clickRoleManagementCard();
+      await pageObjects.svlManagementPage.clickRoleManagementCard();
 
       url = await browser.getCurrentUrl();
       expect(url).to.contain('/management/security/roles');

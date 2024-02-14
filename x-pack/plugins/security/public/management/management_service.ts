@@ -20,6 +20,7 @@ import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
 import type { SecurityLicense } from '../../common';
+import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
 
 export interface ManagementAppConfigType {
@@ -34,38 +35,49 @@ interface SetupParams {
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
-  uiConfig?: ManagementAppConfigType;
 }
 
 interface StartParams {
   capabilities: Capabilities;
-  uiConfig?: ManagementAppConfigType;
 }
 
 export class ManagementService {
   private license!: SecurityLicense;
   private licenseFeaturesSubscription?: Subscription;
   private securitySection?: ManagementSection;
+  private userManagementEnabled: boolean;
+  private roleManagementEnabled: boolean;
+  private roleMappingManagementEnabled: boolean;
 
-  setup({ getStartServices, management, authc, license, fatalErrors, uiConfig }: SetupParams) {
+  constructor(config: ConfigType) {
+    this.userManagementEnabled = !config.ui || config.ui.userManagementEnabled;
+    this.roleManagementEnabled =
+      config.roleManagementEnabled === undefined || config.roleManagementEnabled;
+    this.roleMappingManagementEnabled = !config.ui || config.ui.roleMappingManagementEnabled;
+  }
+
+  setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
 
-    if (!uiConfig || uiConfig.userManagementEnabled) {
+    if (this.userManagementEnabled) {
       this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     }
-    if (!uiConfig || uiConfig.roleManagementEnabled) {
+
+    if (this.roleManagementEnabled) {
       this.securitySection.registerApp(
         rolesManagementApp.create({ fatalErrors, license, getStartServices })
       );
     }
+
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
-    if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+
+    if (this.roleMappingManagementEnabled) {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
     }
   }
 
-  start({ capabilities, uiConfig }: StartParams) {
+  start({ capabilities }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe((features) => {
       const securitySection = this.securitySection!;
 
@@ -73,21 +85,21 @@ export class ManagementService {
         [securitySection.getApp(apiKeysManagementApp.id)!, features.showLinks],
       ];
 
-      if (!uiConfig || uiConfig.userManagementEnabled) {
+      if (this.userManagementEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(usersManagementApp.id)!,
           features.showLinks,
         ]);
       }
 
-      if (!uiConfig || uiConfig.roleManagementEnabled) {
+      if (this.roleManagementEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(rolesManagementApp.id)!,
           features.showLinks,
         ]);
       }
 
-      if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+      if (this.roleMappingManagementEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(roleMappingsManagementApp.id)!,
           features.showLinks && features.showRoleMappingsManagement,

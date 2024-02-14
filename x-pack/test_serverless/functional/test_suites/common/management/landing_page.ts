@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlManagementPage']);
   const browser = getService('browser');
   const retry = getService('retry');
 
@@ -41,7 +41,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should not be displayed by default', async () => {
         await pageObjects.common.navigateToApp('management');
 
-        await pageObjects.svlCommonPage.assertRoleManagementCardDoesNotExist();
+        await pageObjects.svlManagementPage.assertRoleManagementCardDoesNotExist();
       });
     });
   });

@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('security', function () {
+  describe.only('security', function () {
     describe('route access', () => {
       describe('roles', () => {
         describe('enabled', () => {
@@ -30,19 +30,31 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('disabled/moved', () => {
+        describe('moved', () => {
           it('delete role', async () => {
             const { body, status } = await supertest
               .delete('/api/security/role/superuser')
               .set(svlCommonApi.getInternalRequestHeader());
+
             svlCommonApi.assertResponseStatusCode(410, status, body);
           });
 
           it('create/update role', async () => {
+            const role = {
+              elasticsearch: {
+                cluster: [],
+                indices: [{ names: ['test'], privileges: ['read'] }],
+                run_as: [],
+              },
+              kibana: [],
+            };
+
             const { body, status } = await supertest
-              .put('/api/security/role/test')
+              .put('/api/security/role/myRole')
+              .send(role)
               .set(svlCommonApi.getInternalRequestHeader());
-            svlCommonApi.assertResponseStatusCode(400, status, body);
+
+            svlCommonApi.assertResponseStatusCode(410, status, body);
           });
         });
       });
