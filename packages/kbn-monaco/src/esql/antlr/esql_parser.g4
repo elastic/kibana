@@ -146,7 +146,7 @@ identifier
     ;
 
 identifierPattern
-    : idPattern+
+    : ID_PATTERN
     ;
 
 idPattern
