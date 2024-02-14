@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const queryBar = getService('queryBar');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176837
-  describe.skip('lens fields list tests', () => {
+  describe('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
       describe(`${datasourceType} datasource`, () => {
         before(async () => {
@@ -267,12 +266,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           method: 'POST',
           body: {
             '@timestamp': new Date().toISOString(),
-            oldField: 10,
+            oldField: 20,
             newField: 20,
           },
         });
+        await PageObjects.common.sleep(500);
         await PageObjects.lens.waitForField('oldField');
-        await queryBar.setQuery('oldField: 10');
+        await queryBar.setQuery('oldField: 20');
         await queryBar.submitQuery();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.waitForField('newField');
