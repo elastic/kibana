@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +21,13 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
-import { SloDetails } from './components/slo_details';
+import {
+  ALERTS_TAB_ID,
+  OVERVIEW_TAB_ID,
+  SloDetails,
+  TAB_ID_URL_PARAM,
+  SloTabId,
+} from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
 import { paths } from '../../../common/locators/paths';
@@ -40,7 +46,7 @@ export function SloDetailsPage() {
     },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-
+  const { search } = useLocation();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
@@ -55,6 +61,18 @@ export function SloDetailsPage() {
   });
   const isCloningOrDeleting = Boolean(useIsMutating());
 
+  const [selectedTabId, setSelectedTabId] = useState(() => {
+    const searchParams = new URLSearchParams(search);
+    const urlTabId = searchParams.get(TAB_ID_URL_PARAM);
+    return urlTabId && [OVERVIEW_TAB_ID, ALERTS_TAB_ID].includes(urlTabId)
+      ? (urlTabId as SloTabId)
+      : OVERVIEW_TAB_ID;
+  });
+
+  const handleSelectedTab = (newTabId: SloTabId) => {
+    setSelectedTabId(newTabId);
+  };
+
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   useEffect(() => {
@@ -65,7 +83,7 @@ export function SloDetailsPage() {
     return setScreenContext({
       screenDescription: dedent(`
         The user is looking at the detail page for the following SLO
-        
+
         Name: ${slo.name}.
         Id: ${slo.id}
         Description: ${slo.description}
@@ -116,7 +134,14 @@ export function SloDetailsPage() {
     >
       <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
-      {!isLoading && <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} />}
+      {!isLoading && (
+        <SloDetails
+          slo={slo!}
+          isAutoRefreshing={isAutoRefreshing}
+          selectedTabId={selectedTabId}
+          handleSelectedTab={handleSelectedTab}
+        />
+      )}
     </ObservabilityPageTemplate>
   );
 }
