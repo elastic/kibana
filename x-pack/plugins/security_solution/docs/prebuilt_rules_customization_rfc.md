@@ -362,6 +362,31 @@ Since our alerting rules are encrypted saved objects, we have to find an alterna
 
 Since the migration of rules will be performed as the user calls the pertinent endpoints, the migration of the saved objects will be carried out progressively and incrementally: the SO will be migrated only when a endpoint that handles it is called by the user. We therefore have to assume that, at any given point in time, a user may have a mix of migrated and non-migrated rule saved objects. Consequently, we must continue supporting both versions of SOs.
 
+### Problem with tightly coupled logic in our endpoints
+
+All endpoints belonging to Detection Rules Management that create and update -including upgrade of prebuilt rules to new version- use three CRUD methods under the hood:
+
+- [`createRules`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts)
+- [`patchRules`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/patch_rules.ts)
+- [`updateRules`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/update_rules.ts)
+
+This "overuse" of these 3 methods for a variety of user actions makes their logic tightly coupled and creates a considerable amount of complexity to CRUD functions that should remain logically simple.
+
+For example: the `createRules` method is used in 3 use cases:
+1. when creating custom rules with our Rule Creation endpoints
+2. when importing rules, when the imported `rule_id` does not already exist in Kibana 
+3. when upgrading rules, if a rule undergoes a `type` change, the existing rule is deleted a new one is created.
+
+The same happens with `patchRules`. It is used:
+1. when patching rules via our Rule Patch endpoints
+2. when importing rules, when the imported `rule_id` is brand new
+3. when upgrading rules, if a rule maintains its `type`.
+
+This causes these 3 CRUD functions to have an unnecessary complex interfaces and logic in order to handle all these different use cases.
+
+As part of the epic, we should move away from this practice and create new CRUD methods that handle the different cases mentioned above specifically. This will help simplify our existing methods, keep logic in all of our CRUD methods simple and logically uncoupled from one another.
+
+
 ### Migration strategy
 
 Our migration strategy will consist of two distinct types of migration: a **migration on write** that will update the SO on Elasticsearch, and a **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
@@ -541,7 +566,7 @@ So we can analyze the expected outputs of the migration of all these 8 endpoints
 
 The resulting values for `immutable` and `external_source` when calling these endpoints, and the migration being performed in the background, should be as follows:
 
-<table valign="center">
+<table>
   <thead>
     <tr>
       <th>Use case</th>
@@ -838,7 +863,7 @@ Additionally:
 
 - [**Review Rule Installation** - `POST /prebuilt_rules/installation/_review` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts)
 
-This endpoint uses the `convertPrebuiltRuleAssetToRuleResponse` method, which takes in a prebuilt rule asset and converts it to an object of type `RuleResponse`. This method has to be modified so that new prebuilt rules objects are returned by the endpoint with a `prebuilt` object and a legacy `immutable` value of `true`.
+This endpoint uses the `convertPrebuiltRuleAssetToRuleResponse` method, which takes in a prebuilt rule asset and converts it to an object of type `RuleResponse`. This method has to be modified so that new prebuilt rules objects are returned by the endpoint with an `external_source` object and a legacy `immutable` value of `true`.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
 
@@ -854,12 +879,12 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
   };
 
   const ruleResponseSpecificFields = {
-    id: uuidv4(),
     // [... other prebuilt rule fields ...]
     immutable: true,
-    prebuilt: {
+    external_source: {
+      repoName: 'elastic_prebuilt',
       isCustomized: false,
-      elasticUpdateDate: prebuiltRuleAsset.elasticUpdateDate,
+      sourceUpdatedAt: prebuiltRuleAsset.sourceUpdatedAt,
     },
     revision: 1,
   };
@@ -876,73 +901,11 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
 
 To install a new prebuilt rule, this endpoint uses the [`createPrebuiltRules` method](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts), which in turn calls the [`createRules` method](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts).
 
-So when calling `createRules` within `createPrebuiltRules`, we need to explictly pass in the `isPrebuilt` property set to `true`:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts)_
-
-```ts
-// [... file continues above ...]
-
-export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRuleAsset[]) =>
-  withSecuritySpan('createPrebuiltRules', async () => {
-    const result = await initPromisePool({
-      concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-      items: rules,
-      executor: async (rule) => {
-        return createRules({
-          rulesClient,
-          params: rule,
-          isPrebuilt: true, // renamed from "immutable"
-          defaultEnabled: false,
-        });
-      },
-    });
-
-    return result;
-  });
-```
+This endpoint suffers from the issue of tightly coupled logic explained above: using th `createRules` method for creating, importing and upgrading -in some cases- rules. We need to create a new CRUD method specifically for installing prebuilt rules, that extracts that responsibility out of the `createRules` method.
 
 - [**Review Rule Upgrade** - `POST /prebuilt_rules/upgrade/_review` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts)
 
 This endpoint uses the `convertPrebuiltRuleAssetToRuleResponse` method to get a `RuleResponse`-type object from a target version of a rule provided from upstream. This method needs to be modified as described in the section that details the changes needed for the **Review Rule Installation** - `POST /prebuilt_rules/installation/_review`.
-
-An additional change will be needed within the route handler, when calculating the `targetRule` that is returned in the response. Since the `prebuilt` rule field is calculated by the `convertPrebuiltRuleAssetToRuleResponse` method, the `prebuilt.isCustomized` field would always be set to `false`, even when updating rules that have been previously customized. Therefore, the `prebuilt` field needs to be overwritten to take as its value for `prebuilt.isCustomized` the current value that is set in the currently installed rule, or default to false it that value doesn't yet exist:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts)_
-
-```ts
-// [... file continues above ...]
-
-const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfoForReview[] => {
-  return results.map((result) => {
-    const { ruleDiff, ruleVersions } = result;
-    const installedCurrentVersion = ruleVersions.input.current;
-    const targetVersion = ruleVersions.input.target;
-
-    // [... file continues ...]
-
-    const targetRule: RuleResponse = {
-      ...convertPrebuiltRuleAssetToRuleResponse(targetVersion),
-      // Overwrite the prebuilt object returned from convertPrebuiltRuleAssetToRuleResponse
-      // to account for the currently installed rule's value of `isCustomized`.
-      prebuilt: {
-        isCustomized: installedCurrentVersion.prebuilt?.isCustomized ?? false,
-        elasticUpdateDate: targetVersion.elasticUpdateDate,
-      },
-      // [... other props ...]
-    };
-
-    return {
-      // [... other props ...]
-      current_rule: installedCurrentVersion,
-      target_rule: targetRule,
-      diff: {
-        /* [...] */
-      },
-    };
-  });
-};
-```
 
 This endpoint will need further changes, which will be detailed further down, and are out of the scope of Saved Object, migration and rule schema updates.
 
@@ -950,9 +913,9 @@ This endpoint will need further changes, which will be detailed further down, an
 
 This endpoint will require major changes to add the capability of letting users selecting a custom version of the rule with custom values for rule fields. This will be explained further below in the "Changes to upgrade `_review` and `_perform` endpoints" section.
 
-The calculation of the value for the `prebuilt.isCustomized` field for the updated rule will depend on that logic as well, so its calculation will be explained in that section.
+The calculation of the value for the `external_source.isCustomized` field for the updated rule will depend on that logic as well, so its calculation will be explained in that section.
 
-However, once that value is calculated by the endpoint handler logic, we will need to pass it to the `upgradePrebuiltRules` method that is used by the handler to actually upgrade the rules. This method either patches existing rules -for the normal case-, or deletes an existing rule and recreates it if the rule underwent a type change during the upgrade (for example, the previous version of the rule had type of `query` and the new version is `eql`).
+Again, this endpoint suffers from tightly coupled logic: it uses the `upgradePrebuiltRules` method to actually upgrade the rules, but this method either patches existing rules -for the normal case-, or deletes an existing rule and recreates it if the rule underwent a type change, using the `patchRules` and `createRules` methods respectively. Decouple that logic by introducing a new CRUD method with a specific use case for upgrading prebuilt rule.
 
 The changes in the `upgradePrebuiltRules` method need to take into account both paths. In the endpoint logic handler, when calculating if the rule was customized by the user, we will create a boolean called `isRuleCustomizedDuringUpgrade`, that we will pass as an argument to `upgradePrebuiltRules`:
 
