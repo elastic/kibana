@@ -1,5 +1,6 @@
 {
   "openapi": "3.0.0",
+  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -18,12 +19,6 @@
       "description": "local"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ],
-  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -8314,6 +8309,7 @@
                   "type": "string"
                 },
                 "when": {
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8828,6 +8824,7 @@
                   "type": "string"
                 },
                 "when": {
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -9079,5 +9076,10 @@
         ]
       }
     }
-  }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
 }
