@@ -207,6 +207,18 @@ export const useInitSourcerer = (
           ),
         })
       );
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.analyzer,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            SourcererScopeName.analyzer,
+            signalIndexName,
+            true
+          ),
+        })
+      );
     } else if (
       signalIndexNameSourcerer != null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
@@ -221,6 +233,18 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
+            signalIndexNameSourcerer,
+            true
+          ),
+        })
+      );
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.analyzer,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            SourcererScopeName.analyzer,
             signalIndexNameSourcerer,
             true
           ),
@@ -425,26 +449,26 @@ export const useSourcererDataView = (
     [legacyDataView, missingPatterns.length, selectedDataView]
   );
 
-  const indicesExist = useMemo(
-    () =>
-      loading || sourcererDataView.loading
-        ? true
-        : checkIfIndicesExist({
-            scopeId,
-            signalIndexName,
-            patternList: sourcererDataView.patternList,
-            isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
-          }),
-    [
-      defaultDataView.id,
-      loading,
-      scopeId,
-      signalIndexName,
-      sourcererDataView.id,
-      sourcererDataView.loading,
-      sourcererDataView.patternList,
-    ]
-  );
+  const indicesExist = useMemo(() => {
+    if (loading || sourcererDataView.loading) {
+      return true;
+    } else {
+      return checkIfIndicesExist({
+        scopeId,
+        signalIndexName,
+        patternList: sourcererDataView.patternList,
+        isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
+      });
+    }
+  }, [
+    defaultDataView.id,
+    loading,
+    scopeId,
+    signalIndexName,
+    sourcererDataView.id,
+    sourcererDataView.loading,
+    sourcererDataView.patternList,
+  ]);
 
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(

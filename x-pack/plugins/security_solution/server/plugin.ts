@@ -16,6 +16,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
@@ -129,6 +130,7 @@ import {
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
+import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -199,7 +201,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (experimentalFeatures.riskScoringPersistence) {
       registerRiskScoringTask({
-        experimentalFeatures,
         getStartServices: core.getStartServices,
         kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
@@ -674,6 +675,32 @@ export class Plugin implements ISecuritySolutionPlugin {
         }
       }
     );
+
+    if (registerIngestCallback) {
+      registerIngestCallback(
+        'packagePolicyCreate',
+        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+          await getCriblPackagePolicyPostCreateOrUpdateCallback(
+            core.elasticsearch.client.asInternalUser,
+            packagePolicy,
+            this.logger
+          );
+          return packagePolicy;
+        }
+      );
+
+      registerIngestCallback(
+        'packagePolicyUpdate',
+        async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
+          await getCriblPackagePolicyPostCreateOrUpdateCallback(
+            core.elasticsearch.client.asInternalUser,
+            packagePolicy,
+            this.logger
+          );
+          return packagePolicy;
+        }
+      );
+    }
 
     return {};
   }

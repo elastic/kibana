@@ -19,7 +19,7 @@ export interface ProfilingESClient {
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  profilingStacktraces({}: {
+  profilingStacktraces(params: {
     query: QueryDslQueryContainer;
     sampleSize: number;
     durationSeconds: number;
@@ -29,12 +29,13 @@ export interface ProfilingESClient {
     pervCPUWattArm64?: number;
     awsCostDiscountRate?: number;
     costPervCPUPerHour?: number;
+    azureCostDiscountRate?: number;
     indices?: string[];
     stacktraceIdsField?: string;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
-  profilingFlamegraph({}: {
+  profilingFlamegraph(params: {
     query: QueryDslQueryContainer;
     sampleSize: number;
     durationSeconds: number;
@@ -43,6 +44,7 @@ export interface ProfilingESClient {
     pervCPUWattX86?: number;
     pervCPUWattArm64?: number;
     awsCostDiscountRate?: number;
+    azureCostDiscountRate?: number;
     costPervCPUPerHour?: number;
     indices?: string[];
     stacktraceIdsField?: string;

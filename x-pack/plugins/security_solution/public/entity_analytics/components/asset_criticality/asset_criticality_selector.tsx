@@ -181,7 +181,7 @@ interface ModalProps {
 const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, toggle }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
   const [value, setNewValue] = useState<CriticalityLevel>(
-    criticality.query.data?.criticality_level ?? 'normal'
+    criticality.query.data?.criticality_level ?? 'medium_impact'
   );
 
   return (
@@ -238,7 +238,6 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
       criticalityLevel={level}
       style={{ lineHeight: 'inherit' }}
       dataTestSubj="asset-criticality-modal-select-option"
-      withDescription
     />
   ),
   inputDisplay: (
@@ -246,10 +245,10 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
   ),
 });
 const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
-  option('normal'),
-  option('not_important'),
-  option('important'),
-  option('very_important'),
+  option('low_impact'),
+  option('medium_impact'),
+  option('high_impact'),
+  option('extreme_impact'),
 ];
 
 export const AssetCriticalityAccordion = React.memo(AssetCriticalityAccordionComponent);
