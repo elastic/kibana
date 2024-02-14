@@ -19,6 +19,7 @@ import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_bu
 import { EmbeddableSloProps } from './types';
 import { SloOverviewDetails } from '../common/slo_overview_details'; // TODO change to slo_details
 import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
+import { pointer } from 'd3-selection';
 
 export function SloErrorBudget({
   sloId,
@@ -103,11 +104,11 @@ export function SloErrorBudget({
   }
 
   return (
-    <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
-      <EuiFlexGroup justifyContent="flexEnd" wrap>
+    <div ref={containerRef} style={{ width: '100%', padding: 10}}>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiLink data-test-subj="o11ySloErrorBudgetLink" onClick={() => { setSelectedSlo(slo)}}>
-            {slo.name}
+            {slo.name} ({slo.groupBy}: {slo.instanceId})
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>

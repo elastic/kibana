@@ -54,7 +54,7 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
     this.setTitle(
       this.input.title ||
         i18n.translate('xpack.observability.sloEmbeddable.displayTitle', {
-          defaultMessage: 'SLO Error Budget',
+          defaultMessage: 'SLO Error Budget burn down',
         })
     );
   }
