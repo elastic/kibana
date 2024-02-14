@@ -5,8 +5,9 @@
  * 2.0.
  */
 import Ajv, { type ValidateFunction } from 'ajv';
+import dedent from 'dedent';
 import { ChatFunctionClient } from '.';
-import type { ContextRegistry } from '../../../common/types';
+import { ContextRegistry, FunctionVisibility } from '../../../common/types';
 import type { FunctionHandlerRegistry } from '../types';
 
 describe('chatFunctionClient', () => {
@@ -53,7 +54,28 @@ describe('chatFunctionClient', () => {
         )
       );
 
-      client = new ChatFunctionClient(contextRegistry, functionRegistry, validators);
+      client = new ChatFunctionClient([]);
+      client.registerContext({
+        description: '',
+        name: 'core',
+      });
+
+      client.registerFunction(
+        {
+          contexts: ['core'],
+          description: '',
+          name: 'myFunction',
+          parameters: {
+            properties: {
+              foo: {
+                type: 'string',
+              },
+            },
+            required: ['foo'],
+          },
+        },
+        respondFn
+      );
     });
 
     it('throws an error', async () => {
@@ -70,6 +92,77 @@ describe('chatFunctionClient', () => {
       }).rejects.toThrowError(`Function arguments are invalid`);
 
       expect(respondFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when providing application context', () => {
+    it('exposes a function that returns the requested data', async () => {
+      const client = new ChatFunctionClient([
+        {
+          screenDescription: 'My description',
+          data: [
+            {
+              name: 'my_dummy_data',
+              description: 'My dummy data',
+              value: [
+                {
+                  foo: 'bar',
+                },
+              ],
+            },
+            {
+              name: 'my_other_dummy_data',
+              description: 'My other dummy data',
+              value: [
+                {
+                  foo: 'bar',
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const functions = client.getFunctions();
+
+      expect(functions[0]).toEqual({
+        definition: {
+          contexts: ['core'],
+          description: expect.any(String),
+          name: 'get_data_on_screen',
+          parameters: expect.any(Object),
+          visibility: FunctionVisibility.AssistantOnly,
+        },
+        respond: expect.any(Function),
+      });
+
+      expect(functions[0].definition.description).toContain(
+        dedent(`my_dummy_data: My dummy data
+        my_other_dummy_data: My other dummy data
+        `)
+      );
+
+      const result = await client.executeFunction({
+        name: 'get_data_on_screen',
+        args: JSON.stringify({ data: ['my_dummy_data'] }),
+        messages: [],
+        connectorId: '',
+        signal: new AbortController().signal,
+      });
+
+      expect(result).toEqual({
+        content: [
+          {
+            name: 'my_dummy_data',
+            description: 'My dummy data',
+            value: [
+              {
+                foo: 'bar',
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 });

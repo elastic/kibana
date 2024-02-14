@@ -120,6 +120,7 @@ export interface ProcessAlertsOpts {
   notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
   alertDelay: number;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export interface LogAlertsOpts {
