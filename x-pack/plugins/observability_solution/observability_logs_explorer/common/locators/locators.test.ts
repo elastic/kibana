@@ -10,12 +10,12 @@ import {
   AllDatasetsLocatorParams,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { AllDatasetsLocatorDefinition } from './all_datasets/all_datasets_locator';
+import { AllDatasetsLocatorDefinition } from './all_datasets_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset';
-import { DatasetLocatorDependencies } from './types';
+import { ObsLogsExplorerLocatorDependencies } from './types';
 
 const setup = async () => {
-  const dep: DatasetLocatorDependencies = {
+  const dep: ObsLogsExplorerLocatorDependencies = {
     useHash: false,
   };
   const allDatasetsLocator = new AllDatasetsLocatorDefinition(dep);

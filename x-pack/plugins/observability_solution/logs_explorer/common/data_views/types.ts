@@ -15,12 +15,12 @@ export const dataViewDescriptorRT = rt.exact(
   rt.intersection([
     rt.type({
       id: rt.string,
-      name: rt.string,
       title: rt.string,
-      dataType: dataTypeRT,
     }),
     rt.partial({
+      dataType: dataTypeRT,
       kibanaSpaces: rt.array(rt.string),
+      name: rt.string,
       type: rt.string,
     }),
   ])
