@@ -121,6 +121,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       unifiedSearch: {
         ui: {
           QueryStringInput: () => <div>Query String Input</div>,
+          SearchBar: () => <div>Search Bar</div>,
         },
         autocomplete: {
           hasQuerySuggestions: () => {},

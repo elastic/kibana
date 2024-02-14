@@ -20,7 +20,7 @@ import { useSignalIndex } from '../../detections/containers/detection_engine/ale
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
@@ -119,7 +119,7 @@ const DetectionResponseComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.detectionAndResponse} />
