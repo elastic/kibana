@@ -73,7 +73,7 @@ const assetCriticalityHostResponse = [
   {
     fields: {
       id_value: ['host name 2'],
-      criticality_level: ['very_important'],
+      criticality_level: ['extremely_critical'],
     },
   },
   {

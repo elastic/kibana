@@ -16,8 +16,8 @@ describe('getIsExperimentalFeatureEnabled', () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
-        internalAlertsTable: true,
         rulesDetailLogs: true,
+        globalAlertsPage: false,
         ruleTagFilter: true,
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
@@ -35,9 +35,9 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    result = getIsExperimentalFeatureEnabled('internalAlertsTable');
+    result = getIsExperimentalFeatureEnabled('globalAlertsPage');
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(false);
 
     result = getIsExperimentalFeatureEnabled('ruleTagFilter');
 

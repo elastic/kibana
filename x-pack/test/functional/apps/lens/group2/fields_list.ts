@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const queryBar = getService('queryBar');
 
-  describe('lens fields list tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176837
+  describe.skip('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
       describe(`${datasourceType} datasource`, () => {
         before(async () => {

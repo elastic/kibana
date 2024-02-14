@@ -13,7 +13,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
-import { getElastichsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
 
 interface EsSummaryDocument {
   slo: {
@@ -81,7 +81,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           bool: {
             filter: [
               { term: { spaceId: this.spaceId } },
-              getElastichsearchQueryOrThrow(kqlQuery),
+              getElasticsearchQueryOrThrow(kqlQuery),
               ...(parsedFilters.filter ?? []),
             ],
             must_not: [...(parsedFilters.must_not ?? [])],
