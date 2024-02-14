@@ -8,16 +8,13 @@
 import { useConversation } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { welcomeConvo } from '../../mock/conversation';
 import React from 'react';
 import { ConversationRole } from '../../assistant_context/types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WELCOME_CONVERSATION } from './sample_conversations';
 import {
-  appendConversationMessages as _appendConversationMessagesApi,
   deleteConversation,
   getConversationById as _getConversationById,
-  updateConversation,
   createConversation as _createConversationApi,
 } from '../api/conversations';
 
@@ -40,7 +37,6 @@ const mockConvo = {
   apiConfig: { defaultSystemPromptId: 'default-system-prompt' },
 };
 
-const appendConversationMessagesApi = _appendConversationMessagesApi as jest.Mock;
 const getConversationById = _getConversationById as jest.Mock;
 const createConversation = _createConversationApi as jest.Mock;
 
@@ -51,42 +47,6 @@ describe('useConversation', () => {
     httpMock = httpServiceMock.createSetupContract();
 
     jest.clearAllMocks();
-  });
-
-  it('should report telemetry when a message has been sent', async () => {
-    await act(async () => {
-      const reportAssistantMessageSent = jest.fn();
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              assistantTelemetry: {
-                reportAssistantInvoked: () => {},
-                reportAssistantQuickPrompt: () => {},
-                reportAssistantSettingToggled: () => {},
-                reportAssistantMessageSent,
-              },
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-
-      appendConversationMessagesApi.mockResolvedValue([message, anotherMessage, message]);
-      await result.current.appendMessage({
-        id: 'longuuid',
-        title: welcomeConvo.id,
-        message,
-      });
-      expect(reportAssistantMessageSent).toHaveBeenCalledWith({
-        conversationId: 'Welcome',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
-        role: 'user',
-      });
-    });
   });
 
   it('should create a new conversation when called with valid conversationId and message', async () => {
@@ -145,38 +105,6 @@ describe('useConversation', () => {
       expect(createConversation).toHaveBeenCalledWith({
         http: httpMock,
         conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
-      });
-    });
-  });
-
-  it('appends replacements', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-
-      getConversationById.mockResolvedValue(mockConvo);
-
-      await result.current.appendReplacements({
-        conversationId: welcomeConvo.id,
-        replacements: {
-          '1.0.0.721': '127.0.0.1',
-          '1.0.0.01': '10.0.0.1',
-          'tsoh-tset': 'test-host',
-        },
-      });
-
-      expect(updateConversation).toHaveBeenCalledWith({
-        http: httpMock,
-        conversationId: welcomeConvo.id,
-        replacements: {
-          '1.0.0.721': '127.0.0.1',
-          '1.0.0.01': '10.0.0.1',
-          'tsoh-tset': 'test-host',
-        },
       });
     });
   });

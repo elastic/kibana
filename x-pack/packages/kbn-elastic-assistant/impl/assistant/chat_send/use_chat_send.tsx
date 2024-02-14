@@ -12,7 +12,7 @@ import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessages } from '../use_send_messages';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Message, Prompt } from '../../..';
+import { Conversation, Message, Prompt, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
@@ -59,6 +59,11 @@ export const useChatSend = ({
   refresh,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
+  const {
+    assistantTelemetry,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+  } = useAssistantContext();
+
   const { isLoading, sendMessages } = useSendMessages();
   const { clearConversation, removeLastMessage } = useConversation();
 
@@ -113,6 +118,12 @@ export const useChatSend = ({
         conversationId: currentConversation.id,
         replacements,
       });
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId: currentConversation.title,
+        role: userMessage.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
 
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
 
@@ -120,12 +131,21 @@ export const useChatSend = ({
         ...currentConversation,
         messages: [...updatedMessages, responseMessage],
       });
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId: currentConversation.title,
+        role: responseMessage.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
     },
     [
       allSystemPrompts,
+      assistantTelemetry,
       currentConversation,
       editingSystemPromptId,
       http,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       selectedPromptContexts,
       sendMessages,
       setCurrentConversation,

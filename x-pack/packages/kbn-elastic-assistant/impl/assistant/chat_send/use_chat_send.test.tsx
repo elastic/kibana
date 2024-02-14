@@ -23,9 +23,7 @@ const setPromptTextPreview = jest.fn();
 const setSelectedPromptContexts = jest.fn();
 const setUserPrompt = jest.fn();
 const sendMessages = jest.fn();
-const appendMessage = jest.fn();
 const removeLastMessage = jest.fn();
-const appendReplacements = jest.fn();
 const clearConversation = jest.fn();
 const refresh = jest.fn();
 const setCurrentConversation = jest.fn();
@@ -59,13 +57,11 @@ describe('use chat send', () => {
       sendMessages: sendMessages.mockReturnValue(robotMessage),
     });
     (useConversation as jest.Mock).mockReturnValue({
-      appendMessage,
-      appendReplacements,
       removeLastMessage,
       clearConversation,
     });
   });
-  it('handleOnChatCleared clears the conversation', () => {
+  it('handleOnChatCleared clears the conversation', async () => {
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
@@ -74,7 +70,10 @@ describe('use chat send', () => {
     expect(setPromptTextPreview).toHaveBeenCalledWith('');
     expect(setUserPrompt).toHaveBeenCalledWith('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
-    expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation.id);
+    await waitFor(() => {
+      expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation.id);
+      expect(refresh).toHaveBeenCalled();
+    });
     expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
   it('handlePromptChange updates prompt successfully', () => {
@@ -95,14 +94,11 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();
-      const appendMessageSend = setCurrentConversation.mock.calls[1][0].messages[0];
-      const appendMessageResponse = setCurrentConversation.mock.calls[1][0].messages[1];
+      const appendMessageSend = sendMessages.mock.calls[0][0].messages[0];
       expect(appendMessageSend.content).toEqual(
         `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
       );
       expect(appendMessageSend.role).toEqual('user');
-      expect(appendMessageResponse.content).toEqual(robotMessage.response);
-      expect(appendMessageResponse.role).toEqual('assistant');
     });
   });
   it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {

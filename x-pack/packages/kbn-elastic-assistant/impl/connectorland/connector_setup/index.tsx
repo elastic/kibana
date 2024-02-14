@@ -49,7 +49,7 @@ export const useConnectorSetup = ({
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
 } => {
-  const { appendMessage, setApiConfig } = useConversation();
+  const { setApiConfig } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
   const { actionTypeRegistry, http } = useAssistantContext();
@@ -193,25 +193,9 @@ export const useConnectorSetup = ({
 
         refetchConnectors?.();
         setIsConnectorModalVisible(false);
-        await appendMessage({
-          id: updatedConversation.id,
-          title: updatedConversation.title,
-          message: {
-            role: 'assistant',
-            content: i18n.CONNECTOR_SETUP_COMPLETE,
-            timestamp: new Date().toLocaleString(),
-          },
-        });
       }
     },
-    [
-      actionTypeRegistry,
-      appendMessage,
-      conversation,
-      onConversationUpdate,
-      refetchConnectors,
-      setApiConfig,
-    ]
+    [actionTypeRegistry, conversation, onConversationUpdate, refetchConnectors, setApiConfig]
   );
 
   return {

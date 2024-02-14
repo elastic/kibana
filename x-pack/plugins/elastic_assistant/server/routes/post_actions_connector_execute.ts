@@ -10,6 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
 import {
+  ConversationResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
@@ -73,63 +74,94 @@ export const postActionsConnectorExecuteRoute = (
               body: `Authenticated user not found`,
             });
           }
-
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
-          const conversation = await dataClient?.getConversation({
-            id: request.body.conversationId,
-            authenticatedUser,
-          });
 
-          if (conversation == null) {
-            return response.notFound({
-              body: `conversation id: "${request.body.conversationId}" not found`,
+          let onMessageSent;
+          let conversation: ConversationResponse | undefined | null;
+          let prevMessages;
+          if (request.body.conversationId) {
+            conversation = await dataClient?.getConversation({
+              id: request.body.conversationId,
+              authenticatedUser,
             });
-          }
+            prevMessages = conversation?.messages?.map((c) => ({
+              role: c.role,
+              content: c.content,
+            }));
 
-          if (request.body.replacements) {
-            await dataClient?.updateConversation({
-              existingConversation: conversation,
-              conversationUpdateProps: {
-                id: request.body.conversationId,
-                replacements: request.body.replacements,
-              },
-            });
-          }
-
-          const dateTimeString = new Date().toLocaleString();
-
-          const appendMessageFuncs = request.body.params.subActionParams.messages.map(
-            (userMessage) => async () => {
-              const res = await dataClient?.appendConversationMessages({
-                existingConversation: conversation,
-                messages: request.body.params.subActionParams.messages.map((m) => ({
-                  content: getMessageContentWithoutReplacements({
-                    messageContent: userMessage.content,
-                    replacements: request.body.replacements as Record<string, string> | undefined,
-                  }),
-                  role: m.role,
-                  timestamp: dateTimeString,
-                })),
+            if (conversation == null) {
+              return response.notFound({
+                body: `conversation id: "${request.body.conversationId}" not found`,
               });
-              if (res == null) {
-                return response.badRequest({
-                  body: `conversation id: "${request.body.conversationId}" not updated`,
+            }
+
+            if (request.body.replacements) {
+              await dataClient?.updateConversation({
+                existingConversation: conversation,
+                conversationUpdateProps: {
+                  id: request.body.conversationId,
+                  replacements: request.body.replacements,
+                },
+              });
+            }
+
+            const dateTimeString = new Date().toLocaleString();
+
+            const appendMessageFuncs = request.body.params.subActionParams.messages.map(
+              (userMessage) => async () => {
+                if (conversation != null) {
+                  const res = await dataClient?.appendConversationMessages({
+                    existingConversation: conversation,
+                    messages: request.body.params.subActionParams.messages.map((m) => ({
+                      content: getMessageContentWithoutReplacements({
+                        messageContent: userMessage.content,
+                        replacements: request.body.replacements as
+                          | Record<string, string>
+                          | undefined,
+                      }),
+                      role: m.role,
+                      timestamp: dateTimeString,
+                    })),
+                  });
+                  if (res == null) {
+                    return response.badRequest({
+                      body: `conversation id: "${request.body.conversationId}" not updated`,
+                    });
+                  }
+                }
+              }
+            );
+
+            await Promise.all(appendMessageFuncs.map((appendMessageFunc) => appendMessageFunc()));
+
+            const updatedConversation = await dataClient?.getConversation({
+              id: request.body.conversationId,
+              authenticatedUser,
+            });
+
+            if (updatedConversation == null) {
+              return response.notFound({
+                body: `conversation id: "${request.body.conversationId}" not found`,
+              });
+            }
+
+            onMessageSent = (content: string) => {
+              if (updatedConversation) {
+                dataClient?.appendConversationMessages({
+                  existingConversation: updatedConversation,
+                  messages: [
+                    getMessageFromRawResponse({
+                      rawContent: getMessageContentWithoutReplacements({
+                        messageContent: content,
+                        replacements: request.body.replacements as
+                          | Record<string, string>
+                          | undefined,
+                      }),
+                    }),
+                  ],
                 });
               }
-            }
-          );
-
-          await Promise.all(appendMessageFuncs.map((appendMessageFunc) => appendMessageFunc()));
-
-          const updatedConversation = await dataClient?.getConversation({
-            id: request.body.conversationId,
-            authenticatedUser,
-          });
-
-          if (updatedConversation == null) {
-            return response.notFound({
-              body: `conversation id: "${request.body.conversationId}" not found`,
-            });
+            };
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
@@ -144,21 +176,7 @@ export const postActionsConnectorExecuteRoute = (
           ) {
             logger.debug('Executing via actions framework directly');
             const result = await executeAction({
-              onMessageSent: (content) => {
-                dataClient?.appendConversationMessages({
-                  existingConversation: updatedConversation,
-                  messages: [
-                    getMessageFromRawResponse({
-                      rawContent: getMessageContentWithoutReplacements({
-                        messageContent: content,
-                        replacements: request.body.replacements as
-                          | Record<string, string>
-                          | undefined,
-                      }),
-                    }),
-                  ],
-                });
-              },
+              onMessageSent,
               actions,
               request,
               connectorId,
@@ -167,10 +185,7 @@ export const postActionsConnectorExecuteRoute = (
                 subActionParams: {
                   ...request.body.params.subActionParams,
                   messages: [
-                    ...(conversation.messages?.map((c) => ({
-                      role: c.role,
-                      content: c.content,
-                    })) ?? []),
+                    ...(prevMessages ?? []),
                     ...request.body.params.subActionParams.messages,
                   ],
                 },
@@ -203,13 +218,8 @@ export const postActionsConnectorExecuteRoute = (
 
           // convert the assistant messages to LangChain messages:
           const langChainMessages = getLangChainMessages(
-            ([
-              ...(conversation.messages?.map((c) => ({
-                role: c.role,
-                content: c.content,
-              })) ?? []),
-              request.body.params.subActionParams.messages,
-            ] ?? []) as unknown as Array<Pick<Message, 'content' | 'role'>>
+            ([...(prevMessages ?? []), request.body.params.subActionParams.messages] ??
+              []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
@@ -244,21 +254,22 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
 
-          dataClient?.appendConversationMessages({
-            existingConversation: conversation,
-            messages: [
-              getMessageFromRawResponse({
-                rawContent: langChainResponseBody.data,
-                traceData: langChainResponseBody.trace_data
-                  ? {
-                      traceId: langChainResponseBody.trace_data.trace_id,
-                      transactionId: langChainResponseBody.trace_data.transaction_id,
-                    }
-                  : {},
-              }),
-            ],
-          });
-
+          if (conversation != null) {
+            dataClient?.appendConversationMessages({
+              existingConversation: conversation,
+              messages: [
+                getMessageFromRawResponse({
+                  rawContent: langChainResponseBody.data,
+                  traceData: langChainResponseBody.trace_data
+                    ? {
+                        traceId: langChainResponseBody.trace_data.trace_id,
+                        transactionId: langChainResponseBody.trace_data.transaction_id,
+                      }
+                    : {},
+                }),
+              ],
+            });
+          }
           return response.ok({
             body: {
               ...langChainResponseBody,

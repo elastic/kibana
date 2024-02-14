@@ -168,8 +168,8 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       option: ConversationSelectorSettingsOption,
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value, id } = option;
+    ) => React.ReactNode = (option, searchValue) => {
+      const { label, value } = option;
       return (
         <EuiFlexGroup
           alignItems="center"

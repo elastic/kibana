@@ -158,6 +158,8 @@ export const postEvaluateRoute = (
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
+              conversationId: '',
+              llmType: 'openai',
             },
           };
 

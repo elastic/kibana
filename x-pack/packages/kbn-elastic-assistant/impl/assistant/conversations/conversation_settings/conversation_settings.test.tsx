@@ -184,6 +184,9 @@ describe('ConversationSettings', () => {
         ...welcomeConvo,
         apiConfig: {
           connectorId: mockConnector.id,
+          connectorTypeTitle: 'OpenAI',
+          model: undefined,
+          provider: undefined,
         },
       },
     });

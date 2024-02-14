@@ -16,7 +16,7 @@ import {
 import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
-  onMessageSent: (content: string) => void;
+  onMessageSent?: (content: string) => void;
   actions: ActionsPluginStart;
   connectorId: string;
   params: ConnectorExecutionParams;
@@ -49,7 +49,9 @@ export const executeAction = async ({
   }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
-    onMessageSent(content);
+    if (onMessageSent) {
+      onMessageSent(content);
+    }
     return {
       connector_id: connectorId,
       data: content, // the response from the actions framework

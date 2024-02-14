@@ -15,15 +15,19 @@ type StreamParser = (responseStream: Readable) => Promise<string>;
 export const handleStreamStorage: (
   responseStream: Readable,
   llmType: string,
-  onMessageSent: (content: string) => void
+  onMessageSent?: (content: string) => void
 ) => Promise<void> = async (responseStream, llmType, onMessageSent) => {
   try {
     const parser = llmType === 'bedrock' ? parseBedrockStream : parseOpenAIStream;
     // TODO @steph add abort signal
     const parsedResponse = await parser(responseStream);
-    onMessageSent(parsedResponse);
+    if (onMessageSent) {
+      onMessageSent(parsedResponse);
+    }
   } catch (e) {
-    onMessageSent(`An error occurred while streaming the response:\n\n${e.message}`);
+    if (onMessageSent) {
+      onMessageSent(`An error occurred while streaming the response:\n\n${e.message}`);
+    }
   }
 };
 

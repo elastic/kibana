@@ -55,7 +55,7 @@ export type ExecuteConnectorRequestParamsInput = z.input<typeof ExecuteConnector
 
 export type ExecuteConnectorRequestBody = z.infer<typeof ExecuteConnectorRequestBody>;
 export const ExecuteConnectorRequestBody = z.object({
-  conversationId: UUID,
+  conversationId: UUID.optional(),
   params: ConnectorExecutionParams,
   alertsIndexPattern: z.string().optional(),
   allow: z.array(z.string()).optional(),
