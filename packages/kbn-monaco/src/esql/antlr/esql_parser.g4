@@ -146,6 +146,10 @@ identifier
     ;
 
 identifierPattern
+    : ID_PATTERN
+    ;
+
+idPattern
     : UNQUOTED_ID_PATTERN
     | QUOTED_IDENTIFIER
     ;
