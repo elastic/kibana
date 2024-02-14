@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
-import classNames from 'classnames';
-
-import { PhaseEvent } from '@kbn/presentation-publishing';
-import { EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
-
 import { css } from '@emotion/react';
+import {
+  EmbeddablePanel,
+  reactEmbeddableRegistryHasKey,
+  ReactEmbeddableRenderer,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
+import { PhaseEvent } from '@kbn/presentation-publishing';
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
+import { getReferencesForPanelId } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
@@ -52,6 +56,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
+    const panel = container.select((state) => state.explicitInput.panels[id]);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -94,6 +99,33 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         `
       : css``;
 
+    const renderedEmbeddable = useMemo(() => {
+      const references = getReferencesForPanelId(id, container.savedObjectReferences);
+      // render React embeddable
+      if (reactEmbeddableRegistryHasKey(type)) {
+        return (
+          <ReactEmbeddableRenderer
+            uuid={id}
+            key={`${type}_${id}`}
+            type={type}
+            state={{ rawState: panel.explicitInput, version: panel.version, references }}
+          />
+        );
+      }
+      // render legacy embeddable
+      return (
+        <EmbeddablePanel
+          key={type}
+          index={index}
+          showBadges={true}
+          showShadow={true}
+          showNotifications={true}
+          onPanelStatusChange={onPanelStatusChange}
+          embeddable={() => container.untilEmbeddableLoaded(id)}
+        />
+      );
+    }, [container, id, index, onPanelStatusChange, type, panel]);
+
     return (
       <div
         css={focusStyles}
@@ -105,15 +137,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       >
         {isRenderable ? (
           <>
-            <EmbeddablePanel
-              key={type}
-              index={index}
-              showBadges={true}
-              showShadow={true}
-              showNotifications={true}
-              onPanelStatusChange={onPanelStatusChange}
-              embeddable={() => container.untilEmbeddableLoaded(id)}
-            />
+            {renderedEmbeddable}
             {children}
           </>
         ) : (

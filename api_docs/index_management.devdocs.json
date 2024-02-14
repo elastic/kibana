@@ -831,6 +831,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-server.LegacyTemplateSerialized.mappings",
             "type": "Object",
             "tags": [],
@@ -1140,6 +1154,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateDeserialized.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
             "type": "Object",
             "tags": [],
@@ -1279,6 +1307,20 @@
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1343,6 +1385,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -2429,6 +2485,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.LegacyTemplateSerialized.mappings",
             "type": "Object",
             "tags": [],
@@ -2698,6 +2768,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.ignoreMissingComponentTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoreMissingComponentTemplates",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.version",
             "type": "number",
             "tags": [],
@@ -2761,6 +2845,20 @@
             "description": [],
             "signature": [
               "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -2979,6 +3077,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateListItem.ilmPolicy",
             "type": "Object",
             "tags": [],
@@ -2986,6 +3098,20 @@
             "description": [],
             "signature": [
               "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.composedOf",
+            "type": "Array",
+            "tags": [],
+            "label": "composedOf",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -3085,10 +3211,38 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateSerialized.composed_of",
             "type": "Array",
             "tags": [],
             "label": "composed_of",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.ignore_missing_component_templates",
+            "type": "Array",
+            "tags": [],
+            "label": "ignore_missing_component_templates",
             "description": [],
             "signature": [
               "string[] | undefined"

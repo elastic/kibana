@@ -3579,6 +3579,68 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.controlEditorOptionsComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "controlEditorOptionsComponent",
+            "description": [],
+            "signature": [
+              "({ initialInput, onChange, setControlEditorValid, }: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlEditorProps",
+                "text": "ControlEditorProps"
+              },
+              "<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.RangeSliderEmbeddableInput",
+                "text": "RangeSliderEmbeddableInput"
+              },
+              ">) => JSX.Element"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.RangeSliderEmbeddableFactory.controlEditorOptionsComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.ControlEditorProps",
+                    "text": "ControlEditorProps"
+                  },
+                  "<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.RangeSliderEmbeddableInput",
+                    "text": "RangeSliderEmbeddableInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/range_slider/components/range_slider_editor_options.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.RangeSliderEmbeddableFactory.create",
             "type": "Function",
             "tags": [],
@@ -4273,6 +4335,38 @@
                 "description": [],
                 "signature": [
                   "Partial<T>"
+                ],
+                "path": "src/plugins/controls/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlEditorProps.setControlEditorValid",
+            "type": "Function",
+            "tags": [],
+            "label": "setControlEditorValid",
+            "description": [],
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlEditorProps.setControlEditorValid.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isValid",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
@@ -5197,6 +5291,20 @@
             "signature": [
               "RangeValue",
               " | undefined"
+            ],
+            "path": "src/plugins/controls/common/range_slider/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableInput.step",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
@@ -7019,6 +7127,20 @@
             "signature": [
               "RangeValue",
               " | undefined"
+            ],
+            "path": "src/plugins/controls/common/range_slider/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.RangeSliderEmbeddableInput.step",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,

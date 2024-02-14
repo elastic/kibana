@@ -24,7 +24,12 @@
       "datasetQuality"
     ],
     "optionalPlugins": [
-      "serverless"
+      "serverless",
+      "triggersActionsUi",
+      "unifiedSearch",
+      "dataViews",
+      "dataViewEditor",
+      "lens"
     ],
     "requiredBundles": [
       "kibanaReact"

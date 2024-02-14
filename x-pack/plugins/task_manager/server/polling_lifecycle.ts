@@ -173,7 +173,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         const capacity = this.pool.availableWorkers;
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
-          // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
+          // high load causes the poller to skip work (work isn't called when there is no capacity)
           this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
 
           // Emit event indicating task manager utilization

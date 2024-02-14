@@ -44,6 +44,8 @@ export interface IndicesListColumn {
   label: string;
   order: number;
   render?: (index: Index) => ReactNode;
+  // return a value used for sorting (only if the value is different from the original value at index[fieldName])
+  sort?: (index: Index) => any;
 }
 
 export interface ExtensionsSetup {

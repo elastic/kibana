@@ -1,6 +1,5 @@
 {
   "openapi": "3.0.0",
-  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -19,6 +18,12 @@
       "description": "local"
     }
   ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -1304,6 +1309,109 @@
                 "properties": {
                   "force": {
                     "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
+      "post": {
+        "summary": "Authorize transforms",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "transformId": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "transformId",
+                          "error"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "reauthorize-transforms",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgName",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgVersion",
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transforms": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "transformId": {
+                          "type": "string"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -5083,6 +5191,9 @@
                   "is_default": {
                     "type": "boolean"
                   },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
                   "host_urls": {
                     "type": "array",
                     "items": {
@@ -5193,6 +5304,9 @@
                     "type": "string"
                   },
                   "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_internal": {
                     "type": "boolean"
                   },
                   "host_urls": {
@@ -7276,6 +7390,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7348,6 +7466,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -8904,6 +9026,9 @@
           "is_default": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "is_preconfigured": {
             "type": "boolean"
           },
@@ -8954,10 +9079,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ]
+  }
 }

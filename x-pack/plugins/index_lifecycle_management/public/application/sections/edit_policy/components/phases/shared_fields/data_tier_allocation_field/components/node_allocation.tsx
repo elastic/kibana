@@ -100,6 +100,9 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
       <UseField
         path={`_meta.${phase}.allocationNodeAttribute`}
         component={SelectField}
+        config={{
+          defaultValue: nodeAllocationOptions.length ? nodeAllocationOptions[0].value : '',
+        }}
         componentProps={{
           helpText: !!selectedAllocationNodeAttribute ? (
             <EuiButtonEmpty
