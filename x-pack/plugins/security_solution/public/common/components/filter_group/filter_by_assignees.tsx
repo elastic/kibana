@@ -6,22 +6,29 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiFilterButton, EuiFilterGroup, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import { TEST_IDS } from './constants';
-import { AssigneesPopover } from '../assignees/assignees_popover';
 import type { AssigneesIdsSelection } from '../assignees/types';
 import { useLicense } from '../../hooks/use_license';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
+import { ASSIGNEES_PANEL_WIDTH } from '../assignees/constants';
+import { AssigneesSelectable } from '../assignees/assignees_selectable';
 
 export interface FilterByAssigneesPopoverProps {
   /**
-   * Ids of the users assigned to the alert
+   * Selected user ids to filter alerts by
    */
-  assignedUserIds: AssigneesIdsSelection[];
+  selectedUserIds: AssigneesIdsSelection[];
 
   /**
    * Callback to handle changing of the assignees selection
@@ -33,58 +40,66 @@ export interface FilterByAssigneesPopoverProps {
  * The popover to filter alerts by assigned users
  */
 export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
-  ({ assignedUserIds, onSelectionChange }) => {
+  ({ selectedUserIds, onSelectionChange }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
-    const [selectedAssignees, setSelectedAssignees] =
-      useState<AssigneesIdsSelection[]>(assignedUserIds);
-    const handleSelectionChange = useCallback(
-      (users: AssigneesIdsSelection[]) => {
-        setSelectedAssignees(users);
-        onSelectionChange?.(users);
-      },
-      [onSelectionChange]
+    const searchInputId = useGeneratedHtmlId({
+      prefix: 'searchInput',
+    });
+
+    const button = useMemo(
+      () => (
+        <EuiToolTip
+          position="bottom"
+          content={
+            upsellingMessage ??
+            i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
+              defaultMessage: 'Filter by assignee',
+            })
+          }
+        >
+          <EuiFilterButton
+            data-test-subj={TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON}
+            iconType="arrowDown"
+            badgeColor="subdued"
+            disabled={!isPlatinumPlus}
+            onClick={togglePopover}
+            isSelected={isPopoverOpen}
+            hasActiveFilters={selectedUserIds.length > 0}
+            numActiveFilters={selectedUserIds.length}
+          >
+            {i18n.translate('xpack.securitySolution.filtersGroup.assignees.buttonTitle', {
+              defaultMessage: 'Assignees',
+            })}
+          </EuiFilterButton>
+        </EuiToolTip>
+      ),
+      [isPlatinumPlus, isPopoverOpen, selectedUserIds.length, togglePopover, upsellingMessage]
     );
 
     return (
       <EuiFilterGroup>
-        <AssigneesPopover
-          assignedUserIds={assignedUserIds}
-          showUnassignedOption={true}
-          button={
-            <EuiToolTip
-              position="bottom"
-              content={
-                upsellingMessage ??
-                i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
-                  defaultMessage: 'Filter by assignee',
-                })
-              }
-            >
-              <EuiFilterButton
-                data-test-subj={TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON}
-                iconType="arrowDown"
-                badgeColor="subdued"
-                disabled={!isPlatinumPlus}
-                onClick={togglePopover}
-                isSelected={isPopoverOpen}
-                hasActiveFilters={selectedAssignees.length > 0}
-                numActiveFilters={selectedAssignees.length}
-              >
-                {i18n.translate('xpack.securitySolution.filtersGroup.assignees.buttonTitle', {
-                  defaultMessage: 'Assignees',
-                })}
-              </EuiFilterButton>
-            </EuiToolTip>
-          }
-          isPopoverOpen={isPopoverOpen}
+        <EuiPopover
+          panelPaddingSize="none"
+          initialFocus={`#${searchInputId}`}
+          button={button}
+          isOpen={isPopoverOpen}
+          panelStyle={{
+            minWidth: ASSIGNEES_PANEL_WIDTH,
+          }}
           closePopover={togglePopover}
-          onSelectionChange={handleSelectionChange}
-        />
+        >
+          <AssigneesSelectable
+            searchInputId={searchInputId}
+            assignedUserIds={selectedUserIds}
+            showUnassignedOption={true}
+            onSelectionChange={onSelectionChange}
+          />
+        </EuiPopover>
       </EuiFilterGroup>
     );
   }

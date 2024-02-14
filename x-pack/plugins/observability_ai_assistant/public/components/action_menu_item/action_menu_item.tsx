@@ -44,6 +44,16 @@ export function ObservabilityAIAssistantActionMenuItem() {
     };
   }, []);
 
+  useEffect(() => {
+    const unregister = service.setScreenContext({
+      screenDescription: 'The user is looking at ' + window.location.href,
+    });
+
+    return () => {
+      unregister();
+    };
+  }, [service]);
+
   if (!service.isEnabled()) {
     return null;
   }
