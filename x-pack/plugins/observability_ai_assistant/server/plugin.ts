@@ -19,6 +19,8 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
@@ -33,6 +35,7 @@ import {
 } from './types';
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
+import { getConnectorType as getObsAIAssistantConnectorType } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -139,6 +142,25 @@ export class ObservabilityAIAssistantPlugin
     service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
+
+    plugins.actions.registerType(
+      getObsAIAssistantConnectorType({
+        getObsAIClient: () => {
+          const fakeRawRequest: FakeRawRequest = {
+            headers: {
+              authorization: 'ApiKey --',
+            },
+            path: '/',
+          };
+
+          const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+
+          return service.getClient({
+            request: fakeRequest,
+          });
+        },
+      })
+    );
 
     registerServerRoutes({
       core,

@@ -31,6 +31,7 @@ import type {
 } from './types';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -133,6 +134,8 @@ export class ObservabilityAIAssistantPlugin
           </ObservabilityAIAssistantProvider>
         </KibanaContextProvider>
       ));
+
+    pluginsStart.triggersActionsUi.actionTypeRegistry.register(getObsAIAssistantConnectorType());
 
     const services = {
       ...coreStart,

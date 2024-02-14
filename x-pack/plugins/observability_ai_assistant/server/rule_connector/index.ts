@@ -16,9 +16,9 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import type { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server/service/client';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
+import type { ObservabilityAIAssistantClient } from '../service/client';
+import { MessageRole } from '../../common/types';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 const ConfigSchemaProps = {
   connector: schema.maybe(schema.string()),
@@ -48,7 +48,7 @@ export function getConnectorType({
   return {
     id: '.observability-ai-assistant',
     minimumLicenseRequired: 'enterprise',
-    name: i18n.translate('xpack.stackConnectors.observabilityAIAssistant.title', {
+    name: i18n.translate('xpack.observabilityAiAssistant.alertConnector.title', {
       defaultMessage: 'Observability AI Assistant',
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId],
@@ -113,7 +113,24 @@ async function executor(
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              content: 'Can you please tell me more about the ongoing alert ?',
+              content: execOptions.params.message,
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              function_call: {
+                name: 'alerts',
+                arguments: JSON.stringify({
+                  name: 'alerts',
+                  args: {
+                    start: 'now-1h',
+                    end: 'now',
+                  },
+                }),
+                trigger: MessageRole.Assistant as const,
+              },
             },
           },
         ],
@@ -123,6 +140,13 @@ async function executor(
 
   // eslint-disable-next-line no-console
   console.log(JSON.stringify(response));
+
+  //  await axios.post(
+  //    'https://hooks.slack.com/services/...',
+  //    {
+  //      text: response.message.content,
+  //    }
+  //  );
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }

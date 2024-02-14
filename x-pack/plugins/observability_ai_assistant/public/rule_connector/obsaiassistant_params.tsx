@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ObsAIAssistantActionParams } from '../types';
+import { ObsAIAssistantActionParams } from './types';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams>
-> = ({ errors, index, messageVariables }) => {
-  const [textValue, setTextValue] = useState<string | undefined>('');
-
+> = ({ errors, index, messageVariables, editAction, actionParams }) => {
   return (
     <TextAreaWithMessageVariables
       index={index}
-      editAction={(_: string, value: any) => {
-        setTextValue(value);
-      }}
+      editAction={editAction}
       messageVariables={messageVariables}
-      paramsProperty="userMessage"
-      inputTargetValue={textValue}
+      paramsProperty={'message'}
+      inputTargetValue={actionParams.message}
       label={i18n.translate(
-        'xpack.stackConnectors.components.obsAIAssistant.messageTextAreaFieldLabel',
+        'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
         {
           defaultMessage: 'Message',
         }

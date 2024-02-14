@@ -11,21 +11,24 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ObsAIAssistantActionParams } from '../types';
+import { ObsAIAssistantActionParams } from './types';
+import type { ObservabilityAIAssistantService } from '../types';
 
-export function getConnectorType(): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
+export function getConnectorType(
+  assistant: ObservabilityAIAssistantService
+): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
   return {
     id: '.observability-ai-assistant',
     modalWidth: 675,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate(
-      'xpack.stackConnectors.components.obsAIAssistant.selectMessageText',
+      'xpack.observabilityAiAssistant.alertConnector.selectMessageText',
       {
         defaultMessage: 'Send messages to Observability AI Assistant.',
       }
     ),
     actionTypeTitle: i18n.translate(
-      'xpack.stackConnectors.components.obsAIAssistant.connectorTypeTitle',
+      'xpack.observabilityAiAssistant.alertConnector.connectorTypeTitle',
       {
         defaultMessage: 'ObsAIAssistant',
       }
