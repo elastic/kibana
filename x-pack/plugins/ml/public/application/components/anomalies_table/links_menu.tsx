@@ -42,7 +42,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
 
 import { PLUGIN_ID } from '../../../../common/constants/app';
-import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
+import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
@@ -95,7 +95,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const kibana = useMlKibana();
   const {
-    services: { data, share, application, uiActions },
+    services: {
+      data,
+      share,
+      application,
+      uiActions,
+      mlServices: { mlIndexUtils },
+    },
   } = kibana;
 
   const job = useMemo(() => {
@@ -104,7 +110,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const index = job.datafeed_config.indices[0];
-    const dataViewId = await getDataViewIdFromName(data.dataViews, index);
+    const dataViewId = await mlIndexUtils.getDataViewIdFromName(index);
 
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
@@ -144,7 +150,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     const index = job.datafeed_config.indices[0];
-    const dataViewId = await getDataViewIdFromName(data.dataViews, index);
+    const dataViewId = await mlIndexUtils.getDataViewIdFromName(index);
 
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
@@ -218,7 +224,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const getDataViewId = async () => {
       const index = job.datafeed_config.indices[0];
 
-      const dataViewId = await getDataViewIdFromName(data.dataViews, index, job);
+      const dataViewId = await mlIndexUtils.getDataViewIdFromName(index, job);
 
       // If data view doesn't exist for some reasons
       if (!dataViewId && !unmounted) {
@@ -657,7 +663,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           // index configured in the datafeed. If a Kibana data view has not been created
           // for this index, then the user will see a warning message on the Discover tab advising
           // them that no matching data view has been configured.
-          const dataViewId = await getDataViewIdFromName(data.dataViews, index);
+          const dataViewId = await mlIndexUtils.getDataViewIdFromName(index);
 
           // We should not redirect to Discover if data view doesn't exist
           if (!dataViewId) return;

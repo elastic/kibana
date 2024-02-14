@@ -30,7 +30,7 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { getDataViewIdFromName } from '../util/index_utils';
+import type { MlIndexUtils } from '../util/index_service';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -633,7 +633,8 @@ export function removeFilterFromQueryString(
 // Returns an object mapping job ids to source indices which map to geo fields for that index
 export async function getDataViewsAndIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
-  dataViewsService: DataViewsContract
+  dataViewsService: DataViewsContract,
+  mlIndexUtils: MlIndexUtils
 ): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
   // Avoid searching for data view again if previous job already has same source index
@@ -655,7 +656,7 @@ export async function getDataViewsAndIndicesWithGeoFields(
         for (const sourceIndex of sourceIndices) {
           const cachedDV = dataViewsMap.get(sourceIndex);
           const dataViewId =
-            cachedDV?.id ?? (await getDataViewIdFromName(dataViewsService, sourceIndex));
+            cachedDV?.id ?? (await mlIndexUtils.getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
             const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));

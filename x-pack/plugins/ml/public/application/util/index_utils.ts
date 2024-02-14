@@ -9,56 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import { getToastNotifications } from './dependency_cache';
-
-export async function getDataViewNames(dataViewsService: DataViewsContract) {
-  return (await dataViewsService.getIdsWithTitle()).map(({ title }) => title);
-}
-
-/**
- * Retrieves the data view ID from the given name.
- * If a job is passed in, a temporary data view will be created if the requested data view doesn't exist.
- * @param name - The name or index pattern of the data view.
- * @param job - Optional job object.
- * @returns The data view ID or null if it doesn't exist.
- * @deprecated Use `indexServiceFactory:getDataViewIdFromName()` instead.
- */
-export async function getDataViewIdFromName(
-  dataViewsService: DataViewsContract,
-  name: string,
-  job?: Job
-): Promise<string | null> {
-  const dataViews = await dataViewsService.find(name);
-  const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
-  if (!dataView) {
-    if (job !== undefined) {
-      const tempDataView = await dataViewsService.create({
-        id: undefined,
-        name,
-        title: name,
-        timeFieldName: job.data_description.time_field!,
-      });
-      return tempDataView.id ?? null;
-    }
-    return null;
-  }
-  return dataView.id ?? dataView.getIndexPattern();
-}
-
-/**
- * @deprecated Use `indexServiceFactory:getDataViewById()` instead.
- */
-export function getDataViewById(
-  dataViewsService: DataViewsContract,
-  id: string
-): Promise<DataView> {
-  if (id) {
-    return dataViewsService.get(id);
-  } else {
-    return dataViewsService.create({});
-  }
-}
 
 export interface DataViewAndSavedSearch {
   savedSearch: SavedSearch | null;

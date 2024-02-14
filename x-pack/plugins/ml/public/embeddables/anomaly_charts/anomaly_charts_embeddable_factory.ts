@@ -100,7 +100,13 @@ export class AnomalyChartsEmbeddableFactory
     return [
       coreStart,
       pluginsStart as MlDependencies,
-      { anomalyDetectorService, anomalyExplorerService, mlFieldFormatService, mlResultsService },
+      {
+        anomalyDetectorService,
+        anomalyExplorerService,
+        mlFieldFormatService,
+        mlIndexUtils,
+        mlResultsService,
+      },
     ];
   }
 

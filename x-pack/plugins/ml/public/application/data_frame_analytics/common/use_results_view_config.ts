@@ -20,7 +20,6 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../contexts/kibana';
-import { getDataViewIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
@@ -33,6 +32,7 @@ export const useResultsViewConfig = (jobId: string) => {
   const {
     services: {
       data: { dataViews },
+      mlServices: { mlIndexUtils },
     },
   } = useMlKibana();
   const trainedModelsApiService = useTrainedModelsApiService();
@@ -97,7 +97,8 @@ export const useResultsViewConfig = (jobId: string) => {
 
           try {
             const destIndex = getDestinationIndex(jobConfigUpdate);
-            const destDataViewId = (await getDataViewIdFromName(dataViews, destIndex)) ?? destIndex;
+            const destDataViewId =
+              (await mlIndexUtils.getDataViewIdFromName(destIndex)) ?? destIndex;
             let fetchedDataView: DataView | undefined;
 
             try {
@@ -116,7 +117,7 @@ export const useResultsViewConfig = (jobId: string) => {
               setNeedsDestDataView(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceDataViewId =
-                (await getDataViewIdFromName(dataViews, sourceIndex)) ?? sourceIndex;
+                (await mlIndexUtils.getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
                 fetchedDataView = await dataViews.get(sourceDataViewId);
               } catch (e) {

@@ -368,6 +368,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     services: {
       charts: chartsService,
       data: { dataViews: dataViewsService },
+      mlServices: { mlIndexUtils },
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
@@ -444,7 +445,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService)
+      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService, mlIndexUtils)
         .then(({ sourceIndicesWithGeoFieldsMap, dataViews: dv }) => {
           setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap);
           setDataViews(dv);

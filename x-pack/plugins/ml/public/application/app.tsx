@@ -70,6 +70,7 @@ export function getMlGlobalServices(
     httpService,
     mlApiServices,
     mlFieldFormatService,
+    mlIndexUtils,
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),

@@ -40,7 +40,6 @@ import {
 } from '../../../../common/util/job_utils';
 
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
 
@@ -258,7 +257,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     } = this.props;
     const entityControls = this.getControlsForDetector();
 
-    return ml.results
+    return this.context.services.mlService.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
         this.getCriteriaFields(selectedDetectorIndex, entityControls),

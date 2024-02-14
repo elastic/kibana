@@ -39,7 +39,6 @@ import {
   useMlKibana,
 } from '../../../../contexts/kibana';
 import { useEnabledFeatures } from '../../../../contexts/ml';
-import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
   useDeleteAction,
@@ -111,9 +110,9 @@ export const Controls: FC<Props> = React.memo(
 
     const {
       services: {
-        data,
         share,
         application: { navigateToUrl, capabilities },
+        mlServices: { mlIndexUtils },
       },
     } = useMlKibana();
 
@@ -139,7 +138,7 @@ export const Controls: FC<Props> = React.memo(
     const nodeType = selectedNode?.data('type');
 
     const onCreateJobClick = useCallback(async () => {
-      const dataViewId = await getDataViewIdFromName(data.dataViews, nodeLabel);
+      const dataViewId = await mlIndexUtils.getDataViewIdFromName(nodeLabel);
 
       if (dataViewId !== null) {
         const path = await mlLocator.getUrl({
