@@ -36,7 +36,7 @@ export const journey = new Journey({
   },
   ftrConfigPath: 'x-pack/performance/configs/apm_config.ts',
   // FLAKY: https://github.com/elastic/kibana/issues/162813
-  skipped: true
+  skipped: true,
 })
   .step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`app/apm/services`));
