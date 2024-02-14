@@ -57,6 +57,7 @@ describe('AutocompleteFieldMatchComponent', () => {
         isClearable={false}
         isDisabled
         isLoading={false}
+        onWarning={jest.fn()}
         onChange={jest.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
