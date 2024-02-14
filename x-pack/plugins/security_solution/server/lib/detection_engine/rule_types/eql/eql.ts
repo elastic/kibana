@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { firstValueFrom } from 'rxjs';
 import { performance } from 'perf_hooks';
-import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
@@ -44,8 +41,7 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { bulkCreateSuppressedAlerts } from '../utils/bulk_create_suppressed_alerts';
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -63,10 +59,9 @@ interface EqlExecutorParams {
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   wrapSuppressedHits: WrapSuppressedHits;
-  licensing: LicensingPluginSetup;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
-  experimentalFeatures?: ExperimentalFeatures;
+  isAlertSuppressionActive: boolean;
 }
 
 export const eqlExecutor = async ({
@@ -85,10 +80,9 @@ export const eqlExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   wrapSuppressedHits,
-  licensing,
-  experimentalFeatures,
   alertTimestampOverride,
   alertWithSuppression,
+  isAlertSuppressionActive,
 }: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -127,21 +121,16 @@ export const eqlExecutor = async ({
     result.searchAfterTimes = [eqlSearchDuration];
 
     let createResult;
-    /**
-     * Suppression, TODO see how to extract the duplicate code
-     */
-    // const newSignalsLength = newSignals?.length;
-    // console.log(newSignalsLength);
-    if (response.hits.events?.length) {
-      const alertSuppression = completeRule.ruleParams.alertSuppression;
-      const enabled = await isSuppressionEnabled(licensing, experimentalFeatures, alertSuppression);
 
+    if (response.hits.events?.length) {
       // Take the last element as it is the Shell Alert, TBC?
       // const enrichedEvents =
       //   sequenceHits !== undefined ? [newSignals[newSignalsLength - 1]] : newSignals;
 
-      if (enabled) {
-        createResult = await bulkCreateSuppressedAlerts({
+      const alertSuppression = completeRule.ruleParams.alertSuppression;
+
+      if (isAlertSuppressionActive) {
+        createResult = await bulkCreateSuppressedAlertsInMemory({
           enrichedEvents: response.hits.events,
           toReturn: result,
           wrapHits,
@@ -183,22 +172,4 @@ export const eqlExecutor = async ({
     }
     return result;
   });
-};
-
-const isSuppressionEnabled = async (
-  licensing: LicensingPluginSetup,
-  experimentalFeatures?: ExperimentalFeatures,
-  alertSuppression?: AlertSuppressionCamel
-): Promise<Boolean> => {
-  const isAlertSuppressionEnabled = Boolean(alertSuppression?.groupBy?.length);
-  if (!isAlertSuppressionEnabled) return false;
-
-  const license = await firstValueFrom(licensing.license$);
-  const hasPlatinumLicense = license.hasAtLeast('platinum');
-
-  return !!(
-    isAlertSuppressionEnabled &&
-    experimentalFeatures?.alertSuppressionForEqlRuleEnabled &&
-    hasPlatinumLicense
-  );
 };

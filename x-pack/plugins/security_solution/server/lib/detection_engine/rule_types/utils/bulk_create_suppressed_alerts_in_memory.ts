@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type {
   SearchAfterAndBulkCreateParams,
@@ -50,7 +50,7 @@ export interface BulkCreateSuppressedAlertsParams
  * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
  * they will be created as regular alerts
  */
-export const bulkCreateSuppressedAlerts = async ({
+export const bulkCreateSuppressedAlertsInMemory = async ({
   enrichedEvents,
   toReturn,
   wrapHits,

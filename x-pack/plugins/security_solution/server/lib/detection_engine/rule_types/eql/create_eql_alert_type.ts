@@ -15,6 +15,7 @@ import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../t
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import { isAlertSuppressionActive } from '../utils/is_alert_suppression_active';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -97,10 +98,16 @@ export const createEqlAlertType = (
           buildReasonMessage,
           alertTimestampOverride,
           ruleExecutionLogger,
-          publicBaseUrl: publicBaseUrl,
+          publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
         });
+      const isSuppressionActive = await isAlertSuppressionActive({
+        licensing,
+        experimentalFeatures,
+        experimentalFeatureKey: 'alertSuppressionForEqlRuleEnabled',
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+      });
       const result = await eqlExecutor({
         completeRule,
         tuple,
@@ -117,10 +124,9 @@ export const createEqlAlertType = (
         exceptionFilter,
         unprocessedExceptions,
         wrapSuppressedHits,
-        experimentalFeatures,
-        licensing,
         alertTimestampOverride,
         alertWithSuppression,
+        isAlertSuppressionActive: isSuppressionActive,
       });
       return { ...result, state };
     },
