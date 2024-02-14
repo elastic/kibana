@@ -23,9 +23,10 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import { useEnabledFeatures } from '../../../../../contexts/ml';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
-import type {
+import {
   ManagementListResponse,
   ManagementItems,
+  isAnomalyDetectionManagementItems,
 } from '../../../../../../../common/types/management';
 import { useManagementApiService } from '../../../../../services/ml_api_service/management';
 import { getColumns } from './columns';
@@ -125,7 +126,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         ? [
             {
               name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.spaces', {
-                defaultMessage: 'spaces',
+                defaultMessage: 'Spaces',
               }),
               'data-test-subj': 'mlSpaceManagementTableColumnSpaces',
               sortable: true,
@@ -140,6 +141,9 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
                     id={item.id}
                     mlSavedObjectType={currentTabId}
                     refresh={refresh.bind(null, currentTabId)}
+                    showAlertsWarning={
+                      isAnomalyDetectionManagementItems(item) && item.hasAlertingRules
+                    }
                   />
                 );
               },

@@ -57,14 +57,19 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
         },
       },
       routeGuard.fullLicenseAPIGuard(
-        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+        async ({ client, mlClient, request, response, mlSavedObjectService, context }) => {
           try {
             const { listType } = request.params;
             const { jobsSpaces, trainedModelsSpaces } = checksFactory(client, mlSavedObjectService);
 
             switch (listType) {
               case 'anomaly-detector':
-                const { jobsSummary } = jobServiceProvider(client, mlClient);
+                const alerting = await context.alerting;
+                const { jobsSummary } = jobServiceProvider(
+                  client,
+                  mlClient,
+                  alerting?.getRulesClient()
+                );
                 const [jobs, adJobStatus] = await Promise.all([jobsSummary(), jobsSpaces()]);
 
                 const adJobsWithSpaces: AnomalyDetectionManagementItems[] = jobs.map((job) => {
@@ -74,6 +79,7 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
                     jobState: job.jobState,
                     datafeedState: job.datafeedState,
                     spaces: adJobStatus['anomaly-detector'][job.id] ?? [],
+                    hasAlertingRules: (job.alertingRules ?? []).length > 0,
                   };
                 });
 

@@ -14,6 +14,7 @@ export interface AnomalyDetectionManagementItems {
   jobState: SummaryJobState;
   datafeedState: string;
   spaces: string[];
+  hasAlertingRules: boolean;
 }
 
 export interface AnalyticsManagementItems {
@@ -43,3 +44,9 @@ export type ManagementListResponse =
   | AnalyticsManagementItems[]
   | AnomalyDetectionManagementItems[]
   | TrainedModelsManagementItems[];
+
+export function isAnomalyDetectionManagementItems(
+  item: ManagementItems
+): item is AnomalyDetectionManagementItems {
+  return (item as AnomalyDetectionManagementItems).jobState !== undefined;
+}

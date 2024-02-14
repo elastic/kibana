@@ -7,9 +7,10 @@
 
 import React, { FC, useCallback, useState } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   SavedObjectResult,
@@ -23,6 +24,7 @@ interface Props {
   spaceIds: string[];
   id: string;
   mlSavedObjectType: MlSavedObjectType;
+  showAlertsWarning?: boolean;
   refresh(): void;
 }
 
@@ -40,6 +42,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   spaceIds,
   id,
   mlSavedObjectType,
+  showAlertsWarning = false,
   refresh,
 }) => {
   const {
@@ -104,6 +107,23 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
     behaviorContext: 'outside-space',
     changeSpacesHandler,
     onClose,
+    additionalContent: showAlertsWarning ? (
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.ml.management.jobsSpacesList.jobObjectNoun', {
+            defaultMessage: 'The selected job is associated with alerting rules.',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
+            defaultMessage="Moving this job to a different space may cause the alerts to stop working in the current space."
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    ) : undefined,
   };
 
   return (

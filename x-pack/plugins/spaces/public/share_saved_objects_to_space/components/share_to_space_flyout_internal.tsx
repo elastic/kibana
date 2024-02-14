@@ -183,6 +183,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       defaultMessage: 'Share {objectNoun} to spaces',
       values: { objectNoun: savedObjectTarget.noun },
     }),
+    additionalContent,
     enableCreateCopyCallout = false,
     enableCreateNewSpaceLink = false,
     behaviorContext,
@@ -506,6 +507,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         </EuiFlexItem>
 
         <EuiSpacer size="m" />
+
+        {additionalContent ? additionalContent : null}
 
         {getFlyoutBody()}
       </EuiFlexGroup>
