@@ -29,5 +29,9 @@ export function useDebouncedGetPreviewData(
     }
   }, [indicatorState, serializedIndicator, store]);
 
-  return useGetPreviewData(isIndicatorValid, JSON.parse(indicatorState), range);
+  return useGetPreviewData({
+    isValid: isIndicatorValid,
+    indicator: JSON.parse(indicatorState),
+    range,
+  });
 }
