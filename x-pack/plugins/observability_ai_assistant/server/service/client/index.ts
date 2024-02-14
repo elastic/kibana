@@ -10,7 +10,6 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import dedent from 'dedent';
 import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, merge, noop, omit, pick, take } from 'lodash';

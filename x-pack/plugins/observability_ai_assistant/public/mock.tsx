@@ -90,6 +90,12 @@ function createStartContract(): ObservabilityAIAssistantPluginStart {
       selectConnector: () => {},
       reloadConnectors: () => {},
     }),
+    useUserPreferredLanguage: () => ({
+      LANGUAGE_OPTIONS: [{ label: 'English' }],
+      selectedLanguage: 'English',
+      selectLanguage: () => {},
+      getPreferredLanguage: () => 'English',
+    }),
   };
 }
 
