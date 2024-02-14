@@ -8,7 +8,6 @@
 import {
   EuiComboBox,
   EuiForm,
-  EuiOutsideClickDetector,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
@@ -56,6 +55,7 @@ interface SourcererPopoverProps {
   selectedDataViewId: string | null;
   sourcererMissingPatterns: string[];
   onUpdateDetectionAlertsChecked: () => void;
+  handleOutsideClick: () => void;
   setMissingPatterns: (missingPatterns: string[]) => void;
   setDataViewId: (dataViewId: string | null) => void;
   scopeId: sourcererModel.SourcererScopeName;
@@ -84,25 +84,10 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
     scopeId,
     children,
   }) => {
-    const onOutsideClick = useCallback(() => {
-      setDataViewId(selectedDataViewId);
-      setMissingPatterns(sourcererMissingPatterns);
-      onUpdateDetectionAlertsChecked();
-    }, [
-      onUpdateDetectionAlertsChecked,
-      selectedDataViewId,
-      sourcererMissingPatterns,
-      setDataViewId,
-      setMissingPatterns,
-    ]);
     if (!showSourcerer) {
       return null;
     } else if (scopeId === SourcererScopeName.analyzer) {
-      return (
-        <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-          <>{children}</>
-        </EuiOutsideClickDetector>
-      );
+      return <>{children}</>;
     } else {
       return (
         <EuiPopover
@@ -128,9 +113,7 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
           ownFocus
           repositionOnScroll
         >
-          <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-            <>{children}</>
-          </EuiOutsideClickDetector>
+          <>{children}</>
         </EuiPopover>
       );
     }
@@ -157,7 +140,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       missingPatterns: sourcererMissingPatterns,
     },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
-
   const { pollForSignalIndex } = useSignalHelpers();
 
   useEffect(() => {
@@ -288,9 +270,18 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [dispatchChangeDataView, dataViewId, selectedOptions]);
 
   const handleClosePopOver = useCallback(() => {
+    handleOutsideClick();
+    setDataViewId(selectedDataViewId);
+    setMissingPatterns(sourcererMissingPatterns);
+    onUpdateDetectionAlertsChecked();
     setPopoverIsOpen(false);
     setExpandAdvancedOptions(false);
-  }, []);
+  }, [
+    handleOutsideClick,
+    onUpdateDetectionAlertsChecked,
+    selectedDataViewId,
+    sourcererMissingPatterns,
+  ]);
 
   // deprecated timeline index pattern handlers
   const onContinueUpdateDeprecated = useCallback(() => {
@@ -367,6 +358,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       isPopoverOpen={isPopoverOpen}
       isTimelineSourcerer={isTimelineSourcerer}
       loading={loading}
+      handleOutsideClick={handleOutsideClick}
       setPopoverIsOpenCb={setPopoverIsOpenCb}
       selectedPatterns={selectedPatterns}
       signalIndexName={signalIndexName}
