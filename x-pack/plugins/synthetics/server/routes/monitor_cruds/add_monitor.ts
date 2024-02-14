@@ -155,6 +155,10 @@ export const hydrateMonitorFields = async ({
     { preserve_namespace?: boolean }
   >;
 
+  const inlineSource = (normalizedMonitor as BrowserSensitiveSimpleFields)?.[
+    ConfigKey.SOURCE_INLINE
+  ] as string | undefined;
+
   return {
     ...normalizedMonitor,
     [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
@@ -162,14 +166,8 @@ export const hydrateMonitorFields = async ({
     [ConfigKey.NAMESPACE]: preserveNamespace
       ? normalizedMonitor[ConfigKey.NAMESPACE]
       : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),
-    [ConfigKey.SOURCE_PROJECT_CONTENT]: !!(normalizedMonitor as BrowserSensitiveSimpleFields)?.[
-      ConfigKey.SOURCE_INLINE
-    ]
-      ? await inlineToProjectZip(
-          (normalizedMonitor as BrowserSensitiveSimpleFields)?.[ConfigKey.SOURCE_INLINE] as string,
-          newMonitorId,
-          server.logger
-        )
+    [ConfigKey.SOURCE_PROJECT_CONTENT]: !!inlineSource
+      ? await inlineToProjectZip(inlineSource, newMonitorId, server.logger)
       : '',
   };
 };
