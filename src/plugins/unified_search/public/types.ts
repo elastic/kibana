@@ -92,6 +92,9 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   http: CoreStart['http'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   storage: IStorageWrapper;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;

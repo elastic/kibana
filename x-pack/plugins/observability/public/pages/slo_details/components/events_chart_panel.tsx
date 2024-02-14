@@ -32,10 +32,10 @@ import {
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
-import { max, min } from 'lodash';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
@@ -51,12 +51,18 @@ export interface Props {
 export function EventsChartPanel({ slo, range }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const filter = slo.instanceId !== ALL_VALUE ? `${slo.groupBy}: "${slo.instanceId}"` : '';
-  const { isLoading, data } = useGetPreviewData(true, slo.indicator, range, slo.objective, filter);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
+  });
+
+  const { isLoading, data } = useGetPreviewData({
+    range,
+    isValid: true,
+    indicator: slo.indicator,
+    groupBy: slo.groupBy,
+    instanceId: slo.instanceId,
   });
 
   const dateFormat = uiSettings.get('dateFormat');

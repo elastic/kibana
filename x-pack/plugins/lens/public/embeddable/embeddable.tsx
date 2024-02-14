@@ -184,6 +184,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  abortController?: AbortController;
 }
 
 export type LensByValueInput = {
@@ -913,6 +914,12 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
+    if (this.isTextBasedLanguage()) {
+      this.updateInput({
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
+      });
+    }
+
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
         await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
@@ -1146,6 +1153,7 @@ export class Embeddable
               className={input.className}
               style={input.style}
               executionContext={this.getExecutionContext()}
+              abortController={this.input.abortController}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(error) => {
                 this.updateOutput({ error });

@@ -14,9 +14,9 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { Query } from '@kbn/es-query';
+import { buildEsQuery, Query } from '@kbn/es-query';
 import { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { createMergedEsQuery } from '../../index_data_visualizer/utils/saved_search_utils';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useDataDriftStateManagerContext } from '../../data_drift/use_state_manager';
 import type { InitialSettings } from '../../data_drift/use_data_drift_result';
 import {
@@ -74,7 +74,7 @@ export const useData = (
     () => {
       const searchQuery =
         searchString !== undefined && searchQueryLanguage !== undefined
-          ? { query: searchString, language: searchQueryLanguage }
+          ? ({ query: searchString, language: searchQueryLanguage } as Query)
           : undefined;
 
       const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
@@ -90,24 +90,24 @@ export const useData = (
           runtimeFieldMap: selectedDataView.getRuntimeMappings(),
         };
 
-        const refQuery = createMergedEsQuery(
-          searchQuery,
+        const refQuery = buildEsQuery(
+          selectedDataView,
+          searchQuery ?? [],
           mapAndFlattenFilters([
             ...queryManager.filterManager.getFilters(),
             ...(referenceStateManager.filters ?? []),
           ]),
-          selectedDataView,
-          uiSettings
+          uiSettings ? getEsQueryConfig(uiSettings) : undefined
         );
 
-        const compQuery = createMergedEsQuery(
-          searchQuery,
+        const compQuery = buildEsQuery(
+          selectedDataView,
+          searchQuery ?? [],
           mapAndFlattenFilters([
             ...queryManager.filterManager.getFilters(),
             ...(comparisonStateManager.filters ?? []),
           ]),
-          selectedDataView,
-          uiSettings
+          uiSettings ? getEsQueryConfig(uiSettings) : undefined
         );
 
         return {

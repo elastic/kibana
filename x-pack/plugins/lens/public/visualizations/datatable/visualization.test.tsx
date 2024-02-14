@@ -7,7 +7,13 @@
 
 import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
+import {
+  createMockDatasource,
+  createMockFramePublicAPI,
+  DatasourceMock,
+  generateActiveData,
+} from '../../mocks';
+import faker from 'faker';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -15,6 +21,7 @@ import {
   FramePublicAPI,
   TableSuggestionColumn,
   VisualizationDimensionGroupConfig,
+  VisualizationConfigProps,
 } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -406,6 +413,68 @@ describe('Datatable Visualization', () => {
           frame,
         }).groups[2].accessors
       ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
+    });
+
+    describe('with palette', () => {
+      let params: VisualizationConfigProps<DatatableVisualizationState>;
+      beforeEach(() => {
+        const datasource = createMockDatasource('test');
+        datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'b', fields: [] }]);
+        params = {
+          layerId: 'a',
+          state: {
+            layerId: 'a',
+            layerType: LayerTypes.DATA,
+            columns: [
+              {
+                columnId: 'b',
+                palette: {
+                  type: 'palette' as const,
+                  name: '',
+                  params: { stops: [{ color: 'blue', stop: 0 }] },
+                },
+              },
+            ],
+          },
+          frame: {
+            ...mockFrame(),
+            activeData: generateActiveData([
+              {
+                id: 'a',
+                rows: Array(3).fill({
+                  b: faker.random.number(),
+                }),
+              },
+            ]),
+            datasourceLayers: { a: datasource.publicAPIMock },
+          },
+        };
+      });
+
+      it('does include palette for accessor config if the values are numeric and palette exists', () => {
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b', palette: ['blue'], triggerIconType: 'colorBy' },
+        ]);
+      });
+      it('does not include palette for accessor config if the values are not numeric and palette exists', () => {
+        params.frame.activeData = generateActiveData([
+          {
+            id: 'a',
+            rows: Array(3).fill({
+              b: faker.random.word(),
+            }),
+          },
+        ]);
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b' },
+        ]);
+      });
+      it('does not include palette for accessor config if the values are numeric but palette exists', () => {
+        params.state.columns[0].palette = undefined;
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b' },
+        ]);
+      });
     });
 
     it('should compute the groups correctly for text based languages', () => {

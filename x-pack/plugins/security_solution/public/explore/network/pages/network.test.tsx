@@ -21,7 +21,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
-jest.mock('../../../common/components/landing_page');
+jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../common/containers/sourcerer');
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -127,7 +127,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
+    expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
   });
 
   test('it DOES NOT render getting started page when an index is available', async () => {
