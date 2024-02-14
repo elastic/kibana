@@ -49,6 +49,10 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       if (!currentUrl.includes(deployment.getHostPort())) {
         log.debug('Skipping browser state cleanup');
         return;
+      } else {
+        log.debug('browser: navigate to /bootstrap-anonymous.js #2');
+        await browser.get(noAuthRequiredUrl);
+        await find.byCssSelector('body > pre', 5000);
       }
     }
 
