@@ -12,13 +12,11 @@ import {
   type AppDeepLink,
   type PublicAppInfo,
   type PublicAppDeepLinkInfo,
-  type AppDeepLinkLocations,
 } from '@kbn/core-application-browser';
-
-export const linkVisibleEverywhere: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
+import { DEFAULT_APP_VISIBILITY, DEFAULT_LINK_VISIBILITY } from './constants';
 
 export function getAppInfo(app: App): PublicAppInfo {
-  const { updater$, mount, visibleIn = linkVisibleEverywhere, ...infos } = app;
+  const { updater$, mount, visibleIn = DEFAULT_APP_VISIBILITY, ...infos } = app;
   return {
     ...infos,
     status: app.status ?? AppStatus.accessible,
@@ -33,7 +31,7 @@ function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
   if (!deepLinks) return [];
 
   return deepLinks.map(
-    ({ visibleIn = ['globalSearch'], ...rawDeepLink }): PublicAppDeepLinkInfo => {
+    ({ visibleIn = DEFAULT_LINK_VISIBILITY, ...rawDeepLink }): PublicAppDeepLinkInfo => {
       return {
         ...rawDeepLink,
         keywords: rawDeepLink.keywords ?? [],

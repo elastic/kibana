@@ -35,7 +35,7 @@ import {
   PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { act } from 'react-dom/test-utils';
-import { linkVisibleEverywhere } from './utils';
+import { DEFAULT_APP_VISIBILITY } from './utils';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -128,14 +128,14 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          visibleIn: linkVisibleEverywhere,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
         })
       );
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          visibleIn: linkVisibleEverywhere,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
           deepLinks: [
             expect.objectContaining({
@@ -167,7 +167,7 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          visibleIn: linkVisibleEverywhere,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
           deepLinks: [
             expect.objectContaining({
@@ -249,7 +249,7 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          visibleIn: linkVisibleEverywhere,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
           tooltip: 'App accessible',
         })
@@ -319,7 +319,7 @@ describe('#setup()', () => {
         new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.accessible,
-            visibleIn: linkVisibleEverywhere,
+            visibleIn: DEFAULT_APP_VISIBILITY,
           };
         })
       );
@@ -555,7 +555,7 @@ describe('#start()', () => {
       expect.objectContaining({
         appRoute: '/app/app1',
         id: 'app1',
-        visibleIn: linkVisibleEverywhere,
+        visibleIn: DEFAULT_APP_VISIBILITY,
         status: AppStatus.accessible,
       })
     );
@@ -563,7 +563,7 @@ describe('#start()', () => {
       expect.objectContaining({
         appRoute: '/app/app2',
         id: 'app2',
-        visibleIn: linkVisibleEverywhere,
+        visibleIn: DEFAULT_APP_VISIBILITY,
         status: AppStatus.accessible,
       })
     );

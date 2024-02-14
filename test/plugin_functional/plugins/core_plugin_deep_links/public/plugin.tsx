@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DEFAULT_APP_VISIBILITY } from '@kbn/core-application-browser-internal';
 import { Plugin, CoreSetup } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
@@ -25,13 +26,13 @@ export class CorePluginDeepLinksPlugin
           id: 'home',
           title: 'DL Home',
           path: '/home',
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: DEFAULT_APP_VISIBILITY,
         },
         {
           id: 'pageA',
           title: 'DL page A',
           path: '/page-a',
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: DEFAULT_APP_VISIBILITY,
         },
         {
           id: 'sectionOne',
@@ -41,7 +42,7 @@ export class CorePluginDeepLinksPlugin
               id: 'pageB',
               title: 'DL page B',
               path: '/page-b',
-              visibleIn: ['globalSearch', 'sideNav'],
+              visibleIn: DEFAULT_APP_VISIBILITY,
             },
           ],
         },
