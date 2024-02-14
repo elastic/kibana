@@ -19,7 +19,7 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
-import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
@@ -278,13 +278,7 @@ export const createCustomThresholdExecutor = ({
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
           group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
@@ -327,13 +321,7 @@ export const createCustomThresholdExecutor = ({
       const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       alert.setContext({
-        alertDetailsUrl: await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        ),
+        alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         group,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
