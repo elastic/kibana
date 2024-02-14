@@ -1040,6 +1040,18 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
           },
           {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/application.tsx"
           },
@@ -1117,18 +1129,6 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
@@ -1150,6 +1150,18 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "ml",

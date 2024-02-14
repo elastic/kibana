@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -105,7 +105,7 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
           theme: services.core.theme,
           i18n: services.core.i18n,
         }),
@@ -160,7 +160,7 @@ export function useContextAppFetch({
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: errorTitle,
-          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
             theme: services.core.theme,
             i18n: services.core.i18n,
           }),
