@@ -773,8 +773,8 @@ async function handleTransformInstall({
     }
   }
 
-  if (startTransform === false) {
-    // if transform was not set to start automatically in yml config, or if unattended
+  if (startTransform === false || transform?.content?.settings?.unattended === true) {
+    // if transform was not set to start automatically in yml config,
     // we need to check using _stats if the transform had insufficient permissions
     try {
       const transformStats = await retryTransientEsErrors(
@@ -785,7 +785,11 @@ async function handleTransformInstall({
           ),
         { logger, additionalResponseStatuses: [400] }
       );
-      if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
+      if (
+        transformStats &&
+        Array.isArray(transformStats.transforms) &&
+        transformStats.transforms.length === 1
+      ) {
         const transformHealth = transformStats.transforms[0].health;
         if (
           transformHealth &&
