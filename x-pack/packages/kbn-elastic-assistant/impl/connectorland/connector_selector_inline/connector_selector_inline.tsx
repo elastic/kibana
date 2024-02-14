@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
@@ -138,13 +132,11 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        {!isFlyoutMode && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.INLINE_CONNECTOR_LABEL}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.INLINE_CONNECTOR_LABEL}
+          </EuiText>
+        </EuiFlexItem>
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector

@@ -118,7 +118,7 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { amendMessage, createConversation } = useConversation();
+  const { amendMessage, createConversation, deleteConversation } = useConversation();
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
@@ -262,8 +262,18 @@ const AssistantComponent: React.FC<Props> = ({
       setEditingSystemPromptId(
         getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cId] })?.id
       );
+      if (!currentConversation.isDefault && !currentConversation.messages.length) {
+        deleteConversation(currentConversation.id);
+      }
     },
-    [allSystemPrompts, conversations]
+    [
+      allSystemPrompts,
+      conversations,
+      currentConversation.id,
+      currentConversation.isDefault,
+      currentConversation.messages.length,
+      deleteConversation,
+    ]
   );
 
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
@@ -383,6 +393,7 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId,
     selectedPromptContexts,
     setSelectedPromptContexts,
+    setSelectedConversation: handleOnConversationSelected,
   });
 
   const chatbotComments = useMemo(

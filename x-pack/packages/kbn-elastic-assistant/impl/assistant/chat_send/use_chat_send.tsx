@@ -27,6 +27,7 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedConversation: (conversationId: string) => void;
 }
 
 export interface UseChatSend {
@@ -53,10 +54,16 @@ export const useChatSend = ({
   setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
+  setSelectedConversation,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
-    useConversation();
+  const {
+    appendMessage,
+    appendReplacements,
+    clearConversation,
+    removeLastMessage,
+    updateConversationTitle,
+  } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);
@@ -66,6 +73,7 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
+      const isNewChat = currentConversation.messages.length === 0;
       const onNewReplacements = (newReplacements: Record<string, string>) =>
         appendReplacements({
           conversationId: currentConversation.id,
@@ -75,7 +83,7 @@ export const useChatSend = ({
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
       const message = await getCombinedMessage({
-        isNewChat: currentConversation.messages.length === 0,
+        isNewChat,
         currentReplacements: currentConversation.replacements,
         onNewReplacements,
         promptText,
@@ -102,21 +110,47 @@ export const useChatSend = ({
 
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
       appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+
+      if (isNewChat && !currentConversation.isDefault) {
+        const rawResponseTitle = await sendMessages({
+          apiConfig: currentConversation.apiConfig,
+          http,
+          messages: [
+            ...updatedMessages,
+            {
+              role: 'user',
+              timestamp: new Date().toISOString(),
+              content:
+                'Create a short title that summarize the key points of the conversation in a few words, focusing on the main topics and outcomes. It should be maximum 30 characters long.',
+            },
+          ],
+          onNewReplacements,
+          replacements: currentConversation.replacements ?? {},
+        });
+
+        if (!rawResponseTitle.isError) {
+          const updatedTitle = rawResponseTitle.response.toString().replaceAll('"', '');
+          updateConversationTitle({
+            currentTitle: currentConversation.id,
+            updatedTitle,
+          });
+          setSelectedConversation(updatedTitle);
+        }
+      }
     },
     [
       allSystemPrompts,
       appendMessage,
       appendReplacements,
-      currentConversation.apiConfig,
-      currentConversation.id,
-      currentConversation.messages.length,
-      currentConversation.replacements,
+      currentConversation,
       editingSystemPromptId,
       http,
       selectedPromptContexts,
       sendMessages,
       setPromptTextPreview,
+      setSelectedConversation,
       setSelectedPromptContexts,
+      updateConversationTitle,
     ]
   );
 

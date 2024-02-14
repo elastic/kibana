@@ -106,67 +106,75 @@ export const AssistantTitle: React.FC<{
         <EuiFlexItem grow={false}>
           <AssistantAvatar data-test-subj="titleIcon" size={isFlyoutMode ? 's' : 'm'} />
         </EuiFlexItem>
-        <EuiFlexGroup
-          direction={isFlyoutMode ? 'row' : 'column'}
-          gutterSize="none"
-          justifyContent={isFlyoutMode ? 'spaceBetween' : 'center'}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {isFlyoutMode ? (
-                  <EuiInlineEditTitle
-                    heading="h3"
-                    inputAriaLabel="Edit text inline"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
-                    onCancel={() => setNewTitle(title)}
-                    onSave={handleUpdateTitle}
-                  />
-                ) : (
-                  <EuiTitle size={'s'}>
-                    <h3>{title}</h3>
-                  </EuiTitle>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  css={
-                    isFlyoutMode &&
-                    css`
-                      display: inline-flex;
-                    `
-                  }
-                  button={
-                    <EuiButtonIcon
-                      aria-label={i18n.TOOLTIP_ARIA_LABEL}
-                      data-test-subj="tooltipIcon"
-                      iconType="iInCircle"
-                      onClick={onButtonClick}
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction={isFlyoutMode ? 'row' : 'column'}
+            gutterSize="none"
+            justifyContent={isFlyoutMode ? 'spaceBetween' : 'center'}
+          >
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem>
+                  {isFlyoutMode ? (
+                    <EuiInlineEditTitle
+                      heading="h3"
+                      inputAriaLabel="Edit text inline"
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
+                      onCancel={() => setNewTitle(title)}
+                      onSave={handleUpdateTitle}
                     />
-                  }
-                  isOpen={isPopoverOpen}
-                  closePopover={closePopover}
-                  anchorPosition="rightUp"
-                >
-                  <EuiText data-test-subj="tooltipContent" grow={false} css={{ maxWidth: '400px' }}>
-                    <EuiText size={'s'}>
-                      <p>{content}</p>
+                  ) : (
+                    <EuiTitle size={'s'}>
+                      <h3>{title}</h3>
+                    </EuiTitle>
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    css={
+                      isFlyoutMode &&
+                      css`
+                        display: inline-flex;
+                      `
+                    }
+                    button={
+                      <EuiButtonIcon
+                        aria-label={i18n.TOOLTIP_ARIA_LABEL}
+                        data-test-subj="tooltipIcon"
+                        iconType="iInCircle"
+                        onClick={onButtonClick}
+                      />
+                    }
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    anchorPosition="rightUp"
+                  >
+                    <EuiText
+                      data-test-subj="tooltipContent"
+                      grow={false}
+                      css={{ maxWidth: '400px' }}
+                    >
+                      <EuiText size={'s'}>
+                        <p>{content}</p>
+                      </EuiText>
                     </EuiText>
-                  </EuiText>
-                </EuiPopover>
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {!isFlyoutMode && (
+              <EuiFlexItem grow={false}>
+                <ConnectorSelectorInline
+                  isDisabled={isDisabled || selectedConversation === undefined}
+                  selectedConnectorId={selectedConnectorId}
+                  selectedConversation={selectedConversation}
+                  isFlyoutMode={isFlyoutMode}
+                />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ConnectorSelectorInline
-              isDisabled={isDisabled || selectedConversation === undefined}
-              selectedConnectorId={selectedConnectorId}
-              selectedConversation={selectedConversation}
-              isFlyoutMode={isFlyoutMode}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiModalHeaderTitle>
   );
