@@ -16,8 +16,6 @@ import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './uti
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 
-const NOOP = () => {};
-
 export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
@@ -49,38 +47,43 @@ export const endpointResponseAction = async (
     return Promise.resolve();
   };
 
-  logger.info(`${logMsgPrefix} will create a total of [${agentIds.length}] [${command}] action(s)`);
-
-  let response: Promise<void> = Promise.resolve();
+  const response: Array<Promise<void>> = [];
 
   switch (command) {
     case 'isolate':
-      response = Promise.all(
-        Object.values(getIsolateAlerts(alerts)).map(
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
-            return responseActionsClient
-              .isolate(
-                {
-                  endpoint_ids,
-                  alert_ids,
-                  parameters,
-                  comment,
-                },
-                {
-                  hosts,
-                  ruleName,
-                  ruleId,
-                  error,
-                }
-              )
-              .catch((err) => {
-                return processResponseActionClientError(err, endpoint_ids);
-              })
-              .then(NOOP);
-          }
+      response.push(
+        Promise.all(
+          Object.values(getIsolateAlerts(alerts)).map(
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+              logger.info(
+                `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
+                  endpoint_ids
+                )}`
+              );
+
+              return responseActionsClient
+                .isolate(
+                  {
+                    endpoint_ids,
+                    alert_ids,
+                    parameters,
+                    comment,
+                  },
+                  {
+                    hosts,
+                    ruleName,
+                    ruleId,
+                    error,
+                  }
+                )
+                .catch((err) => {
+                  return processResponseActionClientError(err, endpoint_ids);
+                });
+            }
+          )
         )
-      ).then(NOOP);
+      );
 
       break;
 
@@ -99,6 +102,12 @@ export const endpointResponseAction = async (
               actionPerAgent,
               // eslint-disable-next-line @typescript-eslint/naming-convention
               ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+                logger.info(
+                  `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
+                    endpoint_ids
+                  )}`
+                );
+
                 return responseActionsClient[
                   command === 'kill-process' ? 'killProcess' : 'suspendProcess'
                 ](
@@ -114,11 +123,9 @@ export const endpointResponseAction = async (
                     ruleName,
                     error,
                   }
-                )
-                  .catch((err) => {
-                    return processResponseActionClientError(err, endpoint_ids);
-                  })
-                  .then(NOOP);
+                ).catch((err) => {
+                  return processResponseActionClientError(err, endpoint_ids);
+                });
               }
             );
           });
@@ -129,7 +136,7 @@ export const endpointResponseAction = async (
         const processActions = createProcessActionFromAlerts(foundFields);
         const processActionsWithError = createProcessActionFromAlerts(notFoundField);
 
-        response = Promise.all([processActions, processActionsWithError]).then(NOOP);
+        response.push(Promise.all([processActions, processActionsWithError]));
       }
 
       break;
@@ -138,13 +145,15 @@ export const endpointResponseAction = async (
       errors.push(`response action [${command}] is not supported`);
   }
 
-  if (errors.length !== 0) {
-    logger.error(
-      `${logMsgPrefix} The following [${errors.length}] errors were encountered:\n${errors.join(
-        '\n'
-      )}`
-    );
-  }
-
-  return response;
+  return Promise.all(response)
+    .then(() => {})
+    .finally(() => {
+      if (errors.length !== 0) {
+        logger.error(
+          `${logMsgPrefix} The following [${errors.length}] errors were encountered:\n${errors.join(
+            '\n'
+          )}`
+        );
+      }
+    });
 };
