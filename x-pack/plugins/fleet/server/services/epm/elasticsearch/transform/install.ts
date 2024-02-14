@@ -773,7 +773,7 @@ async function handleTransformInstall({
     }
   }
 
-  if (startTransform === false || transform.content?.settings?.unattended === true) {
+  if (startTransform === false) {
     // if transform was not set to start automatically in yml config, or if unattended
     // we need to check using _stats if the transform had insufficient permissions
     try {
