@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: Props) {
   const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    defaultValues: sloFormValuesFromUrlState ?? SLO_EDIT_FORM_DEFAULT_VALUES,
     values: sloFormValuesFromUrlState ? sloFormValuesFromUrlState : sloFormValuesFromSloResponse,
     mode: 'all',
   });
