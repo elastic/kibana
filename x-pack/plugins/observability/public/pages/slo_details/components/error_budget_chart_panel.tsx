@@ -21,6 +21,8 @@ import { useKibana } from '../../../utils/kibana_react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { ErrorBudgetActions } from './error_budget_actions';
 import { ErrorBudgetChart } from './error_budget_chart';
+import { ErrorBudgetHeader } from './error_budget_header';
+
 import { useErrorBudgetActions } from '../hooks/use_error_budget_actions';
 import { SLO_ERROR_BUDGET_EMBEDDABLE } from '../../../embeddable/slo/error_budget/slo_error_budget_embeddable';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -116,49 +118,12 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
         }}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate(
-                        'xpack.observability.slo.sloDetails.errorBudgetChartPanel.title',
-                        {
-                          defaultMessage: 'Error budget burn down',
-                        }
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-
-                {!isDashboardContext && (
-                  <EuiFlexGroup justifyContent="flexEnd" wrap>
-                    {isMouseOver && (
-                      <EuiFlexItem grow={false}>
-                        <ErrorBudgetActions
-                          setDashboardAttachmentReady={setDashboardAttachmentReady}
-                        />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText color="subdued" size="s">
-                {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-                  ? i18n.translate(
-                      'xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration',
-                      {
-                        defaultMessage: 'Last {duration}',
-                        values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                      }
-                    )
-                  : toDurationAdverbLabel(slo.timeWindow.duration)}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ErrorBudgetHeader
+            slo={slo}
+            showTitle={true}
+            isMouseOver={isMouseOver}
+            setDashboardAttachmentReady={setDashboardAttachmentReady}
+          />
 
           <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} />
         </EuiFlexGroup>

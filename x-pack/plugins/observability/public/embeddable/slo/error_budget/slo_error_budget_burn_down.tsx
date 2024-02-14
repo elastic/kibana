@@ -18,6 +18,7 @@ import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
 import { EmbeddableSloProps } from './types';
 import { SloOverviewDetails } from '../common/slo_overview_details'; // TODO change to slo_details
+import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
 
 export function SloErrorBudget({
   sloId,
@@ -112,6 +113,7 @@ export function SloErrorBudget({
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" gutterSize="l">
+        <ErrorBudgetHeader showTitle={false} slo={slo} />
         <ErrorBudgetChart
           data={errorBudgetBurnDownData}
           isLoading={historicalSummaryLoading}
