@@ -63,6 +63,15 @@ export function getMlGlobalServices(
 ) {
   const httpService = new HttpService(httpStart);
   const mlApiServices = mlApiServicesProvider(httpService);
+  // Note on the following services:
+  // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
+  //   but it's not being made available as part of global services. Since it's just
+  //   some stateless utils `useMlIndexUtils()` should be used from within components.
+  // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
+  //   so because of its own state it needs to be made available as a global service.
+  //   In the long run we should again try to get rid of it here and make it available via
+  //   its own context or possibly without having a singleton like state at all, since the
+  //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(dataViews);
   const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
 
