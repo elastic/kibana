@@ -943,9 +943,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: i18n.translate('searchConnectors.nativeConnectors.gmail.service_account_credentials.label', {
-          defaultMessage: 'GMail service account JSON',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.service_account_credentials.label',
+          {
+            defaultMessage: 'GMail service account JSON',
+          }
+        ),
         options: [],
         order: 1,
         required: true,
@@ -954,7 +957,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: ''
+        value: '',
       },
       subject: {
         default_value: null,
@@ -975,10 +978,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [
           {
             type: 'regex',
-            constraint: '^\\S+@\\S+\\.\\S+$'
-          }
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
         ],
-        value: ''
+        value: '',
       },
       customer_id: {
         default_value: null,
@@ -997,46 +1000,59 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: ''
+        value: '',
       },
       include_spam_and_trash: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: i18n.translate('searchConnectors.nativeConnectors.gmail.include_spam_and_trash.label', {
-          defaultMessage: 'Include spam and trash emails',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.include_spam_and_trash.label',
+          {
+            defaultMessage: 'Include spam and trash emails',
+          }
+        ),
         options: [],
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.gmail.include_spam_and_trash.tooltip', {
-          defaultMessage: 'Will include spam and trash emails, when set to true.',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.include_spam_and_trash.tooltip',
+          {
+            defaultMessage: 'Will include spam and trash emails, when set to true.',
+          }
+        ),
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
-        value: false
+        value: false,
       },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: i18n.translate('searchConnectors.nativeConnectors.gmail.use_document_level_security.label', {
-          defaultMessage: 'Enable document level security',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.use_document_level_security.label',
+          {
+            defaultMessage: 'Enable document level security',
+          }
+        ),
         options: [],
         order: 5,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.gmail.use_document_level_security.tooltip', {
-          defaultMessage: 'Document level security ensures identities and permissions set in GMail are maintained in Elasticsearch. This enables you to restrict and personalize read-access users have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gmail.use_document_level_security.tooltip',
+          {
+            defaultMessage:
+              'Document level security ensures identities and permissions set in GMail are maintained in Elasticsearch. This enables you to restrict and personalize read-access users have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+          }
+        ),
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
-        value: true
-      }
+        value: true,
+      },
     },
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
@@ -2867,9 +2883,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 5,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.outlook.exchange_server.tooltip', {
-          defaultMessage: 'Exchange server\'s IP address. E.g. 127.0.0.1',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.exchange_server.tooltip',
+          {
+            defaultMessage: "Exchange server's IP address. E.g. 127.0.0.1",
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -2884,16 +2903,22 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.outlook.active_directory_server.label', {
-          defaultMessage: 'Active Directory Server',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.active_directory_server.label',
+          {
+            defaultMessage: 'Active Directory Server',
+          }
+        ),
         options: [],
         order: 6,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.outlook.active_directory_server.tooltip', {
-          defaultMessage: 'Active Directory server\'s IP address. E.g. 127.0.0.1',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.active_directory_server.tooltip',
+          {
+            defaultMessage: "Active Directory server's IP address. E.g. 127.0.0.1",
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -3019,20 +3044,25 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: i18n.translate('searchConnectors.nativeConnectors.outlook.use_text_extraction_service.label', {
-          defaultMessage: 'Use text extraction service',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.use_text_extraction_service.label',
+          {
+            defaultMessage: 'Use text extraction service',
+          }
+        ),
         options: [],
         order: 12,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.outlook.use_text_extraction_service.toolip', {
-          defaultMessage: 'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.use_text_extraction_service.toolip',
+          {
+            defaultMessage:
+              'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+          }
+        ),
         type: FieldType.BOOLEAN,
-        ui_restrictions: [
-          'advanced'
-        ],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -3040,21 +3070,28 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 2000,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: i18n.translate('searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.label', {
-          defaultMessage: 'Maximum concurrent tasks',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.label',
+          {
+            defaultMessage: 'Maximum concurrent tasks',
+          }
+        ),
         options: [],
         order: 13,
         required: false,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.tooltip', {
-          defaultMessage: 'This value denotes the number of tasks that run in parallel. It depends on the number of accounts in the Azure AD.',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.tooltip',
+          {
+            defaultMessage:
+              'This value denotes the number of tasks that run in parallel. It depends on the number of accounts in the Azure AD.',
+          }
+        ),
         type: FieldType.INTEGER,
         ui_restrictions: [],
         validations: [],
         value: '',
-      }
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
