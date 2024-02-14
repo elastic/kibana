@@ -44,26 +44,14 @@ async function checkFleetServerHostsWriteAPIsAllowed(
   // API integration tests have been flaky due to the request to get the default
   // Fleet server host failing, this function adds retry logic.
   async function attempt(nAttempts: number) {
-    const logger = appContextService.getLogger();
     try {
       return await getFleetServerHost(soClient, SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         if (nAttempts > 0) {
-          logger.warn(
-            `----> Retrying retrieving Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} from saved objects (${
-              4 - nAttempts
-            }/3)`
-          );
           await new Promise((r) => setTimeout(r, 1000));
           await attempt(nAttempts - 1);
         } else {
-          const res = await listFleetServerHosts(soClient);
-          logger.warn(
-            `----> Could not retrieve Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} from saved objects; found host ids: ${res.items.map(
-              (fs) => [fs.id, fs.host_urls]
-            )}`
-          );
           throw new FleetNotFoundError(
             `Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} not found in saved objects: ${e.message}`
           );
@@ -73,7 +61,11 @@ async function checkFleetServerHostsWriteAPIsAllowed(
   }
 
   const serverlessDefaultFleetServerHost = await attempt(3);
-  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost?.host_urls)) {
+  if (!serverlessDefaultFleetServerHost) {
+    throw new Error('Default fleet server not found');
+  } else if (!serverlessDefaultFleetServerHost?.host_urls) {
+    throw new Error(`Missing default fleet server hosts: ${serverlessDefaultFleetServerHost}`);
+  } else if (!isEqual(hostUrls, serverlessDefaultFleetServerHost?.host_urls)) {
     throw new FleetServerHostUnauthorizedError(
       `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost?.host_urls}`
     );
