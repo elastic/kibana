@@ -6,7 +6,6 @@
  */
 import { firstValueFrom } from 'rxjs';
 import { performance } from 'perf_hooks';
-import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -17,6 +16,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import type { ExperimentalFeatures } from '../../../../../common';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
@@ -189,7 +189,7 @@ const isSuppressionEnabled = async (
   licensing: LicensingPluginSetup,
   experimentalFeatures?: ExperimentalFeatures,
   alertSuppression?: AlertSuppressionCamel
-): Promise<Boolean> => {
+): Promise<boolean> => {
   const isAlertSuppressionEnabled = Boolean(alertSuppression?.groupBy?.length);
   if (!isAlertSuppressionEnabled) return false;
 

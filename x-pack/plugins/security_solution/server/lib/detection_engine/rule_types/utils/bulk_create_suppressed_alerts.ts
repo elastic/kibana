@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type {
   SearchAfterAndBulkCreateParams,

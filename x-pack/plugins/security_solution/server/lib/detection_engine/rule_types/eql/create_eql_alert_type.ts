@@ -97,7 +97,7 @@ export const createEqlAlertType = (
           buildReasonMessage,
           alertTimestampOverride,
           ruleExecutionLogger,
-          publicBaseUrl: publicBaseUrl,
+          publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
         });
