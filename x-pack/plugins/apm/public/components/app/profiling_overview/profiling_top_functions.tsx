@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
@@ -17,7 +16,7 @@ import {
   toKueryFilterFormat,
 } from '../../../../common/utils/kuery_utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { ProfilingTopNFunctionsLink } from '../../shared/profiling/top_functions/top_functions_link';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
 
 interface Props {
@@ -47,8 +46,6 @@ export function ProfilingTopNFunctions({
   rangeFrom,
   rangeTo,
 }: Props) {
-  const { profilingLocators } = useProfilingPlugin();
-
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (dataSource) {
@@ -96,20 +93,12 @@ export function ProfilingTopNFunctions({
           <HostnamesFilterWarning hostNames={data?.hostNames} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <EuiLink
-              data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
-              href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
-                kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
-                rangeFrom,
-                rangeTo,
-              })}
-            >
-              {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
-                defaultMessage: 'Go to Universal Profiling Functions',
-              })}
-            </EuiLink>
-          </div>
+          <ProfilingTopNFunctionsLink
+            kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            justifyContent="flexEnd"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

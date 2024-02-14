@@ -109,7 +109,14 @@ export interface ILayer {
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
+  /*
+   * ILayer.getIndexPatternIds returns data view ids used to populate layer data.
+   */
   getIndexPatternIds(): string[];
+  /*
+   * ILayer.getQueryableIndexPatternIds returns ILayer.getIndexPatternIds or a subset of ILayer.getIndexPatternIds.
+   * Data view ids are excluded when the global query is not applied to layer data.
+   */
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
   isVisible(): boolean;
@@ -238,7 +245,7 @@ export class AbstractLayer implements ILayer {
     const sourceDisplayName = source
       ? await source.getDisplayName()
       : await this.getSource().getDisplayName();
-    return sourceDisplayName || `Layer ${this._descriptor.id}`;
+    return sourceDisplayName || this._descriptor.id;
   }
 
   async getAttributions(): Promise<Attribution[]> {
@@ -570,7 +577,10 @@ export class AbstractLayer implements ILayer {
 
   getGeoFieldNames(): string[] {
     const source = this.getSource();
-    return hasESSourceMethod(source, 'getGeoFieldName') ? [source.getGeoFieldName()] : [];
+    const geoFieldName = hasESSourceMethod(source, 'getGeoFieldName')
+      ? source.getGeoFieldName()
+      : undefined;
+    return geoFieldName ? [geoFieldName] : [];
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {

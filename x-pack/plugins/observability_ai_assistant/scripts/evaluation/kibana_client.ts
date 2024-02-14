@@ -12,7 +12,9 @@ import { format, parse, UrlObject } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import { Message, MessageRole } from '../../common';
+import { isSupportedConnectorType } from '../../common/connectors';
 import {
+  BufferFlushEvent,
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
@@ -186,17 +188,21 @@ export class KibanaClient {
       unregister: () => void;
     }> = [];
 
-    async function chat({
-      messages,
-      functions,
-      functionCall,
-    }: {
-      messages: Message[];
-      functions: FunctionDefinition[];
-      functionCall?: string;
-    }) {
+    async function chat(
+      name: string,
+      {
+        messages,
+        functions,
+        functionCall,
+      }: {
+        messages: Message[];
+        functions: FunctionDefinition[];
+        functionCall?: string;
+      }
+    ) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
         {
+          name,
           messages,
           connectorId,
           functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -213,7 +219,17 @@ export class KibanaClient {
           )
         ).data
       ).pipe(
-        map((line) => JSON.parse(line) as ChatCompletionChunkEvent | ChatCompletionErrorEvent),
+        map(
+          (line) =>
+            JSON.parse(line) as
+              | ChatCompletionChunkEvent
+              | ChatCompletionErrorEvent
+              | BufferFlushEvent
+        ),
+        filter(
+          (line): line is ChatCompletionChunkEvent | ChatCompletionErrorEvent =>
+            line.type !== StreamingChatResponseEventType.BufferFlush
+        ),
         throwSerializedChatCompletionErrors(),
         concatenateChatCompletionChunks()
       );
@@ -235,7 +251,7 @@ export class KibanaClient {
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat({ messages, functions: functionDefinitions });
+        return chat('chat', { messages, functions: functionDefinitions });
       },
       complete: async (...args) => {
         const messagesArg = args.length === 1 ? args[0] : args[1];
@@ -266,13 +282,13 @@ export class KibanaClient {
             )
           ).data
         ).pipe(
-          map((line) => JSON.parse(line) as StreamingChatResponseEvent),
-          throwSerializedChatCompletionErrors(),
+          map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
               event.type === StreamingChatResponseEventType.ConversationCreate
           ),
+          throwSerializedChatCompletionErrors(),
           toArray()
         );
 
@@ -298,7 +314,7 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId }, criteria) => {
-        const message = await chat({
+        const message = await chat('evaluate', {
           messages: [
             {
               '@timestamp': new Date().toISOString(),
@@ -423,6 +439,8 @@ export class KibanaClient {
       })
     );
 
-    return connectors.data.filter((connector) => connector.connector_type_id === '.gen-ai');
+    return connectors.data.filter((connector) =>
+      isSupportedConnectorType(connector.connector_type_id)
+    );
   }
 }

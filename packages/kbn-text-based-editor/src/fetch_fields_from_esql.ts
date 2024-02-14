@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import { type DataView, textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
   error: {
@@ -23,15 +23,26 @@ interface TextBasedLanguagesErrorResponse {
 export function fetchFieldsFromESQL(
   query: Query | AggregateQuery,
   expressions: ExpressionsStart,
-  time?: TimeRange
+  time?: TimeRange,
+  abortController?: AbortController,
+  dataView?: DataView
 ) {
   return textBasedQueryStateToAstWithValidation({
     query,
     time,
+    dataView,
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const executionContract = expressions.execute(ast, null);
+
+        if (abortController) {
+          abortController.signal.onabort = () => {
+            executionContract.cancel();
+          };
+        }
+
+        const execution = executionContract.getData();
         let finalData: Datatable;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
