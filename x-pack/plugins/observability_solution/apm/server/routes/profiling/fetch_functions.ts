@@ -51,7 +51,7 @@ export function fetchFunctions({
   indices,
   stacktraceIdsField,
 }: Params) {
-  return profilingDataAccessStart.services.fetchFunction({
+  return profilingDataAccessStart.services.fetchFunctions({
     core,
     esClient,
     startIndex,
