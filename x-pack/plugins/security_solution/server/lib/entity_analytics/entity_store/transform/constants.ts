@@ -55,6 +55,89 @@ export const DESTINATION_INDEX_MAPPING: MappingTypeMapping = {
             },
           },
         },
+        latest_os_timestamp: {
+          type: 'date',
+        },
+        latest_os: {
+          properties: {
+            Ext: {
+              properties: {
+                variant: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+              },
+            },
+            kernel: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            family: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            type: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            version: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            platform: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            full: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+          },
+        },
       },
     },
     host: {
@@ -107,16 +190,27 @@ export const getEntityStoreTransform = (opts: {
             },
             init_script: `
                   state.ip_addresses = [];
+                  state.latest_os_timestamp = null;
+                  state.latest_os = null;
                   state.timestamps = [];
                   `,
             map_script: `
-                  if(doc.containsKey('@timestamp')){
-                      state.timestamps.add(doc['@timestamp'][0])
+                  def src = params._source;
+                  if (doc.containsKey('@timestamp')) {
+                    state.timestamps.add(doc['@timestamp'].value)
                   }
-                  if(doc.containsKey('host.ip')){
-                      doc['host.ip'].each((ip) ->
-                          state.ip_addresses.add([ "ip": ip, "timestamp": doc['@timestamp'][0] ])
-                      )
+                  
+                  if (doc.containsKey('host.ip')) {
+                    for (ip in doc['host.ip']) {
+                      state.ip_addresses.add(["ip": ip, "timestamp": doc['@timestamp'].value])
+                    }
+                  }
+                  
+                  if (src.containsKey('host') && src.host.containsKey('os')) {
+                    if (state.latest_os_timestamp == null || state.latest_os_timestamp.compareTo(doc['@timestamp'].value) < 0) {
+                      state.latest_os_timestamp = doc['@timestamp'].value;
+                      state.latest_os = src.host.os;
+                    }
                   }
                   `,
             combine_script: `
@@ -124,39 +218,45 @@ export const getEntityStoreTransform = (opts: {
                   return state;
                   `,
             reduce_script: `
-                  def sorted_flattened_ips = states.stream()
-                      .map((state) -> state.ip_addresses)
-                      .flatMap(Collection::stream)
-                      .sorted((a, b) -> b.timestamp.compareTo(a.timestamp))
-                      .collect(Collectors.toList());
-                  
-                  def ips_to_return = new ArrayList();
-                  
-                  for (ip in sorted_flattened_ips) {
-                      if (ips_to_return.size() < params.field_history_size) {
-                      def isUnique = !ips_to_return.any((it) -> it['ip'] == ip['ip']);
-                      if (isUnique) {
-                          ips_to_return.add(ip);
-                      }
-                      }
-                  }
+                  def uniqueIps = new LinkedHashMap();
+                  def latest_os = null;
+                  def latest_os_timestamp = null;
                   def first_doc_timestamp = null;
                   def last_doc_timestamp = null;
                   
                   for (state in states) {
-                      def state_last_doc_timestamp = state.timestamps[0];
-                      def state_first_doc_timestamp = state.timestamps[state.timestamps.size() - 1];
-                      
-                      if(first_doc_timestamp == null || state_first_doc_timestamp.compareTo(first_doc_timestamp)){
-                      first_doc_timestamp = state_first_doc_timestamp
+                    for (ip in state.ip_addresses) {
+                      if (!uniqueIps.containsKey(ip.ip) && uniqueIps.size() < params.field_history_size) {
+                        uniqueIps.put(ip.ip, ip);
                       }
-                      
-                      if(last_doc_timestamp == null || state_last_doc_timestamp.compareTo(last_doc_timestamp)){
-                      last_doc_timestamp = state_last_doc_timestamp
+                    }
+                    
+                    if (latest_os_timestamp == null || (state.latest_os_timestamp != null && state.latest_os_timestamp.compareTo(latest_os_timestamp) > 0)) {
+                      latest_os_timestamp = state.latest_os_timestamp;
+                      latest_os = state.latest_os;
+                    }
+                    
+                    if (state.timestamps.size() > 0) {
+                      if (first_doc_timestamp == null || state.timestamps[state.timestamps.size() - 1].compareTo(first_doc_timestamp) < 0) {
+                        first_doc_timestamp = state.timestamps[state.timestamps.size() - 1];
                       }
+                      if (last_doc_timestamp == null || state.timestamps[0].compareTo(last_doc_timestamp) > 0) {
+                        last_doc_timestamp = state.timestamps[0];
+                      }
+                    }
                   }
-  
-                  return ['ip_history': ips_to_return, 'first_doc_timestamp': first_doc_timestamp, 'last_doc_timestamp': last_doc_timestamp, 'type' : 'host'];
+                  
+                  def ips_to_return = new ArrayList(uniqueIps.values());
+                  ips_to_return.sort((a, b) -> b.timestamp.compareTo(a.timestamp));
+                  
+                  return [
+                    'latest_os_timestamp': latest_os_timestamp,
+                    'latest_os': latest_os,
+                    'ip_history': ips_to_return, 
+                    'first_doc_timestamp': first_doc_timestamp, 
+                    'last_doc_timestamp': last_doc_timestamp, 
+                    'type' : 'host'
+                  ];
                   `,
           },
         },
