@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
+    const toasts = getService('toasts');
 
     describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
@@ -86,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(ruleName);
         await alerts.clickSaveAlertsConfirmButton();
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
       });
 
       it('posts an alert, verifies its presence, and deletes the alert', async () => {
@@ -171,7 +172,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
       });
 
       it('has created a valid alert with expected parameters', async () => {

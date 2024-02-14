@@ -2188,13 +2188,7 @@
             "text": "AuditHttp"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/ecs",
-            "scope": "common",
-            "docId": "kibKbnEcsPluginApi",
-            "section": "def-common.EcsHttp",
-            "text": "EcsHttp"
-          }
+          "EcsHttp"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
         "deprecated": false,

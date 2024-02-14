@@ -32,5 +32,10 @@ export type GetDataStreamDetailsParams =
 export type GetDataStreamDetailsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>;
 
+export type GetDataStreamsEstimatedDataInBytesParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/estimated_data`>['params'];
+export type GetDataStreamsEstimatedDataInBytesResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/estimated_data`>;
+
 export type { DataStreamStat } from './data_stream_stat';
 export type { DataStreamDetails } from '../api_types';

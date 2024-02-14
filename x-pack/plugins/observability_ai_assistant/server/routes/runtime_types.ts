@@ -7,12 +7,13 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
-  Conversation,
-  ConversationCreateRequest,
-  ConversationRequestBase,
-  ConversationUpdateRequest,
-  Message,
+  type Conversation,
+  type ConversationCreateRequest,
+  type ConversationRequestBase,
+  type ConversationUpdateRequest,
+  type Message,
   MessageRole,
+  type ObservabilityAIAssistantScreenContext,
 } from '../../common/types';
 
 const serializeableRt = t.any;
@@ -92,3 +93,14 @@ export const conversationRt: t.Type<Conversation> = t.intersection([
     }),
   }),
 ]);
+
+export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContext> = t.partial({
+  description: t.string,
+  data: t.array(
+    t.type({
+      name: t.string,
+      description: t.string,
+      value: t.any,
+    })
+  ),
+});
