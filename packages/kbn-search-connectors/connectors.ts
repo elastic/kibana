@@ -179,10 +179,9 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'gmail.svg',
-    isBeta: false,
-    isNative: false,
-    isTechPreview: true,
-    keywords: ['google', 'gmail', 'connector', 'mail'],
+    isBeta: true,
+    isNative: true,
+    keywords: ['gmail', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
     }),
@@ -253,9 +252,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'outlook.svg',
-    isBeta: false,
-    isNative: false,
-    isTechPreview: true,
+    isBeta: true,
+    isNative: true,
     keywords: ['outlook', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.outlook.name', {
       defaultMessage: 'Outlook',
