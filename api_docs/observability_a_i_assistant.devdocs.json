@@ -776,6 +776,14 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
+              ", unknown>>; screenContexts: ",
+              "ArrayC",
+              "<",
+              "Type",
+              "<",
+              "ObservabilityAIAssistantScreenContext",
+              ", ",
+              "ObservabilityAIAssistantScreenContext",
               ", unknown>>; connectorId: ",
               "StringC",
               "; persist: ",
@@ -796,6 +804,8 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
+              "[]; screenContexts: ",
+              "ObservabilityAIAssistantScreenContext",
               "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
@@ -1272,6 +1282,14 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
+              ", unknown>>; screenContexts: ",
+              "ArrayC",
+              "<",
+              "Type",
+              "<",
+              "ObservabilityAIAssistantScreenContext",
+              ", ",
+              "ObservabilityAIAssistantScreenContext",
               ", unknown>>; connectorId: ",
               "StringC",
               "; persist: ",
@@ -1292,6 +1310,8 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
+              "[]; screenContexts: ",
+              "ObservabilityAIAssistantScreenContext",
               "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
@@ -1561,6 +1581,58 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.setScreenContext",
+            "type": "Function",
+            "tags": [],
+            "label": "setScreenContext",
+            "description": [],
+            "signature": [
+              "(screenContext: ",
+              "ObservabilityAIAssistantScreenContext",
+              ") => () => void"
+            ],
+            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantService.setScreenContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "screenContext",
+                "description": [],
+                "signature": [
+                  "ObservabilityAIAssistantScreenContext"
+                ],
+                "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.getScreenContexts",
+            "type": "Function",
+            "tags": [],
+            "label": "getScreenContexts",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ObservabilityAIAssistantScreenContext",
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -2008,6 +2080,14 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          ", unknown>>; screenContexts: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          "ObservabilityAIAssistantScreenContext",
+          ", ",
+          "ObservabilityAIAssistantScreenContext",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -2028,6 +2108,8 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          "[]; screenContexts: ",
+          "ObservabilityAIAssistantScreenContext",
           "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
@@ -2513,6 +2595,14 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          ", unknown>>; screenContexts: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          "ObservabilityAIAssistantScreenContext",
+          ", ",
+          "ObservabilityAIAssistantScreenContext",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -2533,6 +2623,8 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          "[]; screenContexts: ",
+          "ObservabilityAIAssistantScreenContext",
           "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
@@ -3162,6 +3254,14 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          ", unknown>>; screenContexts: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          "ObservabilityAIAssistantScreenContext",
+          ", ",
+          "ObservabilityAIAssistantScreenContext",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -3182,6 +3282,8 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          "[]; screenContexts: ",
+          "ObservabilityAIAssistantScreenContext",
           "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
