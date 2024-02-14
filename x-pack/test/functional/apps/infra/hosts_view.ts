@@ -7,7 +7,14 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { parse } from 'url';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
+import url from 'url';
+import { kbnTestConfig } from '@kbn/test';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -18,6 +25,7 @@ import {
   HOSTS_VIEW_PATH,
   DATE_PICKER_FORMAT,
 } from './constants';
+import { generateAddServicesToExistingHost } from './helpers';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -90,6 +98,7 @@ const tableEntries = [
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const esClient = getService('es');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
@@ -107,6 +116,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
+
+  const getKibanaServerUrl = () => {
+    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
+    const kibanaServerUrlWithAuth = url
+      .format({
+        ...url.parse(kibanaServerUrl),
+        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
+      })
+      .slice(0, -1);
+    return kibanaServerUrlWithAuth;
+  };
+
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
 
@@ -127,8 +148,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
 
   describe('Hosts View', function () {
+    let synthtraceApmClient: any;
     before(async () => {
+      const kibanaClient = new ApmSynthtraceKibanaClient({
+        target: getKibanaServerUrl(),
+        logger: createLogger(LogLevel.debug),
+      });
+      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
+      await kibanaClient.installApmPackage(kibanaVersion);
+      synthtraceApmClient = new ApmSynthtraceEsClient({
+        client: esClient,
+        logger: createLogger(LogLevel.info),
+        version: kibanaVersion,
+        refreshAfterIndex: true,
+      });
       await Promise.all([
+        synthtraceApmClient.index(
+          generateAddServicesToExistingHost({
+            from: DATES.metricsAndLogs.hosts.processesDataStartDate,
+            to: DATES.metricsAndLogs.hosts.processesDataEndDate,
+            hostName: 'Jennys-MBP.fritz.box',
+            servicesPerHost: 3,
+          })
+        ),
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
@@ -139,6 +181,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await Promise.all([
+        synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
@@ -209,15 +252,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(hosts.length).to.equal(9);
           });
 
-          it('should show all section as collapsable', async () => {
+          it('should show all section as collapsible', async () => {
             await pageObjects.assetDetails.metadataSectionCollapsibleExist();
             await pageObjects.assetDetails.alertsSectionCollapsibleExist();
             await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+
+          it('should show 3 services each with an icon, service name, and url', async () => {
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
+
+            const services =
+              await pageObjects.assetDetails.getAssetDetailsServicesWithIconsAndNames();
+
+            expect(services.length).to.equal(3);
+
+            const currentUrl = await browser.getCurrentUrl();
+            const parsedUrl = new URL(currentUrl);
+            const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+            services.forEach((service, index) => {
+              expect(service.serviceName).to.equal(`service-${index}`);
+              expect(service.iconSrc).to.not.be.empty();
+              const expectedUrlPattern = `${baseUrl}/app/apm/services/service-${index}/overview?rangeFrom=${DATES.metricsAndLogs.hosts.processesDataStartDate}&rangeTo=${DATES.metricsAndLogs.hosts.processesDataEndDate}`;
+              expect(service.serviceUrl).to.equal(expectedUrlPattern);
+            });
           });
         });
 
@@ -270,18 +334,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('Flyout links', () => {
-          it('should navigate to APM services after click', async () => {
-            await pageObjects.assetDetails.clickApmServicesLink();
-            const url = parse(await browser.getCurrentUrl());
-            const query = decodeURIComponent(url.query ?? '');
-            const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-
-            expect(url.pathname).to.eql('/app/apm/services');
-            expect(query).to.contain(kuery);
-
-            await returnTo(HOSTS_VIEW_PATH);
-          });
-
           it('should navigate to Host Details page after click', async () => {
             await pageObjects.assetDetails.clickOpenAsPageLink();
             const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();

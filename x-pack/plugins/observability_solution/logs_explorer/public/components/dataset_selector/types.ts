@@ -6,14 +6,14 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type {
   DatasetSelection,
-  DatasetSelectionChange,
+  SelectionChange,
   DataViewSelection,
 } from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
+import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
@@ -35,9 +35,9 @@ export interface DatasetSelectorProps {
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError: Error | null;
   /* The current selection instance */
-  datasetSelection: DatasetSelection;
+  datasetSelection: DatasetSelection | DataViewSelection;
   /* The available data views list */
-  dataViews: DataViewListItem[] | null;
+  dataViews: DataViewDescriptor[] | null;
   /* Any error occurred to show when the user preview the data views */
   dataViewsError: Error | null;
   /* url props to navigate to discover ES|QL */
@@ -55,8 +55,6 @@ export interface DatasetSelectorProps {
   isEsqlEnabled: boolean;
   /* Triggered when retrying to load the data views */
   onDataViewsReload: ReloadDataViews;
-  /* Triggered when selecting a data view */
-  onDataViewSelection: DataViewSelection;
   /* Triggered when the data views tab is selected */
   onDataViewsTabClick: LoadDataViews;
   /* Triggered when we reach the bottom of the integration list and want to load more */
@@ -77,7 +75,7 @@ export interface DatasetSelectorProps {
   /* Triggered when the uncategorized tab is selected */
   onUncategorizedTabClick: LoadDatasets;
   /* Triggered when the selection is updated */
-  onSelectionChange: DatasetSelectionChange;
+  onSelectionChange: SelectionChange;
 }
 
 export type PanelId = typeof INTEGRATIONS_PANEL_ID | IntegrationId;
@@ -101,4 +99,4 @@ export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId 
 
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
 
-export type DataViewSelectionHandler = (dataView: DataViewListItem) => void;
+export type DataViewSelectionHandler = (dataView: DataViewDescriptor) => void;

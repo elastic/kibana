@@ -38,6 +38,11 @@
 
   .euiDataGridHeaderCell {
     align-items: start;
+
+    &:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
+      height: 100%;
+      align-items: flex-start;
+    }
   }
 
   .euiDataGrid--headerUnderline .euiDataGridHeaderCell {

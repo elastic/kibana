@@ -34,14 +34,16 @@ export const LinkToApmServices = ({ assetName, apmField }: LinkToApmServicesProp
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
-        data-test-subj="infraAssetDetailsViewAPMServicesButton"
+        data-test-subj="infraAssetDetailsViewAPMShowAllServicesButton"
         size="xs"
         flush="both"
         href={linkToApmServices}
+        iconSide="right"
+        iconType="sortRight"
       >
         <FormattedMessage
           id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
-          defaultMessage="APM Services"
+          defaultMessage="Show all"
         />
       </EuiButtonEmpty>
     </RedirectAppLinks>

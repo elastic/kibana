@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { SearchDataViews } from '../../../hooks/use_data_views';
 import {
   DatasetSelection,
-  DatasetSelectionChange,
   DataViewSelection,
+  SelectionChange,
 } from '../../../../common/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
@@ -22,7 +22,7 @@ import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DatasetsSelectorSearchParams, PanelId, TabId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
-  selection: DatasetSelection;
+  selection: DatasetSelection | DataViewSelection;
   tabId: TabId;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId | TabId, DatasetsSelectorSearchParams>;
@@ -71,7 +71,15 @@ export type DatasetsSelectorTypestate =
       context: DefaultDatasetsSelectorContext;
     }
   | {
+      value: 'selection.validatingSelection';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
       value: 'selection.single';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection.dataView';
       context: DefaultDatasetsSelectorContext;
     }
   | {
@@ -103,11 +111,11 @@ export type DatasetsSelectorEvent =
     }
   | {
       type: 'SELECT_DATASET';
-      dataset: Dataset;
+      selection: Dataset;
     }
   | {
       type: 'SELECT_DATA_VIEW';
-      dataView: DataViewListItem;
+      selection: DataViewDescriptor;
     }
   | {
       type: 'SELECT_ALL_LOGS_DATASET';
@@ -126,7 +134,6 @@ export type DatasetsSelectorEvent =
 
 export interface DatasetsSelectorStateMachineDependencies {
   initialContext?: Partial<DefaultDatasetsSelectorContext>;
-  onDataViewSelection: DataViewSelection;
   onDataViewsSearch: SearchDataViews;
   onDataViewsSort: SearchDataViews;
   onIntegrationsLoadMore: LoadMoreIntegrations;
@@ -135,7 +142,7 @@ export interface DatasetsSelectorStateMachineDependencies {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onSelectionChange: DatasetSelectionChange;
+  onSelectionChange: SelectionChange;
   onUncategorizedReload: ReloadDatasets;
   onUncategorizedSearch: SearchDatasets;
   onUncategorizedSort: SearchDatasets;
