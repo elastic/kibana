@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FILTERS, Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
@@ -128,7 +128,6 @@ export const isOneOfOperator: Operator = {
   negate: false,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   id: OPERATORS.IS_ONE_OF,
-  // todo: add support for array of values
   getParamsFromPrevOperator: (prevOperator, params) => {
     if (!prevOperator) return;
     if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) return params;
