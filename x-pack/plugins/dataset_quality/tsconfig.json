@@ -29,6 +29,9 @@
     "@kbn/router-utils",
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
+    "@kbn/ui-theme",
+    "@kbn/core-notifications-browser",
+    "@kbn/formatters"
   ],
   "exclude": [
     "target/**/*",

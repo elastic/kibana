@@ -59,6 +59,7 @@ import { QualifiedNameContext } from "./esql_parser";
 import { QualifiedNamePatternContext } from "./esql_parser";
 import { IdentifierContext } from "./esql_parser";
 import { IdentifierPatternContext } from "./esql_parser";
+import { IdPatternContext } from "./esql_parser";
 import { ConstantContext } from "./esql_parser";
 import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
@@ -752,6 +753,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIdentifierPattern?: (ctx: IdentifierPatternContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.idPattern`.
+	 * @param ctx the parse tree
+	 */
+	enterIdPattern?: (ctx: IdPatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.idPattern`.
+	 * @param ctx the parse tree
+	 */
+	exitIdPattern?: (ctx: IdPatternContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.constant`.

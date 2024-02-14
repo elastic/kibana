@@ -26,6 +26,8 @@ post:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
           runServiceNowITOMConnectorRequest:
             $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
+          runSlackConnectorRequest:
+            $ref: '../components/examples/run_slack_api_connector_request.yaml'
           runSwimlaneConnectorRequest:
             $ref: '../components/examples/run_swimlane_connector_request.yaml'
   responses:
@@ -51,6 +53,10 @@ post:
                     description: An array of information returned from the action.
                     items:
                       type: object
+              message:
+                type: string
+              service_message:
+                type: string
               status:
                 type: string
                 description: The status of the action.
@@ -66,6 +72,8 @@ post:
               $ref: '../components/examples/run_server_log_connector_response.yaml'
             runServiceNowITOMConnectorResponse:
               $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
+            runSlackConnectorResponse:
+              $ref: '../components/examples/run_slack_api_connector_response.yaml'
             runSwimlaneConnectorResponse:
               $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':

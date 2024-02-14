@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { HostMetricsExplanationContent } from '../../lens';
 import { Popover } from '../tabs/common/popover';
 import { AlertsTooltipContent } from './alerts_tooltip_content';
+import { ServicesTooltipContent } from './services_tooltip_content';
 
 const SectionTitle = ({
   title,
@@ -94,3 +95,15 @@ export const AlertsSectionTitle = () => {
     </TitleWithTooltip>
   );
 };
+
+export const ServicesSectionTitle = () => (
+  <TitleWithTooltip
+    title={i18n.translate('xpack.infra.assetDetails.overview.servicesSectionTitle', {
+      defaultMessage: 'Services',
+    })}
+    data-test-subj="infraAssetDetailsServicesTitle"
+    tooltipTestSubj="infraAssetDetailsServicesPopoverButton"
+  >
+    <ServicesTooltipContent />
+  </TitleWithTooltip>
+);

@@ -892,6 +892,10 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/mock.tsx"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_ai_assistant/public/service/create_chat_service.test.ts"
               },
               {

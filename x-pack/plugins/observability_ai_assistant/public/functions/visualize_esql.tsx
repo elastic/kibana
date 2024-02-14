@@ -25,7 +25,7 @@ import type {
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   VisualizeESQLFunctionArguments,
   VisualizeESQLUserIntention,
@@ -85,9 +85,7 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return dataViews.create({
-      title: indexPattern,
-    });
+    return getESQLAdHocDataview(indexPattern, dataViews);
   }, [indexPattern]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
@@ -352,13 +350,15 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
+      const trimmedQuery = query.trim();
+
       return (
         <VisualizeESQL
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}
           columns={content}
-          query={query}
+          query={trimmedQuery}
           onActionClick={onActionClick}
           userOverrides={userOverrides}
           preferredChartType={preferredChartType}
