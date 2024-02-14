@@ -151,6 +151,7 @@ describe('ConversationSettings', () => {
         defaultSystemPromptId: 'default-system-prompt',
         provider: 'OpenAI',
       },
+      category: 'assistant',
       id: 'Cool new conversation',
       title: 'Cool new conversation',
       messages: [],

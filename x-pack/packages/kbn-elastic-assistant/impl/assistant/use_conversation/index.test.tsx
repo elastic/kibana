@@ -64,6 +64,7 @@ describe('useConversation', () => {
         messages: mockConvo.messages,
         apiConfig: { defaultSystemPromptId: 'default-system-prompt' },
         title: mockConvo.title,
+        category: 'assistant',
       });
 
       expect(createResult).toEqual(mockConvo);

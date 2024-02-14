@@ -146,6 +146,7 @@ describe('ConnectorSelectorInline', () => {
       },
       conversation: {
         apiConfig: {},
+        category: 'assistant',
         id: 'conversation_id',
         messages: [],
         title: 'conversation_id',

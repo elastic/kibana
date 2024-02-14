@@ -21,6 +21,7 @@ describe('getBlockBotConversation', () => {
     it('When no conversation history, return only enterprise messaging', () => {
       const conversation = {
         id: 'conversation_id',
+        category: 'assistant',
         theme: {},
         messages: [],
         apiConfig: {},
@@ -46,6 +47,7 @@ describe('getBlockBotConversation', () => {
           },
         ],
         apiConfig: {},
+        category: 'assistant',
         title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
@@ -58,6 +60,7 @@ describe('getBlockBotConversation', () => {
         title: 'conversation_id',
         messages: enterpriseMessaging,
         apiConfig: {},
+        category: 'assistant',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(1);
@@ -68,6 +71,7 @@ describe('getBlockBotConversation', () => {
       const conversation = {
         id: 'conversation_id',
         title: 'conversation_id',
+        category: 'assistant',
         messages: [
           ...enterpriseMessaging,
           {
@@ -93,6 +97,7 @@ describe('getBlockBotConversation', () => {
       const conversation = {
         id: 'conversation_id',
         title: 'conversation_id',
+        category: 'assistant',
         messages: [],
         apiConfig: {},
       };
@@ -103,6 +108,7 @@ describe('getBlockBotConversation', () => {
       const conversation = {
         id: 'conversation_id',
         title: 'conversation_id',
+        category: 'assistant',
         messages: [
           {
             role: 'user' as const,
