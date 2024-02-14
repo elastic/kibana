@@ -90,7 +90,7 @@ export function useChat({
     services: { notifications },
   } = useKibana();
 
-  const { selectedLanguage } = useUserPreferredLanguage();
+  const { getPreferredLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -165,7 +165,7 @@ export function useChat({
         persist,
         signal: abortControllerRef.current.signal,
         conversationId,
-        responseLanguage: selectedLanguage || 'English',
+        responseLanguage: getPreferredLanguage(),
       });
 
       function getPendingMessages() {
@@ -263,7 +263,7 @@ export function useChat({
       persist,
       service,
       systemMessage,
-      selectedLanguage,
+      getPreferredLanguage,
     ]
   );
 

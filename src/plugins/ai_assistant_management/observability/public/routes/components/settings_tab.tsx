@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../hooks/use_app_context';
-import { languages } from './languages';
 
 export function SettingsTab() {
   const {
@@ -55,11 +54,8 @@ export function SettingsTab() {
     });
   };
 
-  const languageOptions = languages.map((language) => ({
-    label: language,
-  }));
-
-  const { selectedLanguage, selectLanguage } = observabilityAIAssistant.useUserPreferredLanguage();
+  const { selectedLanguage, selectLanguage, LANGUAGE_OPTIONS } =
+    observabilityAIAssistant.useUserPreferredLanguage();
 
   return (
     <>
@@ -230,7 +226,7 @@ export function SettingsTab() {
                 data-test-subj="settingsTabUserPreferredLanguage"
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
-                options={languageOptions}
+                options={LANGUAGE_OPTIONS}
                 selectedOptions={selectedLanguage ? [{ label: selectedLanguage }] : []}
                 onChange={(selected) => {
                   selectLanguage(selected[0]?.label ?? '');
