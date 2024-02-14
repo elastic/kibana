@@ -52,10 +52,10 @@ export interface SyntheticsSettingsContextValues {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   commonlyUsedRanges?: CommonlyUsedDateRange[];
   isDev?: boolean;
   isServerless?: boolean;
+  setBreadcrumbs?: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
@@ -75,9 +75,6 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isLogsAvailable: true,
   isDev: false,
   canSave: false,
-  setBreadcrumbs: () => {
-    throw Error('Not implemented');
-  },
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
