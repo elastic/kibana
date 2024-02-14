@@ -70,7 +70,8 @@ export function renderApp(
       }),
     setBadge,
     appMountParameters,
-    setBreadcrumbs: core.chrome.setBreadcrumbs,
+    isServerless: !!startPlugins.serverless,
+    setBreadcrumbs: startPlugins.serverless?.setBreadcrumbs ?? core.chrome.setBreadcrumbs,
   };
 
   ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);

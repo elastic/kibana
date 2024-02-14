@@ -57,7 +57,7 @@ describe('useBreadcrumbs', () => {
     const urlParams: SyntheticsUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
       JSON.stringify(
-        makeBaseBreadcrumb('/app/synthetics', '/app/observability', urlParams).concat(
+        makeBaseBreadcrumb('/app/synthetics', '/app/observability', urlParams, false).concat(
           expectedCrumbs
         )
       )
