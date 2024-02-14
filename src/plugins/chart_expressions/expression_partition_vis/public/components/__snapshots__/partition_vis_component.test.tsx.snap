@@ -426,8 +426,8 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -1342,8 +1342,8 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -2318,8 +2318,8 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -3296,8 +3296,8 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -4212,8 +4212,8 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
@@ -5083,8 +5083,8 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "barBackground": "#343741",
                 "border": "#EDF0F5",
                 "colorBands": Array [
-                  "#D9C6EF",
                   "#AA87D1",
+                  "#D9C6EF",
                 ],
                 "fallbackBandColor": "#98A2B3",
                 "minHeight": 64,
