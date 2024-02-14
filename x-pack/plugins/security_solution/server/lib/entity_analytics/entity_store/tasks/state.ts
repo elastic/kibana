@@ -29,12 +29,19 @@ export const stateSchemaByVersion = {
           lastExecution: schema.maybe(schema.string()),
           lastProcessedCompositeTimestamp: schema.maybe(schema.string()),
           lastProcessedCriticalityTimestamp: schema.maybe(schema.string()),
+          lastProcessedRiskScoreTimestamp: schema.maybe(schema.string()),
         })
       ),
       ids: schema.maybe(
         schema.object({
           lastProcessedCompositeId: schema.maybe(schema.string()),
           lastProcessedCriticalityId: schema.maybe(schema.string()),
+          lastProcessedRiskScoreId: schema.maybe(
+            schema.object({
+              id_field: schema.string(),
+              id_value: schema.string(),
+            })
+          ),
         })
       ),
       namespace: schema.string(),

@@ -92,9 +92,9 @@ sudo ln -sfn /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/Java
 
 #### Step 3 - Run elasticsearch
 
-This makes sure your data stays between runs of elasticsearch
+This makes sure your data stays between runs of elasticsearch, and that you have platinum license features
 ```
-./gradlew run --data-dir /tmp/elasticsearch-repo --preserve-data
+./gradlew run --data-dir /tmp/elasticsearch-repo --preserve-data -Drun.license_type=trial
 ```
 
 ### 2. Get Kibana & The Transforms Running

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import _ from 'lodash';
 import moment from 'moment';
+import type { EcsRiskScore } from '../../../../common/entity_analytics/risk_engine';
 import type { NewEntityStoreEntity } from '../../../../common/entity_analytics/entity_store/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality';
@@ -35,10 +36,15 @@ export interface UpdateEntityStoreResponse {
   timestamps: {
     lastProcessedCompositeTimestamp?: string;
     lastProcessedCriticalityTimestamp?: string;
+    lastProcessedRiskScoreTimestamp?: string;
   };
   ids: {
     lastProcessedCompositeId?: string;
     lastProcessedCriticalityId?: string;
+    lastProcessedRiskScoreId?: {
+      id_field: string;
+      id_value: string;
+    };
   };
 }
 interface OSInformation {
@@ -113,6 +119,9 @@ export const updateEntityStore = async ({
   const lastProcessedCriticalityTimestamp =
     timestamps?.lastProcessedCriticalityTimestamp || moment().subtract(1, 'day').toISOString();
 
+  const lastProcessedRiskScoreTimestamp =
+    timestamps?.lastProcessedRiskScoreTimestamp || moment().subtract(1, 'day').toISOString();
+
   const composites = await getNextEntityComposites({
     esClient,
     lastProcessedCompositeTimestamp,
@@ -123,43 +132,19 @@ export const updateEntityStore = async ({
 
   logger.info(`Processing ${Object.keys(compositesByHostName).length} composites`);
 
-  const newAssetCriticalities = await getNextAssetCriticalities({
+  const assetCriticalitiesById = await getNewAssetCriticalitiesAndEntityAssetCriticalities(
+    Object.keys(compositesByHostName),
     assetCriticalityService,
-    fromTimestamp: lastProcessedCriticalityTimestamp,
-    lastProcessedId: ids?.lastProcessedCriticalityId,
-  });
-
-  const assetCriticalitiesById = _.keyBy(newAssetCriticalities, (criticality) =>
-    AssetCriticalityDataClient.createId({
-      idField: criticality.id_field,
-      idValue: criticality.id_value,
-    })
+    lastProcessedCriticalityTimestamp,
+    ids?.lastProcessedCriticalityId
   );
 
-  const assetCriticalitiesToGet = Object.keys(compositesByHostName).filter(
-    (hostName) =>
-      !assetCriticalitiesById[
-        AssetCriticalityDataClient.createId({ idField: 'host.name', idValue: hostName })
-      ]
+  const riskScoresById = await getNewRiskScoresAndEntityRiskScores(
+    Object.keys(compositesByHostName),
+    riskScoreDataClient,
+    lastProcessedRiskScoreTimestamp,
+    ids?.lastProcessedRiskScoreId
   );
-
-  const entityAssetCriticalities = !assetCriticalitiesToGet.length
-    ? []
-    : await assetCriticalityService.getCriticalitiesByIdentifiers(
-        assetCriticalitiesToGet.map((hostName) => ({
-          id_field: 'host.name',
-          id_value: hostName,
-        }))
-      );
-
-  entityAssetCriticalities.forEach((criticality) => {
-    assetCriticalitiesById[
-      AssetCriticalityDataClient.createId({
-        idField: criticality.id_field,
-        idValue: criticality.id_value,
-      })
-    ] = criticality;
-  });
 
   const compositeEntities: NewEntityStoreEntity[] = Object.entries(compositesByHostName).map(
     ([hostName, composite]) => {
@@ -167,6 +152,7 @@ export const updateEntityStore = async ({
         idField: 'host.name',
         idValue: hostName,
       });
+
       const assetCriticality = assetCriticalitiesById[criticalityId];
 
       if (assetCriticality) {
@@ -174,16 +160,32 @@ export const updateEntityStore = async ({
         delete assetCriticalitiesById[criticalityId];
       }
 
-      return buildEntityFromComposite(composite, assetCriticality);
+      const riskScoreId = createRiskScoreId({ id_field: 'host.name', id_value: hostName });
+      const riskScore = riskScoresById[riskScoreId];
+      if (riskScore) {
+        logger.info(`Found risk score for host ${hostName}`);
+        delete riskScoresById[riskScoreId];
+      }
+
+      return buildEntityFromComposite({ composite, assetCriticality, riskScore });
     }
   );
 
-  const remainingriticalityEntities = Object.values(assetCriticalitiesById).map((criticality) => {
+  const remainingCriticalityEntities = Object.values(assetCriticalitiesById).map((criticality) => {
     logger.info(`Found asset criticality for host ${criticality.id_value}`);
     return buildEntityFromCriticalityRecord(criticality);
   });
 
-  const entities = [...compositeEntities, ...remainingriticalityEntities];
+  const remainingRiskScoreEntities = Object.values(riskScoresById).map((riskScore) => {
+    logger.info(`Found risk score for host ${riskScore.host?.name}`);
+    return buildEntityFromHostRiskScore(riskScore);
+  });
+
+  const entities = [
+    ...compositeEntities,
+    ...remainingCriticalityEntities,
+    ...remainingRiskScoreEntities,
+  ];
 
   const { errors, created, updated } = await entityStoreDataClient.bulkUpsertEntities({
     entities,
@@ -191,7 +193,8 @@ export const updateEntityStore = async ({
 
   const { ids: newIds, timestamps: newTimestamps } = createLastProcessedInfo({
     composites,
-    assetCriticalities: newAssetCriticalities,
+    assetCriticalities: Object.values(assetCriticalitiesById),
+    riskScores: Object.values(riskScoresById),
     ...timestamps,
     ...ids,
   });
@@ -208,10 +211,16 @@ export const updateEntityStore = async ({
 function createLastProcessedInfo(opts: {
   composites: CompositeDocument[];
   assetCriticalities: AssetCriticalityRecord[];
+  riskScores: EcsRiskScore[];
   lastProcessedCompositeTimestamp?: string;
   lastProcessedCriticalityTimestamp?: string;
+  lastProcessedRiskScoreTimestamp?: string;
   lastProcessedCompositeId?: string;
   lastProcessedCriticalityId?: string;
+  lastProcessedRiskScoreId?: {
+    id_field: string;
+    id_value: string;
+  };
 }): {
   ids: UpdateEntityStoreResponse['ids'];
   timestamps: UpdateEntityStoreResponse['timestamps'];
@@ -223,10 +232,19 @@ function createLastProcessedInfo(opts: {
     lastProcessedCompositeTimestamp,
     lastProcessedCompositeId,
     lastProcessedCriticalityId,
+    lastProcessedRiskScoreId,
+    lastProcessedRiskScoreTimestamp,
   } = opts;
 
-  const lastProcessedComposite = composites.at(-1);
-  const lastProcessedCriticality = assetCriticalities.at(-1);
+  const lastProcessedComposite = composites
+    .sort((a, b) => moment(a['@timestamp']).diff(moment(b['@timestamp'])))
+    .at(-1);
+  const lastProcessedCriticality = assetCriticalities
+    .sort((a, b) => moment(a['@timestamp']).diff(moment(b['@timestamp'])))
+    .at(-1);
+  const lastProcessedRiskScore = opts.riskScores
+    .sort((a, b) => moment(a['@timestamp']).diff(moment(b['@timestamp'])))
+    .at(-1);
 
   return {
     ids: {
@@ -234,12 +252,20 @@ function createLastProcessedInfo(opts: {
       lastProcessedCriticalityId: lastProcessedCriticality
         ? AssetCriticalityDataClient.createIdFromRecord(lastProcessedCriticality)
         : lastProcessedCriticalityId,
+      lastProcessedRiskScoreId: lastProcessedRiskScore?.host?.risk
+        ? {
+            id_field: lastProcessedRiskScore.host.risk.id_field,
+            id_value: lastProcessedRiskScore.host.risk.id_value,
+          }
+        : lastProcessedRiskScoreId,
     },
     timestamps: {
       lastProcessedCompositeTimestamp:
         lastProcessedComposite?.['@timestamp'] || lastProcessedCompositeTimestamp,
       lastProcessedCriticalityTimestamp:
         lastProcessedCriticality?.['@timestamp'] || lastProcessedCriticalityTimestamp,
+      lastProcessedRiskScoreTimestamp:
+        lastProcessedRiskScore?.['@timestamp'] || lastProcessedRiskScoreTimestamp,
     },
   };
 }
@@ -345,6 +371,46 @@ async function getNextAssetCriticalities({
   return criticalities.slice(lastProcessedIndex + 1);
 }
 
+async function getNextRiskScores({
+  riskScoreDataClient,
+  fromTimestamp,
+  lastProcessed,
+}: {
+  riskScoreDataClient: RiskScoreDataClient;
+  fromTimestamp?: string;
+  lastProcessed?: {
+    id_field: string;
+    id_value: string;
+  };
+}): Promise<EcsRiskScore[]> {
+  if (!fromTimestamp) {
+    return [];
+  }
+  const riskScores = await riskScoreDataClient.getRiskScoresFromTimestamp({
+    from: fromTimestamp,
+    size: MAX_CRITICALITY_SIZE,
+    namespace: 'default',
+  });
+
+  if (!lastProcessed || !riskScores.length) {
+    return riskScores;
+  }
+
+  const lastProcessedIndex = riskScores.findIndex((riskScore) => {
+    return (
+      riskScore.host?.risk.id_value === lastProcessed.id_value &&
+      riskScore.host?.risk.id_field === lastProcessed.id_field &&
+      riskScore['@timestamp'] === fromTimestamp
+    );
+  });
+
+  if (lastProcessedIndex === -1) {
+    return riskScores;
+  }
+
+  return riskScores.slice(lastProcessedIndex + 1);
+}
+
 function compareTimestamps(a: string, b: string) {
   return moment(a).diff(moment(b));
 }
@@ -425,10 +491,12 @@ function groupAndCombineCompositesByHostName(
   return combinedCompositesByHostName;
 }
 
-function buildEntityFromComposite(
-  composite: CompositeDocument,
-  assetCriticalityRecord?: AssetCriticalityRecord
-): NewEntityStoreEntity {
+function buildEntityFromComposite(opts: {
+  composite: CompositeDocument;
+  assetCriticality?: AssetCriticalityRecord;
+  riskScore?: EcsRiskScore;
+}): NewEntityStoreEntity {
+  const { composite, assetCriticality, riskScore } = opts;
   return {
     '@timestamp': new Date().toISOString(),
     entity_type: 'host',
@@ -437,11 +505,10 @@ function buildEntityFromComposite(
     host: {
       ...composite.host,
       ip_history: composite.ip_history.map((ip) => ip),
-      ...(assetCriticalityRecord
-        ? { asset: { criticality: assetCriticalityRecord.criticality_level } }
-        : {}),
+      ...(assetCriticality ? { asset: { criticality: assetCriticality.criticality_level } } : {}),
       ...(composite.latest_os_timestamp ? { os_seen_at: composite.latest_os_timestamp } : {}),
       ...(composite.latest_os ? { os: composite.latest_os } : {}),
+      ...(riskScore?.host?.risk ? { risk: riskScore.host.risk } : {}),
     },
   };
 }
@@ -459,4 +526,118 @@ function buildEntityFromCriticalityRecord(
       },
     },
   };
+}
+
+function buildEntityFromHostRiskScore(riskScore: EcsRiskScore): NewEntityStoreEntity {
+  if (!riskScore.host?.risk) {
+    throw new Error('Risk score does not contain a host risk');
+  }
+  return {
+    '@timestamp': new Date().toISOString(),
+    entity_type: 'host',
+    host: {
+      name: riskScore.host?.name,
+      risk: riskScore.host?.risk,
+    },
+  };
+}
+
+async function getNewAssetCriticalitiesAndEntityAssetCriticalities(
+  hostNames: string[],
+  assetCriticalityService: AssetCriticalityService,
+  lastProcessedCriticalityTimestamp?: string,
+  lastProcessedCriticalityId?: string
+): Promise<Record<string, AssetCriticalityRecord>> {
+  const newAssetCriticalities = await getNextAssetCriticalities({
+    assetCriticalityService,
+    fromTimestamp: lastProcessedCriticalityTimestamp,
+    lastProcessedId: lastProcessedCriticalityId,
+  });
+
+  const assetCriticalitiesById = _.keyBy(newAssetCriticalities, (criticality) =>
+    AssetCriticalityDataClient.createId({
+      idField: criticality.id_field,
+      idValue: criticality.id_value,
+    })
+  );
+
+  const assetCriticalitiesToGet = hostNames.filter(
+    (hostName) =>
+      !assetCriticalitiesById[
+        AssetCriticalityDataClient.createId({ idField: 'host.name', idValue: hostName })
+      ]
+  );
+
+  const entityAssetCriticalities = !assetCriticalitiesToGet.length
+    ? []
+    : await assetCriticalityService.getCriticalitiesByIdentifiers(
+        assetCriticalitiesToGet.map((hostName) => ({
+          id_field: 'host.name',
+          id_value: hostName,
+        }))
+      );
+
+  entityAssetCriticalities.forEach((criticality) => {
+    assetCriticalitiesById[
+      AssetCriticalityDataClient.createId({
+        idField: criticality.id_field,
+        idValue: criticality.id_value,
+      })
+    ] = criticality;
+  });
+
+  return assetCriticalitiesById;
+}
+
+function createRiskScoreId({
+  id_field: idField,
+  id_value: idValue,
+}: {
+  id_field: string;
+  id_value: string;
+}): string {
+  return `${idField}:${idValue}`;
+}
+
+async function getNewRiskScoresAndEntityRiskScores(
+  hostNames: string[],
+  riskScoreDataClient: RiskScoreDataClient,
+  lastProcessedRiskScoreTimestamp?: string,
+  lastProcessedRiskScoreId?: {
+    id_field: string;
+    id_value: string;
+  }
+): Promise<Record<string, EcsRiskScore>> {
+  const newRiskScores = await getNextRiskScores({
+    riskScoreDataClient,
+    fromTimestamp: lastProcessedRiskScoreTimestamp,
+    lastProcessed: lastProcessedRiskScoreId,
+  });
+
+  const hostRiskScores = newRiskScores.filter((riskScore) => riskScore.host?.risk);
+
+  const riskScoresById = _.keyBy(
+    hostRiskScores,
+    (riskScore) => createRiskScoreId(riskScore.host!.risk) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  );
+
+  const riskScoresToGet = hostNames.filter(
+    (hostName) => !riskScoresById[createRiskScoreId({ id_field: 'host.name', id_value: hostName })]
+  );
+
+  const entityRiskScores = !riskScoresToGet.length
+    ? []
+    : await riskScoreDataClient.getRiskScoresByIdentifiers(
+        riskScoresToGet.map((hostName) => ({
+          id_field: 'host.name',
+          id_value: hostName,
+        })),
+        'default'
+      );
+
+  entityRiskScores.forEach((riskScore) => {
+    riskScoresById[createRiskScoreId(riskScore.host!.risk)] = riskScore; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  });
+
+  return riskScoresById;
 }
