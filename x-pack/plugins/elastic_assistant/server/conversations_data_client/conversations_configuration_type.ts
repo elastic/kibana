@@ -53,12 +53,12 @@ export const conversationsFieldMap: FieldMap = {
     required: false,
   },
   messages: {
-    type: 'object',
+    type: 'nested',
     array: true,
     required: false,
   },
   'messages.@timestamp': {
-    type: 'keyword',
+    type: 'date',
     array: false,
     required: true,
   },
@@ -73,16 +73,11 @@ export const conversationsFieldMap: FieldMap = {
     required: false,
   },
   'messages.content': {
-    type: 'keyword',
+    type: 'text',
     array: false,
     required: false,
   },
   'messages.reader': {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  'messages.replacements': {
     type: 'object',
     array: false,
     required: false,
@@ -98,6 +93,31 @@ export const conversationsFieldMap: FieldMap = {
     required: false,
   },
   'messages.trace_data.trace_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  summary: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'summary.content': {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  'summary.@timestamp': {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  'summary.public': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'summary.confidence': {
     type: 'keyword',
     array: false,
     required: false,

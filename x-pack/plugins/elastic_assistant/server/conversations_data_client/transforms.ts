@@ -26,6 +26,8 @@ export const transformESToConversations = (
             name: user.name,
           })) ?? [],
         title: conversationSchema.title,
+        category: conversationSchema.category,
+        summary: conversationSchema.summary,
         apiConfig: {
           connectorId: conversationSchema.api_config?.connector_id,
           connectorTypeTitle: conversationSchema.api_config?.connector_type_title,

@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
+  ConversationCategory,
+  ConversationCategoryEnum,
   ConversationCreateProps,
   ConversationResponse,
   MessageRole,
@@ -25,6 +27,7 @@ export interface CreateMessageSchema {
   created_at: string;
   title: string;
   id?: string | undefined;
+  category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
     content: string;
@@ -102,6 +105,7 @@ export const transformToCreateScheme = (
   {
     title,
     apiConfig,
+    category,
     excludeFromLastConversationStorage,
     isDefault,
     messages,
@@ -118,6 +122,7 @@ export const transformToCreateScheme = (
       },
     ],
     title,
+    category: category ?? ConversationCategoryEnum.assistant,
     api_config: {
       connector_id: apiConfig?.connectorId,
       connector_type_title: apiConfig?.connectorTypeTitle,

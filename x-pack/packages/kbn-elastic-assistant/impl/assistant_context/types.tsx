@@ -63,6 +63,7 @@ export interface Conversation {
     id?: string;
     name?: string;
   };
+  category: string;
   id: string;
   title: string;
   messages: Message[];

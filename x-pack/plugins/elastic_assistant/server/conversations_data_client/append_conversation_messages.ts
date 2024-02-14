@@ -54,9 +54,7 @@ export const appendConversationMessages = async ({
               newMessage['@timestamp'] = message['@timestamp'];
               newMessage.content = message.content;
               newMessage.is_error = message.is_error;
-              newMessage.presentation = message.presentation;
               newMessage.reader = message.reader;
-              newMessage.replacements = message.replacements;
               newMessage.role = message.role; 
               messages.add(newMessage);
             }

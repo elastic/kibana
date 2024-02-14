@@ -75,6 +75,7 @@ describe('ConnectorSelectorInline', () => {
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
       apiConfig: {},
       title: 'conversation_id',
@@ -94,6 +95,7 @@ describe('ConnectorSelectorInline', () => {
   it('Clicking add connector button opens the connector selector', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
       apiConfig: {},
       title: 'conversation_id',
@@ -116,6 +118,7 @@ describe('ConnectorSelectorInline', () => {
     const connectorTwo = mockConnectors[1];
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
       apiConfig: {},
       title: 'conversation_id',
@@ -152,6 +155,7 @@ describe('ConnectorSelectorInline', () => {
   it('On connector change to add new connector, onchange event does nothing', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
+      category: 'assistant',
       messages: [],
       apiConfig: {},
       title: 'conversation_id',

@@ -84,6 +84,22 @@ export type MessageRoleEnum = typeof MessageRole.enum;
 export const MessageRoleEnum = MessageRole.enum;
 
 /**
+ * The conversation category.
+ */
+export type ConversationCategory = z.infer<typeof ConversationCategory>;
+export const ConversationCategory = z.enum(['assistant', 'insights']);
+export type ConversationCategoryEnum = typeof ConversationCategory.enum;
+export const ConversationCategoryEnum = ConversationCategory.enum;
+
+/**
+ * The conversation confidence.
+ */
+export type ConversationConfidence = z.infer<typeof ConversationConfidence>;
+export const ConversationConfidence = z.enum(['low', 'medium', 'high']);
+export type ConversationConfidenceEnum = typeof ConversationConfidence.enum;
+export const ConversationConfidenceEnum = ConversationConfidence.enum;
+
+/**
  * AI assistant conversation message.
  */
 export type Message = z.infer<typeof Message>;
@@ -138,6 +154,26 @@ export const ApiConfig = z.object({
   model: z.string().optional(),
 });
 
+export type ConversationSummary = z.infer<typeof ConversationSummary>;
+export const ConversationSummary = z.object({
+  /**
+   * Summary text of the conversation over time.
+   */
+  content: z.string().optional(),
+  /**
+   * The timestamp summary was updated.
+   */
+  timestamp: NonEmptyString.optional(),
+  /**
+   * Define if summary is marked as publicly available.
+   */
+  public: z.boolean().optional(),
+  /**
+   * How confident you are about this being a correct and useful learning.
+   */
+  confidence: ConversationConfidence.optional(),
+});
+
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
   .object({
@@ -156,6 +192,11 @@ export const ConversationResponse = z.object({
    * The conversation title.
    */
   title: z.string(),
+  /**
+   * The conversation category.
+   */
+  category: ConversationCategory,
+  summary: ConversationSummary.optional(),
   timestamp: NonEmptyString.optional(),
   /**
    * The last time conversation was updated.
@@ -197,6 +238,10 @@ export const ConversationUpdateProps = z.object({
    */
   title: z.string().optional(),
   /**
+   * The conversation category.
+   */
+  category: ConversationCategory.optional(),
+  /**
    * The conversation messages.
    */
   messages: z.array(Message).optional(),
@@ -204,6 +249,7 @@ export const ConversationUpdateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
+  summary: ConversationSummary.optional(),
   /**
    * excludeFromLastConversationStorage.
    */
@@ -217,6 +263,10 @@ export const ConversationCreateProps = z.object({
    * The conversation title.
    */
   title: z.string(),
+  /**
+   * The conversation category.
+   */
+  category: ConversationCategory.optional(),
   /**
    * The conversation messages.
    */

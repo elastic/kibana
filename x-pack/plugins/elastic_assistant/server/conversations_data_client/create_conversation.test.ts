@@ -40,6 +40,7 @@ export const getCreateConversationMock = (): ConversationCreateProps => ({
   messages: [],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacements: {} as any,
+  category: 'assistant',
 });
 
 export const getConversationResponseMock = (): ConversationResponse => ({
@@ -61,6 +62,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   isDefault: false,
   updatedAt: '2024-01-28T04:20:02.394Z',
   timestamp: '2024-01-28T04:20:02.394Z',
+  category: 'assistant',
   users: [
     {
       name: 'test',
@@ -89,6 +91,7 @@ export const getSearchConversationMock =
             title: 'title-1',
             updated_at: '2020-04-20T15:25:31.830Z',
             messages: [],
+            category: 'assistant',
             id: '1',
             namespace: 'default',
             is_default: true,

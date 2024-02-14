@@ -14,6 +14,7 @@ import {
   Provider,
   MessageRole,
   getMessageContentWithoutReplacements,
+  ConversationSummary,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
@@ -39,6 +40,7 @@ export interface UpdateConversationSchema {
     provider?: Provider;
     model?: string;
   };
+  summary?: ConversationSummary;
   exclude_from_last_conversation_storage?: boolean;
   replacements?: Replacement;
   updated_at?: string;
@@ -118,9 +120,7 @@ export const updateConversation = async ({
               newMessage['@timestamp'] = message['@timestamp'];
               newMessage.content = message.content;
               newMessage.is_error = message.is_error;
-              newMessage.presentation = message.presentation;
               newMessage.reader = message.reader;
-              newMessage.replacements = message.replacements;
               newMessage.role = message.role; 
               messages.add(newMessage);
             }

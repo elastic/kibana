@@ -372,6 +372,7 @@ describe('SystemPrompt', () => {
     it('should save new prompt correctly when prompt is removed from a conversation and linked to another conversation in a single transaction', async () => {
       const secondMockConversation: Conversation = {
         id: 'second',
+        category: 'assistant',
         apiConfig: {
           defaultSystemPromptId: undefined,
         },

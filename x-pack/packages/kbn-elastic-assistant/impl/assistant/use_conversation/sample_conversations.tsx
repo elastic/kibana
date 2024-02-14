@@ -12,6 +12,7 @@ import { WELCOME_CONVERSATION_TITLE } from './translations';
 export const WELCOME_CONVERSATION: Conversation = {
   id: WELCOME_CONVERSATION_TITLE,
   title: WELCOME_CONVERSATION_TITLE,
+  category: 'assistant',
   messages: [
     {
       role: 'assistant',

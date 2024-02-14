@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import { MessageRole, Provider, Reader, Replacement } from '@kbn/elastic-assistant-common';
+import {
+  ConversationCategory,
+  ConversationConfidence,
+  MessageRole,
+  Provider,
+  Reader,
+  Replacement,
+} from '@kbn/elastic-assistant-common';
 
 export interface SearchEsConversationSchema {
   id: string;
   '@timestamp': string;
   created_at: string;
   title: string;
+  summary?: {
+    content?: string;
+    timestamp?: string;
+    public?: boolean;
+    confidence?: ConversationConfidence;
+  };
+  category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
     content: string;

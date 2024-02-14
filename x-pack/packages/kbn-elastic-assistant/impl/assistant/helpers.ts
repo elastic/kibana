@@ -107,7 +107,6 @@ interface OptionalRequestParams {
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  replacements?: Record<string, string>;
   size?: number;
 }
 

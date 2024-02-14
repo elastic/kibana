@@ -34,6 +34,7 @@ export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
       },
     },
   ],
+  category: 'assistant',
 });
 
 export const getUpdateConversationSchemaMock = (
@@ -86,6 +87,7 @@ export const getConversationMock = (
   createdAt: '2019-12-13T16:40:33.400Z',
   updatedAt: '2019-12-13T16:40:33.400Z',
   namespace: 'default',
+  category: 'assistant',
   users: [
     {
       name: 'elastic',
@@ -105,6 +107,7 @@ export const getQueryConversationParams = (
           connectorTypeTitle: 'Test connector',
           model: 'model',
         },
+        category: 'assistant',
         excludeFromLastConversationStorage: false,
         messages: [
           {
@@ -121,6 +124,7 @@ export const getQueryConversationParams = (
       }
     : {
         title: 'Welcome',
+        category: 'assistant',
         apiConfig: {
           connectorId: '1',
           defaultSystemPromptId: 'Default',

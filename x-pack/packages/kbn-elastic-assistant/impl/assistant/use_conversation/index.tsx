@@ -23,6 +23,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: i18n.DEFAULT_CONVERSATION_TITLE,
   messages: [],
   apiConfig: {},
+  category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
 
@@ -162,6 +163,7 @@ export const useConversation = (): UseConversation => {
           http,
           conversation: {
             apiConfig,
+            category: 'assistant',
             title: conversation.title,
             replacements: conversation.replacements,
             excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,

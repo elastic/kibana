@@ -62,6 +62,21 @@ components:
         - user
         - assistant
 
+    ConversationCategory:
+      type: string
+      description: The conversation category.
+      enum:
+        - assistant
+        - insights
+
+    ConversationConfidence:
+      type: string
+      description: The conversation confidence.
+      enum:
+        - low
+        - medium
+        - high
+
     Message:
       type: object
       description: AI assistant conversation message.
@@ -106,7 +121,23 @@ components:
           description: Provider
         model:
           type: string
-          description: model 
+          description: model
+    
+    ConversationSummary:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Summary text of the conversation over time.
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: The timestamp summary was updated.
+        public:
+          type: boolean
+          description: Define if summary is marked as publicly available.
+        confidence:
+          $ref: '#/components/schemas/ConversationConfidence'
+          description: How confident you are about this being a correct and useful learning.
 
     ErrorSchema:
       type: object
@@ -137,6 +168,7 @@ components:
         - users
         - namespace
         - apiConfig
+        - category
       properties:
         id:
           oneOf:
@@ -145,6 +177,11 @@ components:
         title:
           type: string
           description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
         'timestamp':
           $ref: '#/components/schemas/NonEmptyString'
         updatedAt:
@@ -189,6 +226,9 @@ components:
         title:
           type: string
           description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
         messages:
           type: array
           items:
@@ -197,6 +237,8 @@ components:
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
@@ -211,6 +253,9 @@ components:
         title:
           type: string
           description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'         
+          description: The conversation category.
         messages:
           type: array
           items:

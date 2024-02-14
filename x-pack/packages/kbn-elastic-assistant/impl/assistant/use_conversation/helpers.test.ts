@@ -94,6 +94,7 @@ describe('useConversation helpers', () => {
       apiConfig: {
         defaultSystemPromptId: '3',
       },
+      category: 'assistant',
       id: '1',
       messages: [],
       title: '1',
@@ -108,6 +109,7 @@ describe('useConversation helpers', () => {
     test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: {},
+        category: 'assistant',
         id: '1',
         messages: [],
         title: '1',
@@ -123,6 +125,7 @@ describe('useConversation helpers', () => {
     test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist within all system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: {},
+        category: 'assistant',
         id: '4', // this id does not exist within allSystemPrompts
         messages: [],
         title: '4',
@@ -138,6 +141,7 @@ describe('useConversation helpers', () => {
     test('should return the first prompt if both conversation system prompt and default new system prompt do not exist', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: {},
+        category: 'assistant',
         id: '1',
         messages: [],
         title: '1',
@@ -153,6 +157,7 @@ describe('useConversation helpers', () => {
     test('should return undefined if conversation system prompt does not exist and there are no system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: {},
+        category: 'assistant',
         id: '1',
         messages: [],
         title: '1',
@@ -168,6 +173,7 @@ describe('useConversation helpers', () => {
     test('should return undefined if conversation system prompt does not exist within all system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: {},
+        category: 'assistant',
         id: '4', // this id does not exist within allSystemPrompts
         messages: [],
         title: '1',

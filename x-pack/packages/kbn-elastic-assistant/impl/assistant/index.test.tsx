@@ -78,12 +78,14 @@ describe('Assistant', () => {
           Welcome: {
             id: 'Welcome Id',
             title: 'Welcome',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
             id: 'electric sheep id',
             title: 'electric sheep',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
@@ -121,11 +123,13 @@ describe('Assistant', () => {
           Welcome: {
             id: 'Welcome Id',
             title: 'Welcome',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
             id: 'electric sheep id',
+            category: 'assistant',
             title: 'electric sheep',
             messages: [],
             apiConfig: {},
@@ -164,11 +168,13 @@ describe('Assistant', () => {
           Welcome: {
             id: 'Welcome Id',
             title: 'Welcome',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
             id: 'electric sheep id',
+            category: 'assistant',
             title: 'electric sheep',
             messages: [],
             apiConfig: {},
@@ -202,12 +208,14 @@ describe('Assistant', () => {
           Welcome: {
             id: 'Welcome',
             title: 'Welcome',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
             id: 'electric sheep',
             title: 'electric sheep',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
@@ -230,10 +238,12 @@ describe('Assistant', () => {
           Welcome: {
             id: 'Welcome',
             title: 'Welcome',
+            category: 'assistant',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
+            category: 'assistant',
             id: 'electric sheep',
             title: 'electric sheep',
             messages: [],
