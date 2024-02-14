@@ -261,8 +261,23 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    rowItemActions: ({ attributes: { readOnly } }) =>
-      !visualizeCapabilities.save || readOnly ? { edit: { enabled: false } } : undefined,
+    rowItemActions: ({ managed, attributes: { readOnly } }) =>
+      !visualizeCapabilities.save || readOnly
+        ? {
+            edit: {
+              enabled: false,
+              reason: managed
+                ? i18n.translate('visualizations.managedLegacyVisMessage', {
+                    defaultMessage:
+                      'This visualization is managed by Elastic and cannot be changed.',
+                  })
+                : i18n.translate('visualizations.readOnlyLegacyVisMessage', {
+                    defaultMessage:
+                      "These details can't be edited because this visualization is no longer supported.",
+                  }),
+            },
+          }
+        : undefined,
   };
 
   return props;
