@@ -31,7 +31,8 @@
       "taskManager",
       "triggersActionsUi",
       "usageCollection",
-      "bfetch"
+      "bfetch",
+      "serverless"
     ],
     "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
     "requiredBundles": [
