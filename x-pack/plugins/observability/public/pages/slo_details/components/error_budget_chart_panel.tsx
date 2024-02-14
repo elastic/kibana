@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
 import { useKibana } from '../../../utils/kibana_react';
-import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-import { ErrorBudgetActions } from './error_budget_actions';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
-
-import { useErrorBudgetActions } from '../hooks/use_error_budget_actions';
 import { SLO_ERROR_BUDGET_EMBEDDABLE } from '../../../embeddable/slo/error_budget/slo_error_budget_embeddable';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
@@ -32,47 +26,11 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
-function formatTime(minutes: number) {
-  if (minutes > 59) {
-    const mins = minutes % 60;
-    const hours = (minutes - mins) / 60;
-    return i18n.translate(
-      'xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteHoursLabel',
-      {
-        defaultMessage: '{hours}h {mins}m',
-        values: { hours: Math.trunc(hours), mins: Math.trunc(mins) },
-      }
-    );
-  }
-  return i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteLabel', {
-    defaultMessage: '{minutes}m',
-    values: { minutes },
-  });
-}
-
 export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
-  const { uiSettings, embeddable, executionContext } = useKibana().services;
-  const executionContextName = executionContext.get().name;
-  const isDashboardContext = executionContextName === 'dashboards';
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
-
-  const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
-
-  let errorBudgetTimeRemainingFormatted;
-  if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
-    const totalSlices =
-      toMinutes(toDuration(slo.timeWindow.duration)) /
-      toMinutes(toDuration(slo.objective.timesliceWindow!));
-    const errorBudgetRemainingInMinute =
-      slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
-
-    errorBudgetTimeRemainingFormatted = formatTime(
-      errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
-    );
-  }
+  const { embeddable } = useKibana().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -132,12 +90,12 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
         <SavedObjectSaveModalDashboard
           objectType={i18n.translate(
             'xpack.observability.slo.item.actions.attachToDashboard.objectTypeLabel',
-            { defaultMessage: 'SLO Error Budget' }
+            { defaultMessage: 'SLO Error Budget burn down' }
           )}
           documentInfo={{
             title: i18n.translate(
               'xpack.observability.slo.item.actions.attachToDashboard.attachmentTitle',
-              { defaultMessage: 'SLO Error Budget' }
+              { defaultMessage: 'SLO Error Budget burn down' }
             ),
           }}
           canSaveByReference={false}

@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiButtonIcon } from '@elastic/eui';
 
 interface Props {
-  setDashboardAttachmentReady: (value: boolean) => void;
+  setDashboardAttachmentReady?: (value: boolean) => void;
 }
 
 export function ErrorBudgetActions({ setDashboardAttachmentReady }: Props) {

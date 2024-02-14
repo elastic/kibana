@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';

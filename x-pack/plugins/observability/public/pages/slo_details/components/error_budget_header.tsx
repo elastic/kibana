@@ -18,7 +18,7 @@ interface Props {
   slo: SLOWithSummaryResponse;
   showTitle?: boolean;
   isMouseOver?: boolean;
-  setDashboardAttachmentReady?: () => void;
+  setDashboardAttachmentReady?: (value: boolean) => void;
 }
 
 export function ErrorBudgetHeader({
