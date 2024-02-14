@@ -89,3 +89,5 @@ export * from './prebuilt_rules/install_mock_prebuilt_rules';
 export * from './prebuilt_rules/install_prebuilt_rules_and_timelines';
 export * from './get_legacy_action_so';
 export * from './delete_all_exceptions';
+export * from './combine_to_ndjson';
+export * from './get_custom_query_rule_params';
