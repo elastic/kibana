@@ -61,11 +61,13 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
+    hasPrefix,
     language,
     rawName,
     languageSelectValue,
   } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue, setHasPrefix } = useActions(NewSearchIndexLogic);
+  setHasPrefix(type === INGESTION_METHOD_IDS.CRAWLER);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -195,7 +197,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus
-                    prepend="search-"
+                    prepend={hasPrefix ? 'search-' : undefined}
                   />
                 </EuiFormRow>
                 <EuiText size="xs" color="subdued">
