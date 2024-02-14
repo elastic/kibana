@@ -17,7 +17,7 @@ import { CreateSLOForm } from '../types';
 import { PluginContext } from '../../../context/plugin_context/plugin_context';
 import { ObservabilityRuleTypeRegistry } from '../../..';
 import { ObservabilityPublicPluginsStart, ConfigSchema } from '../../../plugin';
-import { SloAddForm } from './slo_form';
+import { SloAddFormFlyout } from './slo_form';
 
 export const getCreateSLOFlyoutLazy = ({
   core,
@@ -66,7 +66,7 @@ export const getCreateSLOFlyoutLazy = ({
           }}
         >
           <QueryClientProvider client={queryClient}>
-            <SloAddForm onClose={onClose} initialValues={initialValues} />
+            <SloAddFormFlyout onClose={onClose} initialValues={initialValues} />
           </QueryClientProvider>
         </PluginContext.Provider>
       </KibanaContextProvider>

@@ -37,11 +37,12 @@ import { SLOInspectWrapper } from './common/slo_inspect';
 export interface Props {
   slo?: GetSLOResponse;
   initialValues?: RecursivePartial<CreateSLOForm>;
+  onSave?: () => void;
 }
 
 export const maxWidth = 775;
 
-export function SloEditForm({ slo, initialValues }: Props) {
+export function SloEditForm({ slo, initialValues, onSave }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -96,7 +97,11 @@ export function SloEditForm({ slo, initialValues }: Props) {
       await createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
       });
-      navigate(basePath.prepend(paths.observability.slos));
+      if (onSave) {
+        onSave();
+      } else {
+        navigate(basePath.prepend(paths.observability.slos));
+      }
     }
   };
 

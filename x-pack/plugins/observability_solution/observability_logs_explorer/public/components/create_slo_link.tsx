@@ -13,13 +13,13 @@ import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { useActor } from '@xstate/react';
 import { createSLoLabel } from '../../common/translations';
 import {
-  ObservabilityLogExplorerService,
-  useObservabilityLogExplorerPageStateContext,
-} from '../state_machines/observability_log_explorer/src';
+  ObservabilityLogsExplorerService,
+  useObservabilityLogsExplorerPageStateContext,
+} from '../state_machines/observability_logs_explorer/src';
 
 type InitializedPageState = MatchedStateFromActor<
-  ObservabilityLogExplorerService,
-  { initialized: 'validLogExplorerState' }
+  ObservabilityLogsExplorerService,
+  { initialized: 'validLogsExplorerState' }
 >;
 
 export const CreateSloLinkForValidState = React.memo(
@@ -28,39 +28,46 @@ export const CreateSloLinkForValidState = React.memo(
   }: {
     observability: ObservabilityPublicStart;
   }) => {
-    const [pageState] = useActor(useObservabilityLogExplorerPageStateContext());
+    const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
 
     const {
-      context: { logExplorerState },
+      context: { logsExplorerState },
     } = pageState as InitializedPageState;
 
     const [isCreateFlyoutOpen, setCreateSLOFlyoutOpen] = useState(false);
 
     const sloParams = useMemo(() => {
-      if (!logExplorerState)
+      if (!logsExplorerState)
         return {
           indicator: {
             type: 'sli.kql.custom' as const,
             params: {},
           },
         };
-      const dataView = hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec();
+      const dataView = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
       const query =
-        logExplorerState?.query && 'query' in logExplorerState.query
-          ? String(logExplorerState.query.query)
+        logsExplorerState?.query && 'query' in logsExplorerState.query
+          ? String(logsExplorerState.query.query)
           : undefined;
+      const filters = logsExplorerState?.filters ?? [];
       return {
         indicator: {
           type: 'sli.kql.custom' as const,
           params: {
             index: dataView.title,
             timestampField: dataView?.timeFieldName,
-            good: query,
+            good:
+              filters.length > 0
+                ? {
+                    kqlQuery: query,
+                    filters,
+                  }
+                : query,
           },
         },
-        groupBy: logExplorerState.chart.breakdownField ?? undefined,
+        groupBy: logsExplorerState.chart.breakdownField ?? undefined,
       };
-    }, [logExplorerState]);
+    }, [logsExplorerState]);
 
     return (
       <>

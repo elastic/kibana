@@ -41,6 +41,9 @@ function SloAddFormFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <SloEditForm
+            onSave={() => {
+              onClose();
+            }}
             initialValues={
               initialValues
                 ? merge(

@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { EuiLink } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -18,10 +23,13 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateSlo() {
   const {
+    i18n: i18nStart,
+    theme,
     application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const services = useKibana().services;
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -36,15 +44,35 @@ export function useCreateSlo() {
       return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      onSuccess: (_data, { slo }) => {
+      onSuccess: (data, { slo }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.create.successNotification', {
-            defaultMessage: 'Successfully created {name}',
-            values: { name: slo.name },
-          })
-        );
+        const sloEditUrl = http.basePath.prepend(paths.observability.sloEdit(data.id));
+
+        toasts.addSuccess({
+          title: toMountPoint(
+            <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
+              <FormattedMessage
+                id={'xpack.observability.slo.create.successNotification'}
+                defaultMessage={'Successfully created {name}.\n {editSLO}'}
+                values={{
+                  name: slo.name,
+                  editSLO: (
+                    <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
+                      {i18n.translate('xpack.observability.useCreateSlo.editSLOLinkLabel', {
+                        defaultMessage: 'Edit SLO',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </RedirectAppLinks>,
+            {
+              i18n: i18nStart,
+              theme,
+            }
+          ),
+        });
       },
       onError: (error, { slo }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
