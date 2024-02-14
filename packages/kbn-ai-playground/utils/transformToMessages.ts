@@ -31,7 +31,7 @@ export const transformFromChatMessages = (messages: UseChatHelpers['messages']):
         retrievalDocs: Array.isArray(annotations)
           ? // @ts-ignore
             annotations
-              .find((annotation) => annotation['type'] === 'retrieval_doc')
+              .find((annotation) => annotation['type'] === 'retrieved_docs')
               ?.['documents']?.map<Annotation>(transformAnnotationToDoc)
           : [],
       } as AIMessage;

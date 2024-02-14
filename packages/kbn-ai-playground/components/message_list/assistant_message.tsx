@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import moment from 'moment';
 
@@ -23,6 +23,7 @@ import type { AIMessage as AIMessageType } from '../../types';
 
 import { CopyActionButton } from './copy_action_button';
 import { CitationsTable } from './citations_table';
+import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 
 type AssistantMessageProps = Pick<
   AIMessageType,
@@ -35,6 +36,8 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
   citations,
   retrievalDocs,
 }) => {
+  const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
+
   return (
     <EuiComment
       username={i18n.translate('aiPlayground.chat.message.assistant.username', {
@@ -77,12 +80,22 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
           </p>
         </EuiTitle>
         {!!retrievalDocs?.length && (
-          <EuiButtonEmpty>
-            {i18n.translate('aiPlayground.chat.message.assistant.retrievalDocButton', {
-              defaultMessage: '{count} {count, plural, one {document} other {documents}} retrieved',
-              values: { count: retrievalDocs.length },
-            })}
-          </EuiButtonEmpty>
+          <>
+            <EuiButtonEmpty onClick={() => setIsDocsFlyoutOpen(true)}>
+              {i18n.translate('aiPlayground.chat.message.assistant.retrievalDocButton', {
+                defaultMessage:
+                  '{count} {count, plural, one {document} other {documents}} retrieved',
+                values: { count: retrievalDocs.length },
+              })}
+            </EuiButtonEmpty>
+
+            {isDocsFlyoutOpen && (
+              <RetrievalDocsFlyout
+                onClose={() => setIsDocsFlyoutOpen(false)}
+                retrievalDocs={retrievalDocs}
+              />
+            )}
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
