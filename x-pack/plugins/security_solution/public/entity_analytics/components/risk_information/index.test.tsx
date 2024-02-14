@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { RiskInformationButtonEmpty, RiskInformationButtonIcon } from '.';
 import { TestProviders } from '../../../common/mock';
@@ -28,9 +28,9 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
           expect(queryByTestId('open-risk-information-flyout-trigger')).toBeInTheDocument();
         });
 
-        it('opens and displays table with 5 rows', () => {
+        it('opens and displays a risk levels table with 5 rows', () => {
           const NUMBER_OF_ROWS = 1 + 5; // 1 header row + 5 severity rows
-          const { getByTestId, queryByTestId, queryAllByRole } = render(
+          const { getByTestId, queryByTestId } = render(
             <TestProviders>
               <Component riskEntity={riskEntity} />
             </TestProviders>
@@ -38,8 +38,26 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
           fireEvent.click(getByTestId('open-risk-information-flyout-trigger'));
 
-          expect(queryByTestId('risk-information-table')).toBeInTheDocument();
-          expect(queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
+          const riskLevelsTable = queryByTestId('risk-level-information-table');
+
+          expect(riskLevelsTable).toBeInTheDocument();
+          expect(within(riskLevelsTable!).queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
+        });
+
+        it('opens and displays an asset criticality tiers table with four (4) rows', () => {
+          const NUMBER_OF_ROWS = 1 + 4; // 1 header row + 4 tier rows
+          const { getByTestId, queryByTestId } = render(
+            <TestProviders>
+              <Component riskEntity={riskEntity} />
+            </TestProviders>
+          );
+
+          fireEvent.click(getByTestId('open-risk-information-flyout-trigger'));
+
+          const criticalityTiersTable = queryByTestId('criticality-level-information-table');
+
+          expect(criticalityTiersTable).toBeInTheDocument();
+          expect(within(criticalityTiersTable!).queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
         });
       }
     );

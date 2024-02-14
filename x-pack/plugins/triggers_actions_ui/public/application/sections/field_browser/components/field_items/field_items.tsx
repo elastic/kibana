@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
