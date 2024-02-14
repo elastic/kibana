@@ -8,6 +8,8 @@ import { createSelector } from 'reselect';
 import type { State } from '../types';
 import type { SourcererModel, SourcererScopeName } from './model';
 
+const SOURCERER_SCOPE_MAX_SIZE = 4;
+
 const selectSourcerer = (state: State): SourcererModel => state.sourcerer;
 
 export const sourcererScopes = createSelector(
@@ -18,37 +20,72 @@ export const sourcererScopes = createSelector(
 export const sourcererScope = createSelector(
   sourcererScopes,
   (state: State, scopeId: SourcererScopeName) => scopeId,
-  (scopes, scopeId) => scopes[scopeId]
+  (scopes, scopeId) => scopes[scopeId],
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
 
 export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading);
 
 export const sourcererScopeSelectedDataViewId = createSelector(
   sourcererScope,
-  (scope) => scope.selectedDataViewId
+  (scope) => scope.selectedDataViewId,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
 
 export const sourcererScopeSelectedPatterns = createSelector(
   sourcererScope,
-  (scope) => scope.selectedPatterns
+  (scope) => scope.selectedPatterns,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
 
 export const sourcererScopeMissingPatterns = createSelector(
   sourcererScope,
-  (scope) => scope.missingPatterns
+  (scope) => scope.missingPatterns,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
 
 export const kibanaDataViews = createSelector(
   selectSourcerer,
-  (sourcerer) => sourcerer.kibanaDataViews
+  (sourcerer) => sourcerer.kibanaDataViews,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
 
 export const defaultDataView = createSelector(
   selectSourcerer,
-  (sourcerer) => sourcerer.defaultDataView
+  (sourcerer) => sourcerer.defaultDataView,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
 
 export const signalIndexName = createSelector(
   selectSourcerer,
-  (sourcerer) => sourcerer.signalIndexName
+  (sourcerer) => sourcerer.signalIndexName,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
 );
