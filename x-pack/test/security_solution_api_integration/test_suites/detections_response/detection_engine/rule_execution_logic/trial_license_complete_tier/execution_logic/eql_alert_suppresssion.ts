@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
   });
 
   // TODO remove the only
-  describe.only('@ess @serverless EQL type rules, alert suppression', () => {
+  describe('@ess @serverless EQL type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });

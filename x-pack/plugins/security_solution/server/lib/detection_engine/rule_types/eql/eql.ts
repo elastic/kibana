@@ -122,54 +122,55 @@ export const eqlExecutor = async ({
 
     let createResult;
 
-    if (response.hits.events?.length) {
-      // Take the last element as it is the Shell Alert, TBC?
-      // const enrichedEvents =
-      //   sequenceHits !== undefined ? [newSignals[newSignalsLength - 1]] : newSignals;
+    const events = response.hits.events;
+    const sequences = response.hits.sequences;
 
+    if (isAlertSuppressionActive) {
       const alertSuppression = completeRule.ruleParams.alertSuppression;
-
-      if (isAlertSuppressionActive) {
-        createResult = await bulkCreateSuppressedAlertsInMemory({
-          enrichedEvents: response.hits.events,
-          toReturn: result,
-          wrapHits,
-          bulkCreate,
-          services,
-          buildReasonMessage: buildReasonMessageForEqlAlert,
-          ruleExecutionLogger,
-          tuple,
-          alertSuppression,
-          wrapSuppressedHits,
-          alertTimestampOverride,
-          alertWithSuppression,
-        });
-      } else {
-        const sequenceHits = response.hits.sequences;
-        let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
-        if (sequenceHits !== undefined) {
-          newSignals = wrapSequences(sequenceHits, buildReasonMessageForEqlAlert);
-        } else if (response.hits.events !== undefined) {
-          newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
-        } else {
-          throw new Error(
-            'eql query response should have either `sequences` or `events` but had neither'
-          );
-        }
-        createResult = await bulkCreate(
-          newSignals,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
+      createResult = await bulkCreateSuppressedAlertsInMemory({
+        enrichedEvents: events ?? [],
+        toReturn: result,
+        wrapHits,
+        bulkCreate,
+        services,
+        buildReasonMessage: buildReasonMessageForEqlAlert,
+        ruleExecutionLogger,
+        tuple,
+        alertSuppression,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+      });
+      if (createResult.warningMessages) {
+        result.warningMessages.push(createResult.warningMessages);
       }
+    } else {
+      const newSignals =
+        sequences !== undefined
+          ? wrapSequences(sequences, buildReasonMessageForEqlAlert)
+          : events !== undefined
+          ? wrapHits(events, buildReasonMessageForEqlAlert)
+          : (() => {
+              throw new Error(
+                'eql query response should have either `sequences` or `events` but had neither'
+              );
+            })();
+
+      createResult = await bulkCreate(
+        newSignals,
+        undefined,
+        createEnrichEventsFunction({
+          services,
+          logger: ruleExecutionLogger,
+        })
+      );
       addToSearchAfterReturn({ current: result, next: createResult });
+      if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
+        result.warningMessages.push(getMaxSignalsWarning());
+      }
     }
-    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
-      result.warningMessages.push(getMaxSignalsWarning());
-    }
+    console.log(result.warningMessages, 'result.warningMessages');
+
     return result;
   });
 };

@@ -13,7 +13,7 @@ import type {
   SignalSourceHit,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
-import { addToSearchAfterReturn } from './utils';
+import { addToSearchAfterReturn, getSuppressionMaxSignalsWarning } from './utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
@@ -46,7 +46,7 @@ export interface BulkCreateSuppressedAlertsParams
 }
 // TODO validate Warning cases + how to reuse this util
 /**
- * bulk create and suppress alerts
+ * bulk create and suppress alerts in memory,
  * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
  * they will be created as regular alerts
  */
@@ -118,14 +118,11 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     (toReturn.suppressedAlertsCount ?? 0) + toReturn.createdSignalsCount >= suppressionMaxSignals ||
     toReturn.createdSignalsCount >= tuple.maxSignals;
 
-  if (alertsWereTruncated) {
-    // TODO validate this case
-    // toReturn.warningMessages.push(getSuppressionMaxSignalsWarning());
-    // ruleExecutionLogger.warn(getSuppressionMaxSignalsWarning());
-  }
-
+  // TODO validate warning cases
+  console.log('alertsWereTruncated', alertsWereTruncated);
   return {
     ...bulkCreateResult,
     alertsWereTruncated,
+    warningMessages: alertsWereTruncated ? getSuppressionMaxSignalsWarning() : '',
   };
 };
