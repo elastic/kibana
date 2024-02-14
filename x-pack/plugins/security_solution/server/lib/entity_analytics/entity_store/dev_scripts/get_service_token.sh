@@ -9,12 +9,12 @@ ELASTICSEARCH_URL="elastic:password@localhost:9200"
 KIBANA_CONFIG_PATH="$1" 
 TOKEN_NAME="kbn-token-1"
 
-TOKEN=$(curl -s -XPOST "${ELASTICSEARCH_URL}/_security/service/elastic/kibana/credential/token/${TOKEN_NAME}" | jq -r '.token.value')
-
 if [ -z "$(which jq)" ]; then
-  echo "jq is not installed. Please install jq to continue."
+  echo "jq is not installed. Please brew install jq to continue."
   exit 1
 fi
+
+TOKEN=$(curl -s -XPOST "${ELASTICSEARCH_URL}/_security/service/elastic/kibana/credential/token/${TOKEN_NAME}" | jq -r '.token.value')
 
 echo "Elasticsearch URL: ${ELASTICSEARCH_URL}"
 echo "Token Value: ${TOKEN}"
