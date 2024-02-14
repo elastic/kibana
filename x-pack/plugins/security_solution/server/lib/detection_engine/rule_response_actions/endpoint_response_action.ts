@@ -56,7 +56,6 @@ export const endpointResponseAction = async (
   switch (command) {
     case 'isolate':
       response = Promise.all(
-        // TODO:PT should this be throttled?
         Object.values(getIsolateAlerts(alerts)).map(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
@@ -127,8 +126,6 @@ export const endpointResponseAction = async (
 
         const foundFields = getProcessAlerts(alerts, processesActionRuleConfig);
         const notFoundField = getErrorProcessAlerts(alerts, processesActionRuleConfig);
-
-        // TODO:PT does this need to be throttled?
         const processActions = createProcessActionFromAlerts(foundFields);
         const processActionsWithError = createProcessActionFromAlerts(notFoundField);
 
