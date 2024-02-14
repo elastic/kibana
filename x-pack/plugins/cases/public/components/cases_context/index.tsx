@@ -8,13 +8,10 @@
 import type { Dispatch, ReactNode } from 'react';
 
 import { merge } from 'lodash';
-import React, { useCallback, useEffect, useState, useReducer } from 'react';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
-
 import { FilesContext } from '@kbn/shared-ux-file-context';
-
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
@@ -86,46 +83,40 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
-  const [value, setValue] = useState<CasesContextStateValue>(() => ({
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    owner,
-    permissions,
-    basePath,
-    /**
-     * The empty object at the beginning avoids the mutation
-     * of the DEFAULT_FEATURES object
-     */
-    features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
-      {},
-      DEFAULT_FEATURES,
-      features
-    ),
-    releasePhase,
-    dispatch,
-  }));
 
-  /**
-   * Only update the context if the nested permissions fields changed, this avoids a rerender when the object's reference
-   * changes.
-   */
-  useDeepCompareEffect(() => {
-    setValue((prev) => ({ ...prev, permissions }));
-  }, [permissions]);
-
-  /**
-   * `appId` and `appTitle` are dynamically retrieved from kibana context.
-   * We need to update the state if any of these values change, the rest of props are never updated.
-   */
-  useEffect(() => {
-    if (appId && appTitle) {
-      setValue((prev) => ({
-        ...prev,
-        appId,
-        appTitle,
-      }));
-    }
-  }, [appTitle, appId]);
+  const value = useMemo(
+    () => ({
+      appId,
+      appTitle,
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      permissions,
+      basePath,
+      /**
+       * The empty object at the beginning avoids the mutation
+       * of the DEFAULT_FEATURES object
+       */
+      features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
+        {},
+        DEFAULT_FEATURES,
+        features
+      ),
+      releasePhase,
+      dispatch,
+    }),
+    [
+      appId,
+      appTitle,
+      basePath,
+      externalReferenceAttachmentTypeRegistry,
+      features,
+      owner,
+      permissions,
+      persistableStateAttachmentTypeRegistry,
+      releasePhase,
+    ]
+  );
 
   const applyFilesContext = useCallback(
     (contextChildren: ReactNode) => {
