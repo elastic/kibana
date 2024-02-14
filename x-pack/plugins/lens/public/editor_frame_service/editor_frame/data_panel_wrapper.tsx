@@ -53,6 +53,7 @@ interface DataPanelWrapperProps {
   };
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
+  abortController?: AbortController;
 }
 
 const memoizeStrictlyEqual = memoizeOne((arg) => arg, isEqual);
@@ -171,6 +172,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     onChangeIndexPattern,
     indexPatternService: props.indexPatternService,
     frame: props.frame,
+    abortController: props.abortController,
     // Visualization can handle dataViews, so need to pass to the data panel the full list of used dataViews
     usedIndexPatterns: memoizeStrictlyEqual([
       ...((activeDatasourceId &&

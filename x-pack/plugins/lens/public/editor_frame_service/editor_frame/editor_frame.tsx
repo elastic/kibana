@@ -139,6 +139,7 @@ export function EditorFrame(props: EditorFrameProps) {
               hasSuggestionForField={hasSuggestionForField}
               indexPatternService={props.indexPatternService}
               frame={framePublicAPI}
+              abortController={props.abortController}
             />
           </ErrorBoundary>
         }

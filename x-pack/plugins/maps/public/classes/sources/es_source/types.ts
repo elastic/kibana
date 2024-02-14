@@ -49,7 +49,7 @@ export interface IESSource extends IVectorSource {
 
   getIndexPatternId(): string;
 
-  getGeoFieldName(): string;
+  getGeoFieldName(): string | undefined;
 
   loadStylePropsMeta({
     layerName,

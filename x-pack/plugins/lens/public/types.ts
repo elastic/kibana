@@ -589,6 +589,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
   usedIndexPatterns?: string[];
+  abortController?: AbortController;
 }
 
 /** @internal **/

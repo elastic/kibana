@@ -31,6 +31,7 @@ import {
   selectActiveDatasourceId,
   selectFramePublicAPI,
   selectIsManaged,
+  selectIsWorkspaceLoading,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -113,6 +114,9 @@ export function App({
     visualization,
     annotationGroups,
   } = useLensSelector((state) => state.lens);
+
+  const isWorkspaceLoading = useLensSelector(selectIsWorkspaceLoading);
+  const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -547,16 +551,18 @@ export function App({
     visualizationState: visualization,
   });
 
-  // todo: isLoading is always false
+  const [abortController, setAbortController] = useState(new AbortController());
 
-  // create new abort controller as soon as we are done loading, it will be used for next query
-  const abortController: AbortController | undefined = useMemo(() => {
-    if (!isLoading) return new AbortController();
-    return abortController;
-  }, [isLoading]);
+  useEffect(() => {
+    setIsQueryLoading(isWorkspaceLoading);
+    if (!isWorkspaceLoading) {
+      setAbortController(new AbortController());
+    }
+  }, [isWorkspaceLoading]);
 
   const onCancel = () => {
     abortController?.abort();
+    setIsQueryLoading(false);
   };
 
   return (
@@ -597,7 +603,7 @@ export function App({
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
           onCancel={onCancel}
-          isLoading={isLoading}
+          isLoading={isQueryLoading}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -608,6 +614,7 @@ export function App({
             indexPatternService={indexPatternService}
             getUserMessages={getUserMessages}
             addUserMessages={addUserMessages}
+            abortController={abortController}
           />
         )}
       </div>

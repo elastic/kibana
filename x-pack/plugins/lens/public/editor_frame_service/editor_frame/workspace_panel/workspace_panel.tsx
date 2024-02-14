@@ -72,6 +72,7 @@ import {
   DatasourceStates,
   DataViewsState,
   selectExecutionContextSearch,
+  setIsWorkspaceLoading,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import {
@@ -239,9 +240,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         events.push('ad_hoc_data_view');
       });
 
+      dispatchLens(setIsWorkspaceLoading(false));
+
       trackUiCounterEvents(events);
     }
-  }, [core.analytics]);
+  }, [core.analytics, dispatchLens]);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
@@ -725,10 +728,16 @@ export const VisualizationWrapper = ({
   displayOptions: VisualizationDisplayOptions | undefined;
   abortController?: AbortController;
 }) => {
+  const dispatchLens = useLensDispatch();
+
   useEffect(() => {
     onComponentRendered();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    dispatchLens(setIsWorkspaceLoading(true));
+  }, [dispatchLens, expression]);
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting

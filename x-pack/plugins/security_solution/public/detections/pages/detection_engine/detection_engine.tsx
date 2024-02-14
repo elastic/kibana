@@ -467,7 +467,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
                     <FilterByAssigneesPopover
-                      assignedUserIds={assignees}
+                      selectedUserIds={assignees}
                       onSelectionChange={handleSelectedAssignees}
                     />
                   </EuiFlexItem>

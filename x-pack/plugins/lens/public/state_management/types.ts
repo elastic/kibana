@@ -61,6 +61,7 @@ export interface LensAppState extends EditorFrameState {
   isSaveable: boolean;
 
   isLoading: boolean;
+  workspaceIsLoading: boolean;
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;

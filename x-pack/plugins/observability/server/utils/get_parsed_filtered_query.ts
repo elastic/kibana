@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  BoolQuery,
+  buildEsQuery,
+  Filter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
+import { SearchConfigurationType } from '../lib/rules/custom_threshold/types';
 
 export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<string, any>> = (
   filter
@@ -17,5 +24,26 @@ export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<
     return [parsedQuery];
   } catch (error) {
     return [];
+  }
+};
+
+export const getSearchConfigurationBoolQuery: (
+  searchConfiguration: SearchConfigurationType,
+  additionalFilters: Filter[]
+) => { bool: BoolQuery } = (searchConfiguration, additionalFilters) => {
+  try {
+    const searchConfigurationFilters = (searchConfiguration.filter as Filter[]) || [];
+    const filters = [...additionalFilters, ...searchConfigurationFilters];
+
+    return buildEsQuery(undefined, searchConfiguration.query, filters, {});
+  } catch (error) {
+    return {
+      bool: {
+        must: [],
+        must_not: [],
+        filter: [],
+        should: [],
+      },
+    };
   }
 };

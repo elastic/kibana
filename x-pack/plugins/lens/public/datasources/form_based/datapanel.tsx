@@ -184,6 +184,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   layerFields,
   showNoDataPopover,
   activeIndexPatterns,
+  abortController,
 }: Omit<
   DatasourceDataPanelProps,
   'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'

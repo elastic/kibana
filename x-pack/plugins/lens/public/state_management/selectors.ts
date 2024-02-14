@@ -40,6 +40,8 @@ export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
+export const selectIsWorkspaceLoading = (state: LensState) => state.lens.workspaceIsLoading;
+
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {
   const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;
