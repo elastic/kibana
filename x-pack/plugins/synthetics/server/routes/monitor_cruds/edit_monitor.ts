@@ -170,11 +170,14 @@ export const refreshInlineZip = async (
       normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
     [ConfigKey.CONFIG_ID]: previousMonitor.id,
   };
-  if (!!(monitorWithId as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE]) {
+  const inlineScript = (monitorWithId as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE] as
+    | string
+    | undefined;
+  if (!!inlineScript) {
     monitorWithId = {
       ...monitorWithId,
       [ConfigKey.SOURCE_PROJECT_CONTENT]: await inlineToProjectZip(
-        (monitorWithId as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE]!,
+        inlineScript,
         monitorWithId[ConfigKey.CONFIG_ID],
         server.logger
       ),
