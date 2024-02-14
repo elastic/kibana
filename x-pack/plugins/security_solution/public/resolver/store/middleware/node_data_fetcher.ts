@@ -43,7 +43,6 @@ export function NodeDataFetcher(
     const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state.analyzer[id])(
       Number.POSITIVE_INFINITY
     );
-
     const indices = selectors.eventIndices(state.analyzer[id]);
 
     if (newIDsToRequest.size <= 0) {

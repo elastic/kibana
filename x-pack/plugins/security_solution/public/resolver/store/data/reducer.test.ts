@@ -29,13 +29,6 @@ jest.mock('../../../common/utils/default_date_settings', () => {
   };
 });
 
-// const normalizedTimeRangeMock = normalizeTimeRange as jest.Mock;
-// jest.mock('../../../common/utils/normalize_time_range');
-
-// normalizedTimeRangeMock.mockImplementation((to: string, from: string) => ({
-//   to: new Date(to),
-//   from: new Date(from),
-// }));
 jest.mock('../../../common/utils/normalize_time_range', () => {
   const original = jest.requireActual('../../../common/utils/normalize_time_range');
   return {

@@ -67,10 +67,19 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
 
   const { selectedPatterns: analyzerPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
 
-  return {
-    selectedPatterns: isDatePickerAndSourcererDisabled ? selectedPatterns : analyzerPatterns,
+  return useMemo(() => {
+    return {
+      selectedPatterns: isDatePickerAndSourcererDisabled ? selectedPatterns : analyzerPatterns,
+      from,
+      to,
+      shouldUpdate,
+    };
+  }, [
+    selectedPatterns,
     from,
     to,
     shouldUpdate,
-  };
+    isDatePickerAndSourcererDisabled,
+    analyzerPatterns,
+  ]);
 }
