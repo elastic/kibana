@@ -2698,6 +2698,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -2745,6 +2748,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -2794,6 +2800,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -2841,6 +2850,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"

@@ -1768,6 +1768,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1802,6 +1804,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1836,6 +1840,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1870,6 +1876,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
