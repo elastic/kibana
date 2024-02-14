@@ -304,17 +304,12 @@ export function canPrependTimeFieldColumn(
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
-  if (!showTimeCol) {
+  if (!showTimeCol || !timeFieldName) {
     return false;
   }
 
   if (isPlainRecord) {
-    return (
-      !!columnTypes &&
-      !!timeFieldName &&
-      timeFieldName in columnTypes &&
-      columns.includes('_source')
-    );
+    return !!columnTypes && timeFieldName in columnTypes && columns.includes('_source');
   }
 
   return true;

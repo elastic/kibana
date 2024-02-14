@@ -9,6 +9,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const SEARCH_NO_COLUMNS = 'searchNoColumns';
+const SEARCH_WITH_ONLY_TIMESTAMP = 'searchWithOnlyTimestampColumn';
+const SEARCH_WITH_SELECTED_COLUMNS = 'searchWithSelectedColumns';
+const SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP = 'searchWithSelectedColumnsAndTimestamp';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
@@ -22,6 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -39,9 +46,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
     [false, true].forEach((hideTimeFieldColumnSetting) => {
+      const savedSearchSuffix = hideTimeFieldColumnSetting ? 'HideTimeField' : 'ShowTimeField';
+
       describe(`should${hideTimeFieldColumnSetting ? ' not' : ''} add a time field column`, () => {
         beforeEach(async () => {
           await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -56,16 +66,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         describe('data view mode', () => {
           describe('time-based data view', () => {
             it('should render initial columns correctly', async () => {
+              // check in Discover
               expect(await dataGrid.getHeaderFields()).to.eql(
                 hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
               );
+              await PageObjects.discover.saveSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
+              await PageObjects.discover.waitUntilSearchingHasFinished();
 
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
+              await PageObjects.discover.waitUntilSearchingHasFinished();
               await retry.try(async () => {
                 expect(await dataGrid.getHeaderFields()).to.eql(
                   hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document'] // legacy behaviour
                 );
               });
+
+              await PageObjects.discover.saveSearch(
+                `${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}`,
+                true
+              );
+              await PageObjects.discover.waitUntilSearchingHasFinished();
 
               await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
               await retry.try(async () => {
@@ -73,9 +93,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
                 );
               });
+
+              await PageObjects.common.navigateToApp('dashboard');
+              await PageObjects.dashboard.clickNewDashboard();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(
+                  hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
+                );
+              });
+
+              // check in Dashboard
+              await dashboardPanelActions.removePanelByTitle(
+                `${SEARCH_NO_COLUMNS}${savedSearchSuffix}`
+              );
+              await PageObjects.header.waitUntilLoadingHasFinished();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(
+                `${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}`
+              );
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(
+                  hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document'] // legacy behaviour
+                );
+              });
             });
 
             it('should render selected columns correctly', async () => {
+              // check in Discover
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
 
@@ -87,6 +139,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 );
               });
 
+              await PageObjects.discover.saveSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`
+              );
+              await PageObjects.discover.waitUntilSearchingHasFinished();
+
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
               await retry.try(async () => {
                 expect(await dataGrid.getHeaderFields()).to.eql([
@@ -95,6 +152,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   '@timestamp',
                 ]);
               });
+
+              await PageObjects.discover.saveSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}`,
+                true
+              );
+              await PageObjects.discover.waitUntilSearchingHasFinished();
 
               await dataGrid.clickMoveColumnLeft('@timestamp');
               await retry.try(async () => {
@@ -121,6 +184,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     ? ['bytes', 'extension']
                     : ['@timestamp', 'bytes', 'extension']
                 );
+              });
+
+              // check in Dashboard
+              await PageObjects.common.navigateToApp('dashboard');
+              await PageObjects.dashboard.clickNewDashboard();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`
+              );
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(
+                  hideTimeFieldColumnSetting
+                    ? ['bytes', 'extension']
+                    : ['@timestamp', 'bytes', 'extension']
+                );
+              });
+
+              await dashboardPanelActions.removePanelByTitle(
+                `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`
+              );
+              await PageObjects.header.waitUntilLoadingHasFinished();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}`
+              );
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql([
+                  'bytes',
+                  'extension',
+                  '@timestamp',
+                ]);
               });
             });
           });
@@ -135,14 +235,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             it('should render initial columns correctly', async () => {
               expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
 
+              await PageObjects.discover.saveSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}-`);
+              await PageObjects.discover.waitUntilSearchingHasFinished();
+
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
               await retry.try(async () => {
                 expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp']);
               });
 
+              await PageObjects.discover.saveSearch(
+                `${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}-`,
+                true
+              );
+              await PageObjects.discover.waitUntilSearchingHasFinished();
+
               await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
               await retry.try(async () => {
                 expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
+              });
+
+              // check in Dashboard
+              await PageObjects.common.navigateToApp('dashboard');
+              await PageObjects.dashboard.clickNewDashboard();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}-`);
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
+              });
+
+              await dashboardPanelActions.removePanelByTitle(
+                `${SEARCH_NO_COLUMNS}${savedSearchSuffix}-`
+              );
+              await PageObjects.header.waitUntilLoadingHasFinished();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(
+                `${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}-`
+              );
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp']);
               });
             });
 
@@ -154,6 +290,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
               });
 
+              await PageObjects.discover.saveSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}-`
+              );
+              await PageObjects.discover.waitUntilSearchingHasFinished();
+
               await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
               await retry.try(async () => {
                 expect(await dataGrid.getHeaderFields()).to.eql([
@@ -162,6 +303,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   '@timestamp',
                 ]);
               });
+
+              await PageObjects.discover.saveSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}-`,
+                true
+              );
+              await PageObjects.discover.waitUntilSearchingHasFinished();
 
               await dataGrid.clickMoveColumnLeft('@timestamp');
               await retry.try(async () => {
@@ -184,6 +331,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
               await retry.try(async () => {
                 expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
+              });
+
+              // check in Dashboard
+              await PageObjects.common.navigateToApp('dashboard');
+              await PageObjects.dashboard.clickNewDashboard();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}-`
+              );
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
+              });
+
+              await dashboardPanelActions.removePanelByTitle(
+                `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}-`
+              );
+              await PageObjects.header.waitUntilLoadingHasFinished();
+              await dashboardAddPanel.clickOpenAddPanel();
+              await dashboardAddPanel.addSavedSearch(
+                `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}-`
+              );
+              await dashboardAddPanel.closeAddPanel();
+              await PageObjects.header.waitUntilLoadingHasFinished();
+
+              await retry.try(async () => {
+                expect(await dataGrid.getHeaderFields()).to.eql([
+                  'bytes',
+                  'extension',
+                  '@timestamp',
+                ]);
               });
             });
           });

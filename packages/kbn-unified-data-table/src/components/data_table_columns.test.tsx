@@ -209,7 +209,7 @@ describe('Data table columns', function () {
     });
 
     describe('dataView without timeField', () => {
-      it('should forward showTimeCol if no _source columns is passed', () => {
+      it('should return false if no _source columns is passed', () => {
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
@@ -219,7 +219,7 @@ describe('Data table columns', function () {
               showTimeCol,
               false
             )
-          ).toBe(showTimeCol);
+          ).toBe(false);
         }
       });
 
@@ -237,7 +237,7 @@ describe('Data table columns', function () {
         }
       });
 
-      it('should forward showTimeCol if _source column is passed', () => {
+      it('should return false if _source column is passed', () => {
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
@@ -247,7 +247,7 @@ describe('Data table columns', function () {
               showTimeCol,
               false
             )
-          ).toBe(showTimeCol);
+          ).toBe(false);
         }
       });
 

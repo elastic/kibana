@@ -229,9 +229,10 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
-    [uiSettings, dataView.timeFieldName]
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [uiSettings]
   );
 
   const columnTypes: DataTableColumnTypes | undefined = useMemo(
