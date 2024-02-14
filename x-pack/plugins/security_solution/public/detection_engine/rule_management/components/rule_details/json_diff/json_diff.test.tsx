@@ -177,4 +177,30 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
   });
 
+  it('Technical properties should not be included in preview', () => {
+    const oldRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 1,
+      revision: 100,
+      created_at: '12/31/2023T23:59:999z',
+      created_by: 'mockUserOne',
+      updated_at: '01/01/2024T00:00:000z',
+      updated_by: 'mockUserTwo',
+    };
+
+    const newRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 2,
+      revision: 1,
+      created_at: '12/31/2023T23:59:999z',
+      created_by: 'mockUserOne',
+      updated_at: '02/02/2024T00:00:000z',
+      updated_by: 'mockUserThree',
+    };
+
+    render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+    ['revision', 'created_at', 'created_by', 'updated_at', 'updated_by'].forEach((property) => {
+      expect(screen.queryAllByText(matchInOrder([property]))).toHaveLength(0);
+    });
+  });
 });
