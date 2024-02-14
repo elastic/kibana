@@ -269,6 +269,13 @@ export const postActionsConnectorExecuteRoute = (
                 }),
               ],
             });
+            await dataClient?.updateConversation({
+              existingConversation: conversation,
+              conversationUpdateProps: {
+                id: conversation.id,
+                replacements: latestReplacements,
+              },
+            });
           }
           return response.ok({
             body: {
