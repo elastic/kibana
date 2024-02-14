@@ -8,6 +8,8 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import {
+  EuiToolTip,
+  EuiIcon,
   EuiSpacer,
   useEuiFontSize,
   EuiButtonIcon,
@@ -148,16 +150,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
       <EuiAccordion
         initialIsOpen
         id="asset-criticality-selector"
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
-                defaultMessage="Asset Criticality"
-              />
-            </h3>
-          </EuiTitle>
-        }
+        buttonContent={<AssetCriticalityTitle />}
         buttonProps={{
           css: css`
             color: ${euiTheme.colors.primary};
@@ -171,6 +164,34 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
     </>
   );
 };
+
+export const AssetCriticalityTitle = () => (
+  <EuiTitle size="xs">
+    <h3>
+      <EuiToolTip
+        position="top"
+        content={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
+            defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk engine is enabled, the asset classification tier will dynamically impact the entity risk."
+          />
+        }
+      >
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
+              defaultMessage="Asset Criticality"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="iInCircle" color="subdued" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
+    </h3>
+  </EuiTitle>
+);
 
 interface ModalProps {
   criticality: State;
