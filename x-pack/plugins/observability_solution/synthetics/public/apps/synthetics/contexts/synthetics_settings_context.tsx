@@ -41,6 +41,7 @@ export interface SyntheticsAppProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
   isDev: boolean;
+  isServerless: boolean;
 }
 
 export interface SyntheticsSettingsContextValues {
@@ -51,8 +52,10 @@ export interface SyntheticsSettingsContextValues {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   commonlyUsedRanges?: CommonlyUsedDateRange[];
   isDev?: boolean;
+  isServerless?: boolean;
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
@@ -72,6 +75,9 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isLogsAvailable: true,
   isDev: false,
   canSave: false,
+  setBreadcrumbs: () => {
+    throw Error('Not implemented');
+  },
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
@@ -79,8 +85,16 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
   children,
   ...props
 }) => {
-  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges, isDev } =
-    props;
+  const {
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    commonlyUsedRanges,
+    isDev,
+    setBreadcrumbs,
+    isServerless,
+  } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -99,6 +113,8 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
       commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
+      setBreadcrumbs,
+      isServerless,
     };
   }, [
     canSave,
@@ -110,6 +126,8 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
     dateRangeStart,
     dateRangeEnd,
     commonlyUsedRanges,
+    setBreadcrumbs,
+    isServerless,
   ]);
 
   return <SyntheticsSettingsContext.Provider value={value} children={children} />;
