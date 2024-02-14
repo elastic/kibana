@@ -76,6 +76,7 @@ export interface KibanaMigratorTestKitParams {
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   defaultIndexTypesMap?: IndexTypesMap;
+  hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
   clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
@@ -131,6 +132,7 @@ export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
   defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
+  hashToVersionMap = {}, // allows testing the md5 => modelVersion transition
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
@@ -163,6 +165,7 @@ export const getKibanaMigratorTestKit = async ({
     loggerFactory,
     kibanaIndex,
     defaultIndexTypesMap,
+    hashToVersionMap,
     kibanaVersion,
     kibanaBranch,
     nodeRoles,
@@ -275,6 +278,7 @@ interface GetMigratorParams {
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
@@ -288,6 +292,7 @@ const getMigrator = async ({
   kibanaIndex,
   typeRegistry,
   defaultIndexTypesMap,
+  hashToVersionMap,
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
@@ -314,6 +319,7 @@ const getMigrator = async ({
     kibanaIndex,
     typeRegistry,
     defaultIndexTypesMap,
+    hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
@@ -322,6 +328,17 @@ const getMigrator = async ({
     nodeRoles,
     esCapabilities,
   });
+};
+
+export const deleteSavedObjectIndices = async (
+  client: ElasticsearchClient,
+  index: string[] = ALL_SAVED_OBJECT_INDICES
+) => {
+  const indices = await client.indices.get({ index, allow_no_indices: true }, { ignore: [404] });
+  return await client.indices.delete(
+    { index: Object.keys(indices), allow_no_indices: true },
+    { ignore: [404] }
+  );
 };
 
 export const getAggregatedTypesCount = async (
