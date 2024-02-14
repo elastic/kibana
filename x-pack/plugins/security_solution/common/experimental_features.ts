@@ -160,11 +160,6 @@ export const allowedExperimentalValues = Object.freeze({
   alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /*
-   * Enables experimental Entity Analytics Asset Criticality feature
-   */
-  entityAnalyticsAssetCriticalityEnabled: false,
-
-  /*
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: false,
