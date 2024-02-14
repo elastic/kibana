@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
@@ -12,9 +13,11 @@ import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout } from '../chat/chat_flyout';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
+  const { plugins } = useKibana().services;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -44,15 +47,16 @@ export function ObservabilityAIAssistantActionMenuItem() {
     };
   }, []);
 
+  const time = plugins.start.data.query.timefilter.timefilter.getTime();
   useEffect(() => {
-    const unregister = service.setScreenContext({
-      screenDescription: 'The user is looking at ' + window.location.href,
-    });
+    const start = datemath.parse(time.from)?.format();
+    const end = datemath.parse(time.to)?.format();
+    console.log(start, end);
 
-    return () => {
-      unregister();
-    };
-  }, [service]);
+    return service.setScreenContext({
+      screenDescription: `The user is looking at ${window.location.href}. The current time range is ${start} - ${end}.`,
+    });
+  }, [service, time]);
 
   if (!service.isEnabled()) {
     return null;
