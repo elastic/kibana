@@ -33,6 +33,19 @@ interface TestRunProps extends EsRunProps {
   kibanaInstallDir: string | undefined;
 }
 
+const readFilesRecursively = (dir: string, callback: Function) => {
+  const files = fs.readdirSync(dir);
+  files.forEach((file) => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat.isDirectory()) {
+      readFilesRecursively(filePath, callback);
+    } else if (stat.isFile()) {
+      callback(filePath);
+    }
+  });
+};
+
 async function startEs(props: EsRunProps) {
   const { procRunner, log, logsDir } = props;
   await procRunner.run('es', {
@@ -110,27 +123,15 @@ run(
 
     const journeys: Journey[] = [];
 
-    if (journeyPath) {
-      const isDirectory = fs.statSync(journeyPath).isDirectory();
-      if (isDirectory) {
-        const files = fs.readdirSync(journeyPath);
-        journeys.push(
-          ...files.map((file) => {
-            return {
-              name: path.parse(file).name,
-              path: path.resolve(journeyPath, file),
-            };
-          })
-        );
-      } else {
-        journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
-      }
+    if (journeyPath && fs.statSync(journeyPath).isFile()) {
+      journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
     } else {
-      // reading all existing journeys
-      const journeyBasePath = path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
-      journeys.push(
-        ...fs.readdirSync(journeyBasePath).map((file) => {
-          return { name: path.parse(file).name, path: path.join(journeyBasePath, file) };
+      // default dir is x-pack/performance/journeys
+      const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+      readFilesRecursively(dir, (filePath: string) =>
+        journeys.push({
+          name: path.parse(filePath).name,
+          path: path.resolve(dir, filePath),
         })
       );
     }
