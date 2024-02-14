@@ -26,7 +26,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "anthropic.claude-v2",
+        "default": "anthropic.claude-v2:1",
         "error": [Function],
         "presence": "optional",
       },
