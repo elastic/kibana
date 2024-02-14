@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MLErrorObject, ErrorType } from './types';
+import type { MLErrorObject, ErrorType } from './types';
 
 /**
  * ML Request Failure

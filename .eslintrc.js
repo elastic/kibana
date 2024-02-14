@@ -1008,6 +1008,7 @@ module.exports = {
         'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',

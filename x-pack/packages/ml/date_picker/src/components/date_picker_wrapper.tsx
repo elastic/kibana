@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
+import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
 import {
   useIsWithinMaxBreakpoint,
   EuiButton,
@@ -16,8 +18,6 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   type EuiSuperDatePickerProps,
-  OnRefreshProps,
-  OnTimeChangeProps,
 } from '@elastic/eui';
 
 import type { TimeRange } from '@kbn/es-query';

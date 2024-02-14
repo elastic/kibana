@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { ML_JOB_AGGREGATION, KIBANA_AGGREGATION, ES_AGGREGATION } from './aggregation_types';
+import type { ML_JOB_AGGREGATION, KIBANA_AGGREGATION, ES_AGGREGATION } from './aggregation_types';
 import { MLCATEGORY } from './field_types';
 
 /**
