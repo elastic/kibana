@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, within } from '@testing-library/react';
+import { render, within, screen } from '@testing-library/react';
 import type { Matcher } from '@testing-library/react';
 import { escapeRegExp } from 'lodash';
 
@@ -82,7 +82,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
 
     const { getByText } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
 
-    /* Line update */
+    /* LINE UPDATE */
     const updatedLine = getByText(matchInOrder(['-', 'version', '1', '+', 'version', '2']));
 
     const updatedLineBefore = within(updatedLine).getByText(matchInOrder(['version', '1']));
@@ -97,16 +97,67 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     const updatedWordAfter = within(updatedLineAfter).getByText('2');
     expect(updatedWordAfter).toHaveStyle(`background: ${addedAccentColor}`);
 
-    /* Line removal */
+    /* LINE REMOVAL */
+    /* Check that the removed line is displayed only once */
+    expect(screen.queryAllByText(matchInOrder(['Bob']))).toHaveLength(1);
+
+    /* Removed line appears in the "before" column */
     const removedLine = getByText(matchInOrder(['-', 'Bob']));
 
     const removedLineBefore = within(removedLine).getByText(matchInOrder(['Bob']));
     expect(removedLineBefore).toHaveStyle(`background: ${removedBackgroundColor}`);
 
-    /* Line addition */
+    /* LINE ADDITION */
+    /* Check that the added line is displayed only once */
+    expect(screen.queryAllByText(matchInOrder(['GPLv3']))).toHaveLength(1);
+
+    /* Added line appears in the "after" column */
     const addedLine = getByText(matchInOrder(['+', 'license', 'GPLv3']));
 
     const addedLineAfter = within(addedLine).getByText(matchInOrder(['license', 'GPLv3']));
     expect(addedLineAfter).toHaveStyle(`background: ${addedBackgroundColor}`);
+  });
+
+  it('Rule actions and exception lists should not be shown as modified', () => {
+    const testAction = {
+      group: 'default',
+      id: 'my-action-id',
+      params: { body: '{"test": true}' },
+      action_type_id: '.webhook',
+      uuid: '1ef8f105-7d0d-434c-9ba1-2e053edddea8',
+      frequency: {
+        summary: true,
+        notifyWhen: 'onActiveAlert',
+        throttle: null,
+      },
+    } as const;
+
+    const oldRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 1,
+      actions: [testAction],
+    };
+
+    const newRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 2,
+    };
+
+    /* Case: rule update doesn't have the "actions" property */
+    const { rerender } = render(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule }} />);
+    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
+
+    /* Case: rule update has "actions" equal to an empty array */
+    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, actions: [] }} />);
+    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
+
+    /* Case: rule update has an action */
+    rerender(
+      <RuleDiffTab
+        oldRule={{ ...oldRule }}
+        newRule={{ ...newRule, actions: [{ ...testAction, id: 'my-other-action' }] }}
+      />
+    );
+    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
   });
 });
