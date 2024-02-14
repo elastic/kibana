@@ -54,7 +54,7 @@ import {
   ObservabilityAIAssistantPluginStart,
   ObservabilityAIAssistantPluginSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -99,6 +99,7 @@ export interface ClientPluginsStart {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
+  serverless: ServerlessPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -164,8 +165,8 @@ export class UptimePlugin
         },
         {
           id: 'management',
-          title: i18n.translate('xpack.synthetics.managementPage.linkText', {
-            defaultMessage: 'Management',
+          title: i18n.translate('xpack.synthetics.monitorsPage.linkText', {
+            defaultMessage: 'Monitors',
           }),
           path: '/monitors',
           visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
