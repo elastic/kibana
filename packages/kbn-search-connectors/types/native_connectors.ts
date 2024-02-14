@@ -964,7 +964,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.gmail.subject.label', {
-          defaultMessage: 'Subject',
+          defaultMessage: 'Google Workspace admin email',
         }),
         options: [],
         order: 2,
