@@ -112,6 +112,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    *
    * @default ['globalSearch', 'sideNav']
    * unless the status is marked as `inaccessible`.
+   * @note Set to `[]` (empty array) to hide this link
    */
   visibleIn?: AppDeepLinkLocations[];
 
