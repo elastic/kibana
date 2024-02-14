@@ -9,7 +9,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SloOverviewDetails } from './slo_overview_details';
 import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
@@ -62,6 +63,8 @@ export function SloOverview({
     list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
   });
 
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
+
   useEffect(() => {
     refetch();
   }, [lastRefreshTime, refetch]);
@@ -112,7 +115,13 @@ export function SloOverview({
 
   return (
     <div ref={containerRef} style={{ width: '100%' }}>
-      <SloCardChart slo={slo} historicalSliData={historicalSliData ?? []} />
+      <SloCardChart
+        slo={slo}
+        historicalSliData={historicalSliData ?? []}
+        onClick={() => {
+          setSelectedSlo(slo);
+        }}
+      />
       <SloCardBadgesPortal containerRef={containerRef}>
         <SloCardItemBadges
           slo={slo}
@@ -121,6 +130,7 @@ export function SloOverview({
           hasGroupBy={hasGroupBy}
         />
       </SloCardBadgesPortal>
+      <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </div>
   );
 }
