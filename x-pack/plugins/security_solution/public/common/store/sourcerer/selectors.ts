@@ -4,108 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createSelector } from 'reselect';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { State } from '../types';
-import type {
-  SourcererDataView,
-  SourcererModel,
-  SourcererScope,
-  SourcererScopeName,
-} from './model';
-export const sourcererKibanaDataViewsSelector = ({
-  sourcerer,
-}: State): SourcererModel['kibanaDataViews'] => sourcerer.kibanaDataViews;
+import type { SourcererModel, SourcererScopeName } from './model';
 
-export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
-  sourcerer.signalIndexName;
+const selectSourcerer = (state: State): SourcererModel => state.sourcerer;
 
-export const sourcererDefaultDataViewSelector = ({
-  sourcerer,
-}: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
+export const sourcererScopes = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.sourcererScopes
+);
 
-export const dataViewSelector = (
-  { sourcerer }: State,
-  id: string | null
-): SourcererDataView | undefined =>
-  sourcerer.kibanaDataViews.find((dataView) => dataView.id === id);
+export const sourcererScope = createSelector(
+  sourcererScopes,
+  (state: State, scopeId: SourcererScopeName) => scopeId,
+  (scopes, scopeId) => scopes[scopeId]
+);
 
-export const sourcererScopeIdSelector = (
-  { sourcerer }: State,
-  scopeId: SourcererScopeName
-): SourcererScope => sourcerer.sourcererScopes[scopeId];
+export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading);
 
-export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (scope) => scope);
+export const sourcererScopeSelectedDataViewId = createSelector(
+  sourcererScope,
+  (scope) => scope.selectedDataViewId
+);
 
-export const kibanaDataViewsSelector = () =>
-  createSelector(sourcererKibanaDataViewsSelector, (dataViews) => dataViews);
+export const sourcererScopeSelectedPatterns = createSelector(
+  sourcererScope,
+  (scope) => scope.selectedPatterns
+);
 
-export const signalIndexNameSelector = () =>
-  createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
+export const sourcererScopeMissingPatterns = createSelector(
+  sourcererScope,
+  (scope) => scope.missingPatterns
+);
 
-export const defaultDataViewSelector = () =>
-  createSelector(sourcererDefaultDataViewSelector, (dataViews) => dataViews);
+export const kibanaDataViews = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.kibanaDataViews
+);
 
-export const sourcererDataViewSelector = () =>
-  createSelector(dataViewSelector, (dataView) => dataView);
+export const defaultDataView = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.defaultDataView
+);
 
-export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
-  selectedDataView: SourcererDataView | undefined;
-  sourcererScope: SourcererScope;
-}
-
-export const getSourcererDataViewsSelector = () => {
-  const getKibanaDataViewsSelector = kibanaDataViewsSelector();
-  const getDefaultDataViewSelector = defaultDataViewSelector();
-  const getSignalIndexNameSelector = signalIndexNameSelector();
-  return (state: State): Omit<SourcererModel, 'sourcererScopes'> => {
-    const kibanaDataViews = getKibanaDataViewsSelector(state);
-    const defaultDataView = getDefaultDataViewSelector(state);
-    const signalIndexName = getSignalIndexNameSelector(state);
-
-    return {
-      defaultDataView,
-      kibanaDataViews,
-      signalIndexName,
-    };
-  };
-};
-
-/**
- * Attn Future Developer
- * Access sourcererScope.selectedPatterns from
- * hook useSourcererDataView in `common/containers/sourcerer/index`
- * in order to get exclude patterns for searches
- * Access sourcererScope.selectedPatterns
- * from this function for display purposes only
- * */
-export const getSourcererScopeSelector = () => {
-  const getDataViewsSelector = getSourcererDataViewsSelector();
-  const getSourcererDataViewSelector = sourcererDataViewSelector();
-  const getScopeSelector = scopeIdSelector();
-
-  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
-    const dataViews = getDataViewsSelector(state);
-    const scope = getScopeSelector(state, scopeId);
-    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
-
-    return {
-      ...dataViews,
-      selectedDataView,
-      sourcererScope: scope,
-    };
-  };
-};
-
-export const getSelectedDataviewSelector = () => {
-  const getSourcererDataViewSelector = sourcererDataViewSelector();
-  const getScopeSelector = scopeIdSelector();
-
-  return (state: State, scopeId: SourcererScopeName): DataViewSpec | undefined => {
-    const scope = getScopeSelector(state, scopeId);
-    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
-
-    return selectedDataView?.dataView;
-  };
-};
+export const signalIndexName = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.signalIndexName
+);
