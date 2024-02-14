@@ -28,6 +28,11 @@ export function SettingsTab() {
     observabilityAIAssistant,
   } = useAppContext();
 
+  // If the AI Assistant is not available, don't render the settings tab
+  if (!observabilityAIAssistant) {
+    return null;
+  }
+
   const {
     connectors = [],
     selectedConnector,

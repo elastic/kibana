@@ -62,6 +62,7 @@ import {
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 
 import './overwrite.scss';
 
@@ -111,6 +112,9 @@ export interface TextBasedLanguagesEditorProps {
 
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
+
+  /** hide @timestamp info **/
+  hideTimeFilterInfo?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -165,6 +169,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   disableSubmitAction,
   dataTestSubj,
   allowQueryCancellation,
+  hideTimeFilterInfo,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -772,44 +777,22 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       </EuiBadge>
                     )}
                     {!isCompactFocused && editorMessages.errors.length > 0 && (
-                      <EuiBadge
-                        color={euiTheme.colors.danger}
-                        css={styles.errorsBadge}
-                        iconType="error"
-                        iconSide="left"
-                        data-test-subj="TextBasedLangEditor-inline-errors-badge"
-                        title={i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.errorCountTitle',
-                          {
-                            defaultMessage:
-                              '{count} {count, plural, one {error} other {errors}} found',
-                            values: { count: editorMessages.errors.length },
-                          }
-                        )}
-                      >
-                        {editorMessages.errors.length}
-                      </EuiBadge>
+                      <ErrorsWarningsCompactViewPopover
+                        items={editorMessages.errors}
+                        type="error"
+                        onErrorClick={onErrorClick}
+                        popoverCSS={styles.errorsBadge}
+                      />
                     )}
                     {!isCompactFocused &&
                       editorMessages.warnings.length > 0 &&
                       editorMessages.errors.length === 0 && (
-                        <EuiBadge
-                          color={euiTheme.colors.warning}
-                          css={styles.errorsBadge}
-                          iconType="warning"
-                          iconSide="left"
-                          data-test-subj="TextBasedLangEditor-inline-warning-badge"
-                          title={i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.warningCountTitle',
-                            {
-                              defaultMessage:
-                                '{count} {count, plural, one {warning} other {warnings}} found',
-                              values: { count: editorMessages.warnings.length },
-                            }
-                          )}
-                        >
-                          {editorMessages.warnings.length}
-                        </EuiBadge>
+                        <ErrorsWarningsCompactViewPopover
+                          items={editorMessages.warnings}
+                          type="warning"
+                          onErrorClick={onErrorClick}
+                          popoverCSS={styles.errorsBadge}
+                        />
                       )}
                     <CodeEditor
                       languageId={languageId(language)}
@@ -903,6 +886,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         isSpaceReduced={isSpaceReduced}
                         isLoading={isQueryLoading}
                         allowQueryCancellation={allowQueryCancellation}
+                        hideTimeFilterInfo={hideTimeFilterInfo}
                       />
                     )}
                   </div>
@@ -999,6 +983,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           isSpaceReduced={isSpaceReduced}
           isLoading={isQueryLoading}
           allowQueryCancellation={allowQueryCancellation}
+          hideTimeFilterInfo={hideTimeFilterInfo}
           {...editorMessages}
         />
       )}

@@ -51,11 +51,13 @@ function ChatContent({
   initialMessages: Message[];
   connectorId: string;
 }) {
+  const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
 
   const initialMessagesRef = useRef(initialMessages);
 
   const { messages, next, state, stop } = useChat({
+    service,
     chatService,
     connectorId,
     initialMessages,
