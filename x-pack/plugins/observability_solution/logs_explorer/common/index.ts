@@ -17,6 +17,9 @@ export {
   DataViewSelection,
   datasetSelectionPlainRT,
   hydrateDatasetSelection,
+  isDatasetSelection,
+  isDataViewSelection,
+  isUnresolvedDatasetSelection,
   UnresolvedDatasetSelection,
 } from './dataset_selection';
 export type { DatasetSelectionPlain } from './dataset_selection';

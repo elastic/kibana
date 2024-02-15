@@ -6,8 +6,8 @@
  */
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
+import { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
 import {
   DataViewSelection,
@@ -18,19 +18,18 @@ import {
 } from '../../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
-import { redirectToDiscover } from './discover_service';
 
 interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
+  events?: LogsExplorerCustomizations['events'];
 }
 
 export const initializeSelection =
   ({
     datasetsClient,
     dataViews,
-    discover,
+    events,
   }: LogsExplorerControllerSelectionServiceDeps): InvokeCreator<
     LogsExplorerControllerContext,
     LogsExplorerControllerEvent
@@ -61,14 +60,10 @@ export const initializeSelection =
       }
 
       /**
-       * If the selection is a data view which is not of logs type, redirect to Discover.
+       * If the selection is a data view which is not of logs type, invoke the customization event for unknown data views.
        */
-      if (datasetSelection.selection.dataView.isUnknownDataType()) {
-        return redirectToDiscover({
-          context,
-          datasetSelection: context.datasetSelection,
-          discover,
-        });
+      if (datasetSelection.selection.dataView.isUnknownDataType() && events?.onUknownDataViewSelection(context)) {
+        return events.onUknownDataViewSelection(context);
       }
 
       return send({ type: 'INITIALIZE_DATA_VIEW', data: datasetSelection });
