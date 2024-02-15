@@ -23,7 +23,6 @@ import type {
 } from '..';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
-import { mlJobService } from '../../application/services/job_service';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import { useTimeSeriesExplorerService } from '../../application/util/time_series_explorer_service';
 import './_index.scss';
@@ -65,7 +64,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
   const [jobsLoaded, setJobsLoaded] = useState(false);
 
-  const { mlApiServices } = services[2];
+  const { mlApiServices, mlJobService } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
     embeddableInput,
     refresh,
@@ -90,6 +89,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
       setJobsLoaded(true);
     }
     loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(

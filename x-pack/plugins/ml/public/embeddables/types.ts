@@ -19,6 +19,7 @@ import type { AnomalyTimelineService } from '../application/services/anomaly_tim
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
+import type { MlJobService } from '../application/services/job_service';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
@@ -135,6 +136,7 @@ export interface SingleMetricViewerServices {
   mlApiServices: MlApiServices;
   mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
+  mlJobService: MlJobService;
   mlResultsService: MlResultsService;
   mlTimeSeriesSearchService?: MlTimeSeriesSeachService;
 }

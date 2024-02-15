@@ -78,25 +78,33 @@ export class SingleMetricViewerEmbeddableFactory
       { fieldFormatServiceFactory },
       { indexServiceFactory },
       { mlApiServicesProvider },
+      { mlJobServiceFactory },
       { mlResultsServiceProvider },
       { MlCapabilitiesService },
       { timeSeriesSearchServiceFactory },
+      { toastNotificationServiceProvider },
     ] = await Promise.all([
       await this.getStartServices(),
       await import('../../application/services/anomaly_detector_service'),
       await import('../../application/services/field_format_service_factory'),
       await import('../../application/util/index_service'),
       await import('../../application/services/ml_api_service'),
+      await import('../../application/services/job_service'),
       await import('../../application/services/results_service'),
       await import('../../application/capabilities/check_capabilities'),
       await import(
         '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
       ),
+      await import('../../application/services/toast_notification_service'),
     ]);
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
+    const mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(coreStart.notifications.toasts),
+      mlApiServices
+    );
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
     const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
       mlResultsService,
@@ -127,11 +135,12 @@ export class SingleMetricViewerEmbeddableFactory
       {
         anomalyDetectorService,
         anomalyExplorerService,
-        mlResultsService,
         mlApiServices,
-        mlTimeSeriesSearchService,
-        mlFieldFormatService,
         mlCapabilities,
+        mlFieldFormatService,
+        mlJobService,
+        mlResultsService,
+        mlTimeSeriesSearchService,
       },
     ];
   }
