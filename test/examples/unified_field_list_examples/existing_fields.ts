@@ -30,6 +30,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'timePicker', 'header', 'unifiedFieldList']);
   const dataViewTitle = 'existence_index_*';
 
@@ -73,7 +74,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+      await retry.waitFor('meta fields section to open', async () => {
+        await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+        return await find.existsByCssSelector(
+          `${PageObjects.unifiedFieldList.getSidebarSectionSelector(
+            'meta',
+            true
+          )}.euiAccordion-isOpen`
+        );
+      });
     });
 
     after(async () => {

@@ -28,6 +28,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
+  const find = getService('find');
   const PageObjects = getPageObjects([
     'common',
     'timePicker',
@@ -78,7 +79,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+      await retry.waitFor('meta fields section to open', async () => {
+        await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+        return await find.existsByCssSelector(
+          `${PageObjects.unifiedFieldList.getSidebarSectionSelector(
+            'meta',
+            true
+          )}.euiAccordion-isOpen`
+        );
+      });
     });
 
     after(async () => {
@@ -92,8 +101,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/172781
-    describe.skip('existence', () => {
+    describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const sidebarFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(sidebarFields.sort()).to.eql([...metaFields, ...fieldsWithData].sort());
