@@ -72,6 +72,7 @@ export const CreateSloLinkForValidState = React.memo(
     return (
       <>
         <EuiHeaderLink
+          color="primary"
           onClick={() => {
             setCreateSLOFlyoutOpen(true);
           }}
