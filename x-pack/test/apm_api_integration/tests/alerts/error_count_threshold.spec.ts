@@ -96,7 +96,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
-      return Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
+      return synthtraceEsClient.index([events, phpEvents]);
     });
 
     after(() => synthtraceEsClient.clean());
