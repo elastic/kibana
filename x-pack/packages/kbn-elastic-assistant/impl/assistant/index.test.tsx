@@ -24,6 +24,7 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
 import { useFetchCurrentUserConversations } from './api';
 import { Conversation } from '../assistant_context/types';
+import * as all from './chat_send/use_chat_send';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -40,6 +41,23 @@ const renderAssistant = (extraProps = {}, providerProps = {}) =>
     </TestProviders>
   );
 
+const mockData = {
+  Welcome: {
+    id: 'Welcome Id',
+    title: 'Welcome',
+    category: 'assistant',
+    messages: [],
+    apiConfig: {},
+  },
+  'electric sheep': {
+    id: 'electric sheep id',
+    category: 'assistant',
+    title: 'electric sheep',
+    messages: [],
+    apiConfig: {},
+  },
+};
+
 describe('Assistant', () => {
   beforeAll(() => {
     jest.mocked(useConnectorSetup).mockReturnValue({
@@ -49,6 +67,26 @@ describe('Assistant', () => {
 
     jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
+    const connectors: unknown[] = [{}];
+    jest.mocked(useLoadConnectors).mockReturnValue({
+      isSuccess: true,
+      data: connectors,
+    } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
+
+    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+      data: mockData,
+      isLoading: false,
+      refetch: jest.fn().mockResolvedValue({
+        isLoading: false,
+        data: {
+          ...mockData,
+          Welcome: {
+            ...mockData.Welcome,
+            apiConfig: { newProp: true },
+          },
+        },
+      }),
+    } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
   });
 
   let persistToLocalStorage: jest.Mock;
@@ -66,34 +104,6 @@ describe('Assistant', () => {
 
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation title to local storage', async () => {
-      const connectors: unknown[] = [{}];
-
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: connectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: {
-          Welcome: {
-            id: 'Welcome Id',
-            title: 'Welcome',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
-          'electric sheep': {
-            id: 'electric sheep id',
-            title: 'electric sheep',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
-        },
-        isLoading: false,
-        refetch: jest.fn(),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
-
       renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
@@ -111,13 +121,6 @@ describe('Assistant', () => {
     });
 
     it('should not persist the conversation id to local storage when excludeFromLastConversationStorage flag is indicated', async () => {
-      const connectors: unknown[] = [{}];
-
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: connectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: {
           Welcome: {
@@ -156,33 +159,7 @@ describe('Assistant', () => {
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
     });
     it('should call the setConversationTitle callback if it is defined and the conversation id changes', async () => {
-      const connectors: unknown[] = [{}];
       const setConversationTitle = jest.fn();
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: connectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: {
-          Welcome: {
-            id: 'Welcome Id',
-            title: 'Welcome',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
-          'electric sheep': {
-            id: 'electric sheep id',
-            category: 'assistant',
-            title: 'electric sheep',
-            messages: [],
-            apiConfig: {},
-          },
-        },
-        isLoading: false,
-        refetch: jest.fn(),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
 
       renderAssistant({ setConversationTitle });
 
@@ -261,6 +238,64 @@ describe('Assistant', () => {
         }
       );
       expect(queryByTestId('prompt-textarea')).toHaveProperty('disabled');
+    });
+  });
+  describe('persistent storage', () => {
+    it('should refetchConversationsState after settings save button click', async () => {
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      const setConversationTitle = jest.fn();
+
+      renderAssistant({ setConversationTitle });
+
+      fireEvent.click(screen.getByTestId('settings'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save-button'));
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            apiConfig: { newProp: true },
+            category: 'assistant',
+            id: 'Welcome Id',
+            messages: [],
+            title: 'Welcome',
+          },
+        })
+      );
+    });
+
+    it('should refetchConversationsState after settings save button click, but do not update convos when refetch returns bad results', async () => {
+      const { Welcome, ...rest } = mockData;
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: mockData,
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: rest,
+        }),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      const setConversationTitle = jest.fn();
+
+      renderAssistant({ setConversationTitle });
+
+      fireEvent.click(screen.getByTestId('settings'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save-button'));
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            apiConfig: {},
+            category: 'assistant',
+            id: 'Welcome Id',
+            messages: [],
+            title: 'Welcome',
+          },
+        })
+      );
     });
   });
 });
