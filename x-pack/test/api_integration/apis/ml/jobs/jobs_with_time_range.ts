@@ -64,12 +64,12 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('returns expected list of groups', async () => {
+    it('returns expected list of jobs with correct time range', async () => {
       const response = await runGetJobsRequest(USER.ML_VIEWER, 200);
 
       expect(response).to.eql(
         expectedResponse,
-        `response should equal the expected groups ${JSON.stringify(expectedResponse)})`
+        `response should equal the expected jobs ${JSON.stringify(expectedResponse)})`
       );
     });
   });
