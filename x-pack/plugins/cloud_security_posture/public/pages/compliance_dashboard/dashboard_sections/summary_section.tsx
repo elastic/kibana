@@ -32,6 +32,7 @@ import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
+  RULE_PASSED,
 } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
 
@@ -66,10 +67,20 @@ export const SummarySection = ({
     navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) });
   };
 
-  const handleCellClick = (ruleSection: string) => {
+  const getCISSectionQueryFilters = (
+    cisSection: string,
+    resultEvaluation: 'passed' | 'failed' = RULE_FAILED
+  ) => ({
+    'rule.section': cisSection,
+    'result.evaluation': resultEvaluation,
+  });
+
+  const handleCellClick = (cisSectionFilters: {
+    'rule.section': string;
+    'result.evaluation': 'passed' | 'failed';
+  }) => {
     navToFindings({
-      'rule.section': ruleSection,
-      'result.evaluation': RULE_FAILED,
+      ...cisSectionFilters,
       ...getPolicyTemplateQuery(dashboardType),
     });
   };
@@ -192,7 +203,21 @@ export const SummarySection = ({
           <RisksTable
             data={complianceData.groupedFindingsEvaluation}
             maxItems={5}
-            onCellClick={handleCellClick}
+            onCellClick={(cisSection: string) => {
+              const cisSectionEvaluation = complianceData.groupedFindingsEvaluation.find(
+                (groupedFindingsEvaluation) => groupedFindingsEvaluation.name === cisSection
+              );
+
+              // if the CIS Section posture score is 100, we should navigate with result evaluation as passed or result evaluation as failed
+              if (
+                cisSectionEvaluation?.postureScore &&
+                Math.trunc(cisSectionEvaluation?.postureScore) === 100
+              ) {
+                handleCellClick(getCISSectionQueryFilters(cisSection, RULE_PASSED));
+              } else {
+                handleCellClick(getCISSectionQueryFilters(cisSection));
+              }
+            }}
             onViewAllClick={handleViewAllClick}
             viewAllButtonTitle={i18n.translate(
               'xpack.csp.dashboard.risksTable.viewAllButtonTitle',
