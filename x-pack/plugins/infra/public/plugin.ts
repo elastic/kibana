@@ -316,11 +316,18 @@ export class Plugin implements InfraClientPluginClass {
 
         const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
-        return renderApp(coreStart, { ...plugins }, pluginStart, this.config, params, {
-          kibanaVersion: this.kibanaVersion,
-          isCloudEnv,
-          isServerlessEnv,
-        });
+        return renderApp(
+          coreStart,
+          { ...plugins, licenseManagement: pluginsSetup.licenseManagement },
+          pluginStart,
+          this.config,
+          params,
+          {
+            kibanaVersion: this.kibanaVersion,
+            isCloudEnv,
+            isServerlessEnv,
+          }
+        );
       },
     });
 

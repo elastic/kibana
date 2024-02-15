@@ -9,30 +9,23 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HttpStart } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
 });
 
+const LICENSE_PAGE_PATH = '/app/management/stack/license_management';
+
 export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
   templateProps
 ) => {
-  return (
-    <PageTemplate {...templateProps} isEmptyState={true}>
-      <SubscriptionSplashPrompt />
-    </PageTemplate>
-  );
-};
-
-export const SubscriptionSplashPrompt: React.FC = () => {
-  const { services } = useKibana<{ http: HttpStart }>();
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
+  const { licenseManagement, http } = useKibanaContextForPlugin().services;
 
   useEffect(() => {
     checkTrialAvailability();
@@ -43,6 +36,12 @@ export const SubscriptionSplashPrompt: React.FC = () => {
   }
 
   const canStartTrial = isTrialAvailable && loadState === 'resolved';
+  const licensePageUrl = http.basePath.prepend(LICENSE_PAGE_PATH);
+  const manageLicenseURL = licenseManagement?.locator
+    ? licenseManagement?.locator?.useUrl({
+        page: 'dashboard',
+      })
+    : licensePageUrl;
 
   let title;
   let description;
@@ -68,7 +67,7 @@ export const SubscriptionSplashPrompt: React.FC = () => {
         data-test-subj="infraSubscriptionSplashPromptStartTrialButton"
         fullWidth={false}
         fill
-        href={services.http.basePath.prepend('/app/management/stack/license_management')}
+        href={manageLicenseURL}
       >
         <FormattedMessage id="xpack.infra.ml.splash.startTrialCta" defaultMessage="Start trial" />
       </EuiButton>
@@ -104,15 +103,61 @@ export const SubscriptionSplashPrompt: React.FC = () => {
   }
 
   return (
+    <PageTemplate {...templateProps} isEmptyState={true}>
+      <EuiEmptyPrompt
+        iconType={'visLine'}
+        title={<h2>{title}</h2>}
+        body={
+          <EuiText>
+            <p>{description}</p>
+          </EuiText>
+        }
+        actions={cta}
+      />
+    </PageTemplate>
+  );
+};
+
+export const SubscriptionSplashPrompt: React.FC = () => {
+  const { licenseManagement, http } = useKibanaContextForPlugin().services;
+  const licensePageUrl = http.basePath.prepend(LICENSE_PAGE_PATH);
+  const manageLicenseURL = licenseManagement?.locator
+    ? licenseManagement?.locator?.useUrl({
+        page: 'dashboard',
+      })
+    : licensePageUrl;
+
+  return (
     <EuiEmptyPrompt
-      iconType={'visLine'}
-      title={<h2>{title}</h2>}
-      body={
-        <EuiText>
-          <p>{description}</p>
-        </EuiText>
+      iconType="logoObservability"
+      iconColor="warning"
+      title={
+        <h3>
+          {i18n.translate('xpack.infra.ml.splash.trial.title', {
+            defaultMessage:
+              'Discover and resolve infrastructure issues faster with anomaly detection',
+          })}
+        </h3>
       }
-      actions={cta}
+      body={
+        <p>
+          {i18n.translate('xpack.infra.ml.splash.trial.description', {
+            defaultMessage:
+              'Uncover infrastructure anomalies to preempt issues and resolve them quicker with the aid of machine learning.',
+          })}
+        </p>
+      }
+      actions={[
+        <EuiButton
+          data-test-subj="infraSubscriptionSplashPromptStartTrialButton"
+          href={manageLicenseURL}
+          fill
+        >
+          {i18n.translate('xpack.infra.ml.splash.startTrialCta', {
+            defaultMessage: 'Start trial',
+          })}
+        </EuiButton>,
+      ]}
     />
   );
 };
