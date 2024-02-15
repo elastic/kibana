@@ -86,7 +86,7 @@ export interface Operator {
    */
   field?: (field: DataViewField) => boolean;
   /**
-   * List of operators that value preserves when switching to this operator
+   * If applicable, preserves or converts filter params when switching between operators
    */
   getParamsFromPrevOperator?: (
     prevOperator: Operator | undefined,
