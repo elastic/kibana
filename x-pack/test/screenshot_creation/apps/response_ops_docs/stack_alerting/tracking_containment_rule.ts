@@ -32,10 +32,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
       await testSubjects.scrollIntoView('addAlertActionButton');
-      const runWhen = await testSubjects.find('addNewActionConnectorActionGroup-0');
-      await runWhen.click();
       await commonScreenshots.takeScreenshot(
         'alert-types-tracking-containment-action-options',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await testSubjects.click('messageAddVariableButton');
+      await commonScreenshots.takeScreenshot(
+        'alert-types-tracking-containment-rule-action-variables',
         screenshotDirectories,
         1400,
         1024
