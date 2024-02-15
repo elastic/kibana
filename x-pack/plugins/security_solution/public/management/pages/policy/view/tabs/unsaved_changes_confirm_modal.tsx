@@ -25,19 +25,19 @@ export const UnsavedChangesConfirmModal = React.memo<{
       confirmButtonText={i18n.translate(
         'xpack.securitySolution.endpoint.policy.details.unsavedChanges.confirmButtonTitle',
         {
-          defaultMessage: 'Continue',
+          defaultMessage: 'Continue without saving',
         }
       )}
       cancelButtonText={i18n.translate(
         'xpack.securitySolution.endpoint.policy.details.unsavedChanges.cancelButtonTitle',
         {
-          defaultMessage: 'Cancel',
+          defaultMessage: 'Back',
         }
       )}
     >
       <FormattedMessage
         id="xpack.securitySolution.endpoint.policy.details.unsavedChanges.warningMessage"
-        defaultMessage="You have unsaved changes. Click Continue to discard your changes or Cancel to continue editing. Your changes won't be saved until you click Save button."
+        defaultMessage="You have unsaved changes on this page. If you leave without saving, your changes will be lost."
       />
     </EuiConfirmModal>
   );
