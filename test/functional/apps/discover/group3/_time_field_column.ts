@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getHeaderFields()).to.eql(
             !hasTimeField
               ? ['@timestamp']
-              : hideTimeFieldColumnSetting
+              : hideTimeFieldColumnSetting && !isTextBased
               ? ['Document'] // legacy behaviour
               : ['@timestamp', 'Document'] // legacy behaviour
           );
@@ -93,7 +93,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
         await retry.try(async () => {
           expect(await dataGrid.getHeaderFields()).to.eql(
-            hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
+            hideTimeFieldColumnSetting && isTextBased
+              ? ['@timestamp', 'Document']
+              : hideTimeFieldColumnSetting || !hasTimeField
+              ? ['Document']
+              : ['@timestamp', 'Document']
           );
         });
       }
@@ -124,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getHeaderFields()).to.eql(
             !hasTimeField
               ? ['@timestamp']
-              : hideTimeFieldColumnSetting
+              : hideTimeFieldColumnSetting && !isTextBased
               ? ['Document'] // legacy behaviour
               : ['@timestamp', 'Document'] // legacy behaviour
           );
@@ -178,7 +182,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
           // FIXME as a part of https://github.com/elastic/kibana/issues/174074
-          isTextBased ? ['bytes', 'extension'] : ['@timestamp', 'bytes', 'extension']
+          isTextBased && !hideTimeFieldColumnSetting
+            ? ['bytes', 'extension']
+            : ['@timestamp', 'bytes', 'extension']
         );
       });
 
@@ -356,7 +362,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
             expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
+              // FIXME as a part of https://github.com/elastic/kibana/issues/174074
+              ['@timestamp', 'Document']
             );
 
             // only @timestamp is selected
@@ -405,19 +412,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
+            expect(await docTable.getHeaderFields()).to.eql(
+              hideTimeFieldColumnSetting
+                ? ['bytes', 'extension']
+                : ['@timestamp', 'bytes', 'extension']
+            );
 
             // with selected columns and @timestamp
             await PageObjects.discover.loadSavedSearch(
               `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql([
-              '@timestamp',
-              'bytes',
-              'extension',
-              '@timestamp',
-            ]);
+            expect(await docTable.getHeaderFields()).to.eql(
+              hideTimeFieldColumnSetting
+                ? ['bytes', 'extension', '@timestamp']
+                : ['@timestamp', 'bytes', 'extension', '@timestamp']
+            );
 
             await PageObjects.discover.loadSavedSearch(
               `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}-`
