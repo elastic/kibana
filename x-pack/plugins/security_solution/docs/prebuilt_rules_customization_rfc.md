@@ -971,7 +971,7 @@ The user will now be able to export both custom and prebuilt rules (including an
 
 The export endpoints (bulk export and bulk action in export mode) will not carry out any migration-on-write logic. Since these endpoints solely read the rules and generate an ndjson file for export purposes, introducing additional writing or patching logic to migrate the rule's schema in Elasticsearch would negatively impact the endpoints' performance and introduce unnecessary overhead.
 
-Instead, we will carry out a normalization-on-read process, as described above, when the rule to be exported is read from ES, and before writing the rule's fields to the `ndjson` file. This means that the rule will actually be exported with the updated schema, thus ensuring backwards compatibility for a subsequent import procedure of this rules, even if they are not yet migrated in ES.
+Instead, we will carry out a normalization-on-read process, as described above, when the rule to be exported is read from ES, and before writing the rule's fields to the `ndjson` file. This means that the rule will actually be exported with the updated schema.
 
 This normalization will take place within the `internalRuleToAPIResponse` method, which internally calls the `normalizePrebuiltSchemaOnRuleRead`, as described in the [Normalization on read](#normalization-on-read) section.
 
@@ -1003,100 +1003,6 @@ If a user attempts to import a rule with `immutable: true` and missing `external
 
 Given the requirements described above, the following table shows the behaviour of our endpoint for a combination of `external_source` and `immutable` fields in the `ndjson` file that a user attempts to import:
 
-<table>
-  <thead>
-    <tr>
-      <th>Prebuilt</th>
-      <th>Immutable</th>
-      <th>Results</th>
-      <th>Use case</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <pre>{isCustomized: true, ...}</pre>
-      </td>
-      <td><pre>true</pre></td>
-      <td>
-        <pre>
-          {
-            prebuilt: {
-              isCustomized: true,
-              ...
-            },
-            immutable: true
-          }
-        </pre>
-      </td>
-      <td>User importing an already migrated/normalized exported rule</td>
-    </tr>
-    <tr>
-      <td>
-        <pre>undefined</pre>
-      </td>
-      <td><pre>true</pre></td>
-      <td>
-        <pre>
-          {
-            prebuilt: {
-              isCustomized: true,
-            },
-            immutable: true
-          }
-        </pre>
-      </td>
-      <td>User importing an prebuilt rule with legacy schema</td>
-    </tr>
-    <tr>
-      <td>
-        <pre>undefined</pre>
-      </td>
-      <td><pre>false</pre></td>
-      <td>
-        <pre>
-          {
-            immutable: false
-          }
-        </pre>
-      </td>
-      <td>User importing a custom rule with new or legacy schema</td>
-    </tr>
-    <tr>
-      <td>
-        <pre>{isCustomized: false, ...}</pre>
-      </td>
-      <td><pre>false</pre>or<pre>undefined</pre></td>
-      <td>
-        <pre>
-          {
-            prebuilt: {
-              isCustomized: false,
-              ...
-            },
-            immutable: true
-          }
-        </pre>
-      </td>
-      <td>This combination shouldn't be possible, but can happen if user manually modifies an `ndjson` file. The prebuilt field takes precendence over the immutable field and the rule is imported as prebuilt.</td>
-    </tr>
-    <tr>
-      <td>
-        <pre>undefined</pre>
-      </td>
-      <td><pre>undefined</pre></td>
-      <td>
-        <pre>
-          {
-            immutable: false
-          }
-        </pre>
-      </td>
-      <td>This combination shouldn't be possible, but can happen if user manually modifies an `ndjson` file. The rule is imported as a custom rule.</td>
-    </tr>
-  </tbody>
-</table>
-
 If a user imports a prebuilt rule (where either the `external_source` or `immutable` fields are `true`), it will continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
 
 With this migration strategy for the import endpoints we can guarantee backwards compatibility for all rules, and don't need to do additional changes to the export endpoints.
@@ -1107,62 +1013,6 @@ Given that, when importing rules, we can be creating a custom rule or a prebuilt
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts)_
 
-```ts
-// [... file continues above ...]
-
-export const importRules = async ({
-  // [...]
-}: {
-    // [...]
-}) => {
-  // [...]
-
-  // Determine if the rule to import is prebuilt based on the payload
-  const isPrebuilt = Boolean(parsedRule.prebuilt) || parsedRule.immutable;
-
-  // If the rule is prebuilt, the `version` is required
-  if (isPrebuilt && !parsedRule.version) {
-    createBulkErrorObject({
-      ruleId: parsedRule.rule_id,
-      statusCode: 409,
-      message: `rule_id: "${parsedRule.rule_id}" is prebuilt but no version was provided`,
-    });
-  }
-
-  // If no rule_id matched, create a new rule. We need to calculate the isPrebuilt
-  // argument to pass it to `createRules` following the logic described above.
-  if (rule == null) {
-
-    await createRules({
-      rulesClient,
-      params: {
-        ...parsedRule,
-        exceptions_list: [...exceptions],
-      },
-      isPrebuilt,
-      allowMissingConnectorSecrets,
-    });
-    resolve({
-      rule_id: parsedRule.rule_id,
-      status_code: 200,
-    });
-    // If rule_id matches and the overwriteRules flag is true, patch the existing rule.
-    // The calculation of the prebuilt and immutable fields will be done by the
-    // `migratePrebuiltSchemaOnRuleUpdate` helper based on the payload from the ndjson
-  } else if (rule != null && overwriteRules) {
-    await patchRules({
-      rulesClient,
-      existingRule: rule,
-      nextParams: {
-        ...parsedRule,
-        exceptions_list: [...exceptions],
-      },
-      allowMissingConnectorSecrets,
-      shouldIncrementRevision: false,
-    });
-
-// [... file continues below ...]
-```
 
 ### Handling the `version` parameter
 
