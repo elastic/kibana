@@ -69,6 +69,7 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApplyCb,
   onCancelCb,
+  hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -279,14 +280,15 @@ export function LensEditConfigurationFlyout({
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
   const runQuery = useCallback(
-    async (q) => {
+    async (q, abortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
-        setErrors
+        setErrors,
+        abortController
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -430,6 +432,7 @@ export function LensEditConfigurationFlyout({
                 expandCodeEditor={(status: boolean) => {}}
                 isCodeEditorExpanded
                 detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
                 warning={
                   suggestsLimitedColumns
@@ -442,13 +445,13 @@ export function LensEditConfigurationFlyout({
                 hideMinimizeButton
                 editorIsInline
                 hideRunQueryText
-                disableSubmitAction={isEqual(query, prevQuery.current)}
-                onTextLangQuerySubmit={(q) => {
+                onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
-                    runQuery(q);
+                    await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
+                allowQueryCancellation={true}
               />
             </EuiFlexItem>
           )}

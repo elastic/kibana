@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsEvent } from '@kbn/ecs';
+import { EcsEvent } from '@elastic/ecs';
 import Chance from 'chance';
 import { CspFinding } from '../../../common/schemas/csp_finding';
 

@@ -67,12 +67,16 @@ export const usePickIndexPatterns = ({
   } = useKibana().services;
   const isHookAlive = useRef(true);
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
-  const alertsOptions = useMemo(
-    () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
-    [signalIndexName]
-  );
+  // anything that uses patternListToOptions should be memoized, as it always returns a new array
+  // TODO: fix that
+  const signalPatternListToOptions = useMemo(() => {
+    return signalIndexName ? patternListToOptions([signalIndexName]) : [];
+  }, [signalIndexName]);
+  const selectedPatternsAsOptions = useMemo(() => {
+    return patternListToOptions(selectedPatterns);
+  }, [selectedPatterns]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
+    isOnlyDetectionAlerts ? signalPatternListToOptions : selectedPatternsAsOptions
   );
   const [isModified, setIsModified] = useState<ModifiedTypes>(
     dataViewId == null ? 'deprecated' : missingPatterns.length > 0 ? 'missingPatterns' : ''
@@ -121,7 +125,7 @@ export const usePickIndexPatterns = ({
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
       scopeId === SourcererScopeName.detections || isAlerts
-        ? alertsOptions
+        ? signalPatternListToOptions
         : patternListToOptions(
             getScopePatternListSelection(
               kibanaDataViews.find((dataView) => dataView.id === id),
@@ -130,7 +134,7 @@ export const usePickIndexPatterns = ({
               id === defaultDataViewId
             )
           ),
-    [alertsOptions, kibanaDataViews, scopeId, signalIndexName, defaultDataViewId]
+    [signalPatternListToOptions, kibanaDataViews, scopeId, signalIndexName, defaultDataViewId]
   );
 
   const defaultSelectedPatternsAsOptions = useMemo(
@@ -162,11 +166,10 @@ export const usePickIndexPatterns = ({
   useEffect(() => {
     setSelectedOptions(
       scopeId === SourcererScopeName.detections
-        ? alertsOptions
-        : patternListToOptions(selectedPatterns)
+        ? signalPatternListToOptions
+        : selectedPatternsAsOptions
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPatterns, scopeId]);
+  }, [selectedPatterns, scopeId, selectedPatternsAsOptions, signalPatternListToOptions]);
   // when scope updates, check modified to set/remove alerts label
   useEffect(() => {
     onSetIsModified(
@@ -200,7 +203,9 @@ export const usePickIndexPatterns = ({
           if (isHookAlive.current) {
             dispatch(sourcererActions.setDataView(dataView));
             setSelectedOptions(
-              isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(dataView.patternList)
+              isOnlyDetectionAlerts
+                ? signalPatternListToOptions
+                : patternListToOptions(dataView.patternList)
             );
           }
         } catch (err) {
@@ -212,7 +217,7 @@ export const usePickIndexPatterns = ({
       }
     },
     [
-      alertsOptions,
+      signalPatternListToOptions,
       dispatch,
       getDefaultSelectedOptionsByDataView,
       isOnlyDetectionAlerts,
@@ -243,8 +248,8 @@ export const usePickIndexPatterns = ({
   }, []);
 
   const handleOutsideClick = useCallback(() => {
-    setSelectedOptions(patternListToOptions(selectedPatterns));
-  }, [selectedPatterns]);
+    setSelectedOptions(selectedPatternsAsOptions);
+  }, [selectedPatternsAsOptions]);
 
   return {
     allOptions,

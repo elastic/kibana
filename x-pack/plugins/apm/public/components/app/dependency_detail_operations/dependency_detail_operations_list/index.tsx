@@ -63,7 +63,8 @@ export function DependencyDetailOperationsList() {
 
   const { core } = useApmPluginContext();
 
-  const breakpoints = useBreakpoints();
+  const { isLarge } = useBreakpoints();
+  const shouldShowSparkPlots = !isLarge;
 
   const { start, end } = useTimeRange({
     rangeFrom,
@@ -147,7 +148,7 @@ export function DependencyDetailOperationsList() {
       render: (_, { spanName }) => <OperationLink spanName={spanName} />,
     },
     ...getSpanMetricColumns({
-      breakpoints,
+      shouldShowSparkPlots,
       comparisonFetchStatus: comparisonStatsFetch.status,
     }),
   ];
