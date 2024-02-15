@@ -305,7 +305,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
-    describe('error_count', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176975
+    describe.skip('error_count', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
