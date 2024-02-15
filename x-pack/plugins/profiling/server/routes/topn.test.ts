@@ -86,6 +86,7 @@ describe('TopN data from Elasticsearch', () => {
         searchField: ProfilingESField.StacktraceID,
         highCardinality: false,
         kuery: '',
+        showErrorFrames: false,
       });
 
       expect(client.search).toHaveBeenCalledTimes(2);

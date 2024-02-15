@@ -146,6 +146,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasSupportedTriggers",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasSupportedTriggers",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasSupportedTriggers",
+            "text": "HasSupportedTriggers"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasSupportedTriggers.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasType",
         "type": "Function",
         "tags": [],
@@ -2273,6 +2313,36 @@
             "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasSupportedTriggers",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasSupportedTriggers",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasSupportedTriggers.supportedTriggers",
+            "type": "Function",
+            "tags": [],
+            "label": "supportedTriggers",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

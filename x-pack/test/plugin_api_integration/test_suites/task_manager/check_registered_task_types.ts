@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const TEST_TYPES = [
     'sampleAdHocTaskTimingOut',
+    'lowPriorityTask',
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',

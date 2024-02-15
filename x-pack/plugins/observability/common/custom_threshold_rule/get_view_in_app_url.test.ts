@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Aggregators } from './types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';
 
 describe('getViewInAppUrl', () => {
   const logsExplorerLocator = {
     getRedirectUrl: jest.fn(() => 'mockedGetRedirectUrl'),
-  } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
+  } as unknown as LocatorPublic<LogsExplorerLocatorParams>;
   const startedAt = '2023-12-07T16:30:15.403Z';
   const endedAt = '2023-12-07T20:30:15.403Z';
   const returnedTimeRange = {
