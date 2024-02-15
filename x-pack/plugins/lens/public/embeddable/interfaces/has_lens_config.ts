@@ -15,7 +15,7 @@ import { apiIsOfType } from '@kbn/presentation-publishing';
 import { LensSavedObjectAttributes } from '../embeddable';
 
 export type HasLensConfig = HasType<'lens'> & {
-  getSavedVis: () => LensSavedObjectAttributes;
+  getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
 };
 
 export type LensApi = HasLensConfig &

@@ -75,7 +75,11 @@ export function createVisToADJobAction(
 
       try {
         if (apiHasLensConfig(embeddable) && lens) {
-          const chartInfo = await getChartInfoFromVisualization(lens, embeddable.getSavedVis());
+          const vis = embeddable.getSavedVis();
+          if (!vis) {
+            return false;
+          }
+          const chartInfo = await getChartInfoFromVisualization(lens, vis);
           return isCompatibleVisualizationType(chartInfo);
         } else if (apiHasMapConfig(embeddable)) {
           return isCompatibleMapVisualization(embeddable);
