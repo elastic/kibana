@@ -67,20 +67,13 @@ export const SummarySection = ({
     navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) });
   };
 
-  const getCISSectionQueryFilters = (
-    cisSection: string,
+  const handleCellClick = (
+    ruleSection: string,
     resultEvaluation: 'passed' | 'failed' = RULE_FAILED
-  ) => ({
-    'rule.section': cisSection,
-    'result.evaluation': resultEvaluation,
-  });
-
-  const handleCellClick = (cisSectionFilters: {
-    'rule.section': string;
-    'result.evaluation': 'passed' | 'failed';
-  }) => {
+  ) => {
     navToFindings({
-      ...cisSectionFilters,
+      'result.evaluation': resultEvaluation,
+      'rule.section': ruleSection,
       ...getPolicyTemplateQuery(dashboardType),
     });
   };
@@ -213,9 +206,9 @@ export const SummarySection = ({
                 cisSectionEvaluation?.postureScore &&
                 Math.trunc(cisSectionEvaluation?.postureScore) === 100
               ) {
-                handleCellClick(getCISSectionQueryFilters(cisSection, RULE_PASSED));
+                handleCellClick(cisSection, RULE_PASSED);
               } else {
-                handleCellClick(getCISSectionQueryFilters(cisSection));
+                handleCellClick(cisSection);
               }
             }}
             onViewAllClick={handleViewAllClick}
