@@ -84,7 +84,7 @@
     "@kbn/esql-utils",
     "@kbn/managed-content-badge",
     "@kbn/deeplinks-analytics",
-    "@kbn/presentation-publishing,
+    "@kbn/presentation-publishing",
     "@kbn/shared-ux-markdown"
   ],
   "exclude": ["target/**/*"]
