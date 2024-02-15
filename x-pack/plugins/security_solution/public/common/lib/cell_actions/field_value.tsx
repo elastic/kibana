@@ -8,9 +8,10 @@
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import type { BrowserField, TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getPageRowIndex } from '@kbn/securitysolution-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
@@ -18,7 +19,6 @@ import { FormattedFieldValue } from '../../../timelines/components/timeline/body
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
-import { DataTableRecord } from '@kbn/discover-utils/types';
 
 const useFormattedFieldProps = ({
   rowIndex,
@@ -45,7 +45,7 @@ const useFormattedFieldProps = ({
       fieldName: columnId,
     };
   }, [pageRowIndex, columnId, data, unifiedDataTableRow]);
-  const ecs = unifiedDataTableRow ? unifiedDataTableRow.ecs :  ecsData[pageRowIndex];
+  const ecs = unifiedDataTableRow ? unifiedDataTableRow.ecs : ecsData[pageRowIndex];
 
   const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
@@ -75,7 +75,6 @@ const useFormattedFieldProps = ({
       values,
       title,
       linkValue: head<string>(normalizedLinkValue),
-
     };
   } else {
     return {
@@ -93,10 +92,7 @@ const useFormattedFieldProps = ({
   }
 };
 
-
-
 export const FieldValueCell = ({
-  browserFieldsByName,
   data,
   ecsData,
   header,
@@ -105,7 +101,6 @@ export const FieldValueCell = ({
   closeCellPopover,
   unifiedDataTableRows,
 }: {
-  browserFieldsByName?: { [fieldName: string]: Partial<BrowserField> },
   data: TimelineNonEcsData[][];
   ecsData: Ecs[];
   header?: ColumnHeaderOptions;
@@ -114,13 +109,12 @@ export const FieldValueCell = ({
   closeCellPopover?: () => void;
   unifiedDataTableRows?: Array<DataTableRecord & TimelineItem>;
 }) => {
-  if (header !== undefined || browserFieldsByName) {
+  if (header !== undefined) {
     return function FieldValue({
       rowIndex,
       columnId,
       Component,
     }: EuiDataGridColumnCellActionProps) {
-      let columnHeader = browserFieldsByName ? browserFieldsByName[columnId] : header;
       const unifiedDataTableRow = unifiedDataTableRows ? unifiedDataTableRows[rowIndex] : undefined;
       const {
         pageRowIndex,
@@ -133,7 +127,15 @@ export const FieldValueCell = ({
         fieldFormat,
         fieldType,
         linkValue,
-      } = useFormattedFieldProps({ unifiedDataTableRow, rowIndex, pageSize, ecsData, columnId, header: columnHeader, data });
+      } = useFormattedFieldProps({
+        unifiedDataTableRow,
+        rowIndex,
+        pageSize,
+        ecsData,
+        columnId,
+        header,
+        data,
+      });
 
       const showEmpty = useMemo(() => {
         const hasLink = link !== undefined && values && !isEmpty(value);
@@ -145,7 +147,7 @@ export const FieldValueCell = ({
         } else {
           return hasLink !== true;
         }
-      }, [link, pageRowIndex, value, values]);
+      }, [link, pageRowIndex, value, values, unifiedDataTableRow]);
 
       return showEmpty === false ? (
         <FormattedFieldValue
@@ -153,7 +155,7 @@ export const FieldValueCell = ({
           contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${scopeId}`}
           eventId={eventId}
           fieldFormat={fieldFormat}
-          isAggregatable={columnHeader?.aggregatable ?? false}
+          isAggregatable={header?.aggregatable ?? false}
           fieldName={fieldName}
           fieldType={fieldType}
           isButton={unifiedDataTableRow ? false : true}

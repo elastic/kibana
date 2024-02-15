@@ -50,7 +50,7 @@ export const useCreateTimeline = ({
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => void) => {
   const dispatch = useDispatch();
   const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
   const { id: dataViewId, patternList: selectedPatterns } =
@@ -77,7 +77,7 @@ export const useCreateTimeline = ({
       );
       dispatch(
         timelineActions.createTimeline({
-          columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
@@ -118,7 +118,7 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
-      useDiscoverComponentsInTimeline,
+      unifiedComponentsInTimelineEnabled,
     ]
   );
 

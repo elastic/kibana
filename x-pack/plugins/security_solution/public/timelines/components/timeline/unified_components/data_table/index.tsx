@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState, useRef } from 'react';
+import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -144,12 +144,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const defaultColumnIds = useMemo(() => columns.map((c) => c.id), [columns]);
 
-    // const [notesMap, setNotesMap] = useState<NotesMap>({});
-    const trGroupRef = useRef<HTMLDivElement | null>(null);
-
-    const {
-      timeline: { filterManager, excludedRowRendererIds, rowHeight, sampleSize } = timelineDefaults,
-    } = useSelector((state: State) => timelineBodySelector(state, timelineId));
+    const { timeline: { filterManager, rowHeight, sampleSize } = timelineDefaults } = useSelector(
+      (state: State) => timelineBodySelector(state, timelineId)
+    );
 
     // const { activeStep, isTourShown, incrementStep } = useTourContext();
 
@@ -466,7 +463,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               browserFields={browserFields}
               handleOnPanelClosed={handleOnPanelClosed}
               runtimeMappings={runtimeMappings}
-              tabType={TimelineTabs.query}
+              tabType={activeTab}
               scopeId={timelineId}
               isFlyoutView
             />

@@ -23,7 +23,7 @@ import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -45,11 +45,11 @@ export const useInitTimelineFromUrlParam = () => {
             dispatch(timelineActions.updateIsLoading(status)),
           updateTimeline: dispatchUpdateTimeline(dispatch),
           savedSearchId: initialState.savedSearchId,
-          useDiscoverComponentsInTimeline,
+          unifiedComponentsInTimelineEnabled,
         });
       }
     },
-    [dispatch, useDiscoverComponentsInTimeline, isEsqlTabDisabled]
+    [dispatch, unifiedComponentsInTimelineEnabled, isEsqlTabDisabled]
   );
 
   useEffect(() => {

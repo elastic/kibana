@@ -156,7 +156,7 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -171,7 +171,7 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           filterManager,
           indexNames: timeline.indexNames ?? [],
           show: true,
@@ -185,7 +185,7 @@ export const useInvestigateInTimeline = ({
       filterManager,
       updateTimelineIsLoading,
       clearActiveTimeline,
-      useDiscoverComponentsInTimeline,
+      unifiedComponentsInTimelineEnabled,
     ]
   );
 

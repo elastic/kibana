@@ -47,7 +47,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
   const dispatch = useDispatch();
 
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -80,7 +80,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
         updateIsLoading: (status: { id: string; isLoading: boolean }) =>
           dispatch(timelineActions.updateIsLoading(status)),
         updateTimeline: dispatchUpdateTimeline(dispatch),
-        useDiscoverComponentsInTimeline,
+        unifiedComponentsInTimelineEnabled,
       });
     }
   }, [
@@ -90,7 +90,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
     newId,
     activeTab,
     graphEventId,
-    useDiscoverComponentsInTimeline,
+    unifiedComponentsInTimelineEnabled,
   ]);
 };
 

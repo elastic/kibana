@@ -52,7 +52,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     SourcererScopeName.timeline
   );
 
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -210,11 +210,11 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
             isLoading: boolean;
           }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
           updateTimeline: dispatchUpdateTimeline(dispatch),
-          useDiscoverComponentsInTimeline,
+          unifiedComponentsInTimelineEnabled,
         });
       }
     },
-    [dispatch, onOpenTimeline, selectedTimeline, useDiscoverComponentsInTimeline]
+    [dispatch, onOpenTimeline, selectedTimeline, unifiedComponentsInTimelineEnabled]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

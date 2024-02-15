@@ -84,7 +84,6 @@ const AssistantTabContainer = styled.div`
 `;
 
 const QueryTab = tabWithSuspense(lazy(() => import('../query_tab_content')));
-const NewQueryTab = tabWithSuspense(lazy(() => import('../query_tab_content_new')));
 const EqlTab = tabWithSuspense(lazy(() => import('../eql_tab_content')));
 const GraphTab = tabWithSuspense(lazy(() => import('../graph_tab_content')));
 const NotesTab = tabWithSuspense(lazy(() => import('../notes_tab_content')));
@@ -137,9 +136,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     showTimeline,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
-    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineEnabled'
-    );
     const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -187,14 +183,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {unifiedComponentsInTimelineEnabled && (
-          <HideShowContainer
-            $isVisible={TimelineTabs.queryNew === activeTimelineTab}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.queryNew}`}
-          >
-            <NewQueryTab rowRenderers={rowRenderers} timelineId={timelineId} />
-          </HideShowContainer>
-        )}
         {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
             $isVisible={true}
@@ -303,9 +291,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
-  );
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
@@ -360,10 +345,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const setQueryAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.query);
-  }, [setActiveTab]);
-
-  const setQueryNewAsActiveTab = useCallback(() => {
-    setActiveTab(TimelineTabs.queryNew);
   }, [setActiveTab]);
 
   const setEqlAsActiveTab = useCallback(() => {
@@ -425,18 +406,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {unifiedComponentsInTimelineEnabled && (
-            <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.queryNew}`}
-              onClick={setQueryNewAsActiveTab}
-              isSelected={activeTab === TimelineTabs.queryNew}
-              disabled={false}
-              key={TimelineTabs.queryNew}
-            >
-              {/* TODO: USE PROPER I18N here */}
-              <span>{`${i18n.QUERY_TAB}-NEW`}</span>
-            </StyledEuiTab>
-          )}
           {!isEsqlTabInTimelineDisabled && isEsqlSettingEnabled && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}

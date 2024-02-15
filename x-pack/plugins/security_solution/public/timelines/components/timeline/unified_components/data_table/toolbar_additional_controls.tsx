@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 
 import { isActiveTimeline } from '../../../../../helpers';
 import { TimelineId } from '../../../../../../common/types/timeline';
@@ -38,7 +38,12 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 
+  const toolTipRef = useRef<EuiToolTip>(null);
+
+  const hideToolTip = () => toolTipRef.current?.hideToolTip();
+
   const toggleFullScreen = useCallback(() => {
+    hideToolTip();
     if (timelineId === TimelineId.active) {
       setTimelineFullScreen(!timelineFullScreen);
     } else {
@@ -66,17 +71,12 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
       <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={timelineId} />
       <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
       <span className="rightPosition">
-        <EuiToolTip content={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+        <EuiToolTip
+          ref={toolTipRef}
+          content={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}
+        >
           <EuiButtonIcon
-            aria-label={
-              isFullScreen({
-                globalFullScreen,
-                isActiveTimelines: isActiveTimeline(timelineId),
-                timelineFullScreen,
-              })
-                ? i18n.EXIT_FULL_SCREEN
-                : i18n.FULL_SCREEN
-            }
+            aria-label={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}
             className={`${fullScreen ? EXIT_FULL_SCREEN_CLASS_NAME : ''}`}
             color={fullScreen ? 'text' : 'primary'}
             data-test-subj={
@@ -84,8 +84,9 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
               // this sets the data-test-subj for each case so that tests can differentiate between them
               isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
             }
-            iconType="fullScreen"
+            iconType={fullScreen ? 'fullScreenExit' : 'fullScreen'}
             onClick={toggleFullScreen}
+            onMouseOut={hideToolTip}
           />
         </EuiToolTip>
       </span>

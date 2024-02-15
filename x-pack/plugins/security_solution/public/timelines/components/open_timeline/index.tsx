@@ -169,7 +169,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       [dispatch]
     );
 
-    const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
       'unifiedComponentsInTimelineEnabled'
     );
 
@@ -260,7 +260,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
+              columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
@@ -278,7 +278,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         dispatch,
         dataViewId,
         selectedPatterns,
-        useDiscoverComponentsInTimeline,
+        unifiedComponentsInTimelineEnabled,
       ]
     );
 
@@ -376,7 +376,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           timelineType: timelineTypeToOpen,
           updateIsLoading,
           updateTimeline,
-          useDiscoverComponentsInTimeline,
+          unifiedComponentsInTimelineEnabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

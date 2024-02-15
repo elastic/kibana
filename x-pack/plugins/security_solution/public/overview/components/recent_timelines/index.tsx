@@ -45,7 +45,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   );
   const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -58,10 +58,10 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
         timelineId,
         updateIsLoading,
         updateTimeline,
-        useDiscoverComponentsInTimeline,
+        unifiedComponentsInTimelineEnabled,
       });
     },
-    [updateIsLoading, updateTimeline, useDiscoverComponentsInTimeline]
+    [updateIsLoading, updateTimeline, unifiedComponentsInTimelineEnabled]
   );
 
   const goToTimelines = useCallback(

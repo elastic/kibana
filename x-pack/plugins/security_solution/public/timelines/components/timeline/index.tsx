@@ -72,7 +72,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -125,7 +125,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,

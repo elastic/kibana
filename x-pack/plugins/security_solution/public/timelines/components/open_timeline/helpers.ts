@@ -255,10 +255,12 @@ export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
   timelineType?: TimelineType,
-  useDiscoverComponentsInTimeline?: boolean
+  unifiedComponentsInTimelineEnabled?: boolean
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineType.template;
-  const defaultHeadersValue = useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders;
+  const defaultHeadersValue = unifiedComponentsInTimelineEnabled
+    ? defaultUdtHeaders
+    : defaultHeaders;
 
   const timelineEntries = {
     ...timeline,
@@ -308,7 +310,7 @@ export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
   timelineType?: TimelineType,
-  useDiscoverComponentsInTimeline?: boolean
+  unifiedComponentsInTimelineEnabled?: boolean
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
@@ -317,7 +319,7 @@ export const formatTimelineResultToModel = (
       timelineModel,
       duplicate,
       timelineType,
-      useDiscoverComponentsInTimeline
+      unifiedComponentsInTimelineEnabled
     ),
   };
 };
@@ -340,7 +342,7 @@ export interface QueryTimelineById<TCache> {
   }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
   savedSearchId?: string;
-  useDiscoverComponentsInTimeline?: boolean; // temporary til fully migrate
+  unifiedComponentsInTimelineEnabled?: boolean; // temporary til fully migrate
 }
 
 export const queryTimelineById = <TCache>({
@@ -355,7 +357,7 @@ export const queryTimelineById = <TCache>({
   updateIsLoading,
   updateTimeline,
   savedSearchId,
-  useDiscoverComponentsInTimeline = false,
+  unifiedComponentsInTimelineEnabled = false,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (timelineId == null) {
@@ -367,7 +369,7 @@ export const queryTimelineById = <TCache>({
       to: DEFAULT_TO_MOMENT.toISOString(),
       timeline: {
         ...timelineDefaults,
-        columns: useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders,
+        columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
         id: TimelineId.active,
         activeTab: activeTimelineTab,
         show: openTimeline,
@@ -387,7 +389,7 @@ export const queryTimelineById = <TCache>({
           timelineToOpen,
           duplicate,
           timelineType,
-          useDiscoverComponentsInTimeline
+          unifiedComponentsInTimelineEnabled
         );
 
         if (onOpenTimeline != null) {

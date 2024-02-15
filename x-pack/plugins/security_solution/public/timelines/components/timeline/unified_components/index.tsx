@@ -86,6 +86,10 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
       .unifiedFieldListSidebar__list {
         padding-left: 0px;
       }
+
+      .unifiedFieldListSidebar__addBtn {
+        margin-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS};
+      }
     }
   }
 `;

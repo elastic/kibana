@@ -18,7 +18,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 export const useTimelineClick = () => {
   const dispatch = useDispatch();
 
-  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
 
@@ -36,10 +36,10 @@ export const useTimelineClick = () => {
           isLoading: boolean;
         }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
         updateTimeline: dispatchUpdateTimeline(dispatch),
-        useDiscoverComponentsInTimeline,
+        unifiedComponentsInTimelineEnabled,
       });
     },
-    [dispatch, useDiscoverComponentsInTimeline]
+    [dispatch, unifiedComponentsInTimelineEnabled]
   );
 
   return handleTimelineClick;
