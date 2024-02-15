@@ -38,7 +38,7 @@ Saved object type definitions should be defined in their own `my_plugin/server/s
 
 The folder should contain a file per type, named after the snake_case name of the type, and an `index.ts` file exporting all the types.
 
-.src/plugins/saved_search/server/saved_objects/search.ts
+.src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts
 [source,typescript]
 ----
 import { SavedObjectsType } from 'src/core/server';
@@ -100,30 +100,27 @@ by a type will be nested under a top-level field that matches the type name.
 For example, the mappings defined by the `search` Saved
 Object type:
 
-src/plugins/saved_search/server/saved_objects/search.ts
+.src/plugins/saved_search/server/saved_objects/search.ts
 [source,typescript]
 ----
 import { SavedObjectsType } from 'src/core/server';
 // ... other imports
-export function getSavedSearchObjectType(
-  getSearchSourceMigrations: () => MigrateFunctionsObject
-): SavedObjectsType {
-  return {
-    name: 'search',
-    hidden: false,
-    namespaceType: 'multiple-isolated',
-    mappings: {
-      dynamic: false,
-      properties: {
-        title: { type: 'text' },
-        description: { type: 'text' },
-      },
+export function getSavedSearchObjectType: SavedObjectsType = { // <1>
+  name: 'search',
+  hidden: false,
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: { type: 'text' },
+      description: { type: 'text' },
     },
-    modelVersions: { ... },
-    // ...other optional properties
-  };
-}
+  },
+  modelVersions: { ... },
+  // ...other optional properties
+};
 ----
+<1> Simplification
 
 Will result in the following mappings being applied to the `.kibana_analytics` index:
 [source,json]
