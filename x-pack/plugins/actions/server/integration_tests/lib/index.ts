@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/actions'],
-};
+export { setupTestServers } from './setup_test_servers';
