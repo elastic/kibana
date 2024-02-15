@@ -29,7 +29,11 @@ export const sourcererScope = createSelector(
   }
 );
 
-export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading);
+export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading, {
+  memoizeOptions: {
+    maxSize: SOURCERER_SCOPE_MAX_SIZE,
+  },
+});
 
 export const sourcererScopeSelectedDataViewId = createSelector(
   sourcererScope,
