@@ -31,7 +31,6 @@ export type ToggleDetailPanel = ExpandedDetailType & {
 
 export enum TimelineTabs {
   query = 'query',
-  queryNew = 'queryNew',
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',

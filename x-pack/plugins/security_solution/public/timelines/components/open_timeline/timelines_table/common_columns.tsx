@@ -70,12 +70,12 @@ export const getCommonColumns = ({
       timelineResult.savedObjectId != null ? (
         <EuiLink
           data-test-subj={`timeline-title-${timelineResult.savedObjectId}`}
-          onClick={() => {
+          onClick={() =>
             onOpenTimeline({
               duplicate: false,
               timelineId: `${timelineResult.savedObjectId}`,
-            });
-          }}
+            })
+          }
         >
           {isUntitled(timelineResult) ? (
             i18n.UNTITLED_TIMELINE

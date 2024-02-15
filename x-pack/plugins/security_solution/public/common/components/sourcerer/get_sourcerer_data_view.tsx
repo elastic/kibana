@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useKibana } from '../../lib/kibana';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 
 // TODO: Define what the difference is between this and the sourcererDataView returned
 // from useSourcererDataView

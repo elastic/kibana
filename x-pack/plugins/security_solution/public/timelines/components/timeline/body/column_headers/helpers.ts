@@ -65,8 +65,6 @@ export const getColumnHeader = (
   ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
 });
 
-
-
 export const getUnifiedDataTableColumnHeader = (
   fieldName: string,
   defaultHeaders: ColumnHeaderOptions[]

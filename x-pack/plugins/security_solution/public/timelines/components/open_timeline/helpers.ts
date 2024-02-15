@@ -342,7 +342,11 @@ export interface QueryTimelineById<TCache> {
   }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
   savedSearchId?: string;
-  unifiedComponentsInTimelineEnabled?: boolean; // temporary til fully migrate
+  /*
+   * Below feature flag will be removed once
+   * unified components have been fully migrated
+   * */
+  unifiedComponentsInTimelineEnabled?: boolean;
 }
 
 export const queryTimelineById = <TCache>({
