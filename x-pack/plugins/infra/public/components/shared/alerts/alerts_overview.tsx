@@ -19,7 +19,7 @@ interface AlertsOverviewProps {
   onLoaded: (alertsCount?: AlertsCount) => void;
 }
 
-export const AlertsOverviewProps = React.memo(
+export const AlertsOverview = React.memo(
   ({ alertsQuery, dateRange, onLoaded }: AlertsOverviewProps) => {
     const { services } = useKibanaContextForPlugin();
 
