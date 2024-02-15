@@ -11,11 +11,12 @@ import {
   getFormattedMessageContent,
   getOptionalRequestParams,
   hasParsableResponse,
+  mergeBaseWithPersistedConversations,
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
-describe('getBlockBotConversation', () => {
+describe('helpers', () => {
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
@@ -324,6 +325,163 @@ describe('getBlockBotConversation', () => {
       });
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('mergeBaseWithPersistedConversations', () => {
+    const messages = [
+      { content: 'Message 1', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
+      { content: 'Message 2', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
+    ];
+    const defaultProps = {
+      messages,
+      category: 'assistant',
+      theme: {},
+      apiConfig: {},
+    };
+    const baseConversations = {
+      conversation1: {
+        ...defaultProps,
+        title: 'Conversation 1',
+        id: 'conversation_1',
+      },
+      conversation2: {
+        ...defaultProps,
+        title: 'Conversation 2',
+        id: 'conversation_2',
+      },
+    };
+    const conversationsData = {
+      page: 1,
+      perPage: 10,
+      total: 2,
+      data: Object.values(baseConversations).map((c) => c),
+    };
+
+    it('should merge base conversations with user conversations when both are non-empty', () => {
+      const moreData = {
+        ...conversationsData,
+        data: [
+          {
+            ...defaultProps,
+            title: 'Conversation 3',
+            id: 'conversation_3',
+          },
+          {
+            ...defaultProps,
+            title: 'Conversation 4',
+            id: 'conversation_4',
+          },
+        ],
+      };
+
+      const result = mergeBaseWithPersistedConversations(baseConversations, moreData);
+
+      expect(result).toEqual({
+        conversation1: {
+          title: 'Conversation 1',
+          id: 'conversation_1',
+          ...defaultProps,
+        },
+        conversation2: {
+          title: 'Conversation 2',
+          id: 'conversation_2',
+          ...defaultProps,
+        },
+        'Conversation 3': {
+          title: 'Conversation 3',
+          id: 'conversation_3',
+          ...defaultProps,
+        },
+        'Conversation 4': {
+          title: 'Conversation 4',
+          id: 'conversation_4',
+          ...defaultProps,
+        },
+      });
+    });
+
+    it('should return base conversations when user conversations are empty', () => {
+      const result = mergeBaseWithPersistedConversations(baseConversations, {
+        ...conversationsData,
+        total: 0,
+        data: [],
+      });
+
+      expect(result).toEqual(baseConversations);
+    });
+
+    it('should return user conversations when base conversations are empty', () => {
+      const result = mergeBaseWithPersistedConversations({}, conversationsData);
+
+      expect(result).toEqual({
+        'Conversation 1': {
+          ...defaultProps,
+          title: 'Conversation 1',
+          id: 'conversation_1',
+        },
+        'Conversation 2': {
+          ...defaultProps,
+          title: 'Conversation 2',
+          id: 'conversation_2',
+        },
+      });
+    });
+
+    it('should handle and merge conversations with duplicate titles', () => {
+      const result = mergeBaseWithPersistedConversations(
+        {
+          'Conversation 1': {
+            title: 'Conversation 1',
+            id: 'conversation1',
+            ...defaultProps,
+          },
+        },
+        {
+          page: 1,
+          perPage: 10,
+          total: 1,
+          data: [
+            {
+              title: 'Conversation 1',
+              id: 'conversation1',
+              ...defaultProps,
+              messages: [
+                {
+                  content: 'Message 3',
+                  role: 'user' as const,
+                  timestamp: '2024-02-14T22:29:43.862Z',
+                },
+                {
+                  content: 'Message 4',
+                  role: 'user' as const,
+                  timestamp: '2024-02-14T22:29:43.862Z',
+                },
+              ],
+            },
+          ],
+        }
+      );
+
+      expect(result).toEqual({
+        'Conversation 1': {
+          title: 'Conversation 1',
+          id: 'conversation1',
+          ...defaultProps,
+          messages: [
+            {
+              content: 'Message 3',
+              role: 'user',
+              timestamp: '2024-02-14T22:29:43.862Z',
+            },
+            {
+              content: 'Message 4',
+              role: 'user',
+              timestamp: '2024-02-14T22:29:43.862Z',
+            },
+          ],
+        },
+      });
     });
   });
 });

@@ -128,11 +128,12 @@ export const bulkChangeConversations = async (
         }),
       }
     );
+
     if (!result.success) {
       const serverError = result.attributes.errors
         ?.map(
           (e) =>
-            `Error code: ${e.status_code}. Error message: ${
+            `${e.status_code ? `Error code: ${e.status_code}. ` : ''}Error message: ${
               e.message
             } for conversation ${e.conversations.map((c) => c.name).join(',')}`
         )

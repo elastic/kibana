@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -74,6 +74,16 @@ export const AssistantHeader: React.FC<Props> = ({
       showAnonymizedValues,
     [currentConversation.replacements, showAnonymizedValues]
   );
+  const onConversationChange = useCallback(
+    (updatedConversation) => {
+      setCurrentConversation(updatedConversation);
+      onConversationSelected({
+        cId: updatedConversation.id,
+        cTitle: updatedConversation.title,
+      });
+    },
+    [onConversationSelected, setCurrentConversation]
+  );
   return (
     <>
       <EuiFlexGroup
@@ -88,13 +98,7 @@ export const AssistantHeader: React.FC<Props> = ({
             isDisabled={isDisabled}
             docLinks={docLinks}
             selectedConversation={currentConversation}
-            onChange={(updatedConversation) => {
-              setCurrentConversation(updatedConversation);
-              onConversationSelected({
-                cId: updatedConversation.id,
-                cTitle: updatedConversation.title,
-              });
-            }}
+            onChange={onConversationChange}
             title={title}
           />
         </EuiFlexItem>
