@@ -6,9 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
-  ProductFeatureKeyType,
+  FeatureKibanaPrivileges,
+  KibanaFeatureConfig,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
+import type {
   ProductFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
@@ -17,8 +20,8 @@ import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
 export class ProductFeatures<T extends string = string, S extends string = string> {
   private featureConfigMerger: ProductFeaturesConfigMerger;
-  private productFeatures?: Set<ProductFeatureKeyType>;
   private featuresSetup?: FeaturesPluginSetup;
+  private readonly registeredActions: Set<string>;
 
   constructor(
     private readonly logger: Logger,
@@ -27,20 +30,14 @@ export class ProductFeatures<T extends string = string, S extends string = strin
     private readonly baseKibanaSubFeatureIds: T[]
   ) {
     this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
+    this.registeredActions = new Set();
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
   }
 
-  public setConfig(config: ProductFeaturesConfig<S>) {
-    if (this.productFeatures) {
-      throw new Error('ProductFeatures has already been registered');
-    }
-    this.registerEnabledKibanaFeatures(config);
-  }
-
-  private registerEnabledKibanaFeatures(productFeatureConfig: ProductFeaturesConfig) {
+  public setConfig(productFeatureConfig: ProductFeaturesConfig<S>) {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
@@ -54,7 +51,42 @@ export class ProductFeatures<T extends string = string, S extends string = strin
     );
 
     this.logger.debug(JSON.stringify(completeProductFeatureConfig));
-
     this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
+    this.addRegisteredActions(completeProductFeatureConfig);
+  }
+
+  private addRegisteredActions(config: KibanaFeatureConfig) {
+    const privileges: FeatureKibanaPrivileges[] = [];
+
+    // get main privileges
+    if (config.privileges?.all) {
+      privileges.push(config.privileges?.all);
+    }
+    if (config.privileges?.read) {
+      privileges.push(config.privileges?.read);
+    }
+
+    // get sub features privileges
+    config.subFeatures?.forEach((subFeature) => {
+      subFeature.privilegeGroups.forEach((privilegeGroup) => {
+        privilegeGroup.privileges.forEach((privilege) => {
+          privileges.push(privilege);
+        });
+      });
+    });
+
+    // add the actions from all the registered privileges
+    privileges.forEach((privilege) => {
+      privilege.api?.forEach((apiAction) => {
+        this.registeredActions.add(`api:${apiAction}`);
+      });
+      privilege.ui?.forEach((uiAction) => {
+        this.registeredActions.add(`ui:${uiAction}`);
+      });
+    });
+  }
+
+  public isActionRegistered(action: string) {
+    return this.registeredActions.has(action);
   }
 }

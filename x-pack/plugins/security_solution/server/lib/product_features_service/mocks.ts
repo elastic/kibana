@@ -15,33 +15,21 @@ import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
 import { ProductFeaturesService } from './product_features_service';
 
-const SECURITY_BASE_CONFIG = {
-  foo: 'foo',
-};
-
-const CASES_BASE_CONFIG = {
-  bar: 'bar',
-};
-
-const ASSISTANT_BASE_CONFIG = {
-  bar: 'bar',
-};
-
 jest.mock('@kbn/security-solution-features/product_features', () => ({
   getSecurityFeature: jest.fn(() => ({
-    baseKibanaFeature: SECURITY_BASE_CONFIG,
-    baseKibanaSubFeatureIds: ['subFeature1'],
-    subFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
   })),
   getCasesFeature: jest.fn(() => ({
-    baseKibanaFeature: CASES_BASE_CONFIG,
-    baseKibanaSubFeatureIds: ['subFeature1'],
-    subFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
   })),
   getAssistantFeature: jest.fn(() => ({
-    baseKibanaFeature: ASSISTANT_BASE_CONFIG,
+    baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
-    subFeaturesMap: new Map([]),
+    subFeaturesMap: new Map(),
   })),
 }));
 

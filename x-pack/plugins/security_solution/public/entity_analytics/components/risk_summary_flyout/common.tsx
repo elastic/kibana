@@ -14,7 +14,7 @@ import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common
 
 interface TableItem {
   category: string;
-  count: number;
+  count: number | undefined;
   score: number;
 }
 
@@ -80,7 +80,9 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     align: 'right',
     footer: (props) =>
       showFooter ? (
-        <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+        <span data-test-subj="risk-summary-result-count">
+          {sumBy((i) => i.count ?? 0, props.items)}
+        </span>
       ) : undefined,
   },
 ];
@@ -101,13 +103,13 @@ export const getItems: (
       ? [
           {
             category: i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.contextGroupLabel',
+              'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
               {
-                defaultMessage: 'Contexts',
+                defaultMessage: 'Asset Criticality',
               }
             ),
             score: entityData?.risk.category_2_score ?? 0,
-            count: entityData?.risk.category_2_count ?? 0,
+            count: undefined,
           },
         ]
       : []),
