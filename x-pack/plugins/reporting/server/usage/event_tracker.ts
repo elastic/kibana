@@ -31,15 +31,26 @@ interface FailureOpts {
 }
 
 export class EventTracker {
-  private reportEvent: AnalyticsServiceStart['reportEvent'];
-
   constructor(
-    analytics: AnalyticsServiceStart,
+    private analytics: AnalyticsServiceStart,
     private reportId: string,
     private exportType: string,
     private objectType: string
-  ) {
-    this.reportEvent = analytics.reportEvent;
+  ) {}
+
+  private track(eventType: string, eventFields: object) {
+    try {
+      this.analytics.reportEvent(eventType, eventFields);
+    } catch (err) {
+      this.analytics.reportEvent(EventType.REPORT_ERROR, {
+        [FieldType.DURATION]: 0,
+        [FieldType.REPORT_ID]: this.reportId,
+        [FieldType.EXPORT_TYPE]: this.exportType,
+        [FieldType.OBJECT_TYPE]: this.objectType,
+        [FieldType.ERROR_MESSAGE]: err.message,
+        [FieldType.ERROR_CODE]: 'unknown',
+      });
+    }
   }
 
   /*
@@ -55,7 +66,7 @@ export class EventTracker {
     isDeprecated: boolean;
     isPublicApi: boolean;
   }) {
-    this.reportEvent(EventType.REPORT_CREATION, {
+    this.track(EventType.REPORT_CREATION, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
@@ -71,11 +82,11 @@ export class EventTracker {
    */
   public claimJob(opts: { timeSinceCreation: number }) {
     const { timeSinceCreation } = opts;
-    this.reportEvent(EventType.REPORT_CLAIM, {
+    this.track(EventType.REPORT_CLAIM, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION]: timeSinceCreation ?? 0,
     });
   }
 
@@ -86,11 +97,11 @@ export class EventTracker {
    */
   public completeJobScreenshot(opts: CompletionOpts & CompletionOptsScreenshot) {
     const { byteSize, timeSinceClaimed, numPages, screenshotLayout } = opts;
-    this.reportEvent(EventType.REPORT_COMPLETION_SCREENSHOT, {
+    this.track(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceClaimed,
+      [FieldType.DURATION]: timeSinceClaimed ?? 0,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.NUM_PAGES]: numPages,
       [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
@@ -105,11 +116,11 @@ export class EventTracker {
    */
   public completeJobCsv(opts: CompletionOpts & CompletionOptsScreenshotCsv) {
     const { byteSize, timeSinceClaimed, csvRows } = opts;
-    this.reportEvent(EventType.REPORT_COMPLETION_CSV, {
+    this.track(EventType.REPORT_COMPLETION_CSV, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceClaimed,
+      [FieldType.DURATION]: timeSinceClaimed ?? 0,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.CSV_ROWS]: csvRows,
       // [FieldType.CSV_COLUMNS]: csvColumns, // TODO add metric to report output
@@ -123,11 +134,11 @@ export class EventTracker {
    */
   public failJob(opts: FailureOpts) {
     const { timeSinceClaimed, errorMessage, errorCode } = opts;
-    this.reportEvent(EventType.REPORT_ERROR, {
+    this.track(EventType.REPORT_ERROR, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceClaimed,
+      [FieldType.DURATION]: timeSinceClaimed ?? 0,
       [FieldType.ERROR_MESSAGE]: errorMessage,
       [FieldType.ERROR_CODE]: errorCode,
     });
@@ -139,11 +150,11 @@ export class EventTracker {
    */
   public downloadReport(opts: { timeSinceCompleted?: number }) {
     const { timeSinceCompleted } = opts;
-    this.reportEvent(EventType.REPORT_DOWNLOAD, {
+    this.track(EventType.REPORT_DOWNLOAD, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCompleted,
+      [FieldType.DURATION]: timeSinceCompleted ?? 0,
     });
   }
 
@@ -154,11 +165,11 @@ export class EventTracker {
    */
   public deleteReport(opts: { timeSinceCompleted?: number }) {
     const { timeSinceCompleted } = opts;
-    this.reportEvent(EventType.REPORT_DELETION, {
+    this.track(EventType.REPORT_DELETION, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCompleted,
+      [FieldType.DURATION]: timeSinceCompleted ?? 0,
     });
   }
 }
