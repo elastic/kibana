@@ -87,7 +87,7 @@ export function WelcomeMessage({
         className={fullHeightClassName}
       >
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={['xl', 'l'].includes(breakpoint) ? 'l' : 's'} />
+          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
 
           <EuiImage
             src={ctaImage}
@@ -97,7 +97,7 @@ export function WelcomeMessage({
 
           <EuiSpacer size="m" />
 
-          <EuiTitle size={['xl', 'l'].includes(breakpoint) ? 'm' : 's'}>
+          <EuiTitle size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'}>
             <h2>
               {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
                 defaultMessage: 'Welcome to the AI Assistant for Observability',
