@@ -32,7 +32,10 @@ import {
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ALL_PRODUCT_FEATURE_KEYS, ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';

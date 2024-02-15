@@ -15,7 +15,10 @@ type PliProductFeatures = Readonly<
 
 export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   security: {
-    essentials: [ProductFeatureKey.endpointHostManagement, ProductFeatureKey.endpointPolicyManagement],
+    essentials: [
+      ProductFeatureKey.endpointHostManagement,
+      ProductFeatureKey.endpointPolicyManagement,
+    ],
     complete: [
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,

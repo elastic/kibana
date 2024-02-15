@@ -163,7 +163,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
-    this.productFeaturesService = new ProductFeaturesService(this.logger, this.config.experimentalFeatures);
+    this.productFeaturesService = new ProductFeaturesService(
+      this.logger,
+      this.config.experimentalFeatures
+    );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);

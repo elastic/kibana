@@ -28,7 +28,9 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
   const isMounted = useIsMounted();
 
   // serverless component that is returned when users do not have Endpoint.Complete tier
-  const UpsellingComponent = useUpsellingComponent(ProductFeatureKey.osqueryAutomatedResponseActions);
+  const UpsellingComponent = useUpsellingComponent(
+    ProductFeatureKey.osqueryAutomatedResponseActions
+  );
 
   if (osquery) {
     const { disabled, permissionDenied } = osquery.fetchInstallationStatus();

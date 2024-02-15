@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import { ProductFeaturesPrivilegeId, ProductFeaturesPrivileges } from '../product_features_privileges';
+import {
+  ProductFeaturesPrivilegeId,
+  ProductFeaturesPrivileges,
+} from '../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
