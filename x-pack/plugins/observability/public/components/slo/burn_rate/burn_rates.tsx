@@ -58,7 +58,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     setBurnRateOption(selected);
   };
 
-  const dateTimeRange = {
+  const dataTimeRange = {
     from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
     to: new Date(),
   };
@@ -119,7 +119,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
             <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} dataTimeRange={dateTimeRange} threshold={threshold} />
+            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

@@ -91,7 +91,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
   });
   const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
   const burnRateOptions =
-    rules?.[slo.id][0].params.windows.map((window) => ({
+    rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
       id: htmlIdGenerator()(),
       label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
         defaultMessage: '{duration}h',
