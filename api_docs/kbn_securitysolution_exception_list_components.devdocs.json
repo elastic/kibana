@@ -478,6 +478,23 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.WildCardWithWrongOperatorCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "WildCardWithWrongOperatorCallout",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/wildcard_with_wrong_operator_callout/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
