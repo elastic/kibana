@@ -257,12 +257,7 @@ describe('validation logic', () => {
   const testCases: Array<{ query: string; error: boolean }> = [];
 
   afterAll(async () => {
-    const targetFolder = join(
-      __dirname,
-      '..',
-      'integration_tests',
-      'esql_validation_meta_tests.json'
-    );
+    const targetFolder = join(__dirname, 'esql_validation_meta_tests.json');
     try {
       await writeFile(
         targetFolder,
