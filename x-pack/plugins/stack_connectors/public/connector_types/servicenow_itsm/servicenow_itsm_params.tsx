@@ -98,6 +98,17 @@ const CorrelationIdField: React.FunctionComponent<
   );
 };
 
+const eventActionOptions = [
+  {
+    value: EventAction.Trigger,
+    text: i18n.EVENT_ACTION_TRIGGER,
+  },
+  {
+    value: EventAction.Resolve,
+    text: i18n.EVENT_ACTION_RESOLVE,
+  },
+];
+
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITSMActionParams>
 > = (props) => {
@@ -251,25 +262,13 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
       if (value === EventAction.Resolve) {
         editAction('subAction', 'closeIncident', index);
+        return;
       }
 
-      if (value === EventAction.Trigger) {
-        editAction('subAction', 'pushToService', index);
-      }
+      editAction('subAction', 'pushToService', index);
     },
     [setEventAction, editAction, index]
   );
-
-  const eventActionOptions = [
-    {
-      value: EventAction.Trigger,
-      text: i18n.EVENT_ACTION_TRIGGER,
-    },
-    {
-      value: EventAction.Resolve,
-      text: i18n.EVENT_ACTION_RESOLVE,
-    },
-  ];
 
   return (
     <>
