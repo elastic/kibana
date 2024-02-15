@@ -792,18 +792,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should fail to schedule recurring task with timeout override', async () => {
-      const response = await supertest
-        .post('/api/sample_tasks/schedule')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          task: {
-            taskType: 'sampleRecurringTaskTimingOut',
-            schedule: { interval: '1s' },
-            params: {},
-            timeoutOverride: '1m',
-          },
-        });
-      expect(response.status).not.to.eql(200);
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskTimingOut',
+        schedule: { interval: '1s' },
+        timeoutOverride: '30s',
+        params: {},
+      });
+
+      expect(task.timeoutOverride).to.be(undefined);
     });
 
     it('should allow timeout override for ad hoc tasks', async () => {
@@ -812,6 +808,8 @@ export default function ({ getService }: FtrProviderContext) {
         timeoutOverride: '30s',
         params: {},
       });
+
+      expect(task.timeoutOverride).to.be('30s');
 
       // this task type is set to time out after 1s but the task runner
       // will wait 15 seconds and then index a document if it hasn't timed out
