@@ -279,20 +279,12 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts)_
 
 ```ts
-// [... file continues above...]
-
-import {
-  // [...]
-  ExternalSourceAttributes,
-  // [...]
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-
 export type BaseRuleParams = z.infer<typeof BaseRuleParams>;
 export const BaseRuleParams = z.object({
   // [...]
 
   immutable: IsRuleImmutable,
-  external_soruce: ExternalSourceAttributes.transform(camelize).optional(),
+  externalSource: ExternalSourceAttributes.transform(camelize).optional(),
 
   // [...]
 });
