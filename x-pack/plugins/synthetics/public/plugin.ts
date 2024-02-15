@@ -53,6 +53,7 @@ import {
   ObservabilityAIAssistantPluginStart,
   ObservabilityAIAssistantPluginSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -69,6 +70,7 @@ export interface ClientPluginsSetup {
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface ClientPluginsStart {
@@ -153,7 +155,7 @@ export class UptimePlugin
             defaultMessage: 'Overview',
           }),
           path: '/',
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: plugins?.serverless ? ['globalSearch', 'sideNav'] : [],
         },
         {
           id: 'management',
@@ -161,7 +163,7 @@ export class UptimePlugin
             defaultMessage: 'Management',
           }),
           path: '/monitors',
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: plugins?.serverless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
       mount: async (params: AppMountParameters) => {
