@@ -47,15 +47,13 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     try {
       return await getFleetServerHost(soClient, SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID);
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        if (nAttempts > 0) {
-          await new Promise((r) => setTimeout(r, 1000));
-          await attempt(nAttempts - 1);
-        } else {
-          throw new FleetNotFoundError(
-            `Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} not found in saved objects: ${e.message}`
-          );
-        }
+      if (nAttempts > 0) {
+        await new Promise((r) => setTimeout(r, 1000));
+        await attempt(nAttempts - 1);
+      } else {
+        throw new FleetNotFoundError(
+          `Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} not found in saved objects: ${e.message}`
+        );
       }
     }
   }

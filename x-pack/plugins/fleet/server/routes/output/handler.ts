@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
@@ -167,13 +166,27 @@ async function validateOutputServerless(
   if (!cloudSetup?.isServerlessEnabled) {
     return;
   }
+
   if (output.type === outputType.RemoteElasticsearch) {
     throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
   }
+
   // Elasticsearch outputs must have the default host URL in serverless.
-  // No need to validate on update if hosts are not passed.
-  if (outputId && !output.hosts) {
+  // No need to validate for other types.
+  if (output.type !== outputType.Elasticsearch) {
     return;
+  }
+
+  if (outputId) {
+    // No need to validate on update if hosts are not passed.
+    if (!output.hosts) {
+      return;
+    }
+    const originalOutput = await outputService.get(soClient, outputId);
+    // No need to validate on update if updating to another type.
+    if (originalOutput.type && originalOutput.type !== outputType.Elasticsearch) {
+      return;
+    }
   }
 
   // API integration tests have been flaky due to the request to get the default
@@ -182,30 +195,23 @@ async function validateOutputServerless(
     try {
       return await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        if (nAttempts > 0) {
-          await new Promise((r) => setTimeout(r, 1000));
-          await attempt(nAttempts - 1);
-        } else {
-          throw Boom.badRequest(
-            `Output id ${SERVERLESS_DEFAULT_OUTPUT_ID} not found in saved objects: ${e.message}`
-          );
-        }
+      if (nAttempts > 0) {
+        await new Promise((r) => setTimeout(r, 1000));
+        await attempt(nAttempts - 1);
+      } else {
+        throw Boom.badRequest(
+          `Output id ${SERVERLESS_DEFAULT_OUTPUT_ID} not found in saved objects: ${e.message}`
+        );
       }
     }
   }
 
   const defaultOutput = await attempt(3);
-  let originalOutput;
-  if (outputId) {
-    originalOutput = await outputService.get(soClient, outputId);
-  }
-  const type = output.type || originalOutput?.type;
-  if (type === outputType.Elasticsearch && !defaultOutput) {
+  if (!defaultOutput) {
     throw Boom.badRequest('Default ES output not found');
-  } else if (type === outputType.Elasticsearch && !defaultOutput?.hosts) {
+  } else if (!defaultOutput?.hosts) {
     throw Boom.badRequest(`Missing default ES output hosts: ${defaultOutput}`);
-  } else if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput?.hosts)) {
+  } else if (!isEqual(output.hosts, defaultOutput?.hosts)) {
     throw Boom.badRequest(
       `Elasticsearch output host must have default URL in serverless: ${defaultOutput?.hosts}`
     );
