@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { LensApi } from '../../../../ui_actions/types';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';

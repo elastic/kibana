@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { type EmbeddableApiContext, apiHasType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { apiHasLensConfig } from '@kbn/lens-plugin/public';
-import { type MapApi, apiHasMapConfig } from '@kbn/maps-plugin/public';
+import { apiHasMapConfig } from '@kbn/maps-plugin/public';
 import type { ActionApi } from './types';
 import { MlCoreSetup } from '../plugin';
 
@@ -46,7 +46,7 @@ export function createVisToADJobAction(
         } else if (apiHasMapConfig(embeddable)) {
           const [{ showMapVisToADJobFlyout }, [coreStart, { share, data, dashboard }]] =
             await Promise.all([import('../embeddables/job_creation/map'), getStartServices()]);
-          await showMapVisToADJobFlyout(embeddable as MapApi, coreStart, share, data, dashboard);
+          await showMapVisToADJobFlyout(embeddable, coreStart, share, data, dashboard);
         }
       } catch (e) {
         return Promise.reject();

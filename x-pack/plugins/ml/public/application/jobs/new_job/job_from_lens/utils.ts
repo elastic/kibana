@@ -19,7 +19,8 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import type { DashboardApi, LensApi } from '../../../../ui_actions/types';
+import type { LensApi } from '@kbn/lens-plugin/public';
+import type { DashboardApi } from '../../../../ui_actions/types';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export const COMPATIBLE_SERIES_TYPES = [
@@ -76,7 +77,11 @@ export async function getJobsItemsFromEmbeddable(embeddable: LensApi, lens?: Len
     );
   }
 
-  const timeRange = embeddable.localTimeRange?.value ?? embeddable.parentApi?.localTimeRange?.value;
+  const dashboardApi = apiIsOfType(embeddable.parentApi, 'dashboard')
+    ? (embeddable.parentApi as DashboardApi)
+    : undefined;
+
+  const timeRange = embeddable.localTimeRange?.value ?? dashboardApi?.localTimeRange?.value;
   if (timeRange === undefined) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noTimeRange', {
@@ -99,11 +104,9 @@ export async function getJobsItemsFromEmbeddable(embeddable: LensApi, lens?: Len
     chartInfo: await getChartInfoFromVisualization(lens, vis),
     from: timeRange.from,
     to: timeRange.to,
-    query: (embeddable.parentApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
-    filters: embeddable.parentApi?.localFilters?.value ?? [],
-    dashboard: apiIsOfType(embeddable.parentApi, 'dashboard')
-      ? (embeddable.parentApi as DashboardApi)
-      : undefined,
+    query: (dashboardApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
+    filters: dashboardApi?.localFilters?.value ?? [],
+    dashboard: dashboardApi,
   };
 }
 

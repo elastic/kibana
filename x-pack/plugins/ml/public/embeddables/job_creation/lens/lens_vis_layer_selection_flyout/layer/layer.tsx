@@ -15,7 +15,7 @@ import {
   EuiSplitPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import type { LensApi } from '../../../../../ui_actions/types';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';

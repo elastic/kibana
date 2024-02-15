@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react'; // useCallback
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import type { LensApi } from '../../../../../ui_actions/types';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import {
   redirectToADJobWizards,
   QuickLensJobCreator,

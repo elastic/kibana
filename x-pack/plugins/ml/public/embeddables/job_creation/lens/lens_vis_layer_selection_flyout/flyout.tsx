@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { LensApi } from '../../../../ui_actions/types';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';

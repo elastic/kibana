@@ -6,13 +6,12 @@
  */
 
 import type {
-  HasParentApi,
   HasType,
   PublishesLocalUnifiedSearch,
   PublishesPanelTitle,
   PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
-import type { HasLensConfig } from '@kbn/lens-plugin/public';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
 
 export type DashboardApi = Partial<
@@ -20,6 +19,3 @@ export type DashboardApi = Partial<
 >;
 
 export type ActionApi = MapApi | LensApi;
-
-export type LensApi = HasLensConfig &
-  Partial<PublishesPanelTitle & PublishesLocalUnifiedSearch & HasParentApi<DashboardApi>>;

@@ -9,7 +9,7 @@ import type { LensPublicStart, ChartInfo } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { LensApi } from '../../../../ui_actions/types';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import {
   getVisTypeFactory,

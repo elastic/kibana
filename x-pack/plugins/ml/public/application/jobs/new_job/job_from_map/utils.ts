@@ -68,8 +68,6 @@ export async function getJobsItemsFromEmbeddable(embeddable: MapApi) {
     to: timeRange.to,
     query: (dashboardApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
     filters: dashboardApi?.localFilters?.value ?? [],
-    dashboard: apiIsOfType(embeddable.parentApi, 'dashboard')
-      ? (embeddable.parentApi as DashboardApi)
-      : undefined,
+    dashboard: dashboardApi,
   };
 }

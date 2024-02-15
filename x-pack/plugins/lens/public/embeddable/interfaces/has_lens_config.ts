@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
+import type {
+  HasParentApi,
+  HasType,
+  PublishesLocalUnifiedSearch,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import { LensSavedObjectAttributes } from '../embeddable';
 
 export type HasLensConfig = HasType<'lens'> & {
   getSavedVis: () => LensSavedObjectAttributes;
 };
 
-export const apiHasLensConfig = (api: unknown): api is HasLensConfig => {
+export type LensApi = HasLensConfig &
+  PublishesPanelTitle &
+  PublishesLocalUnifiedSearch &
+  Partial<HasParentApi<unknown>>;
+
+export const apiHasLensConfig = (api: unknown): api is LensApi => {
   return Boolean(
     api && apiIsOfType(api, 'lens') && typeof (api as HasLensConfig).getSavedVis === 'function'
   );

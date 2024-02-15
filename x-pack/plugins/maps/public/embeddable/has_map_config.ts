@@ -25,7 +25,7 @@ export type MapApi = HasMapConfig &
   PublishesLocalUnifiedSearch &
   Partial<HasParentApi<unknown>>;
 
-export const apiHasMapConfig = (api: unknown): api is HasMapConfig => {
+export const apiHasMapConfig = (api: unknown): api is MapApi => {
   return Boolean(
     api && apiIsOfType(api, 'map') && typeof (api as HasMapConfig).getLayerList === 'function'
   );
