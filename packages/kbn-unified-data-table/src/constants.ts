@@ -21,7 +21,7 @@ export const ROWS_HEIGHT_OPTIONS = {
   auto: -1,
   single: 0,
   default: 3,
-};
+} as const;
 export const defaultRowLineHeight = '1.6em';
 export const defaultMonacoEditorWidth = 370;
 export const defaultTimeColumnWidth = 212;
