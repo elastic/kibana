@@ -42,19 +42,17 @@ export const clearFlashMessages = () => {
 };
 
 export const flashSuccessToast = (message: string, toastOptions: ToastOptions = {}) => {
-  FlashMessagesLogic.actions.addToastMessage({
+  FlashMessagesLogic.values.notifications.toasts.add({
     ...FLASH_MESSAGE_TYPES.success,
     ...toastOptions,
     title: message,
-    id: toastOptions?.id || `successToast-${Date.now()}`,
   });
 };
 
 export const flashErrorToast = (message: string, toastOptions: ToastOptions = {}) => {
-  FlashMessagesLogic.actions.addToastMessage({
+  FlashMessagesLogic.values.notifications.toasts.add({
     ...FLASH_MESSAGE_TYPES.error,
     ...toastOptions,
     title: message,
-    id: toastOptions?.id || `errorToast-${Date.now()}`,
   });
 };

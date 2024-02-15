@@ -7,13 +7,12 @@
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
-import { LINK_TO_METRICS_EXPLORER } from '../../../common/alerting/metrics';
+import { getMetricsViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
-  const link = LINK_TO_METRICS_EXPLORER; // TODO https://github.com/elastic/kibana/issues/106497 & https://github.com/elastic/kibana/issues/106958
 
   return {
     reason,
-    link,
+    link: getMetricsViewInAppUrl(fields),
   };
 };

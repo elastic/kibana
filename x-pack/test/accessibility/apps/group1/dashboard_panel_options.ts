@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('dashboardEditMode');
       await dashboardPanelActions.toggleContextMenu(header);
       await testSubjects.click('embeddablePanelAction-clonePanel');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
