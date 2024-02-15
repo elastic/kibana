@@ -181,19 +181,9 @@ describe('Assistant', () => {
     it('should not persist the conversation id to local storage when excludeFromLastConversationStorage flag is indicated', async () => {
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: {
-          Welcome: {
-            id: 'Welcome Id',
-            title: 'Welcome',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
+          ...mockData,
           'electric sheep': {
-            id: 'electric sheep id',
-            category: 'assistant',
-            title: 'electric sheep',
-            messages: [],
-            apiConfig: {},
+            ...mockData['electric sheep'],
             excludeFromLastConversationStorage: true,
           },
         },
@@ -231,34 +221,6 @@ describe('Assistant', () => {
 
   describe('when no connectors are loaded', () => {
     it('should set welcome conversation id in local storage', async () => {
-      const emptyConnectors: unknown[] = [];
-
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: emptyConnectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: {
-          Welcome: {
-            id: 'Welcome',
-            title: 'Welcome',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
-          'electric sheep': {
-            id: 'electric sheep',
-            title: 'electric sheep',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
-        },
-        isLoading: false,
-        refetch: jest.fn(),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
-
       renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
@@ -268,27 +230,6 @@ describe('Assistant', () => {
 
   describe('when not authorized', () => {
     it('should be disabled', async () => {
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: {
-          Welcome: {
-            id: 'Welcome',
-            title: 'Welcome',
-            category: 'assistant',
-            messages: [],
-            apiConfig: {},
-          },
-          'electric sheep': {
-            category: 'assistant',
-            id: 'electric sheep',
-            title: 'electric sheep',
-            messages: [],
-            apiConfig: {},
-          },
-        },
-        isLoading: false,
-        refetch: jest.fn(),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
-
       const { queryByTestId } = renderAssistant(
         {},
         {
