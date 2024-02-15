@@ -208,7 +208,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables Security AI Assistant in Flyout mode
    */
-  aiAssistantFlyoutMode: false,
+  aiAssistantFlyoutMode: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
