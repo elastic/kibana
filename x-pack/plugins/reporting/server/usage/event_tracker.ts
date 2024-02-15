@@ -10,7 +10,7 @@ import { EventType, FieldType } from './types';
 
 interface CompletionOpts {
   byteSize: number;
-  timeSinceClaimed?: number;
+  timeSinceCreation?: number;
 }
 
 interface CompletionOptsScreenshot {
@@ -25,7 +25,7 @@ interface CompletionOptsScreenshotCsv {
 }
 
 interface FailureOpts {
-  timeSinceClaimed?: number;
+  timeSinceCreation?: number;
   errorCode?: string;
   errorMessage?: string;
 }
@@ -80,22 +80,22 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation ?? 0,
+      [FieldType.DURATION]: timeSinceCreation,
     });
   }
 
   /*
-   * When a report job is completed, the time
-   * since claimed equals the time spent executing
-   * the report.
+   * When a report job is completed, the time since
+   * creation equals the time spent waiting in queue +
+   * retries + executing the final report.
    */
   public completeJobScreenshot(opts: CompletionOpts & CompletionOptsScreenshot) {
-    const { byteSize, timeSinceClaimed, numPages, screenshotLayout } = opts;
+    const { byteSize, timeSinceCreation, numPages, screenshotLayout } = opts;
     this.track(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceClaimed ?? 0,
+      [FieldType.DURATION]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.NUM_PAGES]: numPages,
       [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
@@ -104,17 +104,17 @@ export class EventTracker {
   }
 
   /*
-   * When a report job is completed, the time
-   * since claimed equals the time spent executing
-   * the report.
+   * When a report job is completed, the time since
+   * creation equals the time spent waiting in queue + the
+   * time spent executing the report.
    */
   public completeJobCsv(opts: CompletionOpts & CompletionOptsScreenshotCsv) {
-    const { byteSize, timeSinceClaimed, csvRows } = opts;
+    const { byteSize, timeSinceCreation, csvRows } = opts;
     this.track(EventType.REPORT_COMPLETION_CSV, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceClaimed ?? 0,
+      [FieldType.DURATION]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.CSV_ROWS]: csvRows,
       // [FieldType.CSV_COLUMNS]: csvColumns, // TODO add metric to report output
@@ -122,17 +122,18 @@ export class EventTracker {
   }
 
   /*
-   * When a report job failes, the time since
-   * claimed equals the time took to hit the
-   * error.
+   * When a report job fails, the time since creation
+   * equals the time spent waiting in queue + time
+   * spent on retries + the time spent attempting
+   * execution
    */
   public failJob(opts: FailureOpts) {
-    const { timeSinceClaimed, errorMessage, errorCode } = opts;
+    const { timeSinceCreation, errorMessage, errorCode } = opts;
     this.track(EventType.REPORT_ERROR, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceClaimed ?? 0,
+      [FieldType.DURATION]: timeSinceCreation,
       [FieldType.ERROR_MESSAGE]: errorMessage,
       [FieldType.ERROR_CODE]: errorCode,
     });
@@ -142,13 +143,13 @@ export class EventTracker {
    * When a report job is downloaded, we want to
    * know how old the job is
    */
-  public downloadReport(opts: { timeSinceCompleted?: number }) {
-    const { timeSinceCompleted } = opts;
+  public downloadReport(opts: { timeSinceCreation?: number }) {
+    const { timeSinceCreation } = opts;
     this.track(EventType.REPORT_DOWNLOAD, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCompleted ?? 0,
+      [FieldType.DURATION]: timeSinceCreation,
     });
   }
 
@@ -157,13 +158,13 @@ export class EventTracker {
    * how old the job is, and what type of error it
    * may have had
    */
-  public deleteReport(opts: { timeSinceCompleted?: number }) {
-    const { timeSinceCompleted } = opts;
+  public deleteReport(opts: { timeSinceCreation?: number }) {
+    const { timeSinceCreation } = opts;
     this.track(EventType.REPORT_DELETION, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCompleted ?? 0,
+      [FieldType.DURATION]: timeSinceCreation,
     });
   }
 }

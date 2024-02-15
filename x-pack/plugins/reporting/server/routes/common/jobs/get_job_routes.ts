@@ -47,14 +47,6 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
       const payload = await jobsQuery.getDocumentPayload(doc);
       const { contentType, content, filename, statusCode } = payload;
 
-      // event tracking
-      const completedAt = doc.completed_at;
-      const timeSinceCompleted = completedAt
-        ? new Date(Date.now()).valueOf() - new Date(completedAt).valueOf()
-        : undefined;
-      const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
-      eventTracker?.downloadReport({ timeSinceCompleted });
-
       if (!contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(contentType)) {
         return res.badRequest({
           body: `Unsupported content-type of ${contentType} specified by job output`,
@@ -69,6 +61,14 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
       };
 
       if (filename) {
+        // event tracking of the downloaded file, if
+        // the report job was completed successfully
+        // and a file is available
+        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+        const timeSinceCreation =
+          new Date(Date.now()).valueOf() - new Date(doc.created_at).valueOf();
+        eventTracker?.downloadReport({ timeSinceCreation });
+
         return res.file({ body, headers, filename });
       }
 
@@ -117,13 +117,11 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
 
         await jobsQuery.delete(docIndex, docId);
 
-        // event tracking
-        const completedAt = doc.completed_at;
-        const timeSinceCompleted = completedAt
-          ? new Date(Date.now()).valueOf() - new Date(completedAt).valueOf()
-          : undefined;
+        // event tracking of the deleted report
         const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
-        eventTracker?.deleteReport({ timeSinceCompleted });
+        const timeSinceCreation =
+          new Date(Date.now()).valueOf() - new Date(doc.created_at).valueOf();
+        eventTracker?.deleteReport({ timeSinceCreation });
 
         return res.ok({
           body: { deleted: true },

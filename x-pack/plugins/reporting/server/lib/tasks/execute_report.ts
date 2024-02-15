@@ -236,9 +236,9 @@ export class ExecuteReportTask implements ReportingTask {
 
     // event tracking of claimed job
     const eventTracker = this.getEventTracker(report);
-    eventTracker?.claimJob({
-      timeSinceCreation: new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf(),
-    });
+    const timeSinceCreation =
+      new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf();
+    eventTracker?.claimJob({ timeSinceCreation });
 
     const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no;
@@ -271,9 +271,10 @@ export class ExecuteReportTask implements ReportingTask {
 
     // event tracking of failed job
     const eventTracker = this.getEventTracker(report);
+    const timeSinceCreation =
+      new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf();
     eventTracker?.failJob({
-      timeSinceClaimed:
-        new Date(Date.now()).valueOf() - new Date(report.started_at ?? -Infinity).valueOf(),
+      timeSinceCreation,
       errorCode: docOutput?.error_code,
       errorMessage: error?.message,
     });
@@ -372,19 +373,18 @@ export class ExecuteReportTask implements ReportingTask {
     // event tracking of completed job
     const eventTracker = this.getEventTracker(report);
     const byteSize = docOutput.size;
-    const timeSinceClaimed =
-      completedTime.valueOf() - new Date(report.started_at ?? -Infinity).valueOf();
+    const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
     if (docOutput.metrics?.csv != null) {
       eventTracker?.completeJobCsv({
         byteSize,
-        timeSinceClaimed,
+        timeSinceCreation,
         csvRows: docOutput.metrics.csv.rows ?? 0,
         // csvColumns: docOutput.metrics?.csv?.columns, // TODO: add new metric to report output
       });
     } else if (docOutput.metrics?.pdf != null || docOutput.metrics?.png != null) {
       eventTracker?.completeJobScreenshot({
         byteSize,
-        timeSinceClaimed,
+        timeSinceCreation,
         numPages: docOutput.metrics.pdf?.pages ?? 1,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
         // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // TODO: add new metric to report output
