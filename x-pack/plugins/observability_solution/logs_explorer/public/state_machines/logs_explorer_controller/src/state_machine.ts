@@ -8,7 +8,8 @@
 import { IToasts } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
-import { LogsExplorerStartDeps } from '../../../types';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LogsExplorerCustomizations } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
   AllDatasetSelection,
@@ -28,7 +29,7 @@ import {
 } from './services/control_panels';
 import { changeDataView, createAdHocDataView } from './services/data_view_service';
 import {
-  redirectToDiscoverAction,
+  redirectToDiscover,
   subscribeToDiscoverState,
   updateContextFromDiscoverAppState,
   updateContextFromDiscoverDataState,
@@ -319,7 +320,8 @@ export const createPureLogsExplorerControllerStateMachine = (
 
 export interface LogsExplorerControllerStateMachineDependencies {
   datasetsClient: IDatasetsClient;
-  plugins: Pick<LogsExplorerStartDeps, 'dataViews' | 'discover'>;
+  dataViews: DataViewsPublicPluginStart;
+  events?: LogsExplorerCustomizations['events'];
   initialContext?: LogsExplorerControllerContext;
   query: QueryStart;
   toasts: IToasts;
@@ -327,7 +329,8 @@ export interface LogsExplorerControllerStateMachineDependencies {
 
 export const createLogsExplorerControllerStateMachine = ({
   datasetsClient,
-  plugins: { dataViews, discover },
+  dataViews,
+  events,
   initialContext = DEFAULT_CONTEXT,
   query,
   toasts,
@@ -336,14 +339,14 @@ export const createLogsExplorerControllerStateMachine = ({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
-      redirectToDiscover: redirectToDiscoverAction(discover),
+      redirectToDiscover: redirectToDiscover(events),
       updateTimefilterFromContext: updateTimefilterFromContext(query),
     },
     services: {
       changeDataView: changeDataView({ dataViews }),
       createAdHocDataView: createAdHocDataView(),
       initializeControlPanels: initializeControlPanels(),
-      initializeSelection: initializeSelection({ datasetsClient, discover }),
+      initializeSelection: initializeSelection({ datasetsClient, events }),
       subscribeControlGroup: subscribeControlGroup(),
       updateControlPanels: updateControlPanels(),
       discoverStateService: subscribeToDiscoverState(),
