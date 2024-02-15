@@ -15,7 +15,7 @@ import {
   getDataStreamsDetailsResponseRt,
   getDataStreamsEstimatedDataInBytesResponseRt,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE, UNCATEGORIZED } from '../../../common/constants';
+import { DEFAULT_DATASET_TYPE, NONE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -63,7 +63,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return {
       dataStreamStats: mergedDataStreamsStats.map(DataStreamStat.create),
       integrations: (uncategorizedDatasets
-        ? [...integrations, { name: UNCATEGORIZED, title: 'None' }]
+        ? [...integrations, { name: NONE, title: 'None' }]
         : integrations
       ).map(Integration.create),
     };

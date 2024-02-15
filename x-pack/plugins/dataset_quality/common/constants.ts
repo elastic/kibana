@@ -13,4 +13,4 @@ export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
 export const DEFAULT_SORT_FIELD = 'title';
 export const DEFAULT_SORT_DIRECTION = 'asc';
 
-export const UNCATEGORIZED = 'uncategorized_datasets';
+export const NONE = 'none';
