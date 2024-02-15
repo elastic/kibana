@@ -636,7 +636,6 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
-    // possible error?
     const configurations = await this.casesClient.configure.get();
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
@@ -647,12 +646,7 @@ export class CasesConnectorExecutor {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
 
         bulkCreateReq.push(
-          this.getCreateCaseRequest(
-            params,
-            data,
-            // possibly undefined?
-            customFieldsConfigurationMap.get(params.owner) ?? []
-          )
+          this.getCreateCaseRequest(params, data, customFieldsConfigurationMap.get(params.owner))
         );
       }
     }
@@ -694,7 +688,7 @@ export class CasesConnectorExecutor {
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId,
-    customFieldsConfigurations: CustomFieldsConfiguration
+    customFieldsConfigurations?: CustomFieldsConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord } = groupingData;
 
@@ -896,18 +890,13 @@ export class CasesConnectorExecutor {
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
-    // possible error?
     const configurations = await this.casesClient.configure.get();
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
-      this.getCreateCaseRequest(
-        params,
-        record,
-        customFieldsConfigurationMap.get(params.owner) ?? []
-      )
+      this.getCreateCaseRequest(params, record, customFieldsConfigurationMap.get(params.owner))
     );
 
     const idsToCreate = bulkCreateReq.map(({ id }) => id);
