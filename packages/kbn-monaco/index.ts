@@ -16,9 +16,12 @@ export {
   markdownLanguage,
   yamlConf,
   yamlLanguage,
+  shellConf,
+  shellLanguage,
 } from './src/monaco_imports';
 export { XJsonLang } from './src/xjson';
 export { SQLLang } from './src/sql';
+export { ShellLang } from './src/shell';
 export { ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang } from './src/esql';
 export type { ESQLCallbacks } from './src/esql';
 

@@ -120,6 +120,7 @@ components:
           type: string
           enum:
             - isolate
+            - get-file
         comment:
           type: string
       required:
@@ -151,6 +152,31 @@ components:
         - command
         - config
 
+     ExecuteParams:
+          type: object
+          properties:
+            command:
+              type: string
+              enum:
+                - execute
+            comment:
+              type: string
+            config:
+              required:
+                - command
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: Command to execute on the host
+                  minLength: 1  # Minimum length of 1 (non-empty string) command:
+                timeout:
+                  type: number
+                  description: Timeout for execute on the host
+          required:
+            - command
+            - config
+
     EndpointResponseAction:
       type: object
       properties:
@@ -162,6 +188,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/ExecuteParams'
       required:
         - action_type_id
         - params
@@ -178,6 +205,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/ExecuteParams'
       required:
         - actionTypeId
         - params

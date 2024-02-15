@@ -9,12 +9,24 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
 
 import type { ExperimentalFeatures } from '../../../../common';
-import { isIsolateAction, isProcessesAction } from './endpoint_params_type_guards';
+
+import {
+  isExecuteAction,
+  isGetFileAction,
+  isIsolateAction,
+  isProcessesAction,
+} from './endpoint_params_type_guards';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getProcessAlerts, getIsolateAlerts, getErrorProcessAlerts } from './utils';
 
 import type { ResponseActionAlerts, AlertsAction } from './types';
+import {
+  getProcessAlerts,
+  getIsolateAlerts,
+  getErrorProcessAlerts,
+  getExecuteAlerts,
+  getGetFileAlerts,
+} from './utils';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
@@ -31,6 +43,11 @@ export const endpointResponseAction = (
     rule_name: alerts[0][ALERT_RULE_NAME],
     agent_type: 'endpoint' as const,
   };
+  const {
+    automatedProcessActionsEnabled,
+    automatedExecuteActionEnabled,
+    automatedGetFileActionEnabled,
+  } = experimentalFeatures;
 
   if (isIsolateAction(responseAction.params)) {
     const alertsPerAgent = getIsolateAlerts(alerts);
@@ -45,7 +62,37 @@ export const endpointResponseAction = (
     });
   }
 
-  const automatedProcessActionsEnabled = experimentalFeatures?.automatedProcessActionsEnabled;
+  if (automatedExecuteActionEnabled) {
+    if (isExecuteAction(responseAction.params)) {
+      const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
+
+      return each(actionAlerts, (actionPayload) => {
+        return endpointAppContextService.getActionCreateService().createActionFromAlert(
+          {
+            ...actionPayload,
+            ...commonData,
+          },
+          actionPayload.endpoint_ids
+        );
+      });
+    }
+  }
+
+  if (automatedGetFileActionEnabled) {
+    if (isGetFileAction(responseAction.params)) {
+      const actionAlerts = getGetFileAlerts(alerts);
+
+      return each(actionAlerts, (actionPayload) => {
+        return endpointAppContextService.getActionCreateService().createActionFromAlert(
+          {
+            ...actionPayload,
+            ...commonData,
+          },
+          actionPayload.endpoint_ids
+        );
+      });
+    }
+  }
 
   if (automatedProcessActionsEnabled) {
     const createProcessActionFromAlerts = (

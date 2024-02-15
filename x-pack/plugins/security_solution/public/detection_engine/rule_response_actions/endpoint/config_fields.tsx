@@ -9,6 +9,8 @@ import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash';
+import { TimeoutField } from './timeout';
+import { ExecuteCommandField } from './execute_command_field';
 import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
 
@@ -44,6 +46,39 @@ export const ConfigFieldsComponent = ({
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
           isRequired={!currentOverwrite}
+        />
+        <EuiSpacer />
+      </>
+    );
+  }
+  // if (currentCommand === 'get-file') {
+  //   return (
+  //     <>
+  //       <EuiSpacer />
+  //       <FilePathField
+  //         path={`${basePath}.config.path`}
+  //         disabled={disabled}
+  //         readDefaultValueOnForm={readDefaultValueOnForm}
+  //       />
+  //       <EuiSpacer />
+  //     </>
+  //   );
+  // }
+
+  if (currentCommand === 'execute') {
+    return (
+      <>
+        <EuiSpacer />
+        <ExecuteCommandField
+          path={`${basePath}.config.command`}
+          disabled={disabled}
+          readDefaultValueOnForm={readDefaultValueOnForm}
+        />
+        <EuiSpacer />
+        <TimeoutField
+          path={`${basePath}.config.timeout`}
+          disabled={disabled}
+          readDefaultValueOnForm={readDefaultValueOnForm}
         />
         <EuiSpacer />
       </>

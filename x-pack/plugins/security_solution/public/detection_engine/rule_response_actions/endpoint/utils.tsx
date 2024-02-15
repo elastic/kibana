@@ -59,6 +59,48 @@ const useGetCommandText = (
         description: CONSOLE_COMMANDS.suspendProcess.about,
         tooltip: CONSOLE_COMMANDS.suspendProcess.privileges,
       };
+    case 'get-file':
+      return {
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.getFile"
+            defaultMessage="Get File"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.getFileDescription"
+            defaultMessage="Retrieve a file from a host. Files are downloaded in a password-protected .zip archive to prevent the file from running. "
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.getFileTooltip"
+            defaultMessage="Insufficient privileges to get file. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
+      };
+    case 'execute':
+      return {
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.execute"
+            defaultMessage="Execute"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.executeDescription"
+            defaultMessage="Execute a command on the host"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.executeTooltip"
+            defaultMessage="Insufficient privileges to execute. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
+      };
     default:
       return {
         title: '',

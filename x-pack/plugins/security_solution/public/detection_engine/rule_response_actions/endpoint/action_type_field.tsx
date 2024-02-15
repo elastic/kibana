@@ -48,14 +48,22 @@ const ActionTypeFieldComponent = ({
   const automatedProcessActionsEnabled = useIsExperimentalFeatureEnabled(
     'automatedProcessActionsEnabled'
   );
+  const automatedExecuteActionEnabled = useIsExperimentalFeatureEnabled(
+    'automatedExecuteActionEnabled'
+  );
+  const automatedGetFileActionEnabled = useIsExperimentalFeatureEnabled(
+    'automatedGetFileActionEnabled'
+  );
 
   const enabledActions = useMemo(
     () =>
       [
         ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
         ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-      ] as ['isolate', 'kill-process', 'suspend-process'],
-    [automatedProcessActionsEnabled]
+        ...(automatedExecuteActionEnabled ? ['execute'] : []),
+        ...(automatedGetFileActionEnabled ? ['get-file'] : []),
+      ] as ['isolate', 'kill-process', 'suspend-process', 'execute', 'get-file'],
+    [automatedExecuteActionEnabled, automatedGetFileActionEnabled, automatedProcessActionsEnabled]
   );
 
   const fieldOptions = useMemo(

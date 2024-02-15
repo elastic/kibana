@@ -83,7 +83,7 @@ export const RuleResponseOsqueryAction = z.object({
 
 export type DefaultParams = z.infer<typeof DefaultParams>;
 export const DefaultParams = z.object({
-  command: z.literal('isolate'),
+  command: z.enum(['isolate', 'get-file']),
   comment: z.string().optional(),
 });
 
@@ -103,16 +103,32 @@ export const ProcessesParams = z.object({
   }),
 });
 
+export type ExecuteParams = z.infer<typeof ExecuteParams>;
+export const ExecuteParams = z.object({
+  command: z.literal('execute'),
+  comment: z.string().optional(),
+  config: z.object({
+    /**
+     * Command to execute on the host
+     */
+    command: z.string().min(1),
+    /**
+     * Timeout for execute on the host
+     */
+    timeout: z.number().optional(),
+  }),
+});
+
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams]),
+  params: z.union([DefaultParams, ProcessesParams, ExecuteParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams]),
+  params: z.union([DefaultParams, ProcessesParams, ExecuteParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;

@@ -7,10 +7,22 @@
 
 import type {
   DefaultParams,
+  ExecuteParams,
   ProcessesParams,
   RuleResponseEndpointAction,
 } from '../../../../common/api/detection_engine';
 
+export const isExecuteAction = (
+  params: RuleResponseEndpointAction['params']
+): params is ExecuteParams => {
+  return params.command === 'execute';
+};
+
+export const isGetFileAction = (
+  params: RuleResponseEndpointAction['params']
+): params is DefaultParams => {
+  return params.command === 'get-file';
+};
 export const isIsolateAction = (
   params: RuleResponseEndpointAction['params']
 ): params is DefaultParams => {

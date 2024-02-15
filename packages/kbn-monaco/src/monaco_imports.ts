@@ -34,6 +34,7 @@ import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'; // Needed for yaml support
+import 'monaco-editor/esm/vs/basic-languages/shell/shell.contribution'; // Needed for yaml support
 
 // config for supported base languages
 export {
@@ -48,5 +49,9 @@ export {
   conf as yamlConf,
   language as yamlLanguage,
 } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+export {
+  conf as shellConf,
+  language as shellLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/shell/shell';
 
 export { monaco };

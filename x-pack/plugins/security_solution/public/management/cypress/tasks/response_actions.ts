@@ -27,13 +27,24 @@ import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/e
 export const validateAvailableCommands = () => {
   // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
   const config = Cypress.config();
-  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
-  const automatedProcessActionsEnabled =
-    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
+  const automatedProcessActionsPattern = /automatedProcessActionsEnabled/;
+  const automatedProcessActionsEnabled = config.env.ftrConfig.kbnServerArgs[0].match(
+    automatedProcessActionsPattern
+  );
+  const automatedExecuteActionsPattern = /automatedExecuteActionEnabled/;
+  const automatedExecuteActionEnabled = config.env.ftrConfig.kbnServerArgs[0].match(
+    automatedExecuteActionsPattern
+  );
+  const automatedGetFileActionsPattern = /automatedGetFileActionEnabled/;
+  const automatedGetFileActionEnabled = config.env.ftrConfig.kbnServerArgs[0].match(
+    automatedGetFileActionsPattern
+  );
 
   const enabledActions = [
     ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
     ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+    ...(automatedExecuteActionEnabled ? ['execute'] : []),
+    ...(automatedGetFileActionEnabled ? ['get-file'] : []),
   ];
 
   cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);

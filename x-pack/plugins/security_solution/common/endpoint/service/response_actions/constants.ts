@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { allowedExperimentalValues } from '../../..';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
@@ -36,6 +37,8 @@ export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiComma
   // TODO: TC- Uncomment these when we go GA with automated process actions
   // 'kill-process',
   // 'suspend-process'
+  // 'execute',
+  // 'get-file',
 ];
 
 export type EnabledAutomatedResponseActionsCommands =

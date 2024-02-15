@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { languageConfiguration, lexerRules } from './language';
+import { LANG_ID } from './constants';
+import { LangModuleType } from '../types';
 
-// Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
-declare module 'monaco-editor/esm/vs/basic-languages/shell/shell';
+export const ShellLang: LangModuleType = { ID: LANG_ID, languageConfiguration, lexerRules };
