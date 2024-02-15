@@ -12,6 +12,7 @@ import { InfraStaticSourceConfiguration } from '../../../../common/source_config
 
 import { GetInfraMetricsRequestBodyPayload } from '../../../../common/http_api/infra';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
+import { InfraAlertsClient } from './helpers/get_infra_alerts_client';
 
 export const FilteredMetricsTypeRT = rt.type({
   doc_count: rt.number,
@@ -76,6 +77,7 @@ export interface HostsMetricsAggregationQueryConfig {
 
 export interface GetHostsArgs {
   searchClient: ISearchClient;
+  alertsClient: InfraAlertsClient;
   sourceConfig: InfraStaticSourceConfiguration;
   params: GetInfraMetricsRequestBodyPayload;
 }
