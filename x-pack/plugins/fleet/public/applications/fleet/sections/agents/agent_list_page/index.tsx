@@ -55,10 +55,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     agentsStatus,
     isLoading,
     shownAgents,
-    inactiveShownAgents,
     totalInactiveAgents,
     totalManagedAgentIds,
-    inactiveManagedAgentIds,
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
@@ -399,10 +397,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectedTags={selectedTags}
         onSelectedTagsChange={setSelectedTags}
         shownAgents={shownAgents}
-        inactiveShownAgents={inactiveShownAgents}
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
-        inactiveManagedAgentIds={inactiveManagedAgentIds}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}

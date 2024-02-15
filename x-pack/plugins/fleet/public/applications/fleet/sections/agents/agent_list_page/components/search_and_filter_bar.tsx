@@ -47,10 +47,8 @@ export interface SearchAndFilterBarProps {
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
   shownAgents: number;
-  inactiveShownAgents: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
-  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -77,10 +75,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   selectedTags,
   onSelectedTagsChange,
   shownAgents,
-  inactiveShownAgents,
   totalInactiveAgents,
   totalManagedAgentIds,
-  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -202,9 +198,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
                   shownAgents={shownAgents}
-                  inactiveShownAgents={inactiveShownAgents}
                   totalManagedAgentIds={totalManagedAgentIds}
-                  inactiveManagedAgentIds={inactiveManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}
