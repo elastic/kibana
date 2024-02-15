@@ -112,8 +112,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     await this.writeActionRequestToEndpointIndex({
       ...actionReq,
       error: actionError,
-      rule_id: ruleId,
-      rule_name: ruleName,
+      ruleId,
+      ruleName,
       hosts,
       actionId,
       command,
