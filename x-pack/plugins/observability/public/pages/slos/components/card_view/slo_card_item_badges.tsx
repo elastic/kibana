@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback } from 'react';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import styled from 'styled-components';
 import { EuiFlexGroup } from '@elastic/eui';
-import { SloTagsList } from '../common/slo_tags_list';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import { BurnRateRuleParams } from '../../../../typings';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { LoadingBadges } from '../badges/slo_badges';
 import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
-import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
-import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
+import { SloTagsList } from '../common/slo_tags_list';
 
 interface Props {
   hasGroupBy: boolean;
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
-  rules: Array<Rule<SloRule>> | undefined;
+  rules: Array<Rule<BurnRateRuleParams>> | undefined;
   handleCreateRule?: () => void;
 }
 
