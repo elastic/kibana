@@ -102,6 +102,64 @@ describe('Assistant', () => {
       >);
   });
 
+  describe('persistent storage', () => {
+    it('should refetchConversationsState after settings save button click', async () => {
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      const setConversationTitle = jest.fn();
+
+      renderAssistant({ setConversationTitle });
+
+      fireEvent.click(screen.getByTestId('settings'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save-button'));
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            apiConfig: { newProp: true },
+            category: 'assistant',
+            id: 'Welcome Id',
+            messages: [],
+            title: 'Welcome',
+          },
+        })
+      );
+    });
+
+    it('should refetchConversationsState after settings save button click, but do not update convos when refetch returns bad results', async () => {
+      const { Welcome, ...rest } = mockData;
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: mockData,
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: rest,
+        }),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      const setConversationTitle = jest.fn();
+
+      renderAssistant({ setConversationTitle });
+
+      fireEvent.click(screen.getByTestId('settings'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save-button'));
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            apiConfig: {},
+            category: 'assistant',
+            id: 'Welcome Id',
+            messages: [],
+            title: 'Welcome',
+          },
+        })
+      );
+    });
+  });
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation title to local storage', async () => {
       renderAssistant();
@@ -238,64 +296,6 @@ describe('Assistant', () => {
         }
       );
       expect(queryByTestId('prompt-textarea')).toHaveProperty('disabled');
-    });
-  });
-  describe('persistent storage', () => {
-    it('should refetchConversationsState after settings save button click', async () => {
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      const setConversationTitle = jest.fn();
-
-      renderAssistant({ setConversationTitle });
-
-      fireEvent.click(screen.getByTestId('settings'));
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('save-button'));
-      });
-
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            apiConfig: { newProp: true },
-            category: 'assistant',
-            id: 'Welcome Id',
-            messages: [],
-            title: 'Welcome',
-          },
-        })
-      );
-    });
-
-    it('should refetchConversationsState after settings save button click, but do not update convos when refetch returns bad results', async () => {
-      const { Welcome, ...rest } = mockData;
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: mockData,
-        isLoading: false,
-        refetch: jest.fn().mockResolvedValue({
-          isLoading: false,
-          data: rest,
-        }),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      const setConversationTitle = jest.fn();
-
-      renderAssistant({ setConversationTitle });
-
-      fireEvent.click(screen.getByTestId('settings'));
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('save-button'));
-      });
-
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            apiConfig: {},
-            category: 'assistant',
-            id: 'Welcome Id',
-            messages: [],
-            title: 'Welcome',
-          },
-        })
-      );
     });
   });
 });
