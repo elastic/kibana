@@ -1,0 +1,9 @@
+{
+  "type": "plugin",
+  "id": "@kbn/slos-plugin",
+  "owner": "@elastic/obs-ux-management-team",
+  "plugin": {
+    "id": "slos",
+    "requiredPlugins": ["navigation"]
+  }
+}
