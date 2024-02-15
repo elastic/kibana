@@ -682,6 +682,8 @@ describe('[Logs onboarding] System logs', () => {
       });
     });
 
+    // Skpping this test because it's failing in the CI
+    // https://github.com/elastic/kibana/issues/176995
     xdescribe('when integration installation succeed', () => {
       beforeEach(() => {
         cy.deleteIntegration('system');
