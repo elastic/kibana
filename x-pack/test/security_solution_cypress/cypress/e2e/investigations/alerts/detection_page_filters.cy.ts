@@ -109,7 +109,7 @@ const assertFilterControlsWithFilterObject = (
 describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
+    createRule(getNewRule());
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
@@ -120,19 +120,18 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('Alert Page Filters Customization ', () => {
-    it('should be able to delete Controls', () => {
+    it('should be able to customize Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
       editFilterGroupControls();
+      cy.log('should be able delete an existing control');
       deleteFilterGroupControl(3);
       cy.get(CONTROL_FRAMES).should((sub) => {
         expect(sub.length).lt(4);
       });
-    });
 
-    it('should be able to add new Controls', () => {
-      const fieldName = 'event.module';
-      const label = 'EventModule';
-      editFilterGroupControls();
-      deleteFilterGroupControl(3);
+      cy.log('should be able to add a new control');
+
       addNewFilterGroupControlValues({
         fieldName,
         label,
@@ -140,11 +139,9 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
-    });
 
-    it('should be able to edit Controls', () => {
-      const fieldName = 'event.module';
-      const label = 'EventModule';
+      cy.log('should be able to edit an existing control');
+
       editFilterGroupControls();
       editFilterGroupControl({ idx: 3, fieldName, label });
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
@@ -227,7 +224,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
           const originalAlertCount = noOfAlerts.split(' ')[0];
           markAcknowledgedFirstAlert();
           waitForAlerts();
-          cy.get(OPTION_LIST_VALUES(0)).click();
+          openPageFilterPopover(0);
           cy.get(OPTION_SELECTABLE(0, 'acknowledged')).click();
           cy.get(ALERTS_COUNT)
             .invoke('text')
@@ -254,10 +251,10 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it(`should restore Filters from localstorage when user navigates back to the page.`, () => {
-    cy.get(OPTION_LIST_VALUES(1)).click();
+    openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).click();
 
-    // high should be scuccessfully selected.
+    // high should be successfully selected.
     cy.get(OPTION_LIST_VALUES(1)).contains('high');
     waitForPageFilters();
 
@@ -336,9 +333,10 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
+
     it('should take timeRange into account', () => {
       const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
-      const endDateWithZeroAlerts = 'Jan 1, 2010 @ 00:00:00.000';
+      const endDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
       setStartDate(startDateWithZeroAlerts);
       setEndDate(endDateWithZeroAlerts);
 
