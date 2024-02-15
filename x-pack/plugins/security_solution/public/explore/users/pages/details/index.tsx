@@ -70,7 +70,7 @@ import { getCriteriaFromUsersType } from '../../../../common/components/ml/crite
 import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const QUERY_ID = 'UsersDetailsQueryId';
@@ -296,7 +296,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

@@ -104,7 +104,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176544
+  registry.when.skip('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
     it('runs queries and returns results', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
         endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
