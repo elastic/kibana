@@ -189,11 +189,13 @@ export const getDatasetQualityTableColumns = ({
       render: (_, dataStreamStat: DataStreamStat) => (
         <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
       ),
+      width: '160px',
     },
     {
       name: sizeColumnName,
       field: 'size',
       sortable: true,
+      width: '100px',
     },
     {
       name: (
@@ -219,6 +221,7 @@ export const getDatasetQualityTableColumns = ({
           </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),
+      width: '140px',
     },
     {
       name: lastActivityColumnName,
@@ -239,6 +242,7 @@ export const getDatasetQualityTableColumns = ({
           .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
           .convert(timestamp);
       },
+      width: '300px',
       sortable: true,
     },
     {
