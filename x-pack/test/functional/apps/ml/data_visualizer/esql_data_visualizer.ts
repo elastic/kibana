@@ -156,7 +156,6 @@ const esqlSampleLogData: TestData = {
         viewableInLens: false,
       },
     ],
-    // only testing the geo_point fields
     nonMetricFields: [
       {
         fieldName: 'geo.coordinates',
