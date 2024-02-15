@@ -1251,10 +1251,16 @@ describe('The custom threshold alert type', () => {
       const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
-        filter: mockQuery,
         logsExplorerLocator: undefined,
         metrics: customThresholdCountCriterion.metrics,
         startedAt: expect.stringMatching(ISO_DATE_REGEX),
+        searchConfiguration: {
+          index: {},
+          query: {
+            query: mockQuery,
+            language: 'kuery',
+          },
+        },
       });
     });
   });

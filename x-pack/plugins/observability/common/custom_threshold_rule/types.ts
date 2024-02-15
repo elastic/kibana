@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
@@ -108,6 +109,30 @@ export enum InfraFormatterType {
   bytes = 'bytes',
   bits = 'bits',
   percent = 'percent',
+}
+
+export interface Group {
+  field: string;
+  value: string;
+}
+
+export interface SearchConfigurationType {
+  index: SerializedSearchSourceFields;
+  query: {
+    query: string;
+    language: string;
+  };
+  filter?: Filter[];
+}
+
+export interface SearchConfigurationWithExtractedReferenceType {
+  // Index will be a data view spec after extracting references
+  index: DataViewSpec;
+  query: {
+    query: string;
+    language: string;
+  };
+  filter?: Filter[];
 }
 
 // Custom threshold alert types

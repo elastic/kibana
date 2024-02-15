@@ -10,8 +10,8 @@ import {
   Comparator,
   Aggregators,
   CustomMetricExpressionParams,
+  SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
-import { SearchConfigurationType } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
@@ -30,10 +30,12 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
   const searchConfiguration: SearchConfigurationType = {
     index: {
-      id: 'dataset-logs-*-*',
-      name: 'All logs',
-      timeFieldName: '@timestamp',
-      title: 'logs-*-*',
+      index: {
+        id: 'dataset-logs-*-*',
+        name: 'All logs',
+        timeFieldName: '@timestamp',
+        title: 'logs-*-*',
+      },
     },
     query: {
       language: 'kuery',

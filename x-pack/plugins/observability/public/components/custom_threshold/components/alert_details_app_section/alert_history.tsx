@@ -25,9 +25,12 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_GROUP, ALERT_GROUP_VALUE, type AlertConsumers } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { convertTo } from '../../../../../common/utils/formatters';
+import {
+  getGroupFilters,
+  getGroupQueries,
+} from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { useKibana } from '../../../../utils/kibana_react';
 import { AlertParams } from '../../types';
-import { getGroupFilters, getGroupQueries } from '../helpers/get_group';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
 import { CustomThresholdAlert, CustomThresholdRule } from '../types';
 

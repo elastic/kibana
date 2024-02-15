@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGroupQueries, getGroupFilters } from './get_group';
+import { getGroupQueries, getGroupFilters, getGroups } from './get_group';
 
 describe('getGroup', () => {
   describe('getGroupQueries', () => {
@@ -83,6 +83,23 @@ describe('getGroup', () => {
       const groups = undefined;
 
       expect(getGroupFilters(groups)).toEqual([]);
+    });
+  });
+
+  describe('getGroups', () => {
+    it('should generate correct filter with default field name', () => {
+      const fields = ['container.id', 'host.name'];
+      const values = ['container-0', 'host-0'];
+      const groups = [
+        { field: 'container.id', value: 'container-0' },
+        { field: 'host.name', value: 'host-0' },
+      ];
+
+      expect(getGroups(fields, values)).toEqual(groups);
+    });
+
+    it('should return empty array if fields and values are empty', () => {
+      expect(getGroups([], [])).toEqual([]);
     });
   });
 });

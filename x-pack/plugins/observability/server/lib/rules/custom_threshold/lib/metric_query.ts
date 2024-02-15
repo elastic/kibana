@@ -11,9 +11,9 @@ import { Filter } from '@kbn/es-query';
 import {
   Aggregators,
   CustomMetricExpressionParams,
+  SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getSearchConfigurationBoolQuery } from '../../../../utils/get_parsed_filtered_query';
-import { SearchConfigurationType } from '../types';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   CONTAINER_ID,

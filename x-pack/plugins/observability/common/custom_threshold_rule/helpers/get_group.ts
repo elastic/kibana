@@ -22,10 +22,8 @@ export const getGroupQueries = (
   return (
     (groups &&
       groups.map((group) => ({
-        term: {
-          [groupFieldName || group.field]: {
-            value: group.value,
-          },
+        match_phrase: {
+          [groupFieldName || group.field]: group.value,
         },
       }))) ||
     []
@@ -34,4 +32,11 @@ export const getGroupQueries = (
 
 export const getGroupFilters = (groups?: Group[], groupFieldName?: string): Filter[] => {
   return getGroupQueries(groups, groupFieldName).map((query) => ({ meta: {}, query }));
+};
+
+export const getGroups = (fields: string[], values: string[]): Group[] => {
+  return fields.map((_, index) => ({
+    field: fields[index],
+    value: values[index],
+  }));
 };

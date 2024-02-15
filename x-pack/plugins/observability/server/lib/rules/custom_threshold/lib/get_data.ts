@@ -9,8 +9,10 @@ import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/li
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { SearchConfigurationType } from '../types';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import {
+  CustomMetricExpressionParams,
+  SearchConfigurationType,
+} from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
 import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';

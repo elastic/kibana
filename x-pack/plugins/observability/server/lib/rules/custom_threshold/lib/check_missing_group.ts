@@ -9,8 +9,10 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
-import { SearchConfigurationType } from '../types';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import {
+  CustomMetricExpressionParams,
+  SearchConfigurationType,
+} from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
 import { calculateCurrentTimeFrame, createBoolQuery } from './metric_query';
 

@@ -9,6 +9,8 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
+  ALERT_GROUP_FIELD,
+  ALERT_GROUP_VALUE,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ALERT_START,
@@ -17,12 +19,14 @@ import {
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { MetricExpression } from '../components/custom_threshold/types';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
+  SearchConfigurationWithExtractedReferenceType,
 } from '../../common/custom_threshold_rule/types';
+import type { MetricExpression } from '../components/custom_threshold/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
+import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
 import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
@@ -83,7 +87,7 @@ const thresholdDefaultRecoveryMessage = i18n.translate(
   }
 );
 
-const getDataViewId = (searchConfiguration?: SerializedSearchSourceFields) =>
+const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedReferenceType) =>
   typeof searchConfiguration?.index === 'string'
     ? searchConfiguration.index
     : searchConfiguration?.index?.title;
@@ -147,8 +151,9 @@ export const registerObservabilityRuleTypes = async (
     defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
     requiresAppContext: false,
     format: ({ fields }) => {
+      const groups = getGroups(fields[ALERT_GROUP_FIELD], fields[ALERT_GROUP_VALUE]);
       const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
-        | SerializedSearchSourceFields
+        | SearchConfigurationWithExtractedReferenceType
         | undefined;
       const criteria = fields[ALERT_RULE_PARAMETERS]?.criteria as MetricExpression[];
       const metrics: CustomThresholdExpressionMetric[] =
@@ -158,11 +163,12 @@ export const registerObservabilityRuleTypes = async (
       return {
         reason: fields[ALERT_REASON] ?? '-',
         link: getViewInAppUrl({
-          metrics,
-          startedAt: fields[ALERT_START],
-          logsExplorerLocator,
-          filter: (searchConfiguration?.query as { query: string }).query,
           dataViewId,
+          groups,
+          logsExplorerLocator,
+          metrics,
+          searchConfiguration,
+          startedAt: fields[ALERT_START],
         }),
         hasBasePath: true,
       };
