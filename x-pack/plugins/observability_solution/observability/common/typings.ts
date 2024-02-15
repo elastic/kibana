@@ -41,3 +41,12 @@ export interface AlertStatusFilter {
   query: string;
   label: string;
 }
+
+export const DependencyRT = t.type({
+  ruleId: t.string,
+  actionGroupsToSuppressOn: t.array(t.string),
+});
+
+export const DependenciesRT = t.array(DependencyRT);
+
+export type Dependency = t.OutputOf<typeof DependencyRT>;

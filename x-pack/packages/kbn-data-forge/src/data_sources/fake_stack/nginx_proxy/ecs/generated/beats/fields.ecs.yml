@@ -125,3 +125,24 @@
       description: The name of the logger inside an application. This is usually the
         name of the class which initialized the logger, or can be a custom name.
       example: org.elasticsearch.bootstrap.Bootstrap
+  - name: url
+    title: URL
+    group: 2
+    description: URL fields provide support for complete or partial URLs, and supports
+      the breaking down into scheme, domain, path, and so on.
+    type: group
+    default_field: true
+    fields:
+    - name: domain
+      level: extended
+      type: keyword
+      ignore_above: 1024
+      description: 'Domain of the url, such as "www.elastic.co".
+
+        In some cases a URL may refer to an IP and/or port directly, without a domain
+        name. In this case, the IP address would go to the `domain` field.
+
+        If the URL contains a literal IPv6 address enclosed by `[` and `]` (IETF RFC
+        2732), the `[` and `]` characters should also be captured in the `domain`
+        field.'
+      example: www.elastic.co

@@ -48,6 +48,14 @@ export const LOW_PRIORITY_ACTION = {
   }),
 };
 
+export const SUPPRESSED_PRIORITY_ACTION_ID = 'slo.burnRate.suppressed';
+export const SUPPRESSED_PRIORITY_ACTION = {
+  id: SUPPRESSED_PRIORITY_ACTION_ID,
+  name: i18n.translate('xpack.observability.slo.alerting.burnRate.suppressedPriorityAction', {
+    defaultMessage: 'Suppressed',
+  }),
+};
+
 export const observabilityAlertFeatureIds: ValidFeatureId[] = [
   AlertConsumers.APM,
   AlertConsumers.INFRASTRUCTURE,

@@ -37,3 +37,5 @@ export const NGINX_PROXY = 'nginx_proxy';
 export const NGINX_PROXY_HOSTS = times(5).map(
   (n) => `${NGINX_PROXY}.prod.${padStart(`${n + 1}`, 3, '0')}`
 );
+
+export const HEARTBEAT = 'heartbeat';

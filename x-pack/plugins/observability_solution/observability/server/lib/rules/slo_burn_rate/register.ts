@@ -24,6 +24,7 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   SLO_BURN_RATE_RULE_TYPE_ID,
+  SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 
 import { getRuleExecutor } from './executor';
@@ -43,6 +44,11 @@ const windowSchema = schema.object({
   actionGroup: schema.string(),
 });
 
+const dependency = schema.object({
+  ruleId: schema.string(),
+  actionGroupsToSuppressOn: schema.arrayOf(schema.string()),
+});
+
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 
 export function sloBurnRateRuleType(
@@ -53,6 +59,7 @@ export function sloBurnRateRuleType(
   const paramsSchema = schema.object({
     sloId: schema.string(),
     windows: schema.arrayOf(windowSchema),
+    dependencies: schema.maybe(schema.arrayOf(dependency)),
   });
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
@@ -70,7 +77,13 @@ export function sloBurnRateRuleType(
       },
     },
     defaultActionGroupId: ALERT_ACTION.id,
-    actionGroups: [ALERT_ACTION, HIGH_PRIORITY_ACTION, MEDIUM_PRIORITY_ACTION, LOW_PRIORITY_ACTION],
+    actionGroups: [
+      ALERT_ACTION,
+      HIGH_PRIORITY_ACTION,
+      MEDIUM_PRIORITY_ACTION,
+      LOW_PRIORITY_ACTION,
+      SUPPRESSED_PRIORITY_ACTION,
+    ],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
@@ -89,6 +102,7 @@ export function sloBurnRateRuleType(
         { name: 'sloId', description: sloIdActionVariableDescription },
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
+        { name: 'suppressedAction', description: suppressedActionVariableDescription },
       ],
     },
     alerts: {
@@ -162,5 +176,12 @@ export const sloInstanceIdActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.sloInstanceIdDescription',
   {
     defaultMessage: 'The SLO instance id.',
+  }
+);
+
+export const suppressedActionVariableDescription = i18n.translate(
+  'xpack.observability.slo.alerting.suppressedActionDescription',
+  {
+    defaultMessage: 'The action group that was suppressed.',
   }
 );
