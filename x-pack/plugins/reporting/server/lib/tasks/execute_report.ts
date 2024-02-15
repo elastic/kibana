@@ -381,7 +381,7 @@ export class ExecuteReportTask implements ReportingTask {
           ? completedTime.valueOf() - new Date(startedAt).valueOf()
           : undefined,
         csvRows: docOutput.metrics.csv.rows ?? 0,
-        // csvColumns: docOutput.metrics?.csv?.columns, // FIXME: doesn't exist yet
+        // csvColumns: docOutput.metrics?.csv?.columns, // TODO: add new metric to report output
       });
     } else if (docOutput.metrics?.pdf != null || docOutput.metrics?.png != null) {
       eventTracker?.completeJobScreenshot({
@@ -391,8 +391,7 @@ export class ExecuteReportTask implements ReportingTask {
           : undefined,
         numPages: docOutput.metrics.pdf?.pages ?? 1,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
-        // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // FIXME: doesn't exist yet
-        // screenshotLayout: docOutput.metrics?.screenshot?.layout, // FIXME: doesn't exist yet
+        // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // TODO: add new metric to report output
       });
     }
 

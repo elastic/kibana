@@ -85,16 +85,16 @@ export class EventTracker {
    * the report.
    */
   public completeJobScreenshot(opts: CompletionOpts & CompletionOptsScreenshot) {
-    const { byteSize, timeSinceClaimed, numPages, screenshotPixels, screenshotLayout } = opts;
+    const { byteSize, timeSinceClaimed, numPages, screenshotLayout } = opts;
     this.reportEvent(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION]: timeSinceClaimed,
       [FieldType.BYTE_SIZE]: byteSize,
-      ...(numPages ? { [FieldType.NUM_PAGES]: numPages } : {}),
-      ...(screenshotPixels ? { [FieldType.SCREENSHOT_PIXELS]: screenshotPixels } : {}),
-      ...(screenshotLayout ? { [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout } : {}),
+      [FieldType.NUM_PAGES]: numPages,
+      [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
+      // [FieldType.SCREENSHOT_PIXELS]: screenshotPixels, // TODO: add metric to report output
     });
   }
 
@@ -104,15 +104,15 @@ export class EventTracker {
    * the report.
    */
   public completeJobCsv(opts: CompletionOpts & CompletionOptsScreenshotCsv) {
-    const { byteSize, timeSinceClaimed, csvRows, csvColumns } = opts;
+    const { byteSize, timeSinceClaimed, csvRows } = opts;
     this.reportEvent(EventType.REPORT_COMPLETION_CSV, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION]: timeSinceClaimed,
       [FieldType.BYTE_SIZE]: byteSize,
-      ...(csvRows ? { [FieldType.CSV_ROWS]: csvRows } : {}),
-      ...(csvColumns ? { [FieldType.CSV_COLUMNS]: csvColumns } : {}),
+      [FieldType.CSV_ROWS]: csvRows,
+      // [FieldType.CSV_COLUMNS]: csvColumns, // TODO add metric to report output
     });
   }
 

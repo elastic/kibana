@@ -153,9 +153,8 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION],
       ...fields[FieldType.BYTE_SIZE],
-      ...fields[FieldType.NUM_PAGES],
-      ...fields[FieldType.SCREENSHOT_PIXELS],
-      ...fields[FieldType.SCREENSHOT_LAYOUT],
+      ...fields[FieldType.CSV_ROWS],
+      // ...fields[FieldType.CSV_COLUMNS], // TODO add to report output metrics
     },
   },
   {
@@ -166,8 +165,9 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION],
       ...fields[FieldType.BYTE_SIZE],
-      ...fields[FieldType.CSV_ROWS],
-      ...fields[FieldType.CSV_COLUMNS],
+      ...fields[FieldType.NUM_PAGES],
+      ...fields[FieldType.SCREENSHOT_PIXELS],
+      // ...fields[FieldType.SCREENSHOT_LAYOUT], // TODO add to report output metrics
     },
   },
   {
