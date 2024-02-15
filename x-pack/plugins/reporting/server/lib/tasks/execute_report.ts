@@ -374,20 +374,22 @@ export class ExecuteReportTask implements ReportingTask {
     const eventTracker = this.getEventTracker(report);
     const byteSize = docOutput.size;
     const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
-    if (docOutput.metrics?.csv != null) {
+
+    if (output.metrics?.csv != null) {
       eventTracker?.completeJobCsv({
         byteSize,
         timeSinceCreation,
-        csvRows: docOutput.metrics.csv.rows ?? 0,
-        // csvColumns: docOutput.metrics?.csv?.columns, // TODO: add new metric to report output
+        csvRows: output.metrics.csv.rows ?? -1,
+        // csvColumns: output.metrics.csv.columns, // TODO: add new metric to report output
       });
-    } else if (docOutput.metrics?.pdf != null || docOutput.metrics?.png != null) {
+    } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
+      const { width, height } = report.payload.layout?.dimensions ?? {};
       eventTracker?.completeJobScreenshot({
         byteSize,
         timeSinceCreation,
-        numPages: docOutput.metrics.pdf?.pages ?? 1,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
-        // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // TODO: add new metric to report output
+        numPages: output.metrics.pdf?.pages ?? -1,
+        screenshotPixels: (width ?? 0) * (height ?? 0),
       });
     }
 

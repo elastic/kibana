@@ -15,8 +15,8 @@ interface CompletionOpts {
 
 interface CompletionOptsScreenshot {
   numPages?: number;
-  // screenshotPixels?: number; // FIXME: needs to be added to report output metrics
   screenshotLayout?: string;
+  screenshotPixels?: number;
 }
 
 interface CompletionOptsScreenshotCsv {
@@ -90,7 +90,7 @@ export class EventTracker {
    * retries + executing the final report.
    */
   public completeJobScreenshot(opts: CompletionOpts & CompletionOptsScreenshot) {
-    const { byteSize, timeSinceCreation, numPages, screenshotLayout } = opts;
+    const { byteSize, timeSinceCreation, numPages, screenshotLayout, screenshotPixels } = opts;
     this.track(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
@@ -99,7 +99,7 @@ export class EventTracker {
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.NUM_PAGES]: numPages,
       [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
-      // [FieldType.SCREENSHOT_PIXELS]: screenshotPixels, // TODO: add metric to report output
+      [FieldType.SCREENSHOT_PIXELS]: screenshotPixels,
     });
   }
 
