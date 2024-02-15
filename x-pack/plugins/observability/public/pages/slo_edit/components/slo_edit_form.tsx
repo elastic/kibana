@@ -10,12 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
+import { useCreateRule } from '../../../hooks/use_create_rule';
+import { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import {
   transformCreateSLOFormToCreateSLOInput,
   transformSloResponseToCreateSloForm,
@@ -25,13 +27,11 @@ import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 import { CreateSLOForm } from '../types';
+import { EquivalentApiRequest } from './common/equivalent_api_request';
+import { SLOInspectWrapper } from './common/slo_inspect';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
-import { useCreateRule } from '../../../hooks/use_create_rule';
-import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
-import { BurnRateRuleParams } from '../../../typings';
-import { SLOInspectWrapper } from './common/slo_inspect';
 
 export interface Props {
   slo?: GetSLOResponse;
@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: Props) {
   const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    defaultValues: sloFormValuesFromUrlState ?? SLO_EDIT_FORM_DEFAULT_VALUES,
     values: sloFormValuesFromUrlState ? sloFormValuesFromUrlState : sloFormValuesFromSloResponse,
     mode: 'all',
   });
@@ -86,7 +86,7 @@ export function SloEditForm({ slo }: Props) {
 
     if (isEditMode) {
       const processedValues = transformValuesToUpdateSLOInput(values);
-      updateSlo({ sloId: slo.id, slo: processedValues });
+      await updateSlo({ sloId: slo.id, slo: processedValues });
       navigate(basePath.prepend(paths.observability.slos));
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
@@ -156,7 +156,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiButtonEmpty
               color="primary"
               data-test-subj="sloFormCancelButton"
-              disabled={isCreateSloLoading || isUpdateSloLoading}
+              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
               onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
             >
               {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
@@ -166,10 +166,13 @@ export function SloEditForm({ slo }: Props) {
 
             <EquivalentApiRequest
               slo={slo}
-              disabled={isCreateSloLoading || isUpdateSloLoading}
+              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
               isEditMode={isEditMode}
             />
-            <SLOInspectWrapper slo={slo} disabled={isCreateSloLoading || isUpdateSloLoading} />
+            <SLOInspectWrapper
+              slo={slo}
+              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
+            />
           </EuiFlexGroup>
         </EuiFlexGroup>
       </FormProvider>
