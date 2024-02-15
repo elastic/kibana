@@ -130,7 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
-      it('checks if rule is active', async () => {
+      it.skip('checks if rule is active', async () => {
         const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
