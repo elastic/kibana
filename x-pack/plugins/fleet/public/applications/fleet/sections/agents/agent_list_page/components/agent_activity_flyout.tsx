@@ -6,7 +6,6 @@
  */
 
 import type { ReactNode } from 'react';
-import { useRef } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -73,9 +72,6 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const [scrollPosition, setScrollPosition] = useState<number>(0);
-  const scrollRef = useRef<any>();
-
   const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
     onAbortSuccess,
     refreshAgentActivity
@@ -127,15 +123,12 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     }
   };
 
-  if (scrollRef.current && scrollPosition > 0) {
-    scrollRef.current.scrollTop = scrollPosition;
-  }
-
   return (
     <>
       <EuiFlyout
         data-test-subj="agentActivityFlyout"
         onClose={() => {
+          // stop polling action status API
           refreshAgentActivity = false;
           onClose();
         }}
@@ -212,17 +205,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
-          <EuiFlexGroup
-            direction="column"
-            className="eui-fullHeight"
-            css={{ overflowY: 'auto' }}
-            onScroll={(event: any) => {
-              if (event.target.scrollTop > 0) {
-                setScrollPosition(event.target.scrollTop);
-              }
-            }}
-            ref={scrollRef}
-          >
+          <EuiFlexGroup direction="column" className="eui-fullHeight" css={{ overflowY: 'auto' }}>
             {inProgressActions.length > 0 ? (
               <ActivitySection
                 title={
