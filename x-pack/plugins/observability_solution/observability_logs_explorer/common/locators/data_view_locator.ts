@@ -25,14 +25,15 @@ export class DataViewLocatorDefinition
 
   public readonly getLocation = (params: ObsLogsExplorerDataViewLocatorParams) => {
     const { useHash } = this.deps;
+    const { id, ...locatorParams } = params;
 
     const dataViewSelection = DataViewSelection.fromSelection({
-      dataView: { id: params.id },
+      dataView: { id },
     });
 
     return constructLocatorPath({
       datasetSelection: dataViewSelection.toPlainSelection(),
-      locatorParams: params,
+      locatorParams,
       useHash,
     });
   };
