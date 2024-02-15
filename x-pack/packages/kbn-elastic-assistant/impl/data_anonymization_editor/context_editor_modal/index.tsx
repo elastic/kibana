@@ -95,12 +95,12 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} size="s">
-          {I18n.translate('kbnElasticAssistant.dataAnonymizationEditor.closeButton', {
+          {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.closeButton', {
             defaultMessage: 'Close',
           })}
         </EuiButtonEmpty>
         <EuiButton onClick={handleSave} fill size="s">
-          {I18n.translate('kbnElasticAssistant.dataAnonymizationEditor.saveButton', {
+          {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.saveButton', {
             defaultMessage: 'Save',
           })}
         </EuiButton>

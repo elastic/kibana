@@ -104,7 +104,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 ? {
                     css: css`
                       background: #fff;
-                      border-radius: ${euiThemeVars.euiBorderRadiusSmall};
+                      border-radius: ${euiThemeVars.euiBorderRadius};
                       color: ${euiThemeVars.euiColorPrimary};
 
                       > div:first-child {

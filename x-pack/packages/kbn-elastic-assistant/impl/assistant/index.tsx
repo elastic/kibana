@@ -572,6 +572,7 @@ const AssistantComponent: React.FC<Props> = ({
                     background: none;
                     border-top: 1px solid ${euiThemeVars.euiColorLightShade};
                     overflow: auto;
+                    max-height: 60%;
                   `}
                 >
                   <EuiPanel paddingSize="m" hasShadow={false}>

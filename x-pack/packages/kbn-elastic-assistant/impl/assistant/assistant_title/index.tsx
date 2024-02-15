@@ -100,13 +100,46 @@ export const AssistantTitle: React.FC<{
     setNewTitle(title);
   }, [title]);
 
+  if (isFlyoutMode) {
+    return (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <AssistantAvatar data-test-subj="titleIcon" size={isFlyoutMode ? 's' : 'm'} />
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <EuiInlineEditTitle
+            heading="h3"
+            inputAriaLabel="Edit text inline"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
+            onCancel={() => setNewTitle(title)}
+            onSave={handleUpdateTitle}
+            editModeProps={{
+              formRowProps: {
+                fullWidth: true,
+              },
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiModalHeaderTitle>
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <AssistantAvatar data-test-subj="titleIcon" size={isFlyoutMode ? 's' : 'm'} />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
           <EuiFlexGroup
             direction={isFlyoutMode ? 'row' : 'column'}
             gutterSize="none"
@@ -115,20 +148,9 @@ export const AssistantTitle: React.FC<{
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <EuiFlexItem>
-                  {isFlyoutMode ? (
-                    <EuiInlineEditTitle
-                      heading="h3"
-                      inputAriaLabel="Edit text inline"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
-                      onCancel={() => setNewTitle(title)}
-                      onSave={handleUpdateTitle}
-                    />
-                  ) : (
-                    <EuiTitle size={'s'}>
-                      <h3>{title}</h3>
-                    </EuiTitle>
-                  )}
+                  <EuiTitle size={'s'}>
+                    <h3>{title}</h3>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover

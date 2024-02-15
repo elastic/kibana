@@ -223,7 +223,11 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
         `}
       >
         <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
-          <EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              overflow: hidden;
+            `}
+          >
             <AssistantTitle
               docLinks={docLinks}
               title={currentConversation.id ?? title}

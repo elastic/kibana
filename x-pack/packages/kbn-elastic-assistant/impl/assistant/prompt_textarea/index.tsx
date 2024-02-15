@@ -49,8 +49,8 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
     return (
       <EuiTextArea
         css={css`
-          padding-right: 42px;
-          min-height: ${!isFlyoutMode ? '125px' : 'auto'};
+          padding-right: 42px !important;
+          min-height: ${!isFlyoutMode ? '125px' : '56px'};
         `}
         className="eui-scrollBar"
         inputRef={ref}

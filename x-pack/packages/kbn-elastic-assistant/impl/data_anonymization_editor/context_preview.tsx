@@ -50,27 +50,32 @@ const SelectedPromptContextPreviewComponent = ({
   );
 
   return (
-    <>
-      {Object.entries(data.anonymizedData).map(([key, value]) => (
-        <EuiText
-          color="subdued"
-          css={css`
-            font-family: 'Roboto Mono';
-            font-size: ${euiThemeVars.euiFontSizeXS};
-          `}
-        >
-          {`${key},`}
+    <EuiText
+      color="subdued"
+      size="xs"
+      css={css`
+        max-height: 240px;
+        overflow: auto;
+      `}
+    >
+      <code>
+        <>
+          {Object.entries(data.anonymizedData).map(([key, value]) => (
+            <div>
+              {`${key},`}
 
-          {data.replacements[value[0]] ? (
-            <Strong showRealValues={showRealValues}>
-              {showRealValues ? data.replacements[value[0]] : value}
-            </Strong>
-          ) : (
-            value
-          )}
-        </EuiText>
-      ))}
-    </>
+              {data.replacements[value[0]] ? (
+                <Strong showRealValues={showRealValues}>
+                  {showRealValues ? data.replacements[value[0]] : value}
+                </Strong>
+              ) : (
+                value
+              )}
+            </div>
+          ))}
+        </>
+      </code>
+    </EuiText>
   );
 };
 

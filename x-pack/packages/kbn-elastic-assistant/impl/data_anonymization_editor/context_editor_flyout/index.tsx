@@ -75,18 +75,24 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
                 onClick={() => setShowRealValues(!showRealValues)}
               >
                 {showRealValues
-                  ? I18n.translate('kbnElasticAssistant.dataAnonymizationEditor.hideRealValues', {
-                      defaultMessage: 'Show anonymized',
-                    })
-                  : I18n.translate('kbnElasticAssistant.dataAnonymizationEditor.showRealValues', {
-                      defaultMessage: 'Show real values',
-                    })}
+                  ? I18n.translate(
+                      'xpack.elasticAssistant.dataAnonymizationEditor.hideRealValues',
+                      {
+                        defaultMessage: 'Show anonymized',
+                      }
+                    )
+                  : I18n.translate(
+                      'xpack.elasticAssistant.dataAnonymizationEditor.showRealValues',
+                      {
+                        defaultMessage: 'Show real values',
+                      }
+                    )}
               </EuiButtonEmpty>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="xs" iconType="documentEdit" onClick={openEditModal}>
-                {I18n.translate('kbnElasticAssistant.dataAnonymizationEditor.editButton', {
+                {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.editButton', {
                   defaultMessage: 'Edit',
                 })}
               </EuiButtonEmpty>
