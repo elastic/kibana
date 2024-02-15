@@ -26,9 +26,7 @@ export default function Filters() {
     isLoading,
     integrations,
     onIntegrationsChange,
-    datasets,
     selectedQuery,
-    onSearchChange,
     onQueryChange,
   } = useDatasetQualityFilters();
 
@@ -53,13 +51,7 @@ export default function Filters() {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <FilterBar
-          options={datasets}
-          onSearchChange={onSearchChange}
-          query={selectedQuery}
-          onQueryChange={onQueryChange}
-          isLoading={isLoading}
-        />
+        <FilterBar query={selectedQuery} onQueryChange={onQueryChange} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <IntegrationsSelector

@@ -92,7 +92,6 @@ export const createPureDatasetQualityControllerStateMachine = (
               actions: ['storeIntegrations'],
             },
             UPDATE_QUERY: {
-              target: 'datasets.fetching',
               actions: ['storeQuery'],
             },
           },
@@ -121,9 +120,6 @@ export const createPureDatasetQualityControllerStateMachine = (
               actions: ['storeTimeRange'],
             },
             REFRESH_DATA: {
-              target: 'degradedDocs.fetching',
-            },
-            UPDATE_QUERY: {
               target: 'degradedDocs.fetching',
             },
           },

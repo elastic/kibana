@@ -5,69 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { ChangeEvent, useCallback } from 'react';
+import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-const SINGLE_SELECTION = { asPlainText: true };
 
 const placeholder = i18n.translate('xpack.datasetQuality.filterBar.placeholder', {
   defaultMessage: 'Filter datasets',
 });
 
-const customOptionText = i18n.translate('xpack.datasetQuality.filterBar.customOptionText', {
-  defaultMessage: 'Add \\{searchValue\\} as your filter',
-});
-
 export interface FilterBarComponentProps {
-  isLoading: boolean;
-  options: Array<EuiComboBoxOptionOption<string>>;
   query?: string;
   onQueryChange: (query: string) => void;
-  onSearchChange: (serachVal: string) => void;
 }
 
-export const FilterBar = ({
-  isLoading,
-  options,
-  query,
-  onSearchChange,
-  onQueryChange,
-}: FilterBarComponentProps) => {
+export const FilterBar = ({ query, onQueryChange }: FilterBarComponentProps) => {
   const onChange = useCallback(
-    (selectedOptions) => {
-      onQueryChange(selectedOptions?.[0]?.label);
-    },
-    [onQueryChange]
-  );
-
-  const onCreateOption = useCallback(
-    (searchValue) => {
-      const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-      if (!normalizedSearchValue) {
-        return;
-      }
-
-      onQueryChange(searchValue);
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onQueryChange(event.target.value);
     },
     [onQueryChange]
   );
 
   return (
-    <EuiComboBox
+    <EuiFieldSearch
       fullWidth
-      aria-label={placeholder}
       placeholder={placeholder}
-      singleSelection={SINGLE_SELECTION}
-      options={options}
-      isLoading={isLoading}
-      onSearchChange={onSearchChange}
-      selectedOptions={query ? options.filter((option) => option.label === query) : []}
+      value={query ?? ''}
       onChange={onChange}
-      onCreateOption={onCreateOption}
-      customOptionText={customOptionText}
-      isClearable
+      isClearable={true}
+      aria-label={placeholder}
     />
   );
 };

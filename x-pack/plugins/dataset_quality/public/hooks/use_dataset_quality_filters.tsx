@@ -7,14 +7,12 @@
 
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
-
-  const [searchVal, setSearchVal] = useState('');
 
   const isLoading = useSelector(service, (state) => state.matches('datasets.fetching'));
   const {
@@ -23,7 +21,6 @@ export const useDatasetQualityFilters = () => {
     query: selectedQuery,
   } = useSelector(service, (state) => state.context.filters);
   const integrations = useSelector(service, (state) => state.context.integrations);
-  const datasets = useSelector(service, (state) => state.context.datasets);
 
   const onTimeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
@@ -87,35 +84,6 @@ export const useDatasetQualityFilters = () => {
     [service]
   );
 
-  const datasetItems = useMemo(() => {
-    const items = datasets
-      .filter(
-        (dataset) =>
-          dataset.title.toLowerCase().includes(searchVal.toLowerCase()) ||
-          dataset.rawName.toLowerCase().includes(searchVal.toLowerCase())
-      )
-      .map((dataset) => ({
-        label: `${dataset.name}-${dataset.namespace}`,
-      }));
-
-    if (!selectedQuery) {
-      return items;
-    }
-
-    const selectedQueryOption = items.filter((item) => item.label === selectedQuery);
-
-    return selectedQueryOption.length > 0
-      ? items
-      : [
-          {
-            label: selectedQuery,
-          },
-          ...items,
-        ];
-  }, [datasets, searchVal, selectedQuery]);
-
-  const onSearchChange = useCallback(setSearchVal, [setSearchVal]);
-
   const onQueryChange = useCallback(
     (query: string) => {
       service.send({
@@ -134,9 +102,7 @@ export const useDatasetQualityFilters = () => {
     integrations: integrationItems,
     onIntegrationsChange,
     isLoading,
-    datasets: datasetItems,
     selectedQuery,
-    onSearchChange,
     onQueryChange,
   };
 };

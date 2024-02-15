@@ -39,6 +39,7 @@ export const useDatasetQualityTable = () => {
     fullNames: showFullDatasetNames,
     timeRange,
     integrations,
+    query,
   } = useSelector(service, (state) => state.context.filters);
 
   const flyout = useSelector(service, (state) => state.context.flyout);
@@ -121,16 +122,21 @@ export const useDatasetQualityTable = () => {
       ? datasets
       : filterInactiveDatasets({ datasets, timeRange });
 
-    return integrations.length > 0
-      ? visibleDatasets.filter((dataset) => {
-          if (!dataset.integration && integrations.includes(NONE)) {
-            return true;
-          }
+    const filteredByIntegrations =
+      integrations.length > 0
+        ? visibleDatasets.filter((dataset) => {
+            if (!dataset.integration && integrations.includes(NONE)) {
+              return true;
+            }
 
-          return dataset.integration && integrations.includes(dataset.integration.name);
-        })
-      : visibleDatasets;
-  }, [showInactiveDatasets, datasets, timeRange, integrations]);
+            return dataset.integration && integrations.includes(dataset.integration.name);
+          })
+        : visibleDatasets;
+
+    return query
+      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
+      : filteredByIntegrations;
+  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
 
   const pagination = {
     pageIndex: page,
