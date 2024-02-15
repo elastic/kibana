@@ -374,18 +374,27 @@ export class ExecuteReportTask implements ReportingTask {
     // event tracking
     const startedAt = report.started_at;
     const eventTracker = this.getEventTracker(report);
-    eventTracker?.completeJob({
-      byteSize: docOutput.size,
-      timeSinceClaimed: startedAt
-        ? completedTime.valueOf() - new Date(startedAt).valueOf()
-        : undefined,
-      pdfPages: docOutput.metrics?.pdf?.pages,
-      // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // FIXME: doesn't exist yet
-      // screenshotLayout: docOutput.metrics?.screenshot?.layout, // FIXME: doesn't exist yet
-      csvRows: docOutput.metrics?.csv?.rows,
-      // csvColumns: docOutput.metrics?.csv?.columns, // FIXME: doesn't exist yet
-      warnings: docOutput.warnings,
-    });
+    if (docOutput.metrics?.csv != null) {
+      eventTracker?.completeJobCsv({
+        byteSize: docOutput.size,
+        timeSinceClaimed: startedAt
+          ? completedTime.valueOf() - new Date(startedAt).valueOf()
+          : undefined,
+        csvRows: docOutput.metrics.csv.rows ?? 0,
+        // csvColumns: docOutput.metrics?.csv?.columns, // FIXME: doesn't exist yet
+      });
+    } else if (docOutput.metrics?.pdf != null || docOutput.metrics?.png != null) {
+      eventTracker?.completeJobScreenshot({
+        byteSize: docOutput.size,
+        timeSinceClaimed: startedAt
+          ? completedTime.valueOf() - new Date(startedAt).valueOf()
+          : undefined,
+        numPages: docOutput.metrics.pdf?.pages ?? 1,
+        screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
+        // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // FIXME: doesn't exist yet
+        // screenshotLayout: docOutput.metrics?.screenshot?.layout, // FIXME: doesn't exist yet
+      });
+    }
 
     return report;
   }

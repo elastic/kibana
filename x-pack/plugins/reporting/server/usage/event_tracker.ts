@@ -11,12 +11,17 @@ import { EventType, FieldType } from './types';
 interface CompletionOpts {
   byteSize: number;
   timeSinceClaimed?: number;
-  pdfPages?: number;
+}
+
+interface CompletionOptsScreenshot {
+  numPages?: number;
   screenshotPixels?: number;
   screenshotLayout?: string;
+}
+
+interface CompletionOptsScreenshotCsv {
   csvRows?: number;
   csvColumns?: number;
-  warnings?: string[];
 }
 
 interface FailureOpts {
@@ -79,29 +84,35 @@ export class EventTracker {
    * since claimed equals the time spent executing
    * the report.
    */
-  public completeJob(opts: CompletionOpts) {
-    const {
-      byteSize,
-      timeSinceClaimed,
-      warnings,
-      pdfPages,
-      screenshotPixels,
-      screenshotLayout,
-      csvRows,
-      csvColumns,
-    } = opts;
-    this.reportEvent(EventType.REPORT_COMPLETION, {
+  public completeJobScreenshot(opts: CompletionOpts & CompletionOptsScreenshot) {
+    const { byteSize, timeSinceClaimed, numPages, screenshotPixels, screenshotLayout } = opts;
+    this.reportEvent(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION]: timeSinceClaimed,
       [FieldType.BYTE_SIZE]: byteSize,
-      [FieldType.PDF_PAGES]: pdfPages,
-      [FieldType.SCREENSHOT_PIXELS]: screenshotPixels,
-      [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
-      [FieldType.CSV_ROWS]: csvRows,
-      [FieldType.CSV_COLUMNS]: csvColumns,
-      [FieldType.WARNINGS]: warnings,
+      ...(numPages ? { [FieldType.NUM_PAGES]: numPages } : {}),
+      ...(screenshotPixels ? { [FieldType.SCREENSHOT_PIXELS]: screenshotPixels } : {}),
+      ...(screenshotLayout ? { [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout } : {}),
+    });
+  }
+
+  /*
+   * When a report job is completed, the time
+   * since claimed equals the time spent executing
+   * the report.
+   */
+  public completeJobCsv(opts: CompletionOpts & CompletionOptsScreenshotCsv) {
+    const { byteSize, timeSinceClaimed, csvRows, csvColumns } = opts;
+    this.reportEvent(EventType.REPORT_COMPLETION_CSV, {
+      [FieldType.REPORT_ID]: this.reportId,
+      [FieldType.EXPORT_TYPE]: this.exportType,
+      [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.DURATION]: timeSinceClaimed,
+      [FieldType.BYTE_SIZE]: byteSize,
+      ...(csvRows ? { [FieldType.CSV_ROWS]: csvRows } : {}),
+      ...(csvColumns ? { [FieldType.CSV_COLUMNS]: csvColumns } : {}),
     });
   }
 

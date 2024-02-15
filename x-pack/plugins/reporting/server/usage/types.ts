@@ -255,7 +255,8 @@ export type FeatureAvailabilityMap = Record<string, boolean>;
 export enum EventType {
   REPORT_CREATION = 'report_creation',
   REPORT_CLAIM = 'report_claim',
-  REPORT_COMPLETION = 'report_completion',
+  REPORT_COMPLETION_CSV = 'report_completion_csv',
+  REPORT_COMPLETION_SCREENSHOT = 'report_completion_screenshot',
   REPORT_ERROR = 'report_error',
   REPORT_DOWNLOAD = 'report_download',
   REPORT_DELETION = 'report_deletion',
@@ -271,10 +272,9 @@ export enum FieldType {
   ERROR_CODE = 'error_code',
   ERROR_MESSAGE = 'error_message',
   BYTE_SIZE = 'byte_size',
-  PDF_PAGES = 'pdf_pages',
+  NUM_PAGES = 'num_pages',
   SCREENSHOT_PIXELS = 'screenshot_pixels',
   SCREENSHOT_LAYOUT = 'screenshot_layout',
   CSV_ROWS = 'csv_rows',
   CSV_COLUMNS = 'csv_columns',
-  WARNINGS = 'warnings',
 }

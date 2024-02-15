@@ -83,8 +83,8 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.PDF_PAGES]: {
-    [FieldType.PDF_PAGES]: {
+  [FieldType.NUM_PAGES]: {
+    [FieldType.NUM_PAGES]: {
       type: 'long',
       _meta: {
         description: 'The number of pages in a PDF export.',
@@ -123,14 +123,6 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.WARNINGS]: {
-    [FieldType.WARNINGS]: {
-      type: 'keyword',
-      _meta: {
-        description: 'Warning codes that may be present on a completed report.',
-      },
-    },
-  },
 };
 
 const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
@@ -154,18 +146,28 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     },
   },
   {
-    eventType: EventType.REPORT_COMPLETION,
+    eventType: EventType.REPORT_COMPLETION_CSV,
     schema: {
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION],
       ...fields[FieldType.BYTE_SIZE],
-      ...fields[FieldType.PDF_PAGES],
+      ...fields[FieldType.NUM_PAGES],
       ...fields[FieldType.SCREENSHOT_PIXELS],
       ...fields[FieldType.SCREENSHOT_LAYOUT],
+    },
+  },
+  {
+    eventType: EventType.REPORT_COMPLETION_SCREENSHOT,
+    schema: {
+      ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.EXPORT_TYPE],
+      ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.DURATION],
+      ...fields[FieldType.BYTE_SIZE],
       ...fields[FieldType.CSV_ROWS],
-      ...fields[FieldType.WARNINGS],
+      ...fields[FieldType.CSV_COLUMNS],
     },
   },
   {
