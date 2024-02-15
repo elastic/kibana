@@ -72,9 +72,9 @@ export const SummarySection = ({
     resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
     navToFindings({
-      'result.evaluation': resultEvaluation,
-      'rule.section': ruleSection,
       ...getPolicyTemplateQuery(dashboardType),
+      'rule.section': ruleSection,
+      'result.evaluation': resultEvaluation,
     });
   };
 
