@@ -83,7 +83,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/esql-utils",
     "@kbn/managed-content-badge",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }

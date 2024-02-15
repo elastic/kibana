@@ -17,8 +17,9 @@
     "@kbn/ui-actions-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
-    "@kbn/unified-search-plugin",
     "@kbn/config-schema",
+    "@kbn/presentation-publishing",
+    "@kbn/data-views-plugin",
   ],
   "exclude": [
     "target/**/*",
