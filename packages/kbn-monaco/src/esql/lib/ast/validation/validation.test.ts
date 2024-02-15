@@ -8,8 +8,8 @@
 
 import { CharStreams } from 'antlr4ts';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
-// import { mathCommandDefinition } from '../../autocomplete/autocomplete_definitions';
-// import { getDurationItemsWithQuantifier } from '../../autocomplete/helpers';
+import { join } from 'path';
+import { writeFile } from 'fs/promises';
 import { AstListener } from '../ast_factory';
 import { validateAst } from './validation';
 import { ESQLAst } from '../types';
@@ -24,49 +24,62 @@ import { EditorError } from '../../../../types';
 import { camelCase } from 'lodash';
 
 const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
+const fields = [
+  ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+  { name: 'any#Char$Field', type: 'number' },
+  { name: 'kubernetes.something.something', type: 'number' },
+  { name: '@timestamp', type: 'date' },
+];
+const enrichFields = [
+  { name: 'otherField', type: 'string' },
+  { name: 'yetAnotherField', type: 'number' },
+];
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const unsupported_field = [{ name: 'unsupported_field', type: 'unsupported' }];
+const indexes = [
+  'a_index',
+  'index',
+  'other_index',
+  '.secret_index',
+  'my-index',
+  'unsupported_index',
+];
+const policies = [
+  {
+    name: 'policy',
+    sourceIndices: ['enrich_index'],
+    matchField: 'otherStringField',
+    enrichFields: ['otherField', 'yetAnotherField'],
+  },
+  {
+    name: 'policy$',
+    sourceIndices: ['enrich_index'],
+    matchField: 'otherStringField',
+    enrichFields: ['otherField', 'yetAnotherField'],
+  },
+];
 
 function getCallbackMocks() {
   return {
     getFieldsFor: jest.fn(async ({ query }) => {
       if (/enrich/.test(query)) {
-        return [
-          { name: 'otherField', type: 'string' },
-          { name: 'yetAnotherField', type: 'number' },
-        ];
+        return enrichFields;
       }
       if (/unsupported_index/.test(query)) {
-        return [{ name: 'unsupported_field', type: 'unsupported' }];
+        return unsupported_field;
       }
       if (/dissect|grok/.test(query)) {
         return [{ name: 'firstWord', type: 'string' }];
       }
-      return [
-        ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-        { name: 'any#Char$Field', type: 'number' },
-        { name: 'kubernetes.something.something', type: 'number' },
-        { name: '@timestamp', type: 'date' },
-      ];
+      return fields;
     }),
     getSources: jest.fn(async () =>
-      ['a', 'index', 'otherIndex', '.secretIndex', 'my-index', 'unsupported_index'].map((name) => ({
+      indexes.map((name) => ({
         name,
         hidden: name.startsWith('.'),
       }))
     ),
-    getPolicies: jest.fn(async () => [
-      {
-        name: 'policy',
-        sourceIndices: ['enrichIndex1'],
-        matchField: 'otherStringField',
-        enrichFields: ['otherField', 'yetAnotherField'],
-      },
-      {
-        name: 'policy[]',
-        sourceIndices: ['enrichIndex1'],
-        matchField: 'otherStringField',
-        enrichFields: ['otherField', 'yetAnotherField'],
-      },
-    ]),
+    getPolicies: jest.fn(async () => policies),
     getMetaFields: jest.fn(async () => ['_id', '_source']),
   };
 }
@@ -177,6 +190,36 @@ function getFieldMapping(
 }
 
 describe('validation logic', () => {
+  const testCases: Array<{ query: string; error: boolean }> = [];
+
+  afterAll(async () => {
+    const targetFolder = join(
+      __dirname,
+      '..',
+      'integration_tests',
+      'esql_validation_meta_tests.json'
+    );
+    try {
+      await writeFile(
+        targetFolder,
+        JSON.stringify(
+          {
+            indexes,
+            fields: fields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+            enrichFields: enrichFields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+            policies,
+            unsupported_field,
+            testCases,
+          },
+          null,
+          2
+        )
+      );
+    } catch (e) {
+      throw new Error(`Error writing test cases to ${targetFolder}: ${e.message}`);
+    }
+  });
+
   const getAstAndErrors = async (
     text: string | undefined
   ): Promise<{
@@ -202,6 +245,8 @@ describe('validation logic', () => {
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) {
     const testFn = only ? it.only : skip ? it.skip : it;
+    testCases.push({ query: statement, error: Boolean(expectedErrors.length) });
+
     testFn(
       `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
       async () => {
