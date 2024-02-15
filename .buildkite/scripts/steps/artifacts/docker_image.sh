@@ -101,6 +101,7 @@ gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 echo "--- Validate CDN assets"
 CDN_DESTINATION="https://kibana-cdn.gcp.qa.cld.elstc.co/$GIT_ABBREV_COMMIT"
 cd $CDN_ASSETS_FOLDER
+shopt -s globstar
 for CDN_ASSET in **/*
 do
   if [[ -f "$CDN_ASSET" ]]; then
@@ -108,6 +109,7 @@ do
     curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$CDN_DESTINATION/$CDN_ASSET"
   fi
 done
+shopt -u globstar
 cd -
 
 echo "--- Upload archives"
