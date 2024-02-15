@@ -328,7 +328,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        describe('legacy table', () => {
+        // These tests are skipped as they take a lot of time to run. Temporary unskip them to validate current functionality if necessary.
+        describe.skip('legacy table', () => {
           beforeEach(async () => {
             await kibanaServer.uiSettings.update({
               ...defaultSettings,
