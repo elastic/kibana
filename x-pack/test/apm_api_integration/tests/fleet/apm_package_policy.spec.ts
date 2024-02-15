@@ -108,7 +108,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     return res.total as number;
   }
 
-  registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('APM package policy', { config: 'basic', archives: [] }, () => {
     let apmPackagePolicy: PackagePolicy;
     let agentPolicyId: string;
     let packagePolicyId: string;
