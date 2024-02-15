@@ -1596,10 +1596,10 @@ export class Embeddable
       return;
     }
 
-    // Why are 'type' and 'savedObjectId' being removed from return?
+    // Why are 'type' and 'savedObjectId' keys being removed?
     // Prior to removing them,
     // this method returned 'Readonly<Document | undefined>' while consumers typed the results as 'LensSavedObjectAttributes'.
-    // Removing 'type' and 'savedObjectId' to align method results with consumer typing.
+    // Removing 'type' and 'savedObjectId' keys to align method results with consumer typing.
     const savedVis = { ...this.savedVis };
     delete savedVis.type;
     delete savedVis.savedObjectId;
