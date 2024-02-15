@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { MetricDatum } from '@elastic/charts/dist/chart_types/metric/specs';
+import { SloOverviewDetails } from './slo_overview_details';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -75,10 +76,11 @@ const getSloChartData = ({
 
 export function SloCardChartList({ sloId }: { sloId: string }) {
   const {
-    application: { navigateToUrl },
     http: { basePath },
     uiSettings,
   } = useKibana().services;
+
+  const [selectedSlo, setSelectedSlo] = React.useState<SLOWithSummaryResponse | null>(null);
 
   const kqlQuery = `slo.id:"${sloId}"`;
 
@@ -145,41 +147,43 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
   }
 
   return (
-    <div ref={containerRef} style={{ width: '100%' }}>
-      <Chart>
-        <Settings
-          baseTheme={DARK_THEME}
-          onElementClick={([d]) => {
-            if (isMetricElementEvent(d)) {
-              const { columnIndex, rowIndex } = d;
-              const slo = sloList?.results[rowIndex * 4 + columnIndex];
-              const { sloDetailsUrl } = getSloFormattedSummary(slo!, uiSettings, basePath);
-              navigateToUrl(sloDetailsUrl);
-            }
-          }}
-          locale={i18n.getLocale()}
-        />
-        <Metric id={`slo-id-instances`} data={chartsData} />
-      </Chart>
-      {sloList?.results.map((slo, index) => {
-        const rules = rulesBySlo?.[slo?.id];
-        const activeAlerts = activeAlertsBySlo.get(slo);
-        const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
+    <>
+      <div ref={containerRef} style={{ width: '100%' }}>
+        <Chart>
+          <Settings
+            baseTheme={DARK_THEME}
+            onElementClick={([d]) => {
+              if (isMetricElementEvent(d)) {
+                const { columnIndex, rowIndex } = d;
+                const slo = sloList?.results[rowIndex * 4 + columnIndex];
+                setSelectedSlo(slo ?? null);
+              }
+            }}
+            locale={i18n.getLocale()}
+          />
+          <Metric id={`slo-id-instances`} data={chartsData} />
+        </Chart>
+        {sloList?.results.map((slo, index) => {
+          const rules = rulesBySlo?.[slo?.id];
+          const activeAlerts = activeAlertsBySlo.get(slo);
+          const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
 
-        return (
-          <div key={slo.id + slo.instanceId}>
-            <SloCardBadgesPortal containerRef={containerRef} index={index}>
-              <SloCardItemBadges
-                slo={slo}
-                rules={rules}
-                activeAlerts={activeAlerts}
-                handleCreateRule={() => {}}
-                hasGroupBy={hasGroupBy}
-              />
-            </SloCardBadgesPortal>
-          </div>
-        );
-      })}
-    </div>
+          return (
+            <div key={slo.id + slo.instanceId}>
+              <SloCardBadgesPortal containerRef={containerRef} index={index}>
+                <SloCardItemBadges
+                  slo={slo}
+                  rules={rules}
+                  activeAlerts={activeAlerts}
+                  handleCreateRule={() => {}}
+                  hasGroupBy={hasGroupBy}
+                />
+              </SloCardBadgesPortal>
+            </div>
+          );
+        })}
+      </div>
+      <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
+    </>
   );
 }
