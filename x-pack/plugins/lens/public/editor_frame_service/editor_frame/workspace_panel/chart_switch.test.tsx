@@ -17,18 +17,6 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 
-// Tests are executed in a jsdom environment who does not have sizing methods,
-// thus the AutoSizer will always compute a 0x0 size space
-// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
-jest.mock('react-virtualized-auto-sizer', () => {
-  return function (props: {
-    children: (dimensions: { width: number; height: number }) => React.ReactNode;
-  }) {
-    const { children } = props;
-    return <div>{children({ width: 100, height: 100 })}</div>;
-  };
-});
-
 import {
   Visualization,
   FramePublicAPI,
@@ -41,36 +29,22 @@ import { LensAppState, applyChanges } from '../../../state_management';
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
     return {
-      ...createMockVisualization(),
-      id,
-      getVisualizationTypeId: jest.fn((_state) => id),
-      visualizationTypes: [
+      ...createMockVisualization(id),
+      getSuggestions: jest.fn((options) => [
         {
-          icon: 'empty',
-          id,
-          label: `Label ${id}`,
-          groupLabel: `${id}Group`,
+          score: 1,
+          title: '',
+          state: `suggestion ${id}`,
+          previewIcon: 'empty',
         },
-      ],
-      initialize: jest.fn((_addNewLayer, state) => {
-        return state || `${id} initial state`;
-      }),
-      getSuggestions: jest.fn((options) => {
-        return [
-          {
-            score: 1,
-            title: '',
-            state: `suggestion ${id}`,
-            previewIcon: 'empty',
-          },
-        ];
-      }),
+      ]),
     };
   }
   let visualizationMap = mockVisualizationMap();
   let datasourceMap = mockDatasourceMap();
   let datasourceStates = mockDatasourceStates();
   let frame = mockFrame(['a']);
+
   beforeEach(() => {
     visualizationMap = mockVisualizationMap();
     datasourceMap = mockDatasourceMap();
@@ -222,7 +196,7 @@ describe('chart_switch', () => {
       type: 'lens/switchVisualization',
       payload: {
         suggestion: {
-          visualizationState: 'suggestion visB',
+          visualizationState: 'visB initial state',
           newVisualizationId: 'visB',
           datasourceId: 'testDatasource',
           datasourceState: {},
@@ -525,7 +499,7 @@ describe('chart_switch', () => {
           newVisualizationId: 'visB',
           datasourceId: 'testDatasource',
           datasourceState: 'testDatasource suggestion',
-          visualizationState: 'suggestion visB',
+          visualizationState: 'visB initial state',
         },
         clearStagedPreview: true,
       },
@@ -544,7 +518,7 @@ describe('chart_switch', () => {
       type: 'lens/switchVisualization',
       payload: {
         suggestion: {
-          visualizationState: 'suggestion visB visB',
+          visualizationState: 'visB initial state visB',
           newVisualizationId: 'visB',
           datasourceId: 'testDatasource',
           datasourceState: {},

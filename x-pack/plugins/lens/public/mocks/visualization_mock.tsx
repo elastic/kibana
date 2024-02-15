@@ -7,39 +7,41 @@
 import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { toExpression } from '@kbn/interpreter';
+import faker from 'faker';
 import { Visualization, VisualizationMap } from '../types';
 
-export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualization> {
-  const layerId = 'layer1';
-
+export function createMockVisualization(
+  id = 'testVis',
+  layerIds = ['layer1']
+): jest.Mocked<Visualization> {
   return {
     id,
     clearLayer: jest.fn((state, _layerId, _indexPatternId) => state),
     removeLayer: jest.fn(),
-    getLayerIds: jest.fn((_state) => [layerId]),
+    getLayerIds: jest.fn((_state) => layerIds),
     getSupportedLayers: jest.fn(() => [{ type: LayerTypes.DATA, label: 'Data Layer' }]),
     getLayerType: jest.fn((_state, _layerId) => LayerTypes.DATA),
     visualizationTypes: [
       {
         icon: 'empty',
         id,
-        label: 'TEST',
+        label: faker.lorem.word(),
         groupLabel: `${id}Group`,
       },
     ],
     appendLayer: jest.fn(),
-    getVisualizationTypeId: jest.fn((_state) => 'empty'),
+    getVisualizationTypeId: jest.fn((_state) => id),
     getDescription: jest.fn((_state) => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
     getSuggestions: jest.fn((_options) => []),
     getRenderEventCounters: jest.fn((_state) => []),
-    initialize: jest.fn((_addNewLayer, _state) => ({ newState: 'newState' })),
+    initialize: jest.fn((_addNewLayer, _state) => `${id} initial state`),
     getConfiguration: jest.fn((props) => ({
       groups: [
         {
           groupId: 'a',
           groupLabel: 'a',
-          layerId,
+          layerId: layerIds[0],
           supportsMoreColumns: true,
           accessors: [],
           filterOperations: jest.fn(() => true),
