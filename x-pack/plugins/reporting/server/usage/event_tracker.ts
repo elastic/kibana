@@ -122,13 +122,14 @@ export class EventTracker {
    * error.
    */
   public failJob(opts: FailureOpts) {
-    const { timeSinceClaimed, errorMessage } = opts;
+    const { timeSinceClaimed, errorMessage, errorCode } = opts;
     this.reportEvent(EventType.REPORT_ERROR, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION]: timeSinceClaimed,
       [FieldType.ERROR_MESSAGE]: errorMessage,
+      [FieldType.ERROR_CODE]: errorCode,
     });
   }
 
