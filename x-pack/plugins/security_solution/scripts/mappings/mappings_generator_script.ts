@@ -64,14 +64,17 @@ const generateIndices = (
   indexPrefix: string,
   fieldsCount: number,
   numberOfMappedFieldsPerIndex: number,
-  numberOfIndexBuckets: number
+  numberOfIndexBuckets: number,
+  purgeOutputDirectory: boolean
 ) => {
   const absoluteOutputDir = path.resolve(outputDirectory);
 
-  // Delete output directory if exists
-  console.log(`Deleting directory: ${absoluteOutputDir}`);
-  if (fs.existsSync(absoluteOutputDir)) {
-    fs.rmSync(absoluteOutputDir, { recursive: true, force: true });
+  if (purgeOutputDirectory) {
+    // Delete output directory if exists
+    console.log(`Deleting directory: ${absoluteOutputDir}`);
+    if (fs.existsSync(absoluteOutputDir)) {
+      fs.rmSync(absoluteOutputDir, { recursive: true, force: true });
+    }
   }
 
   // Create output directory if needed
@@ -138,6 +141,15 @@ const main = () => {
       type: 'string',
       description: 'The name of the directory to save generated mappings to',
     })
+    .option('purgeOutputDirectory', {
+      alias: 'p',
+      demandOption: false,
+      type: 'boolean',
+      default: false,
+      description:
+        'Indicates whether we should purge existing output directory before running main script (default is false)',
+    })
+
     .check(({ unmappedRate }) => {
       if (unmappedRate < 0.0 || unmappedRate > 1.0) {
         throw new Error('--unmappedRate can only be in range [0.0, 1.0]');
@@ -147,7 +159,15 @@ const main = () => {
     })
     .help();
 
-  const { fieldsCount, indexCount, indexPrefix, unmappedRate, buckets, outputDirectory } = argv;
+  const {
+    fieldsCount,
+    indexCount,
+    indexPrefix,
+    unmappedRate,
+    buckets,
+    outputDirectory,
+    purgeOutputDirectory,
+  } = argv;
   const numberOfMappedFieldsPerIndex = Math.max(Math.floor(fieldsCount * (1.0 - unmappedRate)), 1);
   const numberOfIndexBuckets = Math.max(1, Math.min(buckets, indexCount));
 
@@ -157,7 +177,8 @@ const main = () => {
     indexPrefix,
     fieldsCount,
     numberOfMappedFieldsPerIndex,
-    numberOfIndexBuckets
+    numberOfIndexBuckets,
+    purgeOutputDirectory
   );
 };
 

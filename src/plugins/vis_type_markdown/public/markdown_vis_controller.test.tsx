@@ -29,7 +29,9 @@ describe('markdown vis controller', () => {
 
     expect(getByText('markdown')).toMatchInlineSnapshot(`
       <a
+        class="euiLink emotion-euiLink-primary"
         href="http://daringfireball.net/projects/markdown"
+        rel="noreferrer"
       >
         markdown
       </a>
@@ -53,7 +55,8 @@ describe('markdown vis controller', () => {
 
     expect(getByText(/testing/i)).toMatchInlineSnapshot(`
       <p>
-        Testing &lt;a&gt;html&lt;/a&gt;
+        Testing 
+        html
       </p>
     `);
   });

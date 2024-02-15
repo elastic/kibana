@@ -13,14 +13,14 @@ import { isAddressValid } from './validate_address';
 export const i18nTexts = {
   urlEmpty: (
     <FormattedMessage
-      id="xpack.remoteClusters.cloudDeploymentForm.urlRequiredError"
-      defaultMessage="A url is required."
+      id="xpack.remoteClusters.cloudDeploymentForm.remoteAddressRequiredError"
+      defaultMessage="A remote address is required."
     />
   ),
   urlInvalid: (
     <FormattedMessage
-      id="xpack.remoteClusters.cloudDeploymentForm.urlInvalidError"
-      defaultMessage="Url is invalid"
+      id="xpack.remoteClusters.cloudDeploymentForm.remoteAddressInvalidError"
+      defaultMessage="Remote address is invalid."
     />
   ),
 };
@@ -28,20 +28,22 @@ export const i18nTexts = {
 const CLOUD_DEFAULT_PROXY_PORT = '9400';
 const EMPTY_PROXY_VALUES = { proxyAddress: '', serverName: '' };
 const PROTOCOL_REGEX = new RegExp(/^https?:\/\//);
+const DEFAULT_SOCKET_CONNECTIONS = 18;
 
-export const isCloudUrlEnabled = (cluster?: Cluster): boolean => {
-  // enable cloud url for new clusters
+export const isCloudAdvancedOptionsEnabled = (cluster?: Cluster): boolean => {
+  // The toggle is switched off by default
   if (!cluster) {
-    return true;
+    return false;
   }
-  const { proxyAddress, serverName } = cluster;
-  if (!proxyAddress && !serverName) {
-    return true;
+  const { proxyAddress, serverName, proxySocketConnections } = cluster;
+  if (!proxyAddress) {
+    return false;
   }
-  const portParts = (proxyAddress ?? '').split(':');
-  const proxyAddressWithoutPort = portParts[0];
-  const port = portParts[1];
-  return port === CLOUD_DEFAULT_PROXY_PORT && proxyAddressWithoutPort === serverName;
+  const proxyAddressWithoutPort = (proxyAddress ?? '').split(':')[0];
+  return (
+    proxyAddressWithoutPort !== serverName ||
+    (proxySocketConnections != null && proxySocketConnections !== DEFAULT_SOCKET_CONNECTIONS)
+  );
 };
 
 const formatUrl = (url: string) => {
@@ -51,29 +53,23 @@ const formatUrl = (url: string) => {
   return url;
 };
 
-export const convertProxyConnectionToCloudUrl = (cluster?: Cluster): string => {
-  if (!isCloudUrlEnabled(cluster)) {
-    return '';
-  }
-  return cluster?.serverName ?? '';
-};
-export const convertCloudUrlToProxyConnection = (
-  cloudUrl: string = ''
-): { proxyAddress: string; serverName: string } => {
-  cloudUrl = formatUrl(cloudUrl);
-  if (!cloudUrl || !isAddressValid(cloudUrl)) {
+export const convertCloudRemoteAddressToProxyConnection = (url: string) => {
+  url = formatUrl(url);
+  if (!url || !isAddressValid(url)) {
     return EMPTY_PROXY_VALUES;
   }
-  const address = cloudUrl.split(':')[0];
-  return { proxyAddress: `${address}:${CLOUD_DEFAULT_PROXY_PORT}`, serverName: address };
+  const host = url.split(':')[0];
+  const port = url.split(':')[1];
+  const proxyAddress = port ? url : `${host}:${CLOUD_DEFAULT_PROXY_PORT}`;
+  return { proxyAddress, serverName: host };
 };
 
-export const validateCloudUrl = (cloudUrl: string): JSX.Element | null => {
-  if (!cloudUrl) {
+export const validateCloudRemoteAddress = (url?: string): JSX.Element | null => {
+  if (!url) {
     return i18nTexts.urlEmpty;
   }
-  cloudUrl = formatUrl(cloudUrl);
-  if (!isAddressValid(cloudUrl)) {
+  url = formatUrl(url);
+  if (!isAddressValid(url)) {
     return i18nTexts.urlInvalid;
   }
   return null;

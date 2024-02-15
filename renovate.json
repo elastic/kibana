@@ -87,26 +87,6 @@
         "team:kibana-core"
       ],
       "matchBaseBranches": [
-        "8.1"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
         "7.17"
       ],
       "labels": [

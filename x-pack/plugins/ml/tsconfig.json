@@ -116,5 +116,7 @@
     "@kbn/deeplinks-management",
     "@kbn/code-editor",
     "@kbn/presentation-publishing",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
 }
