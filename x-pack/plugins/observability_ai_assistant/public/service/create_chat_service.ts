@@ -146,14 +146,15 @@ export async function createChatService({
     hasRenderFunction: (name: string) => {
       return renderFunctionRegistry.has(name);
     },
-    complete({ connectorId, messages, conversationId, persist, signal }) {
+    complete({ screenContexts, connectorId, conversationId, messages, persist, signal }) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
         client('POST /internal/observability_ai_assistant/chat/complete', {
           params: {
             body: {
-              messages,
               connectorId,
               conversationId,
+              screenContexts,
+              messages,
               persist,
             },
           },

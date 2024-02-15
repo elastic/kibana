@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import {
   profilingAWSCostDiscountRate,
@@ -13,26 +13,31 @@ import {
   profilingDatacenterPUE,
   profilingPervCPUWattArm64,
   profilingPervCPUWattX86,
+  profilingAzureCostDiscountRate,
 } from '@kbn/observability-plugin/common';
 import { percentToFactor } from '../../utils/percent_to_factor';
-import { kqlQuery } from '../../utils/query';
 import { RegisterServicesParams } from '../register_services';
 
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
   core: CoreRequestHandlerContext;
-  rangeFromMs: number;
-  rangeToMs: number;
-  kuery: string;
+  indices?: string[];
+  stacktraceIdsField?: string;
+  query: QueryDslQueryContainer;
+  totalSeconds: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({ core, esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
-    const rangeFromSecs = rangeFromMs / 1000;
-    const rangeToSecs = rangeToMs / 1000;
-
+  return async ({
+    core,
+    esClient,
+    indices,
+    stacktraceIdsField,
+    query,
+    totalSeconds,
+  }: FetchFlamechartParams) => {
     const [
       co2PerKWH,
       datacenterPUE,
@@ -40,6 +45,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       pervCPUWattArm64,
       awsCostDiscountRate,
       costPervCPUPerHour,
+      azureCostDiscountRate,
     ] = await Promise.all([
       core.uiSettings.client.get<number>(profilingCo2PerKWH),
       core.uiSettings.client.get<number>(profilingDatacenterPUE),
@@ -47,27 +53,13 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
       core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
       core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+      core.uiSettings.client.get<number>(profilingAzureCostDiscountRate),
     ]);
 
     const profilingEsClient = createProfilingEsClient({ esClient });
-    const totalSeconds = rangeToSecs - rangeFromSecs;
+
     const flamegraph = await profilingEsClient.profilingFlamegraph({
-      query: {
-        bool: {
-          filter: [
-            ...kqlQuery(kuery),
-            {
-              range: {
-                ['@timestamp']: {
-                  gte: String(rangeFromSecs),
-                  lt: String(rangeToSecs),
-                  format: 'epoch_second',
-                },
-              },
-            },
-          ],
-        },
-      },
+      query,
       sampleSize: targetSampleSize,
       durationSeconds: totalSeconds,
       co2PerKWH,
@@ -76,6 +68,9 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       pervCPUWattArm64,
       awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
       costPervCPUPerHour,
+      azureCostDiscountRate: percentToFactor(azureCostDiscountRate),
+      indices,
+      stacktraceIdsField,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };
