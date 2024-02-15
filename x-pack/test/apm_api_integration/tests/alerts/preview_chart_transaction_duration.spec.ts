@@ -300,7 +300,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176989
+  registry.when.skip(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
     describe('transaction_duration', () => {
       before(async () => {
         await generateLatencyData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
