@@ -12,6 +12,7 @@ import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
@@ -27,7 +28,12 @@ import {
 } from './constants';
 import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
 import type { CasesOracleService } from './cases_oracle_service';
-import { convertValueToString, partitionByNonFoundErrors, partitionRecordsByError } from './utils';
+import {
+  convertValueToString,
+  partitionByNonFoundErrors,
+  partitionRecordsByError,
+  buildRequiredCustomFieldsForRequest,
+} from './utils';
 import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
@@ -630,11 +636,24 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
+    // possible error?
+    const configurations = await this.casesClient.configure.get();
+    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+      configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
 
-        bulkCreateReq.push(this.getCreateCaseRequest(params, data));
+        bulkCreateReq.push(
+          this.getCreateCaseRequest(
+            params,
+            data,
+            // possibly undefined?
+            customFieldsConfigurationMap.get(params.owner) ?? []
+          )
+        );
       }
     }
 
@@ -674,7 +693,8 @@ export class CasesConnectorExecutor {
 
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
-    groupingData: GroupedAlertsWithCaseId
+    groupingData: GroupedAlertsWithCaseId,
+    customFieldsConfigurations: CustomFieldsConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord } = groupingData;
 
@@ -700,6 +720,7 @@ export class CasesConnectorExecutor {
        */
       settings: { syncAlerts: false },
       owner: params.owner,
+      customFields: buildRequiredCustomFieldsForRequest(customFieldsConfigurations),
     };
   }
 
@@ -874,8 +895,19 @@ export class CasesConnectorExecutor {
     );
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
+
+    // possible error?
+    const configurations = await this.casesClient.configure.get();
+    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+      configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
-      this.getCreateCaseRequest(params, record)
+      this.getCreateCaseRequest(
+        params,
+        record,
+        customFieldsConfigurationMap.get(params.owner) ?? []
+      )
     );
 
     const idsToCreate = bulkCreateReq.map(({ id }) => id);

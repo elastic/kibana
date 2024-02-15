@@ -40,6 +40,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
 import { MAX_OPEN_CASES } from './constants';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -106,6 +107,7 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
     casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+    casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
     getCasesClient.mockReturnValue(casesClientMock);
 
@@ -261,6 +263,7 @@ describe('CasesConnectorExecutor', () => {
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
               {
                 id: 'mock-id-2',
@@ -284,6 +287,7 @@ describe('CasesConnectorExecutor', () => {
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
               {
                 id: 'mock-id-3',
@@ -307,6 +311,7 @@ describe('CasesConnectorExecutor', () => {
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
             ],
           });
@@ -559,6 +564,7 @@ describe('CasesConnectorExecutor', () => {
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
             ],
           });
@@ -790,7 +796,7 @@ describe('CasesConnectorExecutor', () => {
           });
         });
 
-        it('create new cases if reopenClosedCases=false and there are closed cases', async () => {
+        it('creates new cases with required custom fields if reopenClosedCases=false and there are closed cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
             errors: [],
@@ -831,8 +837,168 @@ describe('CasesConnectorExecutor', () => {
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
             ],
+          });
+        });
+
+        describe('Custom Fields', () => {
+          const mockOwner = params.owner;
+          const mockConfiguration = [
+            {
+              owner: mockOwner,
+              customFields: [
+                {
+                  key: 'first_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 1',
+                  required: true,
+                  defaultValue: 'default value',
+                },
+                {
+                  key: 'second_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 1',
+                  required: true,
+                  defaultValue: true,
+                },
+                {
+                  key: 'third_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 2',
+                  required: true,
+                  // no defaultValue
+                },
+                {
+                  key: 'fourth_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 2',
+                  required: true,
+                  // no defaultValue
+                },
+              ],
+            },
+          ];
+          const expectedCustomFieldValues = [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT as const,
+              value: 'default value',
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE as const,
+              value: true,
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.TEXT as const,
+              value: 'N/A',
+            },
+            {
+              key: 'fourth_key',
+              type: CustomFieldTypes.TOGGLE as const,
+              value: false,
+            },
+          ];
+
+          it('creates non existing cases with required custom fields correctly', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+
+            casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[2]] });
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [cases[0], cases[1]],
+              errors: [
+                {
+                  error: 'Not found',
+                  message: 'Not found',
+                  status: 404,
+                  caseId: 'mock-id-3',
+                },
+              ],
+            });
+
+            await connectorExecutor.execute(params);
+
+            expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+              cases: [
+                {
+                  id: 'mock-id-3',
+                  title: 'Test rule (Auto-created)',
+                  description:
+                    'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
+                  owner: mockOwner,
+                  settings: {
+                    syncAlerts: false,
+                  },
+                  tags: [
+                    'auto-generated',
+                    'rule:rule-test-id',
+                    'host.name:B',
+                    'dest.ip:0.0.0.3',
+                    ...rule.tags,
+                  ],
+                  connector: {
+                    fields: null,
+                    id: 'none',
+                    name: 'none',
+                    type: '.none',
+                  },
+                  customFields: expectedCustomFieldValues,
+                },
+              ],
+            });
+          });
+
+          it('creates new cases with required custom fields if reopenClosedCases=false and there are closed cases', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              reopenClosedCases: false,
+            });
+
+            expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+              { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+            ]);
+
+            expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+              cases: [
+                {
+                  id: 'mock-id-4',
+                  title: 'Test rule (Auto-created)',
+                  description:
+                    'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
+                  owner: mockOwner,
+                  settings: {
+                    syncAlerts: false,
+                  },
+                  tags: [
+                    'auto-generated',
+                    'rule:rule-test-id',
+                    'host.name:A',
+                    'dest.ip:0.0.0.1',
+                    ...rule.tags,
+                  ],
+
+                  connector: {
+                    fields: null,
+                    id: 'none',
+                    name: 'none',
+                    type: '.none',
+                  },
+                  customFields: expectedCustomFieldValues,
+                },
+              ],
+            });
           });
         });
       });

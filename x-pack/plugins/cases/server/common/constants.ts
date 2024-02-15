@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
 import { CasePersistedSeverity, CasePersistedStatus } from './types/case';
 
@@ -64,4 +64,9 @@ export const STATUS_ESMODEL_TO_EXTERNAL: Record<CasePersistedStatus, CaseStatuse
   [CasePersistedStatus.OPEN]: CaseStatuses.open,
   [CasePersistedStatus.IN_PROGRESS]: CaseStatuses['in-progress'],
   [CasePersistedStatus.CLOSED]: CaseStatuses.closed,
+};
+
+export const VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS = {
+  [CustomFieldTypes.TEXT]: 'N/A',
+  [CustomFieldTypes.TOGGLE]: false,
 };
