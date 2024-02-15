@@ -67,7 +67,17 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
-    run: () => services.locator.navigate({}),
+    run: () => {
+      const currentIndexPattern = dataView?.getIndexPattern();
+      if (isTextBased && currentIndexPattern) {
+        return services.locator.navigate({
+          query: {
+            esql: `from ${currentIndexPattern} | limit 10`,
+          },
+        });
+      }
+      return services.locator.navigate({});
+    },
     testId: 'discoverNewButton',
   };
 
