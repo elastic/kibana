@@ -41,16 +41,8 @@ export const initializeSelection =
      * First validation.
      * The selection is a data view.
      */
-    if (
-      isDataViewSelection(context.datasetSelection) &&
-      context.datasetSelection.selection.dataView.isUnknownDataType()
-    ) {
-      return redirectToDiscover({ context, datasetSelection: context.datasetSelection, discover });
-    }
-
     if (isDataViewSelection(context.datasetSelection)) {
       let datasetSelection: DataViewSelection | null = context.datasetSelection;
-
       /**
        * If the selection is unresolved, perform a look up to retrieve it.
        */
