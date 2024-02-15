@@ -84,7 +84,8 @@ describe('jestConfigs', () => {
       ]);
     });
 
-    it('throws if test file outside root', async () => {
+    // Unskip after https://github.com/tschaub/mock-fs/issues/384
+    it.skip('throws if test file outside root', async () => {
       fs.writeFileSync('/kbn-test/bad.test.js', '');
       await expect(() => jestConfigs.expected('unit')).rejects.toMatchSnapshot();
     });
