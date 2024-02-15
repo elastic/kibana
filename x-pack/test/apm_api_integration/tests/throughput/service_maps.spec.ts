@@ -136,7 +136,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('when calling service maps transactions stats api', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/176987
+      describe.skip('when calling service maps transactions stats api', () => {
         let serviceMapsNodeThroughput: number | null | undefined;
         before(async () => {
           const response = await callApi();
