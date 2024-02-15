@@ -659,4 +659,13 @@ describe('Sourcerer component', () => {
     );
     expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
   });
+
+  it('renders without a popover when analyzer is the scope', () => {
+    mount(
+      <TestProviders>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.analyzer} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).exists()).toBeFalsy();
+  });
 });

@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./import_export_rules'));
     loadTestFile(require.resolve('./import_rules'));
     loadTestFile(require.resolve('./import_rules_ess'));
+    loadTestFile(require.resolve('./import_connectors'));
   });
 }

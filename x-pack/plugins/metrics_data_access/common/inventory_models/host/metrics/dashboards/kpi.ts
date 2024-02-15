@@ -23,7 +23,7 @@ export const kpi = {
   }) => {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
       chartType: 'metric',
-      fromFormulas: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
+      fromFormulas: ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'],
       chartConfig: {
         trendLine: true,
         subtitle: options?.subtitle ?? AVERAGE,
@@ -33,7 +33,7 @@ export const kpi = {
     });
 
     return createDashboardModel({
-      charts: [cpuUsage, diskUsage, memoryUsage, normalizedLoad1m].map((p) => ({
+      charts: [cpuUsage, normalizedLoad1m, memoryUsage, diskUsage].map((p) => ({
         ...p,
         decimals: 1,
       })),
