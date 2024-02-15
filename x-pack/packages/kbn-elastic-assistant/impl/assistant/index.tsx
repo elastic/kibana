@@ -188,7 +188,7 @@ const AssistantComponent: React.FC<Props> = ({
     conversation: blockBotConversation,
   });
 
-  const currentTitle: string | JSX.Element =
+  const currentTitle: string =
     isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
@@ -433,6 +433,7 @@ const AssistantComponent: React.FC<Props> = ({
               selectedPromptContexts={selectedPromptContexts}
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               setSelectedPromptContexts={setSelectedPromptContexts}
+              isFlyoutMode={isFlyoutMode}
             />
           )}
       </>

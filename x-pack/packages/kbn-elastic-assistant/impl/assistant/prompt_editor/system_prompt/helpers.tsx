@@ -26,7 +26,7 @@ export const getOptionFromPrompt = ({
   name,
   showTitles = false,
   isFlyoutMode,
-}: Prompt & { showTitles?: boolean; isFlyoutMode: boolean }): EuiSuperSelectOption<string> => ({
+}: Prompt & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
   value: id,
   inputDisplay: isFlyoutMode ? (
     name

@@ -28,7 +28,7 @@ export interface Message {
 }
 
 export interface ConversationTheme {
-  title?: JSX.Element | string;
+  title?: string;
   titleIcon?: string;
   user?: {
     name?: string;

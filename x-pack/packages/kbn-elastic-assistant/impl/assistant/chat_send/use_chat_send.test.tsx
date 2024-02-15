@@ -27,6 +27,7 @@ const appendMessage = jest.fn();
 const removeLastMessage = jest.fn();
 const appendReplacements = jest.fn();
 const clearConversation = jest.fn();
+const setSelectedConversation = jest.fn();
 
 export const testProps: UseChatSendProps = {
   selectedPromptContexts: {},
@@ -44,6 +45,7 @@ export const testProps: UseChatSendProps = {
   setEditingSystemPromptId,
   setPromptTextPreview,
   setSelectedPromptContexts,
+  setSelectedConversation,
   setUserPrompt,
 };
 const robotMessage = { response: 'Response message from the robot', isError: false };

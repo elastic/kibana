@@ -22,6 +22,8 @@ const defaultProps: Props = {
   },
   selectedPromptContexts: {},
   setSelectedPromptContexts: jest.fn(),
+  currentReplacements: {},
+  isFlyoutMode: false,
 };
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {

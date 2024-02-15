@@ -34,6 +34,7 @@ const defaultProps = {
   defaultAllow: [],
   defaultAllowReplacement: [],
   promptContexts: mockPromptContexts,
+  isFlyoutMode: false,
 };
 
 describe('ContextPills', () => {

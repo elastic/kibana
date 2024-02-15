@@ -65,6 +65,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -83,6 +84,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -100,6 +102,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -120,6 +123,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -149,6 +153,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
