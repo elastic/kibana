@@ -36,7 +36,8 @@
       "esUiShared",
       "fieldFormats",
       "uiActions",
-      "lens"
+      "lens",
+      "textBasedLanguages",
     ]
   }
 }

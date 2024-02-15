@@ -7,53 +7,55 @@
 
 import type { Moment } from 'moment';
 import type { ComponentType, ReactNode, RefObject } from 'react';
+import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
-  IconType,
-  RecursivePartial,
   EuiDataGridCellValueElementProps,
-  EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridColumnCellAction,
+  EuiDataGridOnColumnResizeHandler,
   EuiDataGridProps,
   EuiDataGridRefProps,
-  EuiDataGridColumnCellAction,
+  EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
-  EuiDataGridOnColumnResizeHandler,
+  IconType,
+  RecursivePartial,
 } from '@elastic/eui';
-import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
+import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
-  AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryEsIndexConnectorId,
   AsApiContract,
 } from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
-  RuleActionParam,
-  SanitizedRule as AlertingSanitizedRule,
-  ResolvedSanitizedRule,
-  RuleAction,
-  RuleTaskState,
+  ActionVariable,
+  AlertingFrameworkHealth,
+  AlertStatus,
   AlertSummary as RuleSummary,
   ExecutionDuration,
-  AlertStatus,
-  RawAlertInstance,
-  AlertingFrameworkHealth,
-  RuleNotifyWhenType,
-  RuleTypeParams,
-  ActionVariable,
-  RuleLastRun,
   MaintenanceWindow,
+  RawAlertInstance,
+  ResolvedSanitizedRule,
+  RuleAction,
+  RuleActionParam,
+  RuleLastRun,
+  RuleNotifyWhenType,
+  RuleTaskState,
+  RuleTypeMetaData,
+  RuleTypeParams,
+  SanitizedRule as AlertingSanitizedRule,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -62,7 +64,6 @@ import {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import { TypeRegistry } from './application/type_registry';
@@ -71,23 +72,23 @@ import type { RuleTagFilterProps } from './application/sections/rules_list/compo
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import type {
-  RuleTagBadgeProps,
   RuleTagBadgeOptions,
+  RuleTagBadgeProps,
 } from './application/sections/rules_list/components/rule_tag_badge';
 import type {
-  RuleEventLogListProps,
   RuleEventLogListOptions,
+  RuleEventLogListProps,
 } from './application/sections/rule_details/components/rule_event_log_list';
 import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type {
-  FieldBrowserOptions,
-  CreateFieldComponent,
-  GetFieldTableColumns,
-  FieldBrowserProps,
   BrowserFieldItem,
+  CreateFieldComponent,
+  FieldBrowserOptions,
+  FieldBrowserProps,
+  GetFieldTableColumns,
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
@@ -127,6 +128,7 @@ export type {
   AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
+  RuleTypeMetaData,
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
@@ -171,11 +173,13 @@ export interface ConnectorValidationError {
 }
 
 export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
+
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
+
 export interface ActionReadOnlyElementProps {
   connectorId: string;
   connectorName: string;
@@ -207,15 +211,25 @@ interface BulkOperationAttributesByIds {
   ids: string[];
   filter?: never;
 }
+
 interface BulkOperationAttributesByFilter {
   ids?: never;
   filter: KueryNode | null;
 }
+
 export type BulkOperationAttributesWithoutHttp =
   | BulkOperationAttributesByIds
   | BulkOperationAttributesByFilter;
 
 export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
+  http: HttpSetup;
+};
+
+export type BulkDisableParamsWithoutHttp = BulkOperationAttributesWithoutHttp & {
+  untrack: boolean;
+};
+
+export type BulkDisableParams = BulkDisableParamsWithoutHttp & {
   http: HttpSetup;
 };
 
@@ -272,6 +286,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultActionParams?: RecursivePartial<ActionParams>;
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
+  isBeta?: boolean;
   isExperimental?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
@@ -410,10 +425,14 @@ export interface IErrorObject {
 export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
+  Rules = 'rules',
 }
 
-export interface RuleEditProps<MetaData = Record<string, any>> {
-  initialRule: Rule;
+export interface RuleEditProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  initialRule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
@@ -425,14 +444,27 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   ruleType?: RuleType<string, string>;
 }
 
-export interface RuleAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  /**
+   * ID of the feature this rule should be created for.
+   *
+   * Notes:
+   * - The feature needs to be registered using `featuresPluginSetup.registerKibanaFeature()` API during your plugin's setup phase.
+   * - The user needs to have permission to access the feature in order to create the rule.
+   * */
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
+  /**
+   * Determines whether the user should be able to change the rule type in the UI.
+   */
   canChangeTrigger?: boolean;
-  initialValues?: Partial<Rule>;
+  initialValues?: Partial<Rule<Params>>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
   hideGrouping?: boolean;
@@ -445,8 +477,9 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   useRuleProducer?: boolean;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
-export interface RuleDefinitionProps {
-  rule: Rule;
+
+export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
+  rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
@@ -479,6 +512,7 @@ export interface InspectQuery {
   request: string[];
   response: string[];
 }
+
 export type GetInspectQuery = () => InspectQuery;
 
 export type Alert = EcsFieldsResponse;
@@ -784,14 +818,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  actionTypes: string[];
-  ruleExecutionStatuses: string[];
-  ruleLastRunOutcomes: string[];
-  ruleParams: Record<string, string | number | object>;
-  ruleStatuses: RuleStatus[];
-  searchText: string;
-  tags: string[];
-  types: string[];
+  actionTypes?: string[];
+  ruleExecutionStatuses?: string[];
+  ruleLastRunOutcomes?: string[];
+  ruleParams?: Record<string, string | number | object>;
+  ruleStatuses?: RuleStatus[];
+  searchText?: string;
+  tags?: string[];
+  types?: string[];
   kueryNode?: KueryNode;
 }
 

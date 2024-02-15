@@ -387,6 +387,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
       isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||
+    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal) ||
     (await kafkaFieldsAreDifferent()) ||
     (await logstashFieldsAreDifferent()) ||
     (await remoteESFieldsAreDifferent())

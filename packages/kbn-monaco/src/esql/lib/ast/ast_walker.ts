@@ -37,7 +37,7 @@ import {
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
-  MetadataContext,
+  MetadataOptionContext,
   MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
@@ -74,8 +74,8 @@ import {
   createColumnStar,
   wrapIdentifierAsArray,
   createPolicy,
-  createSettingTuple,
-  createLiteralString,
+  createSetting,
+  textExistsAndIsValid,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -91,9 +91,9 @@ export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstIte
 }
 
 function extractIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
-  if (ctx instanceof MetadataContext) {
+  if (ctx instanceof MetadataOptionContext) {
     return wrapIdentifierAsArray(ctx.fromIdentifier());
   }
   if (ctx instanceof MvExpandCommandContext) {
@@ -105,7 +105,7 @@ function extractIdentifiers(
 function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
   const args: ESQLColumn[] =
     identifiers
-      .filter((child) => child.text)
+      .filter((child) => textExistsAndIsValid(child.text))
       .map((sourceContext) => {
         return createColumn(sourceContext);
       }) ?? [];
@@ -113,32 +113,22 @@ function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
 }
 
 export function collectAllColumnIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ): ESQLAstItem[] {
   const identifiers = extractIdentifiers(ctx);
   return makeColumnsOutOfIdentifiers(identifiers);
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
+  if (!ctx._policyName || !textExistsAndIsValid(ctx._policyName.text)) {
     return [];
   }
-  return [createPolicy(ctx._policyName)];
-}
-
-export function getPolicySettings(ctx: EnrichCommandContext) {
-  if (!ctx.setting() || !ctx.setting().length) {
-    return [];
+  const policyComponents = ctx._policyName.text.split(':');
+  if (policyComponents.length > 1) {
+    const [setting, policyName] = policyComponents;
+    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
   }
-  return ctx.setting().map((setting) => {
-    const node = createSettingTuple(setting);
-    if (setting._name?.text && setting._value?.text) {
-      node.args.push(createLiteralString(setting._value)!);
-      return node;
-    }
-    // incomplete setting
-    return node;
-  });
+  return [createPolicy(ctx._policyName, policyComponents[0])];
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
@@ -148,7 +138,7 @@ export function getMatchField(ctx: EnrichCommandContext) {
   const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
     const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
-    if (identifier.text) {
+    if (textExistsAndIsValid(identifier.text)) {
       fn.args.push(createColumn(identifier));
     }
     // overwrite the location inferring the correct position
@@ -166,15 +156,22 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
     const clauses = ctx.enrichWithClause();
     for (const clause of clauses) {
       if (clause._enrichField) {
-        const args = [
+        const args = [];
+        if (clause.ASSIGN()) {
+          args.push(createColumn(clause._newName));
+          if (textExistsAndIsValid(clause._enrichField?.text)) {
+            args.push(createColumn(clause._enrichField));
+          }
+        } else {
           // if an explicit assign is not set, create a fake assign with
           // both left and right value with the same column
-          clause.ASSIGN() ? createColumn(clause._newName) : createColumn(clause._enrichField),
-          createColumn(clause._enrichField),
-        ].filter(nonNullable);
+          if (textExistsAndIsValid(clause._enrichField?.text)) {
+            args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
+          }
+        }
         if (args.length) {
           const fn = createFunction('=', clause);
-          fn.args.push(args[0], [args[1]]);
+          fn.args.push(args[0], args[1] ? [args[1]] : []);
           option.args.push(fn);
         }
       }
@@ -206,11 +203,16 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
   const [left, ...list] = ctx.valueExpression();
-  const values = [visitValueExpression(left), list.map((ve) => visitValueExpression(ve))];
-  for (const arg of values) {
-    if (arg) {
-      const filteredArgs = Array.isArray(arg) ? arg.filter(nonNullable) : [arg];
-      fn.args.push(filteredArgs);
+  const leftArg = visitValueExpression(left);
+  if (leftArg) {
+    fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
+    const values = list.map((ve) => visitValueExpression(ve));
+    const listArgs = values
+      .filter(nonNullable)
+      .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
+    // distinguish between missing brackets (missing text error) and an empty list
+    if (textExistsAndIsValid(ctx.text)) {
+      fn.args.push(listArgs);
     }
   }
   // update the location of the assign based on arguments
@@ -233,6 +235,7 @@ function getMathOperation(ctx: ArithmeticBinaryContext) {
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
     ctx.EQ()?.text ||
+    ctx.CIEQ()?.text ||
     ctx.NEQ()?.text ||
     ctx.LT()?.text ||
     ctx.LTE()?.text ||
@@ -243,6 +246,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
+  if (!textExistsAndIsValid(ctx.text)) {
+    return [];
+  }
   if (ctx instanceof ValueExpressionDefaultContext) {
     return visitOperatorExpression(ctx.operatorExpression());
   }
@@ -267,7 +273,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('multiply', ctx);
+    const fn = createFunction('*', ctx);
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -349,12 +355,12 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       if (asToken) {
         const fn = createOption(asToken.text.toLowerCase(), clause);
         for (const arg of [clause._oldName, clause._newName]) {
-          if (arg?.text) {
+          if (textExistsAndIsValid(arg.text)) {
             fn.args.push(createColumn(arg));
           }
         }
         return fn;
-      } else if (clause._oldName?.text) {
+      } else if (textExistsAndIsValid(clause._oldName?.text)) {
         return createColumn(clause._oldName);
       }
     })
@@ -433,7 +439,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
     return [];
   }
   const negate = ctx.NOT();
-  const fnName = `${negate ? 'not_' : ''}is_null`;
+  const fnName = `is${negate ? ' not ' : ' '}null`;
   const fn = createFunction(fnName, ctx);
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {
@@ -455,12 +461,14 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   if (!ctx) {
     return ast;
   }
-  return ast.concat(
-    collectLogicalExpression(ctx),
-    collectRegexExpression(ctx),
-    collectIsNullExpression(ctx),
-    collectDefaultExpression(ctx)
-  );
+  return ast
+    .concat(
+      collectLogicalExpression(ctx),
+      collectRegexExpression(ctx),
+      collectIsNullExpression(ctx),
+      collectDefaultExpression(ctx)
+    )
+    .flat();
 }
 
 export function visitField(ctx: FieldContext) {
@@ -537,16 +545,18 @@ export function visitDissect(ctx: DissectCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    createLiteral('string', pattern),
-    ...visitDissectOptions(ctx.commandOptions()),
+    ...(pattern && textExistsAndIsValid(pattern.text)
+      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      : []),
   ].filter(nonNullable);
 }
 
 export function visitGrok(ctx: GrokCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
-  return [visitPrimaryExpression(ctx.primaryExpression()), createLiteral('string', pattern)].filter(
-    nonNullable
-  );
+  return [
+    visitPrimaryExpression(ctx.primaryExpression()),
+    ...(pattern && textExistsAndIsValid(pattern.text) ? [createLiteral('string', pattern)] : []),
+  ].filter(nonNullable);
 }
 
 function visitDissectOptions(ctx: CommandOptionsContext | undefined) {

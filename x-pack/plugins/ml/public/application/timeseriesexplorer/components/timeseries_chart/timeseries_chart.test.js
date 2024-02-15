@@ -34,6 +34,8 @@ function getTimeseriesChartPropsMock() {
     showModelBounds: true,
     svgWidth: 1600,
     timefilter: {},
+    tooltipService: {},
+    sourceIndicesWithGeoFields: {},
   };
 }
 
@@ -54,6 +56,6 @@ describe('TimeseriesChart', () => {
 
     const wrapper = mountWithIntl(<TimeseriesChart {...props} />);
 
-    expect(wrapper.html()).toBe(`<div class="ml-timeseries-chart-react"></div>`);
+    expect(wrapper.html()).toBe('<div class="ml-timeseries-chart-react"></div>');
   });
 });

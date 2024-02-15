@@ -20,8 +20,10 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import dateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
+import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
@@ -41,6 +43,8 @@ import {
   isUserRiskData,
   LAST_30_DAYS,
   LENS_VISUALIZATION_HEIGHT,
+  LENS_VISUALIZATION_MIN_WIDTH,
+  SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
@@ -74,8 +78,17 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const columns = useMemo(buildColumns, []);
-  const rows = useMemo(() => getItems(entityData), [entityData]);
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+
+  const columns = useMemo(
+    () => buildColumns(isAssetCriticalityEnabled),
+    [isAssetCriticalityEnabled]
+  );
+
+  const rows = useMemo(
+    () => getItems(entityData, isAssetCriticalityEnabled),
+    [entityData, isAssetCriticalityEnabled]
+  );
 
   const onToggle = useCallback(
     (isOpen) => {
@@ -88,6 +101,29 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
     },
     [riskData, telemetry]
   );
+
+  const casesAttachmentMetadata = useMemo(
+    () => ({
+      description: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel',
+        {
+          defaultMessage:
+            'Risk score for {entityType, select, host {host} user {user}} {entityName}',
+          values: {
+            entityName: entityData?.name,
+            entityType: isUserRiskData(riskData) ? 'user' : 'host',
+          },
+        }
+      ),
+    }),
+    [entityData?.name, riskData]
+  );
+
+  const timerange = useMemo(() => {
+    const from = dateMath.parse(LAST_30_DAYS.from)?.toISOString() ?? LAST_30_DAYS.from;
+    const to = dateMath.parse(LAST_30_DAYS.to)?.toISOString() ?? LAST_30_DAYS.to;
+    return { from, to };
+  }, []);
 
   return (
     <EuiAccordion
@@ -104,7 +140,8 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           <h3>
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.title"
-              defaultMessage="Risk summary"
+              defaultMessage="{entity} risk summary"
+              values={{ entity: isUserRiskData(riskData) ? 'User' : 'Host' }}
             />
           </h3>
         </EuiTitle>
@@ -142,7 +179,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           title: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.riskInputs"
-              defaultMessage="Risk inputs"
+              defaultMessage="View risk contributions"
             />
           ),
           link: {
@@ -160,12 +197,14 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           expandable: false,
         }}
       >
-        <EuiFlexGroup gutterSize="m" direction="column">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m" direction="row" wrap>
+          <EuiFlexItem grow={1}>
             <div
               // Improve Visualization loading state by predefining the size
+              // Set min-width for a fluid layout
               css={css`
                 height: ${LENS_VISUALIZATION_HEIGHT}px;
+                min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
               `}
             >
               {riskData && (
@@ -173,7 +212,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   applyGlobalQueriesAndFilters={false}
                   lensAttributes={lensAttributes}
                   id={`RiskSummary-risk_score_metric`}
-                  timerange={LAST_30_DAYS}
+                  timerange={timerange}
                   width={'100%'}
                   height={LENS_VISUALIZATION_HEIGHT}
                   disableOnClickFilter
@@ -183,11 +222,17 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                       defaultMessage="Risk Summary Visualization"
                     />
                   }
+                  casesAttachmentMetadata={casesAttachmentMetadata}
                 />
               )}
             </div>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={3}
+            css={css`
+              min-width: ${SUMMARY_TABLE_MIN_WIDTH}px;
+            `}
+          >
             <InspectButtonContainer>
               <div
                 // Anchors the position absolute inspect button (nearest positioned ancestor)

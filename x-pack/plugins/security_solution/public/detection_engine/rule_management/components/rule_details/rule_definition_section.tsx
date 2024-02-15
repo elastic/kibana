@@ -54,7 +54,7 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { useAlertSuppression } from '../../logic/use_alert_suppression';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -90,22 +90,25 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
 
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
-      {flattenedFilters.map((filter, idx) => (
-        <EuiFlexItem
-          grow={false}
-          key={`filter-${idx}`}
-          css={{ width: '100%' }}
-          data-test-subj={`filterItem-${filter.meta.key}`}
-        >
-          <EuiBadgeWrap color="hollow">
-            {indexPattern != null ? (
-              <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
-            ) : (
-              <EuiLoadingSpinner size="m" />
-            )}
-          </EuiBadgeWrap>
-        </EuiFlexItem>
-      ))}
+      {flattenedFilters.map((filter, idx) => {
+        const displayContent = filter.meta.alias ? (
+          filter.meta.alias
+        ) : (
+          <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
+        );
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={`filter-${idx}`}
+            css={{ width: '100%' }}
+            data-test-subj={`filterItem-${filter.meta.key}`}
+          >
+            <EuiBadgeWrap color="hollow">
+              {indexPattern != null ? displayContent : <EuiLoadingSpinner size="m" />}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };
@@ -426,7 +429,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  experimentalFeatures?: Partial<ExperimentalFeatures>
+  isSuppressionEnabled: boolean
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -656,7 +659,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if ('alert_suppression' in rule && rule.alert_suppression) {
+  if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
@@ -738,10 +741,13 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
+  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
+
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
-    savedQuery
+    savedQuery,
+    isSuppressionEnabled
   );
 
   return (

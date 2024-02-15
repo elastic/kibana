@@ -44,7 +44,7 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
-import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN_ID } from '../common';
 import {
@@ -68,7 +68,11 @@ import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
+import {
+  DiscoverAppLocator,
+  DiscoverAppLocatorDefinition,
+  DiscoverESQLLocatorDefinition,
+} from '../common';
 import type { RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,
@@ -116,7 +120,7 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showLogExplorerTabs: () => void;
+  readonly showLogsExplorerTabs: () => void;
 }
 
 export interface DiscoverStart {
@@ -159,6 +163,7 @@ export interface DiscoverStart {
  * @internal
  */
 export interface DiscoverSetupPlugins {
+  dataViews: DataViewsServicePublic;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
@@ -215,7 +220,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private showLogExplorerTabs = false;
+  private showLogsExplorerTabs = false;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -333,7 +338,7 @@ export class DiscoverPlugin
           profileRegistry: this.profileRegistry,
           customizationContext: {
             displayMode: 'standalone',
-            showLogExplorerTabs: this.showLogExplorerTabs,
+            showLogsExplorerTabs: this.showLogsExplorerTabs,
           },
           isDev,
         });
@@ -376,8 +381,8 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showLogExplorerTabs: () => {
-        this.showLogExplorerTabs = true;
+      showLogsExplorerTabs: () => {
+        this.showLogsExplorerTabs = true;
       },
     };
   }
@@ -399,6 +404,17 @@ export class DiscoverPlugin
     const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
+
+    const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
+
+    if (plugins.share && this.locator && isEsqlEnabled) {
+      plugins.share?.url.locators.create(
+        new DiscoverESQLLocatorDefinition({
+          discoverAppLocator: this.locator,
+          getIndices: plugins.dataViews.getIndices,
+        })
+      );
+    }
 
     return {
       locator: this.locator,

@@ -26,6 +26,8 @@ const getPatternListFromScope = (
       return signalIndexName != null ? [signalIndexName] : [];
     case SourcererScopeName.timeline:
       return sortWithExcludesAtEnd(patternList);
+    case SourcererScopeName.analyzer:
+      return sortWithExcludesAtEnd(patternList);
   }
 };
 

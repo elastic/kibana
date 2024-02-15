@@ -16,6 +16,7 @@ import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { createResourceNamesMap } from '..';
 import { MessageRole, type Message } from '../../../common';
+import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorCode,
@@ -25,6 +26,7 @@ import {
 import type { CreateChatCompletionResponseChunk } from '../../../public/types';
 import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
+import { createFunctionResponseMessage } from '../util/create_function_response_message';
 import { observableIntoStream } from '../util/observable_into_stream';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
@@ -63,7 +65,7 @@ function createLlmSimulator() {
         ],
       };
       await new Promise<void>((resolve, reject) => {
-        stream.write(`data: ${JSON.stringify(chunk)}\n`, undefined, (err) => {
+        stream.write(`data: ${JSON.stringify(chunk)}\n\n`, undefined, (err) => {
           return err ? reject(err) : resolve();
         });
       });
@@ -72,7 +74,7 @@ function createLlmSimulator() {
       if (stream.destroyed) {
         throw new Error('Stream is already destroyed');
       }
-      await new Promise((resolve) => stream.write('data: [DONE]', () => stream.end(resolve)));
+      await new Promise((resolve) => stream.write('data: [DONE]\n\n', () => stream.end(resolve)));
     },
     error: (error: Error) => {
       stream.destroy(error);
@@ -85,6 +87,7 @@ describe('Observability AI Assistant client', () => {
 
   const actionsClientMock: DeeplyMockedKeys<ActionsClient> = {
     execute: jest.fn(),
+    get: jest.fn(),
   } as any;
 
   const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -122,7 +125,16 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getFunctions.mockReturnValue([]);
     functionClientMock.hasFunction.mockImplementation((name) => {
-      return name !== 'recall';
+      return name !== 'context';
+    });
+
+    actionsClientMock.get.mockResolvedValue({
+      actionTypeId: ObservabilityAIAssistantConnectorType.OpenAI,
+      id: 'foo',
+      name: 'My connector',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
     });
 
     currentUserEsClientMock.search.mockResolvedValue({
@@ -491,6 +503,8 @@ describe('Observability AI Assistant client', () => {
 
       stream.on('data', dataHandler);
 
+      await nextTick();
+
       await llmSimulator.next({ content: 'Hello' });
 
       await llmSimulator.complete();
@@ -590,6 +604,8 @@ describe('Observability AI Assistant client', () => {
 
       stream.on('data', dataHandler);
 
+      await nextTick();
+
       await llmSimulator.next({ content: 'Hello' });
 
       await new Promise((resolve) =>
@@ -598,7 +614,7 @@ describe('Observability AI Assistant client', () => {
             error: {
               message: 'Connection unexpectedly closed',
             },
-          })}\n`,
+          })}\n\n`,
           resolve
         )
       );
@@ -693,6 +709,8 @@ describe('Observability AI Assistant client', () => {
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({
         content: 'Hello',
@@ -969,11 +987,14 @@ describe('Observability AI Assistant client', () => {
       beforeEach(async () => {
         response$ = new Subject();
         fnResponseResolve(response$);
-        await waitForNextWrite(stream);
+
+        await nextTick();
+
+        response$.next(createFunctionResponseMessage({ name: 'my-function', content: {} }));
       });
 
-      it('appends the function response', () => {
-        expect(JSON.parse(dataHandler.mock.lastCall!)).toEqual({
+      it('appends the function response', async () => {
+        expect(JSON.parse(dataHandler.mock.calls[2]!)).toEqual({
           type: StreamingChatResponseEventType.MessageAdd,
           id: expect.any(String),
           message: {
@@ -1066,7 +1087,7 @@ describe('Observability AI Assistant client', () => {
     });
   });
 
-  describe('when recall is available', () => {
+  describe('when context is available', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
@@ -1119,7 +1140,7 @@ describe('Observability AI Assistant client', () => {
       await finished(stream);
     });
 
-    it('appends the recall request message', () => {
+    it('appends the context request message', () => {
       expect(JSON.parse(dataHandler.mock.calls[0]!)).toEqual({
         type: StreamingChatResponseEventType.MessageAdd,
         id: expect.any(String),
@@ -1129,8 +1150,8 @@ describe('Observability AI Assistant client', () => {
             content: '',
             role: MessageRole.Assistant,
             function_call: {
-              name: 'recall',
-              arguments: JSON.stringify({ queries: [], contexts: [] }),
+              name: 'context',
+              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -1138,7 +1159,7 @@ describe('Observability AI Assistant client', () => {
       });
     });
 
-    it('appends the recall response', () => {
+    it('appends the context response', () => {
       expect(JSON.parse(dataHandler.mock.calls[1]!)).toEqual({
         type: StreamingChatResponseEventType.MessageAdd,
         id: expect.any(String),
@@ -1147,7 +1168,7 @@ describe('Observability AI Assistant client', () => {
           message: {
             content: JSON.stringify([{ id: 'my_document', text: 'My document' }]),
             role: MessageRole.User,
-            name: 'recall',
+            name: 'context',
           },
         },
       });
@@ -1259,6 +1280,8 @@ describe('Observability AI Assistant client', () => {
         await nextLlmCallPromise;
       }
 
+      await nextTick();
+
       await requestAlertsFunctionCall();
 
       await requestAlertsFunctionCall();
@@ -1347,6 +1370,8 @@ describe('Observability AI Assistant client', () => {
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
 

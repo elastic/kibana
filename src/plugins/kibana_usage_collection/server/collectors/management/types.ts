@@ -47,6 +47,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
+  'observability:enableInfrastructureHostsCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -66,6 +67,7 @@ export interface UsageStats {
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
   'securitySolution:enableExpandableFlyout': boolean;
+  'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
@@ -155,6 +157,7 @@ export interface UsageStats {
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
+  'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
@@ -164,4 +167,8 @@ export interface UsageStats {
   'observability:profilingDatacenterPUE': number;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
+  'observability:profilingAzureCostDiscountRate': number;
+  'data_views:fields_excluded_data_tiers': string;
+  'observability:apmEnableTransactionProfiling': boolean;
+  'devTools:enableDockedConsole': boolean;
 }

@@ -8,7 +8,7 @@
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
 import type { TopNFunctions } from '@kbn/profiling-utils';
-import { HOST_FIELD } from '../../../../common/constants';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { InfraProfilingFunctionsRequestParams } from '../../../../common/http_api/profiling_api';
 
 export async function fetchProfilingFunctions(
@@ -16,15 +16,31 @@ export async function fetchProfilingFunctions(
   profilingDataAccess: ProfilingDataAccessPluginStart,
   coreRequestContext: CoreRequestHandlerContext
 ): Promise<TopNFunctions> {
-  const { hostname, from, to, startIndex, endIndex } = params;
+  const { kuery, from, to, startIndex, endIndex } = params;
+  const startSecs = from / 1000;
+  const endSecs = to / 1000;
 
   return await profilingDataAccess.services.fetchFunction({
     core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
-    rangeFromMs: from,
-    rangeToMs: to,
-    kuery: `${HOST_FIELD} : "${hostname}"`,
     startIndex,
     endIndex,
+    totalSeconds: endSecs - startSecs,
+    query: {
+      bool: {
+        filter: [
+          ...kqlQuery(kuery),
+          {
+            range: {
+              ['@timestamp']: {
+                gte: String(startSecs),
+                lt: String(endSecs),
+                format: 'epoch_second',
+              },
+            },
+          },
+        ],
+      },
+    },
   });
 }

@@ -24,6 +24,8 @@ import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/aler
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import {
+  getAgentPolicyCreateCallback,
+  getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
@@ -120,6 +122,15 @@ export class EndpointAppContextService {
       } = dependencies;
 
       registerIngestCallback(
+        'agentPolicyCreate',
+        getAgentPolicyCreateCallback(logger, appFeaturesService)
+      );
+      registerIngestCallback(
+        'agentPolicyUpdate',
+        getAgentPolicyUpdateCallback(logger, appFeaturesService)
+      );
+
+      registerIngestCallback(
         'packagePolicyCreate',
         getPackagePolicyCreateCallback(
           logger,
@@ -183,9 +194,17 @@ export class EndpointAppContextService {
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+    if (!this.startDependencies?.appFeaturesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      this.startDependencies.appFeaturesService
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {

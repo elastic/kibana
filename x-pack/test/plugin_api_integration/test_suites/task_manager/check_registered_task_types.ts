@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
+    'lowPriorityTask',
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',

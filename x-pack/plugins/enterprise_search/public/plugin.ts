@@ -7,6 +7,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -61,6 +62,7 @@ interface PluginsSetup {
 export interface PluginsStart {
   charts: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
@@ -435,13 +437,17 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    // Return empty start contract rather than void in order for plugins
+    // that depend on the enterprise search plugin to determine whether it is enabled or not
+    return {};
   }
 
   public stop() {}

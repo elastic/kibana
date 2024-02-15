@@ -204,23 +204,31 @@
         "label": "getDashboardLocatorParamsFromEmbeddable",
         "description": [],
         "signature": [
-          "(source: ",
+          "(api: Partial<",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesLocalUnifiedSearch",
+            "text": "PublishesLocalUnifiedSearch"
           },
-          "<EmbeddableQueryInput, ",
+          " & ",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
           },
-          ", any>, options: ",
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesLocalUnifiedSearch",
+            "text": "PublishesLocalUnifiedSearch"
+          },
+          ">>>, options: ",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
@@ -247,25 +255,34 @@
             "id": "def-public.getDashboardLocatorParamsFromEmbeddable.$1",
             "type": "Object",
             "tags": [],
-            "label": "source",
+            "label": "api",
             "description": [],
             "signature": [
+              "Partial<",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesLocalUnifiedSearch",
+                "text": "PublishesLocalUnifiedSearch"
               },
-              "<EmbeddableQueryInput, ",
+              " & ",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.HasParentApi",
+                "text": "HasParentApi"
               },
-              ", any>"
+              "<Partial<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesLocalUnifiedSearch",
+                "text": "PublishesLocalUnifiedSearch"
+              },
+              ">>>"
             ],
             "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
             "deprecated": false,
@@ -319,13 +336,7 @@
             "description": [],
             "signature": [
               "(() => Partial<",
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardContainerInput",
-                "text": "DashboardContainerInput"
-              },
+              "SavedDashboardInput",
               ">) | undefined"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
@@ -1741,27 +1752,6 @@
           },
           {
             "parentPluginId": "dashboard",
-            "id": "def-common.DashboardContainerInput.controlGroupInput",
-            "type": "Object",
-            "tags": [],
-            "label": "controlGroupInput",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.PersistableControlGroupInput",
-                "text": "PersistableControlGroupInput"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
             "id": "def-common.DashboardContainerInput.panels",
             "type": "Object",
             "tags": [],
@@ -2037,7 +2027,7 @@
           "\nFor BWC reasons, dashboard state is stored with panels as an array instead of a map"
         ],
         "signature": [
-          "{ id?: string | undefined; tags?: string[] | undefined; title?: string | undefined; description?: string | undefined; version?: string | undefined; query?: ",
+          "{ id?: string | undefined; tags?: string[] | undefined; title?: string | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2045,7 +2035,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; filters?: ",
+          " | undefined; version?: string | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2053,7 +2043,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; refreshInterval?: ",
+          "[] | undefined; description?: string | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2093,15 +2083,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; timeslice?: [number, number] | undefined; controlGroupInput?: ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.PersistableControlGroupInput",
-            "text": "PersistableControlGroupInput"
-          },
-          " | undefined; isEmbeddedExternally?: boolean | undefined; timeRestore?: boolean | undefined; useMargins?: boolean | undefined; panels?: ",
+          " | undefined; timeslice?: [number, number] | undefined; isEmbeddedExternally?: boolean | undefined; timeRestore?: boolean | undefined; useMargins?: boolean | undefined; panels?: ",
           "SavedDashboardPanel",
           "[] | undefined; }"
         ],

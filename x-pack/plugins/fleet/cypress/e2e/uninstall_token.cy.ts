@@ -16,18 +16,25 @@ import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 
 describe('Uninstall token page', () => {
-  before(() => {
-    cleanupAgentPolicies();
-    generatePolicies();
-  });
-
-  after(() => {
-    cleanupAgentPolicies();
-  });
   [true, false].forEach((removePolicies) => {
     describe(`When ${
       removePolicies ? 'removing policies' : 'not removing policies'
     } before checking uninstall tokens`, () => {
+      before(() => {
+        cleanupAgentPolicies();
+        generatePolicies();
+
+        if (removePolicies) {
+          cleanupAgentPolicies();
+          // Force page refresh after remove policies
+          cy.visit('app/fleet/uninstall-tokens');
+        }
+      });
+
+      after(() => {
+        cleanupAgentPolicies();
+      });
+
       beforeEach(() => {
         login();
 
@@ -38,12 +45,6 @@ describe('Uninstall token page', () => {
           .first()
           .then(($policyIdField) => $policyIdField[0].textContent)
           .as('policyIdInFirstLine');
-
-        if (removePolicies) {
-          cleanupAgentPolicies();
-          // Force page refresh after remove policies
-          cy.visit('app/fleet/uninstall-tokens');
-        }
       });
 
       it('should show token by clicking on the eye button', () => {
@@ -75,7 +76,12 @@ describe('Uninstall token page', () => {
           cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('exist');
 
           cy.contains(`sudo elastic-agent uninstall --uninstall-token ${fetchedToken.token}`);
-          cy.contains(`Valid for the following agent policy: ${fetchedToken.policy_id}`);
+
+          cy.contains(
+            `Valid for the following agent policy:${fetchedToken.policy_name || '-'} (${
+              fetchedToken.policy_id
+            })`
+          );
         });
       });
 
@@ -86,6 +92,24 @@ describe('Uninstall token page', () => {
 
         cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
       });
+
+      if (!removePolicies) {
+        it('should filter for policy name by partial match', () => {
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('Agent 200');
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
+        });
+      } else {
+        it('should not be able to filter for policy name by partial match', () => {
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('Agent 200');
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 0);
+        });
+      }
     });
   });
 

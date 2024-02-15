@@ -22,12 +22,6 @@ steps:
     depends_on: build
     key: tests
     timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-        - exit_status: '*'
-          limit: 1
 
   - label: '📈 Report performance metrics to ci-stats'
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh

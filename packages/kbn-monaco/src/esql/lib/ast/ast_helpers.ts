@@ -19,9 +19,9 @@ import type {
   DecimalValueContext,
   IntegerValueContext,
   QualifiedIntegerLiteralContext,
-  SettingContext,
 } from '../../antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './shared/constants';
 import type {
   ESQLCommand,
   ESQLLiteral,
@@ -104,6 +104,10 @@ function isMissingText(text: string) {
   return /<missing /.test(text);
 }
 
+export function textExistsAndIsValid(text: string | undefined): text is string {
+  return !!(text && !isMissingText(text));
+}
+
 export function createLiteral(
   type: ESQLLiteral['literalType'],
   node: TerminalNode | undefined
@@ -180,6 +184,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
     location.min = walkFunctionStructure(fn.args, location, 'min', () => 0);
     // get max location navigating in depth keeping the right/last arg
     location.max = walkFunctionStructure(fn.args, location, 'max', (args) => args.length - 1);
+    // in case of empty array as last arg, bump the max location by 3 chars (empty brackets)
+    if (
+      Array.isArray(fn.args[fn.args.length - 1]) &&
+      !(fn.args[fn.args.length - 1] as ESQLAstItem[]).length
+    ) {
+      location.max += 3;
+    }
   }
   return location;
 }
@@ -199,24 +210,31 @@ function getQuotedText(ctx: ParserRuleContext) {
 function getUnquotedText(ctx: ParserRuleContext) {
   return [
     65 /* esql_parser.UNQUOTED_IDENTIFIER */, 71 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
-    75 /* esql_parser.UNQUOTED_ID_PATTERN */,
+    105 /* esql_parser.UNQUOTED_ID_PATTERN */,
   ]
     .map((keyCode) => ctx.tryGetToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 /* SCRIPT_MARKER_END */
 
-const TICKS_REGEX = /(`)/g;
-
 function isQuoted(text: string | undefined) {
   return text && /^(`)/.test(text);
+}
+
+/**
+ * Follow a similar logic to the ES one:
+ * * remove backticks at the beginning and at the end
+ * * remove double backticks
+ */
+function safeBackticksRemoval(text: string | undefined) {
+  return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
   return (
     getUnquotedText(ctx)?.text ||
-    getQuotedText(ctx)?.text.replace(TICKS_REGEX, '') ||
-    ctx.text.replace(TICKS_REGEX, '') // for some reason some quoted text is not detected correctly by the parser
+    safeBackticksRemoval(getQuotedText(ctx)?.text) ||
+    safeBackticksRemoval(ctx.text) // for some reason some quoted text is not detected correctly by the parser
   );
 }
 
@@ -224,16 +242,13 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
-export function createSettingTuple(ctx: SettingContext): ESQLCommandMode {
+export function createSetting(policyName: Token, mode: string): ESQLCommandMode {
   return {
     type: 'mode',
-    name: ctx._name?.text || '',
-    text: ctx.text!,
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete:
-      (ctx._name?.text ? isMissingText(ctx._name.text) : true) ||
-      (ctx._value?.text ? isMissingText(ctx._value.text) : true),
-    args: [],
+    name: mode.replace('_', '').toLowerCase(),
+    text: mode,
+    location: getPosition(policyName, { stopIndex: policyName.startIndex + mode.length - 1 }), // unfortunately this is the only location we have
+    incomplete: false,
   };
 }
 
@@ -241,13 +256,16 @@ export function createSettingTuple(ctx: SettingContext): ESQLCommandMode {
  * In https://github.com/elastic/elasticsearch/pull/103949 the ENRICH policy name
  * changed from rule to token type so we need to handle this specifically
  */
-export function createPolicy(token: Token): ESQLSource {
+export function createPolicy(token: Token, policy: string): ESQLSource {
   return {
     type: 'source',
-    name: token.text!,
-    text: token.text!,
+    name: policy,
+    text: policy,
     sourceType: 'policy',
-    location: getPosition(token),
+    location: getPosition({
+      startIndex: token.stopIndex - policy.length + 1,
+      stopIndex: token.stopIndex,
+    }), // take into account ccq modes
     incomplete: false,
   };
 }
