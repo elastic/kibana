@@ -46,9 +46,5 @@ export interface ObsLogsExplorerDataViewLocatorParams extends DatasetLocatorPara
   /**
    * Data view id to select
    */
-  dataViewId?: string;
-  /**
-   * Data view index pattern
-   */
-  title: string;
+  id: string;
 }

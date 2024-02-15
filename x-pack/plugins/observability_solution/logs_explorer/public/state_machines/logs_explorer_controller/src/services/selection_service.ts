@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
 import { Dataset } from '../../../../../common/datasets';
 import {
+  DataViewSelection,
   isDataViewSelection,
   isUnresolvedDatasetSelection,
   SingleDatasetSelection,
@@ -20,12 +22,14 @@ import { redirectToDiscover } from './discover_service';
 
 interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;
+  dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
 }
 
 export const initializeSelection =
   ({
     datasetsClient,
+    dataViews,
     discover,
   }: LogsExplorerControllerSelectionServiceDeps): InvokeCreator<
     LogsExplorerControllerContext,
@@ -35,7 +39,7 @@ export const initializeSelection =
   async (send) => {
     /**
      * First validation.
-     * If the selection is a data view which is not of logs type, redirect to Discover.
+     * The selection is a data view.
      */
     if (
       isDataViewSelection(context.datasetSelection) &&
@@ -44,17 +48,43 @@ export const initializeSelection =
       return redirectToDiscover({ context, datasetSelection: context.datasetSelection, discover });
     }
 
-    /**
-     * Second validation.
-     * If the selection is a data view, initialize it.
-     */
     if (isDataViewSelection(context.datasetSelection)) {
-      return send('INITIALIZE_DATA_VIEW');
+      let datasetSelection: DataViewSelection | null = context.datasetSelection;
+
+      /**
+       * If the selection is unresolved, perform a look up to retrieve it.
+       */
+      if (datasetSelection.selection.dataView.isUnresolvedDataType()) {
+        try {
+          datasetSelection = await lookupUnresolvedDataViewSelection(datasetSelection, {
+            dataViews,
+          });
+
+          if (datasetSelection === null) {
+            return send('DATAVIEW_SELECTION_RESTORE_FAILURE');
+          }
+        } catch {
+          return send('DATAVIEW_SELECTION_RESTORE_FAILURE');
+        }
+      }
+
+      /**
+       * If the selection is a data view which is not of logs type, redirect to Discover.
+       */
+      if (datasetSelection.selection.dataView.isUnknownDataType()) {
+        return redirectToDiscover({
+          context,
+          datasetSelection: context.datasetSelection,
+          discover,
+        });
+      }
+
+      return send({ type: 'INITIALIZE_DATA_VIEW', data: datasetSelection });
     }
 
     /**
-     * Third validation.
-     * If the selection is an unresolved dataset, perform a look up against integrations..
+     * Second validation.
+     * If the selection is an unresolved dataset, perform a look up against integrations.
      */
     if (isUnresolvedDatasetSelection(context.datasetSelection)) {
       try {
@@ -104,4 +134,25 @@ const lookupUnresolvedDatasetSelection = async (
 
   const dataset = Dataset.create(targetDataset, installedIntegration);
   return SingleDatasetSelection.create(dataset);
+};
+
+const lookupUnresolvedDataViewSelection = async (
+  datasetSelection: DataViewSelection,
+  { dataViews }: Pick<LogsExplorerControllerSelectionServiceDeps, 'dataViews'>
+) => {
+  const resolvedDataView = await dataViews.get(datasetSelection.toDataviewSpec().id);
+
+  if (!resolvedDataView) {
+    return null;
+  }
+
+  return DataViewSelection.fromSelection({
+    dataView: {
+      id: resolvedDataView.id ?? '',
+      kibanaSpaces: resolvedDataView.namespaces,
+      name: resolvedDataView.name,
+      title: resolvedDataView.getIndexPattern(),
+      type: resolvedDataView.type,
+    },
+  });
 };
