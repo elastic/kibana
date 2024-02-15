@@ -10,10 +10,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AppFeatures } from './app_features';
 import type {
   AppFeatureKeyType,
-  AppFeaturesConfig,
-  AppSubFeaturesMap,
+  AppFeatureKibanaConfig,
   BaseKibanaFeatureConfig,
 } from '@kbn/security-solution-features';
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 
 const category = {
   id: 'security',
@@ -51,135 +51,316 @@ const baseKibanaFeature: BaseKibanaFeatureConfig = {
   category,
 };
 
-const privileges = {
+// sub-features definition
+
+const SUB_FEATURE: SubFeatureConfig = {
+  name: 'subFeature1',
+  privilegeGroups: [
+    {
+      groupType: 'independent',
+      privileges: [
+        {
+          id: 'subFeature1',
+          name: 'subFeature1',
+          includeIn: 'all',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['subFeature1-action'],
+          api: ['subFeature1-action'],
+        },
+      ],
+    },
+  ],
+};
+const SUB_FEATURE_2: SubFeatureConfig = {
+  name: 'subFeature2',
+  privilegeGroups: [
+    {
+      groupType: 'independent',
+      privileges: [
+        {
+          id: 'subFeature2',
+          name: 'subFeature2',
+          includeIn: 'all',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['subFeature2-action'],
+          api: ['subFeature2-action'],
+        },
+      ],
+    },
+  ],
+};
+
+const subFeaturesMap = new Map([
+  [SUB_FEATURE.name, SUB_FEATURE],
+  [SUB_FEATURE_2.name, SUB_FEATURE_2],
+]);
+
+// app features configs
+const testSubFeaturePrivilegeConfig: AppFeatureKibanaConfig = {
+  subFeatureIds: [SUB_FEATURE.name],
+};
+
+const testFeaturePrivilegeConfig: AppFeatureKibanaConfig = {
   privileges: {
     all: {
-      api: ['api-read', 'api-write', 'test-capability'],
-      app: ['FEATURE_ID', 'kibana'],
-      catalogue: ['APP_ID'],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['write', 'read', 'test-capability'],
+      ui: ['test-action'],
+      api: ['test-action'],
     },
     read: {
-      api: ['api-read', 'test-capability'],
-      app: ['FEATURE_ID', 'kibana'],
-      catalogue: ['APP_ID'],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['read', 'test-capability'],
+      ui: ['test-action'],
+      api: ['test-action'],
     },
   },
 };
 
-const SECURITY_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
-SECURITY_APP_FEATURE_CONFIG.set('test-base-feature' as AppFeatureKeyType, {
+const expectedBaseWithTestConfigPrivileges = {
   privileges: {
     all: {
-      ui: ['test-capability'],
-      api: ['test-capability'],
-    },
-    read: {
-      ui: ['test-capability'],
-      api: ['test-capability'],
-    },
-  },
-});
-
-const CASES_BASE_CONFIG = {
-  privileges: {
-    all: {
-      api: ['api-read', 'api-write', 'test-cases-capability'],
+      api: ['api-read', 'api-write', 'test-action'],
       app: ['FEATURE_ID', 'kibana'],
       catalogue: ['APP_ID'],
       savedObject: {
         all: [],
         read: [],
       },
-      ui: ['write', 'read', 'test-cases-capability'],
+      ui: ['write', 'read', 'test-action'],
     },
     read: {
-      api: ['api-read', 'test-cases-capability'],
+      api: ['api-read', 'test-action'],
       app: ['FEATURE_ID', 'kibana'],
       catalogue: ['APP_ID'],
       savedObject: {
         all: [],
         read: [],
       },
-      ui: ['read', 'test-cases-capability'],
+      ui: ['read', 'test-action'],
     },
   },
-};
-
-const CASES_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
-CASES_APP_FEATURE_CONFIG.set('test-cases-feature' as AppFeatureKeyType, {
-  privileges: {
-    all: {
-      ui: ['test-cases-capability'],
-      api: ['test-cases-capability'],
-    },
-    read: {
-      ui: ['test-cases-capability'],
-      api: ['test-cases-capability'],
-    },
-  },
-});
-
-const securityKibanaSubFeatures = {
-  securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
-};
-
-const securityCasesKibanaSubFeatures = {
-  casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
 };
 
 describe('AppFeatures', () => {
-  it('should register enabled kibana features', () => {
-    const featuresSetup = {
-      registerKibanaFeature: jest.fn(),
-      getKibanaFeatures: jest.fn(),
-    } as unknown as PluginSetupContract;
+  describe('setConfig', () => {
+    it('should register base kibana features', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+        getKibanaFeatures: jest.fn(),
+      } as unknown as PluginSetupContract;
 
-    const appFeatures = new AppFeatures(
-      loggingSystemMock.create().get('mock'),
-      securityKibanaSubFeatures.securitySubFeaturesMap as unknown as AppSubFeaturesMap<string>,
-      baseKibanaFeature,
-      ['subFeature1']
-    );
-    appFeatures.init(featuresSetup);
-    appFeatures.setConfig(SECURITY_APP_FEATURE_CONFIG);
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        []
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(new Map());
 
-    expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
-      ...baseKibanaFeature,
-      ...SECURITY_APP_FEATURE_CONFIG.get('test-base-feature' as AppFeatureKeyType),
-      ...privileges,
-      subFeatures: [{ baz: 'baz' }],
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        ...baseKibanaFeature,
+        subFeatures: [],
+      });
+    });
+
+    it('should register enabled kibana features', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+        getKibanaFeatures: jest.fn(),
+      } as unknown as PluginSetupContract;
+
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        []
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(
+        new Map([['test-feature' as AppFeatureKeyType, testFeaturePrivilegeConfig]])
+      );
+
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        ...baseKibanaFeature,
+        ...expectedBaseWithTestConfigPrivileges,
+        subFeatures: [],
+      });
+    });
+
+    it('should register enabled kibana features and sub features', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+        getKibanaFeatures: jest.fn(),
+      } as unknown as PluginSetupContract;
+
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        []
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(
+        new Map([
+          ['test-feature' as AppFeatureKeyType, testFeaturePrivilegeConfig],
+          ['test-sub-feature' as AppFeatureKeyType, testSubFeaturePrivilegeConfig],
+        ])
+      );
+
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        ...baseKibanaFeature,
+        ...expectedBaseWithTestConfigPrivileges,
+        subFeatures: [SUB_FEATURE],
+      });
+    });
+
+    it('should register enabled kibana features and default sub features', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+        getKibanaFeatures: jest.fn(),
+      } as unknown as PluginSetupContract;
+
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        [SUB_FEATURE_2.name]
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(
+        new Map([
+          ['test-feature' as AppFeatureKeyType, testFeaturePrivilegeConfig],
+          ['test-sub-feature' as AppFeatureKeyType, testSubFeaturePrivilegeConfig],
+        ])
+      );
+
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        ...baseKibanaFeature,
+        ...expectedBaseWithTestConfigPrivileges,
+        subFeatures: [SUB_FEATURE, SUB_FEATURE_2],
+      });
     });
   });
 
-  it('should register enabled cases features', () => {
-    const featuresSetup = {
-      registerKibanaFeature: jest.fn(),
-    } as unknown as PluginSetupContract;
+  describe('isActionRegistered', () => {
+    it('should register base privilege actions', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+      } as unknown as PluginSetupContract;
 
-    const appFeatures = new AppFeatures(
-      loggingSystemMock.create().get('mock'),
-      securityCasesKibanaSubFeatures.casesSubFeaturesMap as unknown as AppSubFeaturesMap<string>,
-      baseKibanaFeature,
-      ['subFeature1']
-    );
-    appFeatures.init(featuresSetup);
-    appFeatures.setConfig(CASES_APP_FEATURE_CONFIG);
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        []
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(new Map());
 
-    expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
-      ...baseKibanaFeature,
-      ...CASES_APP_FEATURE_CONFIG.get('test-cases-feature' as AppFeatureKeyType),
-      subFeatures: [{ baz: 'baz' }],
-      ...CASES_BASE_CONFIG,
+      expect(appFeatures.isActionRegistered('api:api-read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:api-write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:test-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('ui:test-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('api:subFeature1-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('ui:subFeature1-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('api:subFeature2-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('ui:subFeature2-action')).toEqual(false);
+    });
+
+    it('should register config privilege actions', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+      } as unknown as PluginSetupContract;
+
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        []
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(
+        new Map([['test-feature' as AppFeatureKeyType, testFeaturePrivilegeConfig]])
+      );
+
+      expect(appFeatures.isActionRegistered('api:api-read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:api-write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:test-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:test-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:subFeature1-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('ui:subFeature1-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('api:subFeature2-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('ui:subFeature2-action')).toEqual(false);
+    });
+
+    it('should register config sub-feature privilege actions', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+      } as unknown as PluginSetupContract;
+
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        []
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(
+        new Map([
+          ['test-feature' as AppFeatureKeyType, testFeaturePrivilegeConfig],
+          ['test-sub-feature' as AppFeatureKeyType, testSubFeaturePrivilegeConfig],
+        ])
+      );
+
+      expect(appFeatures.isActionRegistered('api:api-read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:api-write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:test-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:test-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:subFeature1-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:subFeature1-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:subFeature2-action')).toEqual(false);
+      expect(appFeatures.isActionRegistered('ui:subFeature2-action')).toEqual(false);
+    });
+
+    it('should register default and config sub-feature privilege actions', () => {
+      const featuresSetup = {
+        registerKibanaFeature: jest.fn(),
+      } as unknown as PluginSetupContract;
+
+      const appFeatures = new AppFeatures(
+        loggingSystemMock.create().get('mock'),
+        subFeaturesMap,
+        baseKibanaFeature,
+        [SUB_FEATURE_2.name]
+      );
+      appFeatures.init(featuresSetup);
+      appFeatures.setConfig(
+        new Map([
+          ['test-feature' as AppFeatureKeyType, testFeaturePrivilegeConfig],
+          ['test-sub-feature' as AppFeatureKeyType, testSubFeaturePrivilegeConfig],
+        ])
+      );
+
+      expect(appFeatures.isActionRegistered('api:api-read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:read')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:api-write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:write')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:test-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:test-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:subFeature1-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:subFeature1-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('api:subFeature2-action')).toEqual(true);
+      expect(appFeatures.isActionRegistered('ui:subFeature2-action')).toEqual(true);
     });
   });
 });
