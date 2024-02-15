@@ -7,20 +7,35 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import {
+  EmbeddableApiContext,
+  HasParentApi,
+  PublishesLocalUnifiedSearch,
+  PublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../common';
-import type { SearchInput } from './types';
 
-export const getDiscoverLocatorParams = ({
-  input,
-  savedSearch,
-}: {
-  input: SearchInput;
-  savedSearch: SavedSearch;
-}) => {
+export interface HasSavedSearch {
+  getSavedSearch: () => SavedSearch;
+}
+
+export const apiHasSavedSearch = (
+  api: EmbeddableApiContext['embeddable']
+): api is HasSavedSearch => {
+  const embeddable = api as HasSavedSearch;
+  return Boolean(embeddable.getSavedSearch);
+};
+
+export const getDiscoverLocatorParams = (
+  api: HasSavedSearch &
+    Partial<PublishesSavedObjectId> &
+    Partial<HasParentApi<Partial<PublishesLocalUnifiedSearch>>>
+) => {
+  const savedSearch = api.getSavedSearch();
+
   const dataView = savedSearch.searchSource.getField('index');
-  const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
+  const savedObjectId = api.savedObjectId?.value;
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {

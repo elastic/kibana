@@ -72,7 +72,7 @@ import { fetchTextBased } from '../application/main/utils/fetch_text_based';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
-import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { getDiscoverLocatorParams, HasSavedSearch } from './get_discover_locator_params';
 
 export type SearchProps = Partial<UnifiedDataTableProps> &
   Partial<DocTableProps> & {
@@ -206,7 +206,7 @@ export class SavedSearchEmbeddable
     const title = this.getCurrentTitle();
     const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
     const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
-    const locatorParams = getDiscoverLocatorParams({ input, savedSearch });
+    const locatorParams = getDiscoverLocatorParams(this as HasSavedSearch);
     // We need to use a redirect URL if this is a by value saved search using
     // an ad hoc data view to ensure the data view spec gets encoded in the URL
     const useRedirect = !savedObjectId && !dataView?.isPersisted();

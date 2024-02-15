@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { ViewMode, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaLocation } from '@kbn/share-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
+import {
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasType,
+  apiIsOfType,
+  apiPublishesDataViews,
+  apiPublishesPartialLocalUnifiedSearch,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasType,
+  PublishesDataViews,
+} from '@kbn/presentation-publishing';
+import { KibanaLocation } from '@kbn/share-plugin/public';
+
 import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
@@ -28,54 +43,88 @@ export interface Params {
   start: StartServicesGetter<PluginDeps, unknown, CoreDeps>;
 }
 
-export abstract class AbstractExploreDataAction<Context extends { embeddable?: IEmbeddable }> {
-  public readonly getIconType = (context: Context): string => 'discoverApp';
+type AbstractExploreDataActionApi = CanAccessViewMode & HasType & PublishesDataViews;
 
-  public readonly getDisplayName = (context: Context): string =>
+const isApiCompatible = (api: unknown | null): api is AbstractExploreDataActionApi =>
+  apiCanAccessViewMode(api) && apiHasType(api) && apiPublishesDataViews(api);
+
+const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
+  return (
+    isApiCompatible(api) &&
+    getInheritedViewMode(api) === ViewMode.VIEW &&
+    !apiIsOfType(api, LENS_DOC_TYPE)
+  );
+};
+
+export abstract class AbstractExploreDataAction {
+  public readonly getIconType = (): string => 'discoverApp';
+
+  public readonly getDisplayName = (): string =>
     i18n.translate('xpack.discover.FlyoutCreateDrilldownAction.displayName', {
       defaultMessage: 'Explore underlying data',
     });
 
   constructor(protected readonly params: Params) {}
 
-  protected abstract getLocation(context: Context): Promise<KibanaLocation>;
+  public async getLocation({ embeddable }: EmbeddableApiContext): Promise<KibanaLocation> {
+    const { plugins } = this.params.start();
+    const { locator } = plugins.discover;
 
-  public async isCompatible({ embeddable }: Context): Promise<boolean> {
-    if (!embeddable) return false;
-    if (embeddable.type === LENS_DOC_TYPE) return false;
+    if (!locator) {
+      throw new Error('Discover URL locator not available.');
+    }
+
+    const params: DiscoverAppLocatorParams = {};
+    params.dataViewId = shared.getDataViews(embeddable)[0] || undefined;
+    if (
+      apiHasParentApi(embeddable) &&
+      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
+    ) {
+      if (embeddable.parentApi.localTimeRange)
+        params.timeRange = embeddable.parentApi.localTimeRange.value;
+      if (embeddable.parentApi.localQuery) params.query = embeddable.parentApi.localQuery.value;
+      if (embeddable.parentApi.localFilters) {
+        const filters = embeddable.parentApi.localFilters.value ?? [];
+        params.filters = [...filters, ...(params.filters || [])];
+      }
+    }
+
+    const location = await locator.getLocation(params);
+    return location;
+  }
+
+  public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
+    if (!compatibilityCheck(embeddable)) return false;
 
     const { core, plugins } = this.params.start();
     const { capabilities } = core.application;
+    const hasDiscoverPermissions =
+      Boolean(capabilities.discover) &&
+      Boolean(capabilities.discover.show) &&
+      Boolean(plugins.discover.locator);
 
-    if (capabilities.discover && !capabilities.discover.show) return false;
-    if (!plugins.discover.locator) return false;
-    if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
-    if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
-
-    return true;
+    return hasDiscoverPermissions && shared.hasExactlyOneDataView(embeddable);
   }
 
-  public async execute(context: Context): Promise<void> {
-    if (!shared.hasExactlyOneIndexPattern(context.embeddable)) return;
+  public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    if (!this.isCompatible({ embeddable })) return;
 
     const { core } = this.params.start();
-    const { app, path } = await this.getLocation(context);
+    const { app, path } = await this.getLocation({ embeddable });
 
     await core.application.navigateToApp(app, {
       path,
     });
   }
 
-  public async getHref(context: Context): Promise<string> {
-    const { embeddable } = context;
-
-    if (!shared.hasExactlyOneIndexPattern(embeddable)) {
-      throw new Error(`Embeddable not supported for "${this.getDisplayName(context)}" action.`);
+  public async getHref({ embeddable }: EmbeddableApiContext): Promise<string> {
+    if (!shared.hasExactlyOneDataView(embeddable)) {
+      throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
     const { core } = this.params.start();
-    const { app, path } = await this.getLocation(context);
-    const url = await core.application.getUrlForApp(app, { path, absolute: false });
+    const { app, path } = await this.getLocation({ embeddable });
+    const url = core.application.getUrlForApp(app, { path, absolute: false });
 
     return url;
   }

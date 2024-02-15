@@ -22,30 +22,25 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { DiscoverAppLocator } from '../../common';
-import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import type { SavedSearchEmbeddable } from './saved_search_embeddable';
+import {
+  apiHasSavedSearch,
+  getDiscoverLocatorParams,
+  HasSavedSearch,
+} from './get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
-type ViewSavedSearchActionApi = CanAccessViewMode & HasType;
+type ViewSavedSearchActionApi = CanAccessViewMode & HasType & HasSavedSearch;
 
-const isApiCompatible = (api: unknown | null): api is ViewSavedSearchActionApi =>
-  Boolean(apiCanAccessViewMode(api)) && Boolean(apiHasType(api));
-
-const isSavedSearchEmbeddable = (
+const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']
-): api is SavedSearchEmbeddable => {
+): api is ViewSavedSearchActionApi => {
   return (
-    Boolean((api as SavedSearchEmbeddable).getInput) &&
-    Boolean((api as SavedSearchEmbeddable).getSavedSearch)
-  );
-};
-
-const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
-  return (
-    isApiCompatible(api) &&
+    apiCanAccessViewMode(api) &&
     getInheritedViewMode(api) === ViewMode.VIEW &&
-    apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE)
+    apiHasType(api) &&
+    apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
+    apiHasSavedSearch(api)
   );
 };
 
@@ -58,18 +53,12 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
     private readonly locator: DiscoverAppLocator
   ) {}
 
-  async execute(api: EmbeddableApiContext): Promise<void> {
-    const { embeddable } = api;
-    if (!compatibilityCheck(embeddable) || !isSavedSearchEmbeddable(embeddable)) return;
-
-    const savedSearch = embeddable.getSavedSearch();
-    if (!savedSearch) {
+  async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    if (!compatibilityCheck(embeddable)) {
       return;
     }
-    const locatorParams = getDiscoverLocatorParams({
-      input: embeddable.getInput(),
-      savedSearch,
-    });
+
+    const locatorParams = getDiscoverLocatorParams(embeddable as HasSavedSearch);
     await this.locator.navigate(locatorParams);
   }
 
