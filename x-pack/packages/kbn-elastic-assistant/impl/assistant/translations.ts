@@ -18,20 +18,6 @@ export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   }
 );
 
-export const SHOW_ANONYMIZED = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
-  {
-    defaultMessage: 'Show anonymized',
-  }
-);
-
-export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedTooltip',
-  {
-    defaultMessage: 'Show the anonymized values sent to and from the assistant',
-  }
-);
-
 export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.submitMessage', {
   defaultMessage: 'Submit message',
 });

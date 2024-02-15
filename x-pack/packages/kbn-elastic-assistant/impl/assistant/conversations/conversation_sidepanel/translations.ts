@@ -14,34 +14,6 @@ export const SELECTED_CONVERSATION_LABEL = i18n.translate(
   }
 );
 
-export const CONVERSATION_SELECTOR_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.ariaLabel',
-  {
-    defaultMessage: 'Conversation selector',
-  }
-);
-
-export const CONVERSATION_SELECTOR_PLACE_HOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.placeholderTitle',
-  {
-    defaultMessage: 'Select or type to create new...',
-  }
-);
-
-export const CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.CustomOptionTextTitle',
-  {
-    defaultMessage: 'Create new conversation:',
-  }
-);
-
-export const PREVIOUS_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.previousConversationTitle',
-  {
-    defaultMessage: 'Previous conversation',
-  }
-);
-
 export const NEXT_CONVERSATION_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSelector.nextConversationTitle',
   {
@@ -49,9 +21,37 @@ export const NEXT_CONVERSATION_TITLE = i18n.translate(
   }
 );
 
-export const DELETE_CONVERSATION = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.deleteConversationTitle',
+export const DELETE_CONVERSATION_ARIA_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel',
   {
     defaultMessage: 'Delete conversation',
+  }
+);
+
+export const NEW_CHAT = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
+  {
+    defaultMessage: 'New chat',
+  }
+);
+
+export const DELETE_CONVERSATION_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.deleteConversationModal.deleteConversationTitle',
+  {
+    defaultMessage: 'Delete this conversation',
+  }
+);
+
+export const CANCEL_BUTTON_TEXT = i18n.translate(
+  'xpack.elasticAssistant.assistant.deleteConversationModal.cancelButtonText',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const DELETE_BUTTON_TEXT = i18n.translate(
+  'xpack.elasticAssistant.assistant.deleteConversationModal.deleteButtonText',
+  {
+    defaultMessage: 'Delete',
   }
 );

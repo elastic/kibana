@@ -13,15 +13,16 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
+  EuiConfirmModal,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
+import * as i18n from './translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -58,6 +59,7 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
     conversations,
   }) => {
     const { deleteConversation, createConversation } = useConversation();
+    const [deleteConversationId, setDeleteConversationId] = useState<string | null>(null);
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
 
@@ -130,77 +132,91 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
       selectedConversationId,
     ]);
 
+    const handleCloseModal = useCallback(() => {
+      setDeleteConversationId(null);
+    }, []);
+
+    const handleDelete = useCallback(() => {
+      if (deleteConversationId) {
+        setDeleteConversationId(null);
+        onDelete(deleteConversationId);
+      }
+    }, [deleteConversationId, onDelete]);
+
     useEvent('keydown', onKeyDown);
 
     return (
-      <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} borderRadius="none">
-            <EuiListGroup
-              size="xs"
+      <>
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false} borderRadius="none">
+              <EuiListGroup
+                size="xs"
+                css={css`
+                  padding: 0;
+                `}
+              >
+                {Object.values(conversations)
+                  .reverse()
+                  .map((conversation) => (
+                    <EuiListGroupItem
+                      key={conversation.id}
+                      onClick={() => onConversationSelected(conversation.id)}
+                      label={conversation.id}
+                      isActive={conversation.id === selectedConversationId}
+                      extraAction={{
+                        color: 'danger',
+                        onClick: () => setDeleteConversationId(conversation.id),
+                        iconType: 'trash',
+                        iconSize: 's',
+                        disabled: conversation.isDefault,
+                        'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                        'data-test-subj': 'delete-option',
+                      }}
+                    />
+                  ))}
+              </EuiListGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              hasBorder
+              borderRadius="none"
+              paddingSize="m"
               css={css`
-                padding: 0;
+                border-left: 0;
+                border-right: 0;
+                border-bottom: 0;
+                padding-top: 12px;
+                padding-bottom: 12px;
               `}
             >
-              {Object.values(conversations)
-                .reverse()
-                .map((conversation) => (
-                  <EuiListGroupItem
-                    key={conversation.id}
-                    onClick={() => onConversationSelected(conversation.id)}
-                    label={conversation.id}
-                    isActive={conversation.id === selectedConversationId}
-                    extraAction={{
-                      color: 'danger',
-                      onClick: () => onDelete(conversation.id),
-                      iconType: 'trash',
-                      iconSize: 's',
-                      disabled: conversation.isDefault,
-                      'aria-label': i18n.translate(
-                        'xpack.elasticAssistant.assistant.conversations.sidePanel.deleteAriaLabel',
-                        {
-                          defaultMessage: 'Delete conversation',
-                        }
-                      ),
-                      'data-test-subj': 'delete-option',
-                    }}
-                  />
-                ))}
-            </EuiListGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder
-            borderRadius="none"
-            paddingSize="m"
-            css={css`
-              border-left: 0;
-              border-right: 0;
-              border-bottom: 0;
-              padding-top: 12px;
-              padding-bottom: 12px;
-            `}
-          >
-            <EuiButton
-              color="primary"
-              fill
-              iconType="discuss"
-              onClick={onSubmit}
-              fullWidth
-              size="s"
-            >
-              {i18n.translate(
-                'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
-                {
-                  defaultMessage: 'New chat',
-                }
-              )}
-            </EuiButton>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              <EuiButton
+                color="primary"
+                fill
+                iconType="discuss"
+                onClick={onSubmit}
+                fullWidth
+                size="s"
+              >
+                {i18n.NEW_CHAT}
+              </EuiButton>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {deleteConversationId && (
+          <EuiConfirmModal
+            title={i18n.DELETE_CONVERSATION_TITLE}
+            onCancel={handleCloseModal}
+            onConfirm={handleDelete}
+            cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
+            confirmButtonText={i18n.DELETE_BUTTON_TEXT}
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          />
+        )}
+      </>
     );
   }
 );

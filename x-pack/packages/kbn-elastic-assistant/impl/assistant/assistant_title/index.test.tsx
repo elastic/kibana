@@ -14,6 +14,8 @@ const testProps = {
   title: 'Test Title',
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
   selectedConversation: undefined,
+  setSelectedConversationId: jest.fn(),
+  isFlyoutMode: false,
 };
 
 describe('AssistantTitle', () => {

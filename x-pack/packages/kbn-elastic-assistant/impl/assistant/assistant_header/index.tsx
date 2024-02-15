@@ -22,7 +22,7 @@ import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 
 interface OwnProps {
   currentConversation: Conversation;
@@ -38,7 +38,7 @@ interface OwnProps {
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
-  title: string | JSX.Element;
+  title: string;
 }
 
 type Props = OwnProps;
@@ -85,6 +85,7 @@ export const AssistantHeader: React.FC<Props> = ({
             docLinks={docLinks}
             selectedConversation={currentConversation}
             title={title}
+            setSelectedConversationId={setSelectedConversationId}
             isFlyoutMode={false}
           />
         </EuiFlexItem>

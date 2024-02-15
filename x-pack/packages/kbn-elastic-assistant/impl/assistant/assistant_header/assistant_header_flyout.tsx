@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Conversation, useAssistantContext } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
@@ -29,7 +30,7 @@ import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { INLINE_CONNECTOR_PLACEHOLDER } from '../../connectorland/translations';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 
 interface OwnProps {
   currentConversation: Conversation;
@@ -97,18 +98,18 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const onButtonClick = () => {
+  const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
-  };
+  }, [isPopoverOpen]);
 
-  const closePopover = () => {
+  const closePopover = useCallback(() => {
     setPopover(false);
-  };
+  }, []);
 
-  const [isDestroyModalVisible, setIsDestroyModalVisible] = useState(false);
+  const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
 
-  const closeDestroyModal = () => setIsDestroyModalVisible(false);
-  const showDestroyModal = () => setIsDestroyModalVisible(true);
+  const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
+  const showDestroyModal = useCallback(() => setIsResetConversationModalVisible(true), []);
 
   const panels = useMemo(
     () => [
@@ -116,20 +117,21 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
         id: 0,
         items: [
           {
-            name: 'Anonymized values',
+            name: i18n.ANONYMIZED_VALUES,
             panel: 2,
           },
           {
             name: (
-              <>
-                {'Connector '}
-                <strong>{selectedConnectorName}</strong>
-              </>
+              <FormattedMessage
+                id="xpack.elasticAssistant.assistant.settings.connectorName"
+                defaultMessage="Connector {connectorName}"
+                values={{ connectorName: <strong>{selectedConnectorName}</strong> }}
+              />
             ),
             panel: 1,
           },
           {
-            name: 'Reset conversation',
+            name: i18n.RESET_CONVERSATION,
             css: css`
               color: ${euiThemeVars.euiColorDanger};
             `,
@@ -140,7 +142,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
       },
       {
         id: 1,
-        title: 'Connector',
+        title: i18n.CONNECTOR_TITLE,
         content: (
           <EuiPanel hasShadow={false}>
             <ConnectorSelectorInline
@@ -171,6 +173,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
         ),
       },
     ],
+
     [
       currentConversation,
       isDisabled,
@@ -178,8 +181,14 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
       selectedConnectorId,
       selectedConnectorName,
       showAnonymizedValuesChecked,
+      showDestroyModal,
     ]
   );
+
+  const handleReset = useCallback(() => {
+    onChatCleared();
+    closeDestroyModal();
+  }, [onChatCleared, closeDestroyModal]);
 
   return (
     <>
@@ -237,20 +246,17 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      {isDestroyModalVisible && (
+      {isResetConversationModalVisible && (
         <EuiConfirmModal
-          title="Reset conversation"
+          title={i18n.RESET_CONVERSATION_TITLE}
           onCancel={closeDestroyModal}
-          onConfirm={() => {
-            onChatCleared();
-            closeDestroyModal();
-          }}
-          cancelButtonText="Cancel"
-          confirmButtonText="Apply"
+          onConfirm={handleReset}
+          cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
+          confirmButtonText={i18n.RESET_BUTTON_TEXT}
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
-          <p>{'Are you sure want to clear the current chat? All conversation data will be lost'}</p>
+          <p>{i18n.CLEAR_CHAT_CONFIRMATION}</p>
         </EuiConfirmModal>
       )}
     </>
