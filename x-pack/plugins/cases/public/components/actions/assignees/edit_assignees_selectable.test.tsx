@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';

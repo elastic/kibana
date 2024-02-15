@@ -11,7 +11,7 @@ import { createAppMockRenderer } from '../../../common/mock';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import { basicCase } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 describe('EditTagsSelectable', () => {
   let appMock: AppMockRenderer;
