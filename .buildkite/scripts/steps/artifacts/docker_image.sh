@@ -119,7 +119,6 @@ buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
-cd -
 
 # This part is related with updating the configuration of kibana-controller,
 # so that new stack instances contain the latest and greatest image of kibana,
