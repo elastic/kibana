@@ -8,6 +8,7 @@
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { uniq } from 'lodash';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import type { FieldExamples, FieldStatsError } from '../../../../../common/types/field_stats';
 
@@ -45,8 +46,8 @@ export const getESQLExampleFieldValues = async ({
 
       if (textFieldsResp) {
         return textFields.map((textField, idx) => {
-          const examples = (textFieldsResp.rawResponse.values as unknown[][]).map(
-            (row) => row[idx]
+          const examples = uniq(
+            (textFieldsResp.rawResponse.values as unknown[][]).map((row) => row[idx])
           );
 
           return {
