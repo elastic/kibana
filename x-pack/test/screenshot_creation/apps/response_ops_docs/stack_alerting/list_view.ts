@@ -57,14 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
-      const actionsButton = await testSubjects.find('ruleActionsButton');
-      await actionsButton.click();
-      await commonScreenshots.takeScreenshot(
-        'rule-details-disabling',
-        screenshotDirectories,
-        1400,
-        1024
-      );
     });
   });
 }
