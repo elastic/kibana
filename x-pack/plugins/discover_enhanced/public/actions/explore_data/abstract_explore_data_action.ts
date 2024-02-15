@@ -81,10 +81,11 @@ export abstract class AbstractExploreDataAction {
       apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
     ) {
       if (embeddable.parentApi.localTimeRange)
-        params.timeRange = embeddable.parentApi.localTimeRange.value;
-      if (embeddable.parentApi.localQuery) params.query = embeddable.parentApi.localQuery.value;
+        params.timeRange = embeddable.parentApi.localTimeRange.getValue();
+      if (embeddable.parentApi.localQuery)
+        params.query = embeddable.parentApi.localQuery.getValue();
       if (embeddable.parentApi.localFilters) {
-        const filters = embeddable.parentApi.localFilters.value ?? [];
+        const filters = embeddable.parentApi.localFilters.getValue() ?? [];
         params.filters = [...filters, ...(params.filters || [])];
       }
     }

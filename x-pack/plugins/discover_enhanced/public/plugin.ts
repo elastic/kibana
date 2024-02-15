@@ -60,7 +60,6 @@ export class DiscoverEnhancedPlugin
       }
 
       if (this.config.actions.exploreDataInChart.enabled) {
-        console.log('EXPLORE DATA IN CHART');
         const exploreDataChartAction = new ExploreDataChartAction(params);
         uiActions.addTriggerAction(APPLY_FILTER_TRIGGER, exploreDataChartAction);
       }
