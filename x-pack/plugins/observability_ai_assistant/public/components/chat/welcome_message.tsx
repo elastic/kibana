@@ -87,7 +87,7 @@ export function WelcomeMessage({
         className={fullHeightClassName}
       >
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={breakpoint === 'xl' ? 'l' : breakpoint === 'l' ? 'l' : 's'} />
+          <EuiSpacer size={breakpoint === 'xl' || breakpoint === 'l' ? 'l' : 's'} />
 
           <EuiImage
             src={ctaImage}
