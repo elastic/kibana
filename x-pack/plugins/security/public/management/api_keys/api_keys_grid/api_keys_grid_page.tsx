@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
+import type {
+  Criteria,
+  EuiBasicTableColumn,
+  EuiSearchBarOnChangeArgs,
+  Query,
+  SearchFilterConfig,
+} from '@elastic/eui';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButton,
   EuiCallOut,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiInMemoryTable,
   EuiLink,
+  EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -38,7 +46,9 @@ import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
-import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common';
+import type { AuthenticatedUser } from '../../../../common';
+import type { ApiKey, RestApiKey } from '../../../../common/model';
+import type { QueryApiKeyResult } from '../../../../server/routes/api_keys';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
@@ -46,12 +56,73 @@ import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 
+interface UseAsyncTableResult {
+  state: QueryApiKeyResult;
+  isLoading: boolean;
+  query: QueryContainer;
+  from: number;
+  pageSize: number;
+  setQuery: React.Dispatch<React.SetStateAction<QueryContainer>>;
+  setFrom: React.Dispatch<React.SetStateAction<number>>;
+  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  fetchApiKeys: () => Promise<void>;
+}
+
+const useAsyncTable = (): UseAsyncTableResult => {
+  const [state, setState] = useState<QueryApiKeyResult>({} as QueryApiKeyResult);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [query, setQuery] = useState<QueryContainer>({});
+  const [from, setFrom] = useState<number>(0);
+  const [pageSize, setPageSize] = useState(25);
+  const { services } = useKibana<CoreStart>();
+
+  const fetchApiKeys = async () => {
+    setIsLoading(true);
+
+    const requestBody = {
+      query: Object.keys(query).length === 0 ? undefined : query,
+      from,
+      size: pageSize,
+    };
+
+    try {
+      const response = await new APIKeysAPIClient(services.http).queryApiKeys(requestBody);
+
+      setState(response);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApiKeys();
+  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return {
+    state,
+    isLoading,
+    query,
+    from,
+    setQuery,
+    setFrom,
+    fetchApiKeys,
+    pageSize,
+    setPageSize,
+  };
+};
+
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
   const authc = useAuthentication();
-  const [state, getApiKeys] = useAsyncFn(
-    () => Promise.all([new APIKeysAPIClient(services.http).getApiKeys(), authc.getCurrentUser()]),
+
+  const [state, queryApiKeysFn] = useAsyncFn(
+    () =>
+      Promise.all([
+        new APIKeysAPIClient(services.http).queryApiKeys(),
+        new APIKeysAPIClient(services.http).queryApiKeyAggregations(),
+        authc.getCurrentUser(),
+      ]),
     [services.http]
   );
 
@@ -59,12 +130,42 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
 
+  const {
+    state: requestState,
+    isLoading,
+    from,
+    setQuery,
+    setFrom,
+    fetchApiKeys,
+    pageSize,
+    setPageSize,
+  } = useAsyncTable();
+
   useEffect(() => {
-    getApiKeys();
+    fetchApiKeys();
+    queryApiKeysFn();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const onTableChange = ({ page }: Criteria<ApiKey>) => {
+    setFrom(page?.index! * pageSize);
+    setPageSize(page?.size!);
+  };
+
+  const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
+    if (!args.error) {
+      // try {
+      //   console.log(EuiSearchBar.Query.parse(args.queryText));
+      // } catch (e) {
+      //   console.log(e);
+      //   throw e;
+      // }
+      const queryContainer = EuiSearchBar.Query.toESQuery(args.query);
+      setQuery(queryContainer);
+    }
+  };
+
   if (!state.value) {
-    if (state.loading) {
+    if (isLoading) {
       return (
         <SectionLoading>
           <FormattedMessage
@@ -77,7 +178,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
     return (
       <ApiKeysEmptyPrompt error={state.error}>
-        <EuiButton iconType="refresh" onClick={() => getApiKeys()}>
+        <EuiButton iconType="refresh" onClick={() => fetchApiKeys()}>
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeys.retryButton"
             defaultMessage="Try again"
@@ -87,11 +188,14 @@ export const APIKeysGridPage: FunctionComponent = () => {
     );
   }
 
-  const [
-    { apiKeys, canManageCrossClusterApiKeys, canManageApiKeys, canManageOwnApiKeys },
-    currentUser,
-  ] = state.value;
+  const [_, { aggregations }, currentUser] = state.value && state.value;
 
+  const pagination = {
+    pageIndex: from / pageSize,
+    pageSize,
+    totalItemCount: requestState.total,
+    pageSizeOptions: [25, 50, 100],
+  };
   return (
     <>
       <Route path="/create">
@@ -105,10 +209,10 @@ export const APIKeysGridPage: FunctionComponent = () => {
             onSuccess={(createApiKeyResponse) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              getApiKeys();
+              queryApiKeysFn();
             }}
             onCancel={() => history.push({ pathname: '/' })}
-            canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+            canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
           />
         </Breadcrumb>
       </Route>
@@ -125,15 +229,14 @@ export const APIKeysGridPage: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            getApiKeys();
+            queryApiKeysFn();
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
           readOnly={readOnly}
         />
       )}
-
-      {!apiKeys.length ? (
+      {!requestState.apiKeys.length ? (
         <ApiKeysEmptyPrompt readOnly={readOnly}>
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
@@ -159,7 +262,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             description={
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="Allow external services to access your Elastic Stack."
+                defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
               />
             }
             rightSideItems={
@@ -191,7 +294,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
               </>
             )}
 
-            {canManageOwnApiKeys && !canManageApiKeys ? (
+            {requestState.canManageOwnApiKeys && !requestState.canManageApiKeys ? (
               <>
                 <EuiCallOut
                   title={
@@ -206,27 +309,32 @@ export const APIKeysGridPage: FunctionComponent = () => {
             ) : undefined}
 
             <InvalidateProvider
-              isAdmin={canManageApiKeys}
+              isAdmin={requestState.canManageApiKeys}
               notifications={services.notifications}
               apiKeysAPIClient={new APIKeysAPIClient(services.http)}
             >
               {(invalidateApiKeyPrompt) => (
                 <ApiKeysTable
-                  apiKeys={apiKeys}
+                  apiKeys={requestState.apiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
                       apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      getApiKeys
+                      fetchApiKeys
                     )
                   }
                   currentUser={currentUser}
                   createdApiKey={createdApiKey}
-                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-                  canManageApiKeys={canManageApiKeys}
-                  canManageOwnApiKeys={canManageOwnApiKeys}
+                  canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
+                  canManageApiKeys={requestState.canManageApiKeys}
+                  canManageOwnApiKeys={requestState.canManageOwnApiKeys}
                   readOnly={readOnly}
                   loading={state.loading}
+                  totalItemCount={requestState.total}
+                  pagination={pagination}
+                  onTableChange={onTableChange}
+                  onSearchChange={onSearchChange}
+                  aggregations={aggregations}
                 />
               )}
             </InvalidateProvider>
@@ -312,6 +420,11 @@ export interface ApiKeysTableProps {
   canManageOwnApiKeys: boolean;
   onClick(apiKey: CategorizedApiKey): void;
   onDelete(apiKeys: CategorizedApiKey[]): void;
+  totalItemCount?: number;
+  onTableChange: any;
+  pagination: any;
+  onSearchChange: any;
+  aggregations: ApiKeyAggregations;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -324,14 +437,17 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   canManageOwnApiKeys = false,
   readOnly = false,
   loading = false,
+  totalItemCount = 0,
+  onTableChange,
+  pagination,
+  onSearchChange,
+  aggregations,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
+  const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
-  const { categorizedApiKeys, typeFilters, usernameFilters, expiredFilters } = useMemo(
-    () => categorizeApiKeys(apiKeys),
-    [apiKeys]
-  );
+  const { typeFilters, usernameFilters, expired } = categorizeAggregations(aggregations);
 
   const deletable = (item: CategorizedApiKey) =>
     canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
@@ -353,20 +469,26 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.security.management.apiKeys.table.typeColumnName', {
-        defaultMessage: 'Type',
-      }),
+      name: (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.typeColumnName"
+          defaultMessage="Type"
+        />
+      ),
       sortable: true,
       render: (type: CategorizedApiKey['type']) => <ApiKeyBadge type={type} />,
     }
   );
 
-  if (canManageApiKeys || usernameFilters.length > 1) {
+  if (canManageApiKeys || usernameFilters.size > 1) {
     columns.push({
       field: 'username',
-      name: i18n.translate('xpack.security.management.apiKeys.table.ownerColumnName', {
-        defaultMessage: 'Owner',
-      }),
+      name: (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.ownerColumnName"
+          defaultMessage="Owner"
+        />
+      ),
       sortable: true,
       render: (username: CategorizedApiKey['username']) => <UsernameWithIcon username={username} />,
     });
@@ -375,9 +497,12 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   columns.push(
     {
       field: 'creation',
-      name: i18n.translate('xpack.security.management.apiKeys.table.createdColumnName', {
-        defaultMessage: 'Created',
-      }),
+      name: (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.createdColumnName"
+          defaultMessage="Created"
+        />
+      ),
       sortable: true,
       mobileOptions: {
         show: false,
@@ -397,9 +522,12 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     },
     {
       field: 'expiration',
-      name: i18n.translate('xpack.security.management.apiKeys.table.statusColumnName', {
-        defaultMessage: 'Status',
-      }),
+      name: (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.statusColumnName"
+          defaultMessage="Status"
+        />
+      ),
       sortable: true,
       render: (expiration: number) => <ApiKeyStatus expiration={expiration} />,
     }
@@ -410,9 +538,12 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       width: `${24 + 2 * 8}px`,
       actions: [
         {
-          name: i18n.translate('xpack.security.management.apiKeys.table.deleteAction', {
-            defaultMessage: 'Delete',
-          }),
+          name: (
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.deleteAction"
+              defaultMessage="Delete"
+            />
+          ),
           description: i18n.translate('xpack.security.management.apiKeys.table.deleteDescription', {
             defaultMessage: 'Delete this API key',
           }),
@@ -429,97 +560,97 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   const filters: SearchFilterConfig[] = [];
 
-  if (typeFilters.length > 1) {
+  if (typeFilters.size > 1) {
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <TypesFilterButton types={typeFilters} query={query} onChange={onChange} />
+        <TypesFilterButton types={[...typeFilters]} query={query} onChange={onChange} />
       ),
     });
   }
 
-  if (usernameFilters.length > 1) {
-    filters.push({
-      type: 'custom_component',
-      component: ({ query, onChange }) => (
-        <UsersFilterButton usernames={usernameFilters} query={query} onChange={onChange} />
-      ),
-    });
-  }
-
-  if (expiredFilters.length > 1) {
+  if (expired > 0) {
     filters.push({
       type: 'field_value_toggle_group',
-      field: 'expired',
+      field: 'expiration',
       items: [
         {
-          value: false,
+          value: 'now+1m/m',
           name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
             defaultMessage: 'Active',
           }),
+          operator: 'gt',
         },
         {
-          value: true,
+          value: 'now',
           name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
             defaultMessage: 'Expired',
           }),
+          operator: 'lte',
         },
       ],
     });
   }
 
+  if (usernameFilters.size > 1) {
+    filters.push({
+      type: 'custom_component',
+      component: ({ query, onChange }) => (
+        <UsersFilterButton usernames={[...usernameFilters]} query={query} onChange={onChange} />
+      ),
+    });
+  }
+
   return (
-    <EuiInMemoryTable
-      items={categorizedApiKeys}
-      itemId="id"
-      columns={columns}
-      search={
-        categorizedApiKeys.length > 0
-          ? {
-              toolsLeft: selectedItems.length ? (
-                <EuiButton
-                  onClick={() => onDelete(selectedItems)}
-                  color="danger"
-                  iconType="trash"
-                  data-test-subj="bulkInvalidateActionButton"
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
-                    defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
-                    values={{
-                      count: selectedItems.length,
-                    }}
-                  />
-                </EuiButton>
-              ) : undefined,
-              box: {
-                incremental: true,
-              },
-              filters,
-            }
-          : undefined
-      }
-      sorting={{
-        sort: {
-          field: 'creation',
-          direction: 'desc',
-        },
-      }}
-      selection={
-        readOnly
-          ? undefined
-          : {
-              selectable: deletable,
-              onSelectionChange: setSelectedItems,
-            }
-      }
-      pagination={{
-        initialPageSize: 10,
-        pageSizeOptions: [10, 25, 50],
-      }}
-      loading={loading}
-      isSelectable={canManageOwnApiKeys}
-    />
+    <>
+      <EuiSearchBar
+        defaultQuery={initialQuery}
+        box={{
+          placeholder: 'Search...',
+          incremental: true,
+        }}
+        filters={filters}
+        onChange={onSearchChange}
+        toolsLeft={
+          selectedItems.length ? (
+            <EuiButton
+              onClick={() => onDelete(selectedItems)}
+              color="danger"
+              iconType="trash"
+              data-test-subj="bulkInvalidateActionButton"
+            >
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
+                defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
+            </EuiButton>
+          ) : undefined
+        }
+      />
+      <EuiSpacer />
+
+      <EuiBasicTable
+        // @ts-ignore
+        items={apiKeys}
+        itemId="id"
+        columns={columns}
+        loading={loading}
+        pagination={pagination}
+        onChange={onTableChange}
+        selection={
+          readOnly
+            ? undefined
+            : {
+                selectable: deletable,
+                onSelectionChange: setSelectedItems,
+              }
+        }
+        isSelectable={canManageOwnApiKeys}
+      />
+    </>
   );
 };
 
@@ -556,7 +687,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-            defaultMessage="User"
+            defaultMessage="Personal"
           />
         </EuiFilterButton>
       ) : null}
@@ -578,7 +709,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-            defaultMessage="Cross-cluster"
+            defaultMessage="Cross-Cluster"
           />
         </EuiFilterButton>
       ) : null}
@@ -755,7 +886,7 @@ export const ApiKeyStatus: FunctionComponent<ApiKeyStatusProps> = ({ expiration 
 };
 
 export interface ApiKeyBadgeProps {
-  type: CategorizedApiKeyType;
+  type: 'rest' | 'cross_cluster' | 'managed';
 }
 
 export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
@@ -771,7 +902,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       <EuiBadge color="hollow" iconType="cluster">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-          defaultMessage="Cross-cluster"
+          defaultMessage="Cross-Cluster"
         />
       </EuiBadge>
     </EuiToolTip>
@@ -803,7 +934,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       <EuiBadge color="hollow" iconType="user">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-          defaultMessage="User"
+          defaultMessage="Personal"
         />
       </EuiBadge>
     </EuiToolTip>
@@ -825,43 +956,31 @@ export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
   expired: boolean;
 };
 
-/**
- * Categorizes API keys by type (with Kibana system API keys given its own dedicated `managed` type)
- * and determines applicable filter values.
- */
-export function categorizeApiKeys(apiKeys: ApiKey[]) {
-  const categorizedApiKeys: CategorizedApiKey[] = [];
+interface AggregationResponse<V> {
+  buckets: Array<{ key: V; doc_count: number }>;
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+}
+export interface ApiKeyAggregations {
+  usernames: AggregationResponse<string>;
+  types: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
+  expired: { doc_count: number };
+}
+
+export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) => {
+  const { usernames, types, expired } = aggregationResponse;
   const typeFilters: Set<CategorizedApiKey['type']> = new Set();
   const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
-  const expiredFilters: Set<CategorizedApiKey['expired']> = new Set();
 
-  apiKeys.forEach((apiKey) => {
-    const type = getApiKeyType(apiKey);
-    const expired = apiKey.expiration ? Date.now() > apiKey.expiration : false;
-
-    typeFilters.add(type);
-    usernameFilters.add(apiKey.username);
-    expiredFilters.add(expired);
-
-    categorizedApiKeys.push({ ...apiKey, type, expired } as CategorizedApiKey);
+  types.buckets.forEach((type) => {
+    typeFilters.add(type.key);
   });
-
+  usernames.buckets.forEach((username) => {
+    usernameFilters.add(username.key);
+  });
   return {
-    categorizedApiKeys,
-    typeFilters: [...typeFilters],
-    usernameFilters: [...usernameFilters],
-    expiredFilters: [...expiredFilters],
+    typeFilters,
+    usernameFilters,
+    expired: expired.doc_count,
   };
-}
-
-export type CategorizedApiKeyType = ReturnType<typeof getApiKeyType>;
-
-/**
- * Determines API key type the way it is presented in the UI with Kibana system API keys given its own dedicated `managed` type.
- */
-export function getApiKeyType(apiKey: ApiKey) {
-  return apiKey.type === 'rest' &&
-    (apiKey.metadata?.managed || apiKey.name.indexOf('Alerting: ') === 0)
-    ? 'managed'
-    : apiKey.type;
-}
+};

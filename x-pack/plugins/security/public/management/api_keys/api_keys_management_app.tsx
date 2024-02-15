@@ -44,14 +44,9 @@ export const apiKeysManagementApp = Object.freeze({
         defaultMessage: 'API keys',
       }),
       async mount({ element, theme$, setBreadcrumbs, history }) {
-        const [
-          [coreStart],
-          // { APIKeysGridPage },
-          { APIKeysGridPageServer },
-        ] = await Promise.all([
+        const [[coreStart], { APIKeysGridPage }] = await Promise.all([
           getStartServices(),
-          // import('./api_keys_grid/api_keys_grid_page'),
-          import('./api_keys_grid/api_keys_serverside'),
+          import('./api_keys_grid/api_keys_grid_page'),
         ]);
 
         render(
@@ -68,8 +63,7 @@ export const apiKeysManagementApp = Object.freeze({
               })}
               href="/"
             >
-              {/* <APIKeysGridPage /> */}
-              <APIKeysGridPageServer />
+              <APIKeysGridPage />
             </Breadcrumb>
           </Providers>,
           element
