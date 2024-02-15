@@ -115,8 +115,8 @@ export const redirectToDiscover =
   ): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   (context, event) => {
     if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
-      if (events?.onDiscoverNavigation) {
-        return events.onDiscoverNavigation({ ...context, datasetSelection: event.data });
+      if (events?.onUknownDataViewSelection) {
+        return events.onUknownDataViewSelection({ ...context, datasetSelection: event.data });
       }
     }
   };

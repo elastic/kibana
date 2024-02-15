@@ -12,9 +12,9 @@ import {
   LogsExplorerCustomizationEvents,
 } from '@kbn/logs-explorer-plugin/public';
 
-export const createOnDiscoverNavigationHandler = (
+export const createOnUknownDataViewSelectionHandler = (
   discover: DiscoverStart
-): LogsExplorerCustomizationEvents['onDiscoverNavigation'] => {
+): LogsExplorerCustomizationEvents['onUknownDataViewSelection'] => {
   return (context) => {
     if (isDataViewSelection(context.datasetSelection))
       discover.locator?.navigate({

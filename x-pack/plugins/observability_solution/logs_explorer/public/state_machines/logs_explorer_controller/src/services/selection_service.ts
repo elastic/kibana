@@ -38,11 +38,10 @@ export const initializeSelection =
      */
     if (
       isDataViewSelection(context.datasetSelection) &&
-      context.datasetSelection.selection.dataView.isUnknownDataType()
+      context.datasetSelection.selection.dataView.isUnknownDataType() &&
+      events?.onUknownDataViewSelection
     ) {
-      if (events?.onDiscoverNavigation) {
-        return events?.onDiscoverNavigation(context);
-      }
+      return events?.onUknownDataViewSelection(context);
     }
 
     /**

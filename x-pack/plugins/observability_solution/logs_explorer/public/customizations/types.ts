@@ -26,10 +26,10 @@ export interface LogsExplorerFlyoutContentProps {
   doc: LogDocument;
 }
 
-export type OnDiscoverNavigationHandler = (context: LogsExplorerControllerContext) => void;
+export type OnUknownDataViewSelectionHandler = (context: LogsExplorerControllerContext) => void;
 
 export interface LogsExplorerCustomizationEvents {
-  onDiscoverNavigation?: OnDiscoverNavigationHandler;
+  onUknownDataViewSelection?: OnUknownDataViewSelectionHandler;
 }
 
 export interface LogsExplorerCustomizations {

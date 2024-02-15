@@ -45,8 +45,8 @@ const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
   const isDataViewAvailable: IsDataViewAvailable = useCallback(
     (dataView) =>
       dataView.isLogsDataType() ||
-      (dataView.isUnknownDataType() && Boolean(events?.onDiscoverNavigation)),
-    [events?.onDiscoverNavigation]
+      (dataView.isUnknownDataType() && Boolean(events?.onUknownDataViewSelection)),
+    [events?.onUknownDataViewSelection]
   );
 
   const loadDataViews = useCallback(
