@@ -8,6 +8,7 @@
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
+import { connectorTypes } from './mocks/connector_types';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -18,32 +19,6 @@ jest.mock('../action_type_registry', () => {
     }),
   };
 });
-
-const connectorTypes: string[] = [
-  '.email',
-  '.index',
-  '.pagerduty',
-  '.swimlane',
-  '.server-log',
-  '.slack',
-  '.slack_api',
-  '.webhook',
-  '.cases-webhook',
-  '.xmatters',
-  '.servicenow',
-  '.servicenow-sir',
-  '.servicenow-itom',
-  '.jira',
-  '.resilient',
-  '.teams',
-  '.torq',
-  '.opsgenie',
-  '.tines',
-  '.gen-ai',
-  '.bedrock',
-  '.d3security',
-  '.sentinelone',
-];
 
 describe('Connector type config checks', () => {
   let esServer: TestElasticsearchUtils;
@@ -77,9 +52,9 @@ describe('Connector type config checks', () => {
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
       const connectorType = actionTypeRegistry.get(connectorTypeId);
 
-      expect(connectorType?.validate.config.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(connectorType.validate.secrets.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(connectorType.validate.params.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(connectorType?.validate.config.schema.getSchema().describe()).toMatchSnapshot();
+      expect(connectorType.validate.secrets.schema.getSchema().describe()).toMatchSnapshot();
+      expect(connectorType.validate.params.schema.getSchema().describe()).toMatchSnapshot();
     });
   }
 });
