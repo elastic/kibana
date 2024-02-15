@@ -72,20 +72,6 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       await testSubjects.existOrFail('dataVisualizerPageFileUpload');
     },
 
-    async assertTableHasNoResults() {
-      await retry.try(async () => {
-        const table = await find.byCssSelector('[data-test-subj="dataVisualizerTableContainer"]');
-        const $ = await table.parseDomContent();
-        const rows = $.findTestSubjects('rule-row').toArray();
-        expect(rows.length).to.eql(0);
-        const emptyRow = await find.byCssSelector(
-          '[data-test-subj="rulesList"] table .euiTableRow'
-        );
-        expect(await emptyRow.getVisibleText()).to.eql('No items found');
-      });
-      return true;
-    },
-
     async setESQLQuery(
       query: string,
       refreshOrUpdateBtnSelector:

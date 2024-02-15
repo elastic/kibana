@@ -230,10 +230,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await ml.dataVisualizerTable.ensureNumRowsPerPage(testData.rowsPerPage);
       }
 
-      // await ml.dataVisualizerTable.assertSearchPanelExist();
-      // await ml.dfromataVisualizerTable.assertFieldTypeInputExists();
-      // await ml.dataVisualizerTable.assertFieldNameInputExists();
-
       await ml.dataVisualizerIndexBased.assertFieldCountPanelExist();
       await ml.dataVisualizerIndexBased.assertMetricFieldsSummaryExist();
       await ml.dataVisualizerIndexBased.assertFieldsSummaryExist();
