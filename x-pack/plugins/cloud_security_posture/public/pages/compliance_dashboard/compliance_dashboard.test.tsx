@@ -37,6 +37,8 @@ import {
   ComplianceDashboardDataV2,
   CspStatusCode,
 } from '../../../common/types_old';
+import { cloudPosturePages } from '../../common/navigation/constants';
+import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -48,6 +50,7 @@ jest.mock('../../common/navigation/use_csp_integration_link');
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -80,7 +83,7 @@ describe('<ComplianceDashboard />', () => {
     );
   });
 
-  const ComplianceDashboardWithTestProviders = () => {
+  const ComplianceDashboardWithTestProviders = (route: string) => {
     const mockCore = coreMock.createStart();
 
     return (
@@ -97,13 +100,15 @@ describe('<ComplianceDashboard />', () => {
           },
         }}
       >
-        <ComplianceDashboard />
+        <MemoryRouter initialEntries={[route]}>
+          <ComplianceDashboard />
+        </MemoryRouter>
       </TestProvider>
     );
   };
 
-  const renderComplianceDashboardPage = () => {
-    return render(<ComplianceDashboardWithTestProviders />);
+  const renderComplianceDashboardPage = (route = cloudPosturePages.dashboard.path) => {
+    return render(ComplianceDashboardWithTestProviders(route));
   };
 
   it('shows package not installed page instead of tabs', () => {
@@ -412,7 +417,7 @@ describe('<ComplianceDashboard />', () => {
       data: undefined,
     }));
 
-    renderComplianceDashboardPage();
+    renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
     expectIdsInDoc({
       be: [KUBERNETES_DASHBOARD_TAB, KUBERNETES_DASHBOARD_CONTAINER],
@@ -451,7 +456,7 @@ describe('<ComplianceDashboard />', () => {
       data: mockDashboardData,
     }));
 
-    renderComplianceDashboardPage();
+    renderComplianceDashboardPage(cloudPosturePages.cspm_dashboard.path);
 
     expectIdsInDoc({
       be: [CLOUD_DASHBOARD_TAB, CLOUD_DASHBOARD_CONTAINER],
@@ -530,7 +535,7 @@ describe('<ComplianceDashboard />', () => {
       data: { stats: { totalFindings: 0 } },
     }));
 
-    renderComplianceDashboardPage();
+    renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
     expectIdsInDoc({
       be: [KUBERNETES_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
@@ -610,7 +615,7 @@ describe('<ComplianceDashboard />', () => {
       data: mockDashboardData,
     }));
 
-    renderComplianceDashboardPage();
+    renderComplianceDashboardPage(cloudPosturePages.cspm_dashboard.path);
 
     expectIdsInDoc({
       be: [CLOUD_DASHBOARD_CONTAINER],
@@ -650,11 +655,9 @@ describe('<ComplianceDashboard />', () => {
       data: { stats: { totalFindings: 0 } },
     }));
 
-    const { rerender } = renderComplianceDashboardPage();
+    renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
     screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
-
-    rerender(<ComplianceDashboardWithTestProviders />);
 
     expectIdsInDoc({
       be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -697,61 +700,6 @@ describe('<ComplianceDashboard />', () => {
     renderComplianceDashboardPage();
 
     screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
-
-    expectIdsInDoc({
-      be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
-      notToBe: [
-        CLOUD_DASHBOARD_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('should not select default tab is user has already selected one themselves', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'not-installed' },
-          cspm: { status: 'indexed' },
-          installedPackageVersion: '1.2.13',
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { stats: { totalFindings: 0 } },
-    }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: mockDashboardData,
-    }));
-
-    const { rerender } = renderComplianceDashboardPage();
-
-    expectIdsInDoc({
-      be: [CLOUD_DASHBOARD_CONTAINER],
-      notToBe: [
-        KUBERNETES_DASHBOARD_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-
-    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
-
-    rerender(<ComplianceDashboardWithTestProviders />);
 
     expectIdsInDoc({
       be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -836,21 +784,21 @@ describe('getDefaultTab', () => {
     });
   });
 
-  it('returns CSPM tab is plugin status and kspm status is not provided', () => {
+  it('should returns undefined when plugin status and cspm stats is not provided', () => {
     const cspmStats = getStatsMock(1) as ComplianceDashboardDataV2;
 
-    expect(getDefaultTab(undefined, cspmStats, undefined)).toEqual('cspm');
+    expect(getDefaultTab(undefined, cspmStats, undefined)).toEqual(undefined);
   });
 
-  it('returns KSPM tab is plugin status and csp status is not provided', () => {
+  it('should return undefined is plugin status and csp status is not provided ', () => {
     const kspmStats = getStatsMock(1) as ComplianceDashboardDataV2;
 
-    expect(getDefaultTab(undefined, undefined, kspmStats)).toEqual('kspm');
+    expect(getDefaultTab(undefined, undefined, kspmStats)).toEqual(undefined);
   });
 
-  it('returns CSPM tab when only plugins status data is provided', () => {
+  it('should return undefined when  plugins status or cspm stats data is not provided', () => {
     const pluginStatus = getPluginStatusMock('indexed', 'indexed') as BaseCspSetupStatus;
 
-    expect(getDefaultTab(pluginStatus, undefined, undefined)).toEqual('cspm');
+    expect(getDefaultTab(pluginStatus, undefined, undefined)).toEqual(undefined);
   });
 });

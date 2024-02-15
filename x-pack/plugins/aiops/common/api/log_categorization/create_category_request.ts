@@ -31,7 +31,8 @@ export function createCategoryRequest(
   queryIn: QueryDslQueryContainer,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
-  additionalFilter?: CategorizationAdditionalFilter
+  additionalFilter?: CategorizationAdditionalFilter,
+  useStandardTokenizer: boolean = true
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
@@ -39,7 +40,7 @@ export function createCategoryRequest(
       categorize_text: {
         field,
         size: CATEGORY_LIMIT,
-        categorization_analyzer: categorizationAnalyzer,
+        ...(useStandardTokenizer ? { categorization_analyzer: categorizationAnalyzer } : {}),
       },
       aggs: {
         examples: {

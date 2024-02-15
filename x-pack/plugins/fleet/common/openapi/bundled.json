@@ -1,6 +1,5 @@
 {
   "openapi": "3.0.0",
-  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -19,6 +18,12 @@
       "description": "local"
     }
   ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -7385,6 +7390,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7457,6 +7466,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -9066,10 +9079,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ]
+  }
 }
