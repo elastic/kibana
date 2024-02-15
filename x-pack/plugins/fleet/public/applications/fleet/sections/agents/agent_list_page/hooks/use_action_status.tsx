@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 
 import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../../../../hooks';
 
@@ -29,7 +30,9 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
         throw new Error('No data');
       }
 
-      setCurrentActions(res.data.items);
+      if (!isEqual(currentActions, res.data.items)) {
+        setCurrentActions(res.data.items);
+      }
     } catch (err) {
       notifications.toasts.addError(err, {
         title: i18n.translate('xpack.fleet.actionStatus.fetchRequestError', {
@@ -37,7 +40,7 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
         }),
       });
     }
-  }, [notifications.toasts]);
+  }, [notifications.toasts, currentActions]);
 
   if (isFirstLoading) {
     refreshActions();
@@ -47,10 +50,6 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
     if (refreshAgentActivity) {
       refreshActions();
     }
-    return () => {
-      setCurrentActions([]);
-      setIsFirstLoading(true);
-    };
   }, [refreshActions, refreshAgentActivity]);
 
   const abortUpgrade = useCallback(

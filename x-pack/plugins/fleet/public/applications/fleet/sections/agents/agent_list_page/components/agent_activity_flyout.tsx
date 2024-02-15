@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import { useRef } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -72,21 +73,31 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     perPage: SO_SEARCH_LIMIT,
   });
 
+  const [scrollPosition, setScrollPosition] = useState<number>(0);
+  const scrollRef = useRef<any>();
+
   const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
     onAbortSuccess,
     refreshAgentActivity
   );
 
-  const getAgentPolicyName = (policyId: string) => {
-    const policy = agentPoliciesData?.items.find((item) => item.id === policyId);
-    return policy?.name ?? policyId;
-  };
+  const getAgentPolicyName = useCallback(
+    (policyId: string) => {
+      const policy = agentPoliciesData?.items.find((item) => item.id === policyId);
+      return policy?.name ?? policyId;
+    },
+    [agentPoliciesData]
+  );
 
-  const currentActionsEnriched: ActionStatus[] = currentActions.map((a) => ({
-    ...a,
-    newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
-    policyId: getAgentPolicyName(a.policyId ?? ''),
-  }));
+  const currentActionsEnriched: ActionStatus[] = useMemo(
+    () =>
+      currentActions.map((a) => ({
+        ...a,
+        newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
+        policyId: getAgentPolicyName(a.policyId ?? ''),
+      })),
+    [currentActions, getAgentPolicyName]
+  );
 
   const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'IN_PROGRESS');
 
@@ -116,9 +127,21 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     }
   };
 
+  if (scrollRef.current && scrollPosition > 0) {
+    scrollRef.current.scrollTop = scrollPosition;
+  }
+
   return (
     <>
-      <EuiFlyout data-test-subj="agentActivityFlyout" onClose={onClose} size="m" paddingSize="none">
+      <EuiFlyout
+        data-test-subj="agentActivityFlyout"
+        onClose={() => {
+          refreshAgentActivity = false;
+          onClose();
+        }}
+        size="m"
+        paddingSize="none"
+      >
         <EuiFlyoutHeader aria-labelledby="FleetAgentActivityFlyoutTitle">
           <EuiPanel borderRadius="none" hasShadow={false} hasBorder={true}>
             <EuiFlexGroup direction="column" gutterSize="m">
@@ -189,41 +212,53 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
-          {inProgressActions.length > 0 ? (
-            <ActivitySection
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.inProgressTitle"
-                  defaultMessage="In progress"
-                />
+          <EuiFlexGroup
+            direction="column"
+            className="eui-fullHeight"
+            css={{ overflowY: 'auto' }}
+            onScroll={(event: any) => {
+              if (event.target.scrollTop > 0) {
+                setScrollPosition(event.target.scrollTop);
               }
-              actions={inProgressActions}
-              abortUpgrade={abortUpgrade}
-              onClickViewAgents={onClickViewAgents}
-            />
-          ) : null}
-          {todayActions.length > 0 ? (
-            <ActivitySection
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.todayTitle"
-                  defaultMessage="Today"
-                />
-              }
-              actions={todayActions}
-              abortUpgrade={abortUpgrade}
-              onClickViewAgents={onClickViewAgents}
-            />
-          ) : null}
-          {Object.keys(otherDays).map((day) => (
-            <ActivitySection
-              key={day}
-              title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
-              actions={otherDays[day]}
-              abortUpgrade={abortUpgrade}
-              onClickViewAgents={onClickViewAgents}
-            />
-          ))}
+            }}
+            ref={scrollRef}
+          >
+            {inProgressActions.length > 0 ? (
+              <ActivitySection
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.inProgressTitle"
+                    defaultMessage="In progress"
+                  />
+                }
+                actions={inProgressActions}
+                abortUpgrade={abortUpgrade}
+                onClickViewAgents={onClickViewAgents}
+              />
+            ) : null}
+            {todayActions.length > 0 ? (
+              <ActivitySection
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.todayTitle"
+                    defaultMessage="Today"
+                  />
+                }
+                actions={todayActions}
+                abortUpgrade={abortUpgrade}
+                onClickViewAgents={onClickViewAgents}
+              />
+            ) : null}
+            {Object.keys(otherDays).map((day) => (
+              <ActivitySection
+                key={day}
+                title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
+                actions={otherDays[day]}
+                abortUpgrade={abortUpgrade}
+                onClickViewAgents={onClickViewAgents}
+              />
+            ))}
+          </EuiFlexGroup>
         </FullHeightFlyoutBody>
         <FlyoutFooterWPadding>
           <EuiFlexGroup justifyContent="flexStart">
