@@ -439,12 +439,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql([
-              '@timestamp',
-              'bytes',
-              'extension',
-              '@timestamp',
-            ]);
+            expect(await docTable.getHeaderFields()).to.eql(
+              hideTimeFieldColumnSetting
+                ? ['bytes', 'extension', '@timestamp']
+                : ['@timestamp', 'bytes', 'extension', '@timestamp']
+            );
           });
         });
       });
