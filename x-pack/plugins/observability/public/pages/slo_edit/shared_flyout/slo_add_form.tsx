@@ -24,17 +24,17 @@ function SloAddFormFlyout({
     <EuiPortal>
       <EuiFlyout
         onClose={onClose}
-        aria-labelledby="flyoutRuleAddTitle"
+        aria-labelledby="flyoutSLOAddTitle"
         size="l"
         maxWidth={620}
         ownFocus
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s" data-test-subj="addRuleFlyoutTitle">
+          <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
                 defaultMessage="Create SLO"
-                id="xpack.triggersActionsUI.sections.ruleAdd.flyoutTitle"
+                id="xpack.observability.sloAdd.flyoutTitle"
               />
             </h3>
           </EuiTitle>
