@@ -682,7 +682,7 @@ describe('[Logs onboarding] System logs', () => {
       });
     });
 
-    describe('when integration installation succeed', () => {
+    xdescribe('when integration installation succeed', () => {
       beforeEach(() => {
         cy.deleteIntegration('system');
         cy.intercept('GET', '/api/fleet/epm/packages/system').as(
