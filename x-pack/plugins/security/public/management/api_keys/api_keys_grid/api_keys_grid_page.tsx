@@ -116,10 +116,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const history = useHistory();
   const authc = useAuthentication();
 
-  const [state, queryApiKeysFn] = useAsyncFn(
+  const [state, queryApiKeysAggregationsFn] = useAsyncFn(
     () =>
       Promise.all([
-        new APIKeysAPIClient(services.http).queryApiKeys(),
         new APIKeysAPIClient(services.http).queryApiKeyAggregations(),
         authc.getCurrentUser(),
       ]),
@@ -143,7 +142,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   useEffect(() => {
     fetchApiKeys();
-    queryApiKeysFn();
+    queryApiKeysAggregationsFn();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTableChange = ({ page }: Criteria<ApiKey>) => {
@@ -188,7 +187,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
     );
   }
 
-  const [_, { aggregations }, currentUser] = state.value && state.value;
+  const [{ aggregations }, currentUser] = state.value && state.value;
 
   const pagination = {
     pageIndex: from / pageSize,
@@ -209,7 +208,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             onSuccess={(createApiKeyResponse) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              queryApiKeysFn();
+              fetchApiKeys();
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
@@ -229,7 +228,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            queryApiKeysFn();
+            fetchApiKeys();
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
