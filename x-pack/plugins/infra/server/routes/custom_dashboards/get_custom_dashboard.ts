@@ -47,10 +47,14 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
         });
       }
 
+      const attributes = customDashboards.saved_objects[0].attributes;
+
       return response.ok({
-        body: InfraGetCustomDashboardsResponseBodyRT.encode(
-          customDashboards.saved_objects[0].attributes
-        ),
+        body: InfraGetCustomDashboardsResponseBodyRT.encode({
+          assetType: attributes.assetType,
+          dashboardIdList: attributes.dashboardIdList,
+          kuery: attributes.kuery,
+        }),
       });
     })
   );
