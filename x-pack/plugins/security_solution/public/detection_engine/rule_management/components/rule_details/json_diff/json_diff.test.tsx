@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, within, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Matcher } from '@testing-library/react';
 import { escapeRegExp } from 'lodash';
 
@@ -264,5 +265,26 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
 
     rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: '' }} />);
     expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+  });
+
+  it('Unchanged sections of a rule should be hidden by default', () => {
+    const oldRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 1,
+    };
+
+    const newRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 2,
+    };
+
+    render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+    expect(screen.queryAllByText(matchInOrder(['author']))).toHaveLength(0);
+    expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(1);
+
+    userEvent.click(screen.getByText('Expand 44 unchanged lines'));
+
+    expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(0);
+    expect(screen.queryAllByText(matchInOrder(['author']))).toHaveLength(2);
   });
 });
