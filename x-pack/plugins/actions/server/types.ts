@@ -105,7 +105,7 @@ export type ExecutorType<
 export interface ValidatorType<T> {
   schema: {
     validate(value: unknown): T;
-    getSchema: () => AnySchema;
+    getSchema?: () => AnySchema;
   };
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
