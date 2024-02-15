@@ -7,8 +7,8 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
+import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
-import { getActionRequestExpiration } from '../../create/write_action_to_indices';
 import { stringify } from '../../../../utils/stringify';
 import type { HapiReadableStream } from '../../../../../types';
 import type {

@@ -12,7 +12,7 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
 } from './base_response_actions_client';
-import { ResponseActionsClientImpl } from './base_response_actions_client';
+import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
   ActionDetails,
   LogsEndpointAction,
@@ -34,7 +34,6 @@ import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
-import { HOST_NOT_ENROLLED } from '../../create/validate';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 jest.mock('../../action_details_by_id', () => {
