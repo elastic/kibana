@@ -135,12 +135,12 @@ describe('importRules', () => {
 
   /**
    * Existing rule may have nullable fields set to a value (e.g. `timestamp_override` is set to `some.value`) but
-   * a rule to import doesn't have these fields set (e.g. `timestamp_override` is presented at al in ndjson).
+   * a rule to import doesn't have these fields set (e.g. `timestamp_override` is NOT present at all in the ndjson file).
    * We expect the updated rule won't have such fields preserved (e.g. `timestamp_override` will be removed).
    *
    * Unit test is only able to check `updateRules()` receives a proper update object.
    */
-  it('ensures overwritten rule DOES NOT preserve missed in the imported rule fields when "overwriteRules" is "true" and matching rule found', async () => {
+  it('ensures overwritten rule DOES NOT preserve fields missed in the imported rule when "overwriteRules" is "true" and matching rule found', async () => {
     const existingRule = getRuleMock(
       getQueryRuleParams({
         timestampOverride: 'some.value',
