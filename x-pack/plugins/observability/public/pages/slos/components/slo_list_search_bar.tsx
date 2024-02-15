@@ -30,24 +30,20 @@ export type Item<T> = EuiSelectableOption & {
 export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar() {
-  const { state, store: storeState } = useUrlSearchState();
+  const { state, onStateChange: onChange } = useUrlSearchState();
   const { kqlQuery, filters } = state;
 
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
-  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-
-  const loading = isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo;
+  const loading = isDeletingSlo;
 
   const { dataView } = useCreateDataView({
     indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   });
 
   const onStateChange = (newState: Partial<SearchState>) => {
-    storeState({ page: 0, ...newState });
+    onChange({ page: 0, ...newState });
   };
 
   const {
