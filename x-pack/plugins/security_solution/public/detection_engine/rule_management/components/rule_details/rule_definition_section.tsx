@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLoadingSpinner,
-  EuiBadge,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
@@ -25,9 +24,10 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FieldIcon } from '@kbn/react-field';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
@@ -66,10 +66,8 @@ const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
   </EuiText>
 );
 
-const EuiBadgeWrap = styled(EuiBadge)`
-  .euiBadge__text {
-    white-space: pre-wrap !important;
-  }
+const FiltersWidthLimiter = styled.div`
+  max-width: 600px;
 `;
 
 interface FiltersProps {
@@ -89,27 +87,15 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
   const flattenedFilters = mapAndFlattenFilters(filters);
 
   return (
-    <EuiFlexGroup wrap responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
-      {flattenedFilters.map((filter, idx) => {
-        const displayContent = filter.meta.alias ? (
-          filter.meta.alias
-        ) : (
-          <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
-        );
-        return (
-          <EuiFlexItem
-            grow={false}
-            key={`filter-${idx}`}
-            css={{ width: '100%' }}
-            data-test-subj={`filterItem-${filter.meta.key}`}
-          >
-            <EuiBadgeWrap color="hollow">
-              {indexPattern != null ? displayContent : <EuiLoadingSpinner size="m" />}
-            </EuiBadgeWrap>
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+    <FiltersWidthLimiter>
+      <EuiFlexGroup wrap={true} responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
+        <FilterItems
+          filters={flattenedFilters}
+          indexPatterns={[indexPattern as DataView]}
+          readOnly={true}
+        />
+      </EuiFlexGroup>
+    </FiltersWidthLimiter>
   );
 };
 
