@@ -94,12 +94,9 @@ export interface Operator {
   ) => FilterMetaParams | undefined;
 }
 
-export const isOperator: Operator = {
-  message: strings.getIsOperatorOptionLabel(),
+const isSharedProps = {
   type: FILTERS.PHRASE,
-  negate: false,
-  id: OPERATORS.IS,
-  getParamsFromPrevOperator: (prevOperator, params) => {
+  getParamsFromPrevOperator: (prevOperator: Operator | undefined, params: FilterMetaParams) => {
     if (!prevOperator) return;
     if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id)) return params;
     if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) {
@@ -108,48 +105,44 @@ export const isOperator: Operator = {
   },
 };
 
+export const isOperator: Operator = {
+  ...isSharedProps,
+  message: strings.getIsOperatorOptionLabel(),
+  negate: false,
+  id: OPERATORS.IS,
+};
+
 export const isNotOperator: Operator = {
+  ...isSharedProps,
   message: strings.getIsNotOperatorOptionLabel(),
-  type: FILTERS.PHRASE,
   negate: true,
   id: OPERATORS.IS_NOT,
-  getParamsFromPrevOperator: (prevOperator, params) => {
+};
+
+const isOneOfSharedProps = {
+  type: FILTERS.PHRASES,
+  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  getParamsFromPrevOperator: (prevOperator: Operator | undefined, params: FilterMetaParams) => {
     if (!prevOperator) return;
-    if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id)) return params;
-    if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) {
-      if (Array.isArray(params) && params.length > 0) return params[0];
+    if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) return params;
+    if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id) && typeof params === 'string') {
+      if (!Array.isArray(params)) return [params];
     }
   },
 };
 
 export const isOneOfOperator: Operator = {
+  ...isOneOfSharedProps,
   message: strings.getIsOneOfOperatorOptionLabel(),
-  type: FILTERS.PHRASES,
   negate: false,
-  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   id: OPERATORS.IS_ONE_OF,
-  getParamsFromPrevOperator: (prevOperator, params) => {
-    if (!prevOperator) return;
-    if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) return params;
-    if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id) && typeof params === 'string') {
-      if (!Array.isArray(params)) return [params];
-    }
-  },
 };
 
 export const isNotOneOfOperator: Operator = {
+  ...isOneOfSharedProps,
   message: strings.getIsNotOneOfOperatorOptionLabel(),
-  type: FILTERS.PHRASES,
   negate: true,
-  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   id: OPERATORS.IS_NOT_ONE_OF,
-  getParamsFromPrevOperator: (prevOperator, params) => {
-    if (!prevOperator) return;
-    if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) return params;
-    if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id) && typeof params === 'string') {
-      if (!Array.isArray(params)) return [params];
-    }
-  },
 };
 
 const rangeOperatorsSharedProps = {
@@ -164,23 +157,25 @@ const rangeOperatorsSharedProps = {
   },
 };
 
+const betweenGetParamsFromPrevOperator = (
+  prevOperator: Operator | undefined,
+  params: FilterMetaParams
+) => {
+  if (!prevOperator) return;
+  if (
+    [OPERATORS.LESS, OPERATORS.GREATER_OR_EQUAL, OPERATORS.BETWEEN, OPERATORS.NOT_BETWEEN].includes(
+      prevOperator.id
+    )
+  )
+    return params;
+};
+
 export const isBetweenOperator: Operator = {
   ...rangeOperatorsSharedProps,
   message: strings.getIsBetweenOperatorOptionLabel(),
   id: OPERATORS.BETWEEN,
   negate: false,
-  getParamsFromPrevOperator: (prevOperator, params) => {
-    if (!prevOperator) return;
-    if (
-      [
-        OPERATORS.LESS,
-        OPERATORS.GREATER_OR_EQUAL,
-        OPERATORS.BETWEEN,
-        OPERATORS.NOT_BETWEEN,
-      ].includes(prevOperator.id)
-    )
-      return params;
-  },
+  getParamsFromPrevOperator: betweenGetParamsFromPrevOperator,
 };
 
 export const isNotBetweenOperator: Operator = {
@@ -188,18 +183,7 @@ export const isNotBetweenOperator: Operator = {
   message: strings.getIsNotBetweenOperatorOptionLabel(),
   negate: true,
   id: OPERATORS.NOT_BETWEEN,
-  getParamsFromPrevOperator: (prevOperator, params) => {
-    if (!prevOperator) return;
-    if (
-      [
-        OPERATORS.LESS,
-        OPERATORS.GREATER_OR_EQUAL,
-        OPERATORS.BETWEEN,
-        OPERATORS.NOT_BETWEEN,
-      ].includes(prevOperator.id)
-    )
-      return params;
-  },
+  getParamsFromPrevOperator: betweenGetParamsFromPrevOperator,
 };
 
 export const isLessThanOperator: Operator = {
