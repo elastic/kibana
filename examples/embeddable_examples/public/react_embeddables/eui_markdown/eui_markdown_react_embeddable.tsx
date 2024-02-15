@@ -90,6 +90,8 @@ export const registerMarkdownEditorEmbeddable = () => {
         const content = useStateFromPublishingSubject(contentSubject);
         const viewMode = useInheritedViewMode(thisApi) ?? 'view';
 
+        throw new Error('simulated failure');
+
         return viewMode === 'edit' ? (
           <EuiMarkdownEditor
             css={css`
