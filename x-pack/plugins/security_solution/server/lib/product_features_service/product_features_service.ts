@@ -117,12 +117,12 @@ export class ProductFeaturesService {
 
   public registerApiAccessControl(http: HttpServiceSetup) {
     // The `securitySolutionProductFeature:` prefix is used for ProductFeature based control.
-    // Should be used only by routes that do not need RBAC, only direct appFeature control.
+    // Should be used only by routes that do not need RBAC, only direct productFeature control.
     const APP_FEATURE_TAG_PREFIX = 'securitySolutionProductFeature:';
     // The "access:securitySolution-" prefix is used for API action based control.
     // Should be used by routes that need RBAC, extending the `access:` role privilege check from the security plugin.
-    // An additional check is performed to ensure the privilege has been registered by the appFeature service,
-    // preventing full access (`*`) roles, such as superuser, from bypassing appFeature controls.
+    // An additional check is performed to ensure the privilege has been registered by the productFeature service,
+    // preventing full access (`*`) roles, such as superuser, from bypassing productFeature controls.
     const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
 
     http.registerOnPostAuth((request, response, toolkit) => {

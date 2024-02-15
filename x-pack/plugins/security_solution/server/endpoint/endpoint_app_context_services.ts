@@ -194,7 +194,7 @@ export class EndpointAppContextService {
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
-    if (!this.startDependencies?.appFeaturesService) {
+    if (!this.startDependencies?.productFeaturesService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
@@ -203,7 +203,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
-      this.startDependencies.appFeaturesService
+      this.startDependencies.productFeaturesService
     );
   }
 
