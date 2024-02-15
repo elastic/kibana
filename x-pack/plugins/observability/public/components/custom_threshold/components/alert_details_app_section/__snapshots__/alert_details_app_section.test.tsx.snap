@@ -7,10 +7,8 @@ Array [
       Object {
         "meta": Object {},
         "query": Object {
-          "term": Object {
-            "host.name": Object {
-              "value": "host-1",
-            },
+          "match_phrase": Object {
+            "host.name": "host-1",
           },
         },
       },

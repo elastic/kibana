@@ -252,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },
           query: { query: 'host.name:* and container.id:*', language: 'kuery' },
+          filters: [],
         });
         expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });

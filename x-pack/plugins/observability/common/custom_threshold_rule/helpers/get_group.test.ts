@@ -16,8 +16,8 @@ describe('getGroup', () => {
       ];
 
       expect(getGroupQueries(groups)).toEqual([
-        { term: { 'container.id': { value: 'container-0' } } },
-        { term: { 'host.name': { value: 'host-0' } } },
+        { match_phrase: { 'container.id': 'container-0' } },
+        { match_phrase: { 'host.name': 'host-0' } },
       ]);
     });
 
@@ -29,8 +29,8 @@ describe('getGroup', () => {
       const fieldName = 'custom.field';
 
       expect(getGroupQueries(groups, fieldName)).toEqual([
-        { term: { 'custom.field': { value: 'container-0' } } },
-        { term: { 'custom.field': { value: 'host-0' } } },
+        { match_phrase: { 'custom.field': 'container-0' } },
+        { match_phrase: { 'custom.field': 'host-0' } },
       ]);
     });
 
@@ -51,11 +51,11 @@ describe('getGroup', () => {
       expect(getGroupFilters(groups)).toEqual([
         {
           meta: {},
-          query: { term: { 'container.id': { value: 'container-0' } } },
+          query: { match_phrase: { 'container.id': 'container-0' } },
         },
         {
           meta: {},
-          query: { term: { 'host.name': { value: 'host-0' } } },
+          query: { match_phrase: { 'host.name': 'host-0' } },
         },
       ]);
     });
@@ -70,11 +70,11 @@ describe('getGroup', () => {
       expect(getGroupFilters(groups, fieldName)).toEqual([
         {
           meta: {},
-          query: { term: { 'custom.field': { value: 'container-0' } } },
+          query: { match_phrase: { 'custom.field': 'container-0' } },
         },
         {
           meta: {},
-          query: { term: { 'custom.field': { value: 'host-0' } } },
+          query: { match_phrase: { 'custom.field': 'host-0' } },
         },
       ]);
     });

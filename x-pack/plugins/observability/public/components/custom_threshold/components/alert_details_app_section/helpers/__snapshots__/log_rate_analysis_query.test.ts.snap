@@ -117,10 +117,8 @@ Object {
         },
       },
       Object {
-        "term": Object {
-          "groupByField": Object {
-            "value": "groupByValue",
-          },
+        "match_phrase": Object {
+          "groupByField": "groupByValue",
         },
       },
     ],
@@ -185,17 +183,13 @@ Object {
         },
       },
       Object {
-        "term": Object {
-          "groupByField": Object {
-            "value": "groupByValue",
-          },
+        "match_phrase": Object {
+          "groupByField": "groupByValue",
         },
       },
       Object {
-        "term": Object {
-          "secondGroupByField": Object {
-            "value": "secondGroupByValue",
-          },
+        "match_phrase": Object {
+          "secondGroupByField": "secondGroupByValue",
         },
       },
     ],
@@ -211,10 +205,8 @@ Object {
   "bool": Object {
     "filter": Array [
       Object {
-        "term": Object {
-          "groupByField": Object {
-            "value": "groupByValue",
-          },
+        "match_phrase": Object {
+          "groupByField": "groupByValue",
         },
       },
     ],
