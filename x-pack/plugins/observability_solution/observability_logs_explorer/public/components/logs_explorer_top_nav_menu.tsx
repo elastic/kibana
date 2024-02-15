@@ -40,7 +40,6 @@ export const LogsExplorerTopNavMenu = () => {
 const ServerlessTopNav = () => {
   const { services } = useKibanaContextForPlugin();
   const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
-
   return (
     <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
@@ -65,6 +64,7 @@ const ServerlessTopNav = () => {
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
+            <CreateSloLinkForValidState observability={services.observability} />
             <ConnectedDiscoverLink />
             <VerticalRule />
             <FeedbackLink />
