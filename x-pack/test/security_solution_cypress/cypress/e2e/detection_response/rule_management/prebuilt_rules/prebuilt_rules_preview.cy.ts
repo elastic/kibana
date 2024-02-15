@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
@@ -64,6 +65,7 @@ import {
   deleteDataView,
   postDataView,
 } from '../../../../tasks/api_calls/common';
+import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 
 const TEST_ENV_TAGS = ['@ess', '@serverless'];
 
@@ -664,7 +666,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
 
       visitRulesManagementTable();
-      clickRuleUpdatesTab();
     });
 
     describe('Basic functionality', { tags: TEST_ENV_TAGS }, () => {
@@ -1120,6 +1121,44 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
           .contains('"name": "Outdated rule 1"')
           .should('not.exist');
+      });
+
+      it('Dynamic properties should not be included in preview', () => {
+        const dateBeforeRuleExecution = new Date();
+
+        /* Enable a rule and wait for it to execute */
+        enableRules({ names: [OUTDATED_RULE_1['security-rule'].name] });
+        waitForRulesToFinishExecution(
+          [OUTDATED_RULE_1['security-rule'].rule_id],
+          dateBeforeRuleExecution
+        );
+
+        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_review').as(
+          'updatePrebuiltRulesReview'
+        );
+
+        clickRuleUpdatesTab();
+
+        /* Check that API response contains dynamic properties, like "enabled" and "execution_summary" */
+        cy.wait('@updatePrebuiltRulesReview')
+          .its('response.body')
+          .then((body: ReviewRuleUpgradeResponseBody) => {
+            const executedRuleInfo = body.rules.find(
+              (ruleInfo) => ruleInfo.rule_id === OUTDATED_RULE_1['security-rule'].rule_id
+            );
+
+            const enabled = executedRuleInfo?.current_rule?.enabled;
+            expect(enabled).to.eql(true);
+
+            const executionSummary = executedRuleInfo?.current_rule?.execution_summary;
+            expect(executionSummary).to.not.eql(undefined);
+          });
+
+        /* Open the preview and check that dynamic properties are not shown in the diff */
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('enabled').should('not.exist');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('execution_summary').should('not.exist');
       });
     });
   });
