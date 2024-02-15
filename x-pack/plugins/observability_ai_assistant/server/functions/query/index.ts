@@ -18,7 +18,10 @@ import {
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../../../common/functions/visualize_esql';
 import { FunctionVisibility, MessageRole } from '../../../common/types';
-import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import {
+  concatenateChatCompletionChunks,
+  type ConcatenatedMessage,
+} from '../../../common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '../../service/util/create_function_response_message';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
@@ -74,7 +77,7 @@ export function registerQueryFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.AssistantOnly,
-      description: 'Display the results of an ES|QL query.',
+      description: 'Display the results of an ES|QL query',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -104,7 +107,7 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
@@ -322,20 +325,36 @@ export function registerQueryFunction({
             /```esql([\s\S]*?)```/
           )?.[1];
 
+          let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
+
+          if (
+            !args.intention ||
+            !esqlQuery ||
+            args.intention === VisualizeESQLUserIntention.generateQueryOnly
+          ) {
+            functionCall = undefined;
+          } else if (args.intention === VisualizeESQLUserIntention.executeAndReturnResults) {
+            functionCall = {
+              name: 'execute_query',
+              arguments: JSON.stringify({ query: esqlQuery }),
+              trigger: MessageRole.Assistant as const,
+            };
+          } else {
+            functionCall = {
+              name: 'visualize_query',
+              arguments: JSON.stringify({ query: esqlQuery, intention: args.intention }),
+              trigger: MessageRole.Assistant as const,
+            };
+          }
+
           return {
             ...msg,
             message: {
               ...msg.message,
               content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
-              ...(esqlQuery &&
-              args.intention &&
-              args.intention !== VisualizeESQLUserIntention.generateQueryOnly
+              ...(functionCall
                 ? {
-                    function_call: {
-                      name: 'visualize_query',
-                      arguments: JSON.stringify({ query: esqlQuery, intention: args.intention }),
-                      trigger: MessageRole.Assistant as const,
-                    },
+                    function_call: functionCall,
                   }
                 : {}),
             },

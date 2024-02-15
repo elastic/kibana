@@ -7,7 +7,7 @@
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { isArray, pick, remove } from 'lodash';
-import { concatMap, filter, lastValueFrom, map, toArray } from 'rxjs';
+import { concatMap, filter, lastValueFrom, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';

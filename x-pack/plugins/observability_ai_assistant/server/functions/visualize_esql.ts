@@ -6,7 +6,10 @@
  */
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLSearchReponse } from '@kbn/es-types';
-import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
+import {
+  visualizeESQLFunction,
+  VisualizeESQLUserIntention,
+} from '../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerVisualizeESQLFunction({
@@ -16,7 +19,7 @@ export function registerVisualizeESQLFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     visualizeESQLFunction,
-    async ({ arguments: { query }, connectorId, messages }, signal) => {
+    async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
       // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;
@@ -36,7 +39,16 @@ export function registerVisualizeESQLFunction({
           name,
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
-      return { content: columns };
+      return {
+        content: {
+          columns,
+          message:
+            intention === VisualizeESQLUserIntention.executeAndReturnResults ||
+            intention === VisualizeESQLUserIntention.generateQueryOnly
+              ? 'These results are not visualized'
+              : 'The result is visualized in the conversation',
+        },
+      };
     }
   );
 }

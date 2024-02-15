@@ -56,8 +56,9 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
-        If the user wants to visualize data, or run any arbitrary query, always use the "query" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries
-        or explain anything about the ES|QL query language yourself.
+        If the user wants to visualize data, or run any arbitrary query, always use the "query" function. The "query" function also answers all questions about ES|QL.
+        DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
+        DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
 
         Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
         even if it has been called before.

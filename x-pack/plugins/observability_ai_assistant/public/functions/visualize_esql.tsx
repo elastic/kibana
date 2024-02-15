@@ -40,7 +40,10 @@ import type {
 import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
 
 interface VisualizeLensResponse {
-  content: DatatableColumn[];
+  content: {
+    columns: DatatableColumn[];
+    message: string;
+  };
 }
 
 interface VisualizeESQLProps {
@@ -357,7 +360,7 @@ export function registerVisualizeQueryRenderFunction({
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}
-          columns={content}
+          columns={content.columns}
           query={query}
           onActionClick={onActionClick}
           userOverrides={userOverrides}
