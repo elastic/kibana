@@ -70,5 +70,5 @@ export const initInfraServer = (
   initInfraMetricsRoute(libs);
   initProfilingRoutes(libs);
   initServicesRoute(libs);
-  initCustomDashboardsRoutes(libs.framework, coreStart, infraPluginsStart);
+  initCustomDashboardsRoutes(libs.framework);
 };
