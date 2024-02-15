@@ -1044,6 +1044,9 @@ describe('rule_form', () => {
       };
 
       await setup();
+      // expect the accordian to be closed by default
+      expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
+
       expect(getAlertDelayInput().props().value).toEqual(1);
 
       getAlertDelayInput().simulate('change', { target: { value: '2' } });
