@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -15,12 +15,13 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SchedulingConfiguraton } from '@kbn/search-connectors';
+import { IngestionStatus, SchedulingConfiguraton } from '@kbn/search-connectors';
 import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 
 import { Status } from '../../../../../../common/types/api';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { LicensingLogic } from '../../../../shared/licensing';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
@@ -62,18 +63,13 @@ export const ConnectorScheduling: React.FC = () => {
   const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
 
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const shouldShowIncrementalSync =
     hasIncrementalSyncFeature && productFeatures.hasIncrementalSyncEnabled;
 
   const shouldShowAccessControlSync =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
 
-  const handleHasChanges = useCallback(
-    (changes) => {
-      setHasChanges(changes);
-    },
-    [hasChanges]
-  );
   if (!indices.isConnectorIndex(index)) {
     return <></>;
   }
@@ -114,6 +110,7 @@ export const ConnectorScheduling: React.FC = () => {
             <EuiSpacer size="l" />
           </>
         }
+        connector={index.connector}
         configurationPathOnClick={() =>
           navigateToUrl(
             generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
@@ -124,9 +121,9 @@ export const ConnectorScheduling: React.FC = () => {
         }
         dataTelemetryIdPrefix="entSearchContent"
         hasChanges={hasChanges}
-        index={index}
-        ingestionStatus={ingestionStatus}
-        setHasChanges={handleHasChanges}
+        hasIngestionError={ingestionStatus === IngestionStatus.ERROR}
+        hasPlatinumLicense={hasPlatinumLicense}
+        setHasChanges={setHasChanges}
         shouldShowAccessControlSync={shouldShowAccessControlSync}
         shouldShowIncrementalSync={shouldShowIncrementalSync}
         updateConnectorStatus={status === Status.LOADING}

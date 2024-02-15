@@ -8,12 +8,9 @@
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestionStatus } from '../../types/indices';
 
-export const ConnectorError: React.FC<{ ingestionStatus: IngestionStatus }> = ({
-  ingestionStatus,
-}) => {
-  return ingestionStatus === IngestionStatus.ERROR ? (
+export const ConnectorError: React.FC = () => {
+  return (
     <>
       <EuiCallOut
         color="warning"
@@ -24,7 +21,5 @@ export const ConnectorError: React.FC<{ ingestionStatus: IngestionStatus }> = ({
       />
       <EuiSpacer size="l" />
     </>
-  ) : (
-    <></>
   );
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ConnectorIndex, CrawlerIndex, ElasticsearchViewIndexExtension } from "./indices";
+import { ConnectorIndex, CrawlerIndex, ElasticsearchViewIndexExtension } from './indices';
 export interface SelectOption {
   label: string;
   value: string;

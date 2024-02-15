@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -18,15 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IngestionStatus } from '../../types/indices';
 import {
+  Connector,
   ConnectorStatus,
-  ConnectorViewIndex,
-  CrawlerViewIndex,
   SchedulingConfiguraton,
   SyncJobType,
 } from '../../types/connectors';
-import { LicenseContext } from '../configuration';
 import { ConnectorError } from './connector_error';
 import { ConnectorUnconfigured } from './connector_unconfigured';
 import { ConnectorContentScheduling } from './full_content';
@@ -57,11 +54,12 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 
 interface ConnectorContentSchedulingProps {
   children?: React.ReactNode;
+  connector: Connector;
   configurationPathOnClick: () => void;
   dataTelemetryIdPrefix: string;
+  hasPlatinumLicense: boolean;
   hasChanges: boolean;
-  index: CrawlerViewIndex | ConnectorViewIndex;
-  ingestionStatus: IngestionStatus;
+  hasIngestionError: boolean;
   setHasChanges: (changes: boolean) => void;
   shouldShowAccessControlSync: boolean;
   shouldShowIncrementalSync: boolean;
@@ -71,35 +69,36 @@ interface ConnectorContentSchedulingProps {
 
 export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingProps> = ({
   children,
+  connector,
   configurationPathOnClick,
   dataTelemetryIdPrefix,
   hasChanges,
-  index,
-  ingestionStatus,
+  hasIngestionError,
+  hasPlatinumLicense,
   setHasChanges,
   shouldShowAccessControlSync,
   shouldShowIncrementalSync,
   updateConnectorStatus,
   updateScheduling,
 }) => {
-  const { hasPlatinumLicense } = useContext(LicenseContext);
-
   const [hasFullSyncChanges, setHasFullSyncChanges] = useState<boolean>(false);
   const [hasAccessSyncChanges, setAccessSyncChanges] = useState<boolean>(false);
   const [hasIncrementalSyncChanges, setIncrementalSyncChanges] = useState<boolean>(false);
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.use_document_level_security?.value;
+    !connector.configuration.use_document_level_security?.value;
 
   const hasSyncStatusChanged = useMemo(() => {
     return hasFullSyncChanges || hasAccessSyncChanges || hasIncrementalSyncChanges;
   }, [hasFullSyncChanges, hasAccessSyncChanges, hasIncrementalSyncChanges]);
   useEffect(() => {
-    if (hasChanges != hasSyncStatusChanged) setHasChanges(hasSyncStatusChanged);
-  }, [hasSyncStatusChanged]);
+    if (hasChanges !== hasSyncStatusChanged) {
+      setHasChanges(hasSyncStatusChanged);
+    }
+  }, [hasSyncStatusChanged, hasChanges, setHasChanges]);
 
   if (
-    index.connector.status === ConnectorStatus.CREATED ||
-    index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION
+    connector.status === ConnectorStatus.CREATED ||
+    connector.status === ConnectorStatus.NEEDS_CONFIGURATION
   ) {
     return (
       <ConnectorUnconfigured
@@ -111,7 +110,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   return (
     <>
       <EuiSpacer size="l" />
-      <ConnectorError ingestionStatus={ingestionStatus} />
+      {hasIngestionError ? <ConnectorError /> : <></>}
       {children}
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -129,9 +128,8 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
               <EuiFlexItem>
                 <ConnectorContentScheduling
                   type={SyncJobType.FULL}
-                  index={index}
+                  connector={connector}
                   setHasChanges={setHasChanges}
-                  hasChanges={hasChanges}
                   setHasSyncTypeChanges={setHasFullSyncChanges}
                   hasSyncTypeChanges={hasFullSyncChanges}
                   updateConnectorStatus={updateConnectorStatus}
@@ -143,9 +141,8 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                 <EuiFlexItem>
                   <ConnectorContentScheduling
                     type={SyncJobType.INCREMENTAL}
-                    index={index}
+                    connector={connector}
                     setHasChanges={setHasChanges}
-                    hasChanges={hasChanges}
                     setHasSyncTypeChanges={setIncrementalSyncChanges}
                     hasSyncTypeChanges={hasIncrementalSyncChanges}
                     updateConnectorStatus={updateConnectorStatus}
@@ -176,10 +173,9 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                 >
                   <ConnectorContentScheduling
                     type={SyncJobType.ACCESS_CONTROL}
-                    index={index}
+                    connector={connector}
                     hasPlatinumLicense={hasPlatinumLicense}
                     setHasChanges={setHasChanges}
-                    hasChanges={hasChanges}
                     setHasSyncTypeChanges={setAccessSyncChanges}
                     hasSyncTypeChanges={hasAccessSyncChanges}
                     updateConnectorStatus={updateConnectorStatus}

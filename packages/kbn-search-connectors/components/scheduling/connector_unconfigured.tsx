@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface ConnectorUnconfiguredProps {
-  configurationPathOnClick: () => void;
+  configurationPathOnClick?: () => void;
   dataTelemetryIdPrefix: string;
 }
 export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({

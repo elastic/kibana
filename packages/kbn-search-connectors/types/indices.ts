@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HealthStatus, IndexName, IndicesStatsIndexMetadataState, Uuid } from "@elastic/elasticsearch/lib/api/types";
-import { Connector } from "./connectors";
-import { Crawler } from "./crawler";
+import {
+  HealthStatus,
+  IndexName,
+  IndicesStatsIndexMetadataState,
+  Uuid,
+} from '@elastic/elasticsearch/lib/api/types';
+import { Connector } from './connectors';
+import { Crawler } from './crawler';
 
 export enum IngestionStatus {
   CONFIGURED,

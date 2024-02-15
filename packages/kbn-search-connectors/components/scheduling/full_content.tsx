@@ -19,25 +19,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  ConnectorViewIndex,
-  CrawlerViewIndex,
-  SchedulingConfiguraton,
-  SyncJobType,
-} from '../../types/connectors';
+import { Connector, SchedulingConfiguraton, SyncJobType } from '../../types/connectors';
 import { PlatinumLicensePopover } from '../configuration/platinum_license_popover';
 import { ConnectorCronEditor } from './connector_cron_editor';
 export interface ConnectorContentSchedulingProps {
-  setHasSyncTypeChanges: (state: boolean) => void;
-  hasSyncTypeChanges: boolean;
-  hasChanges: boolean;
-  setHasChanges: (hasChanges: boolean) => void;
+  connector: Connector;
+  dataTelemetryIdPrefix: string;
   hasPlatinumLicense?: boolean;
-  index: CrawlerViewIndex | ConnectorViewIndex;
+  hasSyncTypeChanges: boolean;
+  setHasChanges: (hasChanges: boolean) => void;
+  setHasSyncTypeChanges: (state: boolean) => void;
   type: SyncJobType;
   updateConnectorStatus: boolean;
   updateScheduling: (configuration: SchedulingConfiguraton) => void;
-  dataTelemetryIdPrefix: string;
 }
 const getAccordionTitle = (type: ConnectorContentSchedulingProps['type']) => {
   switch (type) {
@@ -103,16 +97,16 @@ const EnableSwitch: React.FC<{
 );
 
 export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProps> = ({
+  connector,
+  dataTelemetryIdPrefix,
   setHasSyncTypeChanges,
+  hasPlatinumLicense = false,
   hasSyncTypeChanges,
   type,
-  index,
-  hasPlatinumLicense = false,
   updateConnectorStatus,
   updateScheduling,
-  dataTelemetryIdPrefix,
 }) => {
-  const schedulingInput = index.connector.scheduling;
+  const schedulingInput = connector.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
   const [isAccordionOpen, setIsAccordionOpen] = useState<'open' | 'closed'>(
     scheduling[type].enabled ? 'open' : 'closed'
@@ -121,7 +115,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
 
   const isGated = !hasPlatinumLicense && type === SyncJobType.ACCESS_CONTROL;
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.use_document_level_security?.value;
+    !connector.configuration.use_document_level_security?.value;
 
   const isEnableSwitchDisabled =
     type === SyncJobType.ACCESS_CONTROL && (!hasPlatinumLicense || isDocumentLevelSecurityDisabled);
@@ -232,8 +226,8 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                   });
                 }}
                 onSave={(interval) => {
-                  const updatedScheduling = {
-                    ...index.connector.scheduling,
+                  const updatedScheduling: SchedulingConfiguraton = {
+                    ...connector.scheduling,
                     [type]: {
                       ...scheduling[type],
                       interval,

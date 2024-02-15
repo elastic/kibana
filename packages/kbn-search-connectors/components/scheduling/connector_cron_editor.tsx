@@ -13,26 +13,26 @@ import { Frequency } from '../../types/cron_editor';
 import { CronEditor } from '../cron_editor';
 
 interface ConnectorCronEditorProps {
+  dataTelemetryIdPrefix: string;
   disabled?: boolean;
   frequencyBlockList?: string[];
+  hasSyncTypeChanges: boolean;
   onReset?(): void;
   onSave?(interval: ConnectorScheduling['interval']): void;
   scheduling: ConnectorScheduling;
-  hasSyncTypeChanges: boolean;
   setHasSyncTypeChanges: (state: boolean) => void;
   status: boolean;
-  dataTelemetryIdPrefix: string;
 }
 export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
+  dataTelemetryIdPrefix,
   disabled = false,
   frequencyBlockList = ['MINUTE'],
-  scheduling,
-  onSave,
-  onReset,
   hasSyncTypeChanges,
+  onReset,
+  onSave,
+  scheduling,
   setHasSyncTypeChanges,
   status,
-  dataTelemetryIdPrefix,
 }) => {
   const [newInterval, setNewInterval] = useState(scheduling.interval);
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
