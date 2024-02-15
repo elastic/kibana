@@ -28,9 +28,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type HasType, type HasParentApi, type PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-
 import type { TimeRange } from '@kbn/es-query';
 import { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
@@ -45,7 +43,6 @@ import { useMlFromLensKibanaContext } from './context';
 export interface CreateADJobParams {
   jobId: string;
   bucketSpan: string;
-  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>> | undefined;
   startJob: boolean;
   runInRealTime: boolean;
 }
@@ -56,7 +53,6 @@ interface Props {
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
   layerIndex: number;
-  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>> | undefined;
   timeRange: TimeRange | undefined;
   incomingCreateError?: { text: string; errorText: string };
   outerFormComplete?: boolean;
@@ -76,7 +72,6 @@ export const JobDetails: FC<Props> = ({
   createADJob,
   layer,
   layerIndex,
-  embeddable,
   timeRange,
   incomingCreateError,
   outerFormComplete,
@@ -110,7 +105,6 @@ export const JobDetails: FC<Props> = ({
     const result = await createADJob({
       jobId,
       bucketSpan,
-      embeddable,
       startJob,
       runInRealTime,
     });

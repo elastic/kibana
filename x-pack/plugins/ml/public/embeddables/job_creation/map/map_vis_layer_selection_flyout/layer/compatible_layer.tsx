@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { MapApi } from '../../../../../ui_actions/types';
 import {
   type LayerResult,
   QuickGeoJobCreator,
@@ -34,7 +34,7 @@ interface DropDownLabel {
 }
 
 interface Props {
-  embeddable: MapEmbeddable;
+  embeddable: MapApi;
   layer: LayerResult;
   layerIndex: number;
 }
@@ -78,18 +78,12 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
   }, [layer?.dataView?.id, embeddable, selectedSplitField]);
 
   const createGeoJob = useCallback(
-    async ({
-      jobId,
-      bucketSpan,
-      embeddable: mapEmbeddable,
-      startJob,
-      runInRealTime,
-    }: CreateADJobParams) => {
+    async ({ jobId, bucketSpan, startJob, runInRealTime }: CreateADJobParams) => {
       try {
         const result = await quickJobCreator.createAndSaveGeoJob({
           jobId,
           bucketSpan,
-          embeddable: mapEmbeddable as MapEmbeddable,
+          embeddable,
           startJob,
           runInRealTime,
           sourceDataView: layer.dataView,
@@ -146,8 +140,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
         layerIndex={layerIndex}
         createADJob={createGeoJob}
         createADJobInWizard={createGeoJobInWizard}
-        embeddable={embeddable}
-        timeRange={embeddable.getInput().timeRange}
+        timeRange={embeddable.localTimeRange?.value}
         incomingCreateError={createError}
       >
         <>

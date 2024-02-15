@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +15,7 @@ import {
   EuiSplitPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import type { MapApi } from '../../../../../ui_actions/types';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_map';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';
@@ -23,7 +23,7 @@ import { IncompatibleLayer } from './incompatible_layer';
 interface Props {
   layer: LayerResult;
   layerIndex: number;
-  embeddable: MapEmbeddable;
+  embeddable: MapApi;
 }
 
 export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => (

@@ -15,7 +15,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
@@ -23,12 +22,6 @@ import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
-
-export function isLensEmbeddable(arg: any): arg is Embeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'lens';
-}
-
-export type Dashboard = Embeddable['parent'];
 
 interface CreationState {
   success: boolean;
@@ -226,7 +219,10 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  private async createDashboardLink(dashboard: Partial<PublishesPanelTitle & PublishesSavedObjectId>, datafeedConfig: estypes.MlDatafeed) {
+  private async createDashboardLink(
+    dashboard: Partial<PublishesPanelTitle & PublishesSavedObjectId>,
+    datafeedConfig: estypes.MlDatafeed
+  ) {
     const savedObjectId = dashboard.savedObjectId?.value;
     if (!savedObjectId) {
       return null;
@@ -261,7 +257,10 @@ export class QuickJobCreatorBase {
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  private async getCustomUrls(dashboard: Partial<PublishesPanelTitle & PublishesSavedObjectId>, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(
+    dashboard: Partial<PublishesPanelTitle & PublishesSavedObjectId>,
+    datafeedConfig: estypes.MlDatafeed
+  ) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }

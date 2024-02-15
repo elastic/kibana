@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type HasType, type HasParentApi, type PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
+import type { MapApi } from '../../../../ui_actions/types';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import { getDataViews } from '../../../util/dependency_cache';
 import {
@@ -62,7 +62,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
   }: {
     jobId: string;
     bucketSpan: string;
-    embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>;
+    embeddable: MapApi;
     startJob: boolean;
     runInRealTime: boolean;
     dataViewId?: string;
@@ -80,7 +80,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     } = await getJobsItemsFromEmbeddable(embeddable);
 
     // Map level stuff
-    const embeddableQuery = embeddable.localQuery?.value as Query ?? getDefaultQuery();
+    const embeddableQuery = (embeddable.localQuery?.value as Query) ?? getDefaultQuery();
     const embeddableFilters = embeddable.localFilters?.value ?? [];
 
     if (dashboardQuery === undefined || dashboardFilters === undefined) {

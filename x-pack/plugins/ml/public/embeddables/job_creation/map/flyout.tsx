@@ -6,8 +6,6 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import type { PublishesDataViews, PublishesPanelTitle } from '@kbn/presentation-publishing';
-import { type HasMapConfig } from '@kbn/maps-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -21,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { MapApi } from '../../../ui_actions/types';
 import { Layer } from './map_vis_layer_selection_flyout/layer';
 import {
   LayerResult,
@@ -28,7 +27,7 @@ import {
 } from '../../../application/jobs/new_job/job_from_map';
 
 interface Props {
-  embeddable: HasMapConfig & Partial<PublishesDataViews & PublishesPanelTitle>;
+  embeddable: MapApi;
   onClose: () => void;
 }
 

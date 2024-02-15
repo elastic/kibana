@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -19,14 +18,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
+import type { LensApi } from '../../../../ui_actions/types';
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
 import { useMlFromLensKibanaContext } from '../../common/context';
 
 interface Props {
-  embeddable: Embeddable;
+  embeddable: LensApi;
   onClose: () => void;
 }
 
@@ -66,7 +65,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
           <FormattedMessage
             id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
             defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
-            values={{ title: embeddable.getTitle() }}
+            values={{ title: embeddable.panelTitle?.value ?? '' }}
           />
         </EuiText>
       </EuiFlyoutHeader>

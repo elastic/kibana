@@ -6,13 +6,13 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import { type HasType, type HasParentApi, type PublishesLocalUnifiedSearch, apiIsOfType } from '@kbn/presentation-publishing';
-import type { HasMapConfig } from '@kbn/maps-plugin/public';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DashboardApi, MapApi } from '../../../../ui_actions/types';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export async function redirectToGeoJobWizard(
-  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>,
+  embeddable: MapApi,
   dataViewId: string,
   geoField: string,
   layerQuery: Query | null,
@@ -43,21 +43,22 @@ export async function redirectToGeoJobWizard(
   window.open(url, '_blank');
 }
 
-export function isCompatibleMapVisualization(api: HasMapConfig) {
+export function isCompatibleMapVisualization(api: MapApi) {
   return api.getLayerList().some((layer) => {
     return layer.getGeoFieldNames().length && layer.getIndexPatternIds().length;
   });
 }
 
-export async function getJobsItemsFromEmbeddable(embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<HasType & PublishesLocalUnifiedSearch>>>) {
-  const timeRange = embeddable.localTimeRange?.value ?? 
-    embeddable.parentApi?.localTimeRange?.value ?? 
-    { from: 'now-15m', to: 'now' };
+export async function getJobsItemsFromEmbeddable(embeddable: MapApi) {
+  const timeRange = embeddable.localTimeRange?.value ??
+    embeddable.parentApi?.localTimeRange?.value ?? { from: 'now-15m', to: 'now' };
   return {
     from: timeRange.from,
     to: timeRange.to,
-    query: embeddable.parentApi?.localQuery ??  { query: '', language: 'kuery' },
-    filters: embeddable.parentApi?.localFilters ??  [],
-    dashboard: apiIsOfType(embeddable.parentApi, 'dashboard') ? embeddable.parentApi : undefined,
+    query: (embeddable.parentApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
+    filters: embeddable.parentApi?.localFilters?.value ?? [],
+    dashboard: apiIsOfType(embeddable.parentApi, 'dashboard')
+      ? (embeddable.parentApi as DashboardApi)
+      : undefined,
   };
 }

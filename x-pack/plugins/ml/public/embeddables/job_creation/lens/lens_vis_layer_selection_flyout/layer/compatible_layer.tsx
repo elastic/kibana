@@ -7,10 +7,8 @@
 
 import React, { FC, useMemo } from 'react'; // useCallback
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-
+import type { LensApi } from '../../../../../ui_actions/types';
 import {
   redirectToADJobWizards,
   QuickLensJobCreator,
@@ -23,7 +21,7 @@ import { JobDetails, CreateADJobParams } from '../../../common/job_details';
 interface Props {
   layer: LayerResult;
   layerIndex: number;
-  embeddable: Embeddable;
+  embeddable: LensApi;
 }
 
 export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
@@ -55,17 +53,11 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
     redirectToADJobWizards(embeddable, layerIndex, share, lens);
   }
 
-  async function createADJob({
-    jobId,
-    bucketSpan,
-    embeddable: lensEmbeddable,
-    startJob,
-    runInRealTime,
-  }: CreateADJobParams) {
+  async function createADJob({ jobId, bucketSpan, startJob, runInRealTime }: CreateADJobParams) {
     const result = await quickJobCreator.createAndSaveJob(
       jobId,
       bucketSpan,
-      lensEmbeddable as Embeddable,
+      embeddable,
       startJob,
       runInRealTime,
       layerIndex
@@ -78,8 +70,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       <JobDetails
         createADJob={createADJob}
         createADJobInWizard={createADJobInWizard}
-        embeddable={embeddable}
-        timeRange={embeddable.getInput().timeRange}
+        timeRange={embeddable.localTimeRange?.value}
         layer={layer}
         layerIndex={layerIndex}
       >

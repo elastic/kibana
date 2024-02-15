@@ -26,7 +26,9 @@ export interface LayerResult {
 export class VisualizationExtractor {
   constructor() {}
 
-  public async getResultLayersFromEmbeddable(embeddable: HasMapConfig & Partial<PublishesDataViews>): Promise<LayerResult[]> {
+  public async getResultLayersFromEmbeddable(
+    embeddable: HasMapConfig & Partial<PublishesDataViews>
+  ): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
     const dataViews: DataView[] = embeddable.dataViews?.value ?? [];
 
