@@ -7,10 +7,10 @@
 
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { AppFeatures } from './app_features';
+import { ProductFeatures } from './product_features';
 import type {
-  AppFeatureKeyType,
-  AppFeaturesConfig,
+  ProductFeatureKeyType,
+  ProductFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
 } from '@kbn/security-solution-features';
@@ -76,8 +76,8 @@ const privileges = {
   },
 };
 
-const SECURITY_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
-SECURITY_APP_FEATURE_CONFIG.set('test-base-feature' as AppFeatureKeyType, {
+const SECURITY_PRODUCT_FEATURE_CONFIG: ProductFeaturesConfig<string> = new Map();
+SECURITY_PRODUCT_FEATURE_CONFIG.set('test-base-feature' as ProductFeatureKeyType, {
   privileges: {
     all: {
       ui: ['test-capability'],
@@ -115,8 +115,8 @@ const CASES_BASE_CONFIG = {
   },
 };
 
-const CASES_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
-CASES_APP_FEATURE_CONFIG.set('test-cases-feature' as AppFeatureKeyType, {
+const CASES_PRODUCT_FEATURE_CONFIG: ProductFeaturesConfig<string> = new Map();
+CASES_PRODUCT_FEATURE_CONFIG.set('test-cases-feature' as ProductFeatureKeyType, {
   privileges: {
     all: {
       ui: ['test-cases-capability'],
@@ -137,25 +137,25 @@ const securityCasesKibanaSubFeatures = {
   casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
 };
 
-describe('AppFeatures', () => {
+describe('ProductFeatures', () => {
   it('should register enabled kibana features', () => {
     const featuresSetup = {
       registerKibanaFeature: jest.fn(),
       getKibanaFeatures: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatures = new AppFeatures(
+    const productFeatures = new ProductFeatures(
       loggingSystemMock.create().get('mock'),
       securityKibanaSubFeatures.securitySubFeaturesMap as unknown as AppSubFeaturesMap<string>,
       baseKibanaFeature,
       ['subFeature1']
     );
-    appFeatures.init(featuresSetup);
-    appFeatures.setConfig(SECURITY_APP_FEATURE_CONFIG);
+    productFeatures.init(featuresSetup);
+    productFeatures.setConfig(SECURITY_PRODUCT_FEATURE_CONFIG);
 
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...baseKibanaFeature,
-      ...SECURITY_APP_FEATURE_CONFIG.get('test-base-feature' as AppFeatureKeyType),
+      ...SECURITY_PRODUCT_FEATURE_CONFIG.get('test-base-feature' as ProductFeatureKeyType),
       ...privileges,
       subFeatures: [{ baz: 'baz' }],
     });
@@ -166,18 +166,18 @@ describe('AppFeatures', () => {
       registerKibanaFeature: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatures = new AppFeatures(
+    const productFeatures = new ProductFeatures(
       loggingSystemMock.create().get('mock'),
       securityCasesKibanaSubFeatures.casesSubFeaturesMap as unknown as AppSubFeaturesMap<string>,
       baseKibanaFeature,
       ['subFeature1']
     );
-    appFeatures.init(featuresSetup);
-    appFeatures.setConfig(CASES_APP_FEATURE_CONFIG);
+    productFeatures.init(featuresSetup);
+    productFeatures.setConfig(CASES_PRODUCT_FEATURE_CONFIG);
 
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...baseKibanaFeature,
-      ...CASES_APP_FEATURE_CONFIG.get('test-cases-feature' as AppFeatureKeyType),
+      ...CASES_PRODUCT_FEATURE_CONFIG.get('test-cases-feature' as ProductFeatureKeyType),
       subFeatures: [{ baz: 'baz' }],
       ...CASES_BASE_CONFIG,
     });

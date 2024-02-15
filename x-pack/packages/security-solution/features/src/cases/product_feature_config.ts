@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AppFeatureCasesKey } from '../app_features_keys';
+import { ProductFeatureCasesKey } from '../product_features_keys';
 import { APP_ID } from '../constants';
-import type { DefaultCasesAppFeaturesConfig } from './types';
+import type { DefaultCasesProductFeaturesConfig } from './types';
 
 /**
  * App features privileges configuration for the Security Cases Kibana Feature app.
@@ -19,14 +19,14 @@ import type { DefaultCasesAppFeaturesConfig } from './types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const getCasesDefaultAppFeaturesConfig = ({
+export const getCasesDefaultProductFeaturesConfig = ({
   apiTags,
   uiCapabilities,
 }: {
   apiTags: { connectors: string };
   uiCapabilities: { connectors: string };
-}): DefaultCasesAppFeaturesConfig => ({
-  [AppFeatureCasesKey.casesConnectors]: {
+}): DefaultCasesProductFeaturesConfig => ({
+  [ProductFeatureCasesKey.casesConnectors]: {
     privileges: {
       all: {
         api: [apiTags.connectors],

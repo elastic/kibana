@@ -14,23 +14,23 @@
 import type { Logger } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import {
   getAssistantFeature,
   getCasesFeature,
   getSecurityFeature,
-} from '@kbn/security-solution-features/app_features';
+} from '@kbn/security-solution-features/product_features';
 import type { ExperimentalFeatures } from '../../../common';
-import { AppFeatures } from './app_features';
-import type { AppFeaturesConfigurator } from './types';
+import { ProductFeatures } from './product_features';
+import type { ProductFeaturesConfigurator } from './types';
 import { securityDefaultSavedObjects } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
-export class AppFeaturesService {
-  private securityAppFeatures: AppFeatures;
-  private casesAppFeatures: AppFeatures;
-  private securityAssistantAppFeatures: AppFeatures;
-  private appFeatures?: Set<AppFeatureKeyType>;
+export class ProductFeaturesService {
+  private securityProductFeatures: ProductFeatures;
+  private casesProductFeatures: ProductFeatures;
+  private securityAssistantProductFeatures: ProductFeatures;
+  private productFeatures?: Set<ProductFeatureKeyType>;
 
   constructor(
     private readonly logger: Logger,
@@ -40,7 +40,7 @@ export class AppFeaturesService {
       savedObjects: securityDefaultSavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
-    this.securityAppFeatures = new AppFeatures(
+    this.securityProductFeatures = new ProductFeatures(
       this.logger,
       securityFeature.subFeaturesMap,
       securityFeature.baseKibanaFeature,
@@ -52,7 +52,7 @@ export class AppFeaturesService {
       apiTags: casesApiTags,
       savedObjects: { files: filesSavedObjectTypes },
     });
-    this.casesAppFeatures = new AppFeatures(
+    this.casesProductFeatures = new ProductFeatures(
       this.logger,
       casesFeature.subFeaturesMap,
       casesFeature.baseKibanaFeature,
@@ -60,7 +60,7 @@ export class AppFeaturesService {
     );
 
     const assistantFeature = getAssistantFeature();
-    this.securityAssistantAppFeatures = new AppFeatures(
+    this.securityAssistantProductFeatures = new ProductFeatures(
       this.logger,
       assistantFeature.subFeaturesMap,
       assistantFeature.baseKibanaFeature,
@@ -69,34 +69,34 @@ export class AppFeaturesService {
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
-    this.securityAppFeatures.init(featuresSetup);
-    this.casesAppFeatures.init(featuresSetup);
-    this.securityAssistantAppFeatures.init(featuresSetup);
+    this.securityProductFeatures.init(featuresSetup);
+    this.casesProductFeatures.init(featuresSetup);
+    this.securityAssistantProductFeatures.init(featuresSetup);
   }
 
-  public setAppFeaturesConfigurator(configurator: AppFeaturesConfigurator) {
-    const securityAppFeaturesConfig = configurator.security();
-    this.securityAppFeatures.setConfig(securityAppFeaturesConfig);
+  public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
+    const securityProductFeaturesConfig = configurator.security();
+    this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
 
-    const casesAppFeaturesConfig = configurator.cases();
-    this.casesAppFeatures.setConfig(casesAppFeaturesConfig);
+    const casesProductFeaturesConfig = configurator.cases();
+    this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
 
-    const securityAssistantAppFeaturesConfig = configurator.securityAssistant();
-    this.securityAssistantAppFeatures.setConfig(securityAssistantAppFeaturesConfig);
+    const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
+    this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
 
-    this.appFeatures = new Set<AppFeatureKeyType>(
+    this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
-        ...securityAppFeaturesConfig.keys(),
-        ...casesAppFeaturesConfig.keys(),
-        ...securityAssistantAppFeaturesConfig.keys(),
-      ]) as readonly AppFeatureKeyType[]
+        ...securityProductFeaturesConfig.keys(),
+        ...casesProductFeaturesConfig.keys(),
+        ...securityAssistantProductFeaturesConfig.keys(),
+      ]) as readonly ProductFeatureKeyType[]
     );
   }
 
-  public isEnabled(appFeatureKey: AppFeatureKeyType): boolean {
-    if (!this.appFeatures) {
-      throw new Error('AppFeatures has not yet been configured');
+  public isEnabled(productFeatureKey: ProductFeatureKeyType): boolean {
+    if (!this.productFeatures) {
+      throw new Error('ProductFeatures has not yet been configured');
     }
-    return this.appFeatures.has(appFeatureKey);
+    return this.productFeatures.has(productFeatureKey);
   }
 }

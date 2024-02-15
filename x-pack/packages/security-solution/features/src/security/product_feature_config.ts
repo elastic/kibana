@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AppFeatureSecurityKey, SecuritySubFeatureId } from '../app_features_keys';
+import { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
-import type { DefaultSecurityAppFeaturesConfig } from './types';
+import type { DefaultSecurityProductFeaturesConfig } from './types';
 
 /**
  * App features privileges configuration for the Security Solution Kibana Feature app.
@@ -19,8 +19,8 @@ import type { DefaultSecurityAppFeaturesConfig } from './types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig = {
-  [AppFeatureSecurityKey.advancedInsights]: {
+export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeaturesConfig = {
+  [ProductFeatureSecurityKey.advancedInsights]: {
     privileges: {
       all: {
         ui: ['entity-analytics'],
@@ -32,7 +32,7 @@ export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig 
       },
     },
   },
-  [AppFeatureSecurityKey.investigationGuide]: {
+  [ProductFeatureSecurityKey.investigationGuide]: {
     privileges: {
       all: {
         ui: ['investigation-guide'],
@@ -43,7 +43,7 @@ export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig 
     },
   },
 
-  [AppFeatureSecurityKey.threatIntelligence]: {
+  [ProductFeatureSecurityKey.threatIntelligence]: {
     privileges: {
       all: {
         ui: ['threat-intelligence'],
@@ -56,18 +56,18 @@ export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig 
     },
   },
 
-  [AppFeatureSecurityKey.endpointHostManagement]: {
+  [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },
 
-  [AppFeatureSecurityKey.endpointPolicyManagement]: {
+  [ProductFeatureSecurityKey.endpointPolicyManagement]: {
     subFeatureIds: [SecuritySubFeatureId.policyManagement],
   },
 
   // Adds no additional kibana feature controls
-  [AppFeatureSecurityKey.endpointPolicyProtections]: {},
+  [ProductFeatureSecurityKey.endpointPolicyProtections]: {},
 
-  [AppFeatureSecurityKey.endpointArtifactManagement]: {
+  [ProductFeatureSecurityKey.endpointArtifactManagement]: {
     subFeatureIds: [
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
@@ -87,7 +87,7 @@ export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig 
     ],
   },
 
-  [AppFeatureSecurityKey.endpointResponseActions]: {
+  [ProductFeatureSecurityKey.endpointResponseActions]: {
     subFeatureIds: [
       SecuritySubFeatureId.hostIsolationExceptions,
       SecuritySubFeatureId.responseActionsHistory,
@@ -105,8 +105,9 @@ export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig 
     ],
   },
 
-  [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
-  [AppFeatureSecurityKey.endpointProtectionUpdates]: {},
-  [AppFeatureSecurityKey.endpointAgentTamperProtection]: {},
-  [AppFeatureSecurityKey.externalRuleActions]: {},
+  // Product features without RBAC
+  [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
+  [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
+  [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
+  [ProductFeatureSecurityKey.externalRuleActions]: {},
 };

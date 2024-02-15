@@ -8,16 +8,16 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
-  AppFeatureKeyType,
-  AppFeaturesConfig,
+  ProductFeatureKeyType,
+  ProductFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
 } from '@kbn/security-solution-features';
-import { AppFeaturesConfigMerger } from './app_features_config_merger';
+import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
-export class AppFeatures<T extends string = string, S extends string = string> {
-  private featureConfigMerger: AppFeaturesConfigMerger;
-  private appFeatures?: Set<AppFeatureKeyType>;
+export class ProductFeatures<T extends string = string, S extends string = string> {
+  private featureConfigMerger: ProductFeaturesConfigMerger;
+  private productFeatures?: Set<ProductFeatureKeyType>;
   private featuresSetup?: FeaturesPluginSetup;
 
   constructor(
@@ -26,35 +26,35 @@ export class AppFeatures<T extends string = string, S extends string = string> {
     private readonly baseKibanaFeature: BaseKibanaFeatureConfig,
     private readonly baseKibanaSubFeatureIds: T[]
   ) {
-    this.featureConfigMerger = new AppFeaturesConfigMerger(this.logger, subFeaturesMap);
+    this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
   }
 
-  public setConfig(config: AppFeaturesConfig<S>) {
-    if (this.appFeatures) {
-      throw new Error('AppFeatures has already been registered');
+  public setConfig(config: ProductFeaturesConfig<S>) {
+    if (this.productFeatures) {
+      throw new Error('ProductFeatures has already been registered');
     }
     this.registerEnabledKibanaFeatures(config);
   }
 
-  private registerEnabledKibanaFeatures(appFeatureConfig: AppFeaturesConfig) {
+  private registerEnabledKibanaFeatures(productFeatureConfig: ProductFeaturesConfig) {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
       );
     }
 
-    const completeAppFeatureConfig = this.featureConfigMerger.mergeAppFeatureConfigs(
+    const completeProductFeatureConfig = this.featureConfigMerger.mergeProductFeatureConfigs(
       this.baseKibanaFeature,
       this.baseKibanaSubFeatureIds,
-      Array.from(appFeatureConfig.values())
+      Array.from(productFeatureConfig.values())
     );
 
-    this.logger.debug(JSON.stringify(completeAppFeatureConfig));
+    this.logger.debug(JSON.stringify(completeProductFeatureConfig));
 
-    this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
+    this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
   }
 }

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { AppFeaturesConfig } from '@kbn/security-solution-features';
+import type { ProductFeaturesConfig } from '@kbn/security-solution-features';
 import type {
   SecuritySubFeatureId,
   CasesSubFeatureId,
   AssistantSubFeatureId,
 } from '@kbn/security-solution-features/keys';
 
-export interface AppFeaturesConfigurator {
-  security: () => AppFeaturesConfig<SecuritySubFeatureId>;
-  cases: () => AppFeaturesConfig<CasesSubFeatureId>;
-  securityAssistant: () => AppFeaturesConfig<AssistantSubFeatureId>;
+export interface ProductFeaturesConfigurator {
+  security: () => ProductFeaturesConfig<SecuritySubFeatureId>;
+  cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
+  securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
 }

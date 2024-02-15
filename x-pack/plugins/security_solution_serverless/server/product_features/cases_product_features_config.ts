@@ -5,28 +5,33 @@
  * 2.0.
  */
 import type {
-  AppFeatureKibanaConfig,
-  AppFeaturesCasesConfig,
-  AppFeatureKeys,
+  ProductFeatureKibanaConfig,
+  ProductFeaturesCasesConfig,
+  ProductFeatureKeys,
 } from '@kbn/security-solution-features';
-import type { AppFeatureCasesKey, CasesSubFeatureId } from '@kbn/security-solution-features/keys';
 import {
-  getCasesDefaultAppFeaturesConfig,
-  createEnabledAppFeaturesConfigMap,
+  getCasesDefaultProductFeaturesConfig,
+  createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-
+import type {
+  ProductFeatureCasesKey,
+  CasesSubFeatureId,
+} from '@kbn/security-solution-features/keys';
 import {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
 
-export const getCasesAppFeaturesConfigurator =
-  (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesCasesConfig => {
-    return createEnabledAppFeaturesConfigMap(casesAppFeaturesConfig, enabledAppFeatureKeys);
+export const getCasesProductFeaturesConfigurator =
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesCasesConfig => {
+    return createEnabledProductFeaturesConfigMap(
+      casesProductFeaturesConfig,
+      enabledProductFeatureKeys
+    );
   };
 
 /**
- * Maps the AppFeatures keys to Kibana privileges that will be merged
+ * Maps the ProductFeatures keys to Kibana privileges that will be merged
  * into the base privileges config for the Security Cases app.
  *
  * Privileges can be added in different ways:
@@ -34,13 +39,13 @@ export const getCasesAppFeaturesConfigurator =
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Cases subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Cases subFeature with the privilege `id` specified.
  */
-const casesAppFeaturesConfig: Record<
-  AppFeatureCasesKey,
-  AppFeatureKibanaConfig<CasesSubFeatureId>
+const casesProductFeaturesConfig: Record<
+  ProductFeatureCasesKey,
+  ProductFeatureKibanaConfig<CasesSubFeatureId>
 > = {
-  ...getCasesDefaultAppFeaturesConfig({
+  ...getCasesDefaultProductFeaturesConfig({
     apiTags: { connectors: GET_CONNECTORS_CONFIGURE_API_TAG },
     uiCapabilities: { connectors: CASES_CONNECTORS_CAPABILITY },
   }),
-  // ess-specific app features configs here
+  // serverless-specific app features configs here
 };
