@@ -5,13 +5,25 @@
  * 2.0.
  */
 
-import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
+import type {
+  HasParentApi,
+  HasType,
+  PublishesDataViews,
+  PublishesPanelTitle,
+  PublishesLocalUnifiedSearch,
+} from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { ILayer } from '../classes/layers/layer';
-
 
 export type HasMapConfig = HasType<'map'> & {
   getLayerList: () => ILayer[];
 };
+
+export type MapApi = HasMapConfig &
+  PublishesDataViews &
+  PublishesPanelTitle &
+  PublishesLocalUnifiedSearch &
+  Partial<HasParentApi<unknown>>;
 
 export const apiHasMapConfig = (api: unknown): api is HasMapConfig => {
   return Boolean(

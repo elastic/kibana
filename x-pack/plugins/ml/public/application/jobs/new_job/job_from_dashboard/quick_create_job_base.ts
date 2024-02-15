@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqWith, isEqual } from 'lodash';
-import type { PublishesPanelTitle, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
@@ -16,6 +15,7 @@ import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plug
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
+import type { DashboardApi } from '../../../../ui_actions/types';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
@@ -72,7 +72,7 @@ export class QuickJobCreatorBase {
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
-    dashboard?: Partial<PublishesPanelTitle & PublishesSavedObjectId>;
+    dashboard?: DashboardApi;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -219,10 +219,7 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  private async createDashboardLink(
-    dashboard: Partial<PublishesPanelTitle & PublishesSavedObjectId>,
-    datafeedConfig: estypes.MlDatafeed
-  ) {
+  private async createDashboardLink(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const savedObjectId = dashboard.savedObjectId?.value;
     if (!savedObjectId) {
       return null;
@@ -257,10 +254,7 @@ export class QuickJobCreatorBase {
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  private async getCustomUrls(
-    dashboard: Partial<PublishesPanelTitle & PublishesSavedObjectId>,
-    datafeedConfig: estypes.MlDatafeed
-  ) {
+  private async getCustomUrls(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }

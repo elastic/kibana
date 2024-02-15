@@ -15,7 +15,7 @@ import {
   EuiSplitPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import type { MapApi } from '../../../../../ui_actions/types';
+import type { MapApi } from '@kbn/maps-plugin/public';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_map';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';

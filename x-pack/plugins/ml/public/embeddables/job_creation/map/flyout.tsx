@@ -19,7 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { MapApi } from '../../../ui_actions/types';
+import type { MapApi } from '@kbn/maps-plugin/public';
 import { Layer } from './map_vis_layer_selection_flyout/layer';
 import {
   LayerResult,

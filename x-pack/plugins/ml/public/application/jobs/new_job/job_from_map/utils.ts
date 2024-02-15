@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DashboardApi, MapApi } from '../../../../ui_actions/types';
+import type { MapApi } from '@kbn/maps-plugin/public';
+import type { DashboardApi } from '../../../../ui_actions/types';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export async function redirectToGeoJobWizard(
@@ -50,13 +52,22 @@ export function isCompatibleMapVisualization(api: MapApi) {
 }
 
 export async function getJobsItemsFromEmbeddable(embeddable: MapApi) {
-  const timeRange = embeddable.localTimeRange?.value ??
-    embeddable.parentApi?.localTimeRange?.value ?? { from: 'now-15m', to: 'now' };
+  const dashboardApi = apiIsOfType(embeddable.parentApi, 'dashboard')
+    ? (embeddable.parentApi as DashboardApi)
+    : undefined;
+  const timeRange = embeddable.localTimeRange?.value ?? dashboardApi?.localTimeRange?.value;
+  if (timeRange === undefined) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromGeo.createJob.error.noTimeRange', {
+        defaultMessage: 'Time range not specified.',
+      })
+    );
+  }
   return {
     from: timeRange.from,
     to: timeRange.to,
-    query: (embeddable.parentApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
-    filters: embeddable.parentApi?.localFilters?.value ?? [],
+    query: (dashboardApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
+    filters: dashboardApi?.localFilters?.value ?? [],
     dashboard: apiIsOfType(embeddable.parentApi, 'dashboard')
       ? (embeddable.parentApi as DashboardApi)
       : undefined,

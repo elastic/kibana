@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MapApi } from '../../../../../ui_actions/types';
+import type { MapApi } from '@kbn/maps-plugin/public';
 import {
   type LayerResult,
   QuickGeoJobCreator,

@@ -76,8 +76,14 @@ export async function getJobsItemsFromEmbeddable(embeddable: LensApi, lens?: Len
     );
   }
 
-  const timeRange = embeddable.localTimeRange?.value ??
-    embeddable.parentApi?.localTimeRange?.value ?? { from: 'now-15m', to: 'now' };
+  const timeRange = embeddable.localTimeRange?.value ?? embeddable.parentApi?.localTimeRange?.value;
+  if (timeRange === undefined) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noTimeRange', {
+        defaultMessage: 'Time range not specified.',
+      })
+    );
+  }
   const vis = embeddable.getSavedVis();
 
   if (vis === undefined) {
