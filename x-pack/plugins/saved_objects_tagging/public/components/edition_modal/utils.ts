@@ -30,6 +30,13 @@ export const duplicateTagNameErrorMessage = i18n.translate(
   }
 );
 
+export const managedTagConflictMessage = i18n.translate(
+  'xpack.savedObjectsTagging.validation.name.managedTagDuplicateError',
+  {
+    defaultMessage: 'This name belongs to a tag managed by Elastic.',
+  }
+);
+
 export const validateTag = (tag: TagAttributes): TagValidation => {
   const validation: TagValidation = {
     valid: true,
