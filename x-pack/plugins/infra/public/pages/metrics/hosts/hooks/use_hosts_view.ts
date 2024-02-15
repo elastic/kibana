@@ -91,6 +91,7 @@ export const useHostsView = () => {
 
   const { value, error, loading } = state;
 
+  console.log('value', value);
   return {
     loading,
     error,

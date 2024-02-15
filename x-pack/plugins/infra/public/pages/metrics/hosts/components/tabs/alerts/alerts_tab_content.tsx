@@ -13,20 +13,21 @@ import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
-import AlertsStatusFilter from './alerts_status_filter';
 import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
 import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
   infraAlertFeatureIds,
-} from '../../../../../../components/shared/alerts/config';
+} from '../../../../../../components/shared/alerts/constants';
+import AlertsStatusFilter from './alerts_status_filter';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
+  console.log('alertStatus', alertStatus);
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
   const { triggersActionsUi } = services;
@@ -39,7 +40,7 @@ export const AlertsTabContent = () => {
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
+            {/* <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} /> */}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem>
@@ -84,6 +85,7 @@ const MemoAlertSummaryWidget = React.memo(
 
     const onBrushEnd: BrushEndListener = (brushEvent) => {
       const { x } = brushEvent as XYBrushEvent;
+      console.log('x', x);
       if (x) {
         const [start, end] = x;
 

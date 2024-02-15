@@ -12,6 +12,7 @@ import { Page } from './template/page';
 import { ContextProviders } from './context_providers';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
 import { DataViewsProvider } from './hooks/use_data_views';
+import { AlertsQueryProvider } from '../../pages/metrics/hosts/hooks/use_alerts_query';
 
 const ContentTemplate = ({
   tabs,
