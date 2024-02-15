@@ -256,7 +256,7 @@ describe('EditConnectorFlyout', () => {
     });
   });
 
-  describe.only('Header', () => {
+  describe('Header', () => {
     it('shows the icon', async () => {
       const { getByTestId } = appMockRenderer.render(
         <EditConnectorFlyout
