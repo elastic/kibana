@@ -13,6 +13,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         "_tables": Object {
           "[object Object]": undefined,
         },
+        Symbol(shapeMode): false,
         Symbol(kCapture): false,
       },
     }
@@ -133,6 +134,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
           "_tables": Object {
             "[object Object]": undefined,
           },
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
@@ -346,6 +348,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
           "_eventsCount": 0,
           "_maxListeners": undefined,
           "_tables": Object {},
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
@@ -387,6 +390,7 @@ exports[`Inspector Data View component should render single table without select
             "type": "datatable",
           },
         },
+        Symbol(shapeMode): false,
         Symbol(kCapture): false,
       },
     }
@@ -523,6 +527,7 @@ exports[`Inspector Data View component should render single table without select
               "type": "datatable",
             },
           },
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
@@ -1650,6 +1655,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
             "type": "datatable",
           },
         },
+        Symbol(shapeMode): false,
         Symbol(kCapture): false,
       },
     }
@@ -1803,6 +1809,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
               "type": "datatable",
             },
           },
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
