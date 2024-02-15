@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './logs_explorer';
-export * from './observability_logs_explorer';
-export * from './observability_onboarding';
-export * from './dataset_quality';
+import { SerializableRecord } from '@kbn/utility-types';
+
+export const DATASET_QUALITY_LOCATOR_ID = 'DATASET_QUALITY_LOCATOR';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DatasetQualityLocatorParams extends SerializableRecord {}

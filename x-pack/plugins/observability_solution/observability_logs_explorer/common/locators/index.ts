@@ -7,13 +7,16 @@
 
 export type { ObservabilityLogsExplorerLocationState } from '@kbn/deeplinks-observability/locators';
 import { AllDatasetsLocator } from './all_datasets';
+import { DatasetQualityLocator } from './dataset_quality';
 import { SingleDatasetLocator } from './single_dataset';
 
 export * from './single_dataset';
 export * from './all_datasets';
+export * from './dataset_quality';
 export * from './utils';
 
 export interface ObservabilityLogsExplorerLocators {
   allDatasetsLocator: AllDatasetsLocator;
   singleDatasetLocator: SingleDatasetLocator;
+  datasetQualityLocator: DatasetQualityLocator;
 }

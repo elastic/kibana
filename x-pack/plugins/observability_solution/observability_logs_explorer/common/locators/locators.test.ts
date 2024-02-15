@@ -11,6 +11,7 @@ import {
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
 import { AllDatasetsLocatorDefinition } from './all_datasets/all_datasets_locator';
+import { DatasetQualityLocatorDefinition } from './dataset_quality';
 import { SingleDatasetLocatorDefinition } from './single_dataset';
 import { DatasetLocatorDependencies } from './types';
 
@@ -20,10 +21,12 @@ const setup = async () => {
   };
   const allDatasetsLocator = new AllDatasetsLocatorDefinition(dep);
   const singleDatasetLocator = new SingleDatasetLocatorDefinition(dep);
+  const datasetQualityLocator = new DatasetQualityLocatorDefinition(dep);
 
   return {
     allDatasetsLocator,
     singleDatasetLocator,
+    datasetQualityLocator,
   };
 };
 
@@ -255,6 +258,19 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location.path).toMatchInlineSnapshot(
         `"/?pageState=(datasetSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),filters:!((meta:(alias:foo,disabled:!f,negate:!f)),(meta:(alias:bar,disabled:!f,negate:!f))),v:1)"`
       );
+    });
+  });
+
+  describe('Dataset Quality Locator', () => {
+    it('should create a link with correct path and no state', async () => {
+      const { datasetQualityLocator } = await setup();
+      const location = await datasetQualityLocator.getLocation({});
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: '/dataset-quality',
+        state: {},
+      });
     });
   });
 });

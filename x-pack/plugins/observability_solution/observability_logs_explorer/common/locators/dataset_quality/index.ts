@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export interface DatasetLocatorDependencies {
-  useHash: boolean;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityLocatorDependencies {}
+export * from './dataset_quality_locator';

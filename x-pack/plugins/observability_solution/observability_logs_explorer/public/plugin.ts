@@ -17,6 +17,7 @@ import {
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
+  DatasetQualityLocatorDefinition,
   ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
@@ -101,10 +102,14 @@ export class ObservabilityLogsExplorerPlugin
         useHash,
       })
     );
+    const datasetQualityLocator = share.url.locators.create(
+      new DatasetQualityLocatorDefinition({})
+    );
 
     this.locators = {
       singleDatasetLocator,
       allDatasetsLocator,
+      datasetQualityLocator,
     };
 
     return {
