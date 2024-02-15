@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useCallback } from 'react';
+import parse from 'bash-parser';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -34,6 +35,21 @@ const CONFIG = {
     />
   ),
 };
+
+function checkShellSyntax(script: string): string[] {
+  try {
+    // Parse the Bash script
+    const ast = parse(script);
+
+    console.log({ ast });
+    // If parsing succeeds, return an empty array (no syntax errors)
+    return [];
+  } catch (error) {
+    console.log({ error });
+    // If parsing fails, return an array of error messages
+    return [error.message];
+  }
+}
 const MIN_HEIGHT = 100;
 const ExecuteCommandFieldComponent = ({
   path,
@@ -42,6 +58,7 @@ const ExecuteCommandFieldComponent = ({
 }: ActionTypeFieldProps) => {
   const [editorValue, setEditorValue] = useState('');
   const [height, setHeight] = useState(MIN_HEIGHT);
+  const [syntaxError, setSyntaxError] = useState(null);
   useDebounce(
     () => {
       // TODO update form's field value
@@ -50,6 +67,26 @@ const ExecuteCommandFieldComponent = ({
     500,
     [editorValue]
   );
+
+  // write an async useEffect to fetch the shellcheck binary
+  useEffect(() => {
+    const bashScript = `
+#!/bin/bash
+
+echo test "Hello, World!"
+
+# This is a comment
+`;
+
+    const errors = checkShellSyntax(editorValue);
+
+    console.log({ errors });
+    if errors.length > 0) {
+      setSyntaxError(errors.join('\n'));
+    } else {
+      setSyntaxError(null);
+    }
+  }, [editorValue]);
 
   const editorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     const minHeight = 100;
@@ -80,10 +117,11 @@ const ExecuteCommandFieldComponent = ({
         value={editorValue}
         onChange={setEditorValue}
         options={editorOptions}
-        height={height + 'px'}
+        height={`${height}px`}
         width="100%"
         editorDidMount={editorDidMount}
       />
+      {syntaxError && <div>{syntaxError}</div>}
     </>
   );
 };
