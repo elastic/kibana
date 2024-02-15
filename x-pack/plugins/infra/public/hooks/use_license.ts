@@ -32,3 +32,13 @@ export const useLicense = (): UseLicenseReturnValue => {
     ),
   };
 };
+
+export const useLicenseUrl = () => {
+  const { licenseManagement, http } = useKibanaContextForPlugin().services;
+  const licensePageUrl = http.basePath.prepend('/app/management/stack/license_management');
+  return (
+    licenseManagement?.locator?.useUrl({
+      page: 'dashboard',
+    }) || licensePageUrl
+  );
+};

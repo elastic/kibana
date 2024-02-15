@@ -13,19 +13,17 @@ import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shar
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+import { useLicenseUrl } from '../hooks/use_license';
 
 const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
 });
 
-const LICENSE_PAGE_PATH = '/app/management/stack/license_management';
-
 export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
   templateProps
 ) => {
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
-  const { licenseManagement, http } = useKibanaContextForPlugin().services;
+  const manageLicenseURL = useLicenseUrl();
 
   useEffect(() => {
     checkTrialAvailability();
@@ -36,12 +34,6 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
   }
 
   const canStartTrial = isTrialAvailable && loadState === 'resolved';
-  const licensePageUrl = http.basePath.prepend(LICENSE_PAGE_PATH);
-  const manageLicenseURL = licenseManagement?.locator
-    ? licenseManagement?.locator?.useUrl({
-        page: 'dashboard',
-      })
-    : licensePageUrl;
 
   let title;
   let description;
@@ -119,13 +111,7 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
 };
 
 export const SubscriptionSplashPrompt: React.FC = () => {
-  const { licenseManagement, http } = useKibanaContextForPlugin().services;
-  const licensePageUrl = http.basePath.prepend(LICENSE_PAGE_PATH);
-  const manageLicenseURL = licenseManagement?.locator
-    ? licenseManagement?.locator?.useUrl({
-        page: 'dashboard',
-      })
-    : licensePageUrl;
+  const manageLicenseURL = useLicenseUrl();
 
   return (
     <EuiEmptyPrompt
