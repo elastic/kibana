@@ -18,7 +18,11 @@ import { PresentationPanel } from '.';
 import { uiActions } from '../kibana_services';
 import { getMockPresentationPanelCompatibleComponent } from '../mocks';
 import * as openCustomizePanel from '../panel_actions/customize_panel_action/open_customize_panel';
-import { DefaultPresentationPanelApi, PanelCompatibleComponent, PresentationPanelInternalProps } from './types';
+import {
+  DefaultPresentationPanelApi,
+  PanelCompatibleComponent,
+  PresentationPanelInternalProps,
+} from './types';
 
 describe('Presentation panel', () => {
   const renderPresentationPanel = async ({
@@ -55,20 +59,18 @@ describe('Presentation panel', () => {
     jest.spyOn(console, 'error').mockImplementation(() => null);
     function ComponentThatThrows() {
       throw new Error('simulated error during rendering');
-      return <div/>
+      return <div />;
     }
     function getComponent(api?: DefaultPresentationPanelApi): Promise<PanelCompatibleComponent> {
       return Promise.resolve(
         React.forwardRef((_, apiRef) => {
           useImperativeHandle(apiRef, () => api ?? {});
-          return <ComponentThatThrows />
+          return <ComponentThatThrows />;
         })
       );
     }
     render(<PresentationPanel Component={getComponent()} />);
-    await waitFor(() =>
-      expect(screen.getByTestId('euiErrorBoundary')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('euiErrorBoundary')).toBeInTheDocument());
   });
 
   describe('actions', () => {
