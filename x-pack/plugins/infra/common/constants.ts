@@ -32,3 +32,7 @@ export const O11Y_AAD_FIELDS = [
   'labels.*',
   'tags',
 ];
+
+export const LINK_TO_INVENTORY = '/app/metrics/link-to/inventory';
+export const METRICS_EXPLORER_URL = '/app/metrics/explorer';
+export const fifteenMinutesInMilliseconds = 15 * 60 * 1000;

@@ -80,6 +80,16 @@ export function QueryBuilder({
                 query: kqlQuerySchema.is(field.value) ? String(field.value) : field.value.kqlQuery,
                 language: 'kuery',
               }}
+              onQueryChange={(value) => {
+                if (kqlQuerySchema.is(field.value)) {
+                  field.onChange(String(value.query?.query));
+                } else {
+                  field.onChange({
+                    ...(field.value ?? {}),
+                    kqlQuery: String(value.query?.query),
+                  });
+                }
+              }}
               onQuerySubmit={(value) => {
                 if (kqlQuerySchema.is(field.value)) {
                   field.onChange(String(value.query?.query));
