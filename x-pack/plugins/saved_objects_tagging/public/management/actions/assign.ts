@@ -60,6 +60,7 @@ export const getAssignAction = ({
     ),
     type: 'icon',
     icon: 'tag',
+    available: (tag) => !tag.managed,
     onClick: async (tag: TagWithRelations) => {
       const flyout = await openFlyout({
         tagIds: [tag.id],
