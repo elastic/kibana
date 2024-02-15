@@ -100,7 +100,7 @@ by a type will be nested under a top-level field that matches the type name.
 For example, the mappings defined by the `search` Saved
 Object type:
 
-.src/plugins/saved_search/server/saved_objects/search.ts
+https://github.com/elastic/kibana/blob/main/src/plugins/saved_search/server/saved_objects/search.ts#L19-L70[.src/plugins/saved_search/server/saved_objects/search.ts]
 [source,typescript]
 ----
 import { SavedObjectsType } from 'src/core/server';
