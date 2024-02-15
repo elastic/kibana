@@ -226,7 +226,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        describe('Overview Tab', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/176951
+        describe.skip('Overview Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickOverviewTab();
           });
