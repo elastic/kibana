@@ -71,11 +71,13 @@ export const BenchmarksSection = ({
   const navToFailedFindingsByBenchmarkAndSection = (
     benchmark: BenchmarkData,
     ruleSection: string,
-    resultEvaluation = RULE_FAILED
+    resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
     navToFindings({
       ...getPolicyTemplateQuery(dashboardType),
       ...getBenchmarkIdQuery(benchmark),
+      'rule.section': ruleSection,
+      'result.evaluation': resultEvaluation,
     });
   };
 
