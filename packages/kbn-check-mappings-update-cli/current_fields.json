@@ -195,6 +195,15 @@
   "cases-connector-mappings": [
     "owner"
   ],
+  "cases-oracle": [
+    "cases",
+    "cases.id",
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
+  ],
   "cases-telemetry": [],
   "cases-user-actions": [
     "action",
@@ -944,15 +953,6 @@
     "scope",
     "status",
     "taskType"
-  ],
-  "cases-oracle": [
-    "cases",
-    "cases.id",
-    "counter",
-    "createdAt",
-    "rules",
-    "rules.id",
-    "updatedAt"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
