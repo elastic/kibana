@@ -68,13 +68,13 @@ export const createSourcererDataView = async ({
       title: siemDataView.title,
     };
   } else {
-    console.log('siemDataViewExist', siemDataViewExist);
+    // console.log('siemDataViewExist', siemDataViewExist);
     const siemDataViewTitle = siemDataViewExist
       ? ensurePatternFormat(siemDataViewExist.title.split(',')).join()
       : '';
     if (patternListAsTitle !== siemDataViewTitle) {
       siemDataView = await dataViewService.get(dataViewId);
-      console.log('siemDataView', siemDataView);
+      // console.log('siemDataView', siemDataView);
       siemDataView.title = patternListAsTitle;
       await dataViewService.updateSavedObject(siemDataView);
     }
@@ -85,8 +85,8 @@ export const createSourcererDataView = async ({
     };
   }
 
-  console.log('dataViewId', dataViewId);
-  console.log('allDataViews', allDataViews);
+  // console.log('dataViewId', dataViewId);
+  // console.log('allDataViews', allDataViews);
 
   if (allDataViews.some((dv) => dv.id === dataViewId)) {
     allDataViews = allDataViews.map((v) =>
@@ -102,7 +102,7 @@ export const createSourcererDataView = async ({
   //   patternList: defaultDataView.title.split(','),
   //   title: siemDataView.title,
   // };
-  console.log('defaultDataView', defaultDataView);
+  // console.log('defaultDataView', defaultDataView);
   return {
     defaultDataView,
     kibanaDataViews: allDataViews.map((dv) =>
