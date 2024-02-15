@@ -13,7 +13,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('', () => {
+  describe('index pattern field editor example', () => {
     it('finds an index pattern', async () => {
       await retry.try(async () => {
         await testSubjects.existOrFail('indexPatternTitle');
