@@ -7,6 +7,8 @@
 
 import { useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { clearResolver } from '../store/actions';
 import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.
@@ -21,6 +23,7 @@ export function useResolverQueryParamCleaner(id: string) {
    */
   const searchRef = useRef<string>();
   searchRef.current = useLocation().search;
+  const dispatch = useDispatch();
 
   const history = useHistory();
 
@@ -46,6 +49,7 @@ export function useResolverQueryParamCleaner(id: string) {
       urlSearchParams.delete(oldResolverKey);
       const relativeURL = { search: urlSearchParams.toString() };
       history.replace(relativeURL);
+      dispatch(clearResolver({ id }));
     };
-  }, [resolverKey, history]);
+  }, [resolverKey, history, dispatch, id]);
 }
