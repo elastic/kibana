@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import parse from 'bash-parser';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -70,18 +71,9 @@ const ExecuteCommandFieldComponent = ({
 
   // write an async useEffect to fetch the shellcheck binary
   useEffect(() => {
-    const bashScript = `
-#!/bin/bash
-
-echo test "Hello, World!"
-
-# This is a comment
-`;
-
     const errors = checkShellSyntax(editorValue);
 
-    console.log({ errors });
-    if errors.length > 0) {
+    if (errors.length > 0) {
       setSyntaxError(errors.join('\n'));
     } else {
       setSyntaxError(null);
@@ -121,7 +113,11 @@ echo test "Hello, World!"
         width="100%"
         editorDidMount={editorDidMount}
       />
-      {syntaxError && <div>{syntaxError}</div>}
+      {syntaxError && (
+        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="error">
+          <p>{syntaxError}</p>
+        </EuiCallOut>
+      )}
     </>
   );
 };
