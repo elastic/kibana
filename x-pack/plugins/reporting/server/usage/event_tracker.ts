@@ -15,7 +15,7 @@ interface CompletionOpts {
 
 interface CompletionOptsScreenshot {
   numPages?: number;
-  screenshotPixels?: number;
+  // screenshotPixels?: number; // FIXME: needs to be added to report output metrics
   screenshotLayout?: string;
 }
 
