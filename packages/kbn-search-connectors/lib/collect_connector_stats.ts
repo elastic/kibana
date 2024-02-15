@@ -374,7 +374,8 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
 
     if (syncJob.status in [SyncStatus.IN_PROGRESS, SyncStatus.CANCELING] && syncJob.last_seen) {
       const lastSeen = new Date(syncJob.last_seen);
-      if (!isNaN(lastSeen.getTime()) && new Date().getTime() - lastSeen.getTime() > 60 * 1000) {
+      // A sync job with last_seen not updated for more than 5 mins is considered idle
+      if (!isNaN(lastSeen.getTime()) && new Date().getTime() - lastSeen.getTime() > 5 * 60 * 1000) {
         idle += 1;
       }
     }
