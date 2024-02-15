@@ -13,6 +13,8 @@ import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import { CloudProvider } from '@kbn/custom-icons';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { EuiToolTip } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -44,6 +46,7 @@ interface HostMetadata {
 export type HostNodeRow = HostMetadata &
   HostMetrics & {
     name: string;
+    alertsCount?: number;
   };
 
 /**
@@ -54,7 +57,7 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
-  return nodes.map(({ metrics, metadata, name }) => {
+  return nodes.map(({ metrics, metadata, name, alertsCount }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
@@ -79,12 +82,14 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
         }),
         {} as HostMetrics
       ),
+
+      alertsCount: alertsCount ?? 0,
     };
   });
 };
 
-const isTitleColumn = (cell: any): cell is HostNodeRow['title'] => {
-  return typeof cell === 'object' && cell && 'name' in cell;
+const isTitleColumn = (cell: HostNodeRow[keyof HostNodeRow]): cell is HostNodeRow['title'] => {
+  return cell !== null && typeof cell === 'object' && cell && 'name' in cell;
 };
 
 const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
@@ -123,6 +128,8 @@ export const useHostsTable = () => {
   const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
+
+  const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
 
   const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
 
@@ -221,6 +228,39 @@ export const useHostsTable = () => {
           },
         ],
       },
+      ...(displayAlerts
+        ? [
+            {
+              name: TABLE_COLUMN_LABEL.alertsCount,
+              field: 'alertsCount',
+              sortable: true,
+              'data-test-subj': 'hostsView-tableRow-alertsCount',
+              render: (alertsCount: HostNodeRow['alertsCount'], row: HostNodeRow) => {
+                if (!alertsCount) {
+                  return null;
+                }
+                return (
+                  <EuiToolTip position="top" content={TABLE_COLUMN_LABEL.alertsCount}>
+                    <EuiBadge
+                      iconType="warning"
+                      color="danger"
+                      onClick={() => {
+                        setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
+                      }}
+                      onClickAriaLabel={TABLE_COLUMN_LABEL.alertsCount}
+                      iconOnClick={() => {
+                        setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
+                      }}
+                      iconOnClickAriaLabel={TABLE_COLUMN_LABEL.alertsCount}
+                    >
+                      {alertsCount}
+                    </EuiBadge>
+                  </EuiToolTip>
+                );
+              },
+            },
+          ]
+        : []),
       {
         name: TABLE_COLUMN_LABEL.title,
         field: 'title',
@@ -315,7 +355,6 @@ export const useHostsTable = () => {
         'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
         align: 'right',
-        width: '120px',
       },
       {
         name: (
@@ -330,7 +369,6 @@ export const useHostsTable = () => {
         'data-test-subj': 'hostsView-tableRow-tx',
         render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
-        width: '120px',
       },
     ],
     [
@@ -344,6 +382,7 @@ export const useHostsTable = () => {
       formulas?.tx.value,
       reportHostEntryClick,
       setProperties,
+      displayAlerts,
     ]
   );
 
