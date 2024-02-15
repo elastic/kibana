@@ -377,6 +377,8 @@ describe('ServiceNowITSMParamsFields renders', () => {
       const theField = wrapper.find('[data-test-subj="eventActionSelect"]').first();
       theField.prop('onChange')!(changeEvent);
 
+      expect(editAction.mock.calls[0][1]).toEqual('pushToService');
+
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
@@ -396,6 +398,8 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
       const theField = wrapper.find('[data-test-subj="eventActionSelect"]').first();
       theField.prop('onChange')!(changeEvent);
+
+      expect(editAction.mock.calls[0][1]).toEqual('closeIncident');
 
       wrapper.update();
 

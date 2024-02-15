@@ -74,7 +74,10 @@ const CorrelationIdField: React.FunctionComponent<
       }
       error={errors['subActionParams.incident.correlation_id']}
       isInvalid={
-        isTestResolveAction && errors['subActionParams.incident.correlation_id'] !== undefined
+        isTestResolveAction &&
+        errors['subActionParams.incident.correlation_id'] !== undefined &&
+        errors['subActionParams.incident.correlation_id'].length > 0 &&
+        correlationId !== undefined
       }
       labelAppend={
         !isTestResolveAction ? (
@@ -123,8 +126,16 @@ const ServiceNowParamsFields: React.FunctionComponent<
     executionMode === ActionConnectorMode.Test && eventAction === EventAction.Resolve;
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
-  const { incident, comments } = useMemo(
-    () =>
+
+  const { incident, comments } = useMemo(() => {
+    if (isTestResolveAction) {
+      return {
+        incident: { ...actionParams.subActionParams?.incident, short_description: undefined },
+        comments: undefined,
+      } as unknown as ServiceNowITSMActionParams['subActionParams'];
+    }
+
+    return (
       actionParams.subActionParams ??
       ({
         incident: {},
@@ -133,9 +144,14 @@ const ServiceNowParamsFields: React.FunctionComponent<
           isTestTriggerAction
             ? []
             : undefined,
-      } as unknown as ServiceNowITSMActionParams['subActionParams']),
-    [actionParams.subActionParams, selectedActionGroupId]
-  );
+      } as unknown as ServiceNowITSMActionParams['subActionParams'])
+    );
+  }, [
+    actionParams.subActionParams,
+    selectedActionGroupId,
+    isTestTriggerAction,
+    isTestResolveAction,
+  ]);
 
   const showAllIncidentDetails =
     (selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED) ||
@@ -241,7 +257,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         editAction('subAction', 'pushToService', index);
       }
     },
-    [setEventAction, editAction, actionParams]
+    [setEventAction, editAction, index]
   );
 
   const eventActionOptions = [
