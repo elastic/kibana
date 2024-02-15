@@ -238,8 +238,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkDisable');
-      await testSubjects.existOrFail('untrackAlertsModal');
-      await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
