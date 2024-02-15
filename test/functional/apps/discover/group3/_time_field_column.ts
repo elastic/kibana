@@ -231,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     }
 
-    // Add `true` to the array to test locally with non default `doc_table:hideTimeColumn` setting too. I would not recommend committing with `true` as it doubles the whole test suit time. 
+    // Add `true` to the array to test locally with non default `doc_table:hideTimeColumn` setting too. I would not recommend committing with `true` as it doubles the whole test suit time.
     [false].forEach((hideTimeFieldColumnSetting) => {
       const savedSearchSuffix = hideTimeFieldColumnSetting ? 'HideTimeColumn' : 'ShowTimeColumn';
 
