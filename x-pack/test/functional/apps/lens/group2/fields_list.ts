@@ -269,22 +269,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show new fields Available fields', async () => {
         await es.transport.request({
-          path: '/field-update-test/_doc/1',
-          method: 'PUT',
+          path: '/field-update-test/_doc?refresh=true',
+          method: 'POST',
           body: {
             '@timestamp': new Date().toISOString(),
             oldField: 20,
             newField: 20,
           },
-        });
-
-        await retry.try(async () => {
-          // wait for the new field to be available, at the first run it might be empty
-          const result = await es.transport.request({
-            path: '/field-update-test/_field_caps?fields=newField&include_empty_fields=false',
-            method: 'GET',
-          });
-          expect(result.fields.newField).to.be.ok();
         });
 
         await PageObjects.lens.waitForField('oldField');
