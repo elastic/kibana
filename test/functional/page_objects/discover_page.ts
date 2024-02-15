@@ -199,7 +199,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickHistogramBar() {
-    await this.elasticChart.waitForRenderComplete();
+    await this.elasticChart.waitForRenderComplete(undefined, 5000);
     const el = await this.elasticChart.getCanvas();
 
     await this.browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
@@ -641,11 +641,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveCurrentSavedQuery() {
-    await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.testSubjects.existOrFail('savedQueryFormSaveButton');
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('savedQueryFormSaveButton')) {
+        await this.testSubjects.click('savedQueryFormSaveButton');
+      }
+      await this.testSubjects.missingOrFail('queryBarMenuPanel');
+    });
   }
 
   public async deleteSavedQuery() {
-    await this.testSubjects.click('delete-saved-query-TEST-button');
+    await this.testSubjects.click('delete-saved-query-button');
   }
 
   public async confirmDeletionOfSavedQuery() {

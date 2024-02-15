@@ -30,7 +30,6 @@ import {
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
-import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import {
   DataStatsFetchProgress,
   isRandomSamplingOption,
@@ -38,7 +37,10 @@ import {
 } from '../../../../common/types/field_stats';
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
-import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import {
+  getDefaultPageState,
+  MAX_CONCURRENT_REQUESTS,
+} from '../constants/index_data_visualizer_viewer';
 import { displayError } from '../../common/util/display_error';
 
 /**

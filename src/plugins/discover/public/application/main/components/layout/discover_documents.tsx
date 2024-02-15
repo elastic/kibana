@@ -112,19 +112,29 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, rowsPerPage, grid, columns, index, sampleSizeState] =
-    useAppStateSelector((state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.index,
-        state.sampleSize,
-      ];
-    });
+  const [
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    index,
+    sampleSizeState,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.index,
+      state.sampleSize,
+    ];
+  });
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -208,6 +218,13 @@ function DiscoverDocumentsComponent({
   const onUpdateRowHeight = useCallback(
     (newRowHeight: number) => {
       stateContainer.appState.update({ rowHeight: newRowHeight });
+    },
+    [stateContainer]
+  );
+
+  const onUpdateHeaderRowHeight = useCallback(
+    (newHeaderRowHeight: number) => {
+      stateContainer.appState.update({ headerRowHeight: newHeaderRowHeight });
     },
     [stateContainer]
   );
@@ -407,6 +424,9 @@ function DiscoverDocumentsComponent({
                   onSort={!isTextBasedQuery ? onSort : undefined}
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
+                  configHeaderRowHeight={3}
+                  headerRowHeightState={headerRowHeight}
+                  onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
                   isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
@@ -426,7 +446,6 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
-                  headerRowHeight={3}
                   externalCustomRenderers={externalCustomRenderers}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
                   customControlColumnsConfiguration={customControlColumnsConfiguration}

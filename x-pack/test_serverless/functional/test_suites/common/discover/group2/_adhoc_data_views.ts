@@ -260,12 +260,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const second = await PageObjects.discover.getCurrentDataViewId();
       expect(first).not.equal(second);
 
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
 
       await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const [firstToast, secondToast] = await toasts.getAllToastElements();
+      const [firstToast, secondToast] = await toasts.getAll();
 
       expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
         [

@@ -110,6 +110,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [data, setData] = useState<{
     categories: Category[];
     categoriesInBucket: Category[] | null;
+    displayExamples: boolean;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -191,7 +192,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
       if (mounted.current === true) {
         setFieldValidationResult(validationResult);
-        const { categories } = categorizationResult;
+        const { categories, hasExamples } = categorizationResult;
 
         const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
         let categoriesInBucket: any | null = null;
@@ -210,6 +211,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         setData({
           categories,
           categoriesInBucket,
+          displayExamples: hasExamples,
         });
 
         setShowTabs(hasBucketCategories);
@@ -388,6 +390,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 <EuiSpacer size="s" />
               </>
             ) : null}
+
             <CategoryTable
               categories={
                 selectedTab === SELECTED_TAB.BUCKET && data.categoriesInBucket !== null
@@ -412,6 +415,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                   : undefined
               }
               navigateToDiscover={additionalFilter !== undefined}
+              displayExamples={data.displayExamples}
             />
           </>
         ) : null}
