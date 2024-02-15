@@ -99,7 +99,7 @@ gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_C
 gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 
 echo "--- Validate CDN assets"
-CDN_DESTINATION="https://kibana-cdn.gcp.qa.cld.elstc.co/$GIT_ABBREV_COMMIT"
+CDN_DESTINATION="https://kibana-cdn.gcp.qa.cld.elstc.co"
 cd $CDN_ASSETS_FOLDER
 shopt -s globstar
 for CDN_ASSET in **/*
