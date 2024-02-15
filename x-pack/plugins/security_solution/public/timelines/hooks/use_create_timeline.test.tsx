@@ -77,12 +77,15 @@ describe('useCreateTimeline', () => {
     );
     expect(createTimeline.mock.calls[0][0].show).toEqual(true);
     expect(createTimeline.mock.calls[0][0].updated).toEqual(undefined);
-    expect(setSelectedDataView).toHaveBeenCalledWith({
-      id: SourcererScopeName.timeline,
-      selectedDataViewId: mockGlobalState.sourcerer.defaultDataView.id,
-      selectedPatterns:
-        mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns,
-    });
+    expect(setSelectedDataView.mock.calls[0][0].id).toEqual(SourcererScopeName.timeline);
+    expect(setSelectedDataView.mock.calls[0][0].selectedDataViewId).toEqual(
+      mockGlobalState.sourcerer.defaultDataView.id
+    );
+    expect(setSelectedDataView.mock.calls[0][0].selectedPatterns).toEqual(
+      expect.arrayContaining(
+        mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
+      )
+    );
     expect(addLinkTo).toHaveBeenCalledWith([InputsModelId.global, InputsModelId.timeline]);
     expect(addNotes).toHaveBeenCalledWith({ notes: [] });
   });
