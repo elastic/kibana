@@ -72,6 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     // FLAKY: https://github.com/elastic/kibana/issues/176986
+    // Failing: See https://github.com/elastic/kibana/issues/176989
     describe.skip('transaction_duration', () => {
       before(async () => {
         await generateLatencyData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
