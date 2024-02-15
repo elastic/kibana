@@ -203,4 +203,66 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       expect(screen.queryAllByText(matchInOrder([property]))).toHaveLength(0);
     });
   });
+
+  it('Properties with semantically equal values should not be shown as modified', () => {
+    const oldRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 1,
+    };
+
+    const newRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 2,
+    };
+
+    /* DURATION */
+    /* Semantically equal durations should not be shown as modified */
+    const { rerender } = render(
+      <RuleDiffTab
+        oldRule={{ ...oldRule, from: 'now-1h' }}
+        newRule={{ ...newRule, from: 'now-60m' }}
+      />
+    );
+    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(0);
+
+    rerender(
+      <RuleDiffTab
+        oldRule={{ ...oldRule, from: 'now-1h' }}
+        newRule={{ ...newRule, from: 'now-3600s' }}
+      />
+    );
+    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(0);
+
+    rerender(
+      <RuleDiffTab
+        oldRule={{ ...oldRule, from: 'now-7200s' }}
+        newRule={{ ...newRule, from: 'now-2h' }}
+      />
+    );
+    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(0);
+
+    /* Semantically different durations should generate diff */
+    rerender(
+      <RuleDiffTab
+        oldRule={{ ...oldRule, from: 'now-7260s' }}
+        newRule={{ ...newRule, from: 'now-2h' }}
+      />
+    );
+    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(1);
+    expect(
+      screen.queryAllByText(matchInOrder(['-', 'from', 'now-7260s', '+', 'from', 'now-7200s']))
+    ).toHaveLength(1);
+
+    /* NOTE */
+    rerender(<RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule }} />);
+    expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+
+    rerender(
+      <RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule, note: undefined }} />
+    );
+    expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+
+    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: '' }} />);
+    expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+  });
 });
