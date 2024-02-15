@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiScreenReaderOnly,
+  EuiToken,
 } from '@elastic/eui';
 
 import { OptionsListStrings } from './options_list_strings';
@@ -40,7 +41,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
-        'data-test-subj': `optionsList-control-ignored-selection-${key}`,
+        'data-test-subj': `optionsList-control-invalid-selection-${key}`,
         prepend: (
           <EuiScreenReaderOnly>
             <div>
@@ -57,17 +58,26 @@ export const OptionsListPopoverInvalidSelections = () => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiTitle
-        size="xxs"
-        className="optionsList-control-ignored-selection-title"
-        data-test-subj="optionList__ignoredSelectionLabel"
-      >
-        <label>
-          {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+      <div>
+        <EuiToken
+          iconType="alert"
+          size="s"
+          color="euiColorVis5"
+          shape="square"
+          fill="dark"
+          title={OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
             invalidSelections?.length ?? 0
           )}
-        </label>
-      </EuiTitle>
+          className="optionsList-control-invalid-selection-token"
+        />
+        <EuiTitle size="xxs" data-test-subj="optionList__invalidSelectionLabel">
+          <label>
+            {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+              invalidSelections?.length ?? 0
+            )}
+          </label>
+        </EuiTitle>
+      </div>
       <EuiSelectable
         aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
           fieldName,

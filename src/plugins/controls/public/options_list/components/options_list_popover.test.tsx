@@ -125,7 +125,7 @@ describe('Options list popover', () => {
       ).toHaveTextContent('75');
       const title = popover.getByTestId('optionList__ignoredSelectionLabel');
       expect(title).toHaveTextContent('Invalid selection');
-      const invalidSelection = popover.getByTestId('optionsList-control-ignored-selection-woof');
+      const invalidSelection = popover.getByTestId('optionsList-control-invalid-selection-woof');
       expect(invalidSelection).toHaveTextContent('woof. Checked option.');
       expect(invalidSelection).toHaveClass('optionsList__selectionInvalid');
     });

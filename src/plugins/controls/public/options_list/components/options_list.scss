@@ -75,8 +75,10 @@
     }
   }
 
-  .optionsList-control-ignored-selection-title {
-    padding-left: $euiSizeS;
+  .optionsList-control-invalid-selection-token {
+    margin-left: $euiSizeS;
+    margin-right: $euiSizeS;
+    vertical-align: text-bottom;
   }
 
   .optionsList__selectionInvalid {
