@@ -97,7 +97,7 @@ export function WelcomeMessage({
 
           <EuiSpacer size="m" />
 
-          <EuiTitle size={breakpoint === 'xl' ? 'm' : breakpoint === 'l' ? 'm' : 's'}>
+          <EuiTitle size={breakpoint === 'xl' || breakpoint === 'l' ? 'm' : 's'}>
             <h2>
               {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
                 defaultMessage: 'Welcome to the AI Assistant for Observability',
