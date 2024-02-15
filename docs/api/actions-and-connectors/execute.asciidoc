@@ -587,6 +587,46 @@ the security incident. The IPs are added as observables to the security incident
 (Required, string) The message to log.
 =====
 
+.Slack connectors
+[%collapsible%open]
+=====
+`message`::
+(Required^*^, string) The Slack message text, which cannot contain Markdown, images, or other advanced formatting.
+It is applicable only when the connector type is `.slack`.
+
+`subAction`::
+(Required^*^, string) The action to test.
+It is applicable only when the connector type is `.slack_api`.
+Valid values include: `postMessage`, `validChannelId`.
+======
+
+`subActionParams`::
+(Required, object) The set of configuration properties, which vary depending
+on the `subAction` value.
++
+.Properties when `subAction` is `postMessage`
+[%collapsible%open]
+=======
+`channelIds`:::
+(Optional, array of strings) The Slack channel identifier, which must be one of the allowed channels in the connector configuration.
+
+`channels`:::
+(Optional, array of strings)
+The name of a channel that your Slack app has access to. deprecated:[8.12.0]
+
+`text`:::
+(Optional, string) The Slack message text, which cannot contain Markdown, images, or other advanced formatting.
+=======
++
+.Properties when `subAction` is `validChannelId`
+[%collapsible%open]
+=======
+`channelId`:::
+(Required, string) The Slack channel identifier. For example, `C123ABC456`.
+=======
+======
+=====
+
 .{swimlane} connectors
 [%collapsible%open]
 =====
