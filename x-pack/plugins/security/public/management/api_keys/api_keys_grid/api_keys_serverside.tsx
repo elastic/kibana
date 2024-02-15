@@ -236,96 +236,111 @@ export const APIKeysGridPageServer: FunctionComponent = () => {
           readOnly={readOnly}
         />
       )}
-
-      <>
-        <KibanaPageTemplate.Header
-          pageTitle={
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.apiKeysTitle"
-              defaultMessage="API keys"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-              defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
-            />
-          }
-          rightSideItems={
-            !readOnly
-              ? [
-                  <EuiButton
-                    {...reactRouterNavigate(history, '/create')}
-                    fill
-                    iconType="plusInCircleFilled"
-                    data-test-subj="apiKeysCreateTableButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.apiKeys.table.createButton"
-                      defaultMessage="Create API key"
-                    />
-                  </EuiButton>,
-                ]
-              : undefined
-          }
-          paddingSize="none"
-          bottomBorder
-        />
-        <EuiSpacer />
-        <KibanaPageTemplate.Section paddingSize="none">
-          {createdApiKey && !state.loading && (
-            <>
-              <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
-              <EuiSpacer />
-            </>
-          )}
-
-          {requestState.canManageOwnApiKeys && !requestState.canManageApiKeys ? (
-            <>
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
-                    defaultMessage="You only have permission to manage your own API keys."
-                  />
-                }
-              />
-              <EuiSpacer />
-            </>
-          ) : undefined}
-
-          <InvalidateProvider
-            isAdmin={requestState.canManageApiKeys}
-            notifications={services.notifications}
-            apiKeysAPIClient={new APIKeysAPIClient(services.http)}
+      {!requestState.apiKeys.length ? (
+        <ApiKeysEmptyPrompt readOnly={readOnly}>
+          <EuiButton
+            {...reactRouterNavigate(history, '/create')}
+            fill
+            iconType="plusInCircleFilled"
+            data-test-subj="apiKeysCreatePromptButton"
           >
-            {(invalidateApiKeyPrompt) => (
-              <ApiKeysTable
-                apiKeys={requestState.apiKeys}
-                onClick={(apiKey) => setOpenedApiKey(apiKey)}
-                onDelete={(apiKeysToDelete) =>
-                  invalidateApiKeyPrompt(
-                    apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                    fetchApiKeys
-                  )
-                }
-                currentUser={currentUser}
-                createdApiKey={createdApiKey}
-                canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
-                canManageApiKeys={requestState.canManageApiKeys}
-                canManageOwnApiKeys={requestState.canManageOwnApiKeys}
-                readOnly={readOnly}
-                loading={state.loading}
-                totalItemCount={requestState.total}
-                pagination={pagination}
-                onTableChange={onTableChange}
-                onSearchChange={onSearchChange}
-                aggregations={aggregations}
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.createButton"
+              defaultMessage="Create API key"
+            />
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
+      ) : (
+        <>
+          <KibanaPageTemplate.Header
+            pageTitle={
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.apiKeysTitle"
+                defaultMessage="API keys"
               />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
+                defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
+              />
+            }
+            rightSideItems={
+              !readOnly
+                ? [
+                    <EuiButton
+                      {...reactRouterNavigate(history, '/create')}
+                      fill
+                      iconType="plusInCircleFilled"
+                      data-test-subj="apiKeysCreateTableButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.security.management.apiKeys.table.createButton"
+                        defaultMessage="Create API key"
+                      />
+                    </EuiButton>,
+                  ]
+                : undefined
+            }
+            paddingSize="none"
+            bottomBorder
+          />
+          <EuiSpacer />
+          <KibanaPageTemplate.Section paddingSize="none">
+            {createdApiKey && !state.loading && (
+              <>
+                <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
+                <EuiSpacer />
+              </>
             )}
-          </InvalidateProvider>
-        </KibanaPageTemplate.Section>
-      </>
+
+            {requestState.canManageOwnApiKeys && !requestState.canManageApiKeys ? (
+              <>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
+                      defaultMessage="You only have permission to manage your own API keys."
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </>
+            ) : undefined}
+
+            <InvalidateProvider
+              isAdmin={requestState.canManageApiKeys}
+              notifications={services.notifications}
+              apiKeysAPIClient={new APIKeysAPIClient(services.http)}
+            >
+              {(invalidateApiKeyPrompt) => (
+                <ApiKeysTable
+                  apiKeys={requestState.apiKeys}
+                  onClick={(apiKey) => setOpenedApiKey(apiKey)}
+                  onDelete={(apiKeysToDelete) =>
+                    invalidateApiKeyPrompt(
+                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
+                      fetchApiKeys
+                    )
+                  }
+                  currentUser={currentUser}
+                  createdApiKey={createdApiKey}
+                  canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
+                  canManageApiKeys={requestState.canManageApiKeys}
+                  canManageOwnApiKeys={requestState.canManageOwnApiKeys}
+                  readOnly={readOnly}
+                  loading={state.loading}
+                  totalItemCount={requestState.total}
+                  pagination={pagination}
+                  onTableChange={onTableChange}
+                  onSearchChange={onSearchChange}
+                  aggregations={aggregations}
+                />
+              )}
+            </InvalidateProvider>
+          </KibanaPageTemplate.Section>
+        </>
+      )}
     </>
   );
 };
