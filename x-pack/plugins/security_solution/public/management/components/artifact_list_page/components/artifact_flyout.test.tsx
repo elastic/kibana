@@ -324,6 +324,51 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         expect(location.search).toBe('');
       });
     });
+
+    describe('and there is a confirmModal', () => {
+      beforeEach(async () => {
+        const _renderAndWaitForFlyout = render;
+
+        // Override renderAndWaitForFlyout to also set the form data as "valid"
+        render = async (...props) => {
+          await _renderAndWaitForFlyout(...props);
+
+          act(() => {
+            const lastProps = getLastFormComponentProps();
+            lastProps.onChange({
+              item: { ...lastProps.item, name: 'some name' },
+              isValid: true,
+              confirmModalLabels: {
+                title: 'title',
+                body: 'body',
+                confirmButton: 'add',
+                cancelButton: 'cancel',
+              },
+            });
+          });
+
+          return renderResult;
+        };
+      });
+
+      it('should show the warning modal', async () => {
+        await render();
+        act(() => {
+          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+        });
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+        expect(renderResult.getByTestId('artifactConfirmModal-header').textContent).toEqual(
+          'title'
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal-body').textContent).toEqual('body');
+        expect(renderResult.getByTestId('artifactConfirmModal-submitButton').textContent).toEqual(
+          'add'
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal-cancelButton').textContent).toEqual(
+          'cancel'
+        );
+      });
+    });
   });
 
   describe('and in Edit mode', () => {

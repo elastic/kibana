@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
+  const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
+    'svlCommonPage',
+    'lens',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const testSubjects = getService('testSubjects');
   const panelActions = getService('dashboardPanelActions');
@@ -21,6 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -47,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '14,005',
           color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -73,6 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,104,036,080.615',
           color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -100,6 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '1,437',
           color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -131,6 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,228,964,670.613',
           color: 'rgba(165, 0, 38, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -140,6 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,186,695,551.251',
           color: 'rgba(253, 191, 111, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -149,6 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,073,190,186.423',
           color: 'rgba(183, 224, 117, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -158,6 +170,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,031,579,645.108',
           color: 'rgba(183, 224, 117, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -167,6 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,009,497,206.823',
           color: 'rgba(183, 224, 117, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -175,7 +189,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: undefined,
           value: undefined,
-          color: 'rgba(0, 0, 0, 0)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -183,7 +198,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dimensions[0].click();
 
-      await lens.openPalettePanel('lnsMetric');
+      await lens.openPalettePanel();
       const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([

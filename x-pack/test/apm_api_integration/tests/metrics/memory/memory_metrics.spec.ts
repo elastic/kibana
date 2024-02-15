@@ -33,7 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Memory', { config: 'trial', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176990
+  registry.when.skip('Memory', { config: 'trial', archives: [] }, () => {
     before(async () => {
       await generateData({ start, end, synthtraceEsClient });
     });

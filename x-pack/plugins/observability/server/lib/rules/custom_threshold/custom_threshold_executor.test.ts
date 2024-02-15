@@ -75,11 +75,13 @@ const mockOptions = {
   previousStartedAt: null,
   params: {
     searchConfiguration: {
+      index: {},
       query: {
         query: mockQuery,
         language: 'kuery',
       },
     },
+    alertOnNoData: true,
   },
   state: {
     wrapped: initialRuleState,
@@ -573,6 +575,7 @@ describe('The custom threshold alert type', () => {
             },
           ],
           searchConfiguration: {
+            index: {},
             query: {
               query: filterQuery,
               language: 'kuery',
@@ -1397,7 +1400,7 @@ describe('The custom threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: '',
+        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
         reason: 'Average test.metric.3 reported no data in the last 1m',
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],

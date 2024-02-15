@@ -116,8 +116,8 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'recall',
-                arguments: JSON.stringify({ queries: [], categories: [] }),
+                name: 'context',
+                arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.Assistant,
               },
             },
@@ -126,7 +126,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'recall',
+              name: 'context',
               content: JSON.stringify([]),
             },
           },
@@ -158,7 +158,7 @@ describe('getTimelineItemsFromConversation', () => {
         ),
       });
 
-      expect(container.textContent).toBe('requested the function recall');
+      expect(container.textContent).toBe('requested the function context');
     });
 
     it('formats the function response', () => {
@@ -184,7 +184,7 @@ describe('getTimelineItemsFromConversation', () => {
         ),
       });
 
-      expect(container.textContent).toBe('executed the function recall');
+      expect(container.textContent).toBe('executed the function context');
     });
   });
   describe('with a render function', () => {
@@ -231,10 +231,6 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
-        chatFlyoutSecondSlotHandler: {
-          container: null,
-          setVisibility: jest.fn(),
-        },
       });
     });
 
@@ -270,8 +266,7 @@ describe('getTimelineItemsFromConversation', () => {
         'my_render_function',
         JSON.stringify({ foo: 'bar' }),
         { content: '[]', name: 'my_render_function', role: 'user' },
-        expect.any(Function),
-        { container: null, setVisibility: expect.any(Function) }
+        expect.any(Function)
       );
 
       expect(container.textContent).toEqual('Rendered');
@@ -466,8 +461,8 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'recall',
-                arguments: JSON.stringify({ queries: [], categories: [] }),
+                name: 'context',
+                arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.User,
               },
             },
@@ -476,7 +471,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'recall',
+              name: 'context',
               content: JSON.stringify([]),
             },
           },
