@@ -236,8 +236,8 @@ export default function ({ getService }: FtrProviderContext) {
             await cleanup();
           });
 
-          for (const { query, error } of queryToErrors) {
-            it(`Checking error message for: "${query}" => ${error ? '❌' : '☑️'}`, async () => {
+          it(`Checking error messages`, async () => {
+            for (const { query, error } of queryToErrors) {
               const jsonBody = await sendESQLQuery(query);
 
               const clientSideHasError = error;
@@ -254,8 +254,8 @@ export default function ({ getService }: FtrProviderContext) {
                   missmatches.push({ query, error: jsonBody.error!.message });
                 }
               }
-            });
-          }
+            }
+          });
         });
       }
     }
