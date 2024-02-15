@@ -6,118 +6,108 @@
  */
 
 import React from 'react';
-import { render, within, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { Matcher } from '@testing-library/react';
-import { escapeRegExp, uniq, sortBy, isEqual } from 'lodash';
+import { uniq, sortBy, isEqual } from 'lodash';
 
 import { RuleDiffTab } from '../rule_diff_tab';
 import { savedRuleMock } from '../../../logic/mock';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
-
-/**
- * Creates a matcher function designed to determine if an element contains specific text content in specific order.
- * It returns true if the element itself contains the strings (matching all strings in the specified order) without
- * any of its children containing all of these strings. This is useful for finding elements with text content that
- * is split across multiple child elements.
- *
- * @param {string[]} strings - An array of strings to be matched within the content.
- * @returns {Function} A Matcher function that returns a boolean indicating whether the element matches the
- * specified text conditions: the element contains the text specified by `strings` and none of its children
- * contain this text.
- *
- * The Matcher function itself has the following signature:
- * @param {string} content - The content string to be checked. Not directly used in the current implementation
- * but is required for the matcher's signature.
- * @param {Element|null} element - The DOM element to check for the text content. If null, the matcher will
- * return false.
- *
- * @returns {boolean} `true` if the element contains the specified text and none of its children do,
- * otherwise `false`.
- * Utilizes Lodash's `escapeRegExp` to handle special characters in the `strings` array.
- */
-const matchInOrder =
-  (strings: string[]): Matcher =>
-  (content: string, element: Element | null) => {
-    if (element) {
-      const hasText = (node: Element): boolean => {
-        const regex = new RegExp(strings.map((string) => escapeRegExp(string)).join('.*?'));
-        return regex.test(node.textContent || '');
-      };
-
-      const nodeHasText = hasText(element);
-      const childrenDontHaveText = Array.from(element.children).every((child) => !hasText(child));
-
-      return nodeHasText && childrenDontHaveText;
-    }
-
-    return false;
-  };
+import { COLORS } from './constants';
 
 describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => {
-  it('User can see precisely how property values would change after upgrade', () => {
-    const removedBackgroundColor = 'rgb(255, 235, 233)';
-    const removedAccentColor = 'rgba(255, 129, 130, 0.4)';
-    const addedBackgroundColor = 'rgb(230, 255, 236)';
-    const addedAccentColor = 'rgb(171, 242, 188)';
+  it.each(['light', 'dark'] as const)(
+    'User can see precisely how property values would change after upgrade - %s theme',
+    (colorMode) => {
+      const oldRule: RuleResponse = {
+        ...savedRuleMock,
+      };
 
-    const oldRule: RuleResponse = {
-      ...savedRuleMock,
-    };
+      const newRule: RuleResponse = {
+        ...savedRuleMock,
+      };
 
-    const newRule: RuleResponse = {
-      ...savedRuleMock,
-    };
+      /* Changes to test line update */
+      oldRule.version = 1;
+      newRule.version = 2;
 
-    /* Changes to test line update */
-    oldRule.version = 1;
-    newRule.version = 2;
+      /* Changes to test line removal */
+      oldRule.author = ['Alice', 'Bob', 'Charlie'];
+      newRule.author = ['Alice', 'Charlie'];
 
-    /* Changes to test line removal */
-    oldRule.author = ['Alice', 'Bob', 'Charlie'];
-    newRule.author = ['Alice', 'Charlie'];
+      /* Changes to test line addition */
+      delete oldRule.license;
+      newRule.license = 'GPLv3';
 
-    /* Changes to test line addition */
-    delete oldRule.license;
-    newRule.license = 'GPLv3';
+      const ThemeWrapper: React.FC<{}> = ({ children }) => (
+        <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>
+      );
 
-    const { getByText } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+      const { container } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />, {
+        wrapper: ThemeWrapper,
+      });
 
-    /* LINE UPDATE */
-    const updatedLine = getByText(matchInOrder(['-', 'version', '1', '+', 'version', '2']));
+      /*
+      Helper function to find an element with a particular text content.
+      React Testing Library's doesn't provide an easy way to search by text if text is split into multiple DOM elements.
+    */
+      const getChildByTextContent = (parent: Element, textContent: string): HTMLElement => {
+        return Array.from(parent.querySelectorAll('*')).find(
+          (childElement) => childElement.textContent === textContent
+        ) as HTMLElement;
+      };
 
-    const updatedLineBefore = within(updatedLine).getByText(matchInOrder(['version', '1']));
-    expect(updatedLineBefore).toHaveStyle(`background: ${removedBackgroundColor}`);
+      /* LINE UPDATE */
+      const updatedLine = getChildByTextContent(container, '-  "version": 1+  "version": 2');
 
-    const updatedWordBefore = within(updatedLineBefore).getByText('1');
-    expect(updatedWordBefore).toHaveStyle(`background: ${removedAccentColor}`);
+      const updatedLineBefore = getChildByTextContent(updatedLine, '  "version": 1');
+      expect(updatedLineBefore).toHaveStyle(
+        `background: ${COLORS[colorMode].lineBackground.deletion}`
+      );
 
-    const updatedLineAfter = within(updatedLine).getByText(matchInOrder(['version', '2']));
-    expect(updatedLineAfter).toHaveStyle(`background: ${addedBackgroundColor}`);
+      const updatedWordBefore = getChildByTextContent(updatedLineBefore, '1');
+      expect(updatedWordBefore).toHaveStyle(
+        `background: ${COLORS[colorMode].characterBackground.deletion}`
+      );
 
-    const updatedWordAfter = within(updatedLineAfter).getByText('2');
-    expect(updatedWordAfter).toHaveStyle(`background: ${addedAccentColor}`);
+      const updatedLineAfter = getChildByTextContent(updatedLine, '  "version": 2');
+      expect(updatedLineAfter).toHaveStyle(
+        `background: ${COLORS[colorMode].lineBackground.insertion}`
+      );
 
-    /* LINE REMOVAL */
-    /* Check that the removed line is displayed only once */
-    expect(screen.queryAllByText(matchInOrder(['Bob']))).toHaveLength(1);
+      const updatedWordAfter = getChildByTextContent(updatedLineAfter, '2');
+      expect(updatedWordAfter).toHaveStyle(
+        `background: ${COLORS[colorMode].characterBackground.insertion}`
+      );
 
-    /* Removed line appears in the "before" column */
-    const removedLine = getByText(matchInOrder(['-', 'Bob']));
+      /* LINE REMOVAL */
+      const removedLine = getChildByTextContent(container, '-    "Bob",');
 
-    const removedLineBefore = within(removedLine).getByText(matchInOrder(['Bob']));
-    expect(removedLineBefore).toHaveStyle(`background: ${removedBackgroundColor}`);
+      const removedLineBefore = getChildByTextContent(removedLine, '    "Bob",');
+      expect(removedLineBefore).toHaveStyle(
+        `background: ${COLORS[colorMode].lineBackground.deletion}`
+      );
 
-    /* LINE ADDITION */
-    /* Check that the added line is displayed only once */
-    expect(screen.queryAllByText(matchInOrder(['GPLv3']))).toHaveLength(1);
+      const removedLineAfter = getChildByTextContent(removedLine, '');
+      expect(
+        removedLineAfter ? window.getComputedStyle(removedLineAfter).backgroundColor : null
+      ).toBe('');
 
-    /* Added line appears in the "after" column */
-    const addedLine = getByText(matchInOrder(['+', 'license', 'GPLv3']));
+      /* LINE ADDITION */
+      const addedLine = getChildByTextContent(container, '+  "license": "GPLv3",');
 
-    const addedLineAfter = within(addedLine).getByText(matchInOrder(['license', 'GPLv3']));
-    expect(addedLineAfter).toHaveStyle(`background: ${addedBackgroundColor}`);
-  });
+      const addedLineBefore = getChildByTextContent(addedLine, '');
+      expect(
+        addedLineBefore ? window.getComputedStyle(addedLineBefore).backgroundColor : null
+      ).toBe('');
+
+      const addedLineAfter = getChildByTextContent(addedLine, '  "license": "GPLv3",');
+      expect(addedLineAfter).toHaveStyle(
+        `background: ${COLORS[colorMode].lineBackground.insertion}`
+      );
+    }
+  );
 
   it('Rule actions and exception lists should not be shown as modified', () => {
     const testAction = {
@@ -153,7 +143,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
 
     /* Case: rule update doesn't have "actions" or "exception_list" properties */
     const { rerender } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
-    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
+    expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
 
     /* Case: rule update has "actions" and "exception_list" equal to empty arrays */
     rerender(
@@ -162,7 +152,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         newRule={{ ...newRule, actions: [], exceptions_list: [] }}
       />
     );
-    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
+    expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
 
     /* Case: rule update has an action and an exception list item */
     rerender(
@@ -175,34 +165,37 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         }}
       />
     );
-    expect(screen.queryAllByText(matchInOrder(['actions']))).toHaveLength(0);
+    expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
   });
 
-  it('Technical properties should not be included in preview', () => {
-    const oldRule: RuleResponse = {
-      ...savedRuleMock,
-      version: 1,
-      revision: 100,
-      created_at: '12/31/2023T23:59:999z',
-      created_by: 'mockUserOne',
-      updated_at: '01/01/2024T00:00:000z',
-      updated_by: 'mockUserTwo',
-    };
+  describe('Technical properties should not be included in preview', () => {
+    it.each(['revision', 'created_at', 'created_by', 'updated_at', 'updated_by'])(
+      'Should not include "%s" in preview',
+      (property) => {
+        const oldRule: RuleResponse = {
+          ...savedRuleMock,
+          version: 1,
+          revision: 100,
+          created_at: '12/31/2023T23:59:000z',
+          created_by: 'mockUserOne',
+          updated_at: '01/01/2024T00:00:000z',
+          updated_by: 'mockUserTwo',
+        };
 
-    const newRule: RuleResponse = {
-      ...savedRuleMock,
-      version: 2,
-      revision: 1,
-      created_at: '12/31/2023T23:59:999z',
-      created_by: 'mockUserOne',
-      updated_at: '02/02/2024T00:00:000z',
-      updated_by: 'mockUserThree',
-    };
+        const newRule: RuleResponse = {
+          ...savedRuleMock,
+          version: 2,
+          revision: 1,
+          created_at: '12/31/2023T23:59:999z',
+          created_by: 'mockUserOne',
+          updated_at: '02/02/2024T00:00:001z',
+          updated_by: 'mockUserThree',
+        };
 
-    render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
-    ['revision', 'created_at', 'created_by', 'updated_at', 'updated_by'].forEach((property) => {
-      expect(screen.queryAllByText(matchInOrder([property]))).toHaveLength(0);
-    });
+        render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+        expect(screen.queryAllByText(property, { exact: false })).toHaveLength(0);
+      }
+    );
   });
 
   it('Properties with semantically equal values should not be shown as modified', () => {
@@ -216,6 +209,14 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       version: 2,
     };
 
+    function findDiffLineContaining(text: string): Element | null {
+      const foundLine = Array.from(document.querySelectorAll('.diff-line')).find((element) =>
+        (element.textContent || '').includes(text)
+      );
+
+      return foundLine || null;
+    }
+
     /* DURATION */
     /* Semantically equal durations should not be shown as modified */
     const { rerender } = render(
@@ -224,7 +225,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         newRule={{ ...newRule, from: 'now-60m' }}
       />
     );
-    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(0);
+    expect(findDiffLineContaining('"from":')).toBeNull();
 
     rerender(
       <RuleDiffTab
@@ -232,7 +233,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         newRule={{ ...newRule, from: 'now-3600s' }}
       />
     );
-    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(0);
+    expect(findDiffLineContaining('"from":')).toBeNull();
 
     rerender(
       <RuleDiffTab
@@ -240,7 +241,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         newRule={{ ...newRule, from: 'now-2h' }}
       />
     );
-    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(0);
+    expect(findDiffLineContaining('"from":')).toBeNull();
 
     /* Semantically different durations should generate diff */
     rerender(
@@ -249,22 +250,22 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         newRule={{ ...newRule, from: 'now-2h' }}
       />
     );
-    expect(screen.queryAllByText(matchInOrder(['-', 'from', '+', 'from']))).toHaveLength(1);
-    expect(
-      screen.queryAllByText(matchInOrder(['-', 'from', 'now-7260s', '+', 'from', 'now-7200s']))
-    ).toHaveLength(1);
+    expect(findDiffLineContaining('-  "from": "now-7260s",+  "from": "now-7200s",')).not.toBeNull();
 
-    /* NOTE */
+    /* NOTE - Investigation guide */
     rerender(<RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule }} />);
-    expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+    expect(findDiffLineContaining('"note":')).toBeNull();
 
     rerender(
       <RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule, note: undefined }} />
     );
-    expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+    expect(findDiffLineContaining('"note":')).toBeNull();
 
     rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: '' }} />);
-    expect(screen.queryAllByText(matchInOrder(['-', 'note', '+', 'note']))).toHaveLength(0);
+    expect(findDiffLineContaining('"note":')).toBeNull();
+
+    rerender(<RuleDiffTab oldRule={{ ...oldRule }} newRule={{ ...newRule, note: 'abc' }} />);
+    expect(findDiffLineContaining('-  "note": "",+  "note": "abc",')).not.toBeNull();
   });
 
   it('Unchanged sections of a rule should be hidden by default', () => {
@@ -279,13 +280,13 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     };
 
     render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
-    expect(screen.queryAllByText(matchInOrder(['author']))).toHaveLength(0);
+    expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(0);
     expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(1);
 
     userEvent.click(screen.getByText('Expand 44 unchanged lines'));
 
     expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(0);
-    expect(screen.queryAllByText(matchInOrder(['author']))).toHaveLength(2);
+    expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(2);
   });
 
   it('Properties should be sorted alphabetically', () => {

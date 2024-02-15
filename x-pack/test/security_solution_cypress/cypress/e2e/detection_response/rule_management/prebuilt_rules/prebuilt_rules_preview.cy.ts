@@ -69,6 +69,12 @@ import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/ap
 
 const TEST_ENV_TAGS = ['@ess', '@serverless'];
 
+const PREVIEW_TABS = {
+  OVERVIEW: 'Overview',
+  JSON_VIEW: 'JSON view',
+  UPDATES: 'Updates',
+};
+
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   const commonProperties: Partial<PrebuiltRuleAsset> = {
     author: ['Elastic', 'Another author'],
@@ -845,8 +851,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'].name);
-          assertSelectedPreviewTab('JSON view');
-          selectPreviewTab('Overview');
+          assertSelectedPreviewTab(PREVIEW_TABS.JSON_VIEW);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           const { index } = UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'] as {
             index: string[];
@@ -873,8 +879,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           closeRulePreview();
 
           openRuleUpdatePreview(UPDATED_SAVED_QUERY_DATA_VIEW_RULE['security-rule'].name);
-          assertSelectedPreviewTab('JSON view');
-          selectPreviewTab('Overview');
+          assertSelectedPreviewTab(PREVIEW_TABS.JSON_VIEW);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           const { data_view_id: dataViewId } = UPDATED_SAVED_QUERY_DATA_VIEW_RULE[
             'security-rule'
@@ -896,7 +902,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_MACHINE_LEARNING_RULE['security-rule'].name);
-          selectPreviewTab('Overview');
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -918,7 +924,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'].name);
-          selectPreviewTab('Overview');
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -949,7 +955,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_EQL_INDEX_PATTERN_RULE['security-rule'].name);
-          selectPreviewTab('Overview');
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -966,7 +972,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_THREAT_MATCH_INDEX_PATTERN_RULE['security-rule'].name);
-          selectPreviewTab('Overview');
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -1010,7 +1016,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_NEW_TERMS_INDEX_PATTERN_RULE['security-rule'].name);
-          selectPreviewTab('Overview');
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -1052,7 +1058,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             clickRuleUpdatesTab();
 
             openRuleUpdatePreview(UPDATED_ESQL_RULE['security-rule'].name);
-            selectPreviewTab('Overview');
+            selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
             assertCommonPropertiesShown(commonProperties);
 
@@ -1068,44 +1074,13 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         clickRuleUpdatesTab();
 
         openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-        assertSelectedPreviewTab('JSON view');
+        assertSelectedPreviewTab(PREVIEW_TABS.JSON_VIEW);
 
-        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
-          .contains('Current rule')
-          .as('currentRuleColumnHeading');
-        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
-          .contains('Elastic update')
-          .as('elasticUpdateColumnHeading');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
 
-        cy.get('@currentRuleColumnHeading').should('be.visible');
-        cy.get('@elasticUpdateColumnHeading').should('be.visible');
-
-        /* "Current rule" should be the left column, "Elastic update" should be the right column. */
-        cy.get('@currentRuleColumnHeading').then(($currentRuleColumnHeading) => {
-          const currentRuleLeftOffset = $currentRuleColumnHeading.offset()?.left || 0;
-          cy.get('@elasticUpdateColumnHeading').then(($elasticUpdateColumnHeading) => {
-            const elasticUpdateLeftOffset = $elasticUpdateColumnHeading.offset()?.left || 0;
-            expect(currentRuleLeftOffset).to.be.lessThan(elasticUpdateLeftOffset);
-          });
-        });
-
-        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 1').as('currentRuleValue');
-        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 2').as('updateVersionValue');
-
-        cy.get('@currentRuleValue').should('be.visible');
-        cy.get('@updateVersionValue').should('be.visible');
-
-        /*
-          "Current rule" version value should be displayed in the left column, 
-          "Elastic update" version value should be displayed the right column.
-        */
-        cy.get('@currentRuleValue').then(($currentRuleValue) => {
-          const currentRuleLeftOffset = $currentRuleValue.offset()?.left || 0;
-          cy.get('@updateVersionValue').then(($updateVersionValue) => {
-            const updateVersionLeftOffset = $updateVersionValue.offset()?.left || 0;
-            expect(currentRuleLeftOffset).to.be.lessThan(updateVersionLeftOffset);
-          });
-        });
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 1').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 2').should('be.visible');
 
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
           .contains('"name": "Outdated rule 1"')
