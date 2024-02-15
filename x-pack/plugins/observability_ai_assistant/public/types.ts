@@ -39,6 +39,7 @@ import type {
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import type { InsightProps } from './components/insight/insight';
@@ -101,6 +102,7 @@ export interface ConfigSchema {}
 export type { PendingMessage };
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
   lens: LensPublicSetup;
@@ -111,6 +113,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   lens: LensPublicStart;

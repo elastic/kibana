@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   isOpenTelemetryAgentName,
@@ -51,6 +52,22 @@ export function ServiceOverview() {
   const router = useApmRouter();
   const { serviceName, fallbackToTransactions, agentName, serverlessType } =
     useApmServiceContext();
+
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
+
+  useEffect(() => {
+    return setScreenContext({
+      screenDescription: `The user is looking at the service overview page for ${serviceName}.`,
+      data: [
+        {
+          name: 'service_name',
+          description: 'The name of the service',
+          value: serviceName,
+        },
+      ],
+    });
+  }, [setScreenContext, serviceName]);
 
   const {
     query,
