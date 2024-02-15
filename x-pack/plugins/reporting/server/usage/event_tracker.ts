@@ -80,18 +80,27 @@ export class EventTracker {
    * the report.
    */
   public completeJob(opts: CompletionOpts) {
-    const { byteSize, timeSinceClaimed, warnings } = opts;
+    const {
+      byteSize,
+      timeSinceClaimed,
+      warnings,
+      pdfPages,
+      screenshotPixels,
+      screenshotLayout,
+      csvRows,
+      csvColumns,
+    } = opts;
     this.reportEvent(EventType.REPORT_COMPLETION, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION]: timeSinceClaimed,
       [FieldType.BYTE_SIZE]: byteSize,
-      [FieldType.PDF_PAGES]: null,
-      [FieldType.SCREENSHOT_PIXELS]: null,
-      [FieldType.SCREENSHOT_LAYOUT]: null,
-      [FieldType.CSV_ROWS]: null,
-      [FieldType.CSV_COLUMNS]: null,
+      [FieldType.PDF_PAGES]: pdfPages,
+      [FieldType.SCREENSHOT_PIXELS]: screenshotPixels,
+      [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
+      [FieldType.CSV_ROWS]: csvRows,
+      [FieldType.CSV_COLUMNS]: csvColumns,
       [FieldType.WARNINGS]: warnings,
     });
   }
