@@ -9,6 +9,8 @@ import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { remove } from 'lodash';
+import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
 
@@ -31,6 +33,8 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
+  const screenContexts: ObservabilityAIAssistantScreenContext[] = [];
+
   return {
     isEnabled: () => {
       return enabled;
@@ -46,5 +50,14 @@ export function createService({
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
     getLicense: () => licenseStart.license$,
     getLicenseManagementLocator: () => shareStart,
+    setScreenContext: (context: ObservabilityAIAssistantScreenContext) => {
+      screenContexts.push(context);
+      return () => {
+        remove(screenContexts, context);
+      };
+    },
+    getScreenContexts: () => {
+      return screenContexts;
+    },
   };
 }

@@ -66,7 +66,7 @@ The knowledge base is an Elasticsearch index, with an inference processor powere
 
 Both the user and the LLM are able to suggest functions, that are executed on behalf (and with the privileges of) the user. Functions allow both the user and the LLM to include relevant context into the conversation. This context can be text, data, or a visual component, like a timeseries graph. Some of the functions that are available are:
 
-- `recall` and `summarize`: these functions query (with a semantic search) or write to (with a summarisation) the knowledge database. This allows the LLM to create a (partly) user-specific working memory, and access predefined embeddings that help improve its understanding of the Elastic platform.
+- `context` and `summarize`: these functions query (with a semantic search) or write to (with a summarisation) the knowledge database. This allows the LLM to create a (partly) user-specific working memory, and access predefined embeddings that help improve its understanding of the Elastic platform.
 - `lens`: a function that can be used to create Lens vizualisations using Formulas.
 - `get_apm_timeseries`, `get_apm_service_summary`, `get_apm_downstream_dependencies` and `get_apm_error_document`: a set of APM functions, some with visual components, that are helpful in performing root cause analysis.
 
