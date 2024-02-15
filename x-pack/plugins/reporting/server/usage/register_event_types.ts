@@ -99,6 +99,7 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
+  // TODO: not used
   [FieldType.SCREENSHOT_PIXELS]: {
     [FieldType.SCREENSHOT_PIXELS]: {
       type: 'keyword',
@@ -115,6 +116,7 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
+  // TODO: not used
   [FieldType.CSV_COLUMNS]: {
     [FieldType.CSV_COLUMNS]: {
       type: 'long',
