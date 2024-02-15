@@ -127,19 +127,14 @@ export function VisualizeESQL({
         },
       };
 
-      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataViewAsync.value);
+      const chartSuggestions = lensHelpersAsync.value.suggestions(
+        context,
+        dataViewAsync.value,
+        [],
+        preferredChartType
+      );
       if (chartSuggestions?.length) {
-        let [suggestion] = chartSuggestions;
-
-        if (chartSuggestions.length > 1 && preferredChartType) {
-          const suggestionFromModel = chartSuggestions.find(
-            (s) =>
-              s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
-          );
-          if (suggestionFromModel) {
-            suggestion = suggestionFromModel;
-          }
-        }
+        const [suggestion] = chartSuggestions;
 
         const attrs = getLensAttributesFromSuggestion({
           filters: [],

@@ -16,6 +16,7 @@ interface SuggestionsApi {
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
   excludedVisualizations?: string[];
+  preferredChartType?: string;
 }
 
 export const suggestionsApi = ({
@@ -24,6 +25,7 @@ export const suggestionsApi = ({
   datasourceMap,
   visualizationMap,
   excludedVisualizations,
+  preferredChartType,
 }: SuggestionsApi) => {
   const initialContext = context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
@@ -86,9 +88,40 @@ export const suggestionsApi = ({
     dataViews,
   }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
   const suggestionsList = [activeVisualization, ...newSuggestions];
+
+  // in case the user asks for a specific type, if it exists in the list, prioritize it
+  if (suggestionsList.length > 1 && preferredChartType) {
+    const suggestionFromModel = suggestionsList.find(
+      (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
+    );
+    if (suggestionFromModel) {
+      return [suggestionFromModel];
+    } else {
+      // handle here the line, area logic
+      if (
+        preferredChartType.toLowerCase() === 'area' ||
+        preferredChartType.toLowerCase() === 'line'
+      ) {
+        const XYSuggestion = suggestionsList.find((sug) => sug.visualizationId === 'lnsXY');
+        if (XYSuggestion) {
+          const visualizationState = visualizationMap[
+            XYSuggestion.visualizationId
+          ]?.switchVisualizationType?.(
+            preferredChartType.toLowerCase(),
+            XYSuggestion?.visualizationState
+          );
+          return [
+            {
+              ...XYSuggestion,
+              visualizationState,
+            },
+          ];
+        }
+      }
+    }
+  }
   // until we separate the text based suggestions logic from the dataview one,
   // we want to sort XY first
   const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
-
   return sortXYFirst;
 };

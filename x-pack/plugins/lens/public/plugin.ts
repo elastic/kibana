@@ -280,7 +280,8 @@ export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigura
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
-  excludedVisualizations?: string[]
+  excludedVisualizations?: string[],
+  preferredChartType?: string
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -705,13 +706,14 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (context, dataView, excludedVisualizations) => {
+          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
               context,
               dataView,
               excludedVisualizations,
+              preferredChartType,
             });
           },
         };
