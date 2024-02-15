@@ -234,10 +234,10 @@ export class ExecuteReportTask implements ReportingTask {
         `[process_expiration: ${expirationTime}]`
     );
 
-    // event tracking
+    // event tracking of claimed job
     const eventTracker = this.getEventTracker(report);
     eventTracker?.claimJob({
-      timeSinceCreation: m.valueOf() - new Date(report.created_at).valueOf(),
+      timeSinceCreation: new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf(),
     });
 
     const resp = await store.setReportClaimed(claimedReport, doc);
@@ -269,13 +269,11 @@ export class ExecuteReportTask implements ReportingTask {
       output: docOutput ?? null,
     };
 
-    // event tracking
-    const startedAt = report.started_at;
+    // event tracking of failed job
     const eventTracker = this.getEventTracker(report);
     eventTracker?.failJob({
-      timeSinceClaimed: startedAt
-        ? completedTime.valueOf() - new Date(startedAt).valueOf()
-        : undefined,
+      timeSinceClaimed:
+        new Date(Date.now()).valueOf() - new Date(report.started_at ?? -Infinity).valueOf(),
       errorCode: docOutput?.error_code,
       errorMessage: error?.message,
     });
@@ -371,24 +369,22 @@ export class ExecuteReportTask implements ReportingTask {
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
 
-    // event tracking
-    const startedAt = report.started_at;
+    // event tracking of completed job
     const eventTracker = this.getEventTracker(report);
+    const byteSize = docOutput.size;
+    const timeSinceClaimed =
+      completedTime.valueOf() - new Date(report.started_at ?? -Infinity).valueOf();
     if (docOutput.metrics?.csv != null) {
       eventTracker?.completeJobCsv({
-        byteSize: docOutput.size,
-        timeSinceClaimed: startedAt
-          ? completedTime.valueOf() - new Date(startedAt).valueOf()
-          : undefined,
+        byteSize,
+        timeSinceClaimed,
         csvRows: docOutput.metrics.csv.rows ?? 0,
         // csvColumns: docOutput.metrics?.csv?.columns, // TODO: add new metric to report output
       });
     } else if (docOutput.metrics?.pdf != null || docOutput.metrics?.png != null) {
       eventTracker?.completeJobScreenshot({
-        byteSize: docOutput.size,
-        timeSinceClaimed: startedAt
-          ? completedTime.valueOf() - new Date(startedAt).valueOf()
-          : undefined,
+        byteSize,
+        timeSinceClaimed,
         numPages: docOutput.metrics.pdf?.pages ?? 1,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
         // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // TODO: add new metric to report output

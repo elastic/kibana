@@ -42,14 +42,8 @@ export class EventTracker {
     try {
       this.analytics.reportEvent(eventType, eventFields);
     } catch (err) {
-      this.analytics.reportEvent(EventType.REPORT_ERROR, {
-        [FieldType.DURATION]: 0,
-        [FieldType.REPORT_ID]: this.reportId,
-        [FieldType.EXPORT_TYPE]: this.exportType,
-        [FieldType.OBJECT_TYPE]: this.objectType,
-        [FieldType.ERROR_MESSAGE]: err.message,
-        [FieldType.ERROR_CODE]: 'unknown',
-      });
+      // eslint-disable-next-line no-console
+      console.error(err);
     }
   }
 
