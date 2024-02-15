@@ -69,6 +69,7 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApplyCb,
   onCancelCb,
+  hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -431,6 +432,7 @@ export function LensEditConfigurationFlyout({
                 expandCodeEditor={(status: boolean) => {}}
                 isCodeEditorExpanded
                 detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
                 warning={
                   suggestsLimitedColumns
