@@ -10,10 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
 import { useLicenseUrl } from '../hooks/use_license';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
@@ -112,6 +114,7 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
 
 export const SubscriptionSplashPrompt: React.FC = () => {
   const manageLicenseURL = useLicenseUrl();
+  const { services } = useKibanaContextForPlugin();
 
   return (
     <EuiEmptyPrompt
@@ -134,15 +137,17 @@ export const SubscriptionSplashPrompt: React.FC = () => {
         </p>
       }
       actions={[
-        <EuiButton
-          data-test-subj="infraSubscriptionSplashPromptStartTrialButton"
-          href={manageLicenseURL}
-          fill
-        >
-          {i18n.translate('xpack.infra.ml.splash.startTrialCta', {
-            defaultMessage: 'Start trial',
-          })}
-        </EuiButton>,
+        <RedirectAppLinks coreStart={services}>
+          <EuiButton
+            data-test-subj="infraSubscriptionSplashPromptStartTrialButton"
+            href={manageLicenseURL}
+            fill
+          >
+            {i18n.translate('xpack.infra.ml.splash.startTrialCta', {
+              defaultMessage: 'Start trial',
+            })}
+          </EuiButton>
+        </RedirectAppLinks>,
       ]}
     />
   );

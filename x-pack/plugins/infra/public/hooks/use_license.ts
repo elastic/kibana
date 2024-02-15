@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import url from 'url';
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -35,7 +36,10 @@ export const useLicense = (): UseLicenseReturnValue => {
 
 export const useLicenseUrl = () => {
   const { licenseManagement, http } = useKibanaContextForPlugin().services;
-  const licensePageUrl = http.basePath.prepend('/app/management/stack/license_management');
+  const licensePageUrl = url.format({
+    pathname: http.basePath.prepend('/app/management/stack/license_management'),
+  });
+
   return (
     licenseManagement?.locator?.useUrl({
       page: 'dashboard',
