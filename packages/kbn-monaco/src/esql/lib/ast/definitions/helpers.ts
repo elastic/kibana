@@ -12,12 +12,42 @@ export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
-  return signatures.map(({ params, returnType, infiniteParams, examples }) => ({
-    declaration: `${name}(${params.map((arg) => printArguments(arg, withTypes)).join(', ')}${
-      infiniteParams ? ` ,[... ${params.map((arg) => printArguments(arg, withTypes))}]` : ''
-    })${withTypes ? `: ${returnType}` : ''}`,
-    examples,
-  }));
+  return signatures.map(({ params, returnType, infiniteParams, minParams, examples }) => {
+    // for functions with a minimum number of args, repeat the last arg multiple times
+    // just make sure to compute the right number of args to add
+    const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
+    return {
+      declaration: `${name}(${params
+        .map((arg) => printArguments(arg, withTypes))
+        .join(', ')}${handleAdditionalArgs(
+        !!infiniteParams,
+        params,
+        withTypes
+      )}${handleAdditionalArgs(
+        minParamsToAdd > 0,
+        Array(minParamsToAdd).fill(params[Math.max(params.length - 1, 0)]),
+        withTypes
+      )})${withTypes ? `: ${returnType}` : ''}`,
+      examples,
+    };
+  });
+}
+
+function handleAdditionalArgs(
+  criteria: boolean,
+  additionalArgs: Array<{
+    name: string;
+    type: string | string[];
+    optional?: boolean;
+    reference?: string;
+  }>,
+  withTypes: boolean
+) {
+  return criteria
+    ? `${withTypes ? ' ,[... ' : ', '}${additionalArgs
+        .map((arg) => printArguments(arg, withTypes))
+        .join(', ')}${withTypes ? ']' : ''}`
+    : '';
 }
 
 export function getCommandSignature(

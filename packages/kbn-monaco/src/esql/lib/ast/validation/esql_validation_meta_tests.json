@@ -519,11 +519,11 @@
       "error": false
     },
     {
-      "query": "row var = case(true, \"a\")",
+      "query": "row var = case(true, \"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row case(true, \"a\")",
+      "query": "row case(true, \"a\", \"a\")",
       "error": false
     },
     {
@@ -567,19 +567,19 @@
       "error": false
     },
     {
-      "query": "row var = concat(\"a\")",
+      "query": "row var = concat(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row concat(\"a\")",
+      "query": "row concat(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row var = concat(to_string(\"a\"))",
+      "query": "row var = concat(to_string(\"a\"), to_string(\"a\"))",
       "error": false
     },
     {
-      "query": "row var = concat(5)",
+      "query": "row var = concat(5, 5)",
       "error": true
     },
     {
@@ -4567,11 +4567,11 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = case(booleanField, stringField)",
+      "query": "from a_index | eval var = case(booleanField, stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval case(booleanField, stringField)",
+      "query": "from a_index | eval case(booleanField, stringField, stringField)",
       "error": false
     },
     {
@@ -4627,23 +4627,19 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = concat(stringField)",
+      "query": "from a_index | eval var = concat(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(stringField)",
+      "query": "from a_index | eval concat(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = concat(to_string(stringField))",
+      "query": "from a_index | eval var = concat(to_string(stringField), to_string(stringField))",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(numberField)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = concat(*)",
+      "query": "from a_index | eval concat(numberField, numberField)",
       "error": true
     },
     {
