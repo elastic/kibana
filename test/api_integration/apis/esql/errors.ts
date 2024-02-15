@@ -8,7 +8,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { REPO_ROOT } from '@kbn/repo-info';
 import uniqBy from 'lodash/uniqBy';
