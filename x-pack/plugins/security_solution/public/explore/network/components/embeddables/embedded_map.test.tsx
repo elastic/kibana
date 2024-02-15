@@ -12,7 +12,6 @@ import { TestProviders, mockGlobalState, createMockStore } from '../../../../com
 
 import { EmbeddedMapComponent } from './embedded_map';
 import { createEmbeddable } from './create_embeddable';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
@@ -53,7 +52,6 @@ jest.mock('@kbn/embeddable-plugin/public', () => ({
   EmbeddablePanel: jest.fn().mockReturnValue(<div data-test-subj="EmbeddablePanel" />),
 }));
 
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockCreateEmbeddable = createEmbeddable as jest.Mock;
 const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
 const mockGetStorage = jest.fn();
