@@ -1,31 +1,22 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 import React, { useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
-import type { AlertsEsQuery } from '../../../../common/alerts/types';
-import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
-import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
 import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 import { useBoolean } from '../../../../hooks/use_boolean';
-import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { CollapsibleSection } from './section/collapsible_section';
 import { AlertsClosedContent } from './alerts_closed_content';
 import { type AlertsCount } from '../../../../hooks/use_alerts_count';
+import { createAlertsEsQuery } from '../../../../utils/filters/create_alerts_es_query';
+import { ALERT_STATUS_ALL } from '../../../shared/alerts/constants';
+import { AlertsOverview } from '../../../shared/alerts/alerts_overview';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -87,7 +78,7 @@ export const AlertsSummaryContent = ({
           </EuiFlexGroup>
         }
       >
-        <MemoAlertSummaryWidget
+        <AlertsOverview
           onLoaded={onLoaded}
           alertsQuery={alertsEsQueryByStatus}
           dateRange={dateRange}
@@ -105,36 +96,3 @@ export const AlertsSummaryContent = ({
     </>
   );
 };
-
-interface MemoAlertSummaryWidgetProps {
-  alertsQuery: AlertsEsQuery;
-  dateRange: TimeRange;
-  onLoaded: (alertsCount?: AlertsCount) => void;
-}
-
-const MemoAlertSummaryWidget = React.memo(
-  ({ alertsQuery, dateRange, onLoaded }: MemoAlertSummaryWidgetProps) => {
-    const { services } = useKibanaContextForPlugin();
-
-    const summaryTimeRange = useSummaryTimeRange(dateRange);
-
-    const { charts, triggersActionsUi } = services;
-    const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
-
-    const chartProps = {
-      baseTheme: charts.theme.useChartsBaseTheme(),
-    };
-
-    return (
-      <AlertSummaryWidget
-        chartProps={chartProps}
-        featureIds={infraAlertFeatureIds}
-        filter={alertsQuery}
-        timeRange={summaryTimeRange}
-        onLoaded={onLoaded}
-        fullSize
-        hideChart
-      />
-    );
-  }
-);
