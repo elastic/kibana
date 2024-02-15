@@ -11,7 +11,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../../store/sourcerer/model';
 import { DEFAULT_TIME_FIELD } from '../../../../common/constants';
-import { getSourcererDataView } from './get_sourcerer_data_view';
 
 export interface GetSourcererDataView {
   signal?: AbortSignal;
@@ -41,6 +40,7 @@ export const createSourcererDataView = async ({
   const { patternList } = body;
   const patternListAsTitle = ensurePatternFormat(patternList).join();
   let siemDataView: DataViewType;
+  let defaultDataView: KibanaDataView;
   if (siemDataViewExist === undefined) {
     try {
       siemDataView = await dataViewService.createAndSave(
@@ -62,33 +62,52 @@ export const createSourcererDataView = async ({
         throw error;
       }
     }
+    defaultDataView = {
+      id: siemDataView.id ?? dataViewId,
+      patternList: siemDataView.title.split(','),
+      title: siemDataView.title,
+    };
   } else {
+    console.log('siemDataViewExist', siemDataViewExist);
     const siemDataViewTitle = siemDataViewExist
       ? ensurePatternFormat(siemDataViewExist.title.split(',')).join()
       : '';
-    siemDataView = await dataViewService.get(dataViewId);
-
     if (patternListAsTitle !== siemDataViewTitle) {
+      siemDataView = await dataViewService.get(dataViewId);
+      console.log('siemDataView', siemDataView);
       siemDataView.title = patternListAsTitle;
       await dataViewService.updateSavedObject(siemDataView);
     }
+    defaultDataView = {
+      id: dataViewId,
+      patternList,
+      title: patternListAsTitle,
+    };
   }
+
+  console.log('dataViewId', dataViewId);
+  console.log('allDataViews', allDataViews);
 
   if (allDataViews.some((dv) => dv.id === dataViewId)) {
     allDataViews = allDataViews.map((v) =>
       v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
     );
-  } else if (siemDataView !== null) {
-    allDataViews.push({ id: siemDataView.id ?? dataViewId, title: siemDataView?.title });
+  } else if (defaultDataView !== null) {
+    allDataViews.push({ id: defaultDataView.id ?? dataViewId, title: defaultDataView?.title });
   }
 
-  const siemSourcererDataView = await getSourcererDataView(dataViewId, dataViewService);
-
+  // const siemSourcererDataView = await getSourcererDataView(dataViewId, dataViewService);
+  // const siemSourcererDataView = {
+  //   id: defaultDataView.id,
+  //   patternList: defaultDataView.title.split(','),
+  //   title: siemDataView.title,
+  // };
+  console.log('defaultDataView', defaultDataView);
   return {
-    defaultDataView: siemSourcererDataView,
+    defaultDataView,
     kibanaDataViews: allDataViews.map((dv) =>
       dv.id === dataViewId
-        ? siemSourcererDataView
+        ? defaultDataView
         : {
             id: dv.id,
             patternList: dv.title.split(','),
