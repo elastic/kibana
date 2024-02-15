@@ -8,6 +8,7 @@
 
 export interface Tag {
   id: string;
+  managed: boolean;
   name: string;
   description: string;
   color: string;
