@@ -396,7 +396,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   // Generic is used to let TS infer the return type at call site.
   private async throwIfKibanaShutsDown<T>(): Promise<T> {
-    await this.reporting.getKibanaShutdown$().toPromise();
+    await Rx.firstValueFrom(this.reporting.getKibanaShutdown$());
     throw new KibanaShuttingDownError();
   }
 
