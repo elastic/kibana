@@ -18,8 +18,8 @@ import { DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PAGE_SIZE_KEY } from '../constants';
 export const GET_DEFAULT_TABLE_PROPERTIES: TableProperties = {
   detailsItemId: null,
   sorting: {
-    direction: 'asc',
-    field: 'name',
+    direction: 'desc',
+    field: 'alertsCount',
   },
   pagination: {
     pageIndex: 0,

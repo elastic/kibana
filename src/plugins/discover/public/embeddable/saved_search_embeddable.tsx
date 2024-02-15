@@ -89,6 +89,7 @@ export type SearchProps = Partial<UnifiedDataTableProps> &
     interceptedWarnings?: SearchResponseWarning[];
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
+    onUpdateHeaderRowHeight?: (headerRowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
     onUpdateSampleSize?: (sampleSize?: number) => void;
   };
@@ -503,6 +504,10 @@ export class SavedSearchEmbeddable
       onUpdateRowHeight: (rowHeight) => {
         this.updateInput({ rowHeight });
       },
+      headerRowHeightState: this.input.headerRowHeight || savedSearch.headerRowHeight,
+      onUpdateHeaderRowHeight: (headerRowHeight) => {
+        this.updateInput({ headerRowHeight });
+      },
       rowsPerPageState: this.input.rowsPerPage || savedSearch.rowsPerPage,
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
@@ -594,7 +599,8 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
     searchProps.sharedItemTitle = this.panelTitleInternal;
     searchProps.searchTitle = this.panelTitleInternal;
-    searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
+    searchProps.rowHeightState = this.input.rowHeight ?? savedSearch.rowHeight;
+    searchProps.headerRowHeightState = this.input.headerRowHeight ?? savedSearch.headerRowHeight;
     searchProps.rowsPerPageState =
       this.input.rowsPerPage ||
       savedSearch.rowsPerPage ||
