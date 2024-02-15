@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { SyntheticsAppProps } from './contexts';
 import { getIntegratedAppAvailability } from './utils/adapters';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
@@ -16,7 +16,8 @@ import { SyntheticsApp } from './synthetics_app';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 
 export function renderApp(
-  core: CoreStart,
+  core: CoreSetup<ClientPluginsStart, unknown>,
+  coreStart: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
   appMountParameters: AppMountParameters,
@@ -29,7 +30,7 @@ export function renderApp(
     http: { basePath },
     i18n,
     theme,
-  } = core;
+  } = coreStart;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
@@ -43,12 +44,12 @@ export function renderApp(
     isDev,
     plugins,
     canSave,
-    core,
+    coreStart,
     i18n,
     startPlugins,
     basePath: basePath.get(),
     darkMode,
-    commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
+    commonlyUsedRanges: coreStart.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
@@ -70,7 +71,7 @@ export function renderApp(
       }),
     setBadge,
     appMountParameters,
-    setBreadcrumbs: core.chrome.setBreadcrumbs,
+    setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
   };
 
   ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);

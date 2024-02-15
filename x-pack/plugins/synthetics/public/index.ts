@@ -10,3 +10,6 @@ import { UptimePlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UptimePlugin(initializerContext);
+
+export { MonitorScreenshotEmbeddable } from './shared';
+export type { MonitorScreenshotEmbeddableProps } from './shared';

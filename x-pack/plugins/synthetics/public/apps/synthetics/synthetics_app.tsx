@@ -6,14 +6,16 @@
  */
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
+import { Observable } from 'rxjs';
 import { Router } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS, CoreStart, CoreTheme } from '@kbn/core/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { ClientPluginsStart } from '../../plugin';
 import { SyntheticsDataViewContextProvider } from './contexts/synthetics_data_view_context';
 import { SyntheticsAppProps } from './contexts';
 
@@ -30,11 +32,35 @@ import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
 
+export function initKibanaService({
+  coreStart,
+  clientPluginStart,
+  coreTheme$,
+}: {
+  coreStart: CoreStart;
+  clientPluginStart?: ClientPluginsStart;
+  coreTheme$?: Observable<CoreTheme>;
+}) {
+  kibanaService.core = coreStart;
+
+  if (clientPluginStart) {
+    kibanaService.startPlugins = clientPluginStart;
+  }
+
+  if (coreTheme$) {
+    kibanaService.theme = coreTheme$;
+  }
+}
+
+export function isKibanaServiceInitialized() {
+  return kibanaService.core !== undefined;
+}
+
 const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,
     canSave,
-    core,
+    coreStart,
     darkMode,
     i18n: i18nCore,
     plugins,
@@ -61,9 +87,11 @@ const Application = (props: SyntheticsAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  kibanaService.core = core;
-  kibanaService.startPlugins = startPlugins;
-  kibanaService.theme = props.appMountParameters.theme$;
+  initKibanaService({
+    coreStart,
+    clientPluginStart: startPlugins,
+    coreTheme$: props.appMountParameters.theme$,
+  });
 
   store.dispatch(setBasePath(basePath));
 
@@ -82,7 +110,7 @@ const Application = (props: SyntheticsAppProps) => {
           <ReduxProvider store={store}>
             <KibanaContextProvider
               services={{
-                ...core,
+                ...coreStart,
                 ...plugins,
                 storage,
                 data: startPlugins.data,
@@ -107,7 +135,7 @@ const Application = (props: SyntheticsAppProps) => {
                             <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
                               <RedirectAppLinks
                                 coreStart={{
-                                  application: core.application,
+                                  application: coreStart.application,
                                 }}
                               >
                                 <InspectorContextProvider>
