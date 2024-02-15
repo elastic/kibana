@@ -6,55 +6,58 @@
  * Side Public License, v 1.
  */
 
-import { LangModuleType } from '../types';
-import { CONSOLE_LANG_ID } from './constants';
 import { monaco } from '../monaco_imports';
+import { CONSOLE_LANG_ID } from './constants';
+import { WorkerProxyService } from './worker_proxy_service';
 
-export const languageConfiguration: monaco.languages.LanguageConfiguration = {};
+const OWNER = 'CONSOLE_GRAMMAR_CHECKER';
 
-export const lexerRules: monaco.languages.IMonarchLanguage = {
-  defaultToken: 'invalid',
-  regex_method: /get|post|put|patch|delete/,
-  regex_url: /.*$/,
-  // C# style strings
-  escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
-  ignoreCase: true,
-  tokenizer: {
-    root: [
-      // whitespace
-      { include: '@rule_whitespace' },
-      // start a multi-line comment
-      { include: '@rule_start_multi_comment' },
-      // a one-line comment
-      [/\/\/.*$/, 'comment'],
-      // method
-      [/@regex_method/, 'keyword'],
-      // url
-      [/@regex_url/, 'identifier'],
-    ],
-    rule_whitespace: [[/[ \t\r\n]+/, 'WHITESPACE']],
-    rule_start_multi_comment: [[/\/\*/, 'comment', '@rule_multi_comment']],
-    rule_multi_comment: [
-      // match everything on a single line inside the comment except for chars / and *
-      [/[^\/*]+/, 'comment'],
-      // start a nested comment by going 1 level down
-      [/\/\*/, 'comment', '@push'],
-      // match the closing of the comment and return 1 level up
-      ['\\*/', 'comment', '@pop'],
-      // match individual chars inside a multi-line comment
-      [/[\/*]/, 'comment'],
-    ],
-    string: [
-      [/[^\\"]+/, 'string'],
-      [/@escapes/, 'string.escape'],
-      [/\\./, 'string.escape.invalid'],
-      [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }],
-    ],
-  },
-};
+monaco.languages.onLanguage(CONSOLE_LANG_ID, async () => {
+  const wps = new WorkerProxyService();
 
-export const ConsoleLang: LangModuleType = {
-  ID: CONSOLE_LANG_ID,
-  lexerRules,
-  languageConfiguration,
-};
+  wps.setup();
+
+  const updateAnnotations = async (model: monaco.editor.IModel): Promise<void> => {
+    if (model.isDisposed()) {
+      return;
+    }
+    const parseResult = await wps.getAnnos(model.uri);
+    if (!parseResult) {
+      return;
+    }
+    const { annotations } = parseResult;
+    monaco.editor.setModelMarkers(
+      model,
+      OWNER,
+      annotations.map(({ at, text, type }) => {
+        const { column, lineNumber } = model.getPositionAt(at);
+        return {
+          startLineNumber: lineNumber,
+          startColumn: column,
+          endLineNumber: lineNumber,
+          endColumn: column,
+          message: text,
+          severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+        };
+      })
+    );
+  };
+
+  const onModelAdd = (model: monaco.editor.IModel) => {
+    if (model.getLanguageId() !== CONSOLE_LANG_ID) {
+      return;
+    }
+
+    const { dispose } = model.onDidChangeContent(async () => {
+      updateAnnotations(model);
+    });
+
+    model.onWillDispose(() => {
+      dispose();
+    });
+
+    updateAnnotations(model);
+  };
+
+  monaco.editor.onDidCreateModel(onModelAdd);
+});
