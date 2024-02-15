@@ -100,6 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           id: adJobIdSpace1s1,
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
+          hasAlertingRules: false,
           jobState: 'closed',
           datafeedState: '',
           spaces: [idSpace1],
@@ -107,6 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           id: adJobIdSpace2s1,
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
+          hasAlertingRules: false,
           jobState: 'closed',
           datafeedState: '',
           spaces: [idSpace1],
