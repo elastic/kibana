@@ -9,7 +9,7 @@ import React from 'react';
 import { render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Matcher } from '@testing-library/react';
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp, uniq, sortBy, isEqual } from 'lodash';
 
 import { RuleDiffTab } from '../rule_diff_tab';
 import { savedRuleMock } from '../../../logic/mock';
@@ -286,5 +286,45 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
 
     expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(0);
     expect(screen.queryAllByText(matchInOrder(['author']))).toHaveLength(2);
+  });
+
+  it('Properties should be sorted alphabetically', () => {
+    const oldRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 1,
+    };
+
+    const newRule: RuleResponse = {
+      ...savedRuleMock,
+      version: 2,
+    };
+
+    function checkRenderedPropertyNamesAreSorted(): boolean {
+      /* Find all lines which contain property names in the diff */
+      const matchedElements = screen.queryAllByText(/\s".*?":/, { trim: false });
+
+      /* Extract property names from the matched elements */
+      const propertyNames = matchedElements.map((element) => {
+        const matches = element.textContent?.match(/\s"(.*?)":/);
+        return matches ? matches[1] : '';
+      });
+
+      /* Remove duplicates */
+      const uniquePropertyNames = uniq(propertyNames);
+
+      /* Check that displayed property names are sorted alphabetically */
+      const isArraySortedAlphabetically = (array: string[]): boolean =>
+        isEqual(array, sortBy(array));
+
+      return isArraySortedAlphabetically(uniquePropertyNames);
+    }
+
+    render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);
+    const arePropertiesSortedInConciseView = checkRenderedPropertyNamesAreSorted();
+    expect(arePropertiesSortedInConciseView).toBe(true);
+
+    userEvent.click(screen.getByText('Expand 44 unchanged lines'));
+    const arePropertiesSortedInExpandedView = checkRenderedPropertyNamesAreSorted();
+    expect(arePropertiesSortedInExpandedView).toBe(true);
   });
 });
