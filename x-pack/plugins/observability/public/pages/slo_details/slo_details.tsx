@@ -86,6 +86,7 @@ export function SloDetailsPage() {
 
         Name: ${slo.name}.
         Id: ${slo.id}
+        Instance Id: ${slo.instanceId}
         Description: ${slo.description}
         Observed value: ${slo.summary.sliValue}
         Status: ${slo.summary.status}

@@ -17,11 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useEffect, useState } from 'react';
-
+import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
@@ -33,7 +33,7 @@ export const OVERVIEW_TAB_ID = 'overview';
 export const ALERTS_TAB_ID = 'alerts';
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-const BURN_RATE_OPTIONS: BurnRateOption[] = [
+const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [
   {
     id: htmlIdGenerator()(),
     label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
@@ -89,7 +89,20 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
     sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
     shouldRefetch: isAutoRefreshing,
   });
-  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+  const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
+  const burnRateOptions =
+    rules?.[slo.id][0].params.windows.map((window) => ({
+      id: htmlIdGenerator()(),
+      label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+        defaultMessage: '{duration}h',
+        values: { duration: window.longWindow.value },
+      }),
+      windowName: window.actionGroup,
+      threshold: window.burnRateThreshold,
+      duration: window.longWindow.value,
+    })) ?? DEFAULT_BURN_RATE_OPTIONS;
+
+  const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
     useFetchHistoricalSummary({
       list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
       shouldRefetch: isAutoRefreshing,
@@ -142,7 +155,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
                 <BurnRates
                   slo={slo}
                   isAutoRefreshing={isAutoRefreshing}
-                  burnRateOptions={BURN_RATE_OPTIONS}
+                  burnRateOptions={burnRateOptions}
                 />
               </EuiFlexItem>
               <EuiFlexItem>

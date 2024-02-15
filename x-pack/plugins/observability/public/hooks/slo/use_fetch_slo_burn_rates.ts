@@ -41,7 +41,7 @@ export function useFetchSloBurnRates({
   const { http } = useKibana().services;
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: sloKeys.burnRates(slo.id, slo.instanceId),
+      queryKey: sloKeys.burnRates(slo.id, slo.instanceId, windows),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.post<GetSLOBurnRatesResponse>(

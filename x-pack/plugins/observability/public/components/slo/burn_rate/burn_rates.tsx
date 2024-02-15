@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
 import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
@@ -47,15 +47,22 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     windows: getWindowsFromOptions(burnRateOptions),
   });
 
+  useEffect(() => {
+    if (burnRateOptions.length) {
+      setBurnRateOption(burnRateOptions[0]);
+    }
+  }, [burnRateOptions]);
+
   const onBurnRateOptionChange = (optionId: string) => {
     const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
     setBurnRateOption(selected);
   };
 
-  const dataTimeRange = {
+  const dateTimeRange = {
     from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
     to: new Date(),
   };
+
   const threshold = burnRateOption.threshold;
   const burnRate = data?.burnRates.find(
     (curr) => curr.name === burnRateOption.windowName
@@ -112,7 +119,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
             <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
+            <ErrorRateChart slo={slo} dataTimeRange={dateTimeRange} threshold={threshold} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
