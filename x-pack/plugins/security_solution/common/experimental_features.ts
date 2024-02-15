@@ -192,6 +192,12 @@ export const allowedExperimentalValues = Object.freeze({
    */
   timelineEsqlTabDisabled: false,
 
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
+
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
    *
