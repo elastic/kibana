@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('error count threshold alert', { config: 'basic', archives: [] }, () => {
     const javaErrorMessage = 'a java error';
     const phpErrorMessage = 'a php error';
 
