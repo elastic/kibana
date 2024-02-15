@@ -146,7 +146,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     },
   },
   {
-    eventType: EventType.REPORT_COMPLETION_CSV,
+    eventType: EventType.REPORT_COMPLETION_SCREENSHOT,
     schema: {
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
@@ -159,7 +159,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     },
   },
   {
-    eventType: EventType.REPORT_COMPLETION_SCREENSHOT,
+    eventType: EventType.REPORT_COMPLETION_CSV,
     schema: {
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],

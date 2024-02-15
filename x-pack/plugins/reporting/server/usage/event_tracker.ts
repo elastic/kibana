@@ -15,7 +15,7 @@ interface CompletionOpts {
 
 interface CompletionOptsScreenshot {
   numPages?: number;
-  screenshotPixels?: number;
+  // screenshotPixels?: number; // FIXME: needs to be added to report output metrics
   screenshotLayout?: string;
 }
 
@@ -92,9 +92,9 @@ export class EventTracker {
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION]: timeSinceClaimed,
       [FieldType.BYTE_SIZE]: byteSize,
-      ...(numPages ? { [FieldType.NUM_PAGES]: numPages } : {}),
-      ...(screenshotPixels ? { [FieldType.SCREENSHOT_PIXELS]: screenshotPixels } : {}),
-      ...(screenshotLayout ? { [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout } : {}),
+      [FieldType.NUM_PAGES]: numPages,
+      [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
+      // [FieldType.SCREENSHOT_PIXELS]: screenshotPixels, // FIXME: needs to be added in report output metrics
     });
   }
 
