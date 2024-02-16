@@ -6,9 +6,13 @@
  */
 
 import React, { FC } from 'react';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
+import { CreateAnalyticsButtonWrapper } from '../../../analytics_creation/components/create_analytics_button_wrapper';
+import { useHasRequiredIndicesPermissions } from '../../../analytics_creation/hooks';
+
+const createPermissionMessage = createPermissionFailureMessage('canCreateDataFrameAnalytics');
 
 interface Props {
   isDisabled: boolean;
@@ -20,31 +24,25 @@ export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, navigateToSourceS
     navigateToSourceSelection();
   };
 
-  const button = (
-    <EuiButton
-      disabled={isDisabled}
-      fill
-      onClick={handleClick}
-      iconType="plusInCircle"
-      size="s"
-      data-test-subj="mlAnalyticsButtonCreate"
+  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions();
+
+  return (
+    <CreateAnalyticsButtonWrapper
+      disabled={isDisabled || !hasRequiredIndicesPermissions}
+      tooltipContent={!hasRequiredIndicesPermissions ? undefined : createPermissionMessage}
     >
-      {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create job',
-      })}
-    </EuiButton>
-  );
-
-  if (isDisabled) {
-    return (
-      <EuiToolTip
-        position="top"
-        content={createPermissionFailureMessage('canCreateDataFrameAnalytics')}
+      <EuiButton
+        disabled={isDisabled || !hasRequiredIndicesPermissions}
+        fill
+        onClick={handleClick}
+        iconType="plusInCircle"
+        size="s"
+        data-test-subj="mlAnalyticsButtonCreate"
       >
-        {button}
-      </EuiToolTip>
-    );
-  }
-
-  return button;
+        {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
+          defaultMessage: 'Create job',
+        })}
+      </EuiButton>
+    </CreateAnalyticsButtonWrapper>
+  );
 };

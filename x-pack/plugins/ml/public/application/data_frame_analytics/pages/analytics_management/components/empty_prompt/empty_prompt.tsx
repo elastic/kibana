@@ -14,11 +14,15 @@ import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
+import { useHasRequiredIndicesPermissions } from '../../../analytics_creation/hooks';
+import { CreateAnalyticsButtonWrapper } from '../../../analytics_creation/components/create_analytics_button_wrapper';
 
 export const AnalyticsEmptyPrompt: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
+
+  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions();
 
   const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
     'canCreateDataFrameAnalytics',
@@ -26,7 +30,10 @@ export const AnalyticsEmptyPrompt: FC = () => {
   ]);
 
   const disabled =
-    !mlNodesAvailable() || !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
+    !mlNodesAvailable() ||
+    !canCreateDataFrameAnalytics ||
+    !canStartStopDataFrameAnalytics ||
+    !hasRequiredIndicesPermissions;
 
   const navigateToPath = useNavigateToPath();
 
@@ -67,16 +74,18 @@ export const AnalyticsEmptyPrompt: FC = () => {
         </>
       }
       actions={[
-        <EuiButton
-          onClick={navigateToSourceSelection}
-          isDisabled={disabled}
-          color="primary"
-          data-test-subj="mlAnalyticsCreateFirstButton"
-        >
-          {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-            defaultMessage: 'Create data frame analytics job',
-          })}
-        </EuiButton>,
+        <CreateAnalyticsButtonWrapper disabled={disabled}>
+          <EuiButton
+            onClick={navigateToSourceSelection}
+            isDisabled={disabled}
+            color="primary"
+            data-test-subj="mlAnalyticsCreateFirstButton"
+          >
+            {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
+              defaultMessage: 'Create data frame analytics job',
+            })}
+          </EuiButton>
+        </CreateAnalyticsButtonWrapper>,
         <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
           <FormattedMessage
             id="xpack.ml.common.readDocumentationLink"

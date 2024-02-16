@@ -6,3 +6,4 @@
  */
 
 export { useIndexData } from './use_index_data';
+export { useHasRequiredIndicesPermissions } from './use_has_required_indices_permissions';
