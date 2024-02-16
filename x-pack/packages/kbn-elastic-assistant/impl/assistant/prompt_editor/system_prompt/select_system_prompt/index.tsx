@@ -174,7 +174,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               onBlur={handleOnBlur}
               options={[...options, addNewSystemPrompt]}
               placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-              valueOfSelected={selectedPrompt?.id ?? allSystemPrompts[0].id}
+              valueOfSelected={selectedPrompt?.id ?? allSystemPrompts[0]?.id}
             />
           </EuiFormRow>
         )}

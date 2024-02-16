@@ -553,14 +553,6 @@ const AssistantComponent: React.FC<Props> = ({
     const refetchedConversations = await refetchResults();
     if (refetchedConversations && refetchedConversations[currentConversation.title]) {
       setCurrentConversation(refetchedConversations[currentConversation.title]);
-    } else if (refetchedConversations) {
-      const createdSelectedConversation = Object.values(refetchedConversations).find(
-        (c) => c.title === currentConversation.title
-      );
-      if (createdSelectedConversation) {
-        setCurrentConversation(createdSelectedConversation);
-        setSelectedConversationTitle(createdSelectedConversation.title);
-      }
     }
   }, [currentConversation.title, refetchResults]);
 
