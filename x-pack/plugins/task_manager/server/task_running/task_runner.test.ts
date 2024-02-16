@@ -250,7 +250,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('calculates retryAt by timeout if it exceeds the schedule when running a recurring task', async () => {
+    test('calculates retryAt by task type timeout if it exceeds the schedule when running a recurring task', async () => {
       const timeoutMinutes = 1;
       const intervalSeconds = 20;
       const id = _.random(1, 20).toString();
@@ -262,6 +262,44 @@ describe('TaskManagerRunner', () => {
           schedule: {
             interval: `${intervalSeconds}s`,
           },
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `${timeoutMinutes}m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      await runner.markTaskAsRunning();
+
+      expect(store.update).toHaveBeenCalledTimes(1);
+      const instance = store.update.mock.calls[0][0];
+
+      expect(instance.retryAt!.getTime()).toEqual(
+        instance.startedAt!.getTime() + timeoutMinutes * 60 * 1000
+      );
+      expect(instance.enabled).not.toBeDefined();
+    });
+
+    test('does not calculate retryAt by task instance timeout if defined for a recurring task', async () => {
+      const timeoutMinutes = 1;
+      const timeoutOverrideSeconds = 90;
+      const intervalSeconds = 20;
+      const id = _.random(1, 20).toString();
+      const initialAttempts = _.random(0, 2);
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          id,
+          attempts: initialAttempts,
+          schedule: {
+            interval: `${intervalSeconds}s`,
+          },
+          timeoutOverride: `${timeoutOverrideSeconds}s`,
           enabled: true,
         },
         definitions: {
@@ -324,6 +362,51 @@ describe('TaskManagerRunner', () => {
       );
       expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
         maxRunAt + timeoutMinutes * 60 * 1000
+      );
+
+      expect(instance.enabled).not.toBeDefined();
+    });
+
+    test('test sets retryAt to task instance timeout override when defined when claiming an ad hoc task', async () => {
+      const timeoutSeconds = 60;
+      const timeoutOverrideSeconds = 90;
+      const id = _.random(1, 20).toString();
+      const initialAttempts = _.random(0, 2);
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          id,
+          enabled: true,
+          attempts: initialAttempts,
+          timeoutOverride: `${timeoutOverrideSeconds}s`,
+          schedule: undefined,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `${timeoutSeconds}s`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      await runner.markTaskAsRunning();
+
+      expect(store.update).toHaveBeenCalledTimes(1);
+      const instance = store.update.mock.calls[0][0];
+
+      expect(instance.attempts).toEqual(initialAttempts + 1);
+      expect(instance.status).toBe('running');
+      expect(instance.startedAt!.getTime()).toEqual(Date.now());
+
+      const minRunAt = Date.now();
+      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
+      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
+        minRunAt + timeoutOverrideSeconds * 1000
+      );
+      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
+        maxRunAt + timeoutOverrideSeconds * 1000
       );
 
       expect(instance.enabled).not.toBeDefined();
@@ -1082,6 +1165,7 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
+      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
@@ -1113,6 +1197,8 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
+      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
+
       const instance = store.update.mock.calls[0][0];
 
       const minRunAt = Date.now();
@@ -1179,6 +1265,8 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
+      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
+
       sinon.assert.notCalled(getRetryStub);
       const instance = store.update.mock.calls[0][0];
 
@@ -1252,6 +1340,7 @@ describe('TaskManagerRunner', () => {
         new Date(Date.now() + intervalSeconds * 1000).getTime()
       );
       expect(instance.enabled).not.toBeDefined();
+      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
     });
 
     test('throws error when the task has invalid state', async () => {
@@ -1266,7 +1355,7 @@ describe('TaskManagerRunner', () => {
         stateVersion: 4,
       };
 
-      const { runner, logger } = await readyToRunStageSetup({
+      const { runner, logger, store } = await readyToRunStageSetup({
         instance: mockTaskInstance,
         definitions: {
           bar: {
@@ -1308,13 +1397,19 @@ describe('TaskManagerRunner', () => {
         },
       });
 
-      expect(() => runner.run()).rejects.toMatchInlineSnapshot(
-        `[Error: [foo]: expected value of type [string] but got [boolean]]`
-      );
+      expect(await runner.run()).toEqual({
+        error: {
+          error: new Error('[foo]: expected value of type [string] but got [boolean]'),
+          shouldValidate: false,
+          state: { bar: 'test', baz: 'test', foo: true },
+        },
+        tag: 'err',
+      });
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         'Task (bar/foo) has a validation error: [foo]: expected value of type [string] but got [boolean]'
       );
+      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: false });
     });
 
     test('does not throw error and runs when the task has invalid state and allowReadingInvalidState = true', async () => {
