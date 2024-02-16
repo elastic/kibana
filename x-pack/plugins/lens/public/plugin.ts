@@ -138,6 +138,7 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
+import { ChartType } from './lens_suggestions_api';
 
 export type { SaveProps } from './app_plugin';
 
@@ -281,7 +282,7 @@ export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
   excludedVisualizations?: string[],
-  preferredChartType?: string
+  preferredChartType?: ChartType
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
