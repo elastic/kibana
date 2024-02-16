@@ -8,6 +8,7 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import isEqual from 'react-fast-compare';
+import { omit } from 'lodash/fp';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
@@ -44,11 +45,10 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { element, ...restOwnProps } = ownProps;
   const { handlers } = dispatchProps;
   return {
     ...stateProps,
-    ...restOwnProps,
+    ...omit('element', ownProps),
     handlers,
   };
 };
