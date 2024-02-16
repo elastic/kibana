@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export interface ConfigSchema {
-  deeplinks: {
-    navLinkStatus: 'default' | 'visible';
-  };
-}
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser/src/application';
+
+export const DEFAULT_APP_VISIBILITY: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
+
+export const DEFAULT_LINK_VISIBILITY: AppDeepLinkLocations[] = ['globalSearch'];

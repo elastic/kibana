@@ -7,7 +7,6 @@
 import React, { ComponentType, lazy, Ref } from 'react';
 import ReactDOM from 'react-dom';
 import {
-  AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   type AppMountParameters,
   type CoreSetup,
@@ -59,7 +58,7 @@ export class ObservabilityAIAssistantPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observabilityAIAssistant',
       category: DEFAULT_APP_CATEGORIES.observability,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'conversations',
