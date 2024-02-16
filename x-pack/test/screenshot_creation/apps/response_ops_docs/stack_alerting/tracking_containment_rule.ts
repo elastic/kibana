@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const comboBox = getService('comboBox');
   const commonScreenshots = getService('commonScreenshots');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
@@ -23,11 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('solutionstackAlertsFilterOption');
       await testSubjects.setValue('solutionsFilterButton', 'solutionstackAlertsFilterOption');
       await testSubjects.click('.geo-containment-SelectOption');
+      await comboBox.setCustom('entitiesDataView', 'Kibana Sample Data Logs');
       await commonScreenshots.takeScreenshot(
         'alert-types-tracking-containment-conditions',
         screenshotDirectories,
         1400,
-        1024
+        1500
       );
 
       await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
