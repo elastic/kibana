@@ -16,6 +16,7 @@ import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
 import { registerVisualizeESQLFunction } from './visualize_esql';
+import { registerPromptSuggestionsFunction } from './prompt_suggestions';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
@@ -37,9 +38,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     signal,
   };
 
-  return client.getKnowledgeBaseStatus().then((response) => {
-    const isReady = response.ready;
-
+  return client.getKnowledgeBaseStatus().then(({ ready: isKnowledgeBaseAvailable }) => {
     let description = dedent(
       `You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.
 
@@ -69,6 +68,8 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
 
+        Use the "prompt_suggestions" prompts that the user can ask to continue the conversation. Call this function after every message.
+
         ${
           hasFunction('get_data_on_screen')
             ? `You have access to data on the screen by calling the "get_data_on_screen" function.
@@ -80,7 +81,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         `
     );
 
-    if (isReady) {
+    if (isKnowledgeBaseAvailable) {
       description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
 
         Additionally, you can use the "context" function to retrieve relevant information from the knowledge database.
@@ -93,14 +94,14 @@ export const registerFunctions: ChatRegistrationFunction = async ({
       description += `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`;
     }
 
-    registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
-
+    registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable });
     registerElasticsearchFunction(registrationParameters);
     registerKibanaFunction(registrationParameters);
     registerQueryFunction(registrationParameters);
     registerVisualizeESQLFunction(registrationParameters);
     registerAlertsFunction(registrationParameters);
     registerGetDatasetInfoFunction(registrationParameters);
+    registerPromptSuggestionsFunction(registrationParameters);
 
     registerContext({
       name: 'core',

@@ -11,6 +11,7 @@ import type {
   RegisterRenderFunctionDefinition,
 } from '../types';
 import { registerLensRenderFunction } from './lens';
+import { registerPromptSuggestionRenderFunction } from './prompt_suggestions';
 import { registerVisualizeQueryRenderFunction } from './visualize_esql';
 
 export async function registerFunctions({
@@ -24,4 +25,5 @@ export async function registerFunctions({
 }) {
   registerLensRenderFunction({ service, pluginsStart, registerRenderFunction });
   registerVisualizeQueryRenderFunction({ service, pluginsStart, registerRenderFunction });
+  registerPromptSuggestionRenderFunction({ service, pluginsStart, registerRenderFunction });
 }
