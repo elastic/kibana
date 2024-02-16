@@ -22,7 +22,12 @@ export type { FilterItemsProps } from './filter_bar';
 export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';
 
-export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
+export {
+  DataViewPicker,
+  DataViewSelector,
+  DataViewsList,
+  TextBasedLanguages,
+} from './dataview_picker';
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';

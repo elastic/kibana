@@ -549,13 +549,18 @@ export class DiscoverPageObject extends FtrService {
     return hasBadge;
   }
 
-  public async selectIndexPattern(indexPattern: string) {
+  public async selectIndexPattern(
+    indexPattern: string,
+    waitUntilLoadingHasFinished: boolean = true
+  ) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
     );
-    await this.header.waitUntilLoadingHasFinished();
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async getIndexPatterns() {

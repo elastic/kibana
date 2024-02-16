@@ -84,6 +84,11 @@ export interface DataViewPickerProps {
    * Callback that is called when the user clicks the Save and switch transition modal button
    */
   onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
+  /**
+   * Callback to determine if the text based language transition
+   * modal should be shown when switching data views
+   */
+  shouldShowTextBasedLanguageTransitionModal?: () => boolean;
 
   /**
    * Makes the picker disabled by disabling the popover trigger
@@ -117,6 +122,7 @@ export const DataViewPicker = ({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  shouldShowTextBasedLanguageTransitionModal,
   onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerPropsExtended) => {
@@ -137,6 +143,7 @@ export const DataViewPicker = ({
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
       textBasedLanguage={textBasedLanguage}
+      shouldShowTextBasedLanguageTransitionModal={shouldShowTextBasedLanguageTransitionModal}
       isDisabled={isDisabled}
     />
   );
