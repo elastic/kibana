@@ -68,7 +68,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
 
-        Use the "prompt_suggestions" prompts that the user can ask to continue the conversation. Call this function after every message.
+        Use the "prompt_suggestions" function to suggest prompts that the user can ask to continue the conversation. Call this function after every message.
 
         ${
           hasFunction('get_data_on_screen')
