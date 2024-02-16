@@ -37,6 +37,8 @@ import { IncludeCitationsField } from './include_citations_field';
 
 import { TelegramIcon } from './telegram_icon';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 
 const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>
   messages.map(({ id, content, createdAt, role }) => ({
@@ -70,6 +72,17 @@ export const Chat = () => {
       return response.response!;
     },
   });
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ['repoData'],
+    queryFn: () =>
+      services.http.post('/internal/enterprise_search/ai_playground/indices_query', {
+        body: JSON.stringify({ indices: ['workplace_index'] }),
+      }),
+  });
+
+  console.log(data)
+  
   const onSubmit = async (data: ChatForm) => {
     await append(
       { content: data.question, role: 'human', createdAt: new Date() },
