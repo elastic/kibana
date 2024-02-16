@@ -109,7 +109,7 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
   },
   [FieldType.SCREENSHOT_PIXELS]: {
     [FieldType.SCREENSHOT_PIXELS]: {
-      type: 'keyword',
+      type: 'long',
       _meta: {
         description: 'The number of pixels captured in the PNG or PDF export.',
       },

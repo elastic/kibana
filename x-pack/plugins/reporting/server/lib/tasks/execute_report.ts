@@ -388,7 +388,7 @@ export class ExecuteReportTask implements ReportingTask {
         timeSinceCreation,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
         numPages: output.metrics.pdf?.pages ?? -1,
-        screenshotPixels: (width ?? 0) * (height ?? 0),
+        screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
       });
     }
 
