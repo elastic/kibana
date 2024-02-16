@@ -10,7 +10,6 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 export type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from './data_view_picker';
-export { TextBasedLanguages } from './data_view_picker';
 
 /**
  * The Lazily-loaded `DataViewsList` component.  Consumers should use `React.Suspense` or
