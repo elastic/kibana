@@ -120,18 +120,15 @@ const mergeProps = (
   };
 };
 
-export const EditMenuWithContext = (props: PropsFromRedux) => {
+export const EditMenuWithContext = React.memo((props: PropsFromRedux) => {
   const { undo, redo } = useContext(WorkpadRoutingContext);
   const hasPasteData: boolean = useMemo(() => getClipboardData(), []);
 
   const basicHandlers = createHandlers(basicHandlerCreators, props);
-
   const clipboardHandler = createHandlers(clipboardHandlerCreators, props);
   const layerHandler = createHandlers(layerHandlerCreators, props);
   const groupHandler = createHandlers(groupHandlerCreators, props);
-  const alignmentDistributionHandler = createHandlers(alignmentDistributionHandlerCreators, {
-    ...props,
-  });
+  const alignmentDistributionHandler = createHandlers(alignmentDistributionHandlerCreators, props);
 
   return (
     <Component
@@ -146,7 +143,7 @@ export const EditMenuWithContext = (props: PropsFromRedux) => {
       redoHistory={redo}
     />
   );
-};
+});
 
 const connector = connect(mapStateToProps, mapDispatchToProps, mergeProps);
 

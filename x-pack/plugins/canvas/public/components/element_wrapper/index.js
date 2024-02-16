@@ -67,7 +67,7 @@ const ElementWrapperComponent = React.memo(
       />
     );
   },
-  (prevProps, nextProps) => isEqual(prevProps.element, nextProps.element)
+  (prevProps, nextProps) => !isEqual(prevProps.element, nextProps.element)
 );
 
 export const ElementWrapper = connectAdvanced(selectorFactory)(ElementWrapperComponent);

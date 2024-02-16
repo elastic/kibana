@@ -24,7 +24,7 @@ interface Props {
   action: string;
 }
 
-export const ToolTipShortcut = (props: Props) => {
+export const ToolTipShortcut = React.memo((props: Props) => {
   const componentProps: ComponentProps = useMemo(() => {
     const { namespace, action } = props;
     const shortcutMap = keymap[namespace][action];
@@ -39,4 +39,4 @@ export const ToolTipShortcut = (props: Props) => {
   }, [props]);
 
   return <Component {...componentProps} />;
-};
+});

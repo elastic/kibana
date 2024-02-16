@@ -21,10 +21,10 @@ interface Props {
   tagType: 'health' | 'badge';
 }
 
-export const TagList = (props: Props) => {
+export const TagList = React.memo((props: Props) => {
   const getTag = useCallback(
     (tag: string): TagSpec => tagsRegistry.get(tag) || { name: tag, color: undefined },
     []
   );
   return <Component {...props} getTag={getTag} />;
-};
+});
