@@ -20,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const actions = getService('actions');
   const rules = getService('rules');
   const browser = getService('browser');
+  const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
   describe('Opsgenie', () => {
@@ -45,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           apiKey: 'apiKey',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -80,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           apiKey: 'apiKey',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
         await testSubjects.click('euiFlyoutCloseButton');
