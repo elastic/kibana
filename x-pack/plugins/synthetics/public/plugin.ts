@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
+  PackageInfo,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -113,7 +114,11 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  private readonly _packageInfo: Readonly<PackageInfo>;
+
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this._packageInfo = initContext.env.packageInfo;
+  }
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     locators.forEach((locator) => {
@@ -155,7 +160,7 @@ export class UptimePlugin
             defaultMessage: 'Overview',
           }),
           path: '/',
-          visibleIn: plugins?.serverless ? ['globalSearch', 'sideNav'] : [],
+          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
           id: 'management',
@@ -163,7 +168,7 @@ export class UptimePlugin
             defaultMessage: 'Management',
           }),
           path: '/monitors',
-          visibleIn: plugins?.serverless ? ['globalSearch', 'sideNav'] : [],
+          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
       mount: async (params: AppMountParameters) => {
@@ -194,6 +199,10 @@ export class UptimePlugin
   }
 
   public stop(): void {}
+
+  private get _isServerless(): boolean {
+    return this._packageInfo.buildFlavor === 'serverless';
+  }
 }
 
 function registerSyntheticsRoutesWithNavigation(
