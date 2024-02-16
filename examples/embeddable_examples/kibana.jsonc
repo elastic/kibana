@@ -16,7 +16,7 @@
       "charts",
       "fieldFormats"
     ],
-    "requiredBundles": ["presentationUtil"],
+    "requiredBundles": ["presentationUtil", "discover"],
     "extraPublicDirs": ["public/hello_world"]
   }
 }

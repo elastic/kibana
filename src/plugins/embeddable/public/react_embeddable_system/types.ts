@@ -7,7 +7,7 @@
  */
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { PublishesUnsavedChanges, PublishingSubject } from '@kbn/presentation-publishing';
+import { HasType, PublishesUnsavedChanges, PublishingSubject } from '@kbn/presentation-publishing';
 import { ReactElement } from 'react';
 
 export type ReactEmbeddableRegistration<
@@ -20,6 +20,7 @@ export type ReactEmbeddableRegistration<
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
 export type DefaultEmbeddableApi = DefaultPresentationPanelApi &
+  HasType &
   PublishesUnsavedChanges & {
     serializeState: () => Promise<SerializedPanelState>;
   };

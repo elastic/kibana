@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
 import { useReactEmbeddableParentContext } from './react_embeddable_api';
-import { EmbeddableStateComparators, ReactEmbeddableFactory } from './types';
+import { DefaultEmbeddableApi, EmbeddableStateComparators, ReactEmbeddableFactory } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
 
@@ -49,9 +49,12 @@ const runComparators = <StateType extends object = object>(
   return Object.keys(latestChanges).length > 0 ? latestChanges : undefined;
 };
 
-export const useReactEmbeddableUnsavedChanges = <StateType extends object = object>(
+export const useReactEmbeddableUnsavedChanges = <
+  StateType extends object = object,
+  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
+>(
   uuid: string,
-  factory: ReactEmbeddableFactory<StateType>,
+  factory: ReactEmbeddableFactory<StateType, ApiType>,
   comparators: EmbeddableStateComparators<StateType>
 ) => {
   const { parentApi } = useReactEmbeddableParentContext() ?? {};

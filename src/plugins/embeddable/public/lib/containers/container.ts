@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { EMPTY, merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Subject, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -72,6 +72,8 @@ export abstract class Container<
 
   public registerPanelApi = <ApiType extends unknown = unknown>(id: string, api: ApiType) => {};
 
+  public childIds: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
@@ -129,6 +131,10 @@ export abstract class Container<
 
   public removePanel(id: string) {
     this.removeEmbeddable(id);
+  }
+
+  public untilAllChildApisAvailable() {
+    return Promise.resolve();
   }
 
   public async addNewPanel<ApiType extends unknown = unknown>(
@@ -558,7 +564,6 @@ export abstract class Container<
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }
-
     return embeddable;
   }
 

@@ -7,6 +7,11 @@
  */
 
 export {
+  apiPublishesLastSavedState,
+  getLastSavedStateSubjectForChild,
+  type PublishesLastSavedState,
+} from './interfaces/last_saved_state';
+export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
   useExpandedPanelId,
@@ -16,13 +21,9 @@ export {
 export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
+  useClosestCompatibleApi,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
-export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
 export { type SerializedPanelState } from './interfaces/serialized_state';
-export {
-  type PublishesLastSavedState,
-  apiPublishesLastSavedState,
-  getLastSavedStateSubjectForChild,
-} from './interfaces/last_saved_state';
+export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';

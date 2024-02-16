@@ -31,6 +31,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { PanelPackage } from '@kbn/presentation-containers';
+import { apiHasForceRefresh } from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -528,7 +529,18 @@ export class DashboardContainer
 
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
-    if (refreshControlGroup) this.controlGroup?.reload();
+    if (refreshControlGroup) {
+      this.controlGroup?.reload();
+
+      /**
+       * we only refresh react embeddable children if this refresh is NOT caused by the control group.
+       * This is because the react embeddable children subscribe to the localFilters subject which
+       * already has the control group filters included.
+       */
+      for (const reactEmbeddableChild of Object.values(this.reactEmbeddableChildren.value)) {
+        if (apiHasForceRefresh(reactEmbeddableChild)) reactEmbeddableChild.forceRefresh();
+      }
+    }
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();
@@ -659,6 +671,14 @@ export class DashboardContainer
     return Object.keys(this.getInput().panels).length;
   };
 
+  public getChild<E extends IEmbeddable>(id: string): E {
+    const type = this.getInput().panels[id]?.type;
+    if (reactEmbeddableRegistryHasKey(type)) {
+      return this.reactEmbeddableChildren.value[id] as unknown as E;
+    }
+    return this.children[id] as E;
+  }
+
   public async getPanelTitles(): Promise<string[]> {
     const titles: string[] = [];
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
@@ -730,6 +750,32 @@ export class DashboardContainer
     });
   };
 
+  public untilAllChildApisAvailable() {
+    const expectedReactEmbeddableIds = Object.keys(this.getInput().panels).filter((id) =>
+      reactEmbeddableRegistryHasKey(this.getInput().panels[id].type)
+    );
+    const currentIds = Object.keys(this.reactEmbeddableChildren.value);
+    if (
+      expectedReactEmbeddableIds.length === 0 ||
+      expectedReactEmbeddableIds.every((id) => currentIds.includes(id))
+    ) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      const subscription = this.reactEmbeddableChildren
+        .pipe(
+          map((children) => Object.keys(children)),
+          distinctUntilChanged(deepEqual)
+        )
+        .subscribe((ids) => {
+          if (expectedReactEmbeddableIds.every((id) => ids.includes(id))) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+    });
+  }
+
   public getLastSavedStateForChild = (childId: string) => {
     const {
       componentState: {
@@ -752,6 +798,12 @@ export class DashboardContainer
   }
 
   public startAuditingReactEmbeddableChildren = () => {
+    this.publishingSubscription.add(
+      this.reactEmbeddableChildren
+        .pipe(map((children) => Object.keys(children)))
+        .subscribe((ids) => this.childIds.next(ids))
+    );
+
     const auditChildren = () => {
       const currentChildren = this.reactEmbeddableChildren.value;
       let panelsChanged = false;

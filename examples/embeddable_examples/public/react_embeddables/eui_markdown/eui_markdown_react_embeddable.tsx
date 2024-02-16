@@ -70,6 +70,7 @@ export const registerMarkdownEditorEmbeddable = () => {
          */
         const thisApi = useReactEmbeddableApiHandle(
           {
+            type: EUI_MARKDOWN_ID,
             ...titlesApi,
             unsavedChanges,
             resetUnsavedChanges,
@@ -105,7 +106,7 @@ export const registerMarkdownEditorEmbeddable = () => {
         ) : (
           <EuiMarkdownFormat
             css={css`
-              padding: ${euiThemeVars.euiSizeS};
+              padding: ${euiThemeVars.euiSizeM};
             `}
           >
             {content ?? ''}

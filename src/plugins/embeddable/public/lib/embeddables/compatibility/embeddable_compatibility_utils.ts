@@ -7,14 +7,7 @@
  */
 
 import { ViewMode } from '@kbn/presentation-publishing';
-import deepEqual from 'fast-deep-equal';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  distinctUntilKeyChanged,
-  map,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, distinctUntilKeyChanged, map, Subscription } from 'rxjs';
 import { Container } from '../../containers';
 import { ViewMode as LegacyViewMode } from '../../types';
 import {
@@ -26,35 +19,15 @@ import {
 export const embeddableInputToSubject = <T extends unknown = unknown>(
   subscription: Subscription,
   embeddable: CommonLegacyEmbeddable,
-  key: keyof CommonLegacyInput,
-  useExplicitInput = false
+  key: keyof CommonLegacyInput
 ) => {
   const subject = new BehaviorSubject<T | undefined>(embeddable.getExplicitInput()?.[key] as T);
-  if (useExplicitInput && embeddable.parent) {
-    subscription.add(
-      embeddable.parent
-        .getInput$()
-        .pipe(
-          distinctUntilChanged((prev, current) => {
-            const previousValue = (prev.panels[embeddable.id]?.explicitInput as CommonLegacyInput)[
-              key
-            ];
-            const currentValue = (
-              current.panels[embeddable.id]?.explicitInput as CommonLegacyInput
-            )?.[key];
-            return deepEqual(previousValue, currentValue);
-          })
-        )
-        .subscribe(() => subject.next(embeddable.getExplicitInput()?.[key] as T))
-    );
-  } else {
-    subscription.add(
-      embeddable
-        .getInput$()
-        .pipe(distinctUntilKeyChanged(key))
-        .subscribe(() => subject.next(embeddable.getInput()?.[key] as T))
-    );
-  }
+  subscription.add(
+    embeddable
+      .getInput$()
+      .pipe(distinctUntilKeyChanged(key))
+      .subscribe(() => subject.next(embeddable.getInput()?.[key] as T))
+  );
   return subject;
 };
 

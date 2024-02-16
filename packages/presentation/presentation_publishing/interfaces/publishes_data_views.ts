@@ -7,7 +7,11 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
+import { PresentationContainer, useClosestCompatibleApi } from '@kbn/presentation-containers';
+import { useEffect, useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { HasParentApi } from './has_parent_api';
 
 export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;
@@ -24,3 +28,33 @@ export const apiPublishesDataViews = (
  */
 export const useDataViews = (api: Partial<PublishesDataViews> | undefined) =>
   useStateFromPublishingSubject(apiPublishesDataViews(api) ? api.dataViews : undefined);
+
+export const useClosestDataViewsSubject = (api: unknown, defaultDataView: DataView) => {
+  const dataViews$ = useMemo(
+    () => new BehaviorSubject<DataView[]>([defaultDataView]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const closestDataViewProvider = useClosestCompatibleApi(
+    api as Partial<HasParentApi<PresentationContainer>>,
+    apiPublishesDataViews
+  );
+
+  useEffect(() => {
+    if (!closestDataViewProvider) {
+      dataViews$.next([defaultDataView]);
+    }
+    if (!closestDataViewProvider) return;
+    const subscription = closestDataViewProvider.dataViews.subscribe((providedDataViews) => {
+      if (providedDataViews) {
+        dataViews$.next(providedDataViews);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [closestDataViewProvider, dataViews$, defaultDataView]);
+
+  return dataViews$;
+};

@@ -10,10 +10,12 @@ import {
   DefaultEmbeddableApi,
   SerializedReactEmbeddableTitles,
 } from '@kbn/embeddable-plugin/public';
+import { PublishesDataViews } from '@kbn/presentation-publishing';
+import { PublishesSelectedFields } from './publishes_selected_fields';
 
 export type FieldListSerializedStateState = SerializedReactEmbeddableTitles & {
   dataViewId?: string;
   selectedFieldNames?: string[];
 };
 
-export type FieldListApi = DefaultEmbeddableApi;
+export type FieldListApi = DefaultEmbeddableApi & PublishesSelectedFields & PublishesDataViews;

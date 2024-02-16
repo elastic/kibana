@@ -21,20 +21,21 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
-export {
-  apiPublishesPhaseEvents,
-  type PublishesPhaseEvents,
-  type PhaseEvent,
-  type PhaseEventType,
-} from './interfaces/publishes_phase_events';
+export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export { apiHasForceRefresh, type HasForceRefresh } from './interfaces/has_force_refresh';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
+export {
+  apiHasSupportedTriggers,
+  type HasSupportedTriggers,
+} from './interfaces/has_supported_triggers';
 export {
   apiHasType,
   apiIsOfType,
   type HasType,
   type HasTypeDisplayName,
 } from './interfaces/has_type';
+export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
   useBlockingError,
@@ -47,6 +48,7 @@ export {
 } from './interfaces/publishes_data_loading';
 export {
   apiPublishesDataViews,
+  useClosestDataViewsSubject,
   useDataViews,
   type PublishesDataViews,
 } from './interfaces/publishes_data_views';
@@ -83,16 +85,21 @@ export {
   type PublishesWritablePanelTitle,
 } from './interfaces/publishes_panel_title';
 export {
+  apiPublishesPhaseEvents,
+  type PhaseEvent,
+  type PhaseEventType,
+  type PublishesPhaseEvents,
+} from './interfaces/publishes_phase_events';
+export {
   apiPublishesSavedObjectId,
   useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
-export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
-export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export {
-  apiHasSupportedTriggers,
-  type HasSupportedTriggers,
-} from './interfaces/has_supported_triggers';
+  apiPublishesUnsavedChanges,
+  useUnsavedChanges,
+  type PublishesUnsavedChanges,
+} from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
@@ -102,13 +109,8 @@ export {
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
-  type PublishesUnsavedChanges,
-  apiPublishesUnsavedChanges,
-  useUnsavedChanges,
-} from './interfaces/publishes_unsaved_changes';
-export {
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
   usePublishingSubject,
+  useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';

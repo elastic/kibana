@@ -6,39 +6,40 @@
  * Side Public License, v 1.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  HelloWorldEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactoryDefinition,
-} from './hello_world';
-
-import {
-  LIST_CONTAINER,
-  ListContainerFactoryDefinition,
-  ListContainerFactory,
-} from './list_container';
-
-import {
-  SIMPLE_EMBEDDABLE,
-  SimpleEmbeddableFactory,
-  SimpleEmbeddableFactoryDefinition,
-} from './migrations';
-import {
-  FILTER_DEBUGGER_EMBEDDABLE,
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
+  FILTER_DEBUGGER_EMBEDDABLE,
 } from './filter_debugger';
-import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown/eui_markdown_react_embeddable';
+import {
+  HelloWorldEmbeddableFactory,
+  HelloWorldEmbeddableFactoryDefinition,
+  HELLO_WORLD_EMBEDDABLE,
+} from './hello_world';
+import {
+  ListContainerFactory,
+  ListContainerFactoryDefinition,
+  LIST_CONTAINER,
+} from './list_container';
+import {
+  SimpleEmbeddableFactory,
+  SimpleEmbeddableFactoryDefinition,
+  SIMPLE_EMBEDDABLE,
+} from './migrations';
+import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
+import { registerDataTableFactory } from './react_embeddables/data_table/data_table_react_embeddable';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
+import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown/eui_markdown_react_embeddable';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -46,6 +47,7 @@ export interface EmbeddableExamplesSetupDependencies {
 }
 
 export interface EmbeddableExamplesStartDependencies {
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
@@ -117,6 +119,9 @@ export class EmbeddableExamplesPlugin
 
     registerMarkdownEditorEmbeddable();
     registerCreateEuiMarkdownAction(deps.uiActions);
+
+    registerDataTableFactory(core, deps);
+    registerCreateDataTableAction(deps.uiActions);
 
     return {
       createSampleData: async () => {},

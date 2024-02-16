@@ -68,8 +68,8 @@ export const PresentationPanelInternal = <
   );
   const viewMode = rawViewMode ?? 'view';
 
-  const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  if (api && !initialLoadComplete && (dataLoading === false || !api.dataLoading)) {
     setInitialLoadComplete(true);
   }
 
@@ -132,8 +132,12 @@ export const PresentationPanelInternal = <
           <PresentationPanelError api={api} error={blockingError} />
         </EuiFlexGroup>
       )}
-      {!initialLoadComplete && <PanelLoader />}
-      <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+      {!blockingError && !initialLoadComplete && <PanelLoader />}
+      <div
+        className={
+          blockingError || !initialLoadComplete ? 'embPanel__content--hidden' : 'embPanel__content'
+        }
+      >
         <Component
           {...(componentProps as React.ComponentProps<typeof Component>)}
           {...contentAttrs}

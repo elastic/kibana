@@ -49,6 +49,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
+  setModuleServices,
   setScopedHistory,
   setUiActions,
   setUrlTracker,
@@ -415,6 +416,8 @@ export class DiscoverPlugin
         })
       );
     }
+
+    setModuleServices(getDiscoverServicesInternal());
 
     return {
       locator: this.locator,

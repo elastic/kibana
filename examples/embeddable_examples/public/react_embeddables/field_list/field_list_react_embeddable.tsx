@@ -12,10 +12,10 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
   DataViewsPublicPluginStart,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  type DataView,
 } from '@kbn/data-views-plugin/public';
 import {
   initializeReactEmbeddableTitles,
@@ -37,7 +37,7 @@ import {
 } from '@kbn/unified-field-list';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
 import { FieldListApi, FieldListSerializedStateState } from './types';
 
@@ -78,21 +78,34 @@ export const registerFieldListFactory = (
       const dataViewIdRef = state.references?.find(
         (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
       );
-      if (dataViewIdRef && serializedState) {
+      // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
+      if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
         serializedState.dataViewId = dataViewIdRef?.id;
       }
       return serializedState;
     },
     getComponent: async (initialState, maybeId) => {
+      const subscriptions = new Subscription();
       const uuid = initializeReactEmbeddableUuid(maybeId);
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
       const allDataViews = await dataViews.getIdsWithTitle();
-
       const selectedDataViewId$ = new BehaviorSubject<string | undefined>(
         initialState.dataViewId ?? (await dataViews.getDefaultDataView())?.id
       );
+
+      // transform data view ID into data views array.
+      const getDataViews = async (id?: string) => {
+        return id ? [await dataViews.get(id)] : undefined;
+      };
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+        await getDataViews(initialState.dataViewId)
+      );
+      subscriptions.add(
+        selectedDataViewId$.subscribe(async (id) => dataViews$.next(await getDataViews(id)))
+      );
+
       const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
         initialState.selectedFieldNames
       );
@@ -116,9 +129,12 @@ export const registerFieldListFactory = (
 
         useReactEmbeddableApiHandle(
           {
+            type: FIELD_LIST_ID,
             ...titlesApi,
             unsavedChanges,
             resetUnsavedChanges,
+            dataViews: dataViews$,
+            selectedFields: selectedFieldNames$,
             serializeState: async () => {
               const dataViewId = selectedDataViewId$.getValue();
               const references: Reference[] = dataViewId
@@ -163,6 +179,13 @@ export const registerFieldListFactory = (
             mounted = false;
           };
         }, [selectedDataViewId]);
+
+        // On destroy
+        useEffect(() => {
+          return () => {
+            subscriptions.unsubscribe();
+          };
+        }, []);
 
         return (
           <EuiFlexGroup direction="column" gutterSize="none">
