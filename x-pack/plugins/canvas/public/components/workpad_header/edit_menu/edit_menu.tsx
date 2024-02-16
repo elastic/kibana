@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
-import { connect } from 'react-redux';
+import React, { useContext, useMemo } from 'react';
+import { ConnectedProps, connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { State, PositionedElement } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
@@ -32,7 +32,7 @@ import {
   groupHandlerCreators,
   alignmentDistributionHandlerCreators,
 } from '../../../lib/element_handler_creators';
-import { EditMenu as Component, Props as ComponentProps } from './edit_menu.component';
+import { EditMenu as Component } from './edit_menu.component';
 import { WorkpadRoutingContext } from '../../../routes/workpad';
 import { createHandlers } from '../../sidebar_header/sidebar_header';
 
@@ -120,34 +120,36 @@ const mergeProps = (
   };
 };
 
-export const EditMenuWithContext: FC<ComponentProps> = (props) => {
+export const EditMenuWithContext = (props: PropsFromRedux) => {
   const { undo, redo } = useContext(WorkpadRoutingContext);
   const hasPasteData: boolean = useMemo(() => getClipboardData(), []);
 
-  const handlers = createHandlers(
-    {
-      ...basicHandlerCreators,
-      ...clipboardHandlerCreators,
-      ...layerHandlerCreators,
-      ...groupHandlerCreators,
-      ...alignmentDistributionHandlerCreators,
-    },
-    { ...props }
-  );
+  const basicHandlers = createHandlers(basicHandlerCreators, props);
+
+  const clipboardHandler = createHandlers(clipboardHandlerCreators, props);
+  const layerHandler = createHandlers(layerHandlerCreators, props);
+  const groupHandler = createHandlers(groupHandlerCreators, props);
+  const alignmentDistributionHandler = createHandlers(alignmentDistributionHandlerCreators, {
+    ...props,
+  });
 
   return (
     <Component
       {...props}
       hasPasteData={hasPasteData}
-      {...handlers}
+      {...basicHandlers}
+      {...clipboardHandler}
+      {...layerHandler}
+      {...groupHandler}
+      {...alignmentDistributionHandler}
       undoHistory={undo}
       redoHistory={redo}
     />
   );
 };
 
-export const EditMenu = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(EditMenuWithContext);
+const connector = connect(mapStateToProps, mapDispatchToProps, mergeProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const EditMenu = connector(EditMenuWithContext);

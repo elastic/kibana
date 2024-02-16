@@ -117,14 +117,7 @@ const isInWorkpad = (element) => {
   }
 };
 
-const componentLayoutState = ({
-  aeroStore,
-  setAeroStore,
-  elements,
-  selectedToplevelNodes,
-  height,
-  width,
-}) => {
+const componentLayoutState = ({ aeroStore, elements, selectedToplevelNodes, height, width }) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter((e) => shapes.find((s) => s.id === e));
   const newState = {
@@ -146,11 +139,10 @@ const componentLayoutState = ({
     },
   };
   if (aeroStore) {
-    aeroStore.setCurrentState(newState);
+    return aeroStore.setCurrentState(newState);
   } else {
-    setAeroStore((aeroStore = createStore(newState, updater)));
+    return createStore(newState, updater);
   }
-  return { aeroStore };
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -207,13 +199,14 @@ const mergeProps = (
 });
 
 const InteractivePageComponent = (props) => {
-  const [aeroStore, setAeroStore] = useState();
+  console.error('props', props);
+  const [aeroStore, setAeroStore] = useState(() => componentLayoutState(props));
   const [canvasOrigin, saveCanvasOrigin] = useState();
   const [, forceRerender] = useState();
 
   const commit = useCallback(
     (type, payload) => {
-      const newLayoutState = aeroStore.commit(type, payload);
+      const newLayoutState = aeroStore?.commit(type, payload);
       if (newLayoutState.currentScene.gestureEnd) {
         props.updateGlobalState(newLayoutState);
       }
@@ -222,29 +215,44 @@ const InteractivePageComponent = (props) => {
     [aeroStore, props]
   );
 
-  useEffect(() => () => props.unregisterLayout(aeroStore), [aeroStore, props]);
+  useEffect(() => {
+    props.registerLayout((type, payload) => {
+      const newLayoutState = aeroStore?.commit(type, payload);
+      if (newLayoutState.currentScene.gestureEnd) {
+        // conditionalizing the global update so as to enable persist-free nudge series
+        props.updateGlobalState(newLayoutState);
+      }
+      forceRerender(newLayoutState);
+      return newLayoutState;
+    });
+
+    return () => props.unregisterLayout(aeroStore);
+  }, [aeroStore, props]);
+
+  const cursor = aeroStore?.getCurrentState().currentScene.cursor;
 
   useEffect(() => {
-    componentLayoutState({
-      aeroStore,
-      setAeroStore,
-      elements: props.elements,
-      selectedToplevelNodes: props.selectedToplevelNodes,
-      height: props.height,
-      width: props.width,
-    });
+    setAeroStore((prev) =>
+      componentLayoutState({
+        aeroStore: prev,
+        elements: props.elements,
+        selectedToplevelNodes: props.selectedToplevelNodes,
+        height: props.height,
+        width: props.width,
+      })
+    );
   }, [aeroStore, props.elements, props.height, props.selectedToplevelNodes, props.width]);
 
   const elements = useMemo(() => {
     const elementLookup = new Map(props.elements.map((element) => [element.id, element]));
-    const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map((shape) => {
+    const elementsToRender = aeroStore?.getCurrentState().currentScene.shapes.map((shape) => {
       const element = elementLookup.get(shape.id);
       return element
         ? { ...shape, width: shape.a * 2, height: shape.b * 2, filter: element.filter }
         : shape;
     });
 
-    return elementsToRender;
+    return elementsToRender ?? [];
   }, [aeroStore, props.elements]);
 
   const canDragElement = useCallback(
@@ -260,7 +268,8 @@ const InteractivePageComponent = (props) => {
       commit={commit}
       canDragElement={canDragElement}
       elements={elements}
-      {...createHandlers(eventHandlers)}
+      cursor={cursor}
+      {...createHandlers(eventHandlers, props)}
     />
   );
 };

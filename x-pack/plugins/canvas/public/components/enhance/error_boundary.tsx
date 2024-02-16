@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ErrorInfo, FC, ReactElement } from 'react';
+import React, { ErrorInfo, FC, ReactElement, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 
 interface Props {
@@ -37,11 +37,17 @@ interface State {
   errorInfo: ErrorInfo | undefined;
 }
 
-export class ErrorBoundary extends React.Component<{}, State> {
-  constructor(props: {}) {
-    super(props);
-    this.state = { error: undefined, errorInfo: undefined };
-  }
+export class ErrorBoundary extends React.Component<
+  {
+    children: (
+      value: State & {
+        resetErrorState: () => void;
+      }
+    ) => ReactNode;
+  },
+  State
+> {
+  state = { error: undefined, errorInfo: undefined };
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ error, errorInfo });
@@ -52,9 +58,12 @@ export class ErrorBoundary extends React.Component<{}, State> {
   };
 
   render() {
-    return React.cloneElement(this.props.children as ReactElement<ComponentProps>, {
-      error: this.state.error,
-      errorInfo: this.state.errorInfo,
+    const { children } = this.props;
+    const { error, errorInfo } = this.state;
+
+    return children({
+      error,
+      errorInfo,
       resetErrorState: this.resetErrorState,
     });
   }

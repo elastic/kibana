@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { AdvancedFilter as Component, Props as ComponentProps } from './advanced_filter';
+import { AdvancedFilter as Component } from './advanced_filter';
 
 export interface Props {
   /** Optional value for the component */
@@ -15,7 +15,7 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: React.FC<Props & ComponentProps> = (props) => {
+export const AdvancedFilter: React.FC<Props> = (props) => {
   const [value, setValue] = useState(props.value || '');
 
   return <Component {...props} value={value} onChange={setValue} />;

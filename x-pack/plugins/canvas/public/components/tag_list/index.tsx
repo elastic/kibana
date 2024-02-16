@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { tagsRegistry } from '../../lib/tags_registry';
-import { TagList as Component, Props as ComponentProps } from './tag_list';
+import { TagList as Component } from './tag_list';
 import { TagSpec } from '../../lib/tag';
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
   tagType: 'health' | 'badge';
 }
 
-export const TagList = (props: Props & ComponentProps) => {
+export const TagList = (props: Props) => {
   const getTag = useCallback(
     (tag: string): TagSpec => tagsRegistry.get(tag) || { name: tag, color: undefined },
     []

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback, useContext, useMemo } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { ConnectedProps, connect, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
@@ -22,7 +22,7 @@ import {
   isWriteable,
 } from '../../../state/selectors/workpad';
 import { WorkpadRoutingContext } from '../../../routes/workpad';
-import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
+import { ViewMenu as Component } from './view_menu.component';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
 import { createHandlers } from '../../sidebar_header/sidebar_header';
 
@@ -40,14 +40,6 @@ interface DispatchProps {
   doRefresh: () => void;
 }
 
-type PropsFromContext =
-  | 'enterFullscreen'
-  | 'setAutoplayInterval'
-  | 'autoplayEnabled'
-  | 'autoplayInterval'
-  | 'setRefreshInterval'
-  | 'refreshInterval';
-
 const mapStateToProps = (state: State) => {
   return {
     zoomScale: getZoomScale(state),
@@ -64,24 +56,19 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   doRefresh: () => dispatch(fetchAllRenderables()),
 });
 
-const mergeProps = (
-  stateProps: StateProps,
-  dispatchProps: DispatchProps,
-  ownProps: ComponentProps
-): ComponentProps => {
+const mergeProps = (stateProps: StateProps, dispatchProps: DispatchProps) => {
   const { boundingBox, workpadWidth, workpadHeight, ...remainingStateProps } = stateProps;
 
   return {
     ...remainingStateProps,
     ...dispatchProps,
-    ...ownProps,
     toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
     fitToWindow: () =>
       dispatchProps.setZoomScale(getFitZoomScale(boundingBox, workpadWidth, workpadHeight)),
   };
 };
 
-const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) => {
+const ViewMenuWithContext = (props: PropsFromRedux) => {
   const dispatch = useDispatch();
   const {
     autoplayInterval,
@@ -96,7 +83,7 @@ const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) 
     setFullscreen(true);
   }, [dispatch, setFullscreen]);
 
-  const handlers = useMemo(() => createHandlers(zoomHandlerCreators, { ...props }), [props]);
+  const handlers = useMemo(() => createHandlers(zoomHandlerCreators, props), [props]);
 
   return (
     <Component
@@ -112,8 +99,8 @@ const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) 
   );
 };
 
-export const ViewMenu = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(ViewMenuWithContext);
+const connector = connect(mapStateToProps, mapDispatchToProps, mergeProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const ViewMenu = connector(ViewMenuWithContext);

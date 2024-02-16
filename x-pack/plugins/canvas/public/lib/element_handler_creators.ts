@@ -106,25 +106,48 @@ export const basicHandlerCreators = {
 };
 
 // handlers for alignment and distribution
-export const alignmentDistributionHandlerCreators = Object.assign(
-  {},
-  ...[
-    'alignLeft',
-    'alignCenter',
-    'alignRight',
-    'alignTop',
-    'alignMiddle',
-    'alignBottom',
-    'distributeHorizontally',
-    'distributeVertically',
-  ].map((event: string) => ({
-    [event]:
-      ({ commit }: Props) =>
-      (): void => {
-        commit('actionEvent', { event });
-      },
-  }))
-);
+export const alignmentDistributionHandlerCreators = {
+  alignLeft:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'alignLeft' });
+    },
+  alignCenter:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'alignCenter' });
+    },
+  alignRight:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'alignRight' });
+    },
+  alignTop:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'alignTop' });
+    },
+  alignMiddle:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'alignMiddle' });
+    },
+  alignBottom:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'alignBottom' });
+    },
+  distributeHorizontally:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'distributeHorizontally' });
+    },
+  distributeVertically:
+    ({ commit }: Props) =>
+    (): void => {
+      commit('actionEvent', { event: 'distributeVertically' });
+    },
+};
 
 // handlers for group and ungroup
 export const groupHandlerCreators = {

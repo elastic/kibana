@@ -86,7 +86,7 @@ const FullscreenControlComponent = (props) => {
 
   const getAnimation = useCallback(
     (pageNumber) => {
-      if (!props.transition || !props.transition.name) {
+      if (!transition || !transition.name) {
         return null;
       }
       if (![props.selectedPageNumber, prevSelectedPageNumber].includes(pageNumber)) {
@@ -98,7 +98,7 @@ const FullscreenControlComponent = (props) => {
       const direction = prevSelectedPageNumber > props.selectedPageNumber ? 'reverse' : 'normal';
       return { name, direction };
     },
-    [prevSelectedPageNumber, props.selectedPageNumber, props.transition, transition.name]
+    [prevSelectedPageNumber, props.selectedPageNumber, transition]
   );
 
   return (
