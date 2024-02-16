@@ -16,7 +16,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
-import { dataViewMock } from './mocks/dataview';
+import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import { DataViewPickerPropsExtended, TextBasedLanguages } from './data_view_picker';
 
 describe('DataView component', () => {
@@ -154,8 +154,8 @@ describe('DataView component', () => {
         {
           ...props,
           onDataViewCreated: jest.fn(),
-          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
-          textBasedLanguage: TextBasedLanguages.SQL,
+          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.ESQL],
+          textBasedLanguage: TextBasedLanguages.ESQL,
         },
         false
       )
@@ -165,40 +165,16 @@ describe('DataView component', () => {
     expect(props.onTextLangQuerySubmit).toHaveBeenCalled();
   });
 
-  it('should not propagate the adHoc dataviews for text based mode', async () => {
+  const runAdHocDataViewTest = (esqlMode: boolean) => {
     const component = mount(
       wrapDataViewComponentInContext(
         {
           ...props,
           onDataViewCreated: jest.fn(),
-          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
-          textBasedLanguage: TextBasedLanguages.ESQL,
-          savedDataViews: [
-            {
-              id: 'dataview-1',
-              title: 'dataview-1',
-            },
-          ],
-          adHocDataViews: [dataViewMock],
-        },
-        false
-      )
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
-      {
-        id: 'dataview-1',
-        title: 'dataview-1',
-      },
-    ]);
-  });
-
-  it('should propagate the adHoc dataviews for dataview mode', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
+          ...(esqlMode && {
+            textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.ESQL],
+            textBasedLanguage: TextBasedLanguages.ESQL,
+          }),
           savedDataViews: [
             {
               id: 'dataview-1',
@@ -223,5 +199,57 @@ describe('DataView component', () => {
         isAdhoc: true,
       },
     ]);
+  };
+
+  it('should propagate the adHoc dataviews for text based mode', () => {
+    runAdHocDataViewTest(true);
+  });
+
+  it('should propagate the adHoc dataviews for dataview mode', () => {
+    runAdHocDataViewTest(false);
+  });
+
+  const runEsqlAdHocDataViewTest = (esqlMode: boolean) => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          adHocDataViews: [dataViewMock, dataViewMockEsql],
+          ...(esqlMode && {
+            textBasedLanguages: [TextBasedLanguages.ESQL],
+            textBasedLanguage: TextBasedLanguages.ESQL,
+          }),
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
+      {
+        id: 'dataview-1',
+        title: 'dataview-1',
+      },
+      {
+        id: 'the-data-view-id',
+        title: 'the-data-view-title',
+        name: 'the-data-view',
+        isAdhoc: true,
+      },
+    ]);
+  };
+
+  it('should not show ES|QL ad hoc data views in the list for text based mode', async () => {
+    runEsqlAdHocDataViewTest(true);
+  });
+
+  it('should not show ES|QL ad hoc data views in the list for data view mode', async () => {
+    runEsqlAdHocDataViewTest(false);
   });
 });

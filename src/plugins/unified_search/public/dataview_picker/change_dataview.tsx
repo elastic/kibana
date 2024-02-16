@@ -31,6 +31,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerPropsExtended } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -111,9 +112,11 @@ export function ChangeDataView({
       const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      // not propagate the adHoc dataviews on the list for text based languages
+      // Don't show ES|QL ad hoc data views in the data view picker
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        (!isTextBasedLangSelected && adHocDataViews?.map(mapAdHocDataView)) || [];
+        adHocDataViews
+          ?.filter((adHocDataView) => adHocDataView.type !== ESQL_TYPE)
+          .map(mapAdHocDataView) ?? [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };

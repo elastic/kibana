@@ -18,7 +18,6 @@ export type ChangeDataViewTriggerProps = EuiButtonProps & {
 };
 
 export enum TextBasedLanguages {
-  SQL = 'SQL',
   ESQL = 'ESQL',
 }
 
