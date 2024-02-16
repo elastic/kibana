@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
+import { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
 import {
   isDataViewSelection,
@@ -16,17 +16,16 @@ import {
 } from '../../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
-import { redirectToDiscover } from './discover_service';
 
 interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;
-  discover: DiscoverStart;
+  events?: LogsExplorerCustomizations['events'];
 }
 
 export const initializeSelection =
   ({
     datasetsClient,
-    discover,
+    events,
   }: LogsExplorerControllerSelectionServiceDeps): InvokeCreator<
     LogsExplorerControllerContext,
     LogsExplorerControllerEvent
@@ -39,9 +38,10 @@ export const initializeSelection =
      */
     if (
       isDataViewSelection(context.datasetSelection) &&
-      context.datasetSelection.selection.dataView.isUnknownDataType()
+      context.datasetSelection.selection.dataView.isUnknownDataType() &&
+      events?.onUknownDataViewSelection
     ) {
-      return redirectToDiscover({ context, datasetSelection: context.datasetSelection, discover });
+      return events?.onUknownDataViewSelection(context);
     }
 
     /**
