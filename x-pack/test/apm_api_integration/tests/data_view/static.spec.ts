@@ -81,7 +81,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('mappings and APM data exists', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177120
+  registry.when.skip('mappings and APM data exists', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateApmData(synthtrace);
     });
