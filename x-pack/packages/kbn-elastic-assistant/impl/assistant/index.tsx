@@ -411,9 +411,19 @@ const AssistantComponent: React.FC<Props> = ({
             ? {
                 css: css`
                   margin-right: 20px;
+                  > li > div:nth-child(2) {
+                    overflow: hidden;
+                  }
                 `,
               }
-            : {})}
+            : {
+                // Avoid comments going off the flyout
+                css: css`
+                  > li > div:nth-child(2) {
+                    overflow: hidden;
+                  }
+                `,
+              })}
         />
 
         {currentConversation.messages.length !== 0 && selectedPromptContextsCount > 0 && (
