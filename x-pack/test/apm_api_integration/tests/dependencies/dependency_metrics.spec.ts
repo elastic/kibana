@@ -94,7 +94,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Dependency metrics when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177121
+  registry.when.skip('Dependency metrics when data is loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateOperationData({
         synthtraceEsClient,
