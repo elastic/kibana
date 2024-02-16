@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { connectAdvanced } from 'react-redux';
 import isEqual from 'react-fast-compare';
 import { omit } from 'lodash/fp';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
@@ -14,54 +15,62 @@ import { getState, getValue } from '../../lib/resolved_arg';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
 import { ElementWrapper as Component } from './element_wrapper';
 
-const mapStateToProps = (state, ownProps) => {
-  const { element } = ownProps;
-  const resolvedArg = getResolvedArgs(state, element.id, 'expressionRenderable');
-  const selectedPage = getSelectedPage(state);
-
-  return {
-    selectedPage,
-    state: getState(resolvedArg),
-    renderable: getValue(resolvedArg),
-    transformMatrix: element.transformMatrix,
-    width: element.width,
-    height: element.height,
-    element: {
-      id: element.id,
-      filter: element.filter,
-      expression: element.expression,
-    },
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
+function selectorFactory(dispatch) {
+  let result = {};
   const createHandlers = createDispatchedHandlerFactory(dispatch);
-  return (ownProps) => {
-    const { element } = ownProps;
-    return {
-      handlers: createHandlers(element),
+
+  return (nextState, nextOwnProps) => {
+    const { element, ...restOwnProps } = nextOwnProps;
+    const { transformMatrix, width, height } = element;
+
+    const resolvedArg = getResolvedArgs(nextState, element.id, 'expressionRenderable');
+    const selectedPage = getSelectedPage(nextState);
+
+    // build interim props object
+    const nextResult = {
+      ...restOwnProps,
+      // state and state-derived props
+      selectedPage,
+      state: getState(resolvedArg),
+      renderable: getValue(resolvedArg),
+      // pass along the handlers creation function
+      createHandlers,
+      // required parts of the element object
+      transformMatrix,
+      width,
+      height,
+      // pass along only the useful parts of the element object
+      // so handlers object can be created
+      element: {
+        id: element.id,
+        filter: element.filter,
+        expression: element.expression,
+      },
     };
+
+    // update props only if something actually changed
+    if (!isEqual(result, nextResult)) {
+      result = nextResult;
+    }
+
+    return result;
   };
-};
+}
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { handlers } = dispatchProps;
-  return {
-    ...stateProps,
-    ...omit('element', ownProps),
-    handlers,
-  };
-};
+const ElementWrapperComponent = React.memo(
+  (props) => {
+    const handlers = props.createHandlers(props.element);
+    return (
+      <Component
+        {...omit(['element', 'createHandlers', 'selectedPage'], props)}
+        handlers={handlers}
+      />
+    );
+  },
+  (prevProps, nextProps) => isEqual(prevProps.element, nextProps.element)
+);
 
-const areStatesEqual = (next, prev) => isEqual(prev, next);
-const areOwnPropsEqual = (next, prev) => isEqual(prev.element, next.element);
-const areStatePropsEqual = (next, prev) => isEqual(prev, next);
-
-export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, mergeProps, {
-  areStatesEqual,
-  areOwnPropsEqual,
-  areStatePropsEqual,
-})(Component);
+export const ElementWrapper = connectAdvanced(selectorFactory)(ElementWrapperComponent);
 
 ElementWrapper.propTypes = {
   element: PropTypes.shape({

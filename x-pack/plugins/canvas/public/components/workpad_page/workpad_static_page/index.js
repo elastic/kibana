@@ -9,4 +9,4 @@ import React from 'react';
 import { simplePositioning } from '../positioning_utils';
 import { StaticWorkpadPage } from './static_workpad_page';
 
-export const StaticPage = (props) => <StaticWorkpadPage {...simplePositioning(props)} />;
+export const StaticPage = (props) => <StaticWorkpadPage {...props} {...simplePositioning(props)} />;

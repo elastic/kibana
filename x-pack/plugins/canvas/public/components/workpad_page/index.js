@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { canUserWrite } from '../../state/selectors/app';
 import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
-import { not } from '../../lib/aeroelastic/functional';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 import { StaticPage } from './workpad_static_page';
 import { InteractivePage } from './workpad_interactive_page';
@@ -39,7 +38,7 @@ const ComposedWorkpadPageComponent = (props) => {
 };
 
 export const ComposedWorkpadPage = connect(mapStateToProps, null, null, {
-  areOwnPropsEqual: not(isEqual), // this is critical, else random unrelated rerenders in the parent cause glitches here
+  areOwnPropsEqual: isEqual, // this is critical, else random unrelated rerenders in the parent cause glitches here
 })(ComposedWorkpadPageComponent);
 
 export const WorkpadPage = (props) => {

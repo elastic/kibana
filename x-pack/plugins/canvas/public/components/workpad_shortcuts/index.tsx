@@ -26,6 +26,7 @@ export const WorkpadShortcuts = (props: WorkpadShortcutsProps) => {
 
   return (
     <Component
+      {...props}
       {...groupHandlers}
       {...layerHandlers}
       {...basicHandlers}

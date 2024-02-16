@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
@@ -127,10 +127,10 @@ const componentLayoutState = ({ aeroStore, elements, selectedToplevelNodes, heig
       configuration: { ...configuration, pageHeight: height, pageWidth: width },
       selectedShapes,
       selectionState: aeroStore
-        ? aeroStore.getCurrentState().currentScene.selectionState
+        ? aeroStore?.getCurrentState().currentScene.selectionState
         : { uid: 0, depthIndex: 0, down: false },
       gestureState: aeroStore
-        ? aeroStore.getCurrentState().currentScene.gestureState
+        ? aeroStore?.getCurrentState().currentScene.gestureState
         : {
             cursor: { x: Infinity, y: Infinity },
             mouseIsDown: false,
@@ -139,10 +139,11 @@ const componentLayoutState = ({ aeroStore, elements, selectedToplevelNodes, heig
     },
   };
   if (aeroStore) {
-    return aeroStore.setCurrentState(newState);
+    aeroStore.setCurrentState(newState);
   } else {
-    return createStore(newState, updater);
+    aeroStore = createStore(newState, updater);
   }
+  return aeroStore;
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -198,9 +199,8 @@ const mergeProps = (
   setMultiplePositions: restDispatchProps.setMultiplePositions(ownProps.pageId),
 });
 
-const InteractivePageComponent = (props) => {
-  console.error('props', props);
-  const [aeroStore, setAeroStore] = useState(() => componentLayoutState(props));
+const InteractivePageComponent = React.memo((props) => {
+  const [aeroStore, setAeroStore] = useState();
   const [canvasOrigin, saveCanvasOrigin] = useState();
   const [, forceRerender] = useState();
 
@@ -210,69 +210,79 @@ const InteractivePageComponent = (props) => {
       if (newLayoutState.currentScene.gestureEnd) {
         props.updateGlobalState(newLayoutState);
       }
-      forceRerender();
+      forceRerender({});
     },
     [aeroStore, props]
   );
-
-  useEffect(() => {
-    props.registerLayout((type, payload) => {
-      const newLayoutState = aeroStore?.commit(type, payload);
-      if (newLayoutState.currentScene.gestureEnd) {
-        // conditionalizing the global update so as to enable persist-free nudge series
-        props.updateGlobalState(newLayoutState);
-      }
-      forceRerender(newLayoutState);
-      return newLayoutState;
-    });
-
-    return () => props.unregisterLayout(aeroStore);
-  }, [aeroStore, props]);
+  const canDragElement = useCallback(
+    (element) => !isEmbeddableBody(element) && !isEuiSelect(element) && isInWorkpad(element),
+    []
+  );
+  const handlers = useMemo(
+    () =>
+      createHandlers(eventHandlers, {
+        zoomScale: props.zoomScale,
+        commit,
+        canvasOrigin,
+        canDragElement,
+      }),
+    [canDragElement, canvasOrigin, commit, props.zoomScale]
+  ); // Captures user intent, needs to have reconciled state
 
   const cursor = aeroStore?.getCurrentState().currentScene.cursor;
 
-  useEffect(() => {
-    setAeroStore((prev) =>
-      componentLayoutState({
-        aeroStore: prev,
-        elements: props.elements,
-        selectedToplevelNodes: props.selectedToplevelNodes,
-        height: props.height,
-        width: props.width,
-      })
-    );
-  }, [aeroStore, props.elements, props.height, props.selectedToplevelNodes, props.width]);
+  const shapes = aeroStore?.getCurrentState().currentScene.shapes;
+  const elements = props.elements;
 
-  const elements = useMemo(() => {
-    const elementLookup = new Map(props.elements.map((element) => [element.id, element]));
-    const elementsToRender = aeroStore?.getCurrentState().currentScene.shapes.map((shape) => {
+  const elementsToRender = useMemo(() => {
+    const elementLookup = new Map(elements?.map((element) => [element.id, element]));
+    return shapes?.map((shape) => {
       const element = elementLookup.get(shape.id);
       return element
         ? { ...shape, width: shape.a * 2, height: shape.b * 2, filter: element.filter }
         : shape;
     });
+  }, [shapes, elements]);
 
-    return elementsToRender ?? [];
-  }, [aeroStore, props.elements]);
+  useEffect(() => {
+    setAeroStore((prev) => {
+      const newAeroStore = componentLayoutState({
+        aeroStore: prev,
+        elements: props.elements,
+        selectedToplevelNodes: props.selectedToplevelNodes,
+        height: props.height,
+        width: props.width,
+      });
 
-  const canDragElement = useCallback(
-    (element) => !isEmbeddableBody(element) && !isEuiSelect(element) && isInWorkpad(element),
-    []
-  );
+      if (!prev) {
+        props.registerLayout((type, payload) => {
+          const newLayoutState = newAeroStore.commit(type, payload);
+          if (newLayoutState.currentScene.gestureEnd) {
+            // conditionalizing the global update so as to enable persist-free nudge series
+            props.updateGlobalState(newLayoutState);
+          }
+          forceRerender(newLayoutState);
+          return newLayoutState;
+        });
+      }
+      return newAeroStore;
+    });
+  }, [setAeroStore, props.elements, props.height, props.selectedToplevelNodes, props.width, props]);
+
+  useEffect(() => () => props.unregisterLayout(aeroStore), [aeroStore, props]);
 
   return (
     <InteractiveComponent
       {...props}
+      cursor={cursor}
       canvasOrigin={canvasOrigin}
       saveCanvasOrigin={saveCanvasOrigin}
+      elements={elementsToRender ?? []}
       commit={commit}
-      canDragElement={canDragElement}
-      elements={elements}
-      cursor={cursor}
-      {...createHandlers(eventHandlers, props)}
+      {...handlers}
     />
   );
-};
+});
 
 export const InteractivePage = connect(
   mapStateToProps,

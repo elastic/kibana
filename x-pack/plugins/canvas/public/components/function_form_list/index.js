@@ -190,10 +190,8 @@ export const FunctionFormList = (props) => {
     const functionsChain = get(selectedElement, 'ast.chain', []);
     // map argTypes from AST, attaching nextArgType if one exists
     const functionsListItems = transformFunctionsToUIConfig(functionsChain, buildPath('', 'ast'));
-    return {
-      functionFormItems: functionsListItems.mapped,
-    };
+    return functionsListItems.mapped;
   }, [props.element]);
 
-  return <Component {...props} functionFormItems={functionFormItems} />;
+  return <Component functionFormItems={functionFormItems} />;
 };
