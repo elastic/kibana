@@ -11,6 +11,7 @@ export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
 
 export const METRICS_FEATURE_ID = 'infrastructure';
+export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
 export const LOGS_FEATURE_ID = 'logs';
 
 export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
