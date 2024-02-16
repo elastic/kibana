@@ -73,7 +73,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
     });
 
-    describe('create rule without kql query', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177104
+    describe.skip('create rule without kql query', () => {
       let ruleId: string;
       let actionId: string;
       let alerts: ApmAlertFields[];
