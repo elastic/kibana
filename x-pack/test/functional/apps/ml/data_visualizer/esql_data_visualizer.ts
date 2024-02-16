@@ -18,6 +18,7 @@ export interface TestData {
   suiteTitle: string;
   query: string;
   rowsPerPage?: 10 | 25 | 50;
+  sourceIndexOrSavedSearch?: string;
   expected: {
     hasDocCountChart: boolean;
     initialLimitSize?: string;
@@ -190,7 +191,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const testSubjects = getService('testSubjects');
 
   function runTests(testData: TestData) {
     it(`${testData.suiteTitle} loads the ES|QL data visualizer page`, async () => {
