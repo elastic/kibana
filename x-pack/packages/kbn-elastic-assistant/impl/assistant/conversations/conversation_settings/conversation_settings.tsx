@@ -37,6 +37,7 @@ export interface ConversationSettingsProps {
     React.SetStateAction<UseAssistantContext['conversations']>
   >;
   isDisabled?: boolean;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -53,6 +54,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     http,
     setUpdatedConversationSettings,
     isDisabled = false,
+    isFlyoutMode,
   }) => {
     const defaultSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: undefined });
@@ -225,6 +227,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             showTitles={true}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
+            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 

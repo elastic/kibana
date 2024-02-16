@@ -16,6 +16,7 @@ const testProps = {
   isLoading: false,
   onChatCleared,
   onSendMessage,
+  isFlyoutMode: false,
 };
 
 describe('ChatActions', () => {
