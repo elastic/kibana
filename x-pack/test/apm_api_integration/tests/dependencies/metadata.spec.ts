@@ -42,7 +42,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/177122
+  registry.when.skip(
     'Dependency metadata when data is generated',
     { config: 'basic', archives: [] },
     () => {
