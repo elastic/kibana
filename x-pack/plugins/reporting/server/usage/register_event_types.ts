@@ -35,6 +35,14 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
+  [FieldType.ATTEMPTS]: {
+    [FieldType.ATTEMPTS]: {
+      type: 'short',
+      _meta: {
+        description: 'The number of attempts used to execute the report.',
+      },
+    },
+  },
   [FieldType.IS_DEPRECATED]: {
     [FieldType.IS_DEPRECATED]: {
       type: 'boolean',
@@ -99,7 +107,6 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  // TODO: not used
   [FieldType.SCREENSHOT_PIXELS]: {
     [FieldType.SCREENSHOT_PIXELS]: {
       type: 'keyword',
@@ -144,6 +151,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.ATTEMPTS],
       ...fields[FieldType.DURATION],
     },
   },
@@ -153,6 +161,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.ATTEMPTS],
       ...fields[FieldType.DURATION],
       ...fields[FieldType.BYTE_SIZE],
       ...fields[FieldType.CSV_ROWS],
@@ -165,6 +174,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.ATTEMPTS],
       ...fields[FieldType.DURATION],
       ...fields[FieldType.BYTE_SIZE],
       ...fields[FieldType.NUM_PAGES],
@@ -178,6 +188,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.ATTEMPTS],
       ...fields[FieldType.DURATION],
       ...fields[FieldType.ERROR_CODE],
       ...fields[FieldType.ERROR_MESSAGE],

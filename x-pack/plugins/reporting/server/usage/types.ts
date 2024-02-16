@@ -266,6 +266,7 @@ export enum FieldType {
   REPORT_ID = 'report_id',
   EXPORT_TYPE = 'export_type',
   OBJECT_TYPE = 'object_type',
+  ATTEMPTS = 'attempts',
   IS_DEPRECATED = 'is_deprecated',
   IS_PUBLIC_API = 'is_public_api',
   DURATION = 'duration_ms',

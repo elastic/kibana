@@ -10,24 +10,23 @@ import { EventType, FieldType } from './types';
 
 interface CompletionOpts {
   byteSize: number;
-  timeSinceCreation?: number;
+  timeSinceCreation: number;
 }
 
 interface CompletionOptsScreenshot {
-  numPages?: number;
-  screenshotLayout?: string;
-  screenshotPixels?: number;
+  numPages: number;
+  screenshotLayout: string;
+  screenshotPixels: number;
 }
 
-interface CompletionOptsScreenshotCsv {
-  csvRows?: number;
-  csvColumns?: number;
+interface CompletionOptsCsv {
+  csvRows: number;
 }
 
 interface FailureOpts {
-  timeSinceCreation?: number;
-  errorCode?: string;
-  errorMessage?: string;
+  timeSinceCreation: number;
+  errorCode: string;
+  errorMessage: string;
 }
 
 export class EventTracker {
@@ -35,7 +34,8 @@ export class EventTracker {
     private analytics: AnalyticsServiceStart,
     private reportId: string,
     private exportType: string,
-    private objectType: string
+    private objectType: string,
+    private attempts: number
   ) {}
 
   private track(eventType: string, eventFields: object) {
@@ -80,6 +80,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.ATTEMPTS]: this.attempts,
       [FieldType.DURATION]: timeSinceCreation,
     });
   }
@@ -95,6 +96,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.ATTEMPTS]: this.attempts,
       [FieldType.DURATION]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.NUM_PAGES]: numPages,
@@ -108,16 +110,16 @@ export class EventTracker {
    * creation equals the time spent waiting in queue + the
    * time spent executing the report.
    */
-  public completeJobCsv(opts: CompletionOpts & CompletionOptsScreenshotCsv) {
+  public completeJobCsv(opts: CompletionOpts & CompletionOptsCsv) {
     const { byteSize, timeSinceCreation, csvRows } = opts;
     this.track(EventType.REPORT_COMPLETION_CSV, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.ATTEMPTS]: this.attempts,
       [FieldType.DURATION]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.CSV_ROWS]: csvRows,
-      // [FieldType.CSV_COLUMNS]: csvColumns, // TODO add metric to report output
     });
   }
 
@@ -133,6 +135,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.ATTEMPTS]: this.attempts,
       [FieldType.DURATION]: timeSinceCreation,
       [FieldType.ERROR_MESSAGE]: errorMessage,
       [FieldType.ERROR_CODE]: errorCode,

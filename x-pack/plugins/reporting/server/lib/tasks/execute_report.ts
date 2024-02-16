@@ -275,8 +275,8 @@ export class ExecuteReportTask implements ReportingTask {
       new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf();
     eventTracker?.failJob({
       timeSinceCreation,
-      errorCode: docOutput?.error_code,
-      errorMessage: error?.message,
+      errorCode: docOutput?.error_code ?? 'unknown',
+      errorMessage: error?.message ?? 'unknown',
     });
 
     return await store.setReportFailed(report, doc);
@@ -380,7 +380,6 @@ export class ExecuteReportTask implements ReportingTask {
         byteSize,
         timeSinceCreation,
         csvRows: output.metrics.csv.rows ?? -1,
-        // csvColumns: output.metrics.csv.columns, // TODO: add new metric to report output
       });
     } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
       const { width, height } = report.payload.layout?.dimensions ?? {};
