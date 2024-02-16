@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
-import { withState, withProps, withHandlers, compose, getContext } from 'recompose';
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { getSelectedPageIndex, getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
@@ -81,34 +79,38 @@ export const FullscreenControlWithContext = (props) => {
   );
 };
 
-export const FullscreenControl = compose(
-  getContext({
-    router: PropTypes.object,
-  }),
-  connect(mapStateToProps, mapDispatchToProps),
-  withState('transition', 'setTransition', null),
-  withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
-  withProps(({ selectedPageNumber, prevSelectedPageNumber, transition }) => {
-    function getAnimation(pageNumber) {
-      if (!transition || !transition.name) {
+const FullscreenControlComponent = (props) => {
+  const [transition, setTransition] = useState(null);
+  const [prevSelectedPageNumber] = useState(0);
+  const onTransitionEnd = useCallback(() => setTransition(null), []);
+
+  const getAnimation = useCallback(
+    (pageNumber) => {
+      if (!props.transition || !props.transition.name) {
         return null;
       }
-      if (![selectedPageNumber, prevSelectedPageNumber].includes(pageNumber)) {
+      if (![props.selectedPageNumber, prevSelectedPageNumber].includes(pageNumber)) {
         return null;
       }
       const { enter, exit } = transitionsRegistry.get(transition.name);
-      const laterPageNumber = Math.max(selectedPageNumber, prevSelectedPageNumber);
+      const laterPageNumber = Math.max(props.selectedPageNumber, prevSelectedPageNumber);
       const name = pageNumber === laterPageNumber ? enter : exit;
-      const direction = prevSelectedPageNumber > selectedPageNumber ? 'reverse' : 'normal';
+      const direction = prevSelectedPageNumber > props.selectedPageNumber ? 'reverse' : 'normal';
       return { name, direction };
-    }
+    },
+    [prevSelectedPageNumber, props.selectedPageNumber, props.transition, transition.name]
+  );
 
-    return { getAnimation };
-  }),
-  withHandlers({
-    onTransitionEnd:
-      ({ setTransition }) =>
-      () =>
-        setTransition(null),
-  })
-)(FullscreenControlWithContext);
+  return (
+    <FullscreenControlWithContext
+      {...props}
+      getAnimation={getAnimation}
+      onTransitionEnd={onTransitionEnd}
+    />
+  );
+};
+
+export const FullscreenControl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FullscreenControlComponent);

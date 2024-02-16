@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { compose, withHandlers, withProps } from 'recompose';
 import { Dispatch } from 'redux';
 import { State, PositionedElement } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
@@ -35,6 +34,7 @@ import {
 } from '../../../lib/element_handler_creators';
 import { EditMenu as Component, Props as ComponentProps } from './edit_menu.component';
 import { WorkpadRoutingContext } from '../../../routes/workpad';
+import { createHandlers } from '../../sidebar_header/sidebar_header';
 
 type LayoutState = any;
 
@@ -122,16 +122,32 @@ const mergeProps = (
 
 export const EditMenuWithContext: FC<ComponentProps> = (props) => {
   const { undo, redo } = useContext(WorkpadRoutingContext);
+  const hasPasteData: boolean = useMemo(() => getClipboardData(), []);
 
-  return <Component {...props} undoHistory={undo} redoHistory={redo} />;
+  const handlers = createHandlers(
+    {
+      ...basicHandlerCreators,
+      ...clipboardHandlerCreators,
+      ...layerHandlerCreators,
+      ...groupHandlerCreators,
+      ...alignmentDistributionHandlerCreators,
+    },
+    { ...props }
+  );
+
+  return (
+    <Component
+      {...props}
+      hasPasteData={hasPasteData}
+      {...handlers}
+      undoHistory={undo}
+      redoHistory={redo}
+    />
+  );
 };
 
-export const EditMenu = compose<ComponentProps, OwnProps>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withProps(() => ({ hasPasteData: Boolean(getClipboardData()) })),
-  withHandlers(basicHandlerCreators),
-  withHandlers(clipboardHandlerCreators),
-  withHandlers(layerHandlerCreators),
-  withHandlers(groupHandlerCreators),
-  withHandlers(alignmentDistributionHandlerCreators)
+export const EditMenu = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
 )(EditMenuWithContext);

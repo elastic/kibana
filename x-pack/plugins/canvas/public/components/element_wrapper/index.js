@@ -6,74 +6,62 @@
  */
 
 import PropTypes from 'prop-types';
-import { connectAdvanced } from 'react-redux';
-import { compose, withPropsOnChange, mapProps } from 'recompose';
+import { connect } from 'react-redux';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
 import { ElementWrapper as Component } from './element_wrapper';
 
-function selectorFactory(dispatch) {
-  let result = {};
-  const createHandlers = createDispatchedHandlerFactory(dispatch);
+const mapStateToProps = (state, ownProps) => {
+  const { element } = ownProps;
+  const resolvedArg = getResolvedArgs(state, element.id, 'expressionRenderable');
+  const selectedPage = getSelectedPage(state);
 
-  return (nextState, nextOwnProps) => {
-    const { element, ...restOwnProps } = nextOwnProps;
-    const { transformMatrix, width, height } = element;
-
-    const resolvedArg = getResolvedArgs(nextState, element.id, 'expressionRenderable');
-    const selectedPage = getSelectedPage(nextState);
-
-    // build interim props object
-    const nextResult = {
-      ...restOwnProps,
-      // state and state-derived props
-      selectedPage,
-      state: getState(resolvedArg),
-      renderable: getValue(resolvedArg),
-      // pass along the handlers creation function
-      createHandlers,
-      // required parts of the element object
-      transformMatrix,
-      width,
-      height,
-      // pass along only the useful parts of the element object
-      // so handlers object can be created
-      element: {
-        id: element.id,
-        filter: element.filter,
-        expression: element.expression,
-      },
-    };
-
-    // update props only if something actually changed
-    if (!isEqual(result, nextResult)) {
-      result = nextResult;
-    }
-
-    return result;
+  return {
+    selectedPage,
+    state: getState(resolvedArg),
+    renderable: getValue(resolvedArg),
+    transformMatrix: element.transformMatrix,
+    width: element.width,
+    height: element.height,
+    element: {
+      id: element.id,
+      filter: element.filter,
+      expression: element.expression,
+    },
   };
-}
+};
 
-export const ElementWrapper = compose(
-  connectAdvanced(selectorFactory),
-  withPropsOnChange(
-    (props, nextProps) => !isEqual(props.element, nextProps.element),
-    (props) => {
-      const { element, createHandlers } = props;
-      const handlers = createHandlers(element);
-      // this removes element and createHandlers from passed props
-      return { handlers };
-    }
-  ),
-  mapProps((props) => {
-    // remove element and createHandlers from props passed to component
-    // eslint-disable-next-line no-unused-vars
-    const { element, createHandlers, selectedPage, ...restProps } = props;
-    return restProps;
-  })
-)(Component);
+const mapDispatchToProps = (dispatch) => {
+  const createHandlers = createDispatchedHandlerFactory(dispatch);
+  return (ownProps) => {
+    const { element } = ownProps;
+    return {
+      handlers: createHandlers(element),
+    };
+  };
+};
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  const { element, ...restOwnProps } = ownProps;
+  const { handlers } = dispatchProps;
+  return {
+    ...stateProps,
+    ...restOwnProps,
+    handlers,
+  };
+};
+
+const areStatesEqual = (next, prev) => isEqual(prev, next);
+const areOwnPropsEqual = (next, prev) => isEqual(prev.element, next.element);
+const areStatePropsEqual = (next, prev) => isEqual(prev, next);
+
+export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, mergeProps, {
+  areStatesEqual,
+  areOwnPropsEqual,
+  areStatePropsEqual,
+})(Component);
 
 ElementWrapper.propTypes = {
   element: PropTypes.shape({

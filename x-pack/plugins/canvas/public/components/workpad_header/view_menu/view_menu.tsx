@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback, useContext } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { compose, withHandlers } from 'recompose';
 import { Dispatch } from 'redux';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
@@ -25,6 +24,7 @@ import {
 import { WorkpadRoutingContext } from '../../../routes/workpad';
 import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
+import { createHandlers } from '../../sidebar_header/sidebar_header';
 
 interface StateProps {
   zoomScale: number;
@@ -96,9 +96,12 @@ const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) 
     setFullscreen(true);
   }, [dispatch, setFullscreen]);
 
+  const handlers = useMemo(() => createHandlers(zoomHandlerCreators, { ...props }), [props]);
+
   return (
     <Component
       {...props}
+      {...handlers}
       enterFullscreen={enterFullscreen}
       setAutoplayInterval={setAutoplayInterval}
       autoplayEnabled={true}
@@ -109,7 +112,8 @@ const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) 
   );
 };
 
-export const ViewMenu = compose<Omit<ComponentProps, PropsFromContext>, {}>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withHandlers(zoomHandlerCreators)
+export const ViewMenu = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
 )(ViewMenuWithContext);

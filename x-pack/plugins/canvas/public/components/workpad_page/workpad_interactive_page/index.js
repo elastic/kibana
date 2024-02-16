@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
@@ -21,6 +21,7 @@ import {
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
+import { createHandlers } from '../../sidebar_header/sidebar_header';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
 import { eventHandlers } from './event_handlers';
 
@@ -205,57 +206,67 @@ const mergeProps = (
   setMultiplePositions: restDispatchProps.setMultiplePositions(ownProps.pageId),
 });
 
-export const InteractivePage = compose(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withState('aeroStore', 'setAeroStore'),
-  withProps(componentLayoutState),
-  withProps(({ aeroStore, updateGlobalState }) => ({
-    commit: (type, payload) => {
+const InteractivePageComponent = (props) => {
+  const [aeroStore, setAeroStore] = useState();
+  const [canvasOrigin, saveCanvasOrigin] = useState();
+  const [, forceRerender] = useState();
+
+  const commit = useCallback(
+    (type, payload) => {
       const newLayoutState = aeroStore.commit(type, payload);
       if (newLayoutState.currentScene.gestureEnd) {
-        updateGlobalState(newLayoutState);
+        props.updateGlobalState(newLayoutState);
       }
+      forceRerender();
     },
-  })),
-  lifecycle({
-    componentWillUnmount() {
-      this.props.unregisterLayout(this.props.aeroStore);
-    },
-  }),
-  withState('canvasOrigin', 'saveCanvasOrigin'),
-  withState('_forceRerender', 'forceRerender'),
-  withProps(({ registerLayout, aeroStore, updateGlobalState, forceRerender }) => {
-    registerLayout((type, payload) => {
-      const newLayoutState = aeroStore.commit(type, payload);
-      if (newLayoutState.currentScene.gestureEnd) {
-        // conditionalizing the global update so as to enable persist-free nudge series
-        updateGlobalState(newLayoutState);
-      }
-      forceRerender(newLayoutState);
-      return newLayoutState;
+    [aeroStore, props]
+  );
+
+  useEffect(() => () => props.unregisterLayout(aeroStore), [aeroStore, props]);
+
+  useEffect(() => {
+    componentLayoutState({
+      aeroStore,
+      setAeroStore,
+      elements: props.elements,
+      selectedToplevelNodes: props.selectedToplevelNodes,
+      height: props.height,
+      width: props.width,
     });
-    return {
-      cursor: aeroStore.getCurrentState().currentScene.cursor,
-    };
-  }),
-  withProps(({ aeroStore, elements }) => {
-    const elementLookup = new Map(elements.map((element) => [element.id, element]));
+  }, [aeroStore, props.elements, props.height, props.selectedToplevelNodes, props.width]);
+
+  const elements = useMemo(() => {
+    const elementLookup = new Map(props.elements.map((element) => [element.id, element]));
     const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map((shape) => {
       const element = elementLookup.get(shape.id);
       return element
         ? { ...shape, width: shape.a * 2, height: shape.b * 2, filter: element.filter }
         : shape;
     });
-    return { elements: elementsToRender };
-  }),
-  withProps(({ commit, forceRerender }) => ({
-    commit: (...args) => forceRerender(commit(...args)),
-  })),
-  withProps((...props) => ({
-    ...props,
-    canDragElement: (element) =>
-      !isEmbeddableBody(element) && !isEuiSelect(element) && isInWorkpad(element),
-  })),
-  withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
-  () => InteractiveComponent
-);
+
+    return elementsToRender;
+  }, [aeroStore, props.elements]);
+
+  const canDragElement = useCallback(
+    (element) => !isEmbeddableBody(element) && !isEuiSelect(element) && isInWorkpad(element),
+    []
+  );
+
+  return (
+    <InteractiveComponent
+      {...props}
+      canvasOrigin={canvasOrigin}
+      saveCanvasOrigin={saveCanvasOrigin}
+      commit={commit}
+      canDragElement={canDragElement}
+      elements={elements}
+      {...createHandlers(eventHandlers)}
+    />
+  );
+};
+
+export const InteractivePage = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(InteractivePageComponent);

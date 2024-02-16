@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, withProps } from 'recompose';
+import React, { useMemo } from 'react';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter';
 import { pluginServices } from '../../services';
@@ -184,14 +184,16 @@ function transformFunctionsToUIConfig(functionsChain, { path, removable }, argUi
   }, createComponentsWithContext());
 }
 
-const functionFormItems = withProps((props) => {
-  const selectedElement = props.element;
-  const functionsChain = get(selectedElement, 'ast.chain', []);
-  // map argTypes from AST, attaching nextArgType if one exists
-  const functionsListItems = transformFunctionsToUIConfig(functionsChain, buildPath('', 'ast'));
-  return {
-    functionFormItems: functionsListItems.mapped,
-  };
-});
+export const FunctionFormList = (props) => {
+  const functionFormItems = useMemo(() => {
+    const selectedElement = props.element;
+    const functionsChain = get(selectedElement, 'ast.chain', []);
+    // map argTypes from AST, attaching nextArgType if one exists
+    const functionsListItems = transformFunctionsToUIConfig(functionsChain, buildPath('', 'ast'));
+    return {
+      functionFormItems: functionsListItems.mapped,
+    };
+  }, [props.element]);
 
-export const FunctionFormList = compose(functionFormItems)(Component);
+  return <Component {...props} functionFormItems={functionFormItems} />;
+};

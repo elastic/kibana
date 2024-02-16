@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, withState } from 'recompose';
+import React, { useState } from 'react';
 import { AdvancedFilter as Component, Props as ComponentProps } from './advanced_filter';
 
 export interface Props {
@@ -15,6 +15,8 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter = compose<ComponentProps, Props>(
-  withState('value', 'onChange', ({ value }) => value || '')
-)(Component);
+export const AdvancedFilter: React.FC<Props & ComponentProps> = (props) => {
+  const [value, setValue] = useState(props.value || '');
+
+  return <Component {...props} value={value} onChange={setValue} />;
+};

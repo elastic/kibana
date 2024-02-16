@@ -6,9 +6,7 @@
  */
 
 import React, { ErrorInfo, FC, ReactElement } from 'react';
-import { withState, withHandlers, lifecycle, mapProps, compose } from 'recompose';
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
 
 interface Props {
   error?: Error;
@@ -34,24 +32,30 @@ ErrorBoundaryComponent.propTypes = {
   resetErrorState: PropTypes.func.isRequired,
 };
 
-export const errorBoundaryHoc = compose<ComponentProps, Pick<ComponentProps, 'children'>>(
-  withState('error', 'setError', null),
-  withState('errorInfo', 'setErrorInfo', null),
-  withHandlers<Pick<Props, 'setError' | 'setErrorInfo'>, Pick<Props, 'resetErrorState'>>({
-    resetErrorState:
-      ({ setError, setErrorInfo }) =>
-      () => {
-        setError(null);
-        setErrorInfo(null);
-      },
-  }),
-  lifecycle<Props, Props>({
-    componentDidCatch(error, errorInfo) {
-      this.props.setError(error);
-      this.props.setErrorInfo(errorInfo);
-    },
-  }),
-  mapProps<ComponentProps, Props>((props) => omit(props, ['setError', 'setErrorInfo']))
-);
+interface State {
+  error: Error | undefined;
+  errorInfo: ErrorInfo | undefined;
+}
 
-export const ErrorBoundary = errorBoundaryHoc(ErrorBoundaryComponent);
+export class ErrorBoundary extends React.Component<{}, State> {
+  constructor(props: {}) {
+    super(props);
+    this.state = { error: undefined, errorInfo: undefined };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ error, errorInfo });
+  }
+
+  resetErrorState = () => {
+    this.setState({ error: undefined, errorInfo: undefined });
+  };
+
+  render() {
+    return React.cloneElement(this.props.children as ReactElement<ComponentProps>, {
+      error: this.state.error,
+      errorInfo: this.state.errorInfo,
+      resetErrorState: this.resetErrorState,
+    });
+  }
+}

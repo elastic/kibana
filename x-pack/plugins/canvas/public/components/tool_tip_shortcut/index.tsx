@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, mapProps } from 'recompose';
+import React, { useMemo } from 'react';
 import { ToolTipShortcut as Component, Props as ComponentProps } from './tool_tip_shortcut';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { keymap } from '../../lib/keymap';
@@ -24,14 +24,19 @@ interface Props {
   action: string;
 }
 
-export const ToolTipShortcut = compose<ComponentProps, Props>(
-  mapProps(({ namespace, action }: Props): ComponentProps => {
+export const ToolTipShortcut = (props: Props) => {
+  const componentProps: ComponentProps = useMemo(() => {
+    const { namespace, action } = props;
     const shortcutMap = keymap[namespace][action];
-    if (typeof shortcutMap === 'string') {
-      return { shortcut: '' };
+    let shortcut = '';
+
+    if (typeof shortcutMap !== 'string') {
+      const shortcuts = shortcutMap[os] || [];
+      shortcut = getPrettyShortcut(shortcuts[0]);
     }
 
-    const shortcuts = shortcutMap[os] || [];
-    return { shortcut: getPrettyShortcut(shortcuts[0]) };
-  })
-)(Component);
+    return { shortcut };
+  }, [props]);
+
+  return <Component {...componentProps} />;
+};

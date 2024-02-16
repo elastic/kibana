@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
-import { withHandlers } from 'recompose';
+import React, { ComponentType, useCallback } from 'react';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
@@ -31,22 +30,31 @@ interface OuterProps {
   onValueChange: Function;
 }
 
-const wrap = (Component: ComponentType<any>) =>
-  // TODO: this should be in a helper
-  withHandlers<OuterProps, Handlers>({
-    getArgValue:
-      ({ argValue }) =>
+const wrap = (Component: ComponentType<any>) => {
+  const WrappedComponent = (props: OuterProps) => {
+    const { argValue, onValueChange } = props;
+
+    const getArgValue: Handlers['getArgValue'] = useCallback(
       (name, alt) => {
         const args = get(argValue, 'chain.0.arguments', {});
         return get(args, `${name}.0`, alt);
       },
-    setArgValue:
-      ({ argValue, onValueChange }) =>
+      [argValue]
+    );
+
+    const setArgValue: Handlers['setArgValue'] = useCallback(
       (name, val) => {
         const newValue = set(argValue, `chain.0.arguments.${name}.0`, val);
         onValueChange(newValue);
       },
-  })(Component);
+      [argValue, onValueChange]
+    );
+
+    return <Component {...props} getArgValue={getArgValue} setArgValue={setArgValue} />;
+  };
+
+  return WrappedComponent;
+};
 
 export const containerStyle = () => ({
   name: 'containerStyle',

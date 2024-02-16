@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { withProps } from 'recompose';
+import React from 'react';
 import { simplePositioning } from '../positioning_utils';
 import { StaticWorkpadPage } from './static_workpad_page';
 
-export const StaticPage = () => withProps(simplePositioning)(StaticWorkpadPage);
+export const StaticPage = (props) => <StaticWorkpadPage {...simplePositioning(props)} />;
