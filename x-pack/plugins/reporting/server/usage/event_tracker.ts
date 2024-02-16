@@ -13,13 +13,13 @@ interface CompletionOpts {
   timeSinceCreation: number;
 }
 
-interface CompletionOptsScreenshot {
+interface CompletionOptsScreenshot extends CompletionOpts {
   numPages: number;
   screenshotLayout: string;
   screenshotPixels: number;
 }
 
-interface CompletionOptsCsv {
+interface CompletionOptsCsv extends CompletionOpts {
   csvRows: number;
 }
 
@@ -88,7 +88,7 @@ export class EventTracker {
    * creation equals the time spent waiting in queue +
    * retries + executing the final report.
    */
-  public completeJobScreenshot(opts: CompletionOpts & CompletionOptsScreenshot) {
+  public completeJobScreenshot(opts: CompletionOptsScreenshot) {
     const { byteSize, timeSinceCreation, numPages, screenshotLayout, screenshotPixels } = opts;
     this.track(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
@@ -102,12 +102,7 @@ export class EventTracker {
     });
   }
 
-  /*
-   * When a report job is completed, the time since
-   * creation equals the time spent waiting in queue + the
-   * time spent executing the report.
-   */
-  public completeJobCsv(opts: CompletionOpts & CompletionOptsCsv) {
+  public completeJobCsv(opts: CompletionOptsCsv) {
     const { byteSize, timeSinceCreation, csvRows } = opts;
     this.track(EventType.REPORT_COMPLETION_CSV, {
       [FieldType.REPORT_ID]: this.reportId,

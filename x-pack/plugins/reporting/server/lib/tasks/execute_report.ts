@@ -106,7 +106,7 @@ export class ExecuteReportTask implements ReportingTask {
   private kibanaName?: string;
   private exportTypesRegistry: ExportTypesRegistry;
   private store?: ReportingStore;
-  private _eventTracker?: EventTracker;
+  private eventTracker?: EventTracker;
 
   constructor(
     private reporting: ReportingCore,
@@ -149,8 +149,8 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getEventTracker(report: Report) {
-    if (this._eventTracker) {
-      return this._eventTracker;
+    if (this.eventTracker) {
+      return this.eventTracker;
     }
 
     const eventTracker = this.reporting.getEventTracker(
@@ -158,8 +158,8 @@ export class ExecuteReportTask implements ReportingTask {
       report.jobtype,
       report.payload.objectType
     );
-    this._eventTracker = eventTracker;
-    return this._eventTracker;
+    this.eventTracker = eventTracker;
+    return this.eventTracker;
   }
 
   private getJobContentEncoding(jobType: string) {
