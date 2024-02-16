@@ -197,7 +197,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create rule with kql query', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177108
+    describe.skip('create rule with kql query', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
