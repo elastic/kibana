@@ -107,7 +107,7 @@ export const BulkActionBase = z.object({
 export type PromptCreateProps = z.infer<typeof PromptCreateProps>;
 export const PromptCreateProps = z.object({
   name: z.string(),
-  promptType: z.string().optional(),
+  promptType: z.string(),
   content: z.string(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),

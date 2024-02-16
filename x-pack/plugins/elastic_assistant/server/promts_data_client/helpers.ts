@@ -7,10 +7,12 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import {
+  PromptCreateProps,
   PromptResponse,
   PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { SearchEsPromptsSchema, UpdatePromptSchema } from './types';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { CreatePromptSchema, SearchEsPromptsSchema, UpdatePromptSchema } from './types';
 
 export const transformESToPrompts = (
   response: estypes.SearchResponse<SearchEsPromptsSchema>
@@ -46,24 +48,52 @@ export const transformESToPrompts = (
 };
 
 export const transformToUpdateScheme = (
+  user: AuthenticatedUser,
   updatedAt: string,
-  { content, isDefault, isNewConversationDefault, isShared }: PromptUpdateProps
+  { content, isNewConversationDefault, isShared, id }: PromptUpdateProps
 ): UpdatePromptSchema => {
+  return {
+    id,
+    updated_at: updatedAt,
+    content: content ?? '',
+    is_new_conversation_default: isNewConversationDefault,
+    is_shared: isShared,
+    users: [
+      {
+        id: user.profile_uid,
+        name: user.username,
+      },
+    ],
+  };
+};
+
+export const transformToCreateScheme = (
+  user: AuthenticatedUser,
+  updatedAt: string,
+  { content, isDefault, isNewConversationDefault, isShared, name, promptType }: PromptCreateProps
+): CreatePromptSchema => {
   return {
     updated_at: updatedAt,
     content: content ?? '',
     is_new_conversation_default: isNewConversationDefault,
     is_shared: isShared,
+    name,
+    is_default: isDefault,
+    prompt_type: promptType,
+    users: [
+      {
+        id: user.profile_uid,
+        name: user.username,
+      },
+    ],
   };
 };
 
 export const getUpdateScript = ({
   prompt,
-  updatedAt,
   isPatch,
 }: {
-  prompt: PromptUpdateProps;
-  updatedAt: string;
+  prompt: UpdatePromptSchema;
   isPatch?: boolean;
 }) => {
   return {
@@ -81,7 +111,7 @@ export const getUpdateScript = ({
   `,
     lang: 'painless',
     params: {
-      ...transformToUpdateScheme(updatedAt, prompt), // when assigning undefined in painless, it will remove property and wil set it to null
+      ...prompt, // when assigning undefined in painless, it will remove property and wil set it to null
       // for patch we don't want to remove unspecified value in payload
       assignEmpty: !(isPatch ?? true),
     },

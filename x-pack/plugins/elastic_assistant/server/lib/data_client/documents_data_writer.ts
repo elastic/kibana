@@ -115,18 +115,19 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     const filterByUser = authenticatedUser
       ? [
           {
-            bool: {
-              should: [
-                {
-                  term: authenticatedUser.profile_uid
-                    ? {
-                        'user.id': { value: authenticatedUser.profile_uid },
-                      }
-                    : {
-                        'user.name': { value: authenticatedUser.username },
-                      },
+            nested: {
+              path: 'users',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      match: authenticatedUser.profile_uid
+                        ? { 'users.id': authenticatedUser.profile_uid }
+                        : { 'users.name': authenticatedUser.username },
+                    },
+                  ],
                 },
-              ],
+              },
             },
           },
         ]
@@ -232,14 +233,12 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     });
 
     return (
-      responseToDelete?.hits.hits.map((c) => [
-        {
-          delete: {
-            _id: c._id,
-            _index: c._index,
-          },
+      responseToDelete?.hits.hits.map((c) => ({
+        delete: {
+          _id: c._id,
+          _index: c._index,
         },
-      ]) ?? []
+      })) ?? []
     );
   };
 

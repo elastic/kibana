@@ -19,14 +19,14 @@ import {
   Message,
 } from '@kbn/elastic-assistant-common';
 import { IIndexPatternString } from '../types';
-import { ConversationDataWriter } from './conversations_data_writer';
 import { createConversation } from './create_conversation';
 import { findConversations } from './find_conversations';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
-import { getIndexTemplateAndPattern } from '../lib/data_client/helper';
+import { getIndexTemplateAndPattern } from '../lib/data_client/helpers';
+import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
 
 export interface AIAssistantConversationsDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -44,7 +44,7 @@ export class AIAssistantConversationsDataClient {
   /** User creating, modifying, deleting, or updating a conversation */
   private readonly currentUser: AuthenticatedUser | null;
 
-  private writerCache: Map<string, ConversationDataWriter> = new Map();
+  private writerCache: Map<string, DocumentsDataWriter> = new Map();
 
   private indexTemplateAndPattern: IIndexPatternString;
 
@@ -57,18 +57,18 @@ export class AIAssistantConversationsDataClient {
     this.spaceId = this.options.spaceId;
   }
 
-  public getWriter = async (): Promise<ConversationDataWriter> => {
+  public getWriter = async (): Promise<DocumentsDataWriter> => {
     const spaceId = this.spaceId;
     if (this.writerCache.get(spaceId)) {
-      return this.writerCache.get(spaceId) as ConversationDataWriter;
+      return this.writerCache.get(spaceId) as DocumentsDataWriter;
     }
     await this.initializeWriter(spaceId, this.indexTemplateAndPattern.alias);
-    return this.writerCache.get(spaceId) as ConversationDataWriter;
+    return this.writerCache.get(spaceId) as DocumentsDataWriter;
   };
 
-  private async initializeWriter(spaceId: string, index: string): Promise<ConversationDataWriter> {
+  private async initializeWriter(spaceId: string, index: string): Promise<DocumentsDataWriter> {
     const esClient = await this.options.elasticsearchClientPromise;
-    const writer = new ConversationDataWriter({
+    const writer = new DocumentsDataWriter({
       esClient,
       spaceId,
       index,

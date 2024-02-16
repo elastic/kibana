@@ -15,11 +15,13 @@ import {
   MessageRole,
   getMessageContentWithoutReplacements,
   ConversationSummary,
+  UUID,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
 
 export interface UpdateConversationSchema {
+  id: UUID;
   '@timestamp'?: string;
   title?: string;
   messages?: Array<{
@@ -166,9 +168,11 @@ export const transformToUpdateScheme = (
     excludeFromLastConversationStorage,
     messages,
     replacements,
+    id,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
+    id,
     updated_at: updatedAt,
     title,
     api_config: {

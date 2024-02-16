@@ -15,7 +15,7 @@ import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/i
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
 import { IIndexPatternString } from '../types';
-import { getIndexTemplateAndPattern } from '../lib/data_client/helper';
+import { getIndexTemplateAndPattern } from '../lib/data_client/helpers';
 import { findAnonymizationFields } from './find_anonymization_fields';
 
 export interface AIAssistantAnonymizationFieldsDataClientParams {

@@ -17,7 +17,7 @@ import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/promp
 
 import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
 import { IIndexPatternString } from '../types';
-import { getIndexTemplateAndPattern } from '../lib/data_client/helper';
+import { getIndexTemplateAndPattern } from '../lib/data_client/helpers';
 import { findPrompts } from './find_prompts';
 
 export interface AIAssistantPromtsDataClientParams {

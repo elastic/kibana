@@ -7,10 +7,16 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import {
+  AnonymizationFieldCreateProps,
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { SearchEsAnonymizationFieldsSchema, UpdateAnonymizationFieldSchema } from './types';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import {
+  CreateAnonymizationFieldSchema,
+  SearchEsAnonymizationFieldsSchema,
+  UpdateAnonymizationFieldSchema,
+} from './types';
 
 export const transformESToAnonymizationFields = (
   response: estypes.SearchResponse<SearchEsAnonymizationFieldsSchema>
@@ -41,11 +47,39 @@ export const transformESToAnonymizationFields = (
 };
 
 export const transformToUpdateScheme = (
+  user: AuthenticatedUser,
   updatedAt: string,
-  { defaultAllow, defaultAllowReplacement }: AnonymizationFieldUpdateProps
+  { defaultAllow, defaultAllowReplacement, id }: AnonymizationFieldUpdateProps
 ): UpdateAnonymizationFieldSchema => {
   return {
+    id,
+    users: [
+      {
+        id: user.profile_uid,
+        name: user.username,
+      },
+    ],
     updated_at: updatedAt,
+    default_allow: defaultAllow,
+    default_allow_replacement: defaultAllowReplacement,
+  };
+};
+
+export const transformToCreateScheme = (
+  user: AuthenticatedUser,
+  createdAt: string,
+  { defaultAllow, defaultAllowReplacement, field }: AnonymizationFieldCreateProps
+): CreateAnonymizationFieldSchema => {
+  return {
+    updated_at: createdAt,
+    field,
+    users: [
+      {
+        id: user.profile_uid,
+        name: user.username,
+      },
+    ],
+    created_at: createdAt,
     default_allow: defaultAllow,
     default_allow_replacement: defaultAllowReplacement,
   };
@@ -53,11 +87,9 @@ export const transformToUpdateScheme = (
 
 export const getUpdateScript = ({
   anonymizationField,
-  updatedAt,
   isPatch,
 }: {
-  anonymizationField: AnonymizationFieldUpdateProps;
-  updatedAt: string;
+  anonymizationField: UpdateAnonymizationFieldSchema;
   isPatch?: boolean;
 }) => {
   return {
@@ -72,7 +104,7 @@ export const getUpdateScript = ({
   `,
     lang: 'painless',
     params: {
-      ...transformToUpdateScheme(updatedAt, anonymizationField), // when assigning undefined in painless, it will remove property and wil set it to null
+      ...anonymizationField, // when assigning undefined in painless, it will remove property and wil set it to null
       // for patch we don't want to remove unspecified value in payload
       assignEmpty: !(isPatch ?? true),
     },

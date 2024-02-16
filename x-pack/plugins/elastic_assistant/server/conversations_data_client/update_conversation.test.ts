@@ -46,6 +46,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
     model: 'test-model',
     provider: 'OpenAI',
   },
+  category: 'assistant',
   excludeFromLastConversationStorage: false,
   messages: [],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

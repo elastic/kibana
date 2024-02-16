@@ -226,7 +226,7 @@ components:
       required:
         - name
         - content
-
+        - promptType
       properties:
         name:
           type: string

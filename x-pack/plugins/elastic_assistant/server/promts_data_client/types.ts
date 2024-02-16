@@ -26,10 +26,32 @@ export interface SearchEsPromptsSchema {
 }
 
 export interface UpdatePromptSchema {
+  id: string;
   '@timestamp'?: string;
   is_shared?: boolean;
   is_new_conversation_default?: boolean;
+  content?: string;
+  updated_at?: string;
+  updated_by?: string;
+  prompt_type?: string;
+  users?: Array<{
+    id?: string;
+    name?: string;
+  }>;
+}
+
+export interface CreatePromptSchema {
+  '@timestamp'?: string;
+  is_shared?: boolean;
+  is_new_conversation_default?: boolean;
+  is_default?: boolean;
+  name: string;
+  prompt_type: string;
   content: string;
   updated_at?: string;
   updated_by?: string;
+  users?: Array<{
+    id?: string;
+    name?: string;
+  }>;
 }

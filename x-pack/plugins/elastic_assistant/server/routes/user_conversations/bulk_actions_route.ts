@@ -24,11 +24,17 @@ import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import { getUpdateScript } from '../../conversations_data_client/helpers';
+import { transformToCreateScheme } from '../../conversations_data_client/create_conversation';
+import {
+  UpdateConversationSchema,
+  transformToUpdateScheme,
+} from '../../conversations_data_client/update_conversation';
 
 export interface BulkOperationError {
   message: string;
   status?: number;
-  conversation: {
+  document: {
     id: string;
     name?: string;
   };
@@ -79,7 +85,7 @@ const buildBulkResponse = (
         attributes: {
           errors: errors.map((e: BulkOperationError) => ({
             status_code: e.status ?? 500,
-            conversations: [{ id: e.conversation.id, name: '' }],
+            conversations: [{ id: e.document.id, name: '' }],
             message: e.message,
             // err_code: '500',
           })),
@@ -147,6 +153,7 @@ export const bulkActionConversationsRoute = (
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const spaceId = ctx.elasticAssistant.getSpaceId();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
             return assistantResponse.error({
@@ -159,7 +166,7 @@ export const bulkActionConversationsRoute = (
             const result = await dataClient?.findConversations({
               perPage: 100,
               page: 1,
-              filter: `user.id:${authenticatedUser?.profile_uid} AND (${body.create
+              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
                 .map((c) => `title:${c.title}`)
                 .join(' OR ')})`,
               fields: ['title'],
@@ -175,7 +182,7 @@ export const bulkActionConversationsRoute = (
           }
 
           const writer = await dataClient?.getWriter();
-
+          const changedAt = new Date().toISOString();
           const {
             errors,
             docs_created: docsCreated,
@@ -183,10 +190,14 @@ export const bulkActionConversationsRoute = (
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            conversationsToCreate: body.create,
-            conversationsToDelete: body.delete?.ids,
-            conversationsToUpdate: body.update,
+            documentsToCreate: body.create?.map((c) =>
+              transformToCreateScheme(changedAt, spaceId, authenticatedUser, c)
+            ),
+            documentsToDelete: body.delete?.ids,
+            documentsToUpdate: body.update?.map((c) => transformToUpdateScheme(changedAt, c)),
             authenticatedUser,
+            getUpdateScript: (document: UpdateConversationSchema) =>
+              getUpdateScript({ conversation: document, isPatch: true }),
           });
 
           const created = await dataClient?.findConversations({

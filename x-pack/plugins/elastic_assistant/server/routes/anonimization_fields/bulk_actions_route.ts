@@ -16,7 +16,6 @@ import {
 
 import {
   AnonymizationFieldResponse,
-  AnonymizationFieldUpdateProps,
   BulkActionSkipResult,
   BulkCrudActionResponse,
   BulkCrudActionResults,
@@ -28,7 +27,12 @@ import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/consta
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
-import { getUpdateScript } from '../../anonymization_fields_data_client/helpers';
+import {
+  getUpdateScript,
+  transformToCreateScheme,
+  transformToUpdateScheme,
+} from '../../anonymization_fields_data_client/helpers';
+import { UpdateAnonymizationFieldSchema } from '../../anonymization_fields_data_client/types';
 
 export interface BulkOperationError {
   message: string;
@@ -156,7 +160,7 @@ export const bulkActionAnonymizationFieldsRoute = (
             const result = await dataClient?.findAnonymizationFields({
               perPage: 100,
               page: 1,
-              filter: `user.id:${authenticatedUser?.profile_uid} AND (${body.create
+              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
                 .map((c) => `field:${c.field}`)
                 .join(' OR ')})`,
               fields: ['field'],
@@ -172,7 +176,7 @@ export const bulkActionAnonymizationFieldsRoute = (
           }
 
           const writer = await dataClient?.getWriter();
-
+          const changedAt = new Date().toISOString();
           const {
             errors,
             docs_created: docsCreated,
@@ -180,11 +184,15 @@ export const bulkActionAnonymizationFieldsRoute = (
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create,
+            documentsToCreate: body.create?.map((f) =>
+              transformToCreateScheme(authenticatedUser, changedAt, f)
+            ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: body.update,
-            getUpdateScript: (document: AnonymizationFieldUpdateProps, updatedAt: string) =>
-              getUpdateScript({ anonymizationField: document, updatedAt, isPatch: false }),
+            documentsToUpdate: body.update?.map((f) =>
+              transformToUpdateScheme(authenticatedUser, changedAt, f)
+            ),
+            getUpdateScript: (document: UpdateAnonymizationFieldSchema) =>
+              getUpdateScript({ anonymizationField: document, isPatch: true }),
             authenticatedUser,
           });
 
