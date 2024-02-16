@@ -91,7 +91,7 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
 }
 
 export function isMathFunction(query: string, offset: number) {
-  const queryTrimmed = query.substring(0, offset).trimEnd();
+  const queryTrimmed = query.trimEnd();
   // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
   // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
   const [opString] = queryTrimmed.split(' ').reverse();
