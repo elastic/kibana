@@ -173,6 +173,7 @@ export function ChatFlyout({
           css: { marginRight: `${euiTheme.size.s}`, marginTop: `${euiTheme.size.s}` },
         }}
         paddingSize="m"
+        pushAnimation
         minWidth={SIDEBAR_WIDTH}
         size={getFlyoutWidth({
           expanded: conversationsExpanded,
