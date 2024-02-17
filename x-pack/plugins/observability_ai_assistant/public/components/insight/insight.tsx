@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { MessageRole, type Message } from '../../../common/types';
 import { sendEvent, TELEMETRY } from '../../analytics';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
@@ -37,6 +38,10 @@ import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
+import {
+  defaultFlyoutState,
+  OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY,
+} from '../action_menu_item/action_menu_item';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -55,6 +60,11 @@ function ChatContent({
   const chatService = useObservabilityAIAssistantChatService();
 
   const initialMessagesRef = useRef(initialMessages);
+
+  const [flyoutState = defaultFlyoutState] = useLocalStorage(
+    OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY,
+    defaultFlyoutState
+  );
 
   const { messages, next, state, stop } = useChat({
     service,
@@ -114,6 +124,7 @@ function ChatContent({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <StartChatButton
+                  disabled={flyoutState.isOpen}
                   onClick={() => {
                     setIsOpen(() => true);
                   }}

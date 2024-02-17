@@ -17,6 +17,20 @@ import { useKibana } from '../../hooks/use_kibana';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout, FlyoutPositionMode } from '../chat/chat_flyout';
 
+interface FlyoutState {
+  conversationId: string;
+  flyoutPositionMode: FlyoutPositionMode;
+  isOpen: boolean;
+}
+
+export const defaultFlyoutState: FlyoutState = {
+  conversationId: '',
+  flyoutPositionMode: 'overlay',
+  isOpen: false,
+};
+
+export const OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY = 'observabilityAIAssistant_flyoutState';
+
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
   const {
@@ -43,14 +57,13 @@ export function ObservabilityAIAssistantActionMenuItem() {
     [service, isOpen]
   );
 
-  const [conversationId, setConversationId, removeConversationId] = useLocalStorage(
-    'observabilityAIAssistant_conversationId',
-    ''
+  const [flyoutState = defaultFlyoutState, setFlyoutState, removeFlyoutState] = useLocalStorage(
+    OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY,
+    defaultFlyoutState
   );
-  const [flyoutMode, setFlyoutMode] = useLocalStorage('observabilityAIAssistant_flyoutMode', '');
 
   useEffect(() => {
-    if (conversationId) {
+    if (flyoutState?.isOpen) {
       setIsOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,15 +94,34 @@ export function ObservabilityAIAssistantActionMenuItem() {
     };
   }, []);
 
+  const handleToggleOpen = () => {
+    setIsOpen(!isOpen);
+    setFlyoutState({ ...flyoutState, isOpen: !isOpen });
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    removeFlyoutState();
+  };
+
+  const handleSelectConversation = (newConversationId: string) => {
+    setFlyoutState({ ...flyoutState, conversationId: newConversationId });
+  };
+
+  const handleSetFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
+    setFlyoutState({
+      ...flyoutState,
+      flyoutPositionMode: newFlyoutPositionMode,
+    });
+  };
+
   return service.isEnabled() ? (
     <>
       <EuiHeaderLink
         color="primary"
         data-test-subj="observabilityAiAssistantNewChatHeaderLink"
         disabled={chatService.loading}
-        onClick={() => {
-          setIsOpen(() => true);
-        }}
+        onClick={handleToggleOpen}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -110,20 +142,15 @@ export function ObservabilityAIAssistantActionMenuItem() {
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
           <ChatFlyout
-            initialConversationId={conversationId || ''}
+            initialConversationId={flyoutState.conversationId}
             initialTitle=""
             initialMessages={[]}
-            initialFlyoutPositionMode={flyoutMode as FlyoutPositionMode}
+            initialFlyoutPositionMode={flyoutState.flyoutPositionMode}
             isOpen={isOpen}
             startedFrom="appTopNavbar"
-            onClose={() => {
-              setIsOpen(false);
-              removeConversationId();
-            }}
-            onSelectConversation={(newConversationId) => {
-              setConversationId(newConversationId);
-            }}
-            onSetFlyoutPositionMode={setFlyoutMode}
+            onClose={handleClose}
+            onSelectConversation={handleSelectConversation}
+            onSetFlyoutPositionMode={handleSetFlyoutPositionMode}
           />
         </ObservabilityAIAssistantChatServiceProvider>
       ) : null}

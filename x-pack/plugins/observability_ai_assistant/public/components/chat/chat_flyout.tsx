@@ -26,7 +26,7 @@ import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 import { ConversationList } from './conversation_list';
-import type { Message } from '../../../common/types';
+import type { Conversation, Message } from '../../../common/types';
 import { ChatInlineEditingContent } from './chat_inline_edit';
 
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
@@ -48,15 +48,15 @@ export function ChatFlyout({
   onSelectConversation,
   onSetFlyoutPositionMode,
 }: {
-  initialConversationId: string;
+  initialConversationId?: string;
   initialTitle: string;
   initialMessages: Message[];
-  initialFlyoutPositionMode: FlyoutPositionMode;
+  initialFlyoutPositionMode?: FlyoutPositionMode;
   isOpen: boolean;
   startedFrom: StartedFrom;
   onClose: () => void;
-  onSelectConversation: (id: string) => void;
-  onSetFlyoutPositionMode: (mode: FlyoutPositionMode) => void;
+  onSelectConversation?: (id: string) => void;
+  onSetFlyoutPositionMode?: (mode: FlyoutPositionMode) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -128,7 +128,16 @@ export function ChatFlyout({
   const handleClickChat = (id: string) => {
     setConversationId(id);
     reloadConversation();
-    onSelectConversation(id);
+    onSelectConversation?.(id);
+  };
+
+  const handleConversationUpdate = ({
+    conversation: { id },
+  }: {
+    conversation: Conversation['conversation'];
+  }) => {
+    setConversationId(id);
+    onSelectConversation?.(id);
   };
 
   const handleClickDeleteConversation = () => {
@@ -149,7 +158,7 @@ export function ChatFlyout({
 
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
-    onSetFlyoutPositionMode(newFlyoutPositionMode);
+    onSetFlyoutPositionMode?.(newFlyoutPositionMode);
   };
 
   return isOpen ? (
@@ -261,10 +270,7 @@ export function ChatFlyout({
               knowledgeBase={knowledgeBase}
               showLinkToConversationsApp
               startedFrom={startedFrom}
-              onConversationUpdate={(conversation) => {
-                setConversationId(conversation.conversation.id);
-                onSelectConversation(conversation.conversation.id);
-              }}
+              onConversationUpdate={handleConversationUpdate}
               onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
             />
