@@ -31,14 +31,12 @@ export function HeaderMenu(): React.ReactElement | null {
           href={http.basePath.prepend('/app/integrations/browse')}
           iconType="indexOpen"
         >
-          {addDataLinkText}
+          {i18n.translate('xpack.observability.home.addData', {
+            defaultMessage: 'Add integrations',
+          })}
         </EuiHeaderLink>
         {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );
 }
-
-const addDataLinkText = i18n.translate('xpack.observability.home.addData', {
-  defaultMessage: 'Add integrations',
-});

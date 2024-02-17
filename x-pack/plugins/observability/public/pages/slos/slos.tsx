@@ -13,22 +13,18 @@ import { FeedbackButton } from './components/common/feedback_button';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloListSearchBar } from './components/slo_list_search_bar';
 import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
-
-export const SLO_PAGE_ID = 'slo-page-container';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
 
   const {
@@ -57,7 +53,7 @@ export function SlosPage() {
   }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
 
   return (
-    <ObservabilityPageTemplate
+    <ObservabilityAppPageTemplate
       data-test-subj="slosPage"
       pageHeader={{
         pageTitle: i18n.translate('xpack.observability.slos.heading', {
@@ -67,9 +63,8 @@ export function SlosPage() {
       }}
       topSearchBar={<SloListSearchBar />}
     >
-      <HeaderMenu />
       <SloOutdatedCallout />
       <SloList />
-    </ObservabilityPageTemplate>
+    </ObservabilityAppPageTemplate>
   );
 }

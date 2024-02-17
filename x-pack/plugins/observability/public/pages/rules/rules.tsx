@@ -16,10 +16,9 @@ import React, { lazy, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
 
 const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
@@ -35,7 +34,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     docLinks,
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout, getRulesSettingsLink: RulesSettingsLink },
   } = useKibana().services;
-  const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
@@ -120,7 +118,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   ];
 
   return (
-    <ObservabilityPageTemplate
+    <ObservabilityAppPageTemplate
       pageHeader={{
         pageTitle: i18n.translate('xpack.observability.rulesTitle', {
           defaultMessage: 'Rules',
@@ -130,7 +128,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       }}
       data-test-subj="rulesPage"
     >
-      <HeaderMenu />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           {activeTab === RULES_TAB_NAME ? (
@@ -158,6 +155,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           useRuleProducer
         />
       )}
-    </ObservabilityPageTemplate>
+    </ObservabilityAppPageTemplate>
   );
 }
