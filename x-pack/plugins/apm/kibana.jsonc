@@ -35,7 +35,6 @@
     "optionalPlugins": [
       "actions",
       "alerting",
-      "cases",
       "charts",
       "cloud",
       "discover",
