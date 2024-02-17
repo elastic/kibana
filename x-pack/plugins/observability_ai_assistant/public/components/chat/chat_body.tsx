@@ -39,7 +39,7 @@ import { ChatActionClickHandler, ChatActionClickType } from './types';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
-import { FlyoutWidthMode } from './chat_flyout';
+import { FlyoutPositionMode, FlyoutWidthMode } from './chat_flyout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -47,6 +47,7 @@ const fullHeightClassName = css`
 
 const timelineClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  white-space: break-spaces;
   ${scrollBarStyles}
 `;
 
@@ -93,6 +94,7 @@ export function ChatBody({
   connectors,
   currentUser,
   flyoutWidthMode,
+  flyoutPositionMode,
   initialConversationId,
   initialMessages,
   initialTitle,
@@ -101,10 +103,12 @@ export function ChatBody({
   startedFrom,
   onConversationUpdate,
   onToggleFlyoutWidthMode,
+  onToggleFlyoutPositionMode,
 }: {
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   flyoutWidthMode?: FlyoutWidthMode;
+  flyoutPositionMode?: FlyoutPositionMode;
   initialTitle?: string;
   initialMessages?: Message[];
   initialConversationId?: string;
@@ -113,6 +117,7 @@ export function ChatBody({
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
+  onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -354,9 +359,7 @@ export function ChatBody({
                   onSendTelemetry={(eventWithPayload) =>
                     sendEvent(chatService.analytics, eventWithPayload)
                   }
-                  onStopGenerating={() => {
-                    stop();
-                  }}
+                  onStopGenerating={stop}
                   onActionClick={handleActionClick}
                 />
               )}
@@ -455,6 +458,7 @@ export function ChatBody({
               : undefined
           }
           flyoutWidthMode={flyoutWidthMode}
+          flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           showLinkToConversationsApp={showLinkToConversationsApp}
@@ -464,6 +468,7 @@ export function ChatBody({
             saveTitle(newTitle);
           }}
           onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
+          onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

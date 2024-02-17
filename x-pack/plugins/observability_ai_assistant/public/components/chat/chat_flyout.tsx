@@ -13,7 +13,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
@@ -35,19 +35,28 @@ const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 const SIDEBAR_WIDTH = 400;
 
 export type FlyoutWidthMode = 'side' | 'full';
+export type FlyoutPositionMode = 'push' | 'overlay';
 
 export function ChatFlyout({
+  initialConversationId,
   initialTitle,
   initialMessages,
-  onClose,
+  initialFlyoutPositionMode,
   isOpen,
   startedFrom,
+  onClose,
+  onSelectConversation,
+  onSetFlyoutPositionMode,
 }: {
+  initialConversationId: string;
   initialTitle: string;
   initialMessages: Message[];
+  initialFlyoutPositionMode: FlyoutPositionMode;
   isOpen: boolean;
   startedFrom: StartedFrom;
   onClose: () => void;
+  onSelectConversation: (id: string) => void;
+  onSetFlyoutPositionMode: (mode: FlyoutPositionMode) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -57,9 +66,12 @@ export function ChatFlyout({
 
   const knowledgeBase = useKnowledgeBase();
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
 
   const [flyoutWidthMode, setFlyoutWidthMode] = useState<FlyoutWidthMode>('side');
+  const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
+    initialFlyoutPositionMode || 'overlay'
+  );
 
   const [conversationsExpanded, setConversationsExpanded] = useState(false);
 
@@ -116,6 +128,7 @@ export function ChatFlyout({
   const handleClickChat = (id: string) => {
     setConversationId(id);
     reloadConversation();
+    onSelectConversation(id);
   };
 
   const handleClickDeleteConversation = () => {
@@ -134,6 +147,11 @@ export function ChatFlyout({
     setFlyoutWidthMode(newFlyoutWidthMode);
   };
 
+  const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
+    setFlyoutPositionMode(newFlyoutPositionMode);
+    onSetFlyoutPositionMode(newFlyoutPositionMode);
+  };
+
   return isOpen ? (
     <ObservabilityAIAssistantMultipaneFlyoutProvider
       value={{
@@ -141,16 +159,18 @@ export function ChatFlyout({
         setVisibility: setIsSecondSlotVisible,
       }}
     >
-      <EuiFlyout
+      <EuiFlyoutResizable
         closeButtonProps={{
           css: { marginRight: `${euiTheme.size.s}`, marginTop: `${euiTheme.size.s}` },
         }}
+        paddingSize="m"
+        minWidth={SIDEBAR_WIDTH}
         size={getFlyoutWidth({
           expanded: conversationsExpanded,
           isSecondSlotVisible,
           flyoutWidthMode,
         })}
-        paddingSize="m"
+        type={flyoutPositionMode}
         onClose={() => {
           onClose();
           setIsSecondSlotVisible(false);
@@ -234,6 +254,7 @@ export function ChatFlyout({
               connectors={connectors}
               currentUser={currentUser}
               flyoutWidthMode={flyoutWidthMode}
+              flyoutPositionMode={flyoutPositionMode}
               initialTitle={initialTitle}
               initialMessages={initialMessages}
               initialConversationId={conversationId}
@@ -242,8 +263,10 @@ export function ChatFlyout({
               startedFrom={startedFrom}
               onConversationUpdate={(conversation) => {
                 setConversationId(conversation.conversation.id);
+                onSelectConversation(conversation.conversation.id);
               }}
               onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
+              onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
             />
           </EuiFlexItem>
 
@@ -263,7 +286,7 @@ export function ChatFlyout({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </ObservabilityAIAssistantMultipaneFlyoutProvider>
   ) : null;
 }
