@@ -14,7 +14,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/lens/constants';
 
-export type { CasesUiStart, CasesUiSetup } from './types';
+export type { CasesPublicStart, CasesPublicSetup } from './types';
 export type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 export type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 export type { GetRecentCasesProps } from './client/ui/get_recent_cases';

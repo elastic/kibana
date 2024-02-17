@@ -21,7 +21,7 @@ interface UseLicenseReturnValue {
 
 export const useLicense = (): UseLicenseReturnValue => {
   const { licensing } = useKibana().services;
-  const license = useObservable<ILicense | null>(licensing?.license$ ?? new Observable(), null);
+  const license = useObservable<ILicense | null>(licensing.license$ ?? new Observable(), null);
 
   const isAtLeast = useCallback(
     (level: LicenseType): boolean => {
