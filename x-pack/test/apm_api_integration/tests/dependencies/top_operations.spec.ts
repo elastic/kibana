@@ -70,205 +70,210 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Top operations when data is generated', { config: 'basic', archives: [] }, () => {
-    before(() =>
-      generateOperationData({
-        synthtraceEsClient,
-        start,
-        end,
-      })
-    );
+  // FLAKY: https://github.com/elastic/kibana/issues/177128
+  registry.when.skip(
+    'Top operations when data is generated',
+    { config: 'basic', archives: [] },
+    () => {
+      before(() =>
+        generateOperationData({
+          synthtraceEsClient,
+          start,
+          end,
+        })
+      );
 
-    after(() => synthtraceEsClient.clean());
+      after(() => synthtraceEsClient.clean());
 
-    describe('requested for elasticsearch', () => {
-      let response: TopOperations;
-      let searchOperation: ValuesType<TopOperations>;
-      let bulkOperation: ValuesType<TopOperations>;
+      describe('requested for elasticsearch', () => {
+        let response: TopOperations;
+        let searchOperation: ValuesType<TopOperations>;
+        let bulkOperation: ValuesType<TopOperations>;
 
-      before(async () => {
-        response = await callApi({ dependencyName: 'elasticsearch' });
-        searchOperation = response.find((op) => op.spanName === '/_search')!;
-        bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
-      });
-
-      it('returns the correct operations', () => {
-        expect(response.length).to.eql(2);
-
-        expect(searchOperation).to.be.ok();
-        expect(bulkOperation).to.be.ok();
-      });
-
-      it('returns the correct latency', () => {
-        expect(searchOperation.latency).to.eql(ES_SEARCH_DURATION * 1000);
-        expect(bulkOperation.latency).to.eql(ES_BULK_DURATION * 1000);
-      });
-
-      it('returns the correct throughput', () => {
-        const expectedSearchThroughput = roundNumber(
-          ES_SEARCH_UNKNOWN_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE
-        );
-        const expectedBulkThroughput = ES_BULK_RATE;
-
-        expect(roundNumber(searchOperation.throughput)).to.eql(expectedSearchThroughput);
-        expect(roundNumber(bulkOperation.throughput)).to.eql(expectedBulkThroughput);
-
-        expect(
-          searchOperation.timeseries.throughput
-            .map((bucket) => bucket.y)
-            .every((val) => val === expectedSearchThroughput)
-        );
-      });
-
-      it('returns the correct failure rate', () => {
-        const expectedSearchFailureRate =
-          ES_SEARCH_FAILURE_RATE / (ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE);
-        const expectedBulkFailureRate = null;
-
-        expect(searchOperation.failureRate).to.be(expectedSearchFailureRate);
-
-        expect(bulkOperation.failureRate).to.be(expectedBulkFailureRate);
-
-        expect(
-          searchOperation.timeseries.failureRate
-            .map((bucket) => bucket.y)
-            .every((val) => val === expectedSearchFailureRate)
-        );
-
-        expect(
-          bulkOperation.timeseries.failureRate
-            .map((bucket) => bucket.y)
-            .every((val) => val === expectedBulkFailureRate)
-        );
-      });
-
-      it('returns the correct impact', () => {
-        expect(searchOperation.impact).to.eql(0);
-        expect(bulkOperation.impact).to.eql(100);
-      });
-    });
-
-    describe('requested for redis', () => {
-      let response: TopOperations;
-      let setOperation: ValuesType<TopOperations>;
-
-      before(async () => {
-        response = await callApi({ dependencyName: 'redis' });
-        setOperation = response.find((op) => op.spanName === 'SET')!;
-      });
-
-      it('returns the correct operations', () => {
-        expect(response.length).to.eql(1);
-
-        expect(setOperation).to.be.ok();
-      });
-
-      it('returns the correct latency', () => {
-        expect(setOperation.latency).to.eql(REDIS_SET_DURATION * 1000);
-      });
-
-      it('returns the correct throughput', () => {
-        expect(roundNumber(setOperation.throughput)).to.eql(roundNumber(REDIS_SET_RATE));
-      });
-    });
-
-    describe('requested for a specific service', () => {
-      let response: TopOperations;
-      let searchOperation: ValuesType<TopOperations>;
-      let bulkOperation: ValuesType<TopOperations> | undefined;
-
-      before(async () => {
-        response = await callApi({
-          dependencyName: 'elasticsearch',
-          kuery: `service.name:"synth-go"`,
+        before(async () => {
+          response = await callApi({ dependencyName: 'elasticsearch' });
+          searchOperation = response.find((op) => op.spanName === '/_search')!;
+          bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
         });
-        searchOperation = response.find((op) => op.spanName === '/_search')!;
-        bulkOperation = response.find((op) => op.spanName === '/_bulk');
-      });
 
-      it('returns the correct operations', () => {
-        expect(response.length).to.eql(1);
+        it('returns the correct operations', () => {
+          expect(response.length).to.eql(2);
 
-        expect(searchOperation).to.be.ok();
-        expect(bulkOperation).not.to.be.ok();
-      });
-    });
-
-    describe('requested for a specific environment', () => {
-      let response: TopOperations;
-      let searchOperation: ValuesType<TopOperations> | undefined;
-      let bulkOperation: ValuesType<TopOperations>;
-
-      before(async () => {
-        response = await callApi({
-          dependencyName: 'elasticsearch',
-          environment: 'development',
+          expect(searchOperation).to.be.ok();
+          expect(bulkOperation).to.be.ok();
         });
-        searchOperation = response.find((op) => op.spanName === '/_search');
-        bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
+
+        it('returns the correct latency', () => {
+          expect(searchOperation.latency).to.eql(ES_SEARCH_DURATION * 1000);
+          expect(bulkOperation.latency).to.eql(ES_BULK_DURATION * 1000);
+        });
+
+        it('returns the correct throughput', () => {
+          const expectedSearchThroughput = roundNumber(
+            ES_SEARCH_UNKNOWN_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE
+          );
+          const expectedBulkThroughput = ES_BULK_RATE;
+
+          expect(roundNumber(searchOperation.throughput)).to.eql(expectedSearchThroughput);
+          expect(roundNumber(bulkOperation.throughput)).to.eql(expectedBulkThroughput);
+
+          expect(
+            searchOperation.timeseries.throughput
+              .map((bucket) => bucket.y)
+              .every((val) => val === expectedSearchThroughput)
+          );
+        });
+
+        it('returns the correct failure rate', () => {
+          const expectedSearchFailureRate =
+            ES_SEARCH_FAILURE_RATE / (ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE);
+          const expectedBulkFailureRate = null;
+
+          expect(searchOperation.failureRate).to.be(expectedSearchFailureRate);
+
+          expect(bulkOperation.failureRate).to.be(expectedBulkFailureRate);
+
+          expect(
+            searchOperation.timeseries.failureRate
+              .map((bucket) => bucket.y)
+              .every((val) => val === expectedSearchFailureRate)
+          );
+
+          expect(
+            bulkOperation.timeseries.failureRate
+              .map((bucket) => bucket.y)
+              .every((val) => val === expectedBulkFailureRate)
+          );
+        });
+
+        it('returns the correct impact', () => {
+          expect(searchOperation.impact).to.eql(0);
+          expect(bulkOperation.impact).to.eql(100);
+        });
       });
 
-      it('returns the correct operations', () => {
-        expect(response.length).to.eql(1);
+      describe('requested for redis', () => {
+        let response: TopOperations;
+        let setOperation: ValuesType<TopOperations>;
 
-        expect(searchOperation).not.to.be.ok();
-        expect(bulkOperation).to.be.ok();
-      });
-    });
+        before(async () => {
+          response = await callApi({ dependencyName: 'redis' });
+          setOperation = response.find((op) => op.spanName === 'SET')!;
+        });
 
-    describe('Compare span metrics and span events', () => {
-      let bulkOperationSpanEventsResponse: ValuesType<TopOperations>;
-      let bulkOperationSpanMetricsResponse: ValuesType<TopOperations>;
+        it('returns the correct operations', () => {
+          expect(response.length).to.eql(1);
 
-      before(async () => {
-        const [spanEventsResponse, spanMetricsResponse] = await Promise.all([
-          callApi({ dependencyName: 'elasticsearch', searchServiceDestinationMetrics: false }),
-          callApi({ dependencyName: 'elasticsearch', searchServiceDestinationMetrics: true }),
-        ]);
-        function findBulkOperation(op: DependencyOperation) {
-          return op.spanName === '/_bulk';
-        }
-        bulkOperationSpanEventsResponse = spanEventsResponse.find(findBulkOperation)!;
-        bulkOperationSpanMetricsResponse = spanMetricsResponse.find(findBulkOperation)!;
-      });
+          expect(setOperation).to.be.ok();
+        });
 
-      it('returns same latency', () => {
-        expect(bulkOperationSpanEventsResponse.latency).to.eql(
-          bulkOperationSpanMetricsResponse.latency
-        );
+        it('returns the correct latency', () => {
+          expect(setOperation.latency).to.eql(REDIS_SET_DURATION * 1000);
+        });
 
-        const meanSpanMetrics = meanBy(
-          bulkOperationSpanEventsResponse.timeseries.latency.filter(({ y }) => y !== null),
-          'y'
-        );
-        const meanSpanEvents = meanBy(
-          bulkOperationSpanMetricsResponse.timeseries.latency.filter(({ y }) => y !== null),
-          'y'
-        );
-        expect(meanSpanMetrics).to.eql(meanSpanEvents);
+        it('returns the correct throughput', () => {
+          expect(roundNumber(setOperation.throughput)).to.eql(roundNumber(REDIS_SET_RATE));
+        });
       });
 
-      it('returns same throughput', () => {
-        expect(bulkOperationSpanEventsResponse.throughput).to.eql(
-          bulkOperationSpanMetricsResponse.throughput
-        );
+      describe('requested for a specific service', () => {
+        let response: TopOperations;
+        let searchOperation: ValuesType<TopOperations>;
+        let bulkOperation: ValuesType<TopOperations> | undefined;
 
-        const meanSpanMetrics = meanBy(
-          bulkOperationSpanEventsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
-          'y'
-        );
-        const meanSpanEvents = meanBy(
-          bulkOperationSpanMetricsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
-          'y'
-        );
-        expect(meanSpanMetrics).to.eql(meanSpanEvents);
+        before(async () => {
+          response = await callApi({
+            dependencyName: 'elasticsearch',
+            kuery: `service.name:"synth-go"`,
+          });
+          searchOperation = response.find((op) => op.spanName === '/_search')!;
+          bulkOperation = response.find((op) => op.spanName === '/_bulk');
+        });
+
+        it('returns the correct operations', () => {
+          expect(response.length).to.eql(1);
+
+          expect(searchOperation).to.be.ok();
+          expect(bulkOperation).not.to.be.ok();
+        });
       });
 
-      it('returns same impact', () => {
-        expect(bulkOperationSpanEventsResponse.impact).to.eql(
-          bulkOperationSpanMetricsResponse.impact
-        );
+      describe('requested for a specific environment', () => {
+        let response: TopOperations;
+        let searchOperation: ValuesType<TopOperations> | undefined;
+        let bulkOperation: ValuesType<TopOperations>;
+
+        before(async () => {
+          response = await callApi({
+            dependencyName: 'elasticsearch',
+            environment: 'development',
+          });
+          searchOperation = response.find((op) => op.spanName === '/_search');
+          bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
+        });
+
+        it('returns the correct operations', () => {
+          expect(response.length).to.eql(1);
+
+          expect(searchOperation).not.to.be.ok();
+          expect(bulkOperation).to.be.ok();
+        });
       });
-    });
-  });
+
+      describe('Compare span metrics and span events', () => {
+        let bulkOperationSpanEventsResponse: ValuesType<TopOperations>;
+        let bulkOperationSpanMetricsResponse: ValuesType<TopOperations>;
+
+        before(async () => {
+          const [spanEventsResponse, spanMetricsResponse] = await Promise.all([
+            callApi({ dependencyName: 'elasticsearch', searchServiceDestinationMetrics: false }),
+            callApi({ dependencyName: 'elasticsearch', searchServiceDestinationMetrics: true }),
+          ]);
+          function findBulkOperation(op: DependencyOperation) {
+            return op.spanName === '/_bulk';
+          }
+          bulkOperationSpanEventsResponse = spanEventsResponse.find(findBulkOperation)!;
+          bulkOperationSpanMetricsResponse = spanMetricsResponse.find(findBulkOperation)!;
+        });
+
+        it('returns same latency', () => {
+          expect(bulkOperationSpanEventsResponse.latency).to.eql(
+            bulkOperationSpanMetricsResponse.latency
+          );
+
+          const meanSpanMetrics = meanBy(
+            bulkOperationSpanEventsResponse.timeseries.latency.filter(({ y }) => y !== null),
+            'y'
+          );
+          const meanSpanEvents = meanBy(
+            bulkOperationSpanMetricsResponse.timeseries.latency.filter(({ y }) => y !== null),
+            'y'
+          );
+          expect(meanSpanMetrics).to.eql(meanSpanEvents);
+        });
+
+        it('returns same throughput', () => {
+          expect(bulkOperationSpanEventsResponse.throughput).to.eql(
+            bulkOperationSpanMetricsResponse.throughput
+          );
+
+          const meanSpanMetrics = meanBy(
+            bulkOperationSpanEventsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
+            'y'
+          );
+          const meanSpanEvents = meanBy(
+            bulkOperationSpanMetricsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
+            'y'
+          );
+          expect(meanSpanMetrics).to.eql(meanSpanEvents);
+        });
+
+        it('returns same impact', () => {
+          expect(bulkOperationSpanEventsResponse.impact).to.eql(
+            bulkOperationSpanMetricsResponse.impact
+          );
+        });
+      });
+    }
+  );
 }
