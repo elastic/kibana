@@ -100,9 +100,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
-      "state": Object {
-        "newState": "newState",
-      },
+      "state": "testVis initial state",
     },
   },
 }
