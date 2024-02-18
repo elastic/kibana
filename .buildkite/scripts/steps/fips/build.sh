@@ -33,3 +33,14 @@ docker logout docker.elastic.co
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "./*docker-image*.tar.gz"
+
+KIBANA_UBI_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+
+cat <<EOF | buildkite-agent annotate --style "info" --context fips
+  ### Kibana FIPS Image
+
+  UBI image: \`$KIBANA_UBI_FIPS_IMAGE\`
+EOF
+
+buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana UBI FIPS Image: \`$KIBANA_UBI_FIPS_IMAGE\`"
+buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"

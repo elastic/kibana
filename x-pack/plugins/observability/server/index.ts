@@ -74,6 +74,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ unused }) => [
     unused('unsafe.thresholdRule.enabled', { level: 'warning' }),
     unused('unsafe.alertDetails.logs.enabled', { level: 'warning' }),
+    unused('unsafe.alertDetails.observability.enabled', { level: 'warning' }),
   ],
 };
 

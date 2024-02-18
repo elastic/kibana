@@ -28,7 +28,7 @@ describe('kb functions', () => {
     const result = await chatClient.evaluate(conversation, [
       'Calls the summarize function',
       'Effectively summarizes and remembers that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
-      'Calls the recall function to respond to What is this cluster used for?',
+      'Calls the "context" function to respond to What is this cluster used for?',
       'Effectively recalls that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
     ]);
 

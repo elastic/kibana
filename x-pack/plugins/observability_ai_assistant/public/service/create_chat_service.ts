@@ -9,8 +9,10 @@ import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { pick } from 'lodash';
-import { concatMap, delay, map, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
+import { concatMap, delay, filter, map, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
 import {
+  BufferFlushEvent,
+  StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
 } from '../../common/conversation_complete';
@@ -144,14 +146,15 @@ export async function createChatService({
     hasRenderFunction: (name: string) => {
       return renderFunctionRegistry.has(name);
     },
-    complete({ connectorId, messages, conversationId, persist, signal }) {
+    complete({ screenContexts, connectorId, conversationId, messages, persist, signal }) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
         client('POST /internal/observability_ai_assistant/chat/complete', {
           params: {
             body: {
-              messages,
               connectorId,
               conversationId,
+              screenContexts,
+              messages,
               persist,
             },
           },
@@ -163,7 +166,11 @@ export async function createChatService({
             const response = _response as unknown as HttpResponse<IncomingMessage>;
             const response$ = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                filter(
+                  (line): line is StreamingChatResponseEvent =>
+                    line.type !== StreamingChatResponseEventType.BufferFlush
+                ),
                 throwSerializedChatCompletionErrors()
               )
               .subscribe(subscriber);
@@ -224,7 +231,11 @@ export async function createChatService({
 
             const subscription = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                filter(
+                  (line): line is StreamingChatResponseEvent =>
+                    line.type !== StreamingChatResponseEventType.BufferFlush
+                ),
                 throwSerializedChatCompletionErrors()
               )
               .subscribe(subscriber);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -30,17 +32,17 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import type { Observable } from 'rxjs';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
   Message,
+  ObservabilityAIAssistantScreenContext,
   PendingMessage,
 } from '../common/types';
-import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
@@ -49,7 +51,6 @@ import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 export type { CreateChatCompletionResponseChunk } from '../common/types';
 export type { PendingMessage };
-export type { ChatFlyoutSecondSlotHandler };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
@@ -63,10 +64,11 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    messages: Message[];
-    connectorId: string;
-    persist: boolean;
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
+    connectorId: string;
+    messages: Message[];
+    persist: boolean;
     signal: AbortSignal;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
@@ -89,6 +91,8 @@ export interface ObservabilityAIAssistantService {
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
+  setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
+  getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -109,6 +113,7 @@ export type ChatRegistrationRenderFunction = ({}: {
 export interface ConfigSchema {}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
   lens: LensPublicSetup;
@@ -119,6 +124,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   lens: LensPublicStart;
