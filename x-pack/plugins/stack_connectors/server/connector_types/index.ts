@@ -31,7 +31,6 @@ import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
-import { getSentinelOneConnectorType } from './sentinelone';
 import { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
@@ -108,8 +107,4 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
-
-  if (experimentalFeatures.sentinelOneConnectorOn) {
-    actions.registerSubActionConnectorType(getSentinelOneConnectorType());
-  }
 }

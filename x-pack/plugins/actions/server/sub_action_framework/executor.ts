@@ -29,7 +29,7 @@ export const buildExecutor = <
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): ExecutorType<Config, Secrets, ExecutorParams, unknown> => {
-  return async ({ actionId, params, config, secrets, services }) => {
+  return async ({ actionId, params, config, secrets, services, request }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
@@ -40,6 +40,7 @@ export const buildExecutor = <
       configurationUtilities,
       logger,
       services,
+      request,
     });
 
     const subActions = service.getSubActions();

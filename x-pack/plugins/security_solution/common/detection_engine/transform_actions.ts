@@ -23,7 +23,8 @@ export const transformRuleToAlertAction = ({
   uuid,
   frequency,
   alerts_filter: alertsFilter,
-}: RuleAction): AlertingRuleAction => ({
+  type,
+}: RuleAction<'withSystemAction'>): AlertingRuleAction<'withSystemAction'> => ({
   group,
   id,
   params: params as AlertingRuleAction['params'],
@@ -33,6 +34,7 @@ export const transformRuleToAlertAction = ({
   }),
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
+  type,
 });
 
 export const transformAlertToRuleAction = ({
@@ -43,10 +45,12 @@ export const transformAlertToRuleAction = ({
   uuid,
   frequency,
   alertsFilter,
-}: AlertingRuleAction): RuleAction => ({
+  type,
+}: AlertingRuleAction<'withSystemAction'>): RuleAction<'withSystemAction'> => ({
   group,
   id,
   params,
+  type,
   action_type_id: actionTypeId,
   // ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
@@ -59,9 +63,11 @@ export const transformNormalizedRuleToAlertAction = ({
   params,
   frequency,
   alerts_filter: alertsFilter,
+  type,
 }: NormalizedRuleAction): NormalizedAlertAction => ({
   group,
   id,
+  type,
   params: params as AlertingRuleAction['params'],
   ...(alertsFilter && {
     // We use "unknown" as the alerts filter type which is stricter than the one
@@ -75,12 +81,14 @@ export const transformNormalizedRuleToAlertAction = ({
 export const transformAlertToNormalizedRuleAction = ({
   group,
   id,
+  type,
   params,
   frequency,
   alertsFilter,
 }: AlertingRuleAction): NormalizedRuleAction => ({
   group,
   id,
+  type,
   params,
   ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(frequency && { frequency }),

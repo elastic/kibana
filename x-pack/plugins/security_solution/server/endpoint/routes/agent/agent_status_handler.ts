@@ -61,16 +61,17 @@ export const getAgentStatusRouteHandler = (
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
-    if (
-      agentType === 'sentinel_one' &&
-      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
-    ) {
-      return errorHandler(
-        logger,
-        response,
-        new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
-      );
-    }
+    // if (
+    //   agentType === 'sentinel_one'
+    //   &&
+    //   !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+    // ) {
+    //   return errorHandler(
+    //     logger,
+    //     response,
+    //     new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
+    //   );
+    // }
 
     // TEMPORARY:
     // For v8.13 we only support SentinelOne on this API due to time constraints

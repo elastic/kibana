@@ -813,7 +813,7 @@ export class ActionsClient {
 
   public isSystemAction(connectorId: string): boolean {
     return !!this.context.inMemoryConnectors.find(
-      (connector) => connector.isSystemAction && connector.id === connectorId
+      (connector) => connector.isSystemAction && connector.actionTypeId === connectorId
     );
   }
 

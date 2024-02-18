@@ -131,6 +131,8 @@ import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
+import { getSentinelOneConnectorType } from './connectors/sentinelone';
+import { getConnectorType, connectorAdapter } from './connectors/endpoint/endpoint_connector';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -493,6 +495,19 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     featureUsageService.setup(plugins.licensing);
 
+    // if (true || experimentalFeatures.sentinelOneConnectorOn) {
+    plugins.actions.registerSubActionConnectorType(
+      getSentinelOneConnectorType({ endpointAppContextService: this.endpointAppContextService })
+    );
+    plugins.actions.registerType(
+      getConnectorType({
+        endpointAppContextService: this.endpointAppContextService,
+      })
+    );
+
+    plugins.alerting.registerConnectorAdapter(connectorAdapter);
+    // }
+
     return {
       setAppFeaturesConfigurator:
         appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
@@ -619,6 +634,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointFleetServicesFactory,
       security: plugins.security,
       alerting: plugins.alerting,
+      actions: plugins.actions,
       config,
       cases: plugins.cases,
       logger,

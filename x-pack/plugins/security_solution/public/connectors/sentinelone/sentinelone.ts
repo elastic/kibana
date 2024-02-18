@@ -11,17 +11,17 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+// import { getIsExperimentalFeatureEnabled } from '@kbn/stack-connectors-plugin/public/common/get_experimental_features';
 import {
   SENTINELONE_CONNECTOR_ID,
   SENTINELONE_TITLE,
   SUB_ACTION,
-} from '../../../common/sentinelone/constants';
+} from '../../../common/connectors/sentinelone/constants';
 import type {
   SentinelOneActionParams,
   SentinelOneConfig,
   SentinelOneSecrets,
-} from '../../../common/sentinelone/types';
+} from '../../../common/connectors/sentinelone/types';
 
 interface ValidationErrors {
   subAction: string[];
@@ -32,9 +32,10 @@ export function getConnectorType(): ConnectorTypeModel<
   SentinelOneSecrets,
   SentinelOneActionParams
 > {
-  const isSentinelOneBetaBadgeEnabled = getIsExperimentalFeatureEnabled(
-    'sentinelOneConnectorOnBeta'
-  );
+  const isSentinelOneBetaBadgeEnabled = true;
+  // getIsExperimentalFeatureEnabled(
+  //   'sentinelOneConnectorOnBeta'
+  // );
 
   return {
     id: SENTINELONE_CONNECTOR_ID,

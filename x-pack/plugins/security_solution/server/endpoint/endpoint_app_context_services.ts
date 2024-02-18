@@ -23,6 +23,11 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  ActionsClient,
+} from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -68,6 +73,7 @@ export interface EndpointAppContextServiceStartContract {
   manifestManager?: ManifestManager;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
+  actions: ActionsPluginStart;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   registerListsServerExtension?: ListsServerExtensionRegistrar;
@@ -193,6 +199,10 @@ export class EndpointAppContextService {
     return this.setupDependencies.loggerFactory.get(...contextParts);
   }
 
+  public getEsClient() {
+    return this.startDependencies?.esClient;
+  }
+
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
@@ -261,6 +271,12 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.messageSigningService;
+  }
+
+  public getActionsClientWithRequest(
+    req: KibanaRequest
+  ): Promise<PublicMethodsOf<ActionsClient>> | undefined {
+    return this.startDependencies?.actions.getActionsClientWithRequest(req);
   }
 
   public getActionCreateService(): ActionCreateService {

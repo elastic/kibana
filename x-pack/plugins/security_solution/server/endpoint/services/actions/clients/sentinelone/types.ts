@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import type { SUB_ACTION } from '../../../../../../common/connectors/sentinelone/constants';
 
 type ConnectorActionsExecuteOptions = Parameters<ActionsClient['execute']>[0];
 

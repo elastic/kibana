@@ -6,17 +6,17 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import {
-  SENTINELONE_CONNECTOR_ID,
-  SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SUB_ACTION,
+} from '../../../../../../common/connectors/sentinelone/constants';
 import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '../../../../../../common/connectors/sentinelone/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';

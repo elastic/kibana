@@ -13,6 +13,10 @@ import type {
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
 import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
@@ -47,6 +51,7 @@ import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
+  actions: ActionsPluginSetup;
   cases: CasesSetup;
   cloud: CloudSetup;
   data: DataPluginSetup;
@@ -69,6 +74,7 @@ export interface SecuritySolutionPluginSetupDependencies {
 
 export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
+  actions: ActionsPluginStart;
   cases?: CasesStart;
   cloud: CloudSetup;
   cloudExperiments?: CloudExperimentsPluginStart;

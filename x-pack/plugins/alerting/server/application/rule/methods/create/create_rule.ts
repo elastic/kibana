@@ -83,6 +83,8 @@ export async function createRule<Params extends RuleParams = never>(
 
   const id = options?.id || SavedObjectsUtils.generateId();
 
+  console.log('data', data.actions);
+
   try {
     createRuleDataSchema.validate(data);
   } catch (error) {

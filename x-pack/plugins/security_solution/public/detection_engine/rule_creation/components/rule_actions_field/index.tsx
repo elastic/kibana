@@ -253,6 +253,7 @@ export const RuleActionsField: React.FC<Props> = ({
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
         disableErrorMessages: !isFormValidated,
+        ruleTypeId: 'example.',
       }),
     [
       actions,

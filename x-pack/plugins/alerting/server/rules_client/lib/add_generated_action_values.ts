@@ -9,6 +9,7 @@ import { v4 } from 'uuid';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { omit } from 'lodash/fp';
 import { RuleActionTypes } from '../../../common';
 import {
   NormalizedAlertAction,
@@ -44,7 +45,7 @@ export async function addGeneratedActionValues(
   return actions.map((action) => {
     if (action.type === RuleActionTypes.SYSTEM) {
       return {
-        ...action,
+        ...omit(['group', 'frequency'], action),
         uuid: action.uuid || v4(),
       };
     }

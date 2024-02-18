@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
   SentinelOneConfig,
   SentinelOneSecrets,
@@ -20,7 +21,7 @@ import type {
   SentinelOneIsolateHostParams,
   SentinelOneKillProcessParams,
   SentinelOneExecuteScriptParams,
-} from '../../../common/sentinelone/types';
+} from '../../../common/connectors/sentinelone/types';
 import {
   SentinelOneKillProcessResponseSchema,
   SentinelOneExecuteScriptParamsSchema,
@@ -34,8 +35,8 @@ import {
   SentinelOneGetAgentsParamsSchema,
   SentinelOneExecuteScriptResponseSchema,
   SentinelOneKillProcessParamsSchema,
-} from '../../../common/sentinelone/schema';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
+} from '../../../common/connectors/sentinelone/schema';
+import { SUB_ACTION } from '../../../common/connectors/sentinelone/constants';
 
 export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
@@ -64,6 +65,8 @@ export class SentinelOneConnector extends SubActionConnector<
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
       agents: `${this.config.url}${API_PATH}/agents`,
     };
+
+    this.endpointAppContextService = params.endpointAppContextService;
 
     this.registerSubActions();
   }
@@ -167,6 +170,20 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async isolateHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {
+    const endpointAuthz = this.endpointAppContextService.getEndpointAuthz(this.paramsRequest);
+
+    this.logger.info(
+      JSON.stringify(
+        await this.endpointAppContextService.getEndpointAuthz(this.paramsRequest),
+        null,
+        2
+      )
+    );
+
+    if (!endpointAuthz.canIsolateHost) {
+      throw new Error('You do not have the required permissions to isolate a host');
+    }
+
     const response = await this.getAgents(payload);
 
     if (response.data.length === 0) {
@@ -183,16 +200,17 @@ export class SentinelOneConnector extends SubActionConnector<
 
     const agentId = response.data[0].id;
 
-    return this.sentinelOneApiRequest({
-      url: this.urls.isolateHost,
-      method: 'post',
-      data: {
-        filter: {
-          ids: agentId,
-        },
-      },
-      responseSchema: SentinelOneIsolateHostResponseSchema,
-    });
+    return Promise.resolve();
+    // return this.sentinelOneApiRequest({
+    //   url: this.urls.isolateHost,
+    //   method: 'post',
+    //   data: {
+    //     filter: {
+    //       ids: agentId,
+    //     },
+    //   },
+    //   responseSchema: SentinelOneIsolateHostResponseSchema,
+    // });
   }
 
   public async releaseHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {

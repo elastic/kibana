@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { SentinelOneGetAgentsResponse } from '@kbn/security-solution-plugin/common/connectors/sentinelone/types';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';

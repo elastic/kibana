@@ -10,7 +10,7 @@ import { set } from '@kbn/safer-lodash-set/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { Logger } from '@kbn/core/server';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import { SUB_ACTION } from '../../../common/connectors/sentinelone/constants';
 
 interface Context {
   alerts: Ecs[];

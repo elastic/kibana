@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { reduce } from 'lodash';
 import {
   EuiButtonIcon,
@@ -17,21 +18,22 @@ import {
   EuiInMemoryTable,
   EuiSuperSelect,
 } from '@elastic/eui';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ActionConnectorMode,
-  ActionParamsProps,
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiBasicTableColumn, EuiSearchBarProps, EuiLink } from '@elastic/eui';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { SUB_ACTION } from '../../../common/connectors/sentinelone/constants';
 import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneActionParams,
-} from '../../../common/sentinelone/types';
+} from '../../../common/connectors/sentinelone/types';
 import type { SentinelOneExecuteSubActionParams } from './types';
 import * as i18n from './translations';
 

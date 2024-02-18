@@ -6,8 +6,11 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { each } from 'lodash';
+import { each, find } from 'lodash';
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ResponseActionsClient } from '../../../endpoint/services';
+import { getResponseActionsClient } from '../../../endpoint/services';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isIsolateAction, isProcessesAction } from './endpoint_params_type_guards';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
@@ -16,11 +19,12 @@ import { getProcessAlerts, getIsolateAlerts, getErrorProcessAlerts } from './uti
 
 import type { ResponseActionAlerts, AlertsAction } from './types';
 
-export const endpointResponseAction = (
+export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
   { alerts }: ResponseActionAlerts,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  request?: KibanaRequest
 ) => {
   const { comment, command } = responseAction.params;
 
@@ -29,19 +33,53 @@ export const endpointResponseAction = (
     command,
     rule_id: alerts[0][ALERT_RULE_UUID],
     rule_name: alerts[0][ALERT_RULE_NAME],
-    agent_type: 'endpoint' as const,
   };
 
   if (isIsolateAction(responseAction.params)) {
+    const casesClient = await endpointAppContextService.getCasesClient(request);
+    const connectorActions = await endpointAppContextService.getActionsClientWithRequest(request);
+
+    if (request) {
+      each(alerts, async (alert) => {
+        const agentType = ['sentinel_one', 'sentinel_one_cloud_funnel'].includes(alert.event.module)
+          ? 'sentinel_one'
+          : 'endpoint';
+        const endpointId =
+          agentType === 'sentinel_one'
+            ? alert.observer?.serial_number ?? alert.sentinel_one_cloud_funnel?.event?.agent?.uuid
+            : alert.agent.id;
+        const user = endpointAppContextService.security?.authc.getCurrentUser(request);
+
+        const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+          agentType ? 'sentinel_one' : 'endpoint',
+          {
+            esClient: endpointAppContextService.getEsClient(),
+            casesClient,
+            endpointService: endpointAppContextService,
+            username: user?.username || 'unknown',
+            connectorActions,
+          }
+        );
+        try {
+          await responseActionsClient.isolate({
+            ...commonData,
+            endpoint_ids: [endpointId],
+            alert_ids: [alert._id],
+          });
+        } catch (e) {}
+      });
+    }
+
     const alertsPerAgent = getIsolateAlerts(alerts);
     each(alertsPerAgent, (actionPayload) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          ...actionPayload,
-          ...commonData,
-        },
-        actionPayload.endpoint_ids
-      );
+      // return endpointAppContextService.getActionCreateService().createActionFromAlert(
+      //   {
+      //     ...actionPayload,
+      //     ...commonData,
+      //     agent_type: 'endpoint' as const,
+      //   },
+      //   actionPayload.endpoint_ids
+      // );
     });
   }
 
@@ -60,6 +98,7 @@ export const endpointResponseAction = (
           alert_ids: alert.alert_ids,
           error,
           parameters,
+          agent_type: 'endpoint' as const,
           ...commonData,
         };
 

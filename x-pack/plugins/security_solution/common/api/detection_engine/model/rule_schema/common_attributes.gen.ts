@@ -396,12 +396,13 @@ export const RuleAction = z.object({
    * The action type used for sending notifications.
    */
   action_type_id: z.string(),
-  group: RuleActionGroup,
+  group: RuleActionGroup.optional(),
   id: RuleActionId,
   params: RuleActionParams,
   uuid: NonEmptyString.optional(),
   alerts_filter: RuleActionAlertsFilter.optional(),
   frequency: RuleActionFrequency.optional(),
+  type: z.string(),
 });
 
 /**

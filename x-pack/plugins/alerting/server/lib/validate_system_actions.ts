@@ -39,7 +39,7 @@ export const validateSystemActions = async ({
   const systemActionsWithActionTypeId: RuleSystemAction[] = [];
 
   for (const systemAction of systemActions) {
-    const isSystemAction = actionsClient.isSystemAction(systemAction.id);
+    const isSystemAction = actionsClient.isSystemAction(systemAction.actionTypeId);
     const foundAction = actionResults.find((actionRes) => actionRes.id === systemAction.id);
 
     if (!isSystemAction || !foundAction) {

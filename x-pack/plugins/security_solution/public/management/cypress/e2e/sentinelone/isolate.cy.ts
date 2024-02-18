@@ -14,7 +14,7 @@ import { ROLE, login } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
-describe.skip(
+describe(
   'Isolate command',
   {
     tags: [
@@ -32,9 +32,9 @@ describe.skip(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'sentinelOneManualHostActionsEnabled',
           ])}`,
-          `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
-            'sentinelOneConnectorOn',
-          ])}`,
+          // `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
+          //   'sentinelOneConnectorOn',
+          // ])}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-sentinelone': {
               name: 'preconfigured-sentinelone',

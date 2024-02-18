@@ -90,12 +90,12 @@ export type RuleAction = t.TypeOf<typeof RuleAction>;
 export const RuleAction = t.exact(
   t.intersection([
     t.type({
-      group: RuleActionGroup,
       id: RuleActionId,
       action_type_id: RuleActionTypeId,
       params: RuleActionParams,
     }),
     t.partial({
+      group: RuleActionGroup,
       uuid: RuleActionUuid,
       alerts_filter: RuleActionAlertsFilter,
       frequency: RuleActionFrequency,
@@ -110,12 +110,12 @@ export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
 export const RuleActionCamel = t.exact(
   t.intersection([
     t.type({
-      group: RuleActionGroup,
       id: RuleActionId,
       actionTypeId: RuleActionTypeId,
       params: RuleActionParams,
     }),
     t.partial({
+      group: RuleActionGroup,
       uuid: RuleActionUuid,
       alertsFilter: RuleActionAlertsFilter,
       frequency: RuleActionFrequency,

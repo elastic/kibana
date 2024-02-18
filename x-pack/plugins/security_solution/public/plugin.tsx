@@ -61,6 +61,8 @@ import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getSentinelOneConnectorType } from './connectors/sentinelone';
+import { getConnectorType } from './connectors/endpoint';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -278,6 +280,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
+
+    // // get sentinelOne connector type
+    // // when either feature flag is enabled
+    // if (
+    //   // 8.12
+    //   ExperimentalFeaturesService.get().sentinelOneConnectorOn ||
+    //   // 8.13
+    //   ExperimentalFeaturesService.get().sentinelOneConnectorOnBeta
+    // ) {
+    plugins.triggersActionsUi.actionTypeRegistry.register(getSentinelOneConnectorType());
+    plugins.triggersActionsUi.actionTypeRegistry.register(getConnectorType());
+    // }
 
     return this.contract.getSetupContract();
   }

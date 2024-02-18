@@ -54,6 +54,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     this.savedObjectsClient = params.services.savedObjectsClient;
     this.esClient = params.services.scopedClusterClient;
     this.configurationUtilities = params.configurationUtilities;
+    this.paramsRequest = params.request;
     this.axiosInstance = axios.create();
   }
 
