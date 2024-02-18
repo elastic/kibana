@@ -7,13 +7,23 @@
 
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type {
+  DiscoverAppState,
+  DiscoverStateContainer,
+  DataDocumentsMsg,
+} from '@kbn/discover-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
-import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
+import type {
+  DatasetEncodingError,
+  DatasetSelection,
+  DataViewSelection,
+  SingleDatasetSelection,
+} from '../../../../common/dataset_selection';
 
 export interface WithDatasetSelection {
-  datasetSelection: DatasetSelection;
+  datasetSelection: DatasetSelection | DataViewSelection;
 }
 
 export interface WithControlPanelGroupAPI {
@@ -32,9 +42,14 @@ export interface WithDiscoverStateContainer {
   discoverStateContainer: DiscoverStateContainer;
 }
 
+export interface WithDataTableRecord {
+  rows: DataTableRecord[];
+}
+
 export type DefaultLogsExplorerControllerState = WithDatasetSelection &
   WithQueryState &
-  WithDisplayOptions;
+  WithDisplayOptions &
+  WithDataTableRecord;
 
 export type LogsExplorerControllerTypeState =
   | {
@@ -42,19 +57,16 @@ export type LogsExplorerControllerTypeState =
       context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
     }
   | {
-      value: 'initializingDataView';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      value: 'initializingSelection';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDataTableRecord &
+        WithDiscoverStateContainer;
     }
   | {
-      value: 'initializingControlPanels';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initializingStateContainer';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initialized';
+      value: 'initializingDataset';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -62,11 +74,28 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.validatingSelection';
+      value: 'initializingDataView';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDiscoverStateContainer;
+    }
+  | {
+      value: 'initializingControlPanels';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
+    }
+  | {
+      value: 'initialized';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -75,22 +104,25 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.updatingDataView';
+      value: 'initialized.datasetSelection.changingDataView';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.updatingStateContainer';
+      value: 'initialized.datasetSelection.creatingAdHocDataView';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -99,6 +131,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -108,6 +141,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -117,6 +151,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     };
 
@@ -130,14 +165,18 @@ export type LogsExplorerControllerEvent =
       discoverStateContainer: DiscoverStateContainer;
     }
   | {
-      type: 'LISTEN_TO_CHANGES';
+      type: 'DATASET_SELECTION_RESTORE_FAILURE';
+    }
+  | {
+      type: 'INITIALIZE_DATA_VIEW';
+    }
+  | {
+      type: 'INITIALIZE_DATASET';
+      data?: SingleDatasetSelection;
     }
   | {
       type: 'UPDATE_DATASET_SELECTION';
-      data: DatasetSelection;
-    }
-  | {
-      type: 'DATASET_SELECTION_RESTORE_FAILURE';
+      data: DatasetSelection | DataViewSelection;
     }
   | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
@@ -152,6 +191,10 @@ export type LogsExplorerControllerEvent =
       appState: DiscoverAppState;
     }
   | {
+      type: 'RECEIVE_DISCOVER_DATA_STATE';
+      dataState: DataDocumentsMsg['result'];
+    }
+  | {
       type: 'RECEIVE_TIMEFILTER_TIME';
       time: TimeRange;
     }
@@ -159,7 +202,7 @@ export type LogsExplorerControllerEvent =
       type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
       refreshInterval: RefreshInterval;
     }
-  | DoneInvokeEvent<DatasetSelection>
+  | DoneInvokeEvent<DatasetSelection | DataViewSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
   | DoneInvokeEvent<DatasetEncodingError>

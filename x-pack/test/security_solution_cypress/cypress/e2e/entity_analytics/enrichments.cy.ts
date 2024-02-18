@@ -46,7 +46,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Custom query rule', () => {
-    describe('from legacy risk scores', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176965
+    describe.skip('from legacy risk scores', () => {
       beforeEach(() => {
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -63,8 +64,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
-        cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
+        cy.get(HOST_RISK_HEADER_COLUMN).contains('Host Risk Level');
+        cy.get(USER_RISK_HEADER_COLUMN).contains('User Risk Level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
         cy.get(HOST_RISK_COLUMN).contains('Low');
         scrollAlertTableColumnIntoView(USER_RISK_COLUMN);
@@ -103,8 +104,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
-        cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
+        cy.get(HOST_RISK_HEADER_COLUMN).contains('Host Risk Level');
+        cy.get(USER_RISK_HEADER_COLUMN).contains('User Risk Level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
         cy.get(HOST_RISK_COLUMN).contains('Critical');
         scrollAlertTableColumnIntoView(USER_RISK_COLUMN);
