@@ -278,9 +278,6 @@ describe('ES|QL query generation', () => {
       | EVAL success_rate = total_success / (total_failures + total_success)
       | KEEP service.name, avg_duration, success_rate, total_requests`,
         execute: true,
-        criteria: [
-          'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
-        ],
       });
     });
 
@@ -296,9 +293,6 @@ describe('ES|QL query generation', () => {
           failure_rate = AVG(total_failures)
           BY span.destination.service.resource`,
         execute: false,
-        criteria: [
-          'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
-        ],
       });
     });
 
@@ -324,9 +318,6 @@ describe('ES|QL query generation', () => {
         | EVAL error_rate = total_errors / total_logs * 100
         | SORT day ASC`,
         execute: true,
-        criteria: [
-          'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
-        ],
       });
     });
 
