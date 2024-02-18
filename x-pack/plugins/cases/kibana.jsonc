@@ -28,7 +28,6 @@
       "uiActions",
     ],
     "optionalPlugins": [
-      "apm",
       "home",
       "taskManager",
       "usageCollection",
