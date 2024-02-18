@@ -264,33 +264,7 @@ export function registerQueryFunction({
         'answer_esql_question',
         {
           messages: [
-            ...withEsqlSystemMessage(
-              `Format every ES|QL query as Markdown:
-              \`\`\`esql
-              <query>
-              \`\`\`
-
-              Prefer to use commands and functions for which you have requested documentation.
-
-              ${userIntentionMessage}
-
-              DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-              as mentioned in the system message and documentation.
-              
-              Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
-              functions in stats commands, NOT in SORT or EVAL.
-              Rationale: Only aggregation functions are supported in STATS commands, and aggregation
-              functions are only supported in STATS commands. 
-              Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
-              Do not use aggregation functions anywhere else, such as SORT or EVAL.
-              Example:
-              \`\`\`esql
-              EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
-              | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-              \`\`\`
-              
-              `
-            ),
+            ...withEsqlSystemMessage(),
             {
               '@timestamp': new Date().toISOString(),
               message: {
@@ -311,6 +285,66 @@ export function registerQueryFunction({
                 content: JSON.stringify({
                   documentation: messagesToInclude,
                 }),
+              },
+            },
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                content: `Answer the user's question that was previously asked using the attached documentation.
+
+                Format any ES|QL query as follows:
+                \`\`\`esql
+                <query>
+                \`\`\`
+  
+                Prefer to use commands and functions for which you have requested documentation.
+  
+                ${
+                  args.intention !== VisualizeESQLUserIntention.generateQueryOnly
+                    ? `DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
+                    If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
+                    
+                    Human: plot both yesterday's and today's data.
+                    
+                    Assistant: Here's how you can plot yesterday's data:
+                    \`\`\`esql
+                    <query>
+                    \`\`\`
+  
+                    Let's see that first. We'll look at today's data next.
+  
+                    Human: <response from yesterday's data>
+  
+                    Assistant: Let's look at today's data:
+  
+                    \`\`\`esql
+                    <query>
+                    \`\`\`
+                    `
+                    : ''
+                }
+  
+                ${userIntentionMessage}
+  
+                DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
+                as mentioned in the system message and documentation. When converting queries from one language
+                to ES|QL, make sure that the functions are available and documented in ES|QL.
+                E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
+                
+                Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
+                functions in stats commands, NOT in SORT or EVAL.
+                Rationale: Only aggregation functions are supported in STATS commands, and aggregation
+                functions are only supported in STATS commands. 
+                Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
+                Do not use aggregation functions anywhere else, such as SORT or EVAL.
+                Example:
+                \`\`\`esql
+                EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
+                | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
+                \`\`\`
+                
+                `,
               },
             },
           ],

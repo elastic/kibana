@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import {
@@ -29,6 +29,17 @@ import { useEnvironmentsContext } from '../../../../context/environments_context
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
+import { string } from '../../../../../common/utils/esql';
+import { getEsqlDateRangeFilter } from '../../../../../common/utils/esql/get_esql_date_range_filter';
+import { getEsqlEnvironmentFilter } from '../../../../../common/utils/esql/get_esql_environment_filter';
 
 interface Props {
   height?: number;
@@ -65,14 +76,23 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { environment } = useEnvironmentsContext();
 
-  const { latencyChartsData, latencyChartsStatus } =
-    useTransactionLatencyChartsFetcher({
-      kuery,
-      environment,
-      transactionName:
-        'transactionName' in query ? query.transactionName : null,
-      latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
-    });
+  const { transactionType, serviceName } = useApmServiceContext();
+
+  const transactionName =
+    'transactionName' in query ? query.transactionName : null;
+
+  const {
+    latencyChartsData,
+    latencyChartsStatus,
+    bucketSizeInSeconds,
+    start,
+    end,
+  } = useTransactionLatencyChartsFetcher({
+    kuery,
+    environment,
+    transactionName,
+    latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
+  });
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
@@ -88,6 +108,51 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
+
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
+
+  useEffect(() => {
+    const clauses = [
+      `${PROCESSOR_EVENT} == "transaction"`,
+      getEsqlDateRangeFilter(start, end),
+      serviceName ? `${SERVICE_NAME} == ${string`${serviceName}`}` : '',
+      transactionName
+        ? `${TRANSACTION_NAME} == ${string`${transactionName}`}`
+        : '',
+      transactionType
+        ? `${TRANSACTION_TYPE} == ${string`${transactionType}`}`
+        : '',
+      environment ? getEsqlEnvironmentFilter(environment) : '',
+    ].filter(Boolean);
+
+    return setScreenContext({
+      screenDescription: `There is a latency chart displayed. The ES|QL equivalent for this is:
+    
+      \`\`\`esql
+      FROM traces-apm*
+        | WHERE ${clauses.join(' AND ')}
+        ${
+          bucketSizeInSeconds !== undefined
+            ? `| EVAL date_bucket = DATE_TRUNC(${bucketSizeInSeconds} seconds, @timestamp)`
+            : ''
+        }
+        | STATS avg_duration = AVG(transaction.duration.us)${
+          bucketSizeInSeconds !== undefined ? ` BY date_bucket` : ''
+        }
+      \`\`\`
+    `,
+    });
+  }, [
+    serviceName,
+    transactionName,
+    transactionType,
+    environment,
+    setScreenContext,
+    bucketSizeInSeconds,
+    start,
+    end,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

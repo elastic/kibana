@@ -40,13 +40,15 @@ export function registerVisualizeESQLFunction({
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
       return {
-        content: {
+        data: {
           columns,
+        },
+        content: {
           message:
             intention === VisualizeESQLUserIntention.executeAndReturnResults ||
             intention === VisualizeESQLUserIntention.generateQueryOnly
               ? 'These results are not visualized'
-              : 'The result is visualized in the conversation',
+              : 'Only following query is visualized: ```esql\n' + query + '\n```',
         },
       };
     }
