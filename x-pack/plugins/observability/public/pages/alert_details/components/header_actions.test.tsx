@@ -17,7 +17,7 @@ import { alertWithTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
 
@@ -103,7 +103,7 @@ describe('Header Actions', () => {
           open: ({ getAttachments }: { getAttachments: () => any[] }) => {
             attachments = getAttachments();
           },
-        })) as CasesUiStart['hooks']['useCasesAddToExistingCaseModal'];
+        })) as CasesPublicStart['hooks']['useCasesAddToExistingCaseModal'];
 
         mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 

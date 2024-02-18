@@ -45,7 +45,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -72,7 +72,7 @@ import { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
-  cases?: CasesUiStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -97,7 +97,7 @@ export interface MlStartDependencies {
 
 export interface MlSetupDependencies {
   alerting?: AlertingSetup;
-  cases?: CasesUiSetup;
+  cases?: CasesPublicSetup;
   dashboard: DashboardSetup;
   embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;

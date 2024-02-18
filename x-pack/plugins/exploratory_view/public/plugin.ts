@@ -24,7 +24,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -51,7 +51,7 @@ export interface ExploratoryViewPublicPluginsSetup {
 }
 
 export interface ExploratoryViewPublicPluginsStart {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

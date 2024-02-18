@@ -17,7 +17,7 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 
 import {
   type CoreStart,
@@ -49,7 +49,7 @@ export interface SloEmbeddableDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   settings: SettingsStart;
   security: SecurityPluginStart;
   charts: ChartsPluginStart;

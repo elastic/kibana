@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
+import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
@@ -73,7 +73,7 @@ export interface EndpointAppContextServiceStartContract {
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
-  cases: CasesStart | undefined;
+  cases: CasesServerStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;

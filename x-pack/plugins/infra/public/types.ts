@@ -35,7 +35,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
@@ -82,7 +82,7 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
