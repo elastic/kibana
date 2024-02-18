@@ -6,7 +6,7 @@
  */
 
 import { createContext } from 'react';
-import type { ChatFlyoutSecondSlotHandler } from '../types';
+import type { ChatFlyoutSecondSlotHandler } from '../components/chat/types';
 
 export const ObservabilityAIAssistantMultipaneFlyoutContext = createContext<
   ChatFlyoutSecondSlotHandler | undefined

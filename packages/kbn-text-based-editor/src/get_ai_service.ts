@@ -25,6 +25,7 @@ export function getAiService(
   const aiConnectors = observabilityAIAssistant.useGenAIConnectors();
   const chatServiceResult = observabilityAIAssistant.useChat({
     chatService,
+    service: observabilityAIAssistant.service,
     connectorId: aiConnectors?.selectedConnector,
     initialMessages: [],
     persist: false,

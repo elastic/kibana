@@ -118,6 +118,9 @@ export interface TextBasedLanguagesEditorProps {
 
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
+
+  /** hide @timestamp info **/
+  hideTimeFilterInfo?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -175,6 +178,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isAiChatVisible,
   setIsAiChatVisible,
   allowQueryCancellation,
+  hideTimeFilterInfo,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -1079,7 +1083,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
-          isLoading={isLoading}
+          isLoading={isQueryLoading}
+          allowQueryCancellation={allowQueryCancellation}
+          hideTimeFilterInfo={hideTimeFilterInfo}
           {...editorMessages}
         />
       )}
