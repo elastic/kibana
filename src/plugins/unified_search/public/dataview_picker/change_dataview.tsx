@@ -30,6 +30,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerPropsExtended } from './data_view_picker';
@@ -341,7 +342,7 @@ export function ChangeDataView({
             color="success"
             size="s"
             fullWidth
-            onClick={() => onTextBasedSubmit({ esql: `from ${trigger.title} | limit 10` })}
+            onClick={() => onTextBasedSubmit({ esql: getInitialESQLQuery(trigger.title!) })}
             data-test-subj="select-text-based-language-panel"
             contentProps={{
               css: {

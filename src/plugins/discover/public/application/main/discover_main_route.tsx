@@ -20,6 +20,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { isOfEsqlQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -250,7 +251,7 @@ export function DiscoverMainRoute({
           ? {
               // reset to a default ES|QL query
               query: {
-                esql: `from ${prevDataView.getIndexPattern()} | limit 10`,
+                esql: getInitialESQLQuery(prevDataView.getIndexPattern()),
               },
             }
           : undefined;
