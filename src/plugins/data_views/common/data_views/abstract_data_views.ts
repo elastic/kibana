@@ -47,7 +47,7 @@ interface AbstractDataViewDeps {
   metaFields?: string[];
 }
 
-type DataViewFieldBaseSpec = Record<string, DataViewFieldBase>;
+type DataViewFieldBaseSpecMap = Record<string, DataViewFieldBase>;
 
 export abstract class AbstractDataView {
   /**
@@ -126,7 +126,7 @@ export abstract class AbstractDataView {
    */
   public matchedIndices: string[] = [];
 
-  protected scriptedFields: DataViewFieldBaseSpec;
+  protected scriptedFields: DataViewFieldBaseSpecMap;
 
   private allowHidden: boolean = false;
 
@@ -160,10 +160,10 @@ export abstract class AbstractDataView {
     this.scriptedFields = spec?.fields
       ? Object.values(spec.fields)
           .filter((field) => field.scripted)
-          .reduce((acc, field) => {
+          .reduce<DataViewFieldBaseSpecMap>((acc, field) => {
             acc[field.name] = field;
             return acc;
-          }, {} as DataViewFieldBaseSpec)
+          }, {})
       : {};
 
     // set dependencies

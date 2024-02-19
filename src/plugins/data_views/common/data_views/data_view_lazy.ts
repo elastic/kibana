@@ -43,8 +43,7 @@ interface DataViewDeps {
 
 interface GetFieldsParams {
   type?: string[];
-  // lookBack?: boolean;
-  // metaFields?: string[];
+  // metaFields?: string[]; // this should probably be a field type
   // rollupIndex?: string;
   // allowNoIndex?: boolean;
   // indexFilter?: QueryDslQueryContainer;
@@ -71,7 +70,6 @@ export class DataViewLazy extends AbstractDataView {
   /*
   pattern: string;
   type?: string;
-   // lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
@@ -119,22 +117,27 @@ export class DataViewLazy extends AbstractDataView {
     return { ...scriptedResult, ...mappedResult, ...runtimeResult };
   }
 
+  // todo test that this is working
   private getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
-    Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce((col, field) => {
-      let cachedField = this.fieldCache.get(field.name);
-      if (cachedField) {
-        cachedField.runtimeField = field.runtimeField;
-        cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
-        cachedField.spec.esTypes = [field.type];
-      } else {
-        cachedField = this.fieldCache.set(
-          field.name,
-          new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
-        );
-      }
-      col[field.name] = cachedField;
-      return col;
-    }, {} as DataViewFieldMap);
+    // getRuntimeFieldSpecMap flattens composites into a list of fields
+    Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
+      (col, field) => {
+        let cachedField = this.fieldCache.get(field.name);
+        if (cachedField) {
+          cachedField.runtimeField = field.runtimeField;
+          cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
+          cachedField.spec.esTypes = [field.type];
+        } else {
+          cachedField = this.fieldCache.set(
+            field.name,
+            new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
+          );
+        }
+        col[field.name] = cachedField;
+        return col;
+      },
+      {}
+    );
 
   /**
    * Add a runtime field - Appended to existing mapped field or a new field is
@@ -266,6 +269,7 @@ export class DataViewLazy extends AbstractDataView {
     return primitveRuntimeField && { [name]: primitveRuntimeField };
   }
 
+  // creates / updates non composite runtime fields. only called from addRuntimeField or addCompositeRuntimeField
   private async updateOrAddRuntimeField(
     fieldName: string,
     fieldType: RuntimeType,
@@ -274,7 +278,7 @@ export class DataViewLazy extends AbstractDataView {
   ): Promise<DataViewField> {
     if (fieldType === 'composite') {
       throw new Error(
-        `Trying to add composite field as primmitive field, this shouldn't happen! [name = ${fieldName}]`
+        `Trying to add composite field as primitive field, this shouldn't happen! [name = ${fieldName}]`
       );
     }
 
@@ -286,7 +290,6 @@ export class DataViewLazy extends AbstractDataView {
       fld.spec.type = castEsToKbnFieldTypeName(fieldType);
       fld.spec.esTypes = [fieldType];
     } else {
-      // todo is there a fn that does this?
       fld = this.fieldCache.set(
         fieldName,
         new DataViewField({
@@ -435,30 +438,19 @@ export class DataViewLazy extends AbstractDataView {
     return dataViewFields;
   }
 
-  // I'm not sure if this is useful but I like that it uses the cache
-  getFieldInstance = async (fieldName: string): Promise<DataViewField> => {
-    // todo review
-    const fld = this.fieldCache.get(fieldName);
-    if (fld) return fld;
-    const fields = await this.getFields({ fieldName: [fieldName] });
-    // todo more specific error OR maybe returning undefined is ok
-    if (!fields.length) throw new Error(`Field ${fieldName} not found`);
-    return this.fieldCache.set(
-      fieldName,
-      new DataViewField({ ...fields[0].spec, shortDotsEnable: this.shortDotsEnable })
-    );
-  };
-
   getScriptedFieldsForQuery() {
-    return Object.values(this.scriptedFields).reduce((scriptFields, field) => {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script as string,
-          lang: field.lang,
-        },
-      };
-      return scriptFields;
-    }, {} as Record<string, estypes.ScriptField>);
+    return Object.values(this.scriptedFields).reduce<Record<string, estypes.ScriptField>>(
+      (scriptFields, field) => {
+        scriptFields[field.name] = {
+          script: {
+            source: field.script as string,
+            lang: field.lang,
+          },
+        };
+        return scriptFields;
+      },
+      {}
+    );
   }
 
   // get computed fields WITHOUT looking at the field list
@@ -505,13 +497,7 @@ export class DataViewLazy extends AbstractDataView {
     return records as estypes.MappingRuntimeFields; // todo - why set the type?
   }
 
-  // TODO should specify which fields are needed
-  /**
-   * Creates static representation of the data view.
-   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
-   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
-   */
-  public async toSpec(includeFields = true): Promise<DataViewSpec> {
+  private toSpecShared(includeFields = true): DataViewSpec {
     // if fields aren't included, don't include count
     const fieldAttrs = cloneDeep(this.fieldAttrs);
     if (!includeFields) {
@@ -523,24 +509,13 @@ export class DataViewLazy extends AbstractDataView {
       });
     }
 
-    const getFieldsAsMap = async () => {
-      const fields: DataViewFieldSpecMap = {};
-      const fldMap = await this.getFields({ fieldName: ['*'] });
-      Object.values(fldMap).forEach((field) => {
-        fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
-      });
-      return fields;
-    };
-
-    const fields = includeFields ? await getFieldsAsMap() : undefined;
-
     const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: [...(this.sourceFilters || [])],
-      fields,
+      // fields,
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: { ...this.fieldFormatMap },
@@ -555,28 +530,50 @@ export class DataViewLazy extends AbstractDataView {
     return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
-  // should specify which fields are needed
+  // TODO should specify which fields are needed
+  /**
+   * Creates static representation of the data view.
+   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
+   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
+   */
+  public async toSpec(includeFields = true): Promise<DataViewSpec> {
+    const getFieldsAsMap = async () => {
+      const fields: DataViewFieldSpecMap = {};
+      const fldMap = await this.getFields({ fieldName: ['*'] });
+      Object.values(fldMap).forEach((field) => {
+        fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
+      });
+      return fields;
+    };
+
+    const spec = this.toSpecShared(includeFields);
+    if (includeFields) {
+      spec.fields = await getFieldsAsMap();
+    }
+
+    return spec;
+  }
+
   /**
    * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
    */
-  // TODO make synchronous
-  public async toMinimalSpec(): Promise<Omit<DataViewSpec, 'fields'>> {
+  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
     // removes `fields`
-    const dataViewSpec = await this.toSpec(false);
+    const spec = this.toSpecShared(false);
 
-    if (dataViewSpec.fieldAttrs) {
+    if (spec.fieldAttrs) {
       // removes `count` props (popularity scores) from `fieldAttrs`
-      dataViewSpec.fieldAttrs = pickBy(
-        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+      spec.fieldAttrs = pickBy(
+        mapValues(spec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
-      if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
-        dataViewSpec.fieldAttrs = undefined;
+      if (Object.keys(spec.fieldAttrs).length === 0) {
+        delete spec.fieldAttrs;
       }
     }
 
-    return dataViewSpec;
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
   /**
