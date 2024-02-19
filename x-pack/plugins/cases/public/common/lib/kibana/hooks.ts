@@ -30,8 +30,6 @@ export const useTimeZone = (): string => {
   return timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
 
-export const useBasePath = (): string => useKibana().services.http.basePath.get();
-
 export const useToasts = (): StartServices['notifications']['toasts'] =>
   useKibana().services.notifications.toasts;
 
