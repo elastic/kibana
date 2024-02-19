@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { AppNavLinkStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
+import { AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId, sloFeatureId } from '../../common';
 
@@ -27,43 +27,52 @@ export function updateGlobalNavigation({
     uptime,
   }).some((visible) => visible);
 
-  const updatedDeepLinks = deepLinks.map((link) => {
-    switch (link.id) {
-      case CasesDeepLinkId.cases:
-        return {
-          ...link,
-          navLinkStatus:
-            capabilities[casesFeatureId].read_cases && someVisible
-              ? AppNavLinkStatus.visible
-              : AppNavLinkStatus.hidden,
-        };
-      case 'alerts':
-        return {
-          ...link,
-          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-        };
-      case 'rules':
-        return {
-          ...link,
-          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-        };
-      case 'slos':
-        return {
-          ...link,
-          navLinkStatus: !!capabilities[sloFeatureId]?.read
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
-        };
-      default:
-        return link;
-    }
-  });
+  const updatedDeepLinks = deepLinks
+    .map((link) => {
+      switch (link.id) {
+        case CasesDeepLinkId.cases:
+          if (capabilities[casesFeatureId].read_cases && someVisible) {
+            return {
+              ...link,
+              visibleIn: ['sideNav', 'globalSearch'],
+            };
+          }
+          return null;
+        case 'alerts':
+          if (someVisible) {
+            return {
+              ...link,
+              visibleIn: ['sideNav', 'globalSearch'],
+            };
+          }
+          return null;
+        case 'rules':
+          if (someVisible) {
+            return {
+              ...link,
+              visibleIn: ['sideNav', 'globalSearch'],
+            };
+          }
+          return null;
+        case 'slos':
+          if (!!capabilities[sloFeatureId]?.read) {
+            return {
+              ...link,
+              visibleIn: ['sideNav', 'globalSearch'],
+            };
+          }
+          return null;
+        default:
+          return link;
+      }
+    })
+    .filter((link): link is AppDeepLink => link !== null);
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    navLinkStatus:
+    visibleIn:
       someVisible || !!capabilities[sloFeatureId]?.read
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+        ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview']
+        : [],
   }));
 }
