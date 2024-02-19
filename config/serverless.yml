@@ -79,7 +79,7 @@ server.securityResponseHeaders.disableEmbedding: true
 server.versioned.versionResolution: newest
 # do not enforce client version check
 server.versioned.strictClientVersionCheck: false
-server.cdn.url: <TODO>
+server.cdn.url: https://kibana.estccdn.com
 
 # Telemetry enabled by default and not disableable via UI
 telemetry.optIn: true
