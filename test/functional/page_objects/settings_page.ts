@@ -155,15 +155,20 @@ export class SettingsPageObject extends FtrService {
   async selectTimeFieldOption(selection: string) {
     const testSubj = 'timestampField';
     const timefield = await this.testSubjects.find(testSubj);
-    // open dropdown
-    const isSelected = await this.comboBox.isOptionSelected(timefield, selection);
-    const isDisabled = await this.comboBox.isDisabled(timefield);
 
-    if (isSelected || isDisabled) {
+    await this.retry.waitFor('loading the timefield options should be finished', async () => {
+      const isLoading = await timefield.getAttribute('data-is-loading');
+      return isLoading === '0';
+    });
+    const isEnabled = await (await timefield.findByTestSubject('comboBoxSearchInput')).isEnabled();
+    if (!isEnabled) {
+      return;
+    }
+    const isSelected = await this.comboBox.isOptionSelected(timefield, selection);
+    if (isSelected) {
       return;
     }
     await this.retry.waitFor('time field dropdown have the right value', async () => {
-      await this.comboBox.clearInputField(testSubj);
       await this.comboBox.set(testSubj, selection);
       return await this.comboBox.isOptionSelected(timefield, selection);
     });
@@ -213,21 +218,6 @@ export class SettingsPageObject extends FtrService {
 
   async getTableHeader() {
     return await this.find.allByCssSelector('table.euiTable thead tr th');
-  }
-
-  async sortBy(columnName: string) {
-    const chartTypes = await this.find.allByCssSelector('table.euiTable thead tr th button');
-
-    const getChartType = async (chart: Record<string, any>) => {
-      const chartString = await chart.getVisibleText();
-      if (chartString === columnName) {
-        await chart.click();
-        await this.header.waitUntilLoadingHasFinished();
-      }
-    };
-
-    const getChartTypesPromises = chartTypes.map(getChartType);
-    return Promise.all(getChartTypesPromises);
   }
 
   async getTableRow(rowNumber: number, colNumber: number) {
@@ -519,7 +509,6 @@ export class SettingsPageObject extends FtrService {
         await this.setIndexPatternField(indexPatternName);
       });
 
-      await this.common.sleep(2000);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
@@ -751,41 +740,6 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
-  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
-    const startingCount = parseInt(await this.getFieldsTabCount(), 10);
-    await this.clickAddField();
-    await this.setFieldName(name);
-    await this.setFieldType(type);
-    if (script) {
-      await this.setFieldScript(script);
-    }
-
-    if (doSaveField) {
-      await this.clickSaveField();
-      await this.retry.try(async () => {
-        expect(parseInt(await this.getFieldsTabCount(), 10)).to.be(startingCount + 1);
-      });
-    }
-  }
-
-  async addCompositeRuntimeField(
-    name: string,
-    script: string,
-    doSaveField = true,
-    subfieldCount = 0
-  ) {
-    await this.clickAddField();
-    await this.setFieldName(name);
-    await this.setFieldTypeComposite();
-    await this.setCompositeScript(script);
-    if (subfieldCount > 0) {
-      await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
-    }
-    if (doSaveField) {
-      await this.clickSaveField();
-    }
-  }
-
   async editFieldFilter(name: string, newName: string) {
     await this.testSubjects.click(`edit_filter-${name}`);
     await this.testSubjects.setValue(`filter_input_${name}`, newName);
@@ -817,11 +771,6 @@ export class SettingsPageObject extends FtrService {
       );
       return fieldNames.includes(name);
     });
-  }
-
-  public async confirmSave() {
-    await this.testSubjects.setValue('saveModalConfirmText', 'change');
-    await this.testSubjects.click('confirmModalConfirmButton');
   }
 
   public async confirmDelete() {
