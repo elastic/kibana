@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 });
 
                 expect(header['content-type']).to.eql('image/png');
-                expect(header['content-disposition']).to.eql('attachment; filename="test.png"');
+                expect(header['content-disposition']).to.eql('attachment; filename=test.png');
                 expect(buffer.toString('utf8')).to.eql('abc');
               });
 
