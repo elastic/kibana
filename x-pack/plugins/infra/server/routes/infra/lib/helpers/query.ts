@@ -32,6 +32,14 @@ export const createFilters = ({
       : [extrafilterClause]
     : [];
 
+  const systemMetricsFilter = [
+    {
+      term: {
+        'event.module': 'system',
+      },
+    },
+  ];
+
   const hostNamesFilter =
     hostNamesShortList.length > 0
       ? [
@@ -46,6 +54,7 @@ export const createFilters = ({
   return [
     ...hostNamesFilter,
     ...extraFilterList,
+    ...systemMetricsFilter,
     {
       range: {
         '@timestamp': {
@@ -58,6 +67,11 @@ export const createFilters = ({
     {
       exists: {
         field: 'host.name',
+      },
+    },
+    {
+      term: {
+        'event.module': 'system',
       },
     },
   ];

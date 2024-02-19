@@ -40,6 +40,11 @@ export const useHostCount = () => {
               },
             },
             {
+              term: {
+                'event.module': 'system',
+              },
+            },
+            {
               range: {
                 [dataView?.timeFieldName ?? '@timestamp']: {
                   gte: searchCriteria.dateRange.from,
