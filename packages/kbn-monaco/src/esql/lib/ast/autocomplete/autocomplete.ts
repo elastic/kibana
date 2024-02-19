@@ -1080,7 +1080,7 @@ async function getFunctionArgsSuggestions(
       return signature.params[argIndex].type;
     }
     if (signature.infiniteParams || signature.minParams) {
-      return signature.params[signature.params.length - 1].type;
+      return signature.params[0].type;
     }
     return [];
   });
