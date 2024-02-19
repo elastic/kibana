@@ -33,63 +33,65 @@ describe('FileDeleteButton', () => {
       appMockRender = createAppMockRenderer();
     });
 
-    it('renders delete button correctly', async () => {
-      appMockRender.render(
-        <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
-      );
+    for (let index = 0; index < 200; index++) {
+      it('renders delete button correctly', async () => {
+        appMockRender.render(
+          <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
+        );
 
-      expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
-    });
+        expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
+      });
 
-    it('clicking delete button opens the confirmation modal', async () => {
-      appMockRender.render(
-        <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
-      );
+      it('clicking delete button opens the confirmation modal', async () => {
+        appMockRender.render(
+          <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
+        );
 
-      const deleteButton = await screen.findByTestId('cases-files-delete-button');
+        const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
-      expect(deleteButton).toBeInTheDocument();
+        expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+        userEvent.click(deleteButton);
 
-      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    });
+        expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      });
 
-    it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
-      appMockRender.render(
-        <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
-      );
+      it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
+        appMockRender.render(
+          <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
+        );
 
-      const deleteButton = await screen.findByTestId('cases-files-delete-button');
+        const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
-      expect(deleteButton).toBeInTheDocument();
+        expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+        userEvent.click(deleteButton);
 
-      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+        expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+        userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
-      await waitFor(() => {
-        expect(mutate).toHaveBeenCalledTimes(1);
-        expect(mutate).toHaveBeenCalledWith({
-          caseId: basicCaseId,
-          fileId: basicFileMock.id,
+        await waitFor(() => {
+          expect(mutate).toHaveBeenCalledTimes(1);
+          expect(mutate).toHaveBeenCalledWith({
+            caseId: basicCaseId,
+            fileId: basicFileMock.id,
+          });
         });
       });
-    });
 
-    it('delete button is not rendered if user has no delete permission', async () => {
-      appMockRender = createAppMockRenderer({
-        permissions: buildCasesPermissions({ delete: false }),
+      it('delete button is not rendered if user has no delete permission', async () => {
+        appMockRender = createAppMockRenderer({
+          permissions: buildCasesPermissions({ delete: false }),
+        });
+
+        appMockRender.render(
+          <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
+        );
+
+        expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
       });
-
-      appMockRender.render(
-        <FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} isIcon={true} />
-      );
-
-      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
-    });
+    }
   });
 
   describe('not isIcon', () => {
@@ -98,56 +100,58 @@ describe('FileDeleteButton', () => {
       appMockRender = createAppMockRenderer();
     });
 
-    it('renders delete button correctly', async () => {
-      appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
+    for (let index = 0; index < 200; index++) {
+      it('renders delete button correctly', async () => {
+        appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
 
-      expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
+        expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
 
-      expect(useDeleteFileAttachmentMock).toBeCalledTimes(1);
-    });
+        expect(useDeleteFileAttachmentMock).toBeCalledTimes(1);
+      });
 
-    it('clicking delete button opens the confirmation modal', async () => {
-      appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
+      it('clicking delete button opens the confirmation modal', async () => {
+        appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
 
-      const deleteButton = await screen.findByTestId('cases-files-delete-button');
+        const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
-      expect(deleteButton).toBeInTheDocument();
+        expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+        userEvent.click(deleteButton);
 
-      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    });
+        expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      });
 
-    it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
-      appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
+      it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
+        appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
 
-      const deleteButton = await screen.findByTestId('cases-files-delete-button');
+        const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
-      expect(deleteButton).toBeInTheDocument();
+        expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+        userEvent.click(deleteButton);
 
-      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+        expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+        userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
-      await waitFor(() => {
-        expect(mutate).toHaveBeenCalledTimes(1);
-        expect(mutate).toHaveBeenCalledWith({
-          caseId: basicCaseId,
-          fileId: basicFileMock.id,
+        await waitFor(() => {
+          expect(mutate).toHaveBeenCalledTimes(1);
+          expect(mutate).toHaveBeenCalledWith({
+            caseId: basicCaseId,
+            fileId: basicFileMock.id,
+          });
         });
       });
-    });
 
-    it('delete button is not rendered if user has no delete permission', async () => {
-      appMockRender = createAppMockRenderer({
-        permissions: buildCasesPermissions({ delete: false }),
+      it('delete button is not rendered if user has no delete permission', async () => {
+        appMockRender = createAppMockRenderer({
+          permissions: buildCasesPermissions({ delete: false }),
+        });
+
+        appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
+
+        expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
       });
-
-      appMockRender.render(<FileDeleteButton caseId={basicCaseId} fileId={basicFileMock.id} />);
-
-      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
-    });
+    }
   });
 });

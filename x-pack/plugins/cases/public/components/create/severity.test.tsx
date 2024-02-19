@@ -23,58 +23,60 @@ describe('Severity form field', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Severity isLoading={false} />
-      </FormTestComponent>
-    );
+  for (let index = 0; 200; index++) {
+    it('renders', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <Severity isLoading={false} />
+        </FormTestComponent>
+      );
 
-    expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
-  });
-
-  // default to LOW in this test configuration
-  it('defaults to the correct value', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Severity isLoading={false} />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-severity-selection-low')).toBeInTheDocument();
-  });
-
-  it('selects the correct value when changed', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Severity isLoading={false} />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('case-severity-selection'));
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(await screen.findByTestId('case-severity-selection-high'));
-
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
-
-    await waitFor(() => {
-      // data, isValid
-      expect(onSubmit).toBeCalledWith({ severity: 'high' }, true);
+      expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
     });
-  });
 
-  it('disables when loading data', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Severity isLoading={true} />
-      </FormTestComponent>
-    );
+    // default to LOW in this test configuration
+    it('defaults to the correct value', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <Severity isLoading={false} />
+        </FormTestComponent>
+      );
 
-    expect(await screen.findByTestId('case-severity-selection')).toHaveAttribute('disabled');
-  });
+      expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-severity-selection-low')).toBeInTheDocument();
+    });
+
+    it('selects the correct value when changed', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <Severity isLoading={false} />
+        </FormTestComponent>
+      );
+
+      expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('case-severity-selection'));
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(await screen.findByTestId('case-severity-selection-high'));
+
+      userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+      await waitFor(() => {
+        // data, isValid
+        expect(onSubmit).toBeCalledWith({ severity: 'high' }, true);
+      });
+    });
+
+    it('disables when loading data', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <Severity isLoading={true} />
+        </FormTestComponent>
+      );
+
+      expect(await screen.findByTestId('case-severity-selection')).toHaveAttribute('disabled');
+    });
+  }
 });

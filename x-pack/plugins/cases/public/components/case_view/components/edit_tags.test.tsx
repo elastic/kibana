@@ -42,118 +42,120 @@ describe('EditTags ', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders no tags, and then edit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+  for (let index = 0; index < 200; index++) {
+    it('renders no tags, and then edit', async () => {
+      appMockRender.render(<EditTags {...defaultProps} />);
 
-    expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
+      expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('no-tags')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId('no-tags')).not.toBeInTheDocument();
+      });
+
+      expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
-  });
+    it('edit tag from options on submit', async () => {
+      appMockRender.render(<EditTags {...defaultProps} />);
 
-  it('edit tag from options on submit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+      userEvent.paste(await screen.findByRole('combobox'), `${sampleTags[0]}`);
+      userEvent.keyboard('{enter}');
 
-    userEvent.paste(await screen.findByRole('combobox'), `${sampleTags[0]}`);
-    userEvent.keyboard('{enter}');
+      userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
-
-    await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
-  });
-
-  it('add new tags on submit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
-
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
-
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
-
-    userEvent.paste(await screen.findByRole('combobox'), 'dude');
-    userEvent.keyboard('{enter}');
-
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
-
-    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
-  });
-
-  it('trims the tags on submit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
-
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
-
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
-
-    userEvent.paste(await screen.findByRole('combobox'), 'dude      ');
-    userEvent.keyboard('{enter}');
-
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
-
-    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
-  });
-
-  it('cancels on cancel', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
-
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
-
-    userEvent.paste(await screen.findByRole('combobox'), 'new');
-    userEvent.keyboard('{enter}');
-
-    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
-
-    userEvent.click(await screen.findByTestId('edit-tags-cancel'));
-
-    await waitFor(() => {
-      expect(onSubmit).not.toBeCalled();
+      await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
     });
 
-    expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
-  });
+    it('add new tags on submit', async () => {
+      appMockRender.render(<EditTags {...defaultProps} />);
 
-  it('shows error when tag is empty', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+      expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
+      userEvent.paste(await screen.findByRole('combobox'), 'dude');
+      userEvent.keyboard('{enter}');
 
-    userEvent.paste(await screen.findByRole('combobox'), ' ');
-    userEvent.keyboard('{enter}');
+      userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
-    expect(await screen.findByText('A tag must contain at least one non-space character.'));
-  });
+      await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+    });
 
-  it('shows error when tag is too long', async () => {
-    const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
+    it('trims the tags on submit', async () => {
+      appMockRender.render(<EditTags {...defaultProps} />);
 
-    appMockRender.render(<EditTags {...defaultProps} />);
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+      expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
+      userEvent.paste(await screen.findByRole('combobox'), 'dude      ');
+      userEvent.keyboard('{enter}');
 
-    userEvent.paste(await screen.findByRole('combobox'), `${longTag}`);
-    userEvent.keyboard('{enter}');
+      userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
-    expect(
-      await screen.findByText(
-        'The length of the tag is too long. The maximum length is 256 characters.'
-      )
-    );
-  });
+      await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+    });
 
-  it('does not render when the user does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
-    appMockRender.render(<EditTags {...defaultProps} />);
+    it('cancels on cancel', async () => {
+      appMockRender.render(<EditTags {...defaultProps} />);
 
-    expect(screen.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
-  });
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+
+      userEvent.paste(await screen.findByRole('combobox'), 'new');
+      userEvent.keyboard('{enter}');
+
+      expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
+
+      userEvent.click(await screen.findByTestId('edit-tags-cancel'));
+
+      await waitFor(() => {
+        expect(onSubmit).not.toBeCalled();
+      });
+
+      expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
+    });
+
+    it('shows error when tag is empty', async () => {
+      appMockRender.render(<EditTags {...defaultProps} />);
+
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+
+      expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
+
+      userEvent.paste(await screen.findByRole('combobox'), ' ');
+      userEvent.keyboard('{enter}');
+
+      expect(await screen.findByText('A tag must contain at least one non-space character.'));
+    });
+
+    it('shows error when tag is too long', async () => {
+      const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
+
+      appMockRender.render(<EditTags {...defaultProps} />);
+
+      userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+
+      expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
+
+      userEvent.paste(await screen.findByRole('combobox'), `${longTag}`);
+      userEvent.keyboard('{enter}');
+
+      expect(
+        await screen.findByText(
+          'The length of the tag is too long. The maximum length is 256 characters.'
+        )
+      );
+    });
+
+    it('does not render when the user does not have update permissions', () => {
+      appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
+      appMockRender.render(<EditTags {...defaultProps} />);
+
+      expect(screen.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
+    });
+  }
 });
