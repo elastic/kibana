@@ -1000,7 +1000,7 @@ describe('validation logic', () => {
     }
 
     testErrorsAndWarnings(`from a_index | where cidr_match(ipField)`, [
-      `Error building [cidr_match]: expects exactly 2 arguments, passed 1 instead.`,
+      `Error building [cidr_match]: expects at least 2 arguments, passed 1 instead.`,
     ]);
     testErrorsAndWarnings(
       `from a_index | eval cidr = "172.0.0.1/30" | where cidr_match(ipField, "172.0.0.1/30", cidr)`,
@@ -1275,9 +1275,21 @@ describe('validation logic', () => {
               name: 'extraArg',
               type: 'number',
             });
+            const refSignature = signatures[0];
             // get the expected args from the first signature in case of errors
-            const expectedArgs = signatures[0].params.filter(({ optional }) => !optional).length;
-            const shouldBeExactly = signatures[0].params.length;
+            const minNumberOfArgs = refSignature.params.filter(({ optional }) => !optional).length;
+            const fullNumberOfArgs = refSignature.params.length;
+            const hasOptionalArgs = minNumberOfArgs < fullNumberOfArgs;
+            const hasTooManyArgs = fieldMappingWithOneExtraArg.length > fullNumberOfArgs;
+
+            // the validation engine tries to be smart about signatures with optional args
+            let messageQuantifier = 'exactly ';
+            if (hasOptionalArgs && hasTooManyArgs) {
+              messageQuantifier = 'no more than ';
+            }
+            if (!hasOptionalArgs && !hasTooManyArgs) {
+              messageQuantifier = 'at least ';
+            }
             testErrorsAndWarnings(
               `from a_index | eval ${
                 getFunctionSignatures(
@@ -1290,14 +1302,12 @@ describe('validation logic', () => {
                 )[0].declaration
               }`,
               [
-                `Error building [${name}]: expects ${
-                  shouldBeExactly - expectedArgs === 0 ? 'exactly ' : ''
-                }${
-                  expectedArgs === 1
+                `Error building [${name}]: expects ${messageQuantifier}${
+                  fullNumberOfArgs === 1
                     ? 'one argument'
-                    : expectedArgs === 0
+                    : fullNumberOfArgs === 0
                     ? '0 arguments'
-                    : `${expectedArgs} arguments`
+                    : `${fullNumberOfArgs} arguments`
                 }, passed ${fieldMappingWithOneExtraArg.length} instead.`,
               ]
             );
