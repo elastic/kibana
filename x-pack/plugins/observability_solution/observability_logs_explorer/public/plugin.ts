@@ -7,7 +7,6 @@
 
 import {
   AppMountParameters,
-  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -52,10 +51,9 @@ export class ObservabilityLogsExplorerPlugin
       title: logsExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
-      navLinkStatus: this.config.navigation.showAppLink
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
-      searchable: true,
+      visibleIn: this.config.navigation.showAppLink
+        ? ['globalSearch', 'sideNav']
+        : ['globalSearch'],
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
       mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
@@ -76,7 +74,7 @@ export class ObservabilityLogsExplorerPlugin
     core.application.register({
       id: 'observability-log-explorer',
       title: logsExplorerAppTitle,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (appMountParams: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         const { renderObservabilityLogsExplorerRedirect } = await import(
