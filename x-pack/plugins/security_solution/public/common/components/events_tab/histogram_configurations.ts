@@ -9,7 +9,6 @@ import numeral from '@elastic/numeral';
 import { getExternalAlertLensAttributes } from '../visualization_actions/lens_attributes/common/external_alert';
 import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/common/events';
 import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
-import { MatrixHistogramType } from '../matrix_histogram/types';
 import * as i18n from './translations';
 
 const DEFAULT_EVENTS_STACK_BY = 'event.action';
@@ -38,7 +37,6 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 export const eventsHistogramConfig: MatrixHistogramConfigs = {
   defaultStackByOption:
     eventsStackByOptions.find((o) => o.text === DEFAULT_EVENTS_STACK_BY) ?? eventsStackByOptions[0],
-  histogramType: MatrixHistogramType.events,
   stackByOptions: eventsStackByOptions,
   subtitle: undefined,
   title: i18n.EVENTS_GRAPH_TITLE,
@@ -61,7 +59,6 @@ const DEFAULT_STACK_BY = 'event.module';
 export const alertsHistogramConfig: MatrixHistogramConfigs = {
   defaultStackByOption:
     alertsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0],
-  histogramType: MatrixHistogramType.alerts,
   stackByOptions: alertsStackByOptions,
   title: i18n.ALERTS_GRAPH_TITLE,
   getLensAttributes: getExternalAlertLensAttributes,

@@ -15,8 +15,6 @@ import { mockRuntimeMappings } from '../../containers/source/mock';
 import { getDnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
 
-import { MatrixHistogramType } from './types';
-
 jest.mock('../../containers/query_toggle');
 
 jest.mock('../visualization_actions/actions');
@@ -28,6 +26,8 @@ jest.mock('../../hooks/use_experimental_features', () => ({
 
 const mockUseVisualizationResponse = jest.fn(() => ({
   responses: [{ aggregations: [{ buckets: [{ key: '1234' }] }], hits: { total: 999 } }],
+  requests: [],
+  loading: false,
 }));
 jest.mock('../visualization_actions/use_visualization_response', () => ({
   useVisualizationResponse: () => mockUseVisualizationResponse(),
@@ -54,15 +54,11 @@ describe('Matrix Histogram Component', () => {
       value: 'dns.question.registered_domain',
     },
     endDate: '2019-07-18T20:00:00.000Z',
-    errorMessage: 'error',
-    histogramType: MatrixHistogramType.alerts,
     id: 'mockId',
     indexNames: [],
     isInspected: false,
     isPtrIncluded: true,
     setQuery: jest.fn(),
-    skip: false,
-    sourceId: 'default',
     stackByOptions: [
       { text: 'dns.question.registered_domain', value: 'dns.question.registered_domain' },
     ],
@@ -107,7 +103,9 @@ describe('Matrix Histogram Component', () => {
 
     test('it should render 0 as subtitle when buckets are empty', () => {
       mockUseVisualizationResponse.mockReturnValue({
+        requests: [],
         responses: [{ aggregations: [{ buckets: [] }], hits: { total: 999 } }],
+        loading: false,
       });
       wrapper.setProps({ endDate: 100 });
       wrapper.update();
@@ -147,7 +145,7 @@ describe('Matrix Histogram Component', () => {
   });
 
   describe('Inspect button', () => {
-    test("it doesn't render Inspect button by default", () => {
+    test('it does not render Inspect button', () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
         getLensAttributes: getDnsTopDomainsLensAttributes,

@@ -18,7 +18,6 @@ import type {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../../common/components/matrix_histogram/types';
-import { MatrixHistogramType } from '../../../../common/components/matrix_histogram/types';
 import * as i18n from './translations';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 import { networkSelectors } from '../../store';
@@ -42,7 +41,6 @@ const DEFAULT_STACK_BY = 'dns.question.registered_domain';
 export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   defaultStackByOption:
     dnsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
-  histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
   getLensAttributes: getDnsTopDomainsLensAttributes,

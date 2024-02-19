@@ -136,14 +136,14 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   const hideHistogram = useMemo(
     () =>
       (visualizationResponse?.[0].hits.total ?? 0) <= 0 && hideHistogramIfEmpty ? true : false,
-    [visualizationResponse, hideHistogramIfEmpty]
+    [hideHistogramIfEmpty, visualizationResponse]
   );
 
   useEffect(() => {
     if (isInitialLoading && !!visualizationResponse) {
       setIsInitialLoading(false);
     }
-  }, [id, isInitialLoading, setIsInitialLoading, setQuery, visualizationResponse]);
+  }, [id, isInitialLoading, visualizationResponse, setIsInitialLoading, setQuery]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   const extraVisualizationOptions = useMemo(

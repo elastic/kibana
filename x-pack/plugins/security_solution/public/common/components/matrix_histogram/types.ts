@@ -8,7 +8,6 @@
 import type { EuiPaddingSize, EuiTitleSize } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { ESQuery } from '../../../../common/typed_json';
-
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
 export interface MatrixHistogramOption {
@@ -19,21 +18,11 @@ export interface MatrixHistogramOption {
 export type GetSubTitle = (count: number) => string;
 export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 
-export enum MatrixHistogramType {
-  authentications = 'authentications',
-  anomalies = 'anomalies',
-  events = 'events',
-  alerts = 'alerts',
-  dns = 'dns',
-  preview = 'preview',
-}
-
 export interface MatrixHistogramConfigs {
   chartHeight?: number;
   defaultStackByOption: MatrixHistogramOption;
   getLensAttributes?: GetLensAttributes;
   hideHistogramIfEmpty?: boolean;
-  histogramType: MatrixHistogramType;
   legendPosition?: Position;
   lensAttributes?: LensAttributes;
   paddingSize?: EuiPaddingSize;

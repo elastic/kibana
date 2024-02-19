@@ -40,21 +40,6 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-const defaultUseQueryAlertsReturn = {
-  loading: false,
-  data: {},
-  setQuery: () => {},
-  response: '',
-  request: '',
-  refetch: () => {},
-};
-const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
-  return {
-    useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
-  };
-});
-
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');

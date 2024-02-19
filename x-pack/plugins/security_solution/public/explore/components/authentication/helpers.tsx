@@ -24,7 +24,6 @@ import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { MatrixHistogramType } from '../../../common/components/matrix_histogram/types';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 import { authenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/authentication';
 
@@ -198,7 +197,6 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     authenticationsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ??
     authenticationsStackByOptions[0],
-  histogramType: MatrixHistogramType.authentications,
   stackByOptions: authenticationsStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
   lensAttributes: authenticationLensAttributes as LensAttributes,
