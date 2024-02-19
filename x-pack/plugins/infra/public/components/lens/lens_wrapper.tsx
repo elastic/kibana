@@ -16,7 +16,7 @@ import type { LensWrapperProps } from './types';
 
 export const LensWrapper = ({
   attributes,
-  dateRange,
+  timeRange,
   filters,
   searchSessionId,
   loading = false,
@@ -30,7 +30,7 @@ export const LensWrapper = ({
   const [embeddableLoaded, setEmbeddableLoaded] = useState(false);
   const [state, setState] = useState({
     attributes,
-    dateRange,
+    timeRange,
     filters,
     query,
     searchSessionId,
@@ -59,7 +59,7 @@ export const LensWrapper = ({
     if (intersectionObserverEntry?.isIntersecting) {
       setState({
         attributes,
-        dateRange,
+        timeRange,
         filters,
         query,
         searchSessionId,
@@ -67,7 +67,7 @@ export const LensWrapper = ({
     }
   }, [
     attributes,
-    dateRange,
+    timeRange,
     filters,
     intersectionObserverEntry?.isIntersecting,
     query,
@@ -115,7 +115,7 @@ export const LensWrapper = ({
               filters={state.filters}
               onLoad={handleOnLoad}
               query={state.query}
-              timeRange={dateRange}
+              timeRange={timeRange}
               viewMode={ViewMode.VIEW}
             />
           </>

@@ -11,14 +11,13 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 import { TooltipContent } from '../../../../../components/lens';
 
+const LIMIT = 500;
 export const HostCountKpi = ({ height }: { height: number }) => {
   const inventoryModel = findInventoryModel('host');
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
-  const { searchCriteria } = useUnifiedSearchContext();
   const euiTheme = useTheme();
 
   const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
@@ -32,11 +31,11 @@ export const HostCountKpi = ({ height }: { height: number }) => {
   };
 
   const getSubtitle = () => {
-    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
+    return LIMIT < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.hostCount.limit', {
           defaultMessage: 'Limited to {limit}',
           values: {
-            limit: searchCriteria.limit,
+            limit: LIMIT,
           },
         })
       : undefined;

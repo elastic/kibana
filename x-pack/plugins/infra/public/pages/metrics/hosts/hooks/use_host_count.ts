@@ -16,24 +16,22 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
 import { useMetricsDataViewContext } from './use_metrics_data_view';
-import { useUnifiedSearchContext } from './use_unified_search';
+import { useHostsViewContext } from './use_hosts_view';
 
 export const useHostCount = () => {
-  const { dataView, metricAlias } = useMetricsDataViewContext();
+  const { dataView } = useMetricsDataViewContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const { buildQuery, searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria } = useHostsViewContext();
 
   const { search: fetchHostCount, requests$ } = useDataSearch({
     getRequest: useCallback(() => {
-      const query = buildQuery();
-
       const filters: QueryDslQueryContainer = {
         bool: {
-          ...query.bool,
+          ...searchCriteria.parsedQuery.bool,
           filter: [
-            ...query.bool.filter,
+            ...searchCriteria.parsedQuery.bool.filter,
             {
               exists: {
                 field: 'host.name',
@@ -42,8 +40,8 @@ export const useHostCount = () => {
             {
               range: {
                 [dataView?.timeFieldName ?? '@timestamp']: {
-                  gte: searchCriteria.dateRange.from,
-                  lte: searchCriteria.dateRange.to,
+                  gte: searchCriteria.timeRange.from,
+                  lte: searchCriteria.timeRange.to,
                 },
               },
             },
@@ -56,7 +54,7 @@ export const useHostCount = () => {
           params: {
             allow_no_indices: true,
             ignore_unavailable: true,
-            index: metricAlias,
+            index: dataView?.getIndexPattern(),
             size: 0,
             track_total_hits: false,
             body: {
@@ -74,18 +72,17 @@ export const useHostCount = () => {
         options: { strategy: ES_SEARCH_STRATEGY },
       };
     }, [
-      buildQuery,
-      dataView?.timeFieldName,
-      metricAlias,
-      searchCriteria.dateRange.from,
-      searchCriteria.dateRange.to,
+      searchCriteria.parsedQuery.bool,
+      searchCriteria.timeRange.from,
+      searchCriteria.timeRange.to,
+      dataView,
     ]),
     parseResponses: useMemo(
       () =>
         normalizeDataSearchResponse({
           telemetry,
           telemetryData: {
-            withQuery: !!searchCriteria.query.query,
+            withQuery: !!searchCriteria.query,
             withFilters:
               searchCriteria.filters.length > 0 || searchCriteria.panelFilters.length > 0,
           },
@@ -93,7 +90,7 @@ export const useHostCount = () => {
       [
         searchCriteria.filters.length,
         searchCriteria.panelFilters.length,
-        searchCriteria.query.query,
+        searchCriteria.query,
         telemetry,
       ]
     ),

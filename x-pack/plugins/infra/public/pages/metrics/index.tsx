@@ -38,6 +38,7 @@ import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { HostsPage } from './hosts';
+import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -70,44 +71,44 @@ export const InfrastructurePage = () => {
   return (
     <EuiErrorBoundary>
       <AlertPrefillProvider>
-        <WaffleOptionsProvider>
-          <WaffleTimeProvider>
-            <WaffleFiltersProvider>
-              <ReactQueryProvider>
-                <InfraMLCapabilitiesProvider>
-                  <HelpCenterContent
-                    feedbackLink="https://discuss.elastic.co/c/metrics"
-                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
-                  {setHeaderActionMenu && theme$ && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                      <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        {config.featureFlags.alertsAndRulesDropdownEnabled && (
-                          <MetricsAlertDropdown />
-                        )}
-                        <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
-                          color="primary"
-                          iconType="indexOpen"
-                        >
-                          {ADD_DATA_LABEL}
-                        </EuiHeaderLink>
-                        {ObservabilityAIAssistantActionMenuItem ? (
-                          <ObservabilityAIAssistantActionMenuItem />
-                        ) : null}
-                      </EuiHeaderLinks>
-                    </HeaderMenuPortal>
-                  )}
-                  <Routes>
-                    <Route path={'/inventory'} component={SnapshotPage} />
+        <InfraMLCapabilitiesProvider>
+          <HelpCenterContent
+            feedbackLink="https://discuss.elastic.co/c/metrics"
+            appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+              defaultMessage: 'Metrics',
+            })}
+          />
+          {setHeaderActionMenu && theme$ && (
+            <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+              <EuiHeaderLinks gutterSize="xs">
+                <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                  {settingsTabTitle}
+                </EuiHeaderLink>
+                <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                {config.featureFlags.alertsAndRulesDropdownEnabled && <MetricsAlertDropdown />}
+                <EuiHeaderLink
+                  href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+                  color="primary"
+                  iconType="indexOpen"
+                >
+                  {ADD_DATA_LABEL}
+                </EuiHeaderLink>
+                {ObservabilityAIAssistantActionMenuItem ? (
+                  <ObservabilityAIAssistantActionMenuItem />
+                ) : null}
+              </EuiHeaderLinks>
+            </HeaderMenuPortal>
+          )}
+          <Routes>
+            {isHostsViewEnabled && <Route path="/hosts" component={HostsPage} />}
+
+            <ReactQueryProvider>
+              <WaffleOptionsProvider>
+                <WaffleTimeProvider>
+                  <WaffleFiltersProvider>
+                    <Route path="/inventory" exact component={SnapshotPage} />
                     {config.featureFlags.metricsExplorerEnabled && (
-                      <Route path={'/explorer'}>
+                      <Route path="/explorer" exact>
                         <MetricsExplorerOptionsContainer>
                           <WithMetricsExplorerOptionsUrlState />
                           {source?.configuration ? (
@@ -121,16 +122,20 @@ export const InfrastructurePage = () => {
                         </MetricsExplorerOptionsContainer>
                       </Route>
                     )}
-                    <Route path="/detail/:type/:node" component={NodeDetail} />
-                    {isHostsViewEnabled && <Route path={'/hosts'} component={HostsPage} />}
-                    <Route path={'/settings'} component={MetricsSettingsPage} />
-                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
-                  </Routes>
-                </InfraMLCapabilitiesProvider>
-              </ReactQueryProvider>
-            </WaffleFiltersProvider>
-          </WaffleTimeProvider>
-        </WaffleOptionsProvider>
+                    <Route path="/settings" exact component={MetricsSettingsPage} />
+                    <Route path="/detail/:type/:node" exact component={NodeDetail} />
+                  </WaffleFiltersProvider>
+                </WaffleTimeProvider>
+              </WaffleOptionsProvider>
+            </ReactQueryProvider>
+
+            <RedirectWithQueryParams from="/" exact to="/inventory" />
+            <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
+            <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
+
+            <Route render={() => <NotFoundPage title="Infrastructure" />} />
+          </Routes>
+        </InfraMLCapabilitiesProvider>
       </AlertPrefillProvider>
     </EuiErrorBoundary>
   );

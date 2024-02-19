@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { useSourceContext } from '../../../../../containers/metrics_source';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 
 export interface Props {
   node: HostNodeRow;
@@ -18,15 +18,15 @@ export interface Props {
 }
 
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
-  const { source } = useSourceContext();
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { metricAlias } = useMetricsDataViewContext();
+  const { searchCriteria } = useHostsViewContext();
 
-  return source ? (
+  return (
     <AssetDetails
       assetId={name}
       assetName={name}
       assetType="host"
-      dateRange={parsedDateRange}
+      dateRange={searchCriteria.isoTimeRange}
       overrides={{
         metadata: {
           showActionsColumn: true,
@@ -38,7 +38,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
         mode: 'flyout',
         closeFlyout,
       }}
-      metricAlias={source.configuration.metricAlias}
+      metricAlias={metricAlias}
     />
-  ) : null;
+  );
 };

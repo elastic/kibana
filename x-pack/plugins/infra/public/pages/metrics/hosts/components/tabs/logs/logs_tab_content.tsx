@@ -12,7 +12,6 @@ import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
@@ -21,9 +20,7 @@ import { useLogViewReference } from '../../../../../../hooks/use_log_view_refere
 
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
-  const { hostNodes, loading } = useHostsViewContext();
+  const { hostNodes, loading, searchCriteria } = useHostsViewContext();
 
   const hostsFilterQuery = useMemo(
     () =>
@@ -79,8 +76,8 @@ export const LogsTabContent = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogsLinkToStream
-            startTime={from}
-            endTime={to}
+            startTime={searchCriteria.timestamps.from}
+            endTime={searchCriteria.timestamps.to}
             query={logsLinkToStreamQuery}
             logView={logView}
           />
@@ -91,8 +88,8 @@ export const LogsTabContent = () => {
         <LogStream
           height={500}
           logView={logView}
-          startTimestamp={from}
-          endTimestamp={to}
+          startTimestamp={searchCriteria.timestamps.from}
+          endTimestamp={searchCriteria.timestamps.to}
           filters={[hostsFilterQuery]}
           query={filterQuery}
           showFlyoutAction

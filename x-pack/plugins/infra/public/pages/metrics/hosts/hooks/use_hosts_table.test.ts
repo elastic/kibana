@@ -8,20 +8,14 @@
 import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
-import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
 import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
 import * as useMetricsDataViewHooks from './use_metrics_data_view';
 
-jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
 jest.mock('./use_metrics_data_view');
 jest.mock('../../../../hooks/use_kibana');
 
-const mockUseUnifiedSearchContext =
-  useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
-    typeof useUnifiedSearchHooks.useUnifiedSearchContext
-  >;
 const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.MockedFunction<
   typeof useHostsViewHooks.useHostsViewContext
 >;
@@ -121,14 +115,11 @@ const mockKibanaServices = {
 
 describe('useHostTable hook', () => {
   beforeAll(() => {
-    mockUseUnifiedSearchContext.mockReturnValue({
-      searchCriteria: {
-        dateRange: { from: 'now-15m', to: 'now' },
-      },
-    } as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
-
     mockUseHostsViewContext.mockReturnValue({
       hostNodes: mockHostNode,
+      searchCriteria: {
+        timeRange: { from: 'now-15m', to: 'now' },
+      },
     } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
 
     mockUseHostsViewContext.mockReturnValue({

@@ -10,7 +10,7 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useNodeDetailsRedirect } from '../../../../link_to';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
 
 interface EntryTitleProps {
   onClick: () => void;
@@ -20,15 +20,15 @@ interface EntryTitleProps {
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { searchCriteria } = useHostsViewContext();
 
   const link = useLinkProps({
     ...getNodeDetailUrl({
       assetId: name,
       assetType: 'host',
       search: {
-        from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
-        to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
+        from: searchCriteria.timestamps.from,
+        to: searchCriteria.timestamps.to,
         name,
       },
     }),

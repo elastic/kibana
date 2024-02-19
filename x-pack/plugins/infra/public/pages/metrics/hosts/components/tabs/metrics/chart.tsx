@@ -6,10 +6,10 @@
  */
 import React, { useMemo } from 'react';
 import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { Query } from '@kbn/es-query';
 import { useDataView } from '../../../../../../hooks/use_data_view';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
@@ -20,8 +20,7 @@ export type ChartProps = LensConfig & {
 };
 
 export const Chart = ({ id, ...chartProps }: ChartProps) => {
-  const { searchCriteria } = useUnifiedSearchContext();
-  const { loading, searchSessionId } = useHostsViewContext();
+  const { loading, searchSessionId, searchCriteria } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
   const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
@@ -31,14 +30,14 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    dateRange: searchCriteria.dateRange,
+    timeRange: searchCriteria.timeRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     searchSessionId,
   });
 
   const filters = useMemo(() => {
     return shouldUseSearchCriteria
-      ? searchCriteria.filters
+      ? [...searchCriteria.filters, ...searchCriteria.panelFilters]
       : [
           buildCombinedHostsFilter({
             field: 'host.name',
@@ -46,18 +45,24 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
             dataView,
           }),
         ];
-  }, [shouldUseSearchCriteria, searchCriteria.filters, currentPage, dataView]);
+  }, [
+    shouldUseSearchCriteria,
+    searchCriteria.filters,
+    searchCriteria.panelFilters,
+    currentPage,
+    dataView,
+  ]);
 
   return (
     <LensChart
       {...chartProps}
       id={`hostsView-metricChart-${id}`}
       borderRadius="m"
-      dateRange={afterLoadedState.dateRange}
+      timeRange={afterLoadedState.timeRange}
       height={METRIC_CHART_HEIGHT}
       loading={loading}
       filters={filters}
-      query={afterLoadedState.query}
+      query={afterLoadedState.query as Query}
       searchSessionId={afterLoadedState.searchSessionId}
     />
   );

@@ -6,18 +6,22 @@
  */
 import React, { useMemo } from 'react';
 import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { Query } from '@kbn/es-query';
 import { useDataView } from '../../../../../hooks/use_data_view';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
 export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number; id: string }) => {
-  const { searchCriteria } = useUnifiedSearchContext();
-  const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
+  const {
+    hostNodes,
+    loading: hostsLoading,
+    searchSessionId,
+    searchCriteria,
+  } = useHostsViewContext();
   const { isRequestRunning: hostCountLoading } = useHostCountContext();
   const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
@@ -25,7 +29,7 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
   const loading = hostsLoading || hostCountLoading;
 
   const filters = shouldUseSearchCriteria
-    ? searchCriteria.filters
+    ? [...searchCriteria.filters, ...searchCriteria.panelFilters]
     : [
         buildCombinedHostsFilter({
           field: 'host.name',
@@ -38,7 +42,7 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    dateRange: searchCriteria.dateRange,
+    timeRange: searchCriteria.timeRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
     searchSessionId,
@@ -56,11 +60,11 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
     <LensChart
       {...chartProps}
       id={`hostsViewKPI-${id}`}
-      dateRange={afterLoadedState.dateRange}
+      timeRange={afterLoadedState.timeRange}
       filters={afterLoadedState.filters}
       loading={loading}
       height={height}
-      query={afterLoadedState.query}
+      query={afterLoadedState.query as Query}
       searchSessionId={afterLoadedState.searchSessionId}
       toolTip={tooltipContent}
       disableTriggers

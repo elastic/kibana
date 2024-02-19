@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-export type LensWrapperProps = Omit<
-  TypedLensByValueInput,
-  'timeRange' | 'attributes' | 'viewMode'
-> & {
+export type LensWrapperProps = Omit<TypedLensByValueInput, 'attributes' | 'viewMode'> & {
   attributes: LensAttributes | null;
-  dateRange: TimeRange;
   extraActions: Action[];
   loading?: boolean;
 };
@@ -26,7 +21,7 @@ export type OnFilterEvent = Parameters<NonNullable<LensEmbeddableInput['onFilter
 export type BaseChartProps = Pick<
   LensWrapperProps,
   | 'id'
-  | 'dateRange'
+  | 'timeRange'
   | 'disableTriggers'
   | 'filters'
   | 'hidePanelTitles'
