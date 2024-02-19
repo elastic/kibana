@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -42,6 +43,16 @@ export const SourcesPanel: React.FC<SourcesFlyoutProps> = () => {
       }
     >
       <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate('aiPlayground.sources.callout', {
+              defaultMessage: 'Changes here will reset your custom query',
+            })}
+            iconType="warning"
+            size="s"
+          />
+        </EuiFlexItem>
+
         <EuiFlexItem>
           <IndicesList indices={selectedIndices} onRemoveClick={removeIndex} hasBorder />
         </EuiFlexItem>
