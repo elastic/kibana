@@ -145,27 +145,27 @@ describe('getHelpForAllCommands()', () => {
         Runs a dev task
 
         Commands:
-          [1m[97m[40m foo [...names] [49m[39m[22m
+          foo [...names]
             Some thing that we wrote to help us execute things.
-            
+
             Example:
-            
+
               foo = bar = baz
-            
+
               Are you getting it?
-          
+
             Options:
               --foo              Some flag
               --bar              Another flag
                                   Secondary info
               --baz, -b          Hey hello
-            
-          [1m[97m[40m bar [...names] [49m[39m[22m
+
+          bar [...names]
             Some other thing that we wrote to help us execute things.
-          
+
             Options:
               --baz, -b          Hey hello
-            
+
 
         Global options:
           --global-flag      some flag that applies to all commands
