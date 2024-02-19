@@ -10,27 +10,23 @@ import archiver from 'archiver';
 import { Writable, WritableOptions } from 'node:stream';
 
 export class MemWritable extends Writable {
-  private _buffer: Buffer;
+  private _queue: Buffer[];
   constructor(opts?: WritableOptions) {
     super(opts);
-    this._buffer = Buffer.from('');
+    this._queue = [];
   }
 
   public get buffer(): Buffer {
-    return this._buffer;
+    return Buffer.concat(this._queue);
   }
 
   _write(
-    chunk: any,
+    chunk: Buffer,
     _encoding: BufferEncoding,
     callback: (error?: Error | null | undefined) => void
   ): void {
-    try {
-      this._buffer = Buffer.concat([this._buffer, chunk]);
-      callback();
-    } catch (e) {
-      callback(e);
-    }
+    this._queue.push(chunk);
+    callback();
   }
 }
 
