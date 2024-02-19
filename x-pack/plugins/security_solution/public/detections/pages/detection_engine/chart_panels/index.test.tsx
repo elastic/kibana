@@ -266,9 +266,9 @@ describe('ChartPanels', () => {
     });
 
     describe('Group by top', () => {
-      const justTableAndTreemap = ['table', 'treemap'];
+      const treemap = ['treemap'];
 
-      justTableAndTreemap.forEach((alertViewSelection) => {
+      treemap.forEach((alertViewSelection) => {
         test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
           (useAlertsLocalStorage as jest.Mock).mockReturnValue({
             ...defaultAlertSettings,
