@@ -220,6 +220,21 @@ export class SettingsPageObject extends FtrService {
     return await this.find.allByCssSelector('table.euiTable thead tr th');
   }
 
+  async sortBy(columnName: string) {
+    const chartTypes = await this.find.allByCssSelector('table.euiTable thead tr th button');
+
+    const getChartType = async (chart: Record<string, any>) => {
+      const chartString = await chart.getVisibleText();
+      if (chartString === columnName) {
+        await chart.click();
+        await this.header.waitUntilLoadingHasFinished();
+      }
+    };
+
+    const getChartTypesPromises = chartTypes.map(getChartType);
+    return Promise.all(getChartTypesPromises);
+  }
+
   async getTableRow(rowNumber: number, colNumber: number) {
     // passing in zero-based index, but adding 1 for css 1-based indexes
     return await this.find.byCssSelector(
@@ -740,6 +755,41 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
+  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
+    const startingCount = parseInt(await this.getFieldsTabCount(), 10);
+    await this.clickAddField();
+    await this.setFieldName(name);
+    await this.setFieldType(type);
+    if (script) {
+      await this.setFieldScript(script);
+    }
+
+    if (doSaveField) {
+      await this.clickSaveField();
+      await this.retry.try(async () => {
+        expect(parseInt(await this.getFieldsTabCount(), 10)).to.be(startingCount + 1);
+      });
+    }
+  }
+
+  async addCompositeRuntimeField(
+    name: string,
+    script: string,
+    doSaveField = true,
+    subfieldCount = 0
+  ) {
+    await this.clickAddField();
+    await this.setFieldName(name);
+    await this.setFieldTypeComposite();
+    await this.setCompositeScript(script);
+    if (subfieldCount > 0) {
+      await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
+    }
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
+  }
+
   async editFieldFilter(name: string, newName: string) {
     await this.testSubjects.click(`edit_filter-${name}`);
     await this.testSubjects.setValue(`filter_input_${name}`, newName);
@@ -771,6 +821,11 @@ export class SettingsPageObject extends FtrService {
       );
       return fieldNames.includes(name);
     });
+  }
+
+  public async confirmSave() {
+    await this.testSubjects.setValue('saveModalConfirmText', 'change');
+    await this.testSubjects.click('confirmModalConfirmButton');
   }
 
   public async confirmDelete() {
