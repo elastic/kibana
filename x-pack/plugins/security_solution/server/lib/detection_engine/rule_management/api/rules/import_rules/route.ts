@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import {
   ImportRulesRequestQuery,
@@ -33,8 +32,6 @@ import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
-
-const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -162,10 +159,8 @@ export const importRulesRoute = (
             savedObjectsClient,
           });
 
-          const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
-
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
-            ruleChunks: chunkParseObjects,
+            rules: parsedRules,
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             mlAuthz,
             overwriteRules: request.query.overwrite,

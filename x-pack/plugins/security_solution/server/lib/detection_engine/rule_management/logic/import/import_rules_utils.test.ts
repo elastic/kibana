@@ -41,7 +41,7 @@ describe('importRules', () => {
 
   it('returns rules response if no rules to import', async () => {
     const result = await importRules({
-      ruleChunks: [],
+      rules: [],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -54,7 +54,7 @@ describe('importRules', () => {
 
   it('returns 400 error if "ruleChunks" includes Error', async () => {
     const result = await importRules({
-      ruleChunks: [[new Error('error importing')]],
+      rules: [new Error('error importing')],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -75,7 +75,7 @@ describe('importRules', () => {
 
   it('creates rule if no matching existing rule found', async () => {
     const result = await importRules({
-      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
+      rules: [getImportRulesSchemaMock({ rule_id: 'rule-1' })],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -92,7 +92,7 @@ describe('importRules', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
-      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
+      rules: [getImportRulesSchemaMock({ rule_id: 'rule-1' })],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -114,12 +114,10 @@ describe('importRules', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
-      ruleChunks: [
-        [
-          getImportRulesSchemaMock({
-            rule_id: 'rule-1',
-          }),
-        ],
+      rules: [
+        getImportRulesSchemaMock({
+          rule_id: 'rule-1',
+        }),
       ],
       rulesResponseAcc: [],
       mlAuthz,
@@ -183,7 +181,7 @@ describe('importRules', () => {
     clients.rulesClient.find.mockRejectedValue(new Error('error reading rule'));
 
     const result = await importRules({
-      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
+      rules: [getImportRulesSchemaMock({ rule_id: 'rule-1' })],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
@@ -208,7 +206,7 @@ describe('importRules', () => {
     (createRules as jest.Mock).mockRejectedValue(new Error('error creating rule'));
 
     const result = await importRules({
-      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
+      rules: [getImportRulesSchemaMock({ rule_id: 'rule-1' })],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
@@ -232,7 +230,7 @@ describe('importRules', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
-      ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
+      rules: [getImportRulesSchemaMock({ rule_id: 'rule-1' })],
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
