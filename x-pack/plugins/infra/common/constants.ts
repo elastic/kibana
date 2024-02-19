@@ -11,6 +11,7 @@ export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
 
 export const METRICS_FEATURE_ID = 'infrastructure';
+export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
 export const LOGS_FEATURE_ID = 'logs';
 
 export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
@@ -32,3 +33,7 @@ export const O11Y_AAD_FIELDS = [
   'labels.*',
   'tags',
 ];
+
+export const LINK_TO_INVENTORY = '/app/metrics/link-to/inventory';
+export const METRICS_EXPLORER_URL = '/app/metrics/explorer';
+export const fifteenMinutesInMilliseconds = 15 * 60 * 1000;

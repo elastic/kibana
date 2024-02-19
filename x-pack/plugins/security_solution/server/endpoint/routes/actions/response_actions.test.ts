@@ -73,7 +73,7 @@ import { omit, set } from 'lodash';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { responseActionsClientMock } from '../../services/actions/clients/mocks';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mock';
+import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');

@@ -47,6 +47,7 @@
     "@kbn/tinymath",
     "@kbn/visualization-utils",
     "@kbn/code-editor",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

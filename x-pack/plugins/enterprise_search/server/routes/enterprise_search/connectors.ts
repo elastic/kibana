@@ -53,9 +53,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
-          index_name: schema.string(),
+          index_name: schema.maybe(schema.string()),
           is_native: schema.boolean(),
           language: schema.nullable(schema.string()),
+          name: schema.maybe(schema.string()),
           service_type: schema.maybe(schema.string()),
         }),
       },
@@ -65,9 +66,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       try {
         const body = await addConnector(client, {
           deleteExistingConnector: request.body.delete_existing_connector,
-          indexName: request.body.index_name,
+          indexName: request.body.index_name ?? null,
           isNative: request.body.is_native,
           language: request.body.language,
+          name: request.body.name ?? null,
           serviceType: request.body.service_type,
         });
         return response.ok({ body });
@@ -567,7 +569,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
       return response.ok({
         body: {
-          connector: connectorResult?.value,
+          connector: connectorResult,
         },
       });
     })
@@ -592,9 +594,9 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       let connectorResponse;
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-        const indexNameToDelete = shouldDeleteIndex ? connector?.value.index_name : null;
-        const apiKeyId = connector?.value.api_key_id;
-        const secretId = connector?.value.api_key_secret_id;
+        const indexNameToDelete = shouldDeleteIndex ? connector?.index_name : null;
+        const apiKeyId = connector?.api_key_id;
+        const secretId = connector?.api_key_secret_id;
 
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
 
@@ -638,6 +640,42 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
 
       return response.ok({ body: connectorResponse });
+    })
+  );
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId, indexName } = request.params;
+
+      try {
+        await client.asCurrentUser.transport.request({
+          body: {
+            index_name: indexName,
+          },
+          method: 'PUT',
+          path: `/_connector/${connectorId}/_index_name`,
+        });
+        return response.ok();
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: `Could not find index ${indexName}`,
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 }
