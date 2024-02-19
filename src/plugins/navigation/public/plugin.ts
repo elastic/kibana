@@ -13,6 +13,7 @@ import {
   NavigationPublicStart,
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
+  ConfigSchema,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
@@ -29,7 +30,7 @@ export class NavigationPublicPlugin
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
 
-  constructor(_initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(_core: CoreSetup): NavigationPublicSetup {
     return {
@@ -64,6 +65,9 @@ export class NavigationPublicPlugin
     ) => {
       return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
     };
+
+    const config = this.initializerContext.config.get();
+    console.log(config);
 
     return {
       ui: {

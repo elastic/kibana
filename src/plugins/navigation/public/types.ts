@@ -32,3 +32,15 @@ export interface NavigationPublicSetupDependencies {}
 export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
+
+export type SolutionNavigationStatus = 'visible' | 'hidden' | 'ask';
+
+export type SolutionType = 'es' | 'oblt' | 'security';
+
+export interface ConfigSchema {
+  solutionNavigation: {
+    enabled: boolean;
+    status: SolutionNavigationStatus;
+    defaultSolution: SolutionType;
+  };
+}
