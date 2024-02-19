@@ -251,6 +251,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           id: columnId,
           enabled: true,
           schema: 'metric',
+          timeShift: column.filter ? undefined : column.timeShift,
           customBucket: buildExpression([
             buildExpressionFunction<AggFunctionsMapping['aggTimeSeries']>('aggTimeSeries', {
               id: `-timeseries`,
@@ -265,7 +266,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               schema: 'metric',
               field: column.sourceField,
               // time shift is added to wrapping aggFilteredMetric if filter is set
-              timeShift: column.filter ? undefined : column.timeShift,
               ...(unit ? { unit } : {}),
             }),
           ]),
