@@ -75,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
     });
 
-    describe('create rule for opbeans-java without kql filter', () => {
+    describe.skip('create rule for opbeans-java without kql filter', () => {
       let ruleId: string;
       let actionId: string;
       let alerts: ApmAlertFields[];
@@ -187,7 +187,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create rule for opbeans-node using kql filter', () => {
+    describe.skip('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

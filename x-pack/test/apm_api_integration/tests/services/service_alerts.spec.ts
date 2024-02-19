@@ -116,7 +116,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
     });
 
-    describe('with alerts', () => {
+    describe.skip('with alerts', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

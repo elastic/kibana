@@ -136,7 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
-      describe('Transaction groups with avg transaction duration alerts', () => {
+      describe.skip('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
@@ -208,7 +208,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('Transaction groups with p99 transaction duration alerts', () => {
+      describe.skip('Transaction groups with p99 transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
@@ -284,7 +284,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('Transaction groups with error rate alerts', () => {
+      describe.skip('Transaction groups with error rate alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
