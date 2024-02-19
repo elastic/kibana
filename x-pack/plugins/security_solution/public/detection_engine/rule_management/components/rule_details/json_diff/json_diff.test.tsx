@@ -16,6 +16,29 @@ import { savedRuleMock } from '../../../logic/mock';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { COLORS } from './constants';
 
+/*
+  Finds an element with a text content that exactly matches the passed argument.
+  Handly because React Testing Library's doesn't provide an easy way to search by 
+  text if the text is split into multiple DOM elements.
+*/
+function findChildByTextContent(parent: Element, textContent: string): HTMLElement {
+  return Array.from(parent.querySelectorAll('*')).find(
+    (childElement) => childElement.textContent === textContent
+  ) as HTMLElement;
+}
+
+/*
+  Finds a diff line element (".diff-line") that contains a particular text content.
+  Match doesn't have to be exact, it's enough for the line to include the text.
+*/
+function findDiffLineContaining(text: string): Element | null {
+  const foundLine = Array.from(document.querySelectorAll('.diff-line')).find((element) =>
+    (element.textContent || '').includes(text)
+  );
+
+  return foundLine || null;
+}
+
 describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => {
   it.each(['light', 'dark'] as const)(
     'User can see precisely how property values would change after upgrade - %s theme',
@@ -48,61 +71,47 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         wrapper: ThemeWrapper,
       });
 
-      /*
-      Helper function to find an element with a particular text content.
-      React Testing Library's doesn't provide an easy way to search by text if text is split into multiple DOM elements.
-    */
-      const getChildByTextContent = (parent: Element, textContent: string): HTMLElement => {
-        return Array.from(parent.querySelectorAll('*')).find(
-          (childElement) => childElement.textContent === textContent
-        ) as HTMLElement;
-      };
-
       /* LINE UPDATE */
-      const updatedLine = getChildByTextContent(container, '-  "version": 1+  "version": 2');
+      const updatedLine = findChildByTextContent(container, '-  "version": 1+  "version": 2');
 
-      const updatedLineBefore = getChildByTextContent(updatedLine, '  "version": 1');
+      const updatedLineBefore = findChildByTextContent(updatedLine, '  "version": 1');
       expect(updatedLineBefore).toHaveStyle(
         `background: ${COLORS[colorMode].lineBackground.deletion}`
       );
 
-      const updatedWordBefore = getChildByTextContent(updatedLineBefore, '1');
+      const updatedWordBefore = findChildByTextContent(updatedLineBefore, '1');
       expect(updatedWordBefore).toHaveStyle(
         `background: ${COLORS[colorMode].characterBackground.deletion}`
       );
 
-      const updatedLineAfter = getChildByTextContent(updatedLine, '  "version": 2');
+      const updatedLineAfter = findChildByTextContent(updatedLine, '  "version": 2');
       expect(updatedLineAfter).toHaveStyle(
         `background: ${COLORS[colorMode].lineBackground.insertion}`
       );
 
-      const updatedWordAfter = getChildByTextContent(updatedLineAfter, '2');
+      const updatedWordAfter = findChildByTextContent(updatedLineAfter, '2');
       expect(updatedWordAfter).toHaveStyle(
         `background: ${COLORS[colorMode].characterBackground.insertion}`
       );
 
       /* LINE REMOVAL */
-      const removedLine = getChildByTextContent(container, '-    "Bob",');
+      const removedLine = findChildByTextContent(container, '-    "Bob",');
 
-      const removedLineBefore = getChildByTextContent(removedLine, '    "Bob",');
+      const removedLineBefore = findChildByTextContent(removedLine, '    "Bob",');
       expect(removedLineBefore).toHaveStyle(
         `background: ${COLORS[colorMode].lineBackground.deletion}`
       );
 
-      const removedLineAfter = getChildByTextContent(removedLine, '');
-      expect(
-        removedLineAfter ? window.getComputedStyle(removedLineAfter).backgroundColor : null
-      ).toBe('');
+      const removedLineAfter = findChildByTextContent(removedLine, '');
+      expect(window.getComputedStyle(removedLineAfter).backgroundColor).toBe('');
 
       /* LINE ADDITION */
-      const addedLine = getChildByTextContent(container, '+  "license": "GPLv3",');
+      const addedLine = findChildByTextContent(container, '+  "license": "GPLv3",');
 
-      const addedLineBefore = getChildByTextContent(addedLine, '');
-      expect(
-        addedLineBefore ? window.getComputedStyle(addedLineBefore).backgroundColor : null
-      ).toBe('');
+      const addedLineBefore = findChildByTextContent(addedLine, '');
+      expect(window.getComputedStyle(addedLineBefore).backgroundColor).toBe('');
 
-      const addedLineAfter = getChildByTextContent(addedLine, '  "license": "GPLv3",');
+      const addedLineAfter = findChildByTextContent(addedLine, '  "license": "GPLv3",');
       expect(addedLineAfter).toHaveStyle(
         `background: ${COLORS[colorMode].lineBackground.insertion}`
       );
@@ -208,14 +217,6 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       ...savedRuleMock,
       version: 2,
     };
-
-    function findDiffLineContaining(text: string): Element | null {
-      const foundLine = Array.from(document.querySelectorAll('.diff-line')).find((element) =>
-        (element.textContent || '').includes(text)
-      );
-
-      return foundLine || null;
-    }
 
     /* DURATION */
     /* Semantically equal durations should not be shown as modified */
