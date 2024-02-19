@@ -5,26 +5,29 @@
  * 2.0.
  */
 import type {
-  AppFeatureKeys,
-  AppFeatureKibanaConfig,
-  AppFeaturesAssistantConfig,
+  ProductFeatureKeys,
+  ProductFeatureKibanaConfig,
+  ProductFeaturesAssistantConfig,
 } from '@kbn/security-solution-features';
 import {
-  assistantDefaultAppFeaturesConfig,
-  createEnabledAppFeaturesConfigMap,
+  assistantDefaultProductFeaturesConfig,
+  createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
 import type {
-  AppFeatureAssistantKey,
+  ProductFeatureAssistantKey,
   AssistantSubFeatureId,
 } from '@kbn/security-solution-features/keys';
 
-export const getSecurityAssistantAppFeaturesConfigurator =
-  (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesAssistantConfig => {
-    return createEnabledAppFeaturesConfigMap(assistantAppFeaturesConfig, enabledAppFeatureKeys);
+export const getSecurityAssistantProductFeaturesConfigurator =
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesAssistantConfig => {
+    return createEnabledProductFeaturesConfigMap(
+      assistantProductFeaturesConfig,
+      enabledProductFeatureKeys
+    );
   };
 
 /**
- * Maps the AppFeatures keys to Kibana privileges that will be merged
+ * Maps the ProductFeatures keys to Kibana privileges that will be merged
  * into the base privileges config for the Security Assistant app.
  *
  * Privileges can be added in different ways:
@@ -32,10 +35,10 @@ export const getSecurityAssistantAppFeaturesConfigurator =
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Assistant subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Assistant subFeature with the privilege `id` specified.
  */
-const assistantAppFeaturesConfig: Record<
-  AppFeatureAssistantKey,
-  AppFeatureKibanaConfig<AssistantSubFeatureId>
+const assistantProductFeaturesConfig: Record<
+  ProductFeatureAssistantKey,
+  ProductFeatureKibanaConfig<AssistantSubFeatureId>
 > = {
-  ...assistantDefaultAppFeaturesConfig,
+  ...assistantDefaultProductFeaturesConfig,
   // ess-specific app features configs here
 };

@@ -6,9 +6,9 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AppFeaturesConfigMerger } from './app_features_config_merger';
+import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 import type { Logger } from '@kbn/core/server';
-import type { AppFeatureKibanaConfig } from '@kbn/security-solution-features';
+import type { ProductFeatureKibanaConfig } from '@kbn/security-solution-features';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 
 const category = {
@@ -138,8 +138,8 @@ export const subFeaturesMap = Object.freeze(
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-describe('AppFeaturesConfigMerger', () => {
-  const merger = new AppFeaturesConfigMerger(mockLogger, subFeaturesMap);
+describe('ProductFeaturesConfigMerger', () => {
+  const merger = new ProductFeaturesConfigMerger(mockLogger, subFeaturesMap);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -147,7 +147,7 @@ describe('AppFeaturesConfigMerger', () => {
 
   describe('main privileges', () => {
     it('should merge enabled main privileges into base config', () => {
-      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+      const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
         {
           privileges: {
             all: {
@@ -179,10 +179,10 @@ describe('AppFeaturesConfigMerger', () => {
         },
       ];
 
-      const merged = merger.mergeAppFeatureConfigs(
+      const merged = merger.mergeProductFeatureConfigs(
         baseKibanaFeature,
         [],
-        enabledAppFeaturesConfigs
+        enabledProductFeaturesConfigs
       );
 
       expect(merged).toEqual({
@@ -227,21 +227,25 @@ describe('AppFeaturesConfigMerger', () => {
     it('adds base subFeatures in the correct order', () => {
       const baseKibanaSubFeatureIds = ['subFeature2', 'subFeature3', 'subFeature1'];
 
-      const merged = merger.mergeAppFeatureConfigs(baseKibanaFeature, baseKibanaSubFeatureIds, []);
+      const merged = merger.mergeProductFeatureConfigs(
+        baseKibanaFeature,
+        baseKibanaSubFeatureIds,
+        []
+      );
       expect(merged.subFeatures).toEqual([subFeature1, subFeature2, subFeature3]);
     });
 
     it('should merge enabled subFeatures into base config in the correct order', () => {
-      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+      const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
         {
           subFeatureIds: ['subFeature3', 'subFeature1'],
         },
       ];
 
-      const merged = merger.mergeAppFeatureConfigs(
+      const merged = merger.mergeProductFeatureConfigs(
         baseKibanaFeature,
         ['subFeature2'],
-        enabledAppFeaturesConfigs
+        enabledProductFeaturesConfigs
       );
 
       expect(merged).toEqual({
@@ -253,7 +257,7 @@ describe('AppFeaturesConfigMerger', () => {
 
   describe('subFeaturePrivileges', () => {
     it('should merge enabled subFeatures with extra subFeaturePrivileges into base config in the correct order', () => {
-      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+      const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
         {
           subFeaturesPrivileges: [
             {
@@ -273,10 +277,10 @@ describe('AppFeaturesConfigMerger', () => {
         },
       ];
 
-      const merged = merger.mergeAppFeatureConfigs(
+      const merged = merger.mergeProductFeatureConfigs(
         baseKibanaFeature,
         ['subFeature2'],
-        enabledAppFeaturesConfigs
+        enabledProductFeaturesConfigs
       );
       expect(merged).toEqual({
         ...baseKibanaFeature,
@@ -323,7 +327,7 @@ describe('AppFeaturesConfigMerger', () => {
 
     it('should warn if there are subFeaturesPrivileges for a subFeature id that is not found', () => {
       const subFeaturesPrivilegesId = 'sub-feature-1_all';
-      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+      const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
         {
           subFeaturesPrivileges: [
             {
@@ -335,10 +339,10 @@ describe('AppFeaturesConfigMerger', () => {
         },
       ];
 
-      const merged = merger.mergeAppFeatureConfigs(
+      const merged = merger.mergeProductFeatureConfigs(
         baseKibanaFeature,
         ['subFeature2', 'subFeature3'],
-        enabledAppFeaturesConfigs
+        enabledProductFeaturesConfigs
       );
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -349,7 +353,7 @@ describe('AppFeaturesConfigMerger', () => {
   });
 
   it('should merge everything at the same time', () => {
-    const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+    const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
       {
         privileges: {
           all: {
@@ -395,10 +399,10 @@ describe('AppFeaturesConfigMerger', () => {
     ];
     const baseKibanaSubFeatureIds = ['subFeature2'];
 
-    const merged = merger.mergeAppFeatureConfigs(
+    const merged = merger.mergeProductFeatureConfigs(
       baseKibanaFeature,
       baseKibanaSubFeatureIds,
-      enabledAppFeaturesConfigs
+      enabledProductFeaturesConfigs
     );
 
     expect(merged).toEqual({

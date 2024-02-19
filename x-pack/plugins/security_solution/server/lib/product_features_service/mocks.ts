@@ -10,12 +10,12 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import type { AppFeatureKeys } from '@kbn/security-solution-features';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
-import { AppFeaturesService } from './app_features_service';
+import { ProductFeaturesService } from './product_features_service';
 
-jest.mock('@kbn/security-solution-features/app_features', () => ({
+jest.mock('@kbn/security-solution-features/product_features', () => ({
   getSecurityFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
@@ -33,19 +33,19 @@ jest.mock('@kbn/security-solution-features/app_features', () => ({
   })),
 }));
 
-export const createAppFeaturesServiceMock = (
+export const createProductFeaturesServiceMock = (
   /** What features keys should be enabled. Default is all */
-  enabledFeatureKeys: AppFeatureKeys = [...ALL_APP_FEATURE_KEYS],
+  enabledFeatureKeys: ProductFeatureKeys = [...ALL_PRODUCT_FEATURE_KEYS],
   experimentalFeatures: ExperimentalFeatures = { ...allowedExperimentalValues },
   featuresPluginSetupContract: FeaturesPluginSetup = featuresPluginMock.createSetup(),
-  logger: Logger = loggingSystemMock.create().get('appFeatureMock')
+  logger: Logger = loggingSystemMock.create().get('productFeatureMock')
 ) => {
-  const appFeaturesService = new AppFeaturesService(logger, experimentalFeatures);
+  const productFeaturesService = new ProductFeaturesService(logger, experimentalFeatures);
 
-  appFeaturesService.init(featuresPluginSetupContract);
+  productFeaturesService.init(featuresPluginSetupContract);
 
   if (enabledFeatureKeys) {
-    appFeaturesService.setAppFeaturesConfigurator({
+    productFeaturesService.setProductFeaturesConfigurator({
       security: jest.fn().mockReturnValue(
         new Map(
           enabledFeatureKeys.map((key) => [
@@ -106,5 +106,5 @@ export const createAppFeaturesServiceMock = (
     });
   }
 
-  return appFeaturesService;
+  return productFeaturesService;
 };

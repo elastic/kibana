@@ -7,7 +7,7 @@
 
 import { APP_ID } from './constants';
 
-export enum AppFeaturesPrivilegeId {
+export enum ProductFeaturesPrivilegeId {
   endpointExceptions = 'endpoint_exceptions',
 }
 
@@ -16,8 +16,8 @@ export enum AppFeaturesPrivilegeId {
  * using a different Kibana feature configuration (sub-feature, main feature privilege, etc)
  * in each offering type (ess, serverless)
  */
-export const AppFeaturesPrivileges = {
-  [AppFeaturesPrivilegeId.endpointExceptions]: {
+export const ProductFeaturesPrivileges = {
+  [ProductFeaturesPrivilegeId.endpointExceptions]: {
     all: {
       ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
       api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
