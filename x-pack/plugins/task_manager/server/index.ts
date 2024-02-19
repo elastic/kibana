@@ -34,8 +34,6 @@ export {
   throwUnrecoverableError,
   throwRetryableError,
   isEphemeralTaskRejectedDueToCapacityError,
-  isSkipError,
-  createSkipError,
   createTaskRunError,
   TaskErrorSource,
 } from './task_running';
