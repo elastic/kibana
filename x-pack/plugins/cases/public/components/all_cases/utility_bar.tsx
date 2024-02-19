@@ -80,7 +80,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     const pageStart = pagination?.pageSize ? pagination.pageSize * pagination.pageIndex + 1 : 0;
 
     const visibleCases =
-      pagination?.pageSize && totalCases > pagination.pageSize
+      pagination?.pageSize && totalCases > pagination.pageSize * (pagination.pageIndex + 1)
         ? pagination.pageSize * (pagination.pageIndex + 1)
         : totalCases;
 
