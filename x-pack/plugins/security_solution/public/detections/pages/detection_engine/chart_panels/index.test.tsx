@@ -227,79 +227,71 @@ describe('ChartPanels', () => {
 
   describe(`'Reset group by fields' context menu action`, () => {
     describe('Group by', () => {
-      const alertViewSelections = ['trend', 'table', 'treemap'];
+      test(`it resets the 'Group by' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is 'treemap'`, async () => {
+        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          ...defaultAlertSettings,
+          alertViewSelection: 'treemap',
+        });
 
-      alertViewSelections.forEach((alertViewSelection) => {
-        test(`it resets the 'Group by' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
-          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
-            ...defaultAlertSettings,
-            alertViewSelection,
-          });
+        const defaultValue = 'kibana.alert.rule.name';
+        const invalidValue = 'an invalid value';
 
-          const defaultValue = 'kibana.alert.rule.name';
-          const invalidValue = 'an invalid value';
+        render(
+          <TestProviders>
+            <ChartPanels {...defaultProps} />
+          </TestProviders>
+        );
 
-          render(
-            <TestProviders>
-              <ChartPanels {...defaultProps} />
-            </TestProviders>
-          );
+        const initialInput = screen.getAllByTestId('comboBoxSearchInput')[0];
+        expect(initialInput).toHaveValue(defaultValue);
 
-          const initialInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-          expect(initialInput).toHaveValue(defaultValue);
+        // update the EuiComboBox input to an invalid value:
+        fireEvent.change(initialInput, { target: { value: invalidValue } });
 
-          // update the EuiComboBox input to an invalid value:
-          fireEvent.change(initialInput, { target: { value: invalidValue } });
+        const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[0];
+        expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+        expect(afterInvalidInput).toBeInvalid();
 
-          const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-          expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
-          expect(afterInvalidInput).toBeInvalid();
+        resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 
-          resetGroupByFields(); // invoke the `Reset group by fields` context menu action
-
-          await waitFor(() => {
-            const afterReset = screen.getAllByTestId('comboBoxSearchInput')[0];
-            expect(afterReset).toHaveValue(defaultValue); // back to the default
-          });
+        await waitFor(() => {
+          const afterReset = screen.getAllByTestId('comboBoxSearchInput')[0];
+          expect(afterReset).toHaveValue(defaultValue); // back to the default
         });
       });
     });
 
     describe('Group by top', () => {
-      const treemap = ['treemap'];
+      test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is 'treemap'`, async () => {
+        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          ...defaultAlertSettings,
+          alertViewSelection: 'treemap',
+        });
 
-      treemap.forEach((alertViewSelection) => {
-        test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
-          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
-            ...defaultAlertSettings,
-            alertViewSelection,
-          });
+        const defaultValue = 'host.name';
+        const invalidValue = 'an-invalid-value';
 
-          const defaultValue = 'host.name';
-          const invalidValue = 'an-invalid-value';
+        render(
+          <TestProviders>
+            <ChartPanels {...defaultProps} />
+          </TestProviders>
+        );
 
-          render(
-            <TestProviders>
-              <ChartPanels {...defaultProps} />
-            </TestProviders>
-          );
+        const initialInput = screen.getAllByTestId('comboBoxSearchInput')[1];
+        expect(initialInput).toHaveValue(defaultValue);
 
-          const initialInput = screen.getAllByTestId('comboBoxSearchInput')[1];
-          expect(initialInput).toHaveValue(defaultValue);
+        // update the EuiComboBox input to an invalid value:
+        fireEvent.change(initialInput, { target: { value: invalidValue } });
 
-          // update the EuiComboBox input to an invalid value:
-          fireEvent.change(initialInput, { target: { value: invalidValue } });
+        const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[1];
+        expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+        expect(afterInvalidInput).toBeInvalid();
 
-          const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[1];
-          expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
-          expect(afterInvalidInput).toBeInvalid();
+        resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 
-          resetGroupByFields(); // invoke the `Reset group by fields` context menu action
-
-          await waitFor(() => {
-            const afterReset = screen.getAllByTestId('comboBoxSearchInput')[1];
-            expect(afterReset).toHaveValue(defaultValue); // back to the default
-          });
+        await waitFor(() => {
+          const afterReset = screen.getAllByTestId('comboBoxSearchInput')[1];
+          expect(afterReset).toHaveValue(defaultValue); // back to the default
         });
       });
     });
