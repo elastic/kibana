@@ -38,6 +38,8 @@ import {
 } from '../../customizations';
 import type { DiscoverCustomizationContext } from '../types';
 import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
+import { isTextBasedQuery } from './utils/is_text_based_query';
+import { LoadParams } from './services/discover_state';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -148,7 +150,7 @@ export function DiscoverMainRoute({
   }, [data.dataViews, savedSearchId, stateContainer.appState]);
 
   const loadSavedSearch = useCallback(
-    async (nextDataView?: DataView) => {
+    async (nextDataView?: DataView, initialAppState?: LoadParams['initialAppState']) => {
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
       if (!nextDataView && !(await checkData())) {
@@ -162,6 +164,7 @@ export function DiscoverMainRoute({
           savedSearchId,
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
+          initialAppState,
         });
         if (customizationContext.displayMode === 'standalone') {
           if (currentSavedSearch?.id) {
@@ -240,8 +243,18 @@ export function DiscoverMainRoute({
     savedSearchId,
     onNewUrl: () => {
       // restore the previously selected data view for a new state
-      const dataView = stateContainer.internalState.getState().dataView;
-      loadSavedSearch(dataView);
+      const prevAppState = stateContainer.appState.getState();
+      const prevDataView = stateContainer.internalState.getState().dataView;
+      const initialAppState =
+        isTextBasedQuery(prevAppState?.query) && prevDataView && prevDataView.type === 'esql'
+          ? {
+              // reset to a default ES|QL query
+              query: {
+                esql: `from ${prevDataView.getIndexPattern()} | limit 10`,
+              },
+            }
+          : undefined;
+      loadSavedSearch(prevDataView, initialAppState);
     },
   });
 

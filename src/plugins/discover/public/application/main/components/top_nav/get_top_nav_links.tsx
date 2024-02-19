@@ -18,7 +18,6 @@ import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
 import type { TopNavCustomization } from '../../../../customizations';
-import { getInitialState } from '../../services/discover_app_state_container';
 
 /**
  * Helper function to build the top nav links
@@ -68,22 +67,7 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
-    run: async () => {
-      const indexPattern = dataView?.getIndexPattern();
-      if (isTextBased && dataView && indexPattern) {
-        const newSavedSearch = await state.savedSearchState.new(dataView);
-        const nextAppState = getInitialState(undefined, newSavedSearch, services);
-
-        state.appState.resetToState({
-          ...nextAppState,
-          query: {
-            esql: `from ${indexPattern} | limit 10`,
-          },
-        });
-        return;
-      }
-      return services.locator.navigate({});
-    },
+    run: () => services.locator.navigate({}),
     testId: 'discoverNewButton',
   };
 
