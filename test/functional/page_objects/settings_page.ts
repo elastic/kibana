@@ -22,10 +22,6 @@ export class SettingsPageObject extends FtrService {
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
-  async clickNavigation() {
-    await this.find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
-  }
-
   async clickLinkText(text: string) {
     await this.find.clickByDisplayedLinkText(text);
   }
@@ -127,22 +123,6 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  async setAdvancedSettingsTextArea(propertyName: string, propertyValue: string) {
-    const wrapper = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
-    const textarea = await wrapper.findByTagName('textarea');
-    await textarea.focus();
-    // only way to properly replace the value of the ace editor is via the JS api
-    await this.browser.execute(
-      (editor: string, value: string) => {
-        return (window as any).ace.edit(editor).setValue(value);
-      },
-      `management-settings-editField-${propertyName}-editor`,
-      propertyValue
-    );
-    await this.testSubjects.click(`settings-save-button`);
-    await this.header.waitUntilLoadingHasFinished();
-  }
-
   async setAdvancedSettingsImage(propertyName: string, path: string) {
     const input = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
     await input.type(path);
@@ -172,11 +152,6 @@ export class SettingsPageObject extends FtrService {
     return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
-  async getTimeFieldNameField() {
-    const wrapperElement = await this.testSubjects.find('timestampField');
-    return wrapperElement.findByTestSubject('comboBoxSearchInput');
-  }
-
   async selectTimeFieldOption(selection: string) {
     const testSubj = 'timestampField';
     const timefield = await this.testSubjects.find(testSubj);
@@ -190,12 +165,8 @@ export class SettingsPageObject extends FtrService {
     await this.retry.waitFor('time field dropdown have the right value', async () => {
       await this.comboBox.clearInputField(testSubj);
       await this.comboBox.set(testSubj, selection);
-      return (await this.comboBox.isOptionSelected(timefield, selection));
+      return await this.comboBox.isOptionSelected(timefield, selection);
     });
-  }
-
-  async getTimeFieldOption(selection: string) {
-    return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
   async getNameField() {
@@ -225,15 +196,6 @@ export class SettingsPageObject extends FtrService {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
 
-  async getCreateButton() {
-    return await this.find.displayedByCssSelector('[type="submit"]');
-  }
-
-  async clickDefaultIndexButton() {
-    await this.testSubjects.click('setDefaultIndexPatternButton');
-    await this.header.waitUntilLoadingHasFinished();
-  }
-
   async clickEditIndexButton() {
     await this.testSubjects.click('editIndexPatternButton');
     await this.retry.waitFor('flyout', async () => {
@@ -247,10 +209,6 @@ export class SettingsPageObject extends FtrService {
 
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
-  }
-
-  async getConfigureHeader() {
-    return await this.find.byCssSelector('h1');
   }
 
   async getTableHeader() {
@@ -450,10 +408,6 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  async hasIndexPattern(name: string) {
-    return await this.find.existsByLinkText(name);
-  }
-
   async clickIndexPatternByName(name: string) {
     const indexLink = await this.find.byXPath(`//a[text()='${name}']`);
     await indexLink.click();
@@ -507,7 +461,7 @@ export class SettingsPageObject extends FtrService {
       await this.header.waitUntilLoadingHasFinished();
       if (
         options.ignoreMissing &&
-        (await this.testSubjects.exists(`detail-link-${dataViewName}`)) === false
+        !(await this.testSubjects.exists(`detail-link-${dataViewName}`))
       ) {
         return;
       }
@@ -717,10 +671,6 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
-  async getCreateIndexPatternGoToStep2Button() {
-    return await this.testSubjects.find('createIndexPatternGoToStep2Button');
-  }
-
   async removeIndexPattern() {
     let alertText;
     await this.retry.try(async () => {
@@ -742,11 +692,6 @@ export class SettingsPageObject extends FtrService {
       }
     });
     return alertText;
-  }
-
-  async clickFieldsTab() {
-    this.log.debug('click Fields tab');
-    await this.testSubjects.click('tab-indexedFields');
   }
 
   async clickScriptedFieldsTab() {
@@ -1100,9 +1045,5 @@ export class SettingsPageObject extends FtrService {
       `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
       [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
     );
-  }
-
-  async clickChangeIndexConfirmButton() {
-    await this.testSubjects.click('changeIndexConfirmButton');
   }
 }
