@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AssistantSubFeatureId } from '../app_features_keys';
-import { AppFeatureAssistantKey } from '../app_features_keys';
-import type { AppFeatureKibanaConfig } from '../types';
+import type { AssistantSubFeatureId } from '../product_features_keys';
+import { ProductFeatureAssistantKey } from '../product_features_keys';
+import type { ProductFeatureKibanaConfig } from '../types';
 
 /**
  * App features privileges configuration for the Security Assistant Kibana Feature app.
@@ -19,11 +19,11 @@ import type { AppFeatureKibanaConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const assistantDefaultAppFeaturesConfig: Record<
-  AppFeatureAssistantKey,
-  AppFeatureKibanaConfig<AssistantSubFeatureId>
+export const assistantDefaultProductFeaturesConfig: Record<
+  ProductFeatureAssistantKey,
+  ProductFeatureKibanaConfig<AssistantSubFeatureId>
 > = {
-  [AppFeatureAssistantKey.assistant]: {
+  [ProductFeatureAssistantKey.assistant]: {
     privileges: {
       all: {
         ui: ['ai-assistant'],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum AppFeatureSecurityKey {
+export enum ProductFeatureSecurityKey {
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
   /**
@@ -65,14 +65,14 @@ export enum AppFeatureSecurityKey {
   externalRuleActions = 'external_rule_actions',
 }
 
-export enum AppFeatureCasesKey {
+export enum ProductFeatureCasesKey {
   /**
    * Enables Cases Connectors
    */
   casesConnectors = 'cases_connectors',
 }
 
-export enum AppFeatureAssistantKey {
+export enum ProductFeatureAssistantKey {
   /**
    * Enables Elastic AI Assistant
    */
@@ -80,15 +80,18 @@ export enum AppFeatureAssistantKey {
 }
 
 // Merges the two enums.
-export const AppFeatureKey = {
-  ...AppFeatureSecurityKey,
-  ...AppFeatureCasesKey,
-  ...AppFeatureAssistantKey,
+export const ProductFeatureKey = {
+  ...ProductFeatureSecurityKey,
+  ...ProductFeatureCasesKey,
+  ...ProductFeatureAssistantKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
-export type AppFeatureKeyType = AppFeatureSecurityKey | AppFeatureCasesKey | AppFeatureAssistantKey;
+export type ProductFeatureKeyType =
+  | ProductFeatureSecurityKey
+  | ProductFeatureCasesKey
+  | ProductFeatureAssistantKey;
 
-export const ALL_APP_FEATURE_KEYS = Object.freeze(Object.values(AppFeatureKey));
+export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
 /** Sub-features IDs for Security */
 export enum SecuritySubFeatureId {

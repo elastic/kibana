@@ -5,30 +5,33 @@
  * 2.0.
  */
 import type {
-  AppFeatureKeys,
-  AppFeatureKibanaConfig,
-  AppFeaturesSecurityConfig,
+  ProductFeatureKeys,
+  ProductFeatureKibanaConfig,
+  ProductFeaturesSecurityConfig,
 } from '@kbn/security-solution-features';
 import {
-  AppFeatureSecurityKey,
+  ProductFeatureSecurityKey,
   type SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 import {
-  securityDefaultAppFeaturesConfig,
-  createEnabledAppFeaturesConfigMap,
+  securityDefaultProductFeaturesConfig,
+  createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
 import {
-  AppFeaturesPrivilegeId,
-  AppFeaturesPrivileges,
+  ProductFeaturesPrivilegeId,
+  ProductFeaturesPrivileges,
 } from '@kbn/security-solution-features/privileges';
 
-export const getSecurityAppFeaturesConfigurator =
-  (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesSecurityConfig => {
-    return createEnabledAppFeaturesConfigMap(securityAppFeaturesConfig, enabledAppFeatureKeys);
+export const getSecurityProductFeaturesConfigurator =
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesSecurityConfig => {
+    return createEnabledProductFeaturesConfigMap(
+      securityProductFeaturesConfig,
+      enabledProductFeatureKeys
+    );
   };
 
 /**
- * Maps the AppFeatures keys to Kibana privileges that will be merged
+ * Maps the ProductFeatures keys to Kibana privileges that will be merged
  * into the base privileges config for the Security app.
  *
  * Privileges can be added in different ways:
@@ -36,12 +39,12 @@ export const getSecurityAppFeaturesConfigurator =
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-const securityAppFeaturesConfig: Record<
-  AppFeatureSecurityKey,
-  AppFeatureKibanaConfig<SecuritySubFeatureId>
+const securityProductFeaturesConfig: Record<
+  ProductFeatureSecurityKey,
+  ProductFeatureKibanaConfig<SecuritySubFeatureId>
 > = {
-  ...securityDefaultAppFeaturesConfig,
-  [AppFeatureSecurityKey.endpointExceptions]: {
-    privileges: AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions],
+  ...securityDefaultProductFeaturesConfig,
+  [ProductFeatureSecurityKey.endpointExceptions]: {
+    privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
   },
 };
