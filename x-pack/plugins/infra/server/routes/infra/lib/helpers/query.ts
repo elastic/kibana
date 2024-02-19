@@ -69,11 +69,6 @@ export const createFilters = ({
         field: 'host.name',
       },
     },
-    {
-      term: {
-        'event.module': 'system',
-      },
-    },
   ];
 };
 
