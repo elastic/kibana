@@ -51,7 +51,16 @@ export function getConnectorType({ endpointAppContextService }): ServerLogConnec
     name: i18n.translate('xpack.stackConnectors.systemLogExample.title', {
       defaultMessage: 'Endpoint',
     }),
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    // getKibanaPrivileges: async ({ params }) => {
+    //   const endpointAuthz = await endpointAppContextService.getEndpointAuthz(params.request);
+
+    //   if (param.subAction === 'isolate') {
+    //     return endpointAuthz.getKibanaPrivileges('isolateHost')
+    //   }
+
+    //   [];
+    // },
+    supportedFeatureIds: [SecurityConnectorFeatureId],
     validate: {
       config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: { schema: schema.object({}, { defaultValue: {} }) },

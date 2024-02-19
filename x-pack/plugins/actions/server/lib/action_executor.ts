@@ -265,7 +265,9 @@ export class ActionExecutor {
             logger,
             source,
             request,
-            // ...(actionType.isSystemActionType ? { request } : {}),
+            // ...(actionType.isSystemActionType || actionType.id === '.sentinelone'
+            //   ? { request }
+            //   : {}),
           });
 
           if (rawResult && rawResult.status === 'error') {

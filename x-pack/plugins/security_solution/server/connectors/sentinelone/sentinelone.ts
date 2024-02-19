@@ -150,7 +150,7 @@ export class SentinelOneConnector extends SubActionConnector<
       throw new Error('No process name provided');
     }
 
-    await this.sentinelOneApiRequest({
+    const response = await this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
       data: {
@@ -167,6 +167,9 @@ export class SentinelOneConnector extends SubActionConnector<
       },
       responseSchema: SentinelOneKillProcessResponseSchema,
     });
+
+    // write to .endpoint-actions index info about parentTaskId
+    // writeActionRequestToEndpointIndex(response);
   }
 
   public async isolateHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {

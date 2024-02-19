@@ -36,10 +36,10 @@ export const endpointResponseAction = async (
   };
 
   if (isIsolateAction(responseAction.params)) {
-    const casesClient = await endpointAppContextService.getCasesClient(request);
-    const connectorActions = await endpointAppContextService.getActionsClientWithRequest(request);
-
     if (request) {
+      const casesClient = await endpointAppContextService.getCasesClient(request);
+      const connectorActions = await endpointAppContextService.getActionsClientWithRequest(request);
+
       each(alerts, async (alert) => {
         const agentType = ['sentinel_one', 'sentinel_one_cloud_funnel'].includes(alert.event.module)
           ? 'sentinel_one'
@@ -70,17 +70,17 @@ export const endpointResponseAction = async (
       });
     }
 
-    const alertsPerAgent = getIsolateAlerts(alerts);
-    each(alertsPerAgent, (actionPayload) => {
-      // return endpointAppContextService.getActionCreateService().createActionFromAlert(
-      //   {
-      //     ...actionPayload,
-      //     ...commonData,
-      //     agent_type: 'endpoint' as const,
-      //   },
-      //   actionPayload.endpoint_ids
-      // );
-    });
+    // const alertsPerAgent = getIsolateAlerts(alerts);
+    // each(alertsPerAgent, (actionPayload) => {
+    // return endpointAppContextService.getActionCreateService().createActionFromAlert(
+    //   {
+    //     ...actionPayload,
+    //     ...commonData,
+    //     agent_type: 'endpoint' as const,
+    //   },
+    //   actionPayload.endpoint_ids
+    // );
+    // });
   }
 
   const automatedProcessActionsEnabled = experimentalFeatures?.automatedProcessActionsEnabled;
