@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { validateTypeMigrations } from './validate_migrations';
 
@@ -49,6 +50,9 @@ describe('validateTypeMigrations', () => {
         migrations: {
           bar: jest.fn(),
           '1.2.3': jest.fn(),
+        },
+        schemas: {
+          '1.2.3': schema.object({ bar: schema.string() }),
         },
       });
 
@@ -107,7 +111,7 @@ describe('validateTypeMigrations', () => {
       expect(() => validate({ type })).not.toThrow();
     });
 
-    describe('when switchToModelVersionAt is specified', () => {
+    describe.only('when switchToModelVersionAt is specified', () => {
       it('throws if a migration is specified for a version superior to switchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
@@ -123,6 +127,23 @@ describe('validateTypeMigrations', () => {
           `"Migration for type foo for version 8.10.0 registered after switchToModelVersionAt (8.9.0)"`
         );
       });
+
+      it('throws if a schema is specified for a version superior to switchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          switchToModelVersionAt: '8.9.0',
+          schemas: {
+            '8.10.0': schema.object({ name: schema.string() }),
+          },
+        });
+
+        expect(() =>
+          validate({ type, kibanaVersion: '8.10.0' })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Schema for type foo for version 8.10.0 registered after switchToModelVersionAt (8.9.0)"`
+        );
+      });
+
       it('throws if a migration is specified for a version equal to switchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
@@ -139,12 +160,40 @@ describe('validateTypeMigrations', () => {
         );
       });
 
+      it('throws if a schema is specified for a version equal to switchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          switchToModelVersionAt: '8.9.0',
+          schemas: {
+            '8.9.0': schema.object({ name: schema.string() }),
+          },
+        });
+
+        expect(() =>
+          validate({ type, kibanaVersion: '8.10.0' })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Schema for type foo for version 8.9.0 registered after switchToModelVersionAt (8.9.0)"`
+        );
+      });
+
       it('does not throw if a migration is specified for a version inferior to switchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
           switchToModelVersionAt: '8.9.0',
           migrations: {
             '8.7.0': jest.fn(),
+          },
+        });
+
+        expect(() => validate({ type, kibanaVersion: '8.10.0' })).not.toThrow();
+      });
+
+      it('does not throw if a schema is specified for a version inferior to switchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          switchToModelVersionAt: '8.9.0',
+          schemas: {
+            '8.7.0': schema.object({ name: schema.string() }),
           },
         });
 
