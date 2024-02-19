@@ -431,11 +431,12 @@ export const internalRuleToAPIResponse = (rule) => {
 };
 
 export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
-  const { immutable, external_source } = normalizePrebuiltSchemaOnRuleRead(params);
+  const { immutable, external_source, rule_source_type } = normalizePrebuiltSchemaOnRuleRead(params);
 
   return {
     immutable,
     external_source,
+    rule_source_type
     // [... more object properties ...]
   };
 };
@@ -918,7 +919,7 @@ Additionally:
 
 - [**Review Rule Installation** - `POST /prebuilt_rules/installation/_review` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts)
 
-This endpoint uses the `convertPrebuiltRuleAssetToRuleResponse` method, which takes in a prebuilt rule asset and converts it to an object of type `RuleResponse`. This method has to be modified so that new prebuilt rules objects are returned by the endpoint with an `external_source` object and a legacy `immutable` value of `true`.
+This endpoint uses the `convertPrebuiltRuleAssetToRuleResponse` method, which takes in a prebuilt rule asset and converts it to an object of type `RuleResponse`. This method has to be modified so that new prebuilt rules objects are returned by the endpoint with a `rule_source_type` field of value `external`, an `external_source` object and a legacy `immutable` value of `true`.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
 
@@ -936,8 +937,8 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
   const ruleResponseSpecificFields = {
     // [... other prebuilt rule fields ...]
     immutable: true,
+    rule_source_type: 'external',
     external_source: {
-      repoName: 'elastic_prebuilt',
       isCustomized: false,
       sourceUpdatedAt: prebuiltRuleAsset.sourceUpdatedAt,
     },
@@ -1047,21 +1048,42 @@ The user will now be able to import both custom and prebuilt rules (including an
 
 We want to handle the case of importing both migrated and non-migrated rules via an `ndjson` file.
 
-Importing rules with `immutable: false` "should" be the only case for non-migrated rules (since `immutable: true` rules cannot currently be exported), but we should also handle the case of users manually modifying the values of rules in the `ndjson` file.
 
-If a user attempts to import a rule with `immutable: true` and missing `external_source` (or viceversa, a `external_source` field but no `immutable` field), then the most likely scenario is of a user trying to import Elastic prebuilt rules from a modified `ndjson` file. So we should consider these rules to be prebuilt and attempt to track them to rules in the Fleet package via their `rule_id` and continue to provide updates to them.
+If a user imports a prebuilt rule, Kibana should continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
 
-Given the requirements described above, the following table shows the behaviour of our endpoint for a combination of `external_source` and `immutable` fields in the `ndjson` file that a user attempts to import:
+To allow for importing of Elastic prebuilt rules, we will **not rely** in the `rule_source_type` or `external_source` fields (which are not part of the import endpoint parameters), but we will rather **calculate them dynamically based on the `rule_id` and `version` request parameters**.
 
-If a user imports a prebuilt rule (where either the `external_source` or `immutable` fields are `true`), it will continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
+The logic to importing a rule is as follows:
+
+First, read the import endpoint request parameters `rule_id` and `version`. These two are the two required parameters in the endpoint, while all other rule fields are optional.
+
+Secondly, check that the `security_detection_engine` Fleet package is installed and install it if it isn't. We will need the package to be installed to check if a rule that is being imported is an Elastic prebuilt rule.
+
+Then, using the `rule_id` and `version`, attempt to fetch the corresponding `security-rule` asset from ES. 
+
+**If a matching `rule_id` and `version` is found**, that means that the rule is an Elastic prebuilt rule, and we should therefore dynamically calculate the rule's `external_source` and `rule_source_type` fields.
+
+- `rule_source_type`: should always be `'external'` if rule is Elastic prebuilt.
+- `external_source`:
+  - `source_updated_at`: can be retrieved from the corresponding `security-rule` asset.
+  - `is_customized`: should be calculated based on the `security-rule` asset's field and the field rules that were part of the import request parameters. If any of them are different, i.e. have diverged from the base version, `is_customized` should be true.
+
+Finally, using the import payload, plus the rule's `security-rule` asset fields and the calculated `rule_source_type` and `external_source` fields, create the rule, or update it if already exists in Kibana.
+
+**If a matching `rule_id` is found, but the `version` is not found**, reject the import for that rule. Without a version, we cannot dynamically calculate `external_source`.
+
+**If a matching `rule_id` is NOT found**, that means that the rule is a custom rule:
+- `rule_source_type`: should be `internal`
+- `external_source`: doesn't need calculation.
+
+And we can finally create or updated an existing rule using the request payload and the calculated `rule_source_type` field.
+
+
+Given the requirements described above, the following table shows the behaviour of our endpoint for a combination of inputs and Kibana states:
+
+
 
 With this migration strategy for the import endpoints we can guarantee backwards compatibility for all rules, and don't need to do additional changes to the export endpoints.
-
-The `importRules` helper method that our import endpoint handler use rely on the already discussed `createRules` and the `patchRules` - when a rule is created from scratch (no `rule_id` match), and when a `rule_id` matches and a rule is overwritten, respectively.
-
-Given that, when importing rules, we can be creating a custom rule or a prebuilt rule, we need to calculate and appropiately pass the `isPrebuilt` flag to the `createRules` method. The `importRules` helper thus needs to be modified so:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/import/import_rules_utils.ts)_
 
 
 ### Handling the `version` parameter
