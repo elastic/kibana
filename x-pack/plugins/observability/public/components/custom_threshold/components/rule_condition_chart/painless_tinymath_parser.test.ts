@@ -24,11 +24,11 @@ describe('PainlessTinyMathParser', () => {
     expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
   });
   it('should parse a simple equation with multi-char aggregation name', () => {
-    const equation = '100 * ABC';
+    const equation = '100 * ABC-abc';
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        ABC: 'average(system.cpu.system.pct)',
+        'ABC-abc': 'average(system.cpu.system.pct)',
       },
     });
     expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
@@ -174,12 +174,12 @@ describe('PainlessTinyMathParser', () => {
   });
   it('should parse a complex equation with multi char aggregation name', () => {
     const equation =
-      '!(AA > 0) || BAA !== 10 && !(AA < 200 || BAA == 2) ? 100 : AA == 10 ? 200 : 300';
+      '!(aa > 0) || baa !== 10 && !(aa < 200 || baa == 2) ? 100 : aa == 10 ? 200 : 300';
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        AA: 'average(system.cpu.system.pct)',
-        BAA: 'average(system.cpu.user.pct)',
+        aa: 'average(system.cpu.system.pct)',
+        baa: 'average(system.cpu.user.pct)',
       },
     });
     expect(parser.parse()).toEqual(
