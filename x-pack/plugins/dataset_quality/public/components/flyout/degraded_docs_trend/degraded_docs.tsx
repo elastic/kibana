@@ -29,7 +29,7 @@ import { DegradedDocsChart } from './degraded_docs_chart';
 const DEFAULT_TIME_RANGE: TimeRangeConfig = {
   from: 'now-24h',
   to: 'now',
-  refresh: { interval: 60_000, isPaused: false },
+  refresh: { interval: 60000, isPaused: false },
 };
 
 export function DegradedDocs({
