@@ -30,7 +30,7 @@ import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/pub
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
@@ -46,7 +46,6 @@ import { AnomalySeverityIndicator } from '../../../../../../../components/loggin
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
-import { useRequestObservable } from '../../../../../../../components/asset_details/hooks/use_request_observable';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
@@ -200,7 +199,7 @@ interface Props {
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
   // subject to watch the completition of the request
-  request$?: Subject<() => Promise<unknown>>;
+  request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -213,8 +212,8 @@ export const AnomaliesTable = ({
   hostName,
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
+  request$,
 }: Props) => {
-  const { request$ } = useRequestObservable();
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({

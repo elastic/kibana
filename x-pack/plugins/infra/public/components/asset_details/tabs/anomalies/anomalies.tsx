@@ -10,9 +10,11 @@ import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/compone
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 
 export const Anomalies = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const { request$ } = useRequestObservable();
   const { getParsedDateRange } = useDatePickerContext();
   const { asset, overrides } = useAssetDetailsRenderPropsContext();
   const { onClose = () => {} } = overrides?.anomalies ?? {};
@@ -29,6 +31,7 @@ export const Anomalies = () => {
         hostName={asset.name}
         dateRange={state.parsedDateRange}
         hideDatePicker
+        request$={request$}
       />
     </div>
   );
