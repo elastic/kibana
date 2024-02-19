@@ -13,6 +13,8 @@ import type { ListPlugin } from './plugin';
 // exporting these since it's required at top level in siem plugin
 export { ListClient } from './services/lists/list_client';
 export type {
+  CreateExceptionListOptions,
+  UpdateExceptionListOptions,
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from './services/exception_lists/exception_list_client_types';
@@ -31,6 +33,10 @@ export type {
   ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreDeleteItemServerExtension,
+  ExceptionsListPreCreateListServerExtension,
+  ExceptionsListPreDeleteListServerExtension,
+  ExceptionsListPreUpdateListServerExtension,
+  ExceptionsListPreListFindServerExtension,
 } from './types';
 export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 

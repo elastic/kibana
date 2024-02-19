@@ -95,6 +95,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               />
             )}
             <SearchBar
+              canAddException={!isReadOnly}
               addExceptionButtonText={
                 listType === ExceptionListTypeEnum.ENDPOINT
                   ? i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON_ENDPOINT

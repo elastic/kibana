@@ -11,16 +11,17 @@ import type {
 } from '@kbn/security-solution-features';
 import {
   ProductFeatureSecurityKey,
-  type SecuritySubFeatureId,
+  SecuritySubFeatureId,
+  // type SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 import {
   securityDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-import {
-  ProductFeaturesPrivilegeId,
-  ProductFeaturesPrivileges,
-} from '@kbn/security-solution-features/privileges';
+// import {
+//   ProductFeaturesPrivilegeId,
+//   ProductFeaturesPrivileges,
+// } from '@kbn/security-solution-features/privileges';
 
 export const getSecurityProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesSecurityConfig => {
@@ -44,7 +45,16 @@ const securityProductFeaturesConfig: Record<
   ProductFeatureKibanaConfig<SecuritySubFeatureId>
 > = {
   ...securityDefaultProductFeaturesConfig,
+  // [ProductFeatureSecurityKey.endpointExceptions]: {
+  //   privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
+  // },
   [ProductFeatureSecurityKey.endpointExceptions]: {
-    privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
+    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
+  },
+  // [ProductFeatureSecurityKey.exceptionsAndValueLists]: {
+  //   privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.exceptionsAndValueLists],
+  // },
+  [ProductFeatureSecurityKey.exceptionsAndValueLists]: {
+    subFeatureIds: [SecuritySubFeatureId.exceptionsAndValueLists],
   },
 };

@@ -28,7 +28,7 @@ describe('ExceptionsViewerItems', () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionsViewerItems
-          disableActions={false}
+          canModifyExceptions={true}
           exceptions={[]}
           isEndpoint={false}
           ruleReferences={null}
@@ -36,7 +36,6 @@ describe('ExceptionsViewerItems', () => {
           onCreateExceptionListItem={jest.fn()}
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
-          isReadOnly={false}
         />
       </TestProviders>
     );
@@ -52,7 +51,7 @@ describe('ExceptionsViewerItems', () => {
       <TestProviders>
         <ThemeProvider theme={mockTheme}>
           <ExceptionsViewerItems
-            disableActions={false}
+            canModifyExceptions={true}
             exceptions={[]}
             isEndpoint={false}
             ruleReferences={null}
@@ -60,7 +59,6 @@ describe('ExceptionsViewerItems', () => {
             onCreateExceptionListItem={jest.fn()}
             onDeleteException={jest.fn()}
             onEditExceptionItem={jest.fn()}
-            isReadOnly={false}
           />
         </ThemeProvider>
       </TestProviders>
@@ -77,7 +75,7 @@ describe('ExceptionsViewerItems', () => {
       <TestProviders>
         <ThemeProvider theme={mockTheme}>
           <ExceptionsViewerItems
-            disableActions={false}
+            canModifyExceptions={true}
             exceptions={[getExceptionListItemSchemaMock()]}
             isEndpoint={false}
             ruleReferences={null}
@@ -85,7 +83,6 @@ describe('ExceptionsViewerItems', () => {
             onCreateExceptionListItem={jest.fn()}
             onDeleteException={jest.fn()}
             onEditExceptionItem={jest.fn()}
-            isReadOnly={false}
           />
         </ThemeProvider>
       </TestProviders>

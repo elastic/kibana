@@ -20,14 +20,14 @@ import type { ViewerState } from './reducer';
 import illustration from '../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
 
 interface ExeptionItemsViewerEmptyPromptsComponentProps {
-  isReadOnly: boolean;
+  canModifyExceptions: boolean;
   isEndpoint: boolean;
   currentState: ViewerState;
   onCreateExceptionListItem: () => void;
 }
 
 const ExeptionItemsViewerEmptyPromptsComponent = ({
-  isReadOnly,
+  canModifyExceptions,
   isEndpoint,
   currentState,
   onCreateExceptionListItem,
@@ -70,7 +70,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
                 onClick={onCreateExceptionListItem}
                 iconType="plusInCircle"
                 color="primary"
-                isDisabled={isReadOnly}
+                isDisabled={!canModifyExceptions}
                 fill
               >
                 {isEndpoint
@@ -102,7 +102,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
   }, [
     currentState,
     euiTheme.colors.darkestShade,
-    isReadOnly,
+    canModifyExceptions,
     isEndpoint,
     onCreateExceptionListItem,
   ]);

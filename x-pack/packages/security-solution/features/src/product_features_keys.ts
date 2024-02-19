@@ -77,6 +77,11 @@ export enum ProductFeatureSecurityKey {
    * enables the integration assistant
    */
   integrationAssistant = 'integration_assistant',
+
+  /**
+   * Enables exceptions and value lists
+   */
+  exceptionsAndValueLists = 'exceptionsAndValueLists',
 }
 
 export enum ProductFeatureCasesKey {
@@ -131,6 +136,7 @@ export enum SecuritySubFeatureId {
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
   scanAction = 'scanActionSubFeature',
+  exceptionsAndValueLists = 'exceptionsAndValueLists',
 }
 
 /** Sub-features IDs for Cases */

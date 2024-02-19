@@ -15,7 +15,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders loading screen when "currentState" is "loading"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
-        isReadOnly={false}
+        canModifyExceptions={true}
         isEndpoint={false}
         currentState="loading"
         onCreateExceptionListItem={jest.fn()}
@@ -30,7 +30,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders empty search screen when "currentState" is "empty_search"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
-        isReadOnly={false}
+        canModifyExceptions={true}
         isEndpoint={false}
         currentState="empty_search"
         onCreateExceptionListItem={jest.fn()}
@@ -45,7 +45,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders no endpoint items screen when "currentState" is "empty" and "isEndpoint" is "true"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
-        isReadOnly={false}
+        canModifyExceptions={true}
         isEndpoint={true}
         currentState="empty"
         onCreateExceptionListItem={jest.fn()}
@@ -66,7 +66,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders no exception items screen when "currentState" is "empty" and "isEndpoint" is "false"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
-        isReadOnly={false}
+        canModifyExceptions={true}
         isEndpoint={false}
         currentState="empty"
         onCreateExceptionListItem={jest.fn()}

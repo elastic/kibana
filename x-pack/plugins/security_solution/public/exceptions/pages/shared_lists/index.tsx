@@ -54,6 +54,7 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/serv
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
+import { useExceptionsAndValueListsCapability } from '../../hooks/use_exceptions_and_value_lists_capability';
 
 export type Func = () => Promise<void>;
 
@@ -92,6 +93,12 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canAccessExceptionsAndValueLists = useExceptionsAndValueListsCapability(
+    'showExceptionsAndValueLists'
+  );
+  const canWriteExceptionsAndValueLists = useExceptionsAndValueListsCapability(
+    'crudExceptionsAndValueLists'
+  );
   const {
     services: {
       http,
@@ -111,12 +118,15 @@ export const SharedLists = React.memo(() => {
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
   const exceptionListTypes = useMemo(() => {
-    const lists = [ExceptionListTypeEnum.DETECTION];
+    const lists = [];
+    if (canAccessExceptionsAndValueLists) {
+      lists.push(ExceptionListTypeEnum.DETECTION);
+    }
     if (canAccessEndpointExceptions) {
       lists.push(ExceptionListTypeEnum.ENDPOINT);
     }
     return lists;
-  }, [canAccessEndpointExceptions]);
+  }, [canAccessEndpointExceptions, canAccessExceptionsAndValueLists]);
   const [
     loadingExceptions,
     exceptions,
@@ -443,8 +453,12 @@ export const SharedLists = React.memo(() => {
   const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
   const isReadOnly = useMemo(() => {
-    return (canUserREAD && !canUserCRUD) ?? true;
-  }, [canUserREAD, canUserCRUD]);
+    return (
+      ((canUserREAD && !canUserCRUD) ||
+        (canAccessExceptionsAndValueLists && !canWriteExceptionsAndValueLists)) ??
+      true
+    );
+  }, [canUserREAD, canUserCRUD, canAccessExceptionsAndValueLists, canWriteExceptionsAndValueLists]);
 
   useEffect(() => {
     if (isSearchingExceptions && hasNoExceptions) {
@@ -457,6 +471,57 @@ export const SharedLists = React.memo(() => {
       setViewStatus(null);
     }
   }, [isSearchingExceptions, hasNoExceptions, exceptionsLoaded, isLoadingExceptions]);
+
+  const rightSideItems = useMemo(
+    () =>
+      canWriteExceptionsAndValueLists
+        ? [
+            <EuiPopover
+              data-test-subj="manageExceptionListCreateButton"
+              button={
+                <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+                  {i18n.CREATE_BUTTON}
+                </EuiButton>
+              }
+              isOpen={isCreatePopoverOpen}
+              closePopover={onCloseCreatePopover}
+            >
+              <EuiContextMenuPanel
+                items={[
+                  <EuiContextMenuItem
+                    key={'createList'}
+                    data-test-subj="manageExceptionListCreateExceptionListButton"
+                    onClick={() => {
+                      onCloseCreatePopover();
+                      onCreateExceptionListOpenClick();
+                    }}
+                  >
+                    {i18n.CREATE_SHARED_LIST_BUTTON}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key={'createItem'}
+                    data-test-subj="manageExceptionListCreateExceptionButton"
+                    onClick={() => {
+                      onCloseCreatePopover();
+                      setDisplayAddExceptionItemFlyout(true);
+                    }}
+                  >
+                    {i18n.CREATE_BUTTON_ITEM_BUTTON}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>,
+            <EuiButton
+              data-test-subj="importSharedExceptionList"
+              iconType={'importAction'}
+              onClick={() => setDisplayImportListFlyout(true)}
+            >
+              {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
+            </EuiButton>,
+          ]
+        : [],
+    [canWriteExceptionsAndValueLists, isCreatePopoverOpen]
+  );
 
   return (
     <>
@@ -490,50 +555,7 @@ export const SharedLists = React.memo(() => {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        rightSideItems={[
-          <EuiPopover
-            data-test-subj="manageExceptionListCreateButton"
-            button={
-              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
-                {i18n.CREATE_BUTTON}
-              </EuiButton>
-            }
-            isOpen={isCreatePopoverOpen}
-            closePopover={onCloseCreatePopover}
-          >
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  key={'createList'}
-                  data-test-subj="manageExceptionListCreateExceptionListButton"
-                  onClick={() => {
-                    onCloseCreatePopover();
-                    onCreateExceptionListOpenClick();
-                  }}
-                >
-                  {i18n.CREATE_SHARED_LIST_BUTTON}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key={'createItem'}
-                  data-test-subj="manageExceptionListCreateExceptionButton"
-                  onClick={() => {
-                    onCloseCreatePopover();
-                    setDisplayAddExceptionItemFlyout(true);
-                  }}
-                >
-                  {i18n.CREATE_BUTTON_ITEM_BUTTON}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>,
-          <EuiButton
-            data-test-subj="importSharedExceptionList"
-            iconType={'importAction'}
-            onClick={() => setDisplayImportListFlyout(true)}
-          >
-            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-          </EuiButton>,
-        ]}
+        rightSideItems={rightSideItems}
       />
 
       {displayCreateSharedListFlyout && (

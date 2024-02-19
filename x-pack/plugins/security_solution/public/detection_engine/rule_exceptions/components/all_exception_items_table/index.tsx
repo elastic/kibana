@@ -29,6 +29,7 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
+import { useExceptionsAndValueListsCapability } from '../../../../exceptions/hooks/use_exceptions_and_value_lists_capability';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -122,6 +123,9 @@ const ExceptionsViewerComponent = ({
   );
 
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+  const canWriteRuleExceptions = useExceptionsAndValueListsCapability(
+    'crudExceptionsAndValueLists'
+  );
 
   // Reducer state
   const [
@@ -476,9 +480,15 @@ const ExceptionsViewerComponent = ({
     [allReferences, exceptionToEdit]
   );
 
+  const canWriteExceptions = isEndpointSpecified
+    ? canWriteEndpointExceptions
+    : canWriteRuleExceptions;
+  const canModifyExceptions = !isReadOnly && viewerState !== 'deleting' && canWriteExceptions;
+
   return (
     <>
-      {currenFlyout === 'editException' &&
+      {canModifyExceptions &&
+        currenFlyout === 'editException' &&
         exceptionToEditList != null &&
         exceptionToEdit != null &&
         rule != null && (
@@ -493,7 +503,7 @@ const ExceptionsViewerComponent = ({
           />
         )}
 
-      {currenFlyout === 'addException' && rule != null && (
+      {canModifyExceptions && currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
           rules={[rule]}
           isBulkAction={false}
@@ -522,7 +532,7 @@ const ExceptionsViewerComponent = ({
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
-                canAddException={isReadOnly}
+                canAddException={canModifyExceptions}
                 isEndpoint={isEndpointSpecified}
                 isSearching={viewerState === 'searching'}
                 onSearch={handleSearch}
@@ -533,8 +543,7 @@ const ExceptionsViewerComponent = ({
           <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
-            isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
+            canModifyExceptions={canModifyExceptions}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}

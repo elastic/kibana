@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { registerListsPluginExtensionPoints } from './exceptions/register_extension_points';
-export { registerListsPluginEndpointExtensionPoints } from './endpoint/register_endpoint_extension_points';
+export { ExceptionsValidator } from './exceptions_validator';

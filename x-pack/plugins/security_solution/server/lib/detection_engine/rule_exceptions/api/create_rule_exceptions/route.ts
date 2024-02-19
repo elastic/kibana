@@ -22,6 +22,7 @@ import {
   CreateRuleExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 
+import { APP_ID } from '../../../../../../common';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
@@ -37,7 +38,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
       path: CREATE_RULE_EXCEPTIONS_URL,
       access: 'public',
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', `${APP_ID}-crudExceptionsAndValueLists`],
       },
     })
     .addVersion(

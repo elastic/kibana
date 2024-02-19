@@ -78,7 +78,10 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [`${SERVER_APP_ID}.showEndpointExceptions`],
+      capabilities: [
+        `${SERVER_APP_ID}.showEndpointExceptions`,
+        `${SERVER_APP_ID}.showExceptionsAndValueLists`,
+      ],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [

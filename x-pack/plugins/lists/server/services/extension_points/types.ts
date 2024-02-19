@@ -10,13 +10,17 @@ import { KibanaRequest } from '@kbn/core/server';
 
 import {
   CreateExceptionListItemOptions,
+  CreateExceptionListOptions,
   DeleteExceptionListItemOptions,
+  DeleteExceptionListOptions,
   ExportExceptionListAndItemsOptions,
   FindExceptionListItemOptions,
+  FindExceptionListOptions,
   FindExceptionListsItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
+  UpdateExceptionListOptions,
 } from '../exception_lists/exception_list_client_types';
 import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
 import type { ExceptionListClient } from '../exception_lists/exception_list_client';
@@ -146,6 +150,40 @@ export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDef
   DeleteExceptionListItemOptions
 >;
 
+/**
+ * Extension point is triggered prior to creating a new Exception List. Throw'ing will cause
+ * the create operation to fail
+ */
+export type ExceptionsListPreCreateListServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreCreateList',
+  CreateExceptionListOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a list deletion
+ */
+export type ExceptionsListPreDeleteListServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreDeleteList',
+  DeleteExceptionListOptions
+>;
+
+/**
+ * Extension point is triggered prior to updating the Exception List. Throw'ing will cause the
+ * update operation to fail
+ */
+export type ExceptionsListPreUpdateListServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreUpdateList',
+  UpdateExceptionListOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a `find` operation against lists
+ */
+export type ExceptionsListPreListFindServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreListsFind',
+  FindExceptionListOptions
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreImportServerExtension
   | ExceptionsListPreCreateItemServerExtension
@@ -155,7 +193,11 @@ export type ExtensionPoint =
   | ExceptionsListPreMultiListFindServerExtension
   | ExceptionsListPreExportServerExtension
   | ExceptionsListPreSummaryServerExtension
-  | ExceptionsListPreDeleteItemServerExtension;
+  | ExceptionsListPreDeleteItemServerExtension
+  | ExceptionsListPreCreateListServerExtension
+  | ExceptionsListPreDeleteListServerExtension
+  | ExceptionsListPreUpdateListServerExtension
+  | ExceptionsListPreListFindServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

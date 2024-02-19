@@ -18,7 +18,7 @@ describe('ExceptionsViewerSearchBar', () => {
         onSearch={jest.fn()}
         onAddExceptionClick={jest.fn()}
         isSearching={false}
-        canAddException
+        canAddException={false}
       />
     );
 
@@ -29,7 +29,7 @@ describe('ExceptionsViewerSearchBar', () => {
     const mockOnAddExceptionClick = jest.fn();
     const wrapper = mount(
       <ExceptionsViewerSearchBar
-        canAddException={false}
+        canAddException={true}
         isEndpoint={false}
         isSearching={false}
         onSearch={jest.fn()}
@@ -49,7 +49,7 @@ describe('ExceptionsViewerSearchBar', () => {
     const mockOnAddExceptionClick = jest.fn();
     const wrapper = mount(
       <ExceptionsViewerSearchBar
-        canAddException={false}
+        canAddException={true}
         isEndpoint={true}
         isSearching={false}
         onSearch={jest.fn()}

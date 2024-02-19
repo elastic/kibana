@@ -644,6 +644,55 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
   ],
 };
 
+const exceptionsAndValueListsSubFeature: SubFeatureConfig = {
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.exceptionsAndValueLists.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for exceptions and value lists access.',
+    }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.exceptionsAndValueLists',
+    {
+      defaultMessage: 'Exceptions and value lists',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.exceptionsAndValueLists.description',
+    {
+      defaultMessage: 'Use exceptions and value lists.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          id: 'exceptions_and_value_lists_all',
+          includeIn: 'all',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.exceptionsAndValueLists].all,
+        },
+        {
+          id: 'exceptions_and_value_lists_read',
+          includeIn: 'read',
+          name: 'Read',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.exceptionsAndValueLists].read,
+        },
+      ],
+    },
+  ],
+};
+
 /**
  * Sub-features that will always be available for Security
  * regardless of the product type.
@@ -661,6 +710,7 @@ export const getSecuritySubFeaturesMap = ({
   experimentalFeatures,
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
+    [SecuritySubFeatureId.exceptionsAndValueLists, exceptionsAndValueListsSubFeature],
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],

@@ -9,6 +9,7 @@ import { APP_ID } from './constants';
 
 export enum ProductFeaturesPrivilegeId {
   endpointExceptions = 'endpoint_exceptions',
+  exceptionsAndValueLists = 'exceptionsAndValueLists',
 }
 
 /**
@@ -25,6 +26,16 @@ export const ProductFeaturesPrivileges = {
     read: {
       ui: ['showEndpointExceptions'],
       api: [`${APP_ID}-showEndpointExceptions`],
+    },
+  },
+  [ProductFeaturesPrivilegeId.exceptionsAndValueLists]: {
+    all: {
+      ui: ['showExceptionsAndValueLists', 'crudExceptionsAndValueLists'],
+      api: [`${APP_ID}-showExceptionsAndValueLists`, `${APP_ID}-crudExceptionsAndValueLists`],
+    },
+    read: {
+      ui: ['showExceptionsAndValueLists'],
+      api: [`${APP_ID}-showExceptionsAndValueLists`],
     },
   },
 };

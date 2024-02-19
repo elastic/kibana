@@ -99,7 +99,7 @@ const SearchBarComponent: FC<SearchBarProps> = ({
           onChange={handleOnSearch}
         />
       </EuiFlexItem>
-      {!canAddException && (
+      {canAddException && (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj={`${dataTestSubj || ''}Button`}

@@ -431,18 +431,30 @@ export class ExceptionListClient {
     version,
   }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
     const { savedObjectsClient, user } = this;
-    return createExceptionList({
+    let data: CreateExceptionListOptions = {
       description,
       immutable,
       listId,
       meta,
       name,
       namespaceType,
-      savedObjectsClient,
       tags,
       type,
-      user,
       version,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      data = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreCreateList',
+        data,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return createExceptionList({
+      ...data,
+      savedObjectsClient,
+      user,
     });
   };
 
@@ -459,6 +471,7 @@ export class ExceptionListClient {
    * @param options.tags user assigned tags of exception list
    * @param options.type container type
    * @param options.version document version, if undefined the current version number will be auto-incremented
+   * @param options.osTypes os types to apply
    * @returns the updated exception list parent container
    */
   public updateExceptionList = async ({
@@ -472,9 +485,10 @@ export class ExceptionListClient {
     tags,
     type,
     version,
+    osTypes,
   }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
-    return updateExceptionList({
+    let data: UpdateExceptionListOptions = {
       _version,
       description,
       id,
@@ -482,11 +496,24 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
-      savedObjectsClient,
+      osTypes,
       tags,
       type,
-      user,
       version,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      data = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreUpdateList',
+        data,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return updateExceptionList({
+      ...data,
+      savedObjectsClient,
+      user,
     });
   };
 
@@ -504,10 +531,22 @@ export class ExceptionListClient {
     namespaceType,
   }: DeleteExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient } = this;
-    return deleteExceptionList({
+    let data: DeleteExceptionListOptions = {
       id,
       listId,
       namespaceType,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      data = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteList',
+        data,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return deleteExceptionList({
+      ...data,
       savedObjectsClient,
     });
   };
@@ -990,6 +1029,24 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListOptions): Promise<FoundExceptionListSchema> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreListsFind',
+        {
+          filter,
+          namespaceType,
+          page,
+          perPage,
+          pit,
+          searchAfter,
+          sortField,
+          sortOrder,
+        },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return findExceptionList({
       filter,
       namespaceType,

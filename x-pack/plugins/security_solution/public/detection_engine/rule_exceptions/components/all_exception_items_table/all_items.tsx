@@ -25,8 +25,7 @@ const MyFlexItem = styled(EuiFlexItem)`
 `;
 
 interface ExceptionItemsViewerProps {
-  isReadOnly: boolean;
-  disableActions: boolean;
+  canModifyExceptions: boolean;
   exceptions: ExceptionListItemSchema[];
   isEndpoint: boolean;
   ruleReferences: RuleReferences | null;
@@ -37,10 +36,9 @@ interface ExceptionItemsViewerProps {
 }
 
 const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
-  isReadOnly,
   exceptions,
   isEndpoint,
-  disableActions,
+  canModifyExceptions,
   ruleReferences,
   viewerState,
   onCreateExceptionListItem,
@@ -51,7 +49,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
     <>
       {viewerState != null && viewerState !== 'deleting' ? (
         <ExeptionItemsViewerEmptyPrompts
-          isReadOnly={isReadOnly}
+          canModifyExceptions={canModifyExceptions}
           isEndpoint={isEndpoint}
           currentState={viewerState}
           onCreateExceptionListItem={onCreateExceptionListItem}
@@ -63,7 +61,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
               {exceptions.map((exception) => (
                 <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
                   <ExceptionItemCard
-                    disableActions={disableActions}
+                    disableActions={!canModifyExceptions}
                     exceptionItem={exception}
                     isEndpoint={isEndpoint}
                     listAndReferences={

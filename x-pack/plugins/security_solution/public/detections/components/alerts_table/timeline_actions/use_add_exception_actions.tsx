@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import { useExceptionsAndValueListsCapability } from '../../../../exceptions/hooks/use_exceptions_and_value_lists_capability';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
@@ -23,6 +24,10 @@ export const useExceptionActions = ({
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+
+  const canWriteExceptionsAndValueLists = useExceptionsAndValueListsCapability(
+    'crudExceptionsAndValueLists'
+  );
 
   const handleDetectionExceptionModal = useCallback(() => {
     onAddExceptionTypeClick();
@@ -50,12 +55,13 @@ export const useExceptionActions = ({
             {
               key: 'add-exception-menu-item',
               'data-test-subj': 'add-exception-menu-item',
-              disabled: disabledAddException,
+              disabled: disabledAddException || !canWriteExceptionsAndValueLists,
               onClick: handleDetectionExceptionModal,
               name: ACTION_ADD_EXCEPTION,
             },
           ],
     [
+      canWriteExceptionsAndValueLists,
       disabledAddEndpointException,
       disabledAddException,
       handleDetectionExceptionModal,

@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
+import { useExceptionsAndValueListsCapability } from '../../../../exceptions/hooks/use_exceptions_and_value_lists_capability';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as i18n from './translations';
@@ -84,6 +85,7 @@ export const useRuleDetailsTabs = ({
   const ruleExecutionSettings = useRuleExecutionSettings();
 
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canReadRuleExceptions = useExceptionsAndValueListsCapability('showExceptionsAndValueLists');
 
   useEffect(() => {
     const hiddenTabs = [];
@@ -93,6 +95,9 @@ export const useRuleDetailsTabs = ({
     }
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       hiddenTabs.push(RuleDetailTabs.executionEvents);
+    }
+    if (!canReadRuleExceptions) {
+      hiddenTabs.push(RuleDetailTabs.exceptions);
     }
     if (!canReadEndpointExceptions) {
       hiddenTabs.push(RuleDetailTabs.endpointExceptions);
@@ -109,7 +114,14 @@ export const useRuleDetailsTabs = ({
     const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
 
     setTabs(tabs);
-  }, [canReadEndpointExceptions, hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
+  }, [
+    canReadEndpointExceptions,
+    canReadRuleExceptions,
+    hasIndexRead,
+    rule,
+    ruleDetailTabs,
+    ruleExecutionSettings,
+  ]);
 
   return pageTabs;
 };

@@ -14,7 +14,7 @@ import {
   CreateSharedExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 
-import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
+import { APP_ID, SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
@@ -24,7 +24,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
       path: SHARED_EXCEPTION_LIST_URL,
       access: 'public',
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', `${APP_ID}-crudExceptionsAndValueLists`],
       },
     })
     .addVersion(

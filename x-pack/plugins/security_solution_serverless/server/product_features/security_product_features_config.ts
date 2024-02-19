@@ -48,4 +48,7 @@ const securityProductFeaturesConfig: Record<
   [ProductFeatureSecurityKey.endpointExceptions]: {
     subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
   },
+  [ProductFeatureSecurityKey.exceptionsAndValueLists]: {
+    subFeatureIds: [SecuritySubFeatureId.exceptionsAndValueLists],
+  },
 };

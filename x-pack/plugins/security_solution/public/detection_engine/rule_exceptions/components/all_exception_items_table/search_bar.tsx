@@ -91,7 +91,7 @@ const ExceptionsViewerSearchBarComponent = ({
           onChange={handleOnSearch}
         />
       </EuiFlexItem>
-      {!canAddException && (
+      {canAddException && (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="exceptionsHeaderAddExceptionBtn"

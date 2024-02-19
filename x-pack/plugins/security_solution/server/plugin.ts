@@ -126,6 +126,7 @@ import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
+import { ExceptionsService } from './lib/exceptions/logic/service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -137,6 +138,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly productFeaturesService: ProductFeaturesService;
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
+  private readonly exceptionsService = new ExceptionsService();
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
@@ -613,6 +615,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.policyWatcher.start(licenseService);
     }
 
+    this.exceptionsService.start({
+      logger,
+      registerListsServerExtension: this.lists?.registerExtension,
+      productFeaturesService,
+      security: plugins.security,
+    });
+
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
       createFleetFilesClient: createFilesClient,
@@ -725,6 +734,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.asyncTelemetryEventsSender.stop().catch(() => {});
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    this.exceptionsService.stop();
     this.policyWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     licenseService.stop();
