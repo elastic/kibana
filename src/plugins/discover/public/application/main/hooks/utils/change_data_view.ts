@@ -13,14 +13,12 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
 import { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
-import {
-  DiscoverDataStateContainer
-} from "@kbn/discover-plugin/public/application/main/services/discover_data_state_container";
 
 /**
  * Function executed when switching data view in the UI
