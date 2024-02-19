@@ -13,5 +13,5 @@ export const useSloCrudLoading = () => {
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
-  return isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo;
+  return isCreatingSlo || isUpdatingSlo || isDeletingSlo;
 };
