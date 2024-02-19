@@ -30,7 +30,7 @@ interface TableCriteria {
   };
 }
 
-export interface TimeRange {
+export interface TimeRangeConfig {
   from: string;
   to: string;
   refresh: {
@@ -42,7 +42,7 @@ export interface TimeRange {
 interface FiltersCriteria {
   inactive: boolean;
   fullNames: boolean;
-  timeRange: TimeRange;
+  timeRange: TimeRangeConfig;
   integrations: string[];
   query?: string;
 }
@@ -145,7 +145,7 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'UPDATE_TIME_RANGE';
-      timeRange: TimeRange;
+      timeRange: TimeRangeConfig;
     }
   | {
       type: 'REFRESH_DATA';

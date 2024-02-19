@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_TIME_RANGE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats';
 import { getDateRange } from './get_date_range';
 
@@ -18,7 +19,7 @@ interface FilterInactiveDatasetsOptions {
 
 export const filterInactiveDatasets = ({
   datasets,
-  timeRange = { from: 'now-24h', to: 'now' },
+  timeRange = DEFAULT_TIME_RANGE,
 }: FilterInactiveDatasetsOptions) => {
   const { startDate, endDate } = getDateRange(timeRange);
 
@@ -41,7 +42,7 @@ export const isActiveDataset = (options: IsActiveDatasetOptions) => {
   const { lastActivity, timeRange } = options;
   const { startDate, endDate } = getDateRange(timeRange);
 
-  return isActive(lastActivity, startDate as number, endDate as number);
+  return isActive(lastActivity, startDate, endDate);
 };
 
 const isActive = (lastActivity: number, startDate: number, endDate: number) =>
