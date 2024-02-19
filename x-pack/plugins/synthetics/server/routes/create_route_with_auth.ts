@@ -11,9 +11,14 @@ import {
   LICENSE_NOT_ACTIVE_ERROR,
   LICENSE_NOT_SUPPORTED_ERROR,
 } from '../../common/constants';
-import { SyntheticsRestApiRouteFactory, SyntheticsRoute, SyntheticsRouteHandler } from './types';
+import {
+  SupportedMethod,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRoute,
+  SyntheticsRouteHandler,
+} from './types';
 
-function getDefaultWriteAccessFlag(method: string) {
+function getDefaultWriteAccessFlag(method: SupportedMethod) {
   // if the method is not GET, it defaults to requiring write access
   return method !== 'GET';
 }
