@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESQLSearchReponse } from '@kbn/es-types';
-import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import { FunctionRegistrationParameters } from '.';
 
 export function registerAddPanelToDashboardFunction({
