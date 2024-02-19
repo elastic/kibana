@@ -16,6 +16,7 @@ import {
   ObjectRemover,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../common/utils/connectors';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
@@ -41,23 +42,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       await esTestIndexTool.destroy();
     });
 
-    async function createConnector(opts: { name: string; space: string; connectorTypeId: string }) {
-      const { name, space, connectorTypeId } = opts;
-      const { body: createdConnector } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .auth(Superuser.username, Superuser.password)
-        .send({
-          name,
-          connector_type_id: connectorTypeId,
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-      objectRemover.add(space, createdConnector.id, 'connector', 'actions');
-      return createdConnector.id;
-    }
-
     async function createRule(opts: { space: string; ruleOverwrites: any }) {
       const { ruleOverwrites, space } = opts;
       const ruleResponse = await supertestWithoutAuth
@@ -73,22 +57,39 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     async function setup() {
       // Create rules and connectors in multiple spaces
       for (const space of Spaces) {
-        const noopConnectorId = await createConnector({
-          name: 'noop connector',
-          space: space.id,
-          connectorTypeId: 'test.noop',
-        });
-        const failingConnectorId = await createConnector({
-          name: 'connector that errors',
-          space: space.id,
-          connectorTypeId: 'test.throw',
-        });
+        const noopConnectorId = await createConnector(
+          supertest,
+          {
+            name: 'noop connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          },
+          { spaceId: space.id }
+        );
+
+        const failingConnectorId = await createConnector(
+          supertest,
+          {
+            name: 'connector that errors',
+            connector_type_id: 'test.throw',
+            config: {},
+            secrets: {},
+          },
+          { spaceId: space.id }
+        );
+
         // excluded connector
-        await createConnector({
-          name: 'unused connector',
-          space: space.id,
-          connectorTypeId: 'test.excluded',
-        });
+        await createConnector(
+          supertest,
+          {
+            name: 'unused connector',
+            connector_type_id: 'test.excluded',
+            config: {},
+            secrets: {},
+          },
+          { spaceId: space.id }
+        );
 
         await createRule({
           space: space.id,

@@ -101,8 +101,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('rule creation', async () => {
       const webhookConnectorName = generateUniqueKey();
       const webApiConnectorName = generateUniqueKey();
-      let webApiAction: { id: string };
-      let webhookAction: { id: string };
+      let webApiConnectorId: string;
+      let webhookConnectorId: string;
 
       const setupRule = async () => {
         const ruleName = generateUniqueKey();
@@ -126,22 +126,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       before(async () => {
-        webApiAction = await actions.api.createConnector({
+        webApiConnectorId = await actions.api.createConnector({
           name: webApiConnectorName,
           config: {},
           secrets: { token: 'supersecrettoken' },
           connectorTypeId: '.slack_api',
         });
 
-        webhookAction = await actions.api.createConnector({
+        webhookConnectorId = await actions.api.createConnector({
           name: webhookConnectorName,
           config: {},
           secrets: { webhookUrl: 'https://test.com' },
           connectorTypeId: '.slack',
         });
 
-        objectRemover.add(webhookAction.id, 'action', 'actions');
-        objectRemover.add(webApiAction.id, 'action', 'actions');
+        objectRemover.add(webhookConnectorId, 'action', 'actions');
+        objectRemover.add(webApiConnectorId, 'action', 'actions');
         await pageObjects.common.navigateToApp('triggersActions');
       });
 
@@ -149,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ruleName = await setupRule();
 
         await selectSlackConnectorInRuleAction({
-          connectorId: webhookAction.id,
+          connectorId: webhookConnectorId,
         });
         await testSubjects.click('saveRuleButton');
         await pageObjects.triggersActionsUI.searchAlerts(ruleName);
@@ -179,7 +179,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it.skip('should save webapi type slack connectors', async () => {
         await setupRule();
         await selectSlackConnectorInRuleAction({
-          connectorId: webApiAction.id,
+          connectorId: webApiConnectorId,
         });
 
         await testSubjects.click('saveRuleButton');

@@ -13,6 +13,7 @@ import {
 } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../common/utils/connectors';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.gen-ai';
@@ -30,21 +31,17 @@ export default function genAiTest({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
   const retry = getService('retry');
-  const createConnector = async (apiUrl: string, spaceId?: string) => {
-    const { body } = await supertest
-      .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name,
-        connector_type_id: connectorTypeId,
-        config: { ...defaultConfig, apiUrl },
-        secrets,
-      })
-      .expect(200);
+  const createOpenAIConnector = async (apiUrl: string, spaceId?: string) => {
+    const id = await createConnector(supertest, {
+      name,
+      connector_type_id: connectorTypeId,
+      config: { ...defaultConfig, apiUrl },
+      secrets,
+    });
 
-    objectRemover.add(spaceId ?? 'default', body.id, 'connector', 'actions');
+    objectRemover.add(spaceId ?? 'default', id, 'connector', 'actions');
 
-    return body.id;
+    return id;
   };
 
   describe('OpenAI', () => {
@@ -227,7 +224,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const apiUrl = await simulator.start();
-          genAiActionId = await createConnector(apiUrl);
+          genAiActionId = await createOpenAIConnector(apiUrl);
         });
 
         after(() => {
@@ -285,7 +282,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             apiUrl = await simulator.start();
-            genAiActionId = await createConnector(apiUrl);
+            genAiActionId = await createOpenAIConnector(apiUrl);
           });
 
           after(() => {
@@ -390,7 +387,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             apiUrl = await simulator.start();
-            genAiActionId = await createConnector(apiUrl, 'space1');
+            genAiActionId = await createOpenAIConnector(apiUrl, 'space1');
           });
           after(() => {
             simulator.close();
@@ -442,7 +439,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             const apiUrl = await simulator.start();
-            genAiActionId = await createConnector(apiUrl);
+            genAiActionId = await createOpenAIConnector(apiUrl);
           });
 
           after(() => {

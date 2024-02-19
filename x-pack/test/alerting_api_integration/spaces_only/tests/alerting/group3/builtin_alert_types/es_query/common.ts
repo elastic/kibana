@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { SuperTest, Test } from 'supertest';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../../common/utils/connectors';
 import { Spaces } from '../../../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
+import { ObjectRemover } from '../../../../../../common/lib';
 import { createEsDocuments, createEsDocumentsWithGroups } from '../../../create_test_data';
 
 export const RULE_TYPE_ID = '.es-query';
@@ -29,29 +31,28 @@ export interface SourceField {
   searchPath: string;
 }
 
-export async function createConnector(
-  supertest: any,
+export const createIndexConnector = async (
+  supertest: SuperTest<Test>,
   objectRemover: ObjectRemover,
   index: string
-): Promise<string> {
-  const { body: createdConnector } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .send({
+) => {
+  const id = await createConnector(
+    supertest,
+    {
       name: 'index action for es query FT',
       connector_type_id: CONNECTOR_TYPE_ID,
       config: {
         index,
       },
       secrets: {},
-    })
-    .expect(200);
+    },
+    { spaceId: Spaces.space1.id }
+  );
 
-  const connectorId = createdConnector.id;
-  objectRemover.add(Spaces.space1.id, connectorId, 'connector', 'actions');
+  objectRemover.add(Spaces.space1.id, id, 'connector', 'actions');
 
-  return connectorId;
-}
+  return id;
+};
 
 export interface CreateRuleParams {
   name: string;

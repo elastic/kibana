@@ -9,6 +9,7 @@ import http from 'http';
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../common/utils/connectors';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -19,7 +20,6 @@ import {
   getConfigurationOutput,
   getServiceNowConnector,
   getServiceNowSimulationServer,
-  createConnector,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
@@ -46,21 +46,20 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a configuration with mapping', async () => {
-      const connector = await createConnector({
-        supertest,
-        req: {
-          ...getServiceNowConnector(),
-          config: { apiUrl: serviceNowSimulatorURL },
-        },
-      });
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      const connectorParams = {
+        ...getServiceNowConnector(),
+        config: { apiUrl: serviceNowSimulatorURL },
+      };
+
+      const connectorId = await createConnector(supertest, connectorParams);
+      actionsRemover.add('default', connectorId, 'action', 'actions');
 
       await createConfiguration(
         supertest,
         getConfigurationRequest({
-          id: connector.id,
-          name: connector.name,
-          type: connector.connector_type_id as ConnectorTypes,
+          id: connectorId,
+          name: connectorParams.name,
+          type: connectorParams.connector_type_id as ConnectorTypes,
         })
       );
 
@@ -87,9 +86,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
           connector: {
-            id: connector.id,
-            name: connector.name,
-            type: connector.connector_type_id,
+            id: connectorId,
+            name: connectorParams.name,
+            type: connectorParams.connector_type_id,
             fields: null,
           },
         })

@@ -83,8 +83,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should edit the connector', async () => {
         const connectorName = generateUniqueKey();
         const updatedConnectorName = `${connectorName}updated`;
-        const createdAction = await createTinesConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        const createdConnectorId = await createTinesConnector(connectorName);
+        objectRemover.add(createdConnectorId, 'action', 'actions');
         browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -117,8 +117,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should reset connector when canceling an edit', async () => {
         const connectorName = generateUniqueKey();
-        const createdAction = await createTinesConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        const connectorId = await createTinesConnector(connectorName);
+        objectRemover.add(connectorId, 'action', 'actions');
         browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -145,8 +145,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should disable the run button when the fields are not filled', async () => {
         const connectorName = generateUniqueKey();
-        const createdAction = await createTinesConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        const connectorId = await createTinesConnector(connectorName);
+        objectRemover.add(connectorId, 'action', 'actions');
         browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -166,9 +166,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         before(async () => {
           const connectorName = generateUniqueKey();
-          const createdAction = await createTinesConnector(connectorName);
-          connectorId = createdAction.id;
-          objectRemover.add(createdAction.id, 'action', 'actions');
+          connectorId = await createTinesConnector(connectorName);
+          objectRemover.add(connectorId, 'action', 'actions');
         });
 
         beforeEach(async () => {

@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const actions = getService('actions');
   const browser = getService('browser');
-  const svlCommonApi = getService('svlCommonApi');
 
   describe('observability connectors', function () {
     before(async () => {
@@ -18,7 +17,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await actions.api.deleteAllConnectors(svlCommonApi.getInternalRequestHeader());
+      await actions.api.deleteAllConnectors();
     });
 
     loadTestFile(require.resolve('./server_log_connector'));

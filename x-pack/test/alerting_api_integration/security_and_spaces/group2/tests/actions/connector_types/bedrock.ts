@@ -17,7 +17,8 @@ import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { createConnector } from '../../../../../../common/utils/connectors';
+import { ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.bedrock';
 const name = 'A bedrock action';
@@ -37,23 +38,17 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
   const retry = getService('retry');
-  const createConnector = async (apiUrl: string, spaceId?: string) => {
-    const result = await supertest
-      .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name,
-        connector_type_id: connectorTypeId,
-        config: { ...defaultConfig, apiUrl },
-        secrets,
-      })
-      .expect(200);
+  const createBedrockConnector = async (apiUrl: string, spaceId?: string) => {
+    const id = await createConnector(supertest, {
+      name,
+      connector_type_id: connectorTypeId,
+      config: { ...defaultConfig, apiUrl },
+      secrets,
+    });
 
-    const { body } = result;
+    objectRemover.add(spaceId ?? 'default', id, 'connector', 'actions');
 
-    objectRemover.add(spaceId ?? 'default', body.id, 'connector', 'actions');
-
-    return body.id;
+    return id;
   };
 
   describe('Bedrock', () => {
@@ -247,7 +242,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const apiUrl = await simulator.start();
-          bedrockActionId = await createConnector(apiUrl);
+          bedrockActionId = await createBedrockConnector(apiUrl);
         });
 
         after(() => {
@@ -305,7 +300,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             apiUrl = await simulator.start();
-            bedrockActionId = await createConnector(apiUrl);
+            bedrockActionId = await createBedrockConnector(apiUrl);
           });
 
           after(() => {
@@ -529,7 +524,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const apiUrl = await simulator.start();
-          bedrockActionId = await createConnector(apiUrl);
+          bedrockActionId = await createBedrockConnector(apiUrl);
         });
 
         after(() => {

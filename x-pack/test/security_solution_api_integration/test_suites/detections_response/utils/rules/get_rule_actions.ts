@@ -8,35 +8,26 @@
 import type SuperTest from 'supertest';
 
 import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getSlackAction } from '..';
-import { getWebHookAction } from '..';
-
-const createConnector = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  payload: Record<string, unknown>
-) =>
-  (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
-    .body;
-const createWebHookConnector = (supertest: SuperTest.SuperTest<SuperTest.Test>) =>
-  createConnector(supertest, getWebHookAction());
-const createSlackConnector = (supertest: SuperTest.SuperTest<SuperTest.Test>) =>
-  createConnector(supertest, getSlackAction());
+import { createConnector } from '../../../../../common/utils/connectors';
+import { getWebHookConnectorParams } from '../connectors/get_web_hook_connector_params';
+import { getSlackConnectorParams } from '../connectors/get_slack_connector_params';
 
 export const getActionsWithoutFrequencies = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<RuleActionArray> => {
-  const webHookAction = await createWebHookConnector(supertest);
-  const slackConnector = await createSlackConnector(supertest);
+  const webHookActionId = await createConnector(supertest, getWebHookConnectorParams());
+  const slackConnectorId = await createConnector(supertest, getSlackConnectorParams());
+
   return [
     {
       group: 'default',
-      id: webHookAction.id,
+      id: webHookActionId,
       action_type_id: '.webhook',
       params: { message: 'Email message' },
     },
     {
       group: 'default',
-      id: slackConnector.id,
+      id: slackConnectorId,
       action_type_id: '.slack',
       params: { message: 'Slack message' },
     },
@@ -46,19 +37,20 @@ export const getActionsWithoutFrequencies = async (
 export const getActionsWithFrequencies = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<RuleActionArray> => {
-  const webHookAction = await createWebHookConnector(supertest);
-  const slackConnector = await createSlackConnector(supertest);
+  const webHookActionId = await createConnector(supertest, getWebHookConnectorParams());
+  const slackConnectorId = await createConnector(supertest, getSlackConnectorParams());
+
   return [
     {
       group: 'default',
-      id: webHookAction.id,
+      id: webHookActionId,
       action_type_id: '.webhook',
       params: { message: 'Email message' },
       frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
     },
     {
       group: 'default',
-      id: slackConnector.id,
+      id: slackConnectorId,
       action_type_id: '.slack',
       params: { message: 'Slack message' },
       frequency: { summary: false, throttle: '3d', notifyWhen: 'onThrottleInterval' },
@@ -69,26 +61,27 @@ export const getActionsWithFrequencies = async (
 export const getSomeActionsWithFrequencies = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<RuleActionArray> => {
-  const webHookAction = await createWebHookConnector(supertest);
-  const slackConnector = await createSlackConnector(supertest);
+  const webHookActionId = await createConnector(supertest, getWebHookConnectorParams());
+  const slackConnectorId = await createConnector(supertest, getSlackConnectorParams());
+
   return [
     {
       group: 'default',
-      id: webHookAction.id,
+      id: webHookActionId,
       action_type_id: '.webhook',
       params: { message: 'Email message' },
       frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
     },
     {
       group: 'default',
-      id: slackConnector.id,
+      id: slackConnectorId,
       action_type_id: '.slack',
       params: { message: 'Slack message' },
       frequency: { summary: false, throttle: '3d', notifyWhen: 'onThrottleInterval' },
     },
     {
       group: 'default',
-      id: slackConnector.id,
+      id: slackConnectorId,
       action_type_id: '.slack',
       params: { message: 'Slack message' },
     },
