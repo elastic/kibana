@@ -309,8 +309,10 @@ export const useMetricsHostsAnomaliesResults = ({
     }
   }, [dispatch, reducerState]);
 
-  const isLoadingMetricsHostsAnomalies = useMemo(
-    () => getMetricsHostsAnomaliesRequest.state === 'pending',
+  const isPendingMetricsHostsAnomalies = useMemo(
+    () =>
+      getMetricsHostsAnomaliesRequest.state === 'pending' ||
+      getMetricsHostsAnomaliesRequest.state === 'uninitialized',
     [getMetricsHostsAnomaliesRequest.state]
   );
 
@@ -322,7 +324,7 @@ export const useMetricsHostsAnomaliesResults = ({
   return {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,
-    isLoadingMetricsHostsAnomalies,
+    isPendingMetricsHostsAnomalies,
     hasFailedLoadingMetricsHostsAnomalies,
     changeSortOptions,
     sortOptions: reducerState.sortOptions,

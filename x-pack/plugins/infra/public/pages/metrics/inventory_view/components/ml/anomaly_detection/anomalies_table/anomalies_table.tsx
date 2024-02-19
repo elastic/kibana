@@ -46,6 +46,7 @@ import { AnomalySeverityIndicator } from '../../../../../../../components/loggin
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
+import { useRequestObservable } from '../../../../../../../components/asset_details/hooks/use_request_observable';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
@@ -212,8 +213,8 @@ export const AnomaliesTable = ({
   hostName,
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
-  request$,
 }: Props) => {
+  const { request$ } = useRequestObservable();
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
@@ -291,7 +292,7 @@ export const AnomaliesTable = ({
     changeSortOptions: hostChangeSort,
     fetchNextPage: hostFetchNextPage,
     fetchPreviousPage: hostFetchPrevPage,
-    isLoadingMetricsHostsAnomalies: hostLoading,
+    isPendingMetricsHostsAnomalies: hostLoading,
   } = useMetricsHostsAnomaliesResults(anomalyParams);
   const {
     metricsK8sAnomalies,
@@ -300,7 +301,7 @@ export const AnomaliesTable = ({
     changeSortOptions: k8sChangeSort,
     fetchNextPage: k8sFetchNextPage,
     fetchPreviousPage: k8sPreviousPage,
-    isLoadingMetricsK8sAnomalies: k8sLoading,
+    isPendingMetricsK8sAnomalies: k8sLoading,
   } = useMetricsK8sAnomaliesResults(anomalyParams);
   const page = useMemo(
     () => (jobType === 'hosts' ? hostPage : k8sPage),

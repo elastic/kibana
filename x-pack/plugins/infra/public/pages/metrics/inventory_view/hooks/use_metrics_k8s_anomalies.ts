@@ -289,8 +289,10 @@ export const useMetricsK8sAnomaliesResults = ({
     }
   }, [dispatch, reducerState]);
 
-  const isLoadingMetricsK8sAnomalies = useMemo(
-    () => getMetricsK8sAnomaliesRequest.state === 'pending',
+  const isPendingMetricsK8sAnomalies = useMemo(
+    () =>
+      getMetricsK8sAnomaliesRequest.state === 'pending' ||
+      getMetricsK8sAnomaliesRequest.state === 'uninitialized',
     [getMetricsK8sAnomaliesRequest.state]
   );
 
@@ -302,7 +304,7 @@ export const useMetricsK8sAnomaliesResults = ({
   return {
     metricsK8sAnomalies,
     getMetricsK8sAnomalies,
-    isLoadingMetricsK8sAnomalies,
+    isPendingMetricsK8sAnomalies,
     hasFailedLoadingMetricsK8sAnomalies,
     changeSortOptions,
     sortOptions: reducerState.sortOptions,
