@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createConnector, deleteConnector, getConnector } from '../../utils/connectors';
