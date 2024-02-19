@@ -6,12 +6,5 @@
  * Side Public License, v 1.
  */
 
-export interface ClientConfigType {
-  ui: {
-    enabled: boolean;
-    embeddedEnabled: boolean;
-  };
-  dev: {
-    enableMonaco: boolean;
-  };
-}
+export { CONSOLE_LANG_ID } from './constants';
+export { ConsoleLang } from './language';
