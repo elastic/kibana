@@ -83,6 +83,10 @@ export const getPreviousDailyTaskTimestamp = (
   return lastExecutionTimestamp;
 };
 
+export function safeValue<T>(promise: PromiseSettledResult<T>, defaultValue: unknown = {}): T {
+  return promise.status === 'fulfilled' ? promise.value : (defaultValue as T);
+}
+
 /**
  * Chunks an Array<T> into an Array<Array<T>>
  * This is to prevent overloading the telemetry channel + user resources

@@ -92,8 +92,6 @@ export interface ITelemetryReceiver {
 
   fetchLicenseInfo(): Promise<Nullable<ESLicense>>;
 
-  openPointInTime(indexPattern: string): Promise<string>;
-
   closePointInTime(pitId: string): Promise<void>;
 
   fetchDetectionRulesPackageVersion(): Promise<Nullable<Installation>>;
@@ -155,14 +153,9 @@ export interface ITelemetryReceiver {
   }>;
 
   fetchPrebuiltRuleAlertsBatch(
-    pitId: string,
-    searchAfterValue: SortResults | undefined
-  ): Promise<{
-    moreToFetch: boolean;
-    newPitId: string;
-    searchAfter: SortResults | undefined;
-    alerts: TelemetryEvent[];
-  }>;
+    executeFrom: string,
+    executeTo: string
+  ): AsyncGenerator<TelemetryEvent[], void, unknown>;
 
   copyLicenseFields(lic: ESLicense): {
     issuer?: string | undefined;
@@ -212,7 +205,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
-    this.logger = logger.get('telemetry_events');
+    this.logger = logger.get('telemetry_events.receiver');
   }
 
   public async start(
@@ -634,17 +627,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async fetchPrebuiltRuleAlertsBatch(
-    pitId: string,
-    searchAfterValue: SortResults | undefined
-  ) {
+  public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
     }
 
-    let newPitId = pitId;
+    tlog(this.logger, `Searching prebuilt rule alerts from ${executeFrom} to ${executeTo}`);
+
+    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
-    let searchAfter: SortResults | undefined = searchAfterValue;
+    let searchAfter: SortResults | undefined;
+
     const query: ESSearchRequest = {
       query: {
         bool: {
@@ -729,8 +722,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             {
               range: {
                 '@timestamp': {
-                  gte: 'now-1h',
-                  lte: 'now',
+                  gte: executeFrom,
+                  lte: executeTo,
                 },
               },
             },
@@ -748,49 +741,44 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     let response = null;
-    try {
-      response = await this.esClient.search(query);
-      const numOfHits = response?.hits.hits.length;
+    while (fetchMore) {
+      try {
+        response = await this.esClient.search(query);
+        const numOfHits = response?.hits.hits.length;
 
-      if (numOfHits > 0) {
-        const lastHit = response?.hits.hits[numOfHits - 1];
-        searchAfter = lastHit?.sort;
+        if (numOfHits > 0) {
+          const lastHit = response?.hits.hits[numOfHits - 1];
+          query.search_after = lastHit?.sort;
+        } else {
+          fetchMore = false;
+        }
+
+        fetchMore = numOfHits > 0 && numOfHits < 1_000;
+      } catch (e) {
+        tlog(this.logger, e);
+        fetchMore = false;
       }
 
-      fetchMore = numOfHits > 0 && numOfHits < 1_000;
-    } catch (e) {
-      tlog(this.logger, e);
-      fetchMore = false;
+      if (response == null) {
+        await this.closePointInTime(pitId);
+        return;
+      }
+
+      const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
+        h._source != null ? ([h._source] as TelemetryEvent[]) : []
+      );
+
+      if (response?.pit_id != null) {
+        pitId = response?.pit_id;
+      }
+
+      tlog(this.logger, `Prebuilt rule alerts to return: ${alerts.length}`);
+
+      yield alerts;
     }
-
-    if (response == null) {
-      return {
-        moreToFetch: false,
-        newPitId: pitId,
-        searchAfter,
-        alerts: [] as TelemetryEvent[],
-      };
-    }
-
-    const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
-      h._source != null ? ([h._source] as TelemetryEvent[]) : []
-    );
-
-    if (response?.pit_id != null) {
-      newPitId = response?.pit_id;
-    }
-
-    tlog(this.logger, `Prebuilt rule alerts to return: ${alerts.length}`);
-
-    return {
-      moreToFetch: fetchMore,
-      newPitId,
-      searchAfter,
-      alerts,
-    };
   }
 
-  public async openPointInTime(indexPattern: string) {
+  private async openPointInTime(indexPattern: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
     }
@@ -1004,7 +992,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient.search<SafeEndpointEvent>(query);
   }
 
-  public async fetchValueListMetaData(interval: number) {
+  public async fetchValueListMetaData(_interval: number) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
     }
