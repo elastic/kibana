@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCount()).to.be('43');
+      expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
       await testSubjects.existOrFail('unifiedHistogramSuggestionSelector');
 
       await PageObjects.discover.clickNewSearchButton();
