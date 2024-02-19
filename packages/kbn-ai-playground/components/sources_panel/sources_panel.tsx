@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -14,7 +15,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { IndicesTable } from './indices_table';
+import { IndicesList } from './indices_list';
 import { AddIndicesField } from './add_indices_field';
 import { FieldsPanel } from './fields_panel';
 
@@ -41,7 +42,14 @@ export const SourcesPanel: React.FC<SourcesFlyoutProps> = () => {
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <IndicesTable onRemoveClick={removeIndex} indices={indices} />
+          <IndicesList
+            indices={[
+              { id: '1', name: 'search-index' },
+              { id: '2', name: 'search-books' },
+            ]}
+            onRemoveClick={removeIndex}
+            hasBorder
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>

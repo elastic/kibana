@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import React, { useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { i18n } from '@kbn/i18n';
@@ -25,22 +25,16 @@ export const AddIndicesField = ({ addIndices, indices }) => {
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
-      <EuiFlexItem>
-        <EuiComboBox
-          singleSelection={{ asPlainText: true }}
-          placeholder={i18n.translate('aiPlayground.sources.addIndex.placeholder', {
-            defaultMessage: 'Add new data source',
-          })}
-          async
-          isLoading={isLoading}
-          onChange={onChange}
-          onSearchChange={onSearchChange}
-          fullWidth
-          options={options.filter((option) => !indices.includes(option.label))}
-          selectedOptions={[]}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiComboBox
+      placeholder={i18n.translate('aiPlayground.sources.addIndex.placeholder', {
+        defaultMessage: 'Add new data source',
+      })}
+      fullWidth
+      options={options}
+      selectedOptions={selectedIndices.map(
+        (index) => options.find((option) => option.key === index)!
+      )}
+      onChange={onChange}
+    />
   );
 };
