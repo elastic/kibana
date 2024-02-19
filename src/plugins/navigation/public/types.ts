@@ -39,6 +39,7 @@ export type SolutionType = 'es' | 'oblt' | 'security';
 
 export interface ConfigSchema {
   solutionNavigation: {
+    featureOn: boolean;
     enabled: boolean;
     status: SolutionNavigationStatus;
     defaultSolution: SolutionType;

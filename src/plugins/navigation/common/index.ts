@@ -5,12 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { NavigationServerPlugin } from './plugin';
-
-export { config } from './config';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  return new NavigationServerPlugin(initializerContext);
-}
+export {
+  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
+  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
+  STATUS_SOLUTION_NAV_UI_SETTING_ID,
+} from './constants';

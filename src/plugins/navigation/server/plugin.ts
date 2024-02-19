@@ -5,13 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+
+import type { NavigationConfig } from './config';
 import type {
   NavigationServerSetup,
   NavigationServerSetupDependencies,
   NavigationServerStart,
   NavigationServerStartDependencies,
 } from './types';
+import { getUiSettings } from './ui_settings';
 
 export class NavigationServerPlugin
   implements
@@ -22,7 +25,12 @@ export class NavigationServerPlugin
       NavigationServerStartDependencies
     >
 {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   setup(core: CoreSetup, plugins: NavigationServerSetupDependencies) {
+    const config = this.initializerContext.config.get<NavigationConfig>();
+    core.uiSettings.registerGlobal(getUiSettings(config));
+
     return {};
   }
 

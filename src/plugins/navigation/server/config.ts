@@ -11,6 +11,7 @@ import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
   solutionNavigation: schema.object({
+    featureOn: schema.boolean({ defaultValue: false }),
     enabled: schema.boolean({ defaultValue: false }),
     status: schema.oneOf(
       [schema.literal('visible'), schema.literal('hidden'), schema.literal('ask')],

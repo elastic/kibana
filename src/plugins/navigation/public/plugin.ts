@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { combineLatest, ReplaySubject, takeUntil } from 'rxjs';
+import { debounce } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
+import {
+  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
+  STATUS_SOLUTION_NAV_UI_SETTING_ID,
+  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
+} from '../common';
 import {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -29,6 +37,7 @@ export class NavigationPublicPlugin
 {
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
+  private readonly stop$ = new ReplaySubject<void>(1);
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -41,7 +50,7 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     { unifiedSearch }: NavigationPublicStartDependencies
   ): NavigationPublicStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
@@ -69,6 +78,18 @@ export class NavigationPublicPlugin
     const config = this.initializerContext.config.get();
     console.log(config);
 
+    combineLatest([
+      core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
+      core.settings.globalClient.get$(STATUS_SOLUTION_NAV_UI_SETTING_ID),
+      core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
+    ])
+      .pipe(takeUntil(this.stop$))
+      .subscribe(
+        debounce(([enabled, status, defaultSolution]) => {
+          console.log({ enabled, status, defaultSolution });
+        }, 10)
+      );
+
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
@@ -78,5 +99,7 @@ export class NavigationPublicPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.stop$.next();
+  }
 }
