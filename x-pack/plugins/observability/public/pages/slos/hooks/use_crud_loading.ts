@@ -9,7 +9,6 @@ import { useIsMutating } from '@tanstack/react-query';
 
 export const useSloCrudLoading = () => {
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
