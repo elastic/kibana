@@ -184,10 +184,6 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('renders IndexPatternsMissingPrompt', async () => {
-    // jest.spyOn(redux, 'useSelector').mockReturnValue({
-    //   ...mockSelector,
-    //   kibanaDataViews: [],
-    // });
     const state = {
       ...mockGlobalState,
       sourcerer: {
