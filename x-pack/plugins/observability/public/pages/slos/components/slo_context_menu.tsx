@@ -34,6 +34,7 @@ export interface Props {
   items: JSX.Element[];
   selected: string;
   label: string;
+  loading: boolean;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -49,6 +50,7 @@ export function SLOContextMenu({
   items,
   selected,
   setIsPopoverOpen,
+  loading,
 }: Props) {
   const singleContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'singleContextMenuPopover',
@@ -65,6 +67,7 @@ export function SLOContextMenu({
       iconType="arrowDown"
       iconSide="right"
       onClick={handleTogglePopover}
+      isLoading={loading}
     >
       {selected}
     </EuiButtonEmpty>
