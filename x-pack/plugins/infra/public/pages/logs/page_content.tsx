@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -74,22 +74,28 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       {setHeaderActionMenu && theme$ && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-          <EuiHeaderLinks gutterSize="xs">
-            <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-              {settingsTabTitle}
-            </EuiHeaderLink>
-            <LazyAlertDropdownWrapper />
-            <EuiHeaderLink
-              href={getUrlForApp('/integrations/browse')}
-              color="primary"
-              iconType="indexOpen"
-            >
-              {ADD_DATA_LABEL}
-            </EuiHeaderLink>
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            <EuiFlexItem>
+              <EuiHeaderLinks gutterSize="xs">
+                <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                  {settingsTabTitle}
+                </EuiHeaderLink>
+                <LazyAlertDropdownWrapper />
+                <EuiHeaderLink
+                  href={getUrlForApp('/integrations/browse')}
+                  color="primary"
+                  iconType="indexOpen"
+                >
+                  {ADD_DATA_LABEL}
+                </EuiHeaderLink>
+              </EuiHeaderLinks>
+            </EuiFlexItem>
             {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
+              <EuiFlexItem>
+                <ObservabilityAIAssistantActionMenuItem />
+              </EuiFlexItem>
             ) : null}
-          </EuiHeaderLinks>
+          </EuiFlexGroup>
         </HeaderMenuPortal>
       )}
 
