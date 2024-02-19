@@ -361,6 +361,8 @@ export function transformOutputToFullPolicyOutput(
       required_acks,
     } = output;
 
+    const topic = topics?.filter((t) => !t.when)?.[0]?.topic;
+
     const transformPartition = () => {
       if (!partition) return {};
       switch (partition) {
@@ -397,26 +399,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topics: (topics ?? []).map((topic) => {
-        const { topic: topicName, ...rest } = topic;
-        const whenKeys = Object.keys(rest);
-
-        if (whenKeys.length === 0) {
-          return { topic: topicName };
-        }
-        if (rest.when && rest.when.condition) {
-          const [keyName, value] = rest.when.condition.split(':');
-
-          return {
-            topic: topicName,
-            when: {
-              [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value,
-              },
-            },
-          };
-        }
-      }),
+      topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
