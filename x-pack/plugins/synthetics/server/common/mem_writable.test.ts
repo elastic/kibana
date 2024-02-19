@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inlineToProjectZip, MemWritable } from './mem_writable';
+import { MemWritable } from './mem_writable';
 
 describe('MemWritable', () => {
   it('should write chunks to the buffer', async () => {
@@ -33,22 +33,5 @@ describe('MemWritable', () => {
       });
     });
     expect(memWritable.buffer).toEqual(expectedBuffer);
-  });
-});
-
-describe('inlineToProjectZip', () => {
-  it('should return base64 encoded zip data', async () => {
-    const inlineJourney = `
-step('goto', () => page.goto('https://elastic.co'));
-step('throw error', () => { throw new Error('error'); });
-`;
-    const monitorId = 'testMonitorId';
-    const logger = jest.fn();
-
-    // @ts-expect-error not checking logger functionality
-    const result = await inlineToProjectZip(inlineJourney, monitorId, logger);
-
-    // zip is not deterministic, so we can't check the exact value
-    expect(result.length).toBeGreaterThan(0);
   });
 });

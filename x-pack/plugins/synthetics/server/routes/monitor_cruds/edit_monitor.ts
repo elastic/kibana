@@ -32,7 +32,7 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './helper';
-import { inlineToProjectZip } from '../../common/mem_writable';
+import { inlineToProjectZip } from '../../common/inline_to_zip';
 import { SyntheticsServerSetup } from '../../types';
 
 // Simplify return promise type and type it with runtime_types

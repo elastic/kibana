@@ -45,7 +45,7 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
-import { inlineToProjectZip } from '../common/mem_writable';
+import { inlineToProjectZip } from '../common/inline_to_zip';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';

@@ -39,7 +39,7 @@ import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { deleteMonitor } from './delete_monitor';
 import { mapSavedObjectToMonitor } from './helper';
-import { inlineToProjectZip } from '../../common/mem_writable';
+import { inlineToProjectZip } from '../../common/inline_to_zip';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',

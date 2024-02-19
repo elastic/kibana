@@ -19,7 +19,7 @@ import {
   TLSFields,
 } from '../../../../common/runtime_types';
 import { publicFormatters } from '.';
-import { inlineToProjectZip } from '../../../common/mem_writable';
+import { inlineToProjectZip } from '../../../common/inline_to_zip';
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,

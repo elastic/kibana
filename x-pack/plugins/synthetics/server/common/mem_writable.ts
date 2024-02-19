@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import archiver from 'archiver';
 import { Writable, WritableOptions } from 'node:stream';
 
 export class MemWritable extends Writable {
@@ -28,39 +26,4 @@ export class MemWritable extends Writable {
     this._queue.push(chunk);
     callback();
   }
-}
-
-function wrapInlineInProject(inlineJourney: string) {
-  return `import { journey, step, expect } from '@elastic/synthetics';
-
-journey('inline', ({ page, context, browser, params, request }) => {
-  ${inlineJourney}
-});
-`;
-}
-
-export async function inlineToProjectZip(
-  inlineJourney: string,
-  monitorId: string,
-  logger: Logger
-): Promise<string> {
-  const mWriter = new MemWritable();
-  try {
-    await new Promise((resolve, reject) => {
-      const archive = archiver('zip', {
-        zlib: { level: 9 },
-      });
-      archive.on('error', reject);
-      mWriter.on('close', resolve);
-      archive.pipe(mWriter);
-      archive.append(wrapInlineInProject(inlineJourney), {
-        name: 'inline.journey.ts',
-      });
-      archive.finalize();
-    });
-  } catch (e) {
-    logger.error(`Failed to create zip for inline monitor ${monitorId}`);
-    throw e;
-  }
-  return mWriter.buffer.toString('base64');
 }
