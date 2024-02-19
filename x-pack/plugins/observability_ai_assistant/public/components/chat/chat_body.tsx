@@ -154,7 +154,7 @@ export function ChatBody({
   }
 
   const containerClassName = css`
-    height: 0; // needed to keep chat timeline from overflowing on mobile viewports.
+    background: white;
     min-width: 0;
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'

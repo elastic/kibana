@@ -97,6 +97,7 @@ export function ChatFlyout({
 
   const containerClassName = css`
     height: 100%;
+    flex-wrap: nowrap;
   `;
 
   const chatBodyContainerClassName = css`
