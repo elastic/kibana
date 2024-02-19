@@ -120,6 +120,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.network_drive,
     platinumOnly: true,
   },
+  notion: {
+    docsUrl: docLinks.connectorsNotion,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.notion,
+    platinumOnly: true,
+  },
   onedrive: {
     docsUrl: docLinks.connectorsOneDrive,
     externalAuthDocsUrl: '',

@@ -135,6 +135,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'network_drive',
   },
   {
+    iconPath: 'notion.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['notion', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.notion.name', {
+      defaultMessage: 'Notion',
+    }),
+    serviceType: 'notion',
+  },
+  {
     iconPath: 'postgresql.svg',
     isBeta: false,
     isNative: true,
@@ -143,6 +153,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
+  },
+  {
+    iconPath: 'redis.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['redis', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.redis.name', {
+      defaultMessage: 'Redis',
+    }),
+    serviceType: 'notion',
   },
   {
     iconPath: 'salesforce.svg',

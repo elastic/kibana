@@ -81,10 +81,12 @@ class DocLinks {
   public connectorsMySQL: string;
   public connectorsNative: string;
   public connectorsNetworkDrive: string;
+  public connectorsNotion: string;
   public connectorsOneDrive: string;
   public connectorsOracle: string;
   public connectorsOutlook: string;
   public connectorsPostgreSQL: string;
+  public connectorsRedis: string;
   public connectorsS3: string;
   public connectorsSalesforce: string;
   public connectorsServiceNow: string;
@@ -253,10 +255,12 @@ class DocLinks {
     this.connectorsMySQL = '';
     this.connectorsNative = '';
     this.connectorsNetworkDrive = '';
+    this.connectorsNotion = '';
     this.connectorsOneDrive = '';
     this.connectorsOracle = '';
     this.connectorsOutlook = '';
     this.connectorsPostgreSQL = '';
+    this.connectorsRedis = '';
     this.connectorsS3 = '';
     this.connectorsSalesforce = '';
     this.connectorsServiceNow = '';
@@ -427,10 +431,12 @@ class DocLinks {
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsNotion = docLinks.links.enterpriseSearch.connectorsNotion;
     this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
+    this.connectorsRedis = docLinks.links.enterpriseSearch.connectorsRedis;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
     this.connectorsSalesforce = docLinks.links.enterpriseSearch.connectorsSalesforce;
     this.connectorsServiceNow = docLinks.links.enterpriseSearch.connectorsServiceNow;
