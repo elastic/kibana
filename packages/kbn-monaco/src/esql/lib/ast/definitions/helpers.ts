@@ -26,8 +26,7 @@ export function getFunctionSignatures(
       )}${handleAdditionalArgs(
         minParamsToAdd > 0,
         Array(minParamsToAdd).fill(params[Math.max(params.length - 1, 0)]),
-        withTypes,
-        false
+        withTypes
       )})${withTypes ? `: ${returnType}` : ''}`,
       examples,
     };
@@ -42,13 +41,12 @@ function handleAdditionalArgs(
     optional?: boolean;
     reference?: string;
   }>,
-  withTypes: boolean,
-  optionalArg: boolean = true
+  withTypes: boolean
 ) {
   return criteria
-    ? `${withTypes && optionalArg ? ' ,[... ' : ', '}${additionalArgs
+    ? `${withTypes ? ' ,[... ' : ', '}${additionalArgs
         .map((arg) => printArguments(arg, withTypes))
-        .join(', ')}${withTypes && optionalArg ? ']' : ''}`
+        .join(', ')}${withTypes ? ']' : ''}`
     : '';
 }
 
