@@ -14,6 +14,7 @@ import {
   EuiSelectable,
   EuiText,
   EuiTourStep,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -65,17 +66,11 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
   margin-left: 10px;
 `;
 
-const TourStepNoHeaderFooter = styled(EuiTourStep)`
-  .euiTourFooter {
-    display: none;
-  }
-  .euiTourHeader {
-    display: none;
-  }
-`;
-
-const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpen }) => (
-  <TourStepNoHeaderFooter
+const InactiveAgentsTourStep: React.FC<{
+  isOpen: boolean;
+  setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
+}> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (
+  <EuiTourStep
     content={
       <EuiText size="s">
         <FormattedMessage
@@ -92,9 +87,21 @@ const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpe
     onFinish={() => {}}
     anchorPosition="upCenter"
     maxWidth={280}
+    footerAction={
+      <EuiLink
+        onClick={() => {
+          setInactiveAgentsCalloutHasBeenDismissed(true);
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.addAgentHelpPopover.footActionButton"
+          defaultMessage="Got it"
+        />
+      </EuiLink>
+    }
   >
     {children as React.ReactElement}
-  </TourStepNoHeaderFooter>
+  </EuiTourStep>
 );
 
 export const AgentStatusFilter: React.FC<{
@@ -198,6 +205,7 @@ export const AgentStatusFilter: React.FC<{
   return (
     <InactiveAgentsTourStep
       isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
+      setInactiveAgentsCalloutHasBeenDismissed={setInactiveAgentsCalloutHasBeenDismissed}
     >
       <EuiPopover
         ownFocus
