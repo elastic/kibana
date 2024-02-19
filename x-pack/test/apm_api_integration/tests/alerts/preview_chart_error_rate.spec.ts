@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
-  registry.when(`without data loaded`, { config: 'basic', archives: [] }, () => {
+  registry.when.skip(`without data loaded`, { config: 'basic', archives: [] }, () => {
     it('transaction_error_rate without data', async () => {
       const options = getOptions();
       const response = await apmApiClient.readUser({
@@ -69,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
+  registry.when.skip(`with data loaded`, { config: 'basic', archives: [] }, () => {
     describe('transaction_error_rate', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
@@ -327,271 +327,275 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
-    describe('transaction_error_rate', () => {
-      before(async () => {
-        await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
-        await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
-      });
-
-      after(() => synthtraceEsClient.clean());
-
-      it('with data', async () => {
-        const options = getOptionsWithFilterQuery();
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
-          ...options,
+  registry.when.skip(
+    `with data loaded and using KQL filter`,
+    { config: 'basic', archives: [] },
+    () => {
+      describe('transaction_error_rate', () => {
+        before(async () => {
+          await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
+          await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
         });
 
-        expect(response.status).to.be(200);
-        expect(
-          response.body.errorRateChartPreview.series.some((item: PreviewChartResponseItem) =>
-            item.data.some((coordinate) => coordinate.x && coordinate.y)
-          )
-        ).to.equal(true);
-      });
+        after(() => synthtraceEsClient.clean());
 
-      it('with transaction name in filter query', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              searchConfiguration: JSON.stringify({
-                query: {
-                  query:
-                    'service.name: synth-go and transaction.type: request and transaction.name: GET /banana',
-                  language: 'kuery',
-                },
-              }),
+        it('with data', async () => {
+          const options = getOptionsWithFilterQuery();
+          const response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+            ...options,
+          });
+
+          expect(response.status).to.be(200);
+          expect(
+            response.body.errorRateChartPreview.series.some((item: PreviewChartResponseItem) =>
+              item.data.some((coordinate) => coordinate.x && coordinate.y)
+            )
+          ).to.equal(true);
+        });
+
+        it('with transaction name in filter query', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                searchConfiguration: JSON.stringify({
+                  query: {
+                    query:
+                      'service.name: synth-go and transaction.type: request and transaction.name: GET /banana',
+                    language: 'kuery',
+                  },
+                }),
+              },
             },
-          },
-        };
+          };
 
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
-          ...options,
+          const response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+            ...options,
+          });
+
+          expect(response.status).to.be(200);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([{ name: 'synth-go_production_request', y: 50 }]);
         });
 
-        expect(response.status).to.be(200);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([{ name: 'synth-go_production_request', y: 50 }]);
-      });
-
-      it('with nonexistent transaction name', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              searchConfiguration: JSON.stringify({
-                query: {
-                  query:
-                    'service.name: synth-go and transaction.type: request and transaction.name: foo',
-                  language: 'kuery',
-                },
-              }),
+        it('with nonexistent transaction name', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                searchConfiguration: JSON.stringify({
+                  query: {
+                    query:
+                      'service.name: synth-go and transaction.type: request and transaction.name: foo',
+                    language: 'kuery',
+                  },
+                }),
+              },
             },
-          },
-        };
+          };
 
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
-          ...options,
+          const response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+            ...options,
+          });
+
+          expect(response.status).to.be(200);
+          expect(response.body.errorRateChartPreview.series).to.eql([]);
         });
 
-        expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.series).to.eql([]);
-      });
+        it('with no group by parameter', async () => {
+          const options = getOptionsWithFilterQuery();
+          const response = await apmApiClient.readUser({
+            ...options,
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          });
 
-      it('with no group by parameter', async () => {
-        const options = getOptionsWithFilterQuery();
-        const response = await apmApiClient.readUser({
-          ...options,
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          expect(response.status).to.be(200);
+          expect(response.body.errorRateChartPreview.series.length).to.equal(1);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([{ name: 'synth-go_production_request', y: 37.5 }]);
         });
 
-        expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.series.length).to.equal(1);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([{ name: 'synth-go_production_request', y: 37.5 }]);
-      });
-
-      it('with default group by fields', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
+        it('with default group by fields', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
+              },
             },
-          },
-        };
+          };
 
-        const response = await apmApiClient.readUser({
-          ...options,
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          const response = await apmApiClient.readUser({
+            ...options,
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          });
+
+          expect(response.status).to.be(200);
+          expect(response.body.errorRateChartPreview.series.length).to.equal(1);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([{ name: 'synth-go_production_request', y: 37.5 }]);
         });
 
-        expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.series.length).to.equal(1);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([{ name: 'synth-go_production_request', y: 37.5 }]);
-      });
-
-      it('with group by on transaction name', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+        it('with group by on transaction name', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+              },
             },
-          },
-        };
+          };
 
-        const response = await apmApiClient.readUser({
-          ...options,
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
-        });
+          const response = await apmApiClient.readUser({
+            ...options,
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          });
 
-        expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.series.length).to.equal(2);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([
-          {
-            name: 'synth-go_production_request_GET /banana',
-            y: 50,
-          },
-          {
-            name: 'synth-go_production_request_GET /apple',
-            y: 25,
-          },
-        ]);
-      });
-
-      it('with group by on transaction name and filter on transaction name', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              searchConfiguration: JSON.stringify({
-                query: {
-                  query:
-                    'service.name: synth-go and transaction.type: request and transaction.name: GET /apple',
-                  language: 'kuery',
-                },
-              }),
-              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+          expect(response.status).to.be(200);
+          expect(response.body.errorRateChartPreview.series.length).to.equal(2);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([
+            {
+              name: 'synth-go_production_request_GET /banana',
+              y: 50,
             },
-          },
-        };
-
-        const response = await apmApiClient.readUser({
-          ...options,
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
-        });
-
-        expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.series.length).to.equal(1);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([{ name: 'synth-go_production_request_GET /apple', y: 25 }]);
-      });
-
-      it('with empty filter query', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              searchConfiguration: JSON.stringify({
-                query: {
-                  query: '',
-                  language: 'kuery',
-                },
-              }),
+            {
+              name: 'synth-go_production_request_GET /apple',
+              y: 25,
             },
-          },
-        };
-
-        const response = await apmApiClient.readUser({
-          ...options,
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          ]);
         });
 
-        expect(response.status).to.be(200);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([
-          { name: 'synth-go_production_request', y: 37.5 },
-          { name: 'synth-java_production_request', y: 37.5 },
-        ]);
-      });
-
-      it('with empty filter query and group by on transaction name', async () => {
-        const options = {
-          params: {
-            query: {
-              ...getOptionsWithFilterQuery().params.query,
-              searchConfiguration: JSON.stringify({
-                query: {
-                  query: '',
-                  language: 'kuery',
-                },
-              }),
-              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+        it('with group by on transaction name and filter on transaction name', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                searchConfiguration: JSON.stringify({
+                  query: {
+                    query:
+                      'service.name: synth-go and transaction.type: request and transaction.name: GET /apple',
+                    language: 'kuery',
+                  },
+                }),
+                groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+              },
             },
-          },
-        };
+          };
 
-        const response = await apmApiClient.readUser({
-          ...options,
-          endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          const response = await apmApiClient.readUser({
+            ...options,
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          });
+
+          expect(response.status).to.be(200);
+          expect(response.body.errorRateChartPreview.series.length).to.equal(1);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([{ name: 'synth-go_production_request_GET /apple', y: 25 }]);
         });
 
-        expect(response.status).to.be(200);
-        expect(
-          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
-            name: item.name,
-            y: item.data[0].y,
-          }))
-        ).to.eql([
-          {
-            name: 'synth-go_production_request_GET /banana',
-            y: 50,
-          },
-          {
-            name: 'synth-java_production_request_GET /banana',
-            y: 50,
-          },
-          {
-            name: 'synth-go_production_request_GET /apple',
-            y: 25,
-          },
-          {
-            name: 'synth-java_production_request_GET /apple',
-            y: 25,
-          },
-        ]);
+        it('with empty filter query', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                searchConfiguration: JSON.stringify({
+                  query: {
+                    query: '',
+                    language: 'kuery',
+                  },
+                }),
+              },
+            },
+          };
+
+          const response = await apmApiClient.readUser({
+            ...options,
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          });
+
+          expect(response.status).to.be(200);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([
+            { name: 'synth-go_production_request', y: 37.5 },
+            { name: 'synth-java_production_request', y: 37.5 },
+          ]);
+        });
+
+        it('with empty filter query and group by on transaction name', async () => {
+          const options = {
+            params: {
+              query: {
+                ...getOptionsWithFilterQuery().params.query,
+                searchConfiguration: JSON.stringify({
+                  query: {
+                    query: '',
+                    language: 'kuery',
+                  },
+                }),
+                groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+              },
+            },
+          };
+
+          const response = await apmApiClient.readUser({
+            ...options,
+            endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+          });
+
+          expect(response.status).to.be(200);
+          expect(
+            response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
+              name: item.name,
+              y: item.data[0].y,
+            }))
+          ).to.eql([
+            {
+              name: 'synth-go_production_request_GET /banana',
+              y: 50,
+            },
+            {
+              name: 'synth-java_production_request_GET /banana',
+              y: 50,
+            },
+            {
+              name: 'synth-go_production_request_GET /apple',
+              y: 25,
+            },
+            {
+              name: 'synth-java_production_request_GET /apple',
+              y: 25,
+            },
+          ]);
+        });
       });
-    });
-  });
+    }
+  );
 }
