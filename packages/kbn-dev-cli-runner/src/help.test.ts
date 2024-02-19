@@ -98,11 +98,11 @@ describe('getCommandLevelHelp()', () => {
         node scripts/jest foo [...names]
 
         Some thing that we wrote to help us execute things.
-        
+
         Example:
-        
+
           foo = bar = baz
-        
+
           Are you getting it?
 
         Command-specific options:
