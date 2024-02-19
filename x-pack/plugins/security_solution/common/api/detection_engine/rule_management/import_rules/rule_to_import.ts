@@ -11,8 +11,7 @@ import {
   ResponseFields,
   RuleSignatureId,
   TypeSpecificCreateProps,
-  IsRuleImmutable,
-  Prebuilt,
+  RuleVersion,
 } from '../../model/rule_schema';
 
 /**
@@ -30,7 +29,6 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    immutable: IsRuleImmutable.optional(),
-    prebuilt: Prebuilt.optional(),
+    version: RuleVersion,
   })
 );

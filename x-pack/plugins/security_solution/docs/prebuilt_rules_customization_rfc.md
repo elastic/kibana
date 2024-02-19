@@ -108,44 +108,53 @@ During this RFC, we will explicitly refer to case of Elastic prebuilt rules, but
 
 ## Necessary rule schema changes
 
-In order to support the customization of Elastic Prebuilt Rules, we need to modify our rule schema. This involves introducing a new nested `external_source` field and deprecating the `immutable` field.
+In order to support the customization of Elastic Prebuilt Rules, we need to modify our rule schema. This involves introducing the new top level fields: `rule_source_type` and the nested `external_source` field, as well deprecating the `immutable` field.
 
 ```ts
 // PSEUDOCODE - see complete schema in detail below
 {
+  rule_source_type: 'external' | 'internal',
   external_source?: {
-    repo_name: string;
     is_customized: boolean;
     source_updated_at?: Date;
-  }
+  },
 }
 ```
 
-### `external_source` and `immutable` fields
+### `rule_source_type` field
 
-The `external_source` field will be a top-level object field in our rule schema that will contain subfields with information relating to Elastic Prebuilt rules.
+The `rule_source_type` field will be a required top-level string field that can take two values: `internal` or `external`.
 
-It will be an optional field, which will only be present for Elastic prebuilt rules (i.e. rules that are externally soruced).
+Rules with value of `internal` are rules generated internally in the Kibana application and which don't have an external origin outside of it.
 
-Its existence within a rule object will determine if a rule is a prebuilt rule, and its absence will determine that it is a custom rule.
+Rules with value of `external` are rules who have an external origin or source. Elastic prebuilt rules are a case of `external` rule, with the `detection-rules` repository handled by the TRaDE team being their external source origin.
 
-This means that its presence in a rule object will determine whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intented to replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
 
-That means that, in the current state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
+### `external_source` field
 
-When successfully implemented, the `external_source` field should replace the `immutable` field as a flag to mark Elastic prebuilt rules, but with one difference: the `external_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user, i.e. independently of the existence (or absence) of `external_source`.
+The `external_source` field will be a top-level object field in our rule schema that will contain subfields with information relating to Elastic Prebuilt rules (or rules with an external source, in general).
+
+It will be an optional field, which will only be present for Elastic prebuilt rules (i.e. rules that are externally sourced).
+
+The field will only exist when `rule_source_type` has a value of `external`, and should never be defined for rules with `rule_source_type` with value of `internal`.
+
+This means that its presence in a rule object will determine whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intented to partly replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
+
+### Deprecating the `immutable` field
+
+In the current application's state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
+
+When successfully implemented, the `external_source` field, together with `rule_source_type` field, should replace the `immutable` field as a flag to mark Elastic prebuilt rules, but with one difference: the `external_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user in Kibana, i.e. independently of the existence (or absence) of `external_source`.
 
 Because of this difference in the behaviour of the `external_source` and `immutable` fields, we feel that a field called `immutable` will lose its meaning over time and become confusing, especially for consumers of the API who interact directly with the field name. That's why we want to eventually deprecate it and fully replace it with `external_source`.
 
-To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `external_source` field: this means that for all rules that have a `immutable` value of `true`, the `external_source` rule will always exist. Viceversa, rule with `immutable: false` will not have a `external_source` field.
+To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the`rule_source_type` and `external_source` fields: this means that for all rules that have a `immutable` value of `true`, the `rule_source_type` will be `external` and the `external_source` field will always exist. Viceversa, rules with `immutable: false` will have a `rule_source_type` of `internal` and will not have a `external_source` field.
 
 This means, however, that there will be a change in behaviour of the `immutable` field: with the release of the feature, rules with the `immutable: true` value will now be customizable by the user, which is not the current behaviour.
 
-In this first phase, the `external_source` will contain three subfields: `repo_name`, `is_customized` and `source_updated_at`.
+### Subfields in the `external_source` field
 
-#### `repo_name` subfield
-
-The `repo_name` will be a required string field that specifies the origin repo of the rule. For Elastic prebuilt rules, its value will be `elastic_prebuilt`. The field is required since it will be the leaf node used when searching/filtering for externally sourced rules when using KQL. More details about that below.
+In this first phase, the `external_source` will contain two subfields: `is_customized` and `source_updated_at`.
 
 #### `is_customized` subfield
 
@@ -171,7 +180,13 @@ This means that we need to differentiate between changes to the internal rule sc
 
 #### API schema
 
-**In the API schema** the `external_source` field will be optional, as it will exist for Elastic prebuilt rules, but won't for custom rules. The OpenAPI schema will need to be modified so:
+##### API request and response rule schema
+
+**In the API schema** the `rule_source_type` will be required, but the `external_source` field will be optional, as it will exist for Elastic prebuilt rules, but won't for custom rules. 
+
+Notice, as well, that `immutable` and `external_source` will continue to be part **only of the API response schema**, and never form part of the **request parameters**.
+
+The OpenAPI schema will need to be modified so:
 
 _Source: [x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml)_
 
@@ -182,11 +197,6 @@ _Source: [x-pack/plugins/security_solution/common/api/detection_engine/model/rul
 IsRuleImmutable:
   type: boolean
   description: '[DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).'
-
-# Add the top-level `external_source` object and its subfields `repo_name`, `is_customized` and `source_updated_at`
-ExternalSourceRepoName:
-  type: string
-  description: Name of the external origin repo where rule originated from. For rules created by Elastic and originating from the `detection-rules` repo, the value should be `elastic_prebuilt`.
 
 IsExternalRuleCustomized:
   type: boolean
@@ -201,15 +211,19 @@ ExternalSourceAttributes:
   type: object
   description: Property whose existence determines whether the rule is an externally sourced rule. Contains information relating to externally sourced rules. Elastic Prebuilt rules are a specific case of externally sourced rules.
   properties:
-    repo_name:
-      $ref:
     is_customized:
       $ref: '#/components/schemas/IsExternalRuleCustomized'
     source_updated_at:
       $ref: '#/components/schemas/SourceUpdatedAt'
   required:
-    - repo_name
     - isCustomized
+
+RuleSourceType:
+  description: Indicates whether the rules is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
+  type: string
+  enum:
+    - internal
+    - external
 #  [... file continues below ...]
 ```
 
@@ -229,6 +243,8 @@ ResponseFields:
       $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleImmutable'
     external_source:
       $ref: './common_attributes.schema.yaml#/components/schemas/ExternalSourceAttributes'
+    rule_source_type:
+      $ref: './common_attributes.schema.yaml#/components/schemas/RuleSourceType'
     #  [...  more response fields ...]
   required:
     # notice `external_source` is not required
@@ -240,15 +256,21 @@ ResponseFields:
     - created_at
     - created_by
     - revision
-    - related_integrations
-    - required_fields
-    - setup
+    - rule_source_type
 #  [... file continues below...]
 ```
 
+##### Rule Import request schema
+
 We also need to modify the `RuleToImport` schema, since now we will be allowing the importing of both custom rules and prebuilt rules.
 
-Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules. We need to update this schema so that it accepts the `immutable` param with both boolean values, and also optionally accepts the new `external_source` field:
+Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules. 
+
+We will be changing the mechanism for importing rules so that, besides the `rule_id`, the `version` of the rule is also a required parameter. These two parameters will be used to determine if the rule is prebuilt or not, and dynamically calculate the `external_source` and `rule_source_type` during import.
+
+See the detailed explanation for this mechanism in the [Exporting and importing rules](#exporting-and-importing-rules) sections.
+
+The `immutable` and `external_source` fields will be ignored if passed in the request payload.
 
 _Source: [x-pack/plugins/security_solution/common/api/detection_engine/rule_management/import_rules/rule_to_import.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/rule_management/import_rules/rule_to_import.ts)_
 
@@ -259,6 +281,7 @@ import {
   RuleSignatureId,
   IsRuleImmutable,
   ExternalSourceAttributes,
+  RuleVersion,
 } from '../../model/rule_schema';
 
 export type RuleToImport = z.infer<typeof RuleToImport>;
@@ -266,15 +289,14 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    immutable: IsRuleImmutable.optional(),
-    external_source: ExternalSourceAttributes.optional(),
+    version: RuleVersion,
   })
 );
 ```
 
 #### Internal rule schema
 
-**The internal rule schema** needs to represent that the new `external_source` field may not always exist, so `external_source` must also be optional.
+**The internal rule schema** needs to represent that the new `ruleSourceType` and `externalSource` field may not always exist, so both need to be optional.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts)_
 
@@ -285,19 +307,23 @@ export const BaseRuleParams = z.object({
 
   immutable: IsRuleImmutable,
   externalSource: ExternalSourceAttributes.transform(camelize).optional(),
-
+  ruleSourceType: RuleSourceType.optional()
   // [...]
 });
 ```
 
 > Notice that in the internal schema we cannot simply reuse the `ExternalSourceAttributes` attribute defined for the API schema, since it should have CamelCase and the API schema uses snake_case. We need to apply a transformation to our Zod type. See this [issue](https://github.com/colinhacks/zod/issues/486#issuecomment-1567296747).
 
-In the internal rule schema, there are two additional important reasons why we need to make sure that this value is optional:
+In the internal rule schema, there are two additional important reasons why we need to make sure that these two fields optional:
 
-- When rules are executed, a call to the method `validateRuleTypeParams` is done, which is a method that validates the passed rule's parameters using the validators defined in `x-pack/plugins/security_solution/server/lib/detection_engine/rule_types`, within each of the rule query types files (for [EQL rules](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/create_eql_alert_type.ts#L27), for example). The validation is done based on the internal rule schema `BaseRulesParams` displayed above. Having `external_source` as a required field would cause custom rules to fail on runtime.
+- When rules are executed, a call to the method `validateRuleTypeParams` is done, which is a method that validates the passed rule's parameters using the validators defined in `x-pack/plugins/security_solution/server/lib/detection_engine/rule_types`, within each of the rule query types files (for [EQL rules](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/create_eql_alert_type.ts#L27), for example). The validation is done based on the internal rule schema `BaseRulesParams` displayed above. Having `ruleSourceType` or `externalSource` as required fields would cause custom rules or prebuilt rules that haven't had their schema migrated to fail during runtime.
 - The Rule Client `update` method also calls the `validateRuleTypeParams` to validate the rule's params. Since the Rule Client's `update` method is used in our endpoint handlers, such as and `/rules/patch` and `/_bulk_actions`, these would fail when executed against a payload of custom rule.
 
-Additionally, the `PrebuiltRuleAsset` type needs to be updated to include the new `source_updated_at` date that will be progressively shipped with new versions of rules in the Elastic Prebuilt Rules package:
+##### Prebuilt Rule asset schema
+
+The `PrebuiltRuleAsset` type needs to be updated to include the new `source_updated_at` date that will be progressively shipped with new versions of rules in the Elastic Prebuilt Rules package.
+
+Notice that this field will be a **top-level field in the Prebuilt Rule asset** schema, but will be part of the `external_source` field in the API rule schema and internal rule schema.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts)_
 
@@ -322,11 +348,11 @@ In order to mark the `immutable` field as deprecated, and making sure that our a
 2. via a deprecation warning in the OpenAPI schema, as detailed above
 3. by adding a custom response header in said endpoints.
 
-The `immutable` field will afterwards be actually removed from our API endpoint responses and our application after a deprecation period that should give our users enough time to adapt to this change. The length of this deprecation period can vary, but around 4 months, or roughly two ESS releases, is a good starting point.
+The `immutable` field will afterwards be actually removed from our API endpoint responses and our application after a deprecation period that should give our users enough time to adapt to this change. The length of this deprecation period can vary depending on adoption or other factors, but around 18 monthscan be a good starting point.
 
 Both the docs and the custom response header should communicate that the `immutable` field:
 
-- has been replaced by the `external_source` field and users should rely on that new field onwards
+- has been replaced by the `rule_source_type` and `external_source` fields and users should rely on that new field onwards
 - is maintained for backwards compatibility reasons only
 - will be removed after a specific date/release
 
@@ -381,15 +407,17 @@ As part of the epic, we should move away from this practice and create new CRUD 
 
 ### Migration strategy
 
-Our migration strategy will consist of two distinct types of migration: a **migration on write** that will update the SO on Elasticsearch, and a **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
+Our migration strategy will consist of two distinct types of migration: a **migration on write** that will update the SO on Elasticsearch, and a **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operations, before returning it as a response from an API endpoint.
 
 #### Normalization on read
 
 All endpoints that respond with a rule Saved Object, typed as `RuleResponse`, will perform **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
 
-This means that the endpoints will always respond with the rules with the new schema, while the actual rule might still be stored with the legacy schema in Elasticsearch, if it still has not been migrated-on-write.
+This means that the endpoints will always respond with the rules with the new schema, while the actual rule saved object might still be stored with the legacy schema in Elasticsearch, if it still has not been migrated-on-write.
 
-The **normalization on read** will be carried out by a new `normalizePrebuiltSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. Inside this method, we will use `normalizePrebuiltSchemaOnRuleRead` to calculate the normalized values of `external_source` and `immutable`.
+The **normalization on read** will be carried out by a new `normalizePrebuiltSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. 
+
+Inside this method, we will use `normalizePrebuiltSchemaOnRuleRead` to calculate the normalized values of `rule_source_type`, `external_source` and `immutable`.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
 
@@ -421,6 +449,7 @@ _Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_manag
 interface OnReadNormalizationResult {
   immutable: IsRuleImmutable;
   external_source?: ExternalSourceAttributes;
+  rule_source_type: RuleSourceType
 }
 
 /**
@@ -456,11 +485,13 @@ export const normalizePrebuiltSchemaOnRuleRead = (
  *   - If `external_source` does not exist, return the value of the params' `immutable` field. (Use case of Rules that have not yet been migrated on write.)
  */
   const immutable = Boolean(ruleParams.external_source) || Boolean(ruleParams.immutable);
+  const rule_source_type = immutable ? 'external' : 'internal';
   const external_source = getExternalSourceValueForRuleRead(ruleParams);
 
   return {
     immutable,
     external_source,
+    rule_source_type
   };
 };
 ```
@@ -526,7 +557,7 @@ All other type of actions should **not** perform migration-on-write:
 
 ### Technical implementation of migration-on-write
 
-The logic for the migration of the rule saved objects, which means the determination of the `immutable` and `external_source` fields before writing to ES, might differ depending on the action being performed by the user.
+The logic for the migration of the rule saved objects, which means the determination of the `immutable`, `rule_source_type` and `external_source` fields before writing to ES, might differ depending on the action being performed by the user.
 
 Let's see all possible use cases that will require migration-on-write, the endpoints that they apply to, and the expected resulting migrated field, based on the action and their input.
 
@@ -562,6 +593,7 @@ The resulting values for `immutable` and `external_source` when calling these en
     <tr>
       <th>Use case</th>
       <th>Current value of <pre>external_source</pre></th>
+      <th>Current value of <pre>rule_source_type</pre></th>
       <th>Current value of <pre>immutable</pre></th>
       <th>Any field diverges <br> from base version during update?</th>
       <th>Results</th>
@@ -569,7 +601,10 @@ The resulting values for `immutable` and `external_source` when calling these en
   </thead>
   <tbody>
     <tr>
-      <td>Migrating a <b>custom rule</b> (migrated or not yet)</td>
+      <td>Migrating a <b>custom rule</b> (not migrated yet)</td>
+      <td>
+        <pre>undefined</pre>
+      </td>
       <td>
         <pre>undefined</pre>
       </td>
@@ -578,7 +613,27 @@ The resulting values for `immutable` and `external_source` when calling these en
       <td>
         <pre>
           {
-            immutable: false
+            immutable: false,
+            rule_source_type: 'internal'
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a <b>custom rule</b> (already migrated)</td>
+      <td>
+        <pre>undefined</pre>
+      </td>
+      <td>
+        <pre>'internal'</pre>
+      </td>
+      <td><pre>false</pre></td>
+      <td>N/A - Doesn't apply for custom rules</td>
+      <td>
+        <pre>
+          {
+            immutable: false,
+            rule_source_type: 'internal'
           }
         </pre>
       </td>
