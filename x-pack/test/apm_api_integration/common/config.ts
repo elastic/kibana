@@ -104,6 +104,7 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          console.log('### caue  return  synthtraceKibanaClient:', synthtraceKibanaClient);
           return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
         },
         synthtraceKibanaClient: () => synthtraceKibanaClient,

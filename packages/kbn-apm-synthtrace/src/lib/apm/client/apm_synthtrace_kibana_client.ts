@@ -23,6 +23,7 @@ export class ApmSynthtraceKibanaClient {
   async fetchLatestApmPackageVersion() {
     this.logger.debug(`Fetching latest APM package version`);
     const fleetPackageApiUrl = `${this.target}/api/fleet/epm/packages/apm?prerelease=true`;
+    console.log('### caue  fetchLatestApmPackageVersion  this.target:', this.target);
     const response = await fetch(fleetPackageApiUrl, {
       method: 'GET',
       headers: kibanaHeaders(),
@@ -37,6 +38,7 @@ export class ApmSynthtraceKibanaClient {
     }
 
     const { latestVersion } = responseJson.item;
+    console.log('### caue  fetchLatestApmPackageVersion  latestVersion:', latestVersion);
 
     return latestVersion as string;
   }
