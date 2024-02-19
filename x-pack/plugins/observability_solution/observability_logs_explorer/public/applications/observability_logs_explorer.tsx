@@ -12,6 +12,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { DatasetQualityRoute, ObservabilityLogsExplorerMainRoute } from '../routes/main';
+import { NotFoundPage } from '../routes/not_found';
 import {
   ObservabilityLogsExplorerAppMountParameters,
   ObservabilityLogsExplorerPluginStart,
@@ -83,6 +84,7 @@ export const ObservabilityLogsExplorerApp = ({
                   exact={true}
                   render={() => <DatasetQualityRoute />}
                 />
+                <Route render={() => <NotFoundPage />} />
               </Routes>
             </EuiThemeProvider>
           </Router>

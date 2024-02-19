@@ -8,6 +8,7 @@
 import { EuiFormRow } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import styled from 'styled-components';
 import { kqlQuerySchema } from '@kbn/slo-schema';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
@@ -59,6 +60,7 @@ export function QueryBuilder({
       }
       labelAppend={!required ? <OptionalText /> : undefined}
       isInvalid={getFieldState(name).invalid}
+      error={getFieldState(name).error?.message}
       fullWidth
     >
       <Controller
@@ -67,6 +69,15 @@ export function QueryBuilder({
         control={control}
         rules={{
           required: Boolean(required) && Boolean(dataView),
+          validate: (value) => {
+            try {
+              if (!dataView) return;
+              const ast = fromKueryExpression(String(value));
+              toElasticsearchQuery(ast, dataView);
+            } catch (e) {
+              return e.message;
+            }
+          },
         }}
         render={({ field, fieldState }) => (
           <Container>
