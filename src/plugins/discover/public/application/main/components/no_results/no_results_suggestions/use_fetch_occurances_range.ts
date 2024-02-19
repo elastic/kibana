@@ -66,7 +66,10 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
             abortSignal: abortControllerRef.current?.signal,
           });
         } catch (error) {
-          //
+          if (error.name !== 'AbortError') {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          }
         }
       }
 

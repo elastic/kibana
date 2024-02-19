@@ -27,6 +27,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-browser-mocks",
     "@kbn/react-kibana-context-theme",
+    "@kbn/code-editor",
+    "@kbn/monaco",
   ],
   "exclude": [
     "target/**/*",
