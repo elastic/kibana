@@ -8,8 +8,8 @@
 import type { ExecutorSubActionPushParamsITSM } from '../../../server/connector_types/lib/servicenow/types';
 
 export enum EventAction {
-  Trigger = 'trigger',
-  Resolve = 'resolve',
+  TRIGGER = 'trigger',
+  RESOLVE = 'resolve',
 }
 
 export interface ServiceNowITSMActionParams {

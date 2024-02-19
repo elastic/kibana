@@ -100,11 +100,11 @@ const CorrelationIdField: React.FunctionComponent<
 
 const eventActionOptions = [
   {
-    value: EventAction.Trigger,
+    value: EventAction.TRIGGER,
     text: i18n.EVENT_ACTION_TRIGGER,
   },
   {
-    value: EventAction.Resolve,
+    value: EventAction.RESOLVE,
     text: i18n.EVENT_ACTION_RESOLVE,
   },
 ];
@@ -132,9 +132,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
   const [eventAction, setEventAction] = useState<EventAction | undefined>(undefined);
 
   const isTestTriggerAction =
-    executionMode === ActionConnectorMode.Test && eventAction === EventAction.Trigger;
+    executionMode === ActionConnectorMode.Test && eventAction === EventAction.TRIGGER;
   const isTestResolveAction =
-    executionMode === ActionConnectorMode.Test && eventAction === EventAction.Resolve;
+    executionMode === ActionConnectorMode.Test && eventAction === EventAction.RESOLVE;
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
@@ -260,7 +260,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
       setEventAction(value);
 
-      if (value === EventAction.Resolve) {
+      if (value === EventAction.RESOLVE) {
         editAction('subAction', 'closeIncident', index);
         return;
       }
