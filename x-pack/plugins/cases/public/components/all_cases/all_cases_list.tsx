@@ -155,16 +155,16 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       selectedColumns,
     });
 
-    const pagination = useMemo(() => {
-      const totalCases = data.total > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
+    const totalCases = data.total > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
 
-      return {
+    const pagination = useMemo(
+      () => ({
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
         totalItemCount: totalCases ?? 0,
         pageSizeOptions: CASES_TABLE_PER_PAGE_VALUES,
       }),
-      [data, queryParams]
+      [queryParams, totalCases]
     );
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<CaseUI>>(

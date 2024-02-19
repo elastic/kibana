@@ -52,7 +52,6 @@ import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
-import { getQueryParamsLocalStorageKey } from './use_all_cases_state';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -673,13 +672,21 @@ describe('AllCasesListGeneric', () => {
       'should not show next page when cases are more than 10K and last page is displayed pageSize %s',
       async (item) => {
         const lastPage = MAX_DOCS_PER_PAGE / item;
+
         // set local storage with custom query params
-        const APP_ID = 'testAppId';
-        const LOCALSTORAGE_QUERY_PARAMS_KEY = getQueryParamsLocalStorageKey(APP_ID);
-        localStorage.setItem(
-          LOCALSTORAGE_QUERY_PARAMS_KEY,
-          JSON.stringify({ perPage: item, page: lastPage })
-        );
+        const LS_KEY = 'testAppId.cases.list.state';
+        const existingLocalStorageValues = {
+          queryParams: {
+            ...DEFAULT_CASES_TABLE_STATE.queryParams,
+            perPage: item,
+            page: lastPage - 1,
+            sortOrder: 'asc',
+            sortField: SortFieldCase.severity,
+          },
+          filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+        };
+
+        localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
         useGetCasesMock.mockReturnValue({
           ...defaultGetCases,

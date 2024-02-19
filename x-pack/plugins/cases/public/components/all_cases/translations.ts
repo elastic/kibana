@@ -44,7 +44,7 @@ export const SHOWING_CASES = (totalRules: number, pageStart: number, pageSize: n
   });
 
 export const SHOWING_ZERO_CASES = (totalRules: number, pageSize: number) =>
-  i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
+  i18n.translate('xpack.cases.caseTable.showingZeroCasesTitle', {
     values: { totalRules, pageSize },
     defaultMessage:
       'Showing {pageSize} of {totalRules} {totalRules, plural, =1 {case} other {cases}}',
