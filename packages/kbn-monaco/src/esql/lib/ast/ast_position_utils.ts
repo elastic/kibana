@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Token } from 'antlr4ts';
+import type { Token } from 'antlr4';
 
 export function getPosition(
   token: Pick<Token, 'startIndex' | 'stopIndex'> | undefined,

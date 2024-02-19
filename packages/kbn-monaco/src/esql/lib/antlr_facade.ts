@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CommonTokenStream, type CodePointCharStream, type ANTLRErrorListener } from 'antlr4ts';
+import { CommonTokenStream, type CodePointCharStream, type ANTLRErrorListener } from 'antlr4';
 
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';

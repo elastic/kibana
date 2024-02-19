@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ANTLRErrorListener, Recognizer, RecognitionException } from 'antlr4ts';
+import type { ANTLRErrorListener, Recognizer, RecognitionException } from 'antlr4';
 import type { EditorError } from '../../../types';
 import { createError } from '../ast/ast_errors';
 

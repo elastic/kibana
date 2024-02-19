@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Token } from 'antlr4ts';
+import type { Token } from 'antlr4';
 import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
 
 /*

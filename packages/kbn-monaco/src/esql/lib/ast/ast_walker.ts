@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
+import type { ParserRuleContext } from 'antlr4/ParserRuleContext';
 import {
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,

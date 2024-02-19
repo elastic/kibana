@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ANTLRErrorListener, Recognizer } from 'antlr4ts';
+import { ANTLRErrorListener, Recognizer } from 'antlr4';
 import type { EditorError } from '../types';
 
 export class ANTLREErrorListener implements ANTLRErrorListener<any> {

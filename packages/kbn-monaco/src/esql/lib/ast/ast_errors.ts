@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RecognitionException } from 'antlr4ts';
+import type { RecognitionException } from 'antlr4';
 import { esql_parser } from '../../antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 

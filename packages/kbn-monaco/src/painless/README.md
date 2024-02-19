@@ -116,7 +116,7 @@ Elasticsearch has defined [lexer and parser grammar](https://github.com/elastic/
 To regenerate the lexer and parser, run the following script:
 
 ```
-npm run build:antlr4ts
+npm run build:antlr4
 ```
 
 *Note:* This script should only need to be run if a change has been made to `painless_lexer.g4` or `painless_parser.g4`.

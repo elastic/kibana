@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CommonTokenStream, CharStreams } from 'antlr4ts';
+import { CommonTokenStream, CharStreams } from 'antlr4';
 import { painless_parser as PainlessParser, SourceContext } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
 import { EditorError } from '../../../types';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams } from 'antlr4ts';
+import { CharStreams } from 'antlr4';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { join } from 'path';
 import { writeFile } from 'fs/promises';
