@@ -22,6 +22,8 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   api_key_created_by_user:
     type: boolean
     description: Indicates whether the API key that is associated with the rule was created by the user.
