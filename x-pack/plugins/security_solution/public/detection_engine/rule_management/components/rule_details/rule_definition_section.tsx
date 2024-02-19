@@ -272,7 +272,7 @@ const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
                 data-test-subj="requiredFieldsPropertyValueItem"
                 className={styles.fieldTypeText}
                 grow={false}
-                size={'s'}
+                size="xs"
               >
                 {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
               </EuiText>

@@ -36,11 +36,10 @@ export const useRequiredFieldsStyles = () => {
   return useMemo(
     () => ({
       fieldTypeText: css({
-        fontSize: euiTheme.font.scale.xs,
         fontFamily: euiTheme.font.familyCode,
         display: 'inline',
       }),
     }),
-    [euiTheme.font.scale.xs, euiTheme.font.familyCode]
+    [euiTheme.font.familyCode]
   );
 };
