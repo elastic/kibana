@@ -178,21 +178,19 @@ export class SettingsPageObject extends FtrService {
   }
 
   async selectTimeFieldOption(selection: string) {
+    const testSubj = 'timestampField';
+    const timefield = await this.testSubjects.find(testSubj);
     // open dropdown
-    const timefield = await this.getTimeFieldNameField();
-    const prevValue = await timefield.getAttribute('value');
-    const enabled = await timefield.isEnabled();
+    const isSelected = await this.comboBox.isOptionSelected(timefield, selection);
+    const isDisabled = await this.comboBox.isDisabled(timefield);
 
-    if (prevValue === selection || !enabled) {
+    if (isSelected || isDisabled) {
       return;
     }
     await this.retry.waitFor('time field dropdown have the right value', async () => {
-      await timefield.click();
-      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
-      await this.browser.pressKeys(selection);
-      await this.browser.pressKeys(this.browser.keys.TAB);
-      const value = await timefield.getAttribute('value');
-      return value === selection;
+      await this.comboBox.clearInputField(testSubj);
+      await this.comboBox.set(testSubj, selection);
+      return (await this.comboBox.isOptionSelected(timefield, selection));
     });
   }
 
