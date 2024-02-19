@@ -62,7 +62,10 @@ export const initializeSelection =
       /**
        * If the selection is a data view which is not of logs type, invoke the customization event for unknown data views.
        */
-      if (datasetSelection.selection.dataView.isUnknownDataType() && events?.onUknownDataViewSelection(context)) {
+      if (
+        datasetSelection.selection.dataView.isUnknownDataType() &&
+        events?.onUknownDataViewSelection(context)
+      ) {
         return events.onUknownDataViewSelection(context);
       }
 
