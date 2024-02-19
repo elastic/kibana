@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ParserRuleContext } from 'antlr4/ParserRuleContext';
+import { type ParserRuleContext } from 'antlr4';
 import {
+  default as esql_parser,
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
   BooleanArrayLiteralContext,
@@ -25,7 +26,6 @@ import {
   type DissectCommandContext,
   type DropCommandContext,
   type EnrichCommandContext,
-  esql_parser,
   type FieldContext,
   type FieldsContext,
   type FromCommandContext,
@@ -94,12 +94,12 @@ function extractIdentifiers(
   ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
   if (ctx instanceof MetadataOptionContext) {
-    return wrapIdentifierAsArray(ctx.fromIdentifier());
+    return wrapIdentifierAsArray(ctx.fromIdentifier_list());
   }
   if (ctx instanceof MvExpandCommandContext) {
     return wrapIdentifierAsArray(ctx.qualifiedName());
   }
-  return wrapIdentifierAsArray(ctx.qualifiedNamePattern());
+  return wrapIdentifierAsArray(ctx.qualifiedNamePattern_list());
 }
 
 function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
@@ -153,7 +153,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
   if (ctx.WITH()) {
     const option = createOption(ctx.WITH()!.text.toLowerCase(), ctx);
     ast.push(option);
-    const clauses = ctx.enrichWithClause();
+    const clauses = ctx.enrichWithClause_list();
     for (const clause of clauses) {
       if (clause._enrichField) {
         const args = [];
@@ -202,7 +202,7 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
-  const [left, ...list] = ctx.valueExpression();
+  const [left, ...list] = ctx.valueExpression_list();
   const leftArg = visitValueExpression(left);
   if (leftArg) {
     fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
@@ -223,23 +223,23 @@ function visitLogicalIns(ctx: LogicalInContext) {
 
 function getMathOperation(ctx: ArithmeticBinaryContext) {
   return (
-    ctx.PLUS()?.text ||
-    ctx.MINUS()?.text ||
-    ctx.ASTERISK()?.text ||
-    ctx.SLASH()?.text ||
-    ctx.PERCENT()?.text ||
+    ctx.PLUS().symbol ||
+    ctx.MINUS().symbol ||
+    ctx.ASTERISK().symbol ||
+    ctx.SLASH().symbol ||
+    ctx.PERCENT().symbol ||
     ''
   );
 }
 
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
-    ctx.EQ()?.text ||
-    ctx.NEQ()?.text ||
-    ctx.LT()?.text ||
-    ctx.LTE()?.text ||
-    ctx.GT()?.text ||
-    ctx.GTE()?.text ||
+    ctx.EQ().symbol ||
+    ctx.NEQ().symbol ||
+    ctx.LT().symbol ||
+    ctx.LTE().symbol ||
+    ctx.GT().symbol ||
+    ctx.GTE().symbol ||
     ''
   );
 }

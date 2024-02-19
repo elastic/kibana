@@ -200,7 +200,7 @@ export function computeLocationExtends(fn: ESQLFunction) {
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
   return [66 /* esql_parser.QUOTED_IDENTIFIER */]
-    .map((keyCode) => ctx.tryGetToken(keyCode, 0))
+    .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
@@ -209,7 +209,7 @@ function getUnquotedText(ctx: ParserRuleContext) {
     65 /* esql_parser.UNQUOTED_IDENTIFIER */, 71 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
     105 /* esql_parser.UNQUOTED_ID_PATTERN */,
   ]
-    .map((keyCode) => ctx.tryGetToken(keyCode, 0))
+    .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 /* SCRIPT_MARKER_END */
@@ -244,7 +244,7 @@ export function createSetting(policyName: Token, mode: string): ESQLCommandMode 
     type: 'mode',
     name: mode.replace('_', '').toLowerCase(),
     text: mode,
-    location: getPosition(policyName, { stopIndex: policyName.startIndex + mode.length - 1 }), // unfortunately this is the only location we have
+    location: getPosition(policyName, { stop: policyName.start + mode.length - 1 }), // unfortunately this is the only location we have
     incomplete: false,
   };
 }
@@ -260,8 +260,8 @@ export function createPolicy(token: Token, policy: string): ESQLSource {
     text: policy,
     sourceType: 'policy',
     location: getPosition({
-      startIndex: token.stopIndex - policy.length + 1,
-      stopIndex: token.stopIndex,
+      start: token.stop - policy.length + 1,
+      stop: token.stop,
     }), // take into account ccq modes
     incomplete: false,
   };

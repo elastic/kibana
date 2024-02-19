@@ -54,14 +54,14 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
         if (token.type === EOF) {
           done = true;
         } else {
-          const tokenTypeName = lexer.vocabulary.getSymbolicName(token.type);
+          const tokenTypeName = lexer.symbolicNames[token.type];
 
           if (tokenTypeName) {
             const indexOffset = cleanedLine === line ? 0 : line.length - cleanedLine.length;
             const myToken = new ESQLToken(
               tokenTypeName,
-              token.startIndex + indexOffset,
-              token.stopIndex + indexOffset
+              token.start + indexOffset,
+              token.stop + indexOffset
             );
             myTokens.push(myToken);
           }
@@ -75,7 +75,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
 
     myTokens.sort((a, b) => a.startIndex - b.startIndex);
 
-    // special tratement for functions
+    // special treatment for functions
     // the previous custom Kibana grammar baked functions directly as tokens, so highlight was easier
     // The ES grammar doesn't have the token concept of "function"
     const tokensWithFunctions = enrichTokensWithFunctionsMetadata(myTokens);

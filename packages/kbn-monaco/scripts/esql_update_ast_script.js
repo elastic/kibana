@@ -60,7 +60,7 @@ function getQuotedText(ctx: ParserRuleContext) {
     return [
         ${quotedList.map(({ name, value }) => `${value} /* esql_parser.${name} */`).join(', ')}
     ]
-        .map((keyCode) => ctx.tryGetToken(keyCode, 0))
+        .map((keyCode) => ctx.getToken(keyCode, 0))
         .filter(nonNullable)[0];
     }
     
@@ -69,7 +69,7 @@ function getUnquotedText(ctx: ParserRuleContext) {
         ${unquotedList.map(({ name, value }) => `${value} /* esql_parser.${name} */`).join(', ')}
 
     ]
-        .map((keyCode) => ctx.tryGetToken(keyCode, 0))
+        .map((keyCode) => ctx.getToken(keyCode, 0))
         .filter(nonNullable)[0];
 }
 /* SCRIPT_MARKER_END */

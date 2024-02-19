@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { ANTLRErrorListener, Recognizer, RecognitionException } from 'antlr4';
+import type { ErrorListener, Recognizer, RecognitionException } from 'antlr4';
 import type { EditorError } from '../../../types';
 import { createError } from '../ast/ast_errors';
 
-export class ESQLErrorListener implements ANTLRErrorListener<any> {
+export class ESQLErrorListener implements ErrorListener<any> {
   private errors: EditorError[] = [];
 
   syntaxError(
-    recognizer: Recognizer<any, any>,
+    recognizer: Recognizer<any>,
     offendingSymbol: any,
     line: number,
     column: number,

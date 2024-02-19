@@ -7,15 +7,15 @@
  */
 
 import type { RecognitionException } from 'antlr4';
-import { esql_parser } from '../../antlr/esql_parser';
+import { default as esql_parser } from '../../antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 
 function getExpectedSymbols(expectedTokens: RecognitionException['expectedTokens']) {
   const tokenIds = expectedTokens?.toIntegerList().toArray() || [];
   const list = [];
   for (const tokenId of tokenIds) {
-    if (esql_parser.VOCABULARY.getSymbolicName(tokenId)) {
-      const symbol = esql_parser.VOCABULARY.getSymbolicName(tokenId);
+    if (esql_parser.symbolicNames[tokenId]) {
+      const symbol = esql_parser.symbolicNames[tokenId];
       list.push(symbol === 'EOF' ? `<${symbol}>` : symbol);
     }
   }
@@ -23,7 +23,7 @@ function getExpectedSymbols(expectedTokens: RecognitionException['expectedTokens
 }
 
 export function createError(exception: RecognitionException) {
-  const token = exception.getOffendingToken();
+  const token = exception.offendingToken;
   if (token) {
     const expectedSymbols = getExpectedSymbols(exception.expectedTokens);
     if (

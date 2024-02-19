@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ANTLRErrorListener, Recognizer } from 'antlr4';
+import { ErrorListener, Recognizer } from 'antlr4';
 import type { EditorError } from '../types';
 
-export class ANTLREErrorListener implements ANTLRErrorListener<any> {
+export class ANTLREErrorListener implements ErrorListener<any> {
   private errors: EditorError[] = [];
 
   syntaxError(
-    recognizer: Recognizer<any, any>,
+    recognizer: Recognizer<any>,
     offendingSymbol: any,
     line: number,
     column: number,
