@@ -6,7 +6,7 @@
  */
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import {
   DateHistogramIndexPatternColumn,
@@ -95,7 +95,7 @@ export class EmbeddedLensExamplePlugin
     core.application.register({
       id: 'third_party_lens_navigation_prompt',
       title: 'Third party Lens navigation prompt',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: (params) => {
         (async () => {
           const [, { lens: lensStart, dataViews }] = await core.getStartServices();
