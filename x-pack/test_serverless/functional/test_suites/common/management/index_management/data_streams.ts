@@ -115,7 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('saveButton');
 
       // Expect to see a success toast
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention updated');
     });
 
@@ -133,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('saveButton');
 
       // Expect to see a success toast
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
     });
   });

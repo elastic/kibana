@@ -80,7 +80,7 @@ export function IndexSelection() {
             trigger={{
               label: field.value || SELECT_DATA_VIEW,
               fullWidth: true,
-              color: 'text',
+              color: fieldState.invalid ? 'danger' : 'text',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
             }}

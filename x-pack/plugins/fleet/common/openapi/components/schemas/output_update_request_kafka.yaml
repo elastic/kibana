@@ -103,6 +103,8 @@ properties:
         topic:
           type: string
         when:
+          deprecated: true
+          description: Deprecated, kafka output do not support conditionnal topics anymore.
           type: object
           properties:
             type:
