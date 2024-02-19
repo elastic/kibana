@@ -11,6 +11,7 @@ import {
   EuiLoadingSpinner,
   EuiSuperSelect,
   EuiText,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -30,8 +31,8 @@ const wrapperClassName = css`
   }
 `;
 
-const noWrapClassName = css`
-  white-space: nowrap;
+const smallFontClassName = css`
+  font-size: 12px;
 `;
 
 export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
@@ -84,14 +85,14 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
       gutterSize="xs"
       responsive={false}
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow>
         <EuiSuperSelect
           compressed
           valueOfSelected={props.selectedConnector}
           options={props.connectors.map((connector) => ({
             value: connector.id,
             inputDisplay: (
-              <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
                     {i18n.translate(
@@ -102,18 +103,16 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
                     )}
                   </EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" className={noWrapClassName}>
-                    {connector.name}
-                  </EuiText>
+                <EuiFlexItem grow>
+                  <EuiTextTruncate
+                    text={connector.name}
+                    className={smallFontClassName}
+                    truncation="end"
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),
-            dropdownDisplay: (
-              <EuiText size="xs" className={noWrapClassName}>
-                {connector.name}
-              </EuiText>
-            ),
+            dropdownDisplay: <EuiText size="xs">{connector.name}</EuiText>,
           }))}
           onChange={(id) => {
             props.selectConnector(id);

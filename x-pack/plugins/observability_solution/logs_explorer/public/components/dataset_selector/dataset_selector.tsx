@@ -44,6 +44,7 @@ export function DatasetSelector({
   discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isDataViewAvailable,
   isEsqlEnabled,
   isLoadingDataViews,
   isLoadingIntegrations,
@@ -164,8 +165,16 @@ export function DatasetSelector({
       'data-test-subj': getDataViewTestSubj(dataView.title),
       name: <DataViewMenuItem dataView={dataView} />,
       onClick: () => selectDataView(dataView),
+      disabled: !isDataViewAvailable(dataView),
     }));
-  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
+  }, [
+    dataViews,
+    dataViewsError,
+    isDataViewAvailable,
+    isLoadingDataViews,
+    onDataViewsReload,
+    selectDataView,
+  ]);
 
   const tabs = [
     {
