@@ -177,20 +177,23 @@ export class SettingsPageObject extends FtrService {
     return wrapperElement.findByTestSubject('comboBoxSearchInput');
   }
 
+  async getTimeFieldComboBox() {
+    const wrapperElement = await this.testSubjects.find('timestampField');
+    return wrapperElement.findByTestSubject('comboBoxInput');
+  }
+
+  noTimeFieldOption = "--- I don't want to use the time filter ---";
+
   async selectTimeFieldOption(selection: string) {
     // open dropdown
     const timefield = await this.getTimeFieldNameField();
-    const prevValue = await timefield.getAttribute('value');
     const enabled = await timefield.isEnabled();
 
-    if (prevValue === selection || !enabled) {
+    if (!enabled) {
       return;
     }
     await this.retry.waitFor('time field dropdown have the right value', async () => {
-      await timefield.click();
-      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
-      await this.browser.pressKeys(selection);
-      await this.browser.pressKeys(this.browser.keys.TAB);
+      await this.comboBox.setElement(await this.getTimeFieldComboBox(), selection);
       const value = await timefield.getAttribute('value');
       return value === selection;
     });
