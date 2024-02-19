@@ -105,7 +105,6 @@ import { SplitChart } from './split_chart';
 import {
   Annotations,
   getAnnotationsGroupedByInterval,
-  getScaledDateFormat,
   isRangeAnnotation,
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
@@ -119,8 +118,6 @@ import './xy_chart.scss';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
-import { Duration } from 'moment';
-import moment from 'moment';
 
 declare global {
   interface Window {
@@ -153,8 +150,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   shouldUseVeil: boolean;
   uiState?: PersistedState;
-  dateFormat: string;
-  dateFormatScaled: string[][];
+  timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
   shouldShowLegendAction?: (actionId: string) => boolean;
 };
@@ -219,8 +215,7 @@ export function XYChart({
   useLegacyTimeAxis,
   renderComplete,
   uiState,
-  dateFormat,
-  dateFormatScaled,
+  timeFormat,
   overrides,
 }: XYChartRenderProps) {
   const {
@@ -449,18 +444,12 @@ export function XYChart({
     ? partition(annotations?.datatable.rows, isRangeAnnotation)
     : [[], []];
 
-  const scaledDateFormatForPoint = getScaledDateFormat(
-    moment.duration(minInterval),
-    dateFormatScaled,
-    dateFormat
-  );
-
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     lineAnnotations as PointEventAnnotationRow[],
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    scaledDateFormatForPoint
+    timeFormat
   );
 
   const visualConfigs = [
@@ -1030,8 +1019,7 @@ export function XYChart({
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}
-              dateFormatScaled={dateFormatScaled}
-              dateFormat={dateFormat}
+              timeFormat={timeFormat}
               isHorizontal={shouldRotate}
               paddingMap={linesPaddings}
               isBarChart={filteredBarLayers.length > 0}
