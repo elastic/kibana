@@ -215,6 +215,12 @@ export class ObservabilityAIAssistantClient {
                     })
                     .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
 
+            if (numFunctionsCalled >= MAX_FUNCTION_CALLS) {
+              this.dependencies.logger.debug(
+                `Max function calls exceeded, no longer sending over functions`
+              );
+            }
+
             const response$ = (
               await this.chat(
                 lastMessage.message.name && lastMessage.message.name !== 'context'
@@ -460,6 +466,8 @@ export class ObservabilityAIAssistantClient {
 
     const spanId = (span?.ids['span.id'] || '').substring(0, 6);
 
+    const loggerPrefix = `${name}${spanId ? ` (${spanId})` : ''}`;
+
     try {
       const connector = await this.dependencies.actionsClient.get({
         id: connectorId,
@@ -492,8 +500,10 @@ export class ObservabilityAIAssistantClient {
 
       const subAction = adapter.getSubAction();
 
-      this.dependencies.logger.debug(`Sending conversation to connector`);
-      this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+      this.dependencies.logger.debug(`${loggerPrefix}: Sending conversation to connector`);
+      this.dependencies.logger.trace(
+        `${loggerPrefix}:\n${JSON.stringify(subAction.subActionParams, null, 2)}`
+      );
 
       const now = performance.now();
 
@@ -503,9 +513,9 @@ export class ObservabilityAIAssistantClient {
       });
 
       this.dependencies.logger.debug(
-        `Received action client response: ${executeResult.status} (took: ${Math.round(
-          performance.now() - now
-        )}ms)${spanId ? ` (${spanId})` : ''}`
+        `${loggerPrefix}: Received action client response: ${
+          executeResult.status
+        } (took: ${Math.round(performance.now() - now)}ms)`
       );
 
       if (executeResult.status === 'error' && executeResult?.serviceMessage) {
@@ -531,11 +541,13 @@ export class ObservabilityAIAssistantClient {
 
       response$.pipe(concatenateChatCompletionChunks(), lastOperator()).subscribe({
         error: (error) => {
-          this.dependencies.logger.debug('Error in chat response');
+          this.dependencies.logger.debug(`${loggerPrefix}: Error in chat response`);
           this.dependencies.logger.debug(error);
         },
         next: (message) => {
-          this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
+          this.dependencies.logger.debug(
+            `${loggerPrefix}: Received message:\n${JSON.stringify(message)}`
+          );
         },
       });
 

@@ -143,10 +143,12 @@ export class KibanaClient {
 
   createChatClient({
     connectorId,
+    evaluationConnectorId,
     persist,
     suite,
   }: {
     connectorId: string;
+    evaluationConnectorId: string;
     persist: boolean;
     suite: Mocha.Suite;
   }): ChatClient {
@@ -204,17 +206,19 @@ export class KibanaClient {
         messages,
         functions,
         functionCall,
+        connectorIdOverride,
       }: {
         messages: Message[];
         functions: FunctionDefinition[];
         functionCall?: string;
+        connectorIdOverride?: string;
       }
     ) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
         {
           name,
           messages,
-          connectorId,
+          connectorId: connectorIdOverride || connectorId,
           functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
           functionCall,
         };
@@ -358,6 +362,7 @@ export class KibanaClient {
       },
       evaluate: async ({ messages, conversationId }, criteria) => {
         const message = await chat('evaluate', {
+          connectorIdOverride: evaluationConnectorId,
           messages: [
             {
               '@timestamp': new Date().toISOString(),

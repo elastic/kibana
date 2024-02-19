@@ -8,6 +8,11 @@ import { format, parse } from 'url';
 import { Argv } from 'yargs';
 import { readKibanaConfig } from './read_kibana_config';
 
+export enum EvaluateWith {
+  same = 'same',
+  other = 'other',
+}
+
 export function options(y: Argv) {
   const config = readKibanaConfig();
 
@@ -65,6 +70,11 @@ export function options(y: Argv) {
     .option('logLevel', {
       describe: 'Log level',
       default: 'info',
+    })
+    .option('evaluateWith', {
+      describe:
+        'The connector ID to evaluate with. Leave empty for the same connector, use "other" to get a selection menu',
+      default: EvaluateWith.same,
     })
     .check((argv) => {
       if (!argv.persist && argv.clear) {
