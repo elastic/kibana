@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
+import Boom from '@hapi/boom';
 import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
@@ -163,9 +164,45 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
   },
 });
 
+const testErrorRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/test_error_route',
+
+  options: {
+    tags: [],
+  },
+  async handler(resources) {
+    throw new Error();
+  },
+});
+
+const testErrorWithMessageRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/test_error_with_message_route',
+
+  options: {
+    tags: [],
+  },
+  async handler(resources) {
+    throw new Error('Dataset quality - Test error');
+  },
+});
+
+const testErrorWithBoomMessageRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/test_error_with_boom_message_route',
+
+  options: {
+    tags: [],
+  },
+  async handler(resources) {
+    throw Boom.internal('Dataset quality - Test Boom error');
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...dataStreamDetailsRoute,
   ...estimatedDataInBytesRoute,
+  ...testErrorRoute,
+  ...testErrorWithMessageRoute,
+  ...testErrorWithBoomMessageRoute,
 };
