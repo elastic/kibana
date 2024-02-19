@@ -64,7 +64,7 @@ export const initializeSelection =
        */
       if (
         datasetSelection.selection.dataView.isUnknownDataType() &&
-        events?.onUknownDataViewSelection(context)
+        events?.onUknownDataViewSelection
       ) {
         return events.onUknownDataViewSelection(context);
       }
