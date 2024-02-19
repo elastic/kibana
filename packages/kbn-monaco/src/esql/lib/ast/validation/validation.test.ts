@@ -979,27 +979,28 @@ describe('validation logic', () => {
       ]);
     }
 
-    testErrorsAndWarnings(`from a_index | where numberField =~ 0`, [
+    // Skip these tests until the insensitive case equality gets restored back
+    testErrorsAndWarnings.skip(`from a_index | where numberField =~ 0`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where NOT numberField =~ 0`, [
+    testErrorsAndWarnings.skip(`from a_index | where NOT numberField =~ 0`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where (numberField =~ 0)`, [
+    testErrorsAndWarnings.skip(`from a_index | where (numberField =~ 0)`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where (NOT (numberField =~ 0))`, [
+    testErrorsAndWarnings.skip(`from a_index | where (NOT (numberField =~ 0))`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where 1 =~ 0`, [
+    testErrorsAndWarnings.skip(`from a_index | where 1 =~ 0`, [
       'Argument of [=~] must be [string], found value [1] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | eval stringField =~ 0`, [
+    testErrorsAndWarnings.skip(`from a_index | eval stringField =~ 0`, [
       `Argument of [=~] must be [string], found value [0] type [number]`,
     ]);
 
