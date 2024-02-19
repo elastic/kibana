@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { take, map, takeLast } from 'rxjs/operators';
-import type { App } from '@kbn/core-application-browser';
+import { type App, AppStatus } from '@kbn/core-application-browser';
 import { NavLinksService } from './nav_links_service';
 
-const availableApps = new Map([
-  ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1' }],
+const availableApps: ReadonlyMap<string, App> = new Map([
+  ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1', mount: () => () => undefined }],
   [
     'app2',
     {
@@ -20,12 +20,14 @@ const availableApps = new Map([
       order: -10,
       title: 'App 2',
       euiIconType: 'canvasApp',
+      mount: () => () => undefined,
       deepLinks: [
         {
           id: 'deepApp1',
           order: 50,
           title: 'Deep App 1',
           path: '/deepapp1',
+          visibleIn: ['sideNav'],
           deepLinks: [
             {
               id: 'deepApp2',
@@ -38,7 +40,42 @@ const availableApps = new Map([
       ],
     },
   ],
-  ['chromelessApp', { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true }],
+  [
+    'chromelessApp',
+    {
+      id: 'chromelessApp',
+      order: 20,
+      title: 'Chromless App',
+      chromeless: true,
+      mount: () => () => undefined,
+    },
+  ],
+  [
+    'inaccessibleApp', // inaccessible app
+    {
+      id: 'inaccessibleApp',
+      order: 30,
+      title: 'App inaccessible',
+      mount: () => () => undefined,
+      status: AppStatus.inaccessible,
+      deepLinks: [
+        {
+          id: 'deepInaccessibleApp1',
+          order: 50,
+          title: 'Deep App 3',
+          path: '/deepapp3',
+          deepLinks: [
+            {
+              id: 'deepInaccessibleApp2',
+              order: 40,
+              title: 'Deep App 3',
+              path: '/deepapp3',
+            },
+          ],
+        },
+      ],
+    },
+  ],
 ]);
 
 const mockHttp = {
@@ -55,7 +92,7 @@ describe('NavLinksService', () => {
   beforeEach(() => {
     service = new NavLinksService();
     mockAppService = {
-      applications$: new BehaviorSubject<ReadonlyMap<string, App>>(availableApps as any),
+      applications$: new BehaviorSubject<ReadonlyMap<string, App>>(availableApps),
     };
     start = service.start({ application: mockAppService, http: mockHttp });
   });
@@ -63,25 +100,34 @@ describe('NavLinksService', () => {
   describe('#getNavLinks$()', () => {
     it('does not include `chromeless` applications', async () => {
       expect(
-        await start
-          .getNavLinks$()
-          .pipe(
+        await lastValueFrom(
+          start.getNavLinks$().pipe(
             take(1),
             map((links) => links.map((l) => l.id))
           )
-          .toPromise()
+        )
       ).not.toContain('chromelessApp');
+    });
+
+    it('does not include `inaccesible` applications', async () => {
+      expect(
+        await lastValueFrom(
+          start.getNavLinks$().pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+        )
+      ).not.toContain('inaccessibleApp');
     });
 
     it('sorts navlinks by `order` property', async () => {
       expect(
-        await start
-          .getNavLinks$()
-          .pipe(
+        await lastValueFrom(
+          start.getNavLinks$().pipe(
             take(1),
             map((links) => links.map((l) => l.id))
           )
-          .toPromise()
+        )
       ).toEqual(['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1']);
     });
 
@@ -94,7 +140,7 @@ describe('NavLinksService', () => {
     });
 
     it('completes when service is stopped', async () => {
-      const last$ = start.getNavLinks$().pipe(takeLast(1)).toPromise();
+      const last$ = lastValueFrom(start.getNavLinks$().pipe(takeLast(1)));
       service.stop();
       await expect(last$).resolves.toBeInstanceOf(Array);
     });
@@ -107,6 +153,10 @@ describe('NavLinksService', () => {
 
     it('returns undefined if it does not exist', () => {
       expect(start.get('phony')).toBeUndefined();
+    });
+
+    it('returns undefined if app is inaccessible', () => {
+      expect(start.get('inaccessibleApp')).toBeUndefined();
     });
   });
 
@@ -133,15 +183,15 @@ describe('NavLinksService', () => {
 
   describe('#enableForcedAppSwitcherNavigation()', () => {
     it('flips #getForceAppSwitcherNavigation$()', async () => {
-      await expect(start.getForceAppSwitcherNavigation$().pipe(take(1)).toPromise()).resolves.toBe(
-        false
-      );
+      await expect(
+        lastValueFrom(start.getForceAppSwitcherNavigation$().pipe(take(1)))
+      ).resolves.toBe(false);
 
       start.enableForcedAppSwitcherNavigation();
 
-      await expect(start.getForceAppSwitcherNavigation$().pipe(take(1)).toPromise()).resolves.toBe(
-        true
-      );
+      await expect(
+        lastValueFrom(start.getForceAppSwitcherNavigation$().pipe(take(1)))
+      ).resolves.toBe(true);
     });
   });
 });
