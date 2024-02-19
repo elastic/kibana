@@ -51,9 +51,24 @@ export interface ValidationErrors {
       fn: string;
       numArgs: number;
       passedArgs: number;
-      missingArgs: number;
+    };
+  };
+  wrongArgumentNumberTooMany: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
       extraArgs: number;
-      exactly: boolean;
+    };
+  };
+  wrongArgumentNumberTooFew: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      missingArgs: number;
     };
   };
   unknownColumn: {

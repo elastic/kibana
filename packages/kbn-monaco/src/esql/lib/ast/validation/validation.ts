@@ -325,23 +325,50 @@ function validateFunction(
     const refSignature = fnDefinition.signatures[0];
     const numArgs =
       refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentNumber',
-        values: {
-          fn: astFunction.name,
-          numArgs,
-          passedArgs: astFunction.args.length,
-          missingArgs: Math.max(numArgs - astFunction.args.length, 0),
-          extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
-          exactly:
-            !refSignature.minParams &&
-            refSignature.params.filter(({ optional }) => !optional).length ===
-              refSignature.params.length,
-        },
-        locations: astFunction.location,
-      })
-    );
+    if (
+      !refSignature.minParams &&
+      refSignature.params.filter(({ optional }) => !optional).length === refSignature.params.length
+    ) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumber',
+          values: {
+            fn: astFunction.name,
+            numArgs:
+              refSignature.minParams ??
+              refSignature.params.filter(({ optional }) => !optional).length,
+            passedArgs: astFunction.args.length,
+          },
+          locations: astFunction.location,
+        })
+      );
+    } else if (Math.max(astFunction.args.length - refSignature.params.length, 0) > 0) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumberTooMany',
+          values: {
+            fn: astFunction.name,
+            numArgs: refSignature.params.length,
+            passedArgs: astFunction.args.length,
+            extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+          },
+          locations: astFunction.location,
+        })
+      );
+    } else {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumberTooFew',
+          values: {
+            fn: astFunction.name,
+            numArgs,
+            passedArgs: astFunction.args.length,
+            missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+          },
+          locations: astFunction.location,
+        })
+      );
+    }
   }
   // now perform the same check on all functions args
   for (const arg of astFunction.args) {
