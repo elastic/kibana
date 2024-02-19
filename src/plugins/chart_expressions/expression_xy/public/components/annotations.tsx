@@ -18,7 +18,7 @@ import {
   Position,
   RectAnnotation,
 } from '@elastic/charts';
-import moment from 'moment';
+import moment, { Duration } from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,7 +45,8 @@ import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers'
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
   rangeAnnotations: ManualRangeEventAnnotationRow[];
-  timeFormat?: string;
+  dateFormat: string;
+  dateFormatScaled: string[][];
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   simpleView?: boolean;
@@ -53,6 +54,20 @@ export interface AnnotationsProps {
   isBarChart?: boolean;
   outsideDimension: number;
 }
+
+export const getScaledDateFormat = (
+  interval: Duration,
+  dateFormatScaled: string[][],
+  dateFormat: string
+) => {
+  for (let i = dateFormatScaled.length - 1; i >= 0; i--) {
+    const rule = dateFormatScaled[i];
+    if (!rule[0] || (interval && interval >= moment.duration(rule[0]))) {
+      return rule[1];
+    }
+  }
+  return dateFormat;
+};
 
 const TooltipAnnotationDetails = ({
   row,
@@ -103,7 +118,7 @@ const createCustomTooltip =
     rows: PointEventAnnotationRow[],
     formatFactory: FormatFactory,
     columns: DatatableColumn[] | undefined,
-    timeFormat: string
+    scaledDateFormat: string
   ): CustomAnnotationTooltip =>
   () => {
     const lastElement = rows[rows.length - 1];
@@ -146,7 +161,7 @@ const createCustomTooltip =
                       <EuiTitle size="xxxs">
                         <h6>{row.label}</h6>
                       </EuiTitle>
-                      <EuiFlexItem>{moment(row.time).format(timeFormat)}</EuiFlexItem>
+                      <EuiFlexItem>{moment(row.time).format(scaledDateFormat)}</EuiFlexItem>
                       <TooltipAnnotationDetails
                         key={snakeCase(row.time)}
                         row={row}
@@ -218,7 +233,7 @@ export const getAnnotationsGroupedByInterval = (
   configs: EventAnnotationOutput[] | undefined,
   columns: DatatableColumn[] | undefined,
   formatFactory: FormatFactory,
-  timeFormat: string
+  scaledDateFormat: string
 ) => {
   const visibleGroupedConfigs = annotations.reduce<Record<string, PointEventAnnotationRow[]>>(
     (acc, current) => {
@@ -247,7 +262,7 @@ export const getAnnotationsGroupedByInterval = (
       icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
-      customTooltip: createCustomTooltip(rowsPerBucket, formatFactory, columns, timeFormat),
+      customTooltip: createCustomTooltip(rowsPerBucket, formatFactory, columns, scaledDateFormat),
       isGrouped: false,
     };
     if (rowsPerBucket.length > 1) {
@@ -270,13 +285,14 @@ RectAnnotation.displayName = 'RectAnnotation';
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
-  timeFormat,
   isHorizontal,
   paddingMap,
   simpleView,
   minInterval,
   isBarChart,
   outsideDimension,
+  dateFormatScaled,
+  dateFormat,
 }: AnnotationsProps) => {
   return (
     <>
@@ -350,6 +366,13 @@ export const Annotations = ({
         );
       })}
       {rangeAnnotations.map(({ id, label, time, color, endTime, outside }) => {
+        const duration = Math.max(moment(endTime).diff(moment(time)));
+        console.log(minInterval);
+        const scaledDateFormat = getScaledDateFormat(
+          moment.duration(Math.max(duration, minInterval || 0)),
+          dateFormatScaled,
+          dateFormat
+        );
         return (
           <RectAnnotation
             id={id}
@@ -372,9 +395,9 @@ export const Annotations = ({
                       <EuiTitle size="xxxs">
                         <h6>{label}</h6>
                       </EuiTitle>
-                      <EuiFlexItem>{`${moment(time).format(timeFormat)} — ${moment(endTime).format(
-                        timeFormat
-                      )}`}</EuiFlexItem>
+                      <EuiFlexItem>{`${moment(time).format(scaledDateFormat)} — ${moment(
+                        endTime
+                      ).format(scaledDateFormat)}`}</EuiFlexItem>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </div>

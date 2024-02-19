@@ -97,7 +97,8 @@ export class ExpressionXyPlugin {
         useLegacyTimeAxis,
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
-        timeFormat: core.uiSettings.get('dateFormat'),
+        dateFormat: core.uiSettings.get('dateFormat'),
+        dateFormatScaled: core.uiSettings.get('dateFormat:scaled'),
       };
     };
 

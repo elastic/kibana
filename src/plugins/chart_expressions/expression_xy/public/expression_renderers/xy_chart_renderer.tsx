@@ -54,7 +54,8 @@ export type GetStartDepsFn = () => Promise<{
   kibanaTheme: ThemeServiceStart;
   eventAnnotationService: EventAnnotationServiceType;
   usageCollection?: UsageCollectionStart;
-  timeFormat: string;
+  dateFormat: string;
+  dateFormatScaled: string[][];
 }>;
 
 interface XyChartRendererDeps {
@@ -271,7 +272,8 @@ export const getXyChartRenderer = ({
               chartsThemeService={deps.theme}
               paletteService={deps.paletteService}
               timeZone={deps.timeZone}
-              timeFormat={deps.timeFormat}
+              dateFormat={deps.dateFormat}
+              dateFormatScaled={deps.dateFormatScaled}
               eventAnnotationService={deps.eventAnnotationService}
               useLegacyTimeAxis={deps.useLegacyTimeAxis}
               minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
