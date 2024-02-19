@@ -63,6 +63,7 @@ export function useFetchAgentsData() {
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  console.log('selectedTags ' + selectedTags);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
@@ -99,6 +100,7 @@ export function useFetchAgentsData() {
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
   const [allTags, setAllTags] = useState<string[]>();
+  console.log('allTags ' + allTags);
   const [isLoading, setIsLoading] = useState(false);
   const [shownAgents, setShownAgents] = useState(0);
   const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
@@ -198,6 +200,7 @@ export function useFetchAgentsData() {
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
             setAllTags(newAllTags);
+            console.log('setAllTags ' + newAllTags);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
@@ -317,7 +320,10 @@ export function useFetchAgentsData() {
     selectedStatus,
     setSelectedStatus,
     selectedTags,
-    setSelectedTags,
+    setSelectedTags: (tags: string[]) => {
+      console.log('setSelectedTags ' + tags);
+      setSelectedTags(tags);
+    },
     agentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
