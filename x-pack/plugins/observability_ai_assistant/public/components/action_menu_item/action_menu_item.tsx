@@ -27,7 +27,7 @@ const buttonLabelClassName = css`
   display: none;
 `;
 
-export function ObservabilityAIAssistantActionMenuItem({ onClick }: { onClick: () => void }) {
+export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
   const breakpoint = useCurrentEuiBreakpoint();
 
@@ -82,7 +82,6 @@ export function ObservabilityAIAssistantActionMenuItem({ onClick }: { onClick: (
         data-test-subj="observabilityAiAssistantNewChatHeaderLink"
         onClick={() => {
           setIsOpen(() => true);
-          onClick();
         }}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
