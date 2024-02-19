@@ -61,7 +61,7 @@ export const SourcesPanelSidebar: React.FC<SourcesPanelSidebarProps> = () => {
           <AddIndicesField
             selectedIndices={selectedIndices}
             indices={indices}
-            addIndex={addIndex}
+            onIndexSelect={addIndex}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

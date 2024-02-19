@@ -14,39 +14,33 @@ import { useQueryIndices } from '../../hooks/useQueryIndices';
 interface AddIndicesFieldProps {
   indices: string[];
   selectedIndices: string[];
-  addIndex: (index: string) => void;
+  onIndexSelect: (index: string) => void;
 }
 
 export const AddIndicesField: React.FC<AddIndicesFieldProps> = ({
   selectedIndices,
   indices,
-  addIndex,
-}) => {
-  const onChange = (selectedIndex: string) => {
-    addIndex(selectedIndex);
-  };
-
-  return (
-    <EuiFormRow
-      fullWidth
-      label={i18n.translate('aiPlayground.sources.addIndex.label', {
-        defaultMessage: 'Add index',
+  onIndexSelect,
+}) => (
+  <EuiFormRow
+    fullWidth
+    label={i18n.translate('aiPlayground.sources.addIndex.label', {
+      defaultMessage: 'Add index',
+    })}
+    labelType="legend"
+  >
+    <EuiSuperSelect
+      placeholder={i18n.translate('aiPlayground.sources.addIndex.placeholder', {
+        defaultMessage: 'Select new data source',
       })}
-      labelType="legend"
-    >
-      <EuiSuperSelect
-        placeholder={i18n.translate('aiPlayground.sources.addIndex.placeholder', {
-          defaultMessage: 'Add new data source',
-        })}
-        fullWidth
-        options={indices.map((index) => ({
-          value: index,
-          inputDisplay: index,
-          disabled: selectedIndices.includes(index),
-        }))}
-        onChange={onChange}
-        hasDividers
-      />
-    </EuiFormRow>
-  );
-};
+      fullWidth
+      options={indices.map((index) => ({
+        value: index,
+        inputDisplay: index,
+        disabled: selectedIndices.includes(index),
+      }))}
+      onChange={onIndexSelect}
+      hasDividers
+    />
+  </EuiFormRow>
+);

@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { SourcesPanelEmptyPrompt } from './sources_panel/sources_panel_empty_prompt';
 
 interface EmptyIndexProps {
   onCreateIndexClick: () => void;
@@ -17,7 +18,7 @@ interface EmptyIndexProps {
 
 export const EmptyIndex: React.FC<EmptyIndexProps> = ({ onCreateIndexClick }) => {
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup gutterSize="l" direction="column">
       <EuiFlexItem>
         <EuiPanel>
           <EuiEmptyPrompt
@@ -54,6 +55,8 @@ export const EmptyIndex: React.FC<EmptyIndexProps> = ({ onCreateIndexClick }) =>
           />
         </EuiPanel>
       </EuiFlexItem>
+
+      <SourcesPanelEmptyPrompt />
     </EuiFlexGroup>
   );
 };

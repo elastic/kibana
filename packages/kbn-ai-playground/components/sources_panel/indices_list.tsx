@@ -15,33 +15,35 @@ interface IndicesListProps {
   hasBorder?: boolean;
 }
 
-export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick, hasBorder }) => (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate('aiPlayground.sources.indices.label', {
-      defaultMessage: 'Selected indices',
-    })}
-    labelType="legend"
-  >
-    <EuiListGroup bordered={hasBorder}>
-      {indices.map((index) => (
-        <EuiListGroupItem
-          key={index}
-          color="primary"
-          label={index}
-          size="s"
-          extraAction={{
-            alwaysShow: true,
-            'aria-label': i18n.translate('aiPlayground.sources.indices.removeIndex', {
-              defaultMessage: 'Remove index from sources',
-            }),
-            color: 'text',
-            iconType: 'minusInCircle',
-            onClick: () => onRemoveClick(index),
-            disabled: indices.length === 1,
-          }}
-        />
-      ))}
-    </EuiListGroup>
-  </EuiFormRow>
-);
+export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick, hasBorder }) =>
+  indices?.length ? (
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('aiPlayground.sources.indices.label', {
+        defaultMessage: 'Selected indices',
+      })}
+      labelType="legend"
+    >
+      <EuiListGroup bordered={hasBorder} maxWidth={false} wrapText>
+        {indices.map((index) => (
+          <EuiListGroupItem
+            key={index}
+            wrapText
+            color="primary"
+            label={index}
+            size="s"
+            extraAction={{
+              alwaysShow: true,
+              'aria-label': i18n.translate('aiPlayground.sources.indices.removeIndex', {
+                defaultMessage: 'Remove index from sources',
+              }),
+              color: 'text',
+              iconType: 'minusInCircle',
+              onClick: () => onRemoveClick(index),
+              disabled: indices.length === 1,
+            }}
+          />
+        ))}
+      </EuiListGroup>
+    </EuiFormRow>
+  ) : null;
