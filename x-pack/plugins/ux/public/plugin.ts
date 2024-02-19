@@ -178,9 +178,6 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-      // navLinkStatus: config.ui.enabled
-      //   ? AppNavLinkStatus.default
-      //   : AppNavLinkStatus.hidden,
       keywords: [
         'RUM',
         'Real User Monitoring',
