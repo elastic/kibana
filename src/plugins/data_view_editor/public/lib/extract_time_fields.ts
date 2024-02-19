@@ -10,6 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { TimestampOption } from '../types';
 
+export const noTimeFieldLabel = i18n.translate(
+  'indexPatternEditor.createIndexPattern.stepTime.noTimeFieldOptionLabel',
+  {
+    defaultMessage: "--- I don't want to use the time filter ---",
+  }
+);
+export const noTimeFieldValue = '';
+
 export function extractTimeFields(
   fields: DataViewField[],
   requireTimestampField: boolean = false
@@ -20,15 +28,9 @@ export function extractTimeFields(
     return [];
   }
 
-  const noTimeFieldLabel = i18n.translate(
-    'indexPatternEditor.createIndexPattern.stepTime.noTimeFieldOptionLabel',
-    {
-      defaultMessage: "--- I don't want to use the time filter ---",
-    }
-  );
   const noTimeFieldOption = {
     display: noTimeFieldLabel,
-    fieldName: '',
+    fieldName: noTimeFieldValue,
   };
 
   const timeFields = dateFields.map((field) => ({
