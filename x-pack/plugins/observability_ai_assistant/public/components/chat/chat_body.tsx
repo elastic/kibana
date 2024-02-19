@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   useEuiTheme,
   euiScrollBarStyles,
+  EuiText,
 } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -390,6 +391,18 @@ export function ChatBody({
                 return next(messages.concat(message));
               }}
             />
+            {conversation.value?.conversation.token_count && (
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.observabilityAiAssistant.chatBody.tokenCountTextLabel', {
+                      defaultMessage: '{tokenCount} tokens',
+                      values: { tokenCount: conversation.value?.conversation.token_count },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
             <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
