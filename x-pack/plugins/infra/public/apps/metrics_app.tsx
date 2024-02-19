@@ -17,7 +17,6 @@ import { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
-import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { SourceProvider } from '../containers/metrics_source';
@@ -104,15 +103,6 @@ const MetricsApp: React.FC<{
             <Router history={history}>
               <Routes>
                 <Route path="/link-to" component={LinkToMetricsPage} />
-                {uiCapabilities?.infrastructure?.show && (
-                  <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
-                )}
-                {uiCapabilities?.infrastructure?.show && (
-                  <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
-                )}
-                {uiCapabilities?.infrastructure?.show && (
-                  <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-                )}
                 {uiCapabilities?.infrastructure?.show && (
                   <Route path="/" component={InfrastructurePage} />
                 )}

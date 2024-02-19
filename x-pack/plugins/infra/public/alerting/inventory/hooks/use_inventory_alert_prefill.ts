@@ -17,15 +17,21 @@ export const useInventoryAlertPrefill = () => {
   const [filterQuery, setFilterQuery] = useState<string | undefined>();
   const [metric, setMetric] = useState<SnapshotMetricInput>({ type: 'cpu' });
   const [customMetrics, setCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
+  const [region, setRegion] = useState('');
+  const [accountId, setAccountId] = useState('');
 
   return {
     nodeType,
     filterQuery,
     metric,
     customMetrics,
+    region,
+    accountId,
+    setAccountId,
     setNodeType,
     setFilterQuery,
     setMetric,
     setCustomMetrics,
+    setRegion,
   };
 };

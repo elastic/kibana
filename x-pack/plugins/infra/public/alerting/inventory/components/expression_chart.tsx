@@ -17,7 +17,6 @@ import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
-import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
@@ -37,6 +36,8 @@ interface Props {
   filterQuery?: string | symbol;
   nodeType: InventoryItemType;
   sourceId: string;
+  accountId?: string;
+  region?: string;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
@@ -44,6 +45,8 @@ export const ExpressionChart: React.FC<Props> = ({
   filterQuery,
   nodeType,
   sourceId,
+  accountId = '',
+  region = '',
 }) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
@@ -63,7 +66,6 @@ export const ExpressionChart: React.FC<Props> = ({
     type: 'custom' as SnapshotMetricType,
   });
 
-  const options = useWaffleOptionsContext();
   const { loading, nodes } = useSnapshot({
     filterQuery,
     metrics:
@@ -74,8 +76,8 @@ export const ExpressionChart: React.FC<Props> = ({
     nodeType,
     sourceId,
     currentTime: 0,
-    accountId: options.accountId,
-    region: options.region,
+    accountId,
+    region,
     timerange,
   });
 

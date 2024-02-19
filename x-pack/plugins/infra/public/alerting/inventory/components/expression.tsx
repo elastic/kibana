@@ -70,6 +70,8 @@ import { NodeTypeExpression } from './node_type';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
+  accountId?: string;
+  region?: string;
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
@@ -86,6 +88,8 @@ type Props = Omit<
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
+      accountId?: string;
+      region?: string;
     },
     AlertContextMeta
   >,
@@ -309,6 +313,8 @@ export const Expressions: React.FC<Props> = (props) => {
                 filterQuery={ruleParams.filterQuery}
                 nodeType={ruleParams.nodeType}
                 sourceId={ruleParams.sourceId}
+                accountId={ruleParams.accountId}
+                region={ruleParams.region}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>

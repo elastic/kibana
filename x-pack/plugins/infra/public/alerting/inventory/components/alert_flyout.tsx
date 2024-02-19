@@ -8,6 +8,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
@@ -17,15 +18,26 @@ interface Props {
   visible?: boolean;
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
+  // only shows for AWS when there are accounts info
+  accountId?: string;
+  // only shows for AWS when there are regions info
+  region?: string;
   filter?: string;
+  customMetrics?: SnapshotCustomMetricInput[];
   setVisible(val: boolean): void;
 }
 
-export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
+export const AlertFlyout = ({
+  options,
+  nodeType,
+  filter,
+  visible,
+  setVisible,
+  customMetrics = [],
+  accountId = '',
+  region = '',
+}: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-
-  const { inventoryPrefill } = useAlertPrefillContext();
-  const { customMetrics = [] } = inventoryPrefill ?? {};
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const AddAlertFlyout = useMemo(
     () =>
@@ -36,10 +48,12 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
         canChangeTrigger: false,
         ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
         metadata: {
+          accountId,
           options,
           nodeType,
           filter,
           customMetrics,
+          region,
         },
         useRuleProducer: true,
       }),
@@ -52,13 +66,16 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
 
 export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery } = inventoryPrefill;
+  const { nodeType, metric, filterQuery, accountId, region, customMetrics } = inventoryPrefill;
 
   return (
     <AlertFlyout
+      accountId={accountId}
       options={{ metric }}
       nodeType={nodeType}
       filter={filterQuery}
+      region={region}
+      customMetrics={customMetrics}
       visible
       setVisible={onClose}
     />
