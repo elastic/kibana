@@ -10,22 +10,25 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 interface IndicesListProps {
-  indices: Array<{ id: string; name: string }>;
+  indices: string[];
   onRemoveClick: (index: string) => void;
   hasBorder?: boolean;
 }
 
 export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick, hasBorder }) => (
   <EuiFormRow
+    fullWidth
     label={i18n.translate('aiPlayground.sources.indices.label', {
       defaultMessage: 'Selected indices',
     })}
+    labelType="legend"
   >
     <EuiListGroup bordered={hasBorder}>
       {indices.map((index) => (
         <EuiListGroupItem
+          key={index}
           color="primary"
-          label={index.name}
+          label={index}
           size="s"
           extraAction={{
             alwaysShow: true,
@@ -34,7 +37,8 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
             }),
             color: 'text',
             iconType: 'minusInCircle',
-            onClick: () => onRemoveClick(index.id),
+            onClick: () => onRemoveClick(index),
+            disabled: indices.length === 1,
           }}
         />
       ))}

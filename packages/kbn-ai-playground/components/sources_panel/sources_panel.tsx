@@ -23,12 +23,13 @@ interface SourcesFlyoutProps {}
 
 export const SourcesPanel: React.FC<SourcesFlyoutProps> = () => {
   const accordionId = useGeneratedHtmlId({ prefix: 'sourceAccordion' });
-  const [indices, setIndices] = React.useState<string[]>([]);
-  const addIndices = (newIndices: string[]) => {
-    setIndices([...indices, ...newIndices]);
+  const indices = ['search-index', 'search-books'];
+  const [selectedIndices, setSelectedIndices] = React.useState<string[]>([]);
+  const addIndex = (newIndex: string) => {
+    setSelectedIndices([...selectedIndices, newIndex]);
   };
   const removeIndex = (index: string) => {
-    setIndices(indices.filter((i: string) => i !== index));
+    setSelectedIndices(selectedIndices.filter((indexName) => indexName !== index));
   };
 
   return (
@@ -42,22 +43,15 @@ export const SourcesPanel: React.FC<SourcesFlyoutProps> = () => {
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <IndicesList
-            indices={[
-              { id: '1', name: 'search-index' },
-              { id: '2', name: 'search-books' },
-            ]}
-            onRemoveClick={removeIndex}
-            hasBorder
+          <IndicesList indices={selectedIndices} onRemoveClick={removeIndex} hasBorder />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AddIndicesField
+            selectedIndices={selectedIndices}
+            indices={indices}
+            addIndex={addIndex}
           />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <AddIndicesField addIndices={addIndices} indices={indices} />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <FieldsPanel indices={indices} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiAccordion>
