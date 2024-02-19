@@ -322,7 +322,9 @@ function validateFunction(
   }
   const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
-    const numArgs = fnDefinition.signatures[0].params.filter(({ optional }) => !optional).length;
+    const refSignature = fnDefinition.signatures[0];
+    const numArgs =
+      refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
     messages.push(
       getMessageFromId({
         messageId: 'wrongArgumentNumber',
@@ -330,7 +332,12 @@ function validateFunction(
           fn: astFunction.name,
           numArgs,
           passedArgs: astFunction.args.length,
-          exactly: fnDefinition.signatures[0].params.length - numArgs,
+          missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+          extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+          exactly:
+            !refSignature.minParams &&
+            refSignature.params.filter(({ optional }) => !optional).length ===
+              refSignature.params.length,
         },
         locations: astFunction.location,
       })

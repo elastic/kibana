@@ -56,15 +56,45 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         }),
       };
     case 'wrongArgumentNumber':
+      if (out.exactly) {
+        return {
+          message: i18n.translate('monaco.esql.validation.wrongArgumentExactNumber', {
+            defaultMessage:
+              'Error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+            values: {
+              fn: out.fn,
+              numArgs: out.numArgs,
+              passedArgs: out.passedArgs,
+              missingArgs: out.missingArgs,
+              extraArgs: out.extraArgs,
+            },
+          }),
+        };
+      }
+      if (Number(out.extraArgs) > 0) {
+        return {
+          message: i18n.translate('monaco.esql.validation.wrongArgumentTooManyNumber', {
+            defaultMessage:
+              'Error building [{fn}]: expects {extraArgs, plural, =0 {} other {no more than }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+            values: {
+              fn: out.fn,
+              numArgs: Number(out.passedArgs) - Number(out.extraArgs),
+              passedArgs: out.passedArgs,
+              extraArgs: out.extraArgs,
+            },
+          }),
+        };
+      }
       return {
         message: i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
           defaultMessage:
-            'Error building [{fn}]: expects {canHaveMoreArgs, plural, =0 {exactly } other {}}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+            'Error building [{fn}]: expects {missingArgs, plural, =0 {} other {at least }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
           values: {
             fn: out.fn,
             numArgs: out.numArgs,
             passedArgs: out.passedArgs,
-            canHaveMoreArgs: out.exactly,
+            missingArgs: out.missingArgs,
+            extraArgs: out.extraArgs,
           },
         }),
       };
