@@ -983,6 +983,13 @@ describe('autocomplete', () => {
       ],
       ','
     );
+    // test that the arg type is correct after minParams
+    testSuggestions('from a | eval a=cidr_match(ipField, stringField,', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]),
+    ]);
     // test deep function nesting suggestions (and check that the same function is not suggested)
     // round(round(
     // round(round(round(
