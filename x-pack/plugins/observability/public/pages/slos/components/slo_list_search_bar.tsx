@@ -77,7 +77,6 @@ export function SloListSearchBar() {
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
         saveQueryMenuVisibility="globally_managed"
-        onClearSavedQuery={() => {}}
       />
     </Container>
   );
