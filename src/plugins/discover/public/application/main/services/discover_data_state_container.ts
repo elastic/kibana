@@ -122,7 +122,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: (savedSearch: SavedSearch) => void;
+  reset: () => void;
 
   /**
    * cancels the running queries
@@ -320,7 +320,8 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = (savedSearch: SavedSearch) => {
+  const reset = () => {
+    const savedSearch = getSavedSearch();
     const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
     sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
   };

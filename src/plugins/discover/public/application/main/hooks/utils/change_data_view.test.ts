@@ -26,7 +26,13 @@ const setupTestParams = (dataView: DataView | undefined) => {
   discoverState.internalState.transitions.setDataView(savedSearch.searchSource.getField('index')!);
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
   discoverState.appState.update = jest.fn();
-  return { services, appState: discoverState.appState, internalState: discoverState.internalState };
+  discoverState.dataState.reset = jest.fn();
+  return {
+    services,
+    appState: discoverState.appState,
+    internalState: discoverState.internalState,
+    dataState: discoverState.dataState,
+  };
 };
 
 describe('changeDataView', () => {
@@ -38,6 +44,7 @@ describe('changeDataView', () => {
       index: 'data-view-with-user-default-column-id',
       sort: [['@timestamp', 'desc']],
     });
+    expect(params.dataState.reset).toHaveBeenCalled();
   });
 
   it('should set the right app state when a valid data view to switch to is given', async () => {
@@ -48,11 +55,13 @@ describe('changeDataView', () => {
       index: 'data-view-with-various-field-types-id',
       sort: [['data', 'desc']],
     });
+    expect(params.dataState.reset).toHaveBeenCalled();
   });
 
   it('should not set the app state when an invalid data view to switch to is given', async () => {
     const params = setupTestParams(undefined);
     await changeDataView('data-view-with-various-field-types', params);
     expect(params.appState.update).not.toHaveBeenCalled();
+    expect(params.dataState.reset).toHaveBeenCalled();
   });
 });

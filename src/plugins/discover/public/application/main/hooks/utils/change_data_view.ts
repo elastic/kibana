@@ -18,6 +18,9 @@ import { DiscoverAppStateContainer } from '../../services/discover_app_state_con
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
+import {
+  DiscoverDataStateContainer
+} from "@kbn/discover-plugin/public/application/main/services/discover_data_state_container";
 
 /**
  * Function executed when switching data view in the UI
@@ -28,10 +31,12 @@ export async function changeDataView(
     services,
     internalState,
     appState,
+    dataState,
   }: {
     services: DiscoverServices;
     internalState: DiscoverInternalStateContainer;
     appState: DiscoverAppStateContainer;
+    dataState: DiscoverDataStateContainer;
   }
 ) {
   addLog('[ui] changeDataView', { id });
@@ -39,6 +44,8 @@ export async function changeDataView(
   const dataView = internalState.getState().dataView;
   const state = appState.getState();
   let nextDataView: DataView | null = null;
+  // switch to the loading state of Discover Data, to make sure loading indication is displayed when loading the new data view
+  dataState.reset();
 
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;

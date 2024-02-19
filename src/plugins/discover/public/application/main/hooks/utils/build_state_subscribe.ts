@@ -60,7 +60,7 @@ export const buildStateSubscribe =
       const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
       if (!isTextBasedQueryLangPrev) {
         savedSearchState.update({ nextState });
-        dataState.reset(savedSearch);
+        dataState.reset();
       }
     }
     // Cast to boolean to avoid false positives when comparing
@@ -86,7 +86,7 @@ export const buildStateSubscribe =
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
-      dataState.reset(savedSearch);
+      dataState.reset();
       setDataView(nextDataView);
       savedSearchDataView = nextDataView;
     }
