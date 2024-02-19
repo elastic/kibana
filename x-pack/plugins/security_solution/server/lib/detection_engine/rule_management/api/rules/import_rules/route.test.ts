@@ -58,6 +58,18 @@ describe('Import rules route', () => {
     importRulesRoute(server.router, config, ml);
   });
 
+  test('sets higher custom socket timeout', () => {
+    expect(server.router.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          timeout: {
+            idleSocket: 30 * 60 * 1000,
+          },
+        }),
+      })
+    );
+  });
+
   describe('status codes', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));

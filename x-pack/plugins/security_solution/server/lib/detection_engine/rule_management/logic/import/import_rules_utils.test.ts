@@ -150,13 +150,11 @@ describe('importRules', () => {
     );
 
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
+      rules: [
+        {
+          ...getImportRulesSchemaMock(),
+          rule_id: 'rule-1',
+        },
       ],
       rulesResponseAcc: [],
       mlAuthz,
