@@ -172,6 +172,20 @@ describe('PainlessTinyMathParser', () => {
       'ifelse(ifelse(average(system.cpu.system.pct)>0,0,1) + ifelse(average(system.cpu.user.pct)==10,0,1) * ifelse(average(system.cpu.system.pct)<200,0,1) + ifelse(average(system.cpu.user.pct)==2,1,0) > 0, 100, ifelse(average(system.cpu.system.pct)==10, 200, 300))'
     );
   });
+  it('should parse a complex equation with multi char aggregation name', () => {
+    const equation =
+      '!(AA > 0) || BAA !== 10 && !(AA < 200 || BAA == 2) ? 100 : AA == 10 ? 200 : 300';
+    const parser = new PainlessTinyMathParser({
+      equation,
+      aggMap: {
+        AA: 'average(system.cpu.system.pct)',
+        BAA: 'average(system.cpu.user.pct)',
+      },
+    });
+    expect(parser.parse()).toEqual(
+      'ifelse(ifelse(average(system.cpu.system.pct)>0,0,1) + ifelse(average(system.cpu.user.pct)==10,0,1) * ifelse(average(system.cpu.system.pct)<200,0,1) + ifelse(average(system.cpu.user.pct)==2,1,0) > 0, 100, ifelse(average(system.cpu.system.pct)==10, 200, 300))'
+    );
+  });
 
   it('should parse a complex equation with many nested conditions and many aggregations', () => {
     const equation =
