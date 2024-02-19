@@ -68,6 +68,15 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+  } else if (detectionRuleMetric.rule_type === 'esql') {
+    updatedUsage = {
+      ...usage,
+      esql: updateQueryUsage({
+        ruleType: detectionRuleMetric.rule_type,
+        usage,
+        detectionRuleMetric,
+      }),
+    };
   }
 
   if (detectionRuleMetric.elastic_rule) {

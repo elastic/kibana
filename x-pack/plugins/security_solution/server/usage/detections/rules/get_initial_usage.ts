@@ -83,6 +83,17 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
   },
+  esql: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+    legacy_notifications_enabled: 0,
+    legacy_notifications_disabled: 0,
+    notifications_enabled: 0,
+    notifications_disabled: 0,
+    legacy_investigation_fields: 0,
+  },
   elastic_total: {
     enabled: 0,
     disabled: 0,
