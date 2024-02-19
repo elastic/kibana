@@ -162,6 +162,10 @@ export function ChatBody({
       : '100%'};
   `;
 
+  const headerContainerClassName = css`
+    padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
+  `;
+
   const [stickToBottom, setStickToBottom] = useState(true);
 
   const isAtBottom = (parent: HTMLElement) =>
@@ -453,7 +457,7 @@ export function ChatBody({
           </EuiCallOut>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingRight: showLinkToConversationsApp ? '24px' : '0' }}>
+      <EuiFlexItem grow={false} className={headerContainerClassName}>
         <ChatHeader
           connectors={connectors}
           conversationId={
