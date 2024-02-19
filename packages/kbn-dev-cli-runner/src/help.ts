@@ -110,19 +110,23 @@ export function getHelpForAllCommands({
   const globalUsage = dedent(usage || '') || DEFAULT_GLOBAL_USAGE;
   const globalHelp = joinAndTrimLines(dedent(globalFlagHelp || ''), GLOBAL_FLAGS);
 
+  const hasHelp = (command: Command<any>) => command.flags?.help;
+
   const commandsHelp = commands
     .map((command) => {
-      const options = command.flags?.help
-        ? '\n' +
-          dedent`
+      let options = '';
+
+      if (hasHelp(command)) {
+        const helpOrEmpty = command.flags?.help || '';
+        const joined = joinAndTrimLines(dedent(helpOrEmpty));
+        const str = `
             Options:
-              ${indent(
-                joinAndTrimLines(dedent(command.flags?.help || '')),
-                '              '.length
-              )}
-          ` +
-          '\n'
-        : '';
+              ${indent(joined, 14)}
+          `;
+        const dedentedAgain = dedent`${str}`;
+        const concatenated = '\n' + dedentedAgain + '\n';
+        options = concatenated;
+      }
 
       return [
         chalk.bold.whiteBright.bgBlack(` ${dedent(command.usage || '') || command.name} `),
