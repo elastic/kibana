@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
@@ -190,40 +189,10 @@ async function validateOutputServerless(
     }
   }
 
-  const logger = appContextService.getLogger();
-
-  async function attempt(nAttempts: number) {
-    try {
-      return await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        if (nAttempts > 0) {
-          logger.warn(
-            `Retrying retrieving default Fleet ES output id ${SERVERLESS_DEFAULT_OUTPUT_ID} (${
-              4 - nAttempts
-            }/3)`
-          );
-          await new Promise((r) => setTimeout(r, 1000));
-          await attempt(nAttempts - 1);
-        } else {
-          throw Boom.badRequest(
-            `Output id ${SERVERLESS_DEFAULT_OUTPUT_ID} not found in saved objects: ${e.message}`
-          );
-        }
-      } else {
-        throw new Error(
-          `Error retrieving default ES output id ${SERVERLESS_DEFAULT_OUTPUT_ID}: ${e.message}`
-        );
-      }
-    }
-  }
-
-  const defaultOutput = await attempt(3);
-  if (!defaultOutput) {
-    throw Boom.badRequest('Default ES output not found');
-  } else if (!isEqual(output.hosts, defaultOutput?.hosts)) {
+  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+  if (!isEqual(output.hosts, defaultOutput.hosts)) {
     throw Boom.badRequest(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput?.hosts}`
+      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
     );
   }
 }
