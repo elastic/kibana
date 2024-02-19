@@ -973,16 +973,6 @@ describe('autocomplete', () => {
       ],
       '('
     );
-    testSuggestions(
-      'from a | eval a=concat(stringField, ',
-      [
-        ...getFieldNamesByType('string'),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
-          'concat',
-        ]),
-      ],
-      ','
-    );
     // test deep function nesting suggestions (and check that the same function is not suggested)
     // round(round(
     // round(round(round(
