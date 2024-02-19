@@ -58,7 +58,7 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     sortable: true,
     dataType: 'number',
     align: 'right',
-    render: (score: number) => formatRiskScore(score),
+    render: formatRiskScore,
     footer: (props) =>
       showFooter ? (
         <span data-test-subj="risk-summary-result-score">
