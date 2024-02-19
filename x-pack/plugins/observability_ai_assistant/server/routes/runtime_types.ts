@@ -54,9 +54,12 @@ export const messageRt: t.Type<Message> = t.type({
 
 export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
   '@timestamp': t.string,
-  conversation: t.type({
-    title: t.string,
-  }),
+  conversation: t.intersection([
+    t.type({
+      title: t.string,
+    }),
+    t.partial({ token_count: t.number }),
+  ]),
   messages: t.array(messageRt),
   labels: t.record(t.string, t.string),
   numeric_labels: t.record(t.string, t.number),
@@ -75,10 +78,13 @@ export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.interse
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
   baseConversationRt,
   t.type({
-    conversation: t.type({
-      id: t.string,
-      title: t.string,
-    }),
+    conversation: t.intersection([
+      t.type({
+        id: t.string,
+        title: t.string,
+      }),
+      t.partial({ token_count: t.number }),
+    ]),
   }),
 ]);
 

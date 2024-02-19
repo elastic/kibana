@@ -101,10 +101,10 @@ export class ObservabilityAIAssistantClient {
     return response.hits.hits[0];
   };
 
-  private getConversationUpdateValues = (now: string) => {
+  private getConversationUpdateValues = (lastUpdated: string) => {
     return {
       conversation: {
-        last_updated: now,
+        last_updated: lastUpdated,
       },
       user: this.dependencies.user,
       namespace: this.dependencies.namespace,
@@ -385,6 +385,7 @@ export class ObservabilityAIAssistantClient {
             const updatedConversation = await this.update(
               merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
             );
+
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationUpdate,
               conversation: updatedConversation.conversation,
@@ -590,9 +591,11 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    const tokenCount = encode(JSON.stringify(conversation)).length;
     const updatedConversation: Conversation = merge(
       {},
       conversation,
+      { conversation: { token_count: tokenCount } },
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
@@ -704,12 +707,13 @@ export class ObservabilityAIAssistantClient {
   create = async (conversation: ConversationCreateRequest): Promise<Conversation> => {
     const now = new Date().toISOString();
 
+    const tokenCount = encode(JSON.stringify(conversation)).length;
     const createdConversation: Conversation = merge(
       {},
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: v4(), token_count: tokenCount },
       },
       this.getConversationUpdateValues(now)
     );

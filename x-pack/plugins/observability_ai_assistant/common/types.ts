@@ -63,6 +63,7 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
+    token_count?: number;
   };
   messages: Message[];
   labels: Record<string, string>;
@@ -72,7 +73,7 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string };
+  conversation: { title: string; token_count?: number };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;

@@ -20,6 +20,10 @@ const date = {
   type: 'date' as const,
 };
 
+const integer = {
+  type: 'integer' as const,
+};
+
 const dynamic = {
   type: 'object' as const,
   dynamic: true,
@@ -55,6 +59,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
             id: keyword,
             title: text,
             last_updated: date,
+            token_count: integer,
           },
         },
         namespace: keyword,
