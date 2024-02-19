@@ -46,9 +46,15 @@ const datasetRT = rt.intersection([
   ),
 ]);
 
+const timeRangeRT = rt.strict({
+  from: rt.string,
+  to: rt.string,
+});
+
 export const flyoutRT = rt.exact(
   rt.partial({
     dataset: datasetRT,
+    insightsTimeRange: timeRangeRT,
   })
 );
 

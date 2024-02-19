@@ -16,10 +16,11 @@ export const useDatasetQualityFlyout = () => {
 
   const { service } = useDatasetQualityContext();
 
-  const { dataset: dataStreamStat, datasetDetails: dataStreamDetails } = useSelector(
-    service,
-    (state) => state.context.flyout
-  );
+  const {
+    dataset: dataStreamStat,
+    datasetDetails: dataStreamDetails,
+    insightsTimeRange: timeRange,
+  } = useSelector(service, (state) => state.context.flyout);
   const dataStreamDetailsLoading = useSelector(service, (state) =>
     state.matches('datasets.loaded.flyoutOpen.fetching')
   );
@@ -29,5 +30,6 @@ export const useDatasetQualityFlyout = () => {
     dataStreamDetails,
     dataStreamDetailsLoading,
     fieldFormats,
+    timeRange,
   };
 };

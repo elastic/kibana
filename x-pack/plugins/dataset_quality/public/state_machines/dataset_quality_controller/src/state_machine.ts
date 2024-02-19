@@ -147,6 +147,9 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'closed',
                   actions: ['resetFlyoutOptions'],
                 },
+                UPDATE_INSIGHTS_TIME_RANGE: {
+                  actions: ['storeFlyoutOptions'],
+                },
               },
             },
             closed: {
@@ -238,6 +241,13 @@ export const createPureDatasetQualityControllerStateMachine = (
                 flyout: {
                   ...context.flyout,
                   dataset: event.dataset as FlyoutDataset,
+                },
+              }
+            : 'timeRange' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  insightsTimeRange: event.timeRange,
                 },
               }
             : {};
