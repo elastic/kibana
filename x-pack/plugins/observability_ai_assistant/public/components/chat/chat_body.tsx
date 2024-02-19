@@ -154,6 +154,7 @@ export function ChatBody({
   }
 
   const containerClassName = css`
+    height: 0; // needed to keep chat timeline from overflowing on mobile viewports.
     min-width: 0;
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'
@@ -401,9 +402,10 @@ export function ChatBody({
     return (
       <EuiFlexGroup
         direction="column"
-        gutterSize="none"
         className={containerClassName}
+        gutterSize="none"
         justifyContent="center"
+        responsive={false}
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
@@ -425,7 +427,12 @@ export function ChatBody({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={containerClassName}
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
