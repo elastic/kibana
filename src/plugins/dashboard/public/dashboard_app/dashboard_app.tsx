@@ -57,6 +57,7 @@ export const useDashboardAPI = (): DashboardAPI => {
   if (api == null) {
     throw new Error('useDashboardAPI must be used inside DashboardAPIContext');
   }
+  window._dashboardAPI = api;
   return api!;
 };
 

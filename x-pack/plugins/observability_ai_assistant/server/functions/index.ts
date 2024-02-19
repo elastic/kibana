@@ -13,6 +13,7 @@ import { registerAlertsFunction } from './alerts';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { registerQueryFunction } from './query';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
+import { registerAddPanelToDashboardFunction } from './add_dashboard_panel';
 import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
 import { registerVisualizeESQLFunction } from './visualize_esql';
@@ -101,6 +102,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     registerVisualizeESQLFunction(registrationParameters);
     registerAlertsFunction(registrationParameters);
     registerGetDatasetInfoFunction(registrationParameters);
+    registerAddPanelToDashboardFunction(registrationParameters);
 
     registerContext({
       name: 'core',

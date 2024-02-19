@@ -21,6 +21,7 @@
       "share",
       "taskManager",
       "triggersActionsUi",
+      "navigation",
       "uiActions",
       "dataViews",
       "ml"
