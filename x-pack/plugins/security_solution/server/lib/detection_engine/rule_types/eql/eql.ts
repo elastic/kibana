@@ -145,7 +145,7 @@ export const eqlExecutor = async ({
         result.warningMessages.push(createResult.warningMessages);
       }
     } else {
-      const newSignals =
+      const newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> =
         sequences !== undefined
           ? wrapSequences(sequences, buildReasonMessageForEqlAlert)
           : events !== undefined
