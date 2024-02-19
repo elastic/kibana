@@ -22,6 +22,7 @@ import {
 import { ESQLCallbacks } from '../shared/types';
 import { AstProviderFn, ESQLAst, ESQLCommand } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
@@ -191,7 +192,7 @@ async function getQuotableActionForColumns(
   const actions = [];
   if (shouldBeQuotedText(errorText)) {
     const availableFields = new Set(await getFieldsByType('any'));
-    const solution = `\`${errorText}\``;
+    const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
     if (availableFields.has(errorText) || availableFields.has(solution)) {
       actions.push(
         createAction(

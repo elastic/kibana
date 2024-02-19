@@ -90,22 +90,25 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
 
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
-      {flattenedFilters.map((filter, idx) => (
-        <EuiFlexItem
-          grow={false}
-          key={`filter-${idx}`}
-          css={{ width: '100%' }}
-          data-test-subj={`filterItem-${filter.meta.key}`}
-        >
-          <EuiBadgeWrap color="hollow">
-            {indexPattern != null ? (
-              <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
-            ) : (
-              <EuiLoadingSpinner size="m" />
-            )}
-          </EuiBadgeWrap>
-        </EuiFlexItem>
-      ))}
+      {flattenedFilters.map((filter, idx) => {
+        const displayContent = filter.meta.alias ? (
+          filter.meta.alias
+        ) : (
+          <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
+        );
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={`filter-${idx}`}
+            css={{ width: '100%' }}
+            data-test-subj={`filterItem-${filter.meta.key}`}
+          >
+            <EuiBadgeWrap color="hollow">
+              {indexPattern != null ? displayContent : <EuiLoadingSpinner size="m" />}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };
