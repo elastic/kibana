@@ -71,6 +71,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       },
       interval: '3600',
       query: 'select * from uptime;',
+      timeout: 607,
     }).then((data) => {
       oneMappingSavedQueryId = data.saved_object_id;
       oneMappingSavedQueryName = data.id;
@@ -132,6 +133,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Attach next query');
       getIdFormField().type('Query1');
       inputQuery('select * from uptime;');
+      cy.getBySel('timeout-input').clear().type('601');
       cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
       cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
@@ -140,6 +142,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Attach next query');
       getIdFormField().type('Query2');
       inputQuery('select * from uptime;');
+      cy.getBySel('timeout-input').clear().type('602');
 
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential').click();
@@ -151,6 +154,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Attach next query');
       getIdFormField().type('Query3');
       inputQuery('select * from uptime;');
+      cy.getBySel('timeout-input').clear().type('603');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
       cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -197,21 +201,21 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       const queries = {
         Query1: {
           interval: 3600,
-          timeout: 60,
+          timeout: 601,
           query: 'select * from uptime;',
           removed: true,
           snapshot: false,
         },
         Query2: {
           interval: 3600,
-          timeout: 60,
+          timeout: 602,
           query: 'select * from uptime;',
           removed: false,
           snapshot: false,
         },
         Query3: {
           interval: 3600,
-          timeout: 60,
+          timeout: 603,
           query: 'select * from uptime;',
         },
       };
@@ -714,6 +718,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
         cy.contains('Name of the continent').should('exist');
         cy.contains('Seconds of uptime').should('exist');
+        cy.getBySel('timeout-input').should('have.value', '607');
       });
     }
   );

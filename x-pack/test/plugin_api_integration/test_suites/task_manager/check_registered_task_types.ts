@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
+    'sampleAdHocTaskTimingOut',
+    'lowPriorityTask',
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
@@ -49,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
+        'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
         'Synthetics:Clean-Up-Package-Policies',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
@@ -61,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',
+        `actions:.sentinelone`,
         'actions:.server-log',
         'actions:.servicenow',
         'actions:.servicenow-itom',
@@ -139,7 +143,6 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
         'report:execute',
-        'reports:monitor',
         'risk_engine:risk_scoring',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',

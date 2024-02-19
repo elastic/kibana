@@ -13,8 +13,8 @@ export async function plugin() {
 
 export type {
   AdvancedUiActionsServerPlugin as Plugin,
-  SetupContract as AdvancedUiActionsSetup,
-  StartContract as AdvancedUiActionsStart,
+  UiActionsEnhancedServerSetup as AdvancedUiActionsSetup,
+  UiActionsEnhancedServerStart as AdvancedUiActionsStart,
 } from './plugin';
 
 export type {

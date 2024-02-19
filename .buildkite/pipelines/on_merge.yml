@@ -271,30 +271,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
-    label: 'Defend Workflows Cypress Tests'
-    agents:
-      queue: n2-4-virt
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 10
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    label: 'Defend Workflows Cypress Tests on Serverless'
-    agents:
-      queue: n2-4-virt
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
     label: 'Threat Intelligence Cypress Tests'
     agents:
@@ -361,6 +337,16 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
@@ -386,7 +372,7 @@ steps:
     agents:
       queue: n2-8-spot
     key: storybooks
-    timeout_in_minutes: 60
+    timeout_in_minutes: 80
     retry:
       automatic:
         - exit_status: '-1'

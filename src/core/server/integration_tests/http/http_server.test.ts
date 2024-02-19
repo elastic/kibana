@@ -11,19 +11,21 @@ import supertest from 'supertest';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { Logger } from '@kbn/logging';
 
 describe('Http server', () => {
   let server: HttpServer;
   let config: HttpConfig;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let logger: Logger;
+  let coreContext: ReturnType<typeof mockCoreContext.create>;
   const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
   beforeEach(() => {
-    const loggingService = loggingSystemMock.create();
-    logger = loggingSystemMock.createLogger();
+    coreContext = mockCoreContext.create();
+    logger = coreContext.logger.get();
 
     config = {
       name: 'kibana',
@@ -43,7 +45,7 @@ describe('Http server', () => {
       shutdownTimeout: moment.duration(5, 's'),
     } as any;
 
-    server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+    server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
   });
 
   describe('Graceful shutdown', () => {
@@ -57,7 +59,9 @@ describe('Http server', () => {
 
       const router = new Router('', logger, enhanceWithContext, {
         isDev: false,
-        versionedRouteResolution: 'oldest',
+        versionedRouterOptions: {
+          defaultHandlerResolutionStrategy: 'oldest',
+        },
       });
       router.post(
         {

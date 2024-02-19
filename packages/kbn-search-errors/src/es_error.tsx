@@ -7,11 +7,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core/public';
-import { IEsError } from './types';
-import { getRootCause } from './utils';
+import { EuiButton, EuiCodeBlock } from '@elastic/eui';
+import type { IEsError } from './types';
 
 /**
  * Checks if a given errors originated from Elasticsearch.
@@ -24,39 +22,25 @@ export function isEsError(e: any): e is IEsError {
 }
 
 export class EsError extends Error {
-  readonly attributes: IEsError['attributes'];
+  public readonly attributes: IEsError['attributes'];
+  private readonly openInInspector: () => void;
 
-  constructor(protected readonly err: IEsError, private readonly openInInspector: () => void) {
-    super(
-      `EsError: ${
-        getRootCause(err?.attributes?.error)?.reason ||
-        i18n.translate('searchErrors.esError.unknownRootCause', { defaultMessage: 'unknown' })
-      }`
-    );
+  constructor(err: IEsError, message: string, openInInspector: () => void) {
+    super(message);
     this.attributes = err.attributes;
+    this.openInInspector = openInInspector;
     Object.setPrototypeOf(this, new.target.prototype);
   }
 
   public getErrorMessage() {
-    if (!this.attributes?.error) {
-      return null;
-    }
-
-    const rootCause = getRootCause(this.attributes.error)?.reason;
-    const topLevelCause = this.attributes.error.reason;
-    const cause = rootCause ?? topLevelCause;
-
     return (
-      <>
-        <EuiSpacer size="s" />
-        <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
-          {cause}
-        </EuiCodeBlock>
-      </>
+      <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
+        {this.message}
+      </EuiCodeBlock>
     );
   }
 
-  public getActions(application: ApplicationStart) {
+  public getActions() {
     return [
       <EuiButton
         data-test-subj="viewEsErrorButton"

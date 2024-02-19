@@ -36,7 +36,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
   const theme = [EUI_SPARKLINE_THEME_PARTIAL];
   const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
 
-  const colors = theme[1].colors?.vizColors ?? [];
+  const colors = baseTheme.colors?.vizColors ?? [];
 
   if (!value) {
     return (

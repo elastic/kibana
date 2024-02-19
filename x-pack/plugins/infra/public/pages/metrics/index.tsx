@@ -13,8 +13,8 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -44,6 +44,9 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 });
 
 export const InfrastructurePage = () => {
+  const {
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibanaContextForPlugin().services;
   const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
@@ -95,7 +98,9 @@ export const InfrastructurePage = () => {
                         >
                           {ADD_DATA_LABEL}
                         </EuiHeaderLink>
-                        <ObservabilityAIAssistantActionMenuItem />
+                        {ObservabilityAIAssistantActionMenuItem ? (
+                          <ObservabilityAIAssistantActionMenuItem />
+                        ) : null}
                       </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}

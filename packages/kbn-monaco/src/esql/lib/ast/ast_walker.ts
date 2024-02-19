@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
 import {
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
@@ -36,8 +37,8 @@ import {
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
-  type MetadataContext,
-  type MvExpandCommandContext,
+  MetadataOptionContext,
+  MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
   NumericValueContext,
@@ -49,13 +50,13 @@ import {
   QualifiedIntegerLiteralContext,
   RegexBooleanExpressionContext,
   type RenameClauseContext,
-  SourceIdentifierContext,
   type StatsCommandContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
+  FromIdentifierContext,
 } from '../../antlr/esql_parser';
 import {
   createSource,
@@ -71,6 +72,10 @@ import {
   sanifyIdentifierString,
   computeLocationExtends,
   createColumnStar,
+  wrapIdentifierAsArray,
+  createPolicy,
+  createSetting,
+  textExistsAndIsValid,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -82,39 +87,58 @@ import type {
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  return ctx.getRuleContexts(SourceIdentifierContext).map((sourceCtx) => createSource(sourceCtx));
+  return ctx.getRuleContexts(FromIdentifierContext).map((sourceCtx) => createSource(sourceCtx));
 }
 
-export function collectAllColumnIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
-): ESQLAstItem[] {
-  const identifiers = (
-    Array.isArray(ctx.sourceIdentifier()) ? ctx.sourceIdentifier() : [ctx.sourceIdentifier()]
-  ) as SourceIdentifierContext[];
+function extractIdentifiers(
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
+) {
+  if (ctx instanceof MetadataOptionContext) {
+    return wrapIdentifierAsArray(ctx.fromIdentifier());
+  }
+  if (ctx instanceof MvExpandCommandContext) {
+    return wrapIdentifierAsArray(ctx.qualifiedName());
+  }
+  return wrapIdentifierAsArray(ctx.qualifiedNamePattern());
+}
+
+function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
   const args: ESQLColumn[] =
     identifiers
-      .filter((child) => child.text)
+      .filter((child) => textExistsAndIsValid(child.text))
       .map((sourceContext) => {
         return createColumn(sourceContext);
       }) ?? [];
   return args;
 }
 
+export function collectAllColumnIdentifiers(
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
+): ESQLAstItem[] {
+  const identifiers = extractIdentifiers(ctx);
+  return makeColumnsOutOfIdentifiers(identifiers);
+}
+
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName) {
+  if (!ctx._policyName || !textExistsAndIsValid(ctx._policyName.text)) {
     return [];
   }
-  return [createSource(ctx._policyName, 'policy')];
+  const policyComponents = ctx._policyName.text.split(':');
+  if (policyComponents.length > 1) {
+    const [setting, policyName] = policyComponents;
+    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
+  }
+  return [createPolicy(ctx._policyName, policyComponents[0])];
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
   if (!ctx._matchField) {
     return [];
   }
-  const identifier = ctx.sourceIdentifier(1);
+  const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
     const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
-    if (identifier.text) {
+    if (textExistsAndIsValid(identifier.text)) {
       fn.args.push(createColumn(identifier));
     }
     // overwrite the location inferring the correct position
@@ -132,15 +156,22 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
     const clauses = ctx.enrichWithClause();
     for (const clause of clauses) {
       if (clause._enrichField) {
-        const args = [
+        const args = [];
+        if (clause.ASSIGN()) {
+          args.push(createColumn(clause._newName));
+          if (textExistsAndIsValid(clause._enrichField?.text)) {
+            args.push(createColumn(clause._enrichField));
+          }
+        } else {
           // if an explicit assign is not set, create a fake assign with
           // both left and right value with the same column
-          clause.ASSIGN() ? createColumn(clause._newName) : createColumn(clause._enrichField),
-          createColumn(clause._enrichField),
-        ].filter(nonNullable);
+          if (textExistsAndIsValid(clause._enrichField?.text)) {
+            args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
+          }
+        }
         if (args.length) {
           const fn = createFunction('=', clause);
-          fn.args.push(args[0], [args[1]]);
+          fn.args.push(args[0], args[1] ? [args[1]] : []);
           option.args.push(fn);
         }
       }
@@ -172,11 +203,16 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
   const [left, ...list] = ctx.valueExpression();
-  const values = [visitValueExpression(left), list.map((ve) => visitValueExpression(ve))];
-  for (const arg of values) {
-    if (arg) {
-      const filteredArgs = Array.isArray(arg) ? arg.filter(nonNullable) : [arg];
-      fn.args.push(filteredArgs);
+  const leftArg = visitValueExpression(left);
+  if (leftArg) {
+    fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
+    const values = list.map((ve) => visitValueExpression(ve));
+    const listArgs = values
+      .filter(nonNullable)
+      .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
+    // distinguish between missing brackets (missing text error) and an empty list
+    if (textExistsAndIsValid(ctx.text)) {
+      fn.args.push(listArgs);
     }
   }
   // update the location of the assign based on arguments
@@ -199,6 +235,7 @@ function getMathOperation(ctx: ArithmeticBinaryContext) {
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
     ctx.EQ()?.text ||
+    ctx.CIEQ()?.text ||
     ctx.NEQ()?.text ||
     ctx.LT()?.text ||
     ctx.LTE()?.text ||
@@ -209,6 +246,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
+  if (!textExistsAndIsValid(ctx.text)) {
+    return [];
+  }
   if (ctx instanceof ValueExpressionDefaultContext) {
     return visitOperatorExpression(ctx.operatorExpression());
   }
@@ -233,7 +273,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('multiply', ctx);
+    const fn = createFunction('*', ctx);
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -315,12 +355,12 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       if (asToken) {
         const fn = createOption(asToken.text.toLowerCase(), clause);
         for (const arg of [clause._oldName, clause._newName]) {
-          if (arg?.text) {
+          if (textExistsAndIsValid(arg.text)) {
             fn.args.push(createColumn(arg));
           }
         }
         return fn;
-      } else if (clause._oldName?.text) {
+      } else if (textExistsAndIsValid(clause._oldName?.text)) {
         return createColumn(clause._oldName);
       }
     })
@@ -399,7 +439,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
     return [];
   }
   const negate = ctx.NOT();
-  const fnName = `${negate ? 'not_' : ''}is_null`;
+  const fnName = `is${negate ? ' not ' : ' '}null`;
   const fn = createFunction(fnName, ctx);
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {
@@ -421,12 +461,14 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   if (!ctx) {
     return ast;
   }
-  return ast.concat(
-    collectLogicalExpression(ctx),
-    collectRegexExpression(ctx),
-    collectIsNullExpression(ctx),
-    collectDefaultExpression(ctx)
-  );
+  return ast
+    .concat(
+      collectLogicalExpression(ctx),
+      collectRegexExpression(ctx),
+      collectIsNullExpression(ctx),
+      collectDefaultExpression(ctx)
+    )
+    .flat();
 }
 
 export function visitField(ctx: FieldContext) {
@@ -459,16 +501,12 @@ export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQL
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext) {
-  if (!ctx.BY()) {
+export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+  if (!ctx.BY() || !expr) {
     return [];
   }
   const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
-  for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    if (qnCtx?.text?.length) {
-      option.args.push(createColumn(qnCtx));
-    }
-  }
+  option.args.push(...collectAllFieldsStatements(expr));
   return [option];
 }
 
@@ -507,16 +545,18 @@ export function visitDissect(ctx: DissectCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    createLiteral('string', pattern),
-    ...visitDissectOptions(ctx.commandOptions()),
+    ...(pattern && textExistsAndIsValid(pattern.text)
+      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      : []),
   ].filter(nonNullable);
 }
 
 export function visitGrok(ctx: GrokCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
-  return [visitPrimaryExpression(ctx.primaryExpression()), createLiteral('string', pattern)].filter(
-    nonNullable
-  );
+  return [
+    visitPrimaryExpression(ctx.primaryExpression()),
+    ...(pattern && textExistsAndIsValid(pattern.text) ? [createLiteral('string', pattern)] : []),
+  ].filter(nonNullable);
 }
 
 function visitDissectOptions(ctx: CommandOptionsContext | undefined) {

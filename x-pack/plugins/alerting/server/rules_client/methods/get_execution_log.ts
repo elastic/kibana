@@ -22,6 +22,7 @@ import { IExecutionLogResult } from '../../../common';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
 import { get } from './get';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetExecutionLogByIdParams {
   id: string;
@@ -62,7 +63,7 @@ export async function getExecutionLogForRule(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_EXECUTION_LOG,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -72,7 +73,7 @@ export async function getExecutionLogForRule(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_EXECUTION_LOG,
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -85,7 +86,7 @@ export async function getExecutionLogForRule(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       [id],
       {
         start: parsedDateStart.toISOString(),
@@ -151,7 +152,7 @@ export async function getGlobalExecutionLogWithAuth(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
       {
         start: parsedDateStart.toISOString(),

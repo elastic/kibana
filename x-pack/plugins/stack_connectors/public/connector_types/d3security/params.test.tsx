@@ -8,20 +8,8 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import D3ParamsFields from './params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { SUB_ACTION } from '../../../common/d3security/constants';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 const messageVariables = [
   {
     name: 'myVar',

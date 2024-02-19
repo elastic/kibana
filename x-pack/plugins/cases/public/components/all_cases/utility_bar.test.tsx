@@ -6,7 +6,7 @@
  */
 
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
@@ -37,6 +37,8 @@ describe('Utility bar', () => {
     },
     selectedColumns: [],
     onSelectedColumnsChange: jest.fn(),
+    onClearFilters: jest.fn(),
+    showClearFiltersButton: false,
   };
 
   beforeEach(() => {
@@ -45,10 +47,13 @@ describe('Utility bar', () => {
 
   it('renders', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
-    expect(screen.getByText('Showing 1 to 5 of 5 cases')).toBeInTheDocument();
-    expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
-    expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
+
+    expect(await screen.findByText('Showing 1 to 5 of 5 cases')).toBeInTheDocument();
+    expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
+
+    expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
   });
 
   it('renders showing cases correctly', async () => {
@@ -60,9 +65,11 @@ describe('Utility bar', () => {
         totalItemCount: 20,
       },
     };
+
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-    expect(screen.getByText('Showing 1 to 10 of 20 cases')).toBeInTheDocument();
-    expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
+
+    expect(await screen.findByText('Showing 1 to 10 of 20 cases')).toBeInTheDocument();
+    expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
   });
 
   it('renders showing cases correctly for second page', async () => {
@@ -75,13 +82,16 @@ describe('Utility bar', () => {
         totalItemCount: 20,
       },
     };
+
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-    expect(screen.getByText('Showing 11 to 20 of 20 cases')).toBeInTheDocument();
-    expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
+
+    expect(await screen.findByText('Showing 11 to 20 of 20 cases')).toBeInTheDocument();
+    expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
   });
 
   it('renders showing cases correctly when no cases available', async () => {
     const updatedProps = {
+      ...props,
       totalCases: 0,
       selectedCases: [],
       deselectCases,
@@ -90,16 +100,15 @@ describe('Utility bar', () => {
         pageIndex: 1,
         totalItemCount: 0,
       },
-      selectedColumns: [],
-      onSelectedColumnsChange: jest.fn(),
     };
+
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-    expect(screen.getByText('Showing 0 of 0 cases')).toBeInTheDocument();
+    expect(await screen.findByText('Showing 0 of 0 cases')).toBeInTheDocument();
   });
 
   it('renders columns popover button when isSelectorView=False', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
-    expect(screen.getByTestId('column-selection-popover-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('column-selection-popover-button')).toBeInTheDocument();
   });
 
   it('does not render columns popover button when isSelectorView=True', async () => {
@@ -110,34 +119,28 @@ describe('Utility bar', () => {
   it('opens the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
+    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('case-table-bulk-actions-context-menu'));
-    });
+    expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
   });
 
   it('closes the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
+    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('case-table-bulk-actions-context-menu'));
-    });
+    expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
 
-    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
+    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('case-table-bulk-actions-context-menu')).toBeFalsy();
-    });
+    await waitForElementToBeRemoved(screen.queryByTestId('case-table-bulk-actions-context-menu'));
   });
 
   it('refresh correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    userEvent.click(screen.getByTestId('all-cases-refresh-link-icon'));
+    userEvent.click(await screen.findByTestId('all-cases-refresh-link-icon'));
 
     await waitFor(() => {
       expect(deselectCases).toHaveBeenCalled();
@@ -151,47 +154,215 @@ describe('Utility bar', () => {
     appMockRender = createAppMockRenderer({ permissions: noCasesPermissions() });
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
+    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
   });
 
   it('does show the bulk actions with only delete permissions', async () => {
     appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
   });
 
   it('does show the bulk actions with update permissions', async () => {
     appMockRender = createAppMockRenderer({ permissions: writeCasesPermissions() });
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
   });
 
   it('does not show the bulk actions if there are not selected cases', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} selectedCases={[]} />);
 
-    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
-    expect(screen.queryByText('Showing 0 cases')).toBeFalsy();
+    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
+    expect(screen.queryByText('Showing 0 cases')).not.toBeInTheDocument();
   });
 
-  it.each(allCasesPageSize)(`renders showing cases message correctly`, (size) => {
-    const newPageIndex = MAX_DOCS_PER_PAGE / size - 1;
-    const pageStart = size * newPageIndex + 1;
-    const visibleCases = size * (newPageIndex + 1);
+  it('shows the clear filter button', async () => {
+    appMockRender.render(<CasesTableUtilityBar {...props} showClearFiltersButton={true} />);
 
-    appMockRender.render(
-      <CasesTableUtilityBar
-        {...{
-          ...props,
-          totalCases: MAX_DOCS_PER_PAGE,
-          pagination: { ...props.pagination, pageSize: size, pageIndex: newPageIndex },
-        }}
-      />
+    expect(await screen.findByTestId('all-cases-clear-filters-link-icon')).toBeInTheDocument();
+  });
+
+  it('clears the filters correctly', async () => {
+    appMockRender.render(<CasesTableUtilityBar {...props} showClearFiltersButton={true} />);
+
+    userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+
+    await waitFor(() => {
+      expect(props.onClearFilters).toHaveBeenCalled();
+    });
+  });
+
+  describe('Maximum number of cases', () => {
+    const newProps = {
+      ...props,
+      selectedCaseS: [],
+      totalCases: MAX_DOCS_PER_PAGE,
+      pagination: {
+        ...props.pagination,
+        totalItemCount: MAX_DOCS_PER_PAGE,
+      },
+    };
+
+    const allCasesPageSize = [10, 25, 50, 100];
+
+    it.each(allCasesPageSize)(
+      `does not show warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 < ${MAX_DOCS_PER_PAGE}`,
+      async (size) => {
+        const newPageIndex = MAX_DOCS_PER_PAGE / size - 2;
+
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
+            }}
+          />
+        );
+
+        expect(
+          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+        ).toBeInTheDocument();
+
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+      }
     );
 
-    expect(
-      screen.getByText(`Showing ${pageStart} to ${visibleCases} of ${MAX_DOCS_PER_PAGE} cases`)
-    ).toBeInTheDocument();
+    it.each(allCasesPageSize)(
+      `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 = ${MAX_DOCS_PER_PAGE}`,
+      async (size) => {
+        const newPageIndex = MAX_DOCS_PER_PAGE / size - 1;
+
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...props,
+              totalCases: MAX_DOCS_PER_PAGE,
+              pagination: { ...props.pagination, pageSize: size, pageIndex: newPageIndex },
+            }}
+          />
+        );
+
+        expect(
+          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+        ).toBeInTheDocument();
+
+        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      }
+    );
+
+    it.each(allCasesPageSize)(
+      `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 > ${MAX_DOCS_PER_PAGE}`,
+      async (size) => {
+        const newPageIndex = MAX_DOCS_PER_PAGE / size;
+
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
+            }}
+          />
+        );
+
+        expect(
+          await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+        ).toBeInTheDocument();
+
+        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      }
+    );
+
+    it('should show dismiss and do not show again buttons correctly', async () => {
+      appMockRender.render(
+        <CasesTableUtilityBar
+          {...{
+            ...newProps,
+            pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+          }}
+        />
+      );
+
+      expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      expect(await screen.findByTestId('dismiss-warning')).toBeInTheDocument();
+      expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
+    });
+
+    it('should dismiss warning correctly', async () => {
+      appMockRender.render(
+        <CasesTableUtilityBar
+          {...{
+            ...newProps,
+            pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+          }}
+        />
+      );
+
+      expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      expect(await screen.findByTestId('dismiss-warning')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('dismiss-warning'));
+
+      expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+    });
+
+    describe('do not show button', () => {
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.clearAllTimers();
+      });
+
+      afterAll(() => {
+        jest.useRealTimers();
+        sessionStorage.removeItem(localStorageKey);
+      });
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should set storage key correctly', async () => {
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+            }}
+          />
+        );
+
+        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+        expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
+
+        expect(localStorage.getItem(localStorageKey)).toBe(null);
+      });
+
+      it('should hide warning correctly when do not show button clicked', async () => {
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+            }}
+          />
+        );
+
+        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+        expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
+
+        userEvent.click(await screen.findByTestId('do-not-show-warning'));
+
+        act(() => {
+          jest.advanceTimersByTime(1000);
+        });
+
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+        expect(localStorage.getItem(localStorageKey)).toBe('true');
+      });
+    });
   });
 });

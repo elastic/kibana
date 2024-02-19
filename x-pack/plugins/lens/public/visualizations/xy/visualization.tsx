@@ -115,6 +115,7 @@ import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const XY_ID = 'lnsXY';
 
@@ -966,6 +967,15 @@ export const getXyVisualization = ({
 
   getVisualizationInfo(state, frame) {
     return getVisualizationInfo(state, frame, paletteService, fieldFormats);
+  },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    const dataLayers = getDataLayers(state.layers);
+    const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
+    return dataLayers.flatMap((l) => {
+      const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
+      return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
+    });
   },
 });
 

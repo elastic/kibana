@@ -25,50 +25,31 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import { Status } from '../../../../common/types/api';
-
-import { CreateApiKeyAPILogic } from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
 import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { KibanaLogic } from '../kibana';
 
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 
-interface ApiKeyPanelProps {
-  user: AuthenticatedUser | null;
-}
-
 const COPIED_LABEL = i18n.translate('xpack.enterpriseSearch.overview.apiKey.copied', {
   defaultMessage: 'Copied',
 });
 
-export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
-  const { cloud, navigateToUrl } = useValues(KibanaLogic);
+export const ApiKeyPanel: React.FC = () => {
+  const { cloud, esConfig, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
-  const { makeRequest: saveApiKey } = useActions(CreateApiKeyAPILogic);
-  const { error, status } = useValues(CreateApiKeyAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const elasticsearchEndpoint = esConfig.elasticsearch_host;
 
   useEffect(() => makeRequest({}), []);
 
   const apiKeys = data?.api_keys || [];
   const cloudId = cloud?.cloudId;
-  const elasticsearchEndpoint = cloud?.elasticsearchUrl || ELASTICSEARCH_URL_PLACEHOLDER;
 
   return (
     <>
-      {isFlyoutOpen && (
-        <CreateApiKeyFlyout
-          error={error?.body?.message}
-          isLoading={status === Status.LOADING}
-          onClose={() => setIsFlyoutOpen(false)}
-          setApiKey={saveApiKey}
-          username={user?.full_name || user?.username || ''}
-        />
-      )}
+      {isFlyoutOpen && <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} />}
       <EuiSplitPanel.Outer>
         {Boolean(cloud) && (
           <EuiSplitPanel.Inner>

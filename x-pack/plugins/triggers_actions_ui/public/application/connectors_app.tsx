@@ -11,7 +11,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -22,6 +21,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -38,6 +38,7 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { Section } from './constants';
+import { queryClient } from './query_client';
 
 const ActionsConnectorsHome = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_home')
@@ -74,8 +75,8 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, uiSettings, theme$ } = deps;
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const { dataViews, theme } = deps;
+  const isDarkMode = theme.getTheme().darkMode;
   const sections: Section[] = ['connectors', 'logs'];
   const sectionsRegex = sections.join('|');
 
@@ -83,10 +84,12 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme$={theme.theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              <QueryClientProvider client={queryClient}>
+                <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              </QueryClientProvider>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

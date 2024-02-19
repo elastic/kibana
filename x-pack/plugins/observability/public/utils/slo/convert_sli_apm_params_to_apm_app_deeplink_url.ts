@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  kqlQuerySchema,
+  SLOResponse,
+} from '@kbn/slo-schema';
 
-interface Props {
-  duration?: string;
-  environment: string;
-  filter: string | undefined;
-  service: string;
-  transactionName: string;
-  transactionType: string;
-}
-
-export function convertSliApmParamsToApmAppDeeplinkUrl({
-  duration,
-  environment,
-  filter,
-  service,
-  transactionName,
-  transactionType,
-}: Props) {
-  if (!service) {
-    return '';
+export function convertSliApmParamsToApmAppDeeplinkUrl(slo: SLOResponse): string | undefined {
+  if (
+    !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
+    !apmTransactionErrorRateIndicatorSchema.is(slo.indicator)
+  ) {
+    return undefined;
   }
+
+  const {
+    indicator: {
+      params: { environment, filter, service, transactionName, transactionType },
+    },
+    timeWindow: { duration },
+    groupBy,
+    instanceId,
+  } = slo;
 
   const qs = new URLSearchParams('comparisonEnabled=true');
 
@@ -47,8 +49,11 @@ export function convertSliApmParamsToApmAppDeeplinkUrl({
   if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
-  if (filter && filter.length > 0) {
+  if (filter && kqlQuerySchema.is(filter) && filter.length > 0) {
     kueryParams.push(filter);
+  }
+  if (groupBy !== ALL_VALUE && instanceId !== ALL_VALUE) {
+    kueryParams.push(`${groupBy} : "${instanceId}"`);
   }
 
   if (kueryParams.length > 0) {

@@ -52,6 +52,8 @@ export { getUrl } from './src/jest/get_url';
 
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
+export { runCheckFtrCodeOwnersCli } from './src/functional_test_runner/run_check_ftr_code_owners';
+
 export { runJest } from './src/jest/run';
 
 export * from './src/kbn_archiver_cli';

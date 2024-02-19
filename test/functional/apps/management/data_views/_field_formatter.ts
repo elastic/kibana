@@ -8,8 +8,8 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -413,6 +413,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
+
+    describe('default formatter by field meta value', () => {
+      const indexTitle = 'field_formats_management_functional_tests';
+
+      before(async () => {
+        if (await es.indices.exists({ index: indexTitle })) {
+          await es.indices.delete({ index: indexTitle });
+        }
+      });
+
+      it('should apply default formatter by field meta value', async () => {
+        await es.indices.create({
+          index: indexTitle,
+          body: {
+            mappings: {
+              properties: {
+                seconds: { type: 'long', meta: { unit: 's' } },
+              },
+            },
+          },
+        });
+
+        const docResult = await es.index({
+          index: indexTitle,
+          body: { seconds: 1234 },
+          refresh: 'wait_for',
+        });
+
+        const testDocumentId = docResult._id;
+
+        const indexPatternResult = await indexPatterns.create(
+          { title: `${indexTitle}*` }, // sidesteps field caching when index pattern is reused
+          { override: true }
+        );
+
+        await PageObjects.common.navigateToApp('discover', {
+          hash: `/doc/${indexPatternResult.id}/${indexTitle}?id=${testDocumentId}`,
+        });
+        await testSubjects.exists('doc-hit');
+
+        const renderedValue = await testSubjects.find(`tableDocViewRow-seconds-value`);
+        const text = await renderedValue.getVisibleText();
+        expect(text).to.be('20.57 min');
+      });
+    });
   });
 
   /**
@@ -465,6 +510,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternByName(indexTitle);
+        await PageObjects.settings.refreshDataViewFieldList();
       });
 
       afterEach(async () => {
@@ -475,7 +521,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.controlChangeCancel();
         }
 
-        await toasts.dismissAllToasts(); // dismiss "saved" toast, otherwise it could overlap save button for a next test
+        await toasts.dismissAll(); // dismiss "saved" toast, otherwise it could overlap save button for a next test
       });
 
       specs.forEach((spec, index) => {

@@ -60,3 +60,8 @@ export const cspBenchmarkRuleSavedObjectMapping: SavedObjectsTypeMappingDefiniti
     },
   },
 };
+
+export const cspSettingsSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {},
+};

@@ -8,16 +8,20 @@
 import type { Client } from '@elastic/elasticsearch';
 import { Message } from '../../common';
 import { KibanaClient } from './kibana_client';
+import { SynthtraceEsClients } from './setup_synthtrace';
 
 export interface ScenarioOptions {
   esClient: Client;
   kibanaClient: KibanaClient;
   chatClient: ReturnType<KibanaClient['createChatClient']>;
+  synthtraceClients: SynthtraceEsClients;
 }
 
 export interface EvaluationResult {
+  name: string;
   conversationId?: string;
   messages: Array<Message['message']>;
+  passed: boolean;
   scores: Array<{
     criterion: string;
     reasoning: string;

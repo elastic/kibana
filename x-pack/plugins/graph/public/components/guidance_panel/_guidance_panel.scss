@@ -28,7 +28,7 @@
 .gphGuidancePanel__itemIcon {
   position: absolute;
   left: 0;
-  top: -($euiSizeXS / 2);
+  top: -(calc($euiSizeXS / 2));
   width: $euiSizeL;
   height: $euiSizeL;
   padding: $euiSizeXS;

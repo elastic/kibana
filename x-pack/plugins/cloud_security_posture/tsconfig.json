@@ -43,7 +43,6 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
-    "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
@@ -61,6 +60,9 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-grouping",
+    "@kbn/alerting-plugin",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock"
   ],
   "exclude": ["target/**/*"]
 }

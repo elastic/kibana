@@ -17,18 +17,18 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { COMPARATOR_OPTIONS } from '../../constants';
 import { CreateSLOForm } from '../../types';
 import { MetricInput } from './metric_input';
 
 interface MetricIndicatorProps {
-  indexFields: Field[];
+  indexFields: FieldSpec[];
   isLoadingIndex: boolean;
 }
 
@@ -270,10 +270,11 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
                 defaultValue={0}
                 render={({ field: { ref, ...field }, fieldState }) => (
                   <EuiFieldNumber
+                    {...field}
+                    data-test-subj="timesliceMetricThreshold"
                     required
                     isInvalid={fieldState.invalid}
-                    data-test-subj="timesliceMetricThreshold"
-                    value={field.value}
+                    value={String(field.value)}
                     style={{ width: 80 }}
                     disabled={!indexPattern}
                     onChange={(event) => field.onChange(Number(event.target.value))}

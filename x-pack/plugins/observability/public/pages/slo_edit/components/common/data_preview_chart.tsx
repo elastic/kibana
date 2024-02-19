@@ -16,8 +16,11 @@ import {
   ScaleType,
   Settings,
   Tooltip,
+  TooltipTable,
+  TooltipTableColumn,
 } from '@elastic/charts';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -45,6 +48,7 @@ interface DataPreviewChartProps {
   thresholdDirection?: 'above' | 'below';
   thresholdColor?: string;
   thresholdMessage?: string;
+  ignoreMoreThan100?: boolean;
 }
 
 const ONE_HOUR_IN_MILLISECONDS = 1 * 60 * 60 * 1000;
@@ -55,6 +59,7 @@ export function DataPreviewChart({
   thresholdDirection,
   thresholdColor,
   thresholdMessage,
+  ignoreMoreThan100,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
@@ -76,6 +81,8 @@ export function DataPreviewChart({
     isSuccess,
     isError,
   } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'), range);
+
+  const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -165,9 +172,54 @@ export function DataPreviewChart({
     </>
   );
 
+  const columns: TooltipTableColumn[] = [
+    {
+      id: 'color',
+      type: 'color',
+    },
+    {
+      id: 'label',
+      type: 'custom',
+      truncate: true,
+      cell: ({ label }) => <span className="echTooltip__label">{label}</span>,
+      style: {
+        textAlign: 'left',
+      },
+    },
+    {
+      id: 'value',
+      type: 'custom',
+      cell: ({ formattedValue }) => (
+        <>
+          <span className="echTooltip__value" dir="ltr">
+            {formattedValue}
+          </span>
+        </>
+      ),
+      style: {
+        textAlign: 'right',
+      },
+    },
+  ];
+
   return (
     <EuiFlexItem>
       {title}
+      {isMoreThan100 && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.moreThan100', {
+              defaultMessage:
+                'Some of the SLI values are more than 100%. That means good query is returning more results than total query.',
+            })}
+            iconType="warning"
+          />
+          <EuiSpacer size="xs" />
+        </>
+      )}
       <EuiFormRow fullWidth>
         <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
           {(isPreviewLoading || isError) && (
@@ -189,7 +241,40 @@ export function DataPreviewChart({
           )}
           {isSuccess && (
             <Chart size={{ height: 160, width: '100%' }}>
-              <Tooltip type="vertical" />
+              <Tooltip
+                type="vertical"
+                body={({ items }) => {
+                  const firstItem = items[0];
+                  const events = firstItem.datum.events;
+                  const rows = [items[0]];
+                  if (events) {
+                    rows.push({
+                      ...firstItem,
+                      formattedValue: events.good,
+                      value: events.good,
+                      label: i18n.translate(
+                        'xpack.observability.slo.sloEdit.dataPreviewChart.goodEvents',
+                        {
+                          defaultMessage: 'Good events',
+                        }
+                      ),
+                    });
+                    rows.push({
+                      ...firstItem,
+                      value: events.total,
+                      formattedValue: events.total,
+                      label: i18n.translate(
+                        'xpack.observability.slo.sloEdit.dataPreviewChart.badEvents',
+                        {
+                          defaultMessage: 'Total events',
+                        }
+                      ),
+                    });
+                  }
+
+                  return <TooltipTable columns={columns} items={rows} />;
+                }}
+              />
               <Settings
                 baseTheme={baseTheme}
                 showLegend={false}
@@ -249,6 +334,7 @@ export function DataPreviewChart({
                 data={(previewData ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
                   value: datum.sliValue >= 0 ? datum.sliValue : null,
+                  events: datum.events,
                 }))}
               />
             </Chart>

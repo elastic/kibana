@@ -83,6 +83,12 @@ describe('Output form validation', () => {
       expect(res).toEqual([{ message: 'URL is required' }]);
     });
 
+    it('should not work with empty url', () => {
+      const res = validateESHosts(['']);
+
+      expect(res).toEqual([{ index: 0, message: 'URL is required' }]);
+    });
+
     it('should work with valid url', () => {
       const res = validateESHosts(['https://test.fr:9200']);
 
@@ -117,6 +123,11 @@ describe('Output form validation', () => {
         { index: 1, message: 'Duplicate URL' },
       ]);
     });
+    it('should return an error when invalid protocol', () => {
+      const res = validateESHosts(['ftp://test.fr']);
+
+      expect(res).toEqual([{ index: 0, message: 'Invalid protocol' }]);
+    });
   });
 
   describe('validateLogstashHosts', () => {
@@ -131,6 +142,13 @@ describe('Output form validation', () => {
 
       expect(res).toBeUndefined();
     });
+
+    it('should work with hostnames using uppercase letters', () => {
+      const res = validateLogstashHosts(['tEsT.fr:9200', 'TEST2.fr:9200', 'teSt.fR:9999']);
+
+      expect(res).toBeUndefined();
+    });
+
     it('should throw for invalid hosts starting with http', () => {
       const res = validateLogstashHosts(['https://test.fr:5044']);
 

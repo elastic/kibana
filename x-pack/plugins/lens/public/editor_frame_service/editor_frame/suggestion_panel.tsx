@@ -270,14 +270,13 @@ export function SuggestionPanel({
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
-  const initialAccordionStatusValue =
-    typeof isAccordionOpen !== 'undefined' ? !Boolean(isAccordionOpen) : false;
+  const initialAccordionStatusValue = isAccordionOpen != null ? !Boolean(isAccordionOpen) : false;
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
     initialAccordionStatusValue
   );
   useEffect(() => {
-    if (typeof isAccordionOpen !== 'undefined') {
+    if (isAccordionOpen != null) {
       setHideSuggestions(!Boolean(isAccordionOpen));
     }
   }, [isAccordionOpen, setHideSuggestions]);

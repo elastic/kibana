@@ -9,8 +9,8 @@
 import { DebugState } from '@elastic/charts';
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 declare global {
   interface Window {
@@ -40,10 +40,11 @@ export class ElasticChartService extends FtrService {
     return await this.find.existsByCssSelector('.echChart canvas:last-of-type');
   }
 
-  public async waitForRenderComplete(dataTestSubj?: string) {
-    const chart = await this.getChart(dataTestSubj);
+  public async waitForRenderComplete(dataTestSubj?: string, timeout?: number) {
+    const chart = await this.getChart(dataTestSubj, timeout);
     const rendered = await chart.findAllByCssSelector(
-      '.echChartStatus[data-ech-render-complete=true]'
+      '.echChartStatus[data-ech-render-complete=true]',
+      timeout
     );
     expect(rendered.length).to.equal(1);
   }

@@ -9,19 +9,24 @@
 import { Query } from '@elastic/eui';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition } from '@kbn/management-settings-types';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from '../services';
 import { useSettings } from './use_settings';
 
 /**
  * React hook which retrieves settings and returns an observed collection of
  * {@link FieldDefinition} objects derived from those settings.
+ * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
  * @param query The {@link Query} to execute for filtering the fields.
  * @returns An array of {@link FieldDefinition} objects.
  */
-export const useFields = (query?: Query): FieldDefinition[] => {
-  const { isCustomSetting: isCustom, isOverriddenSetting: isOverridden } = useServices();
-  const settings = useSettings();
-  const fields = getFieldDefinitions(settings, { isCustom, isOverridden });
+export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinition[] => {
+  const { isCustomSetting, isOverriddenSetting } = useServices();
+  const settings = useSettings(scope);
+  const fields = getFieldDefinitions(settings, {
+    isCustom: (key) => isCustomSetting(key, scope),
+    isOverridden: (key) => isOverriddenSetting(key, scope),
+  });
   if (query) {
     return Query.execute(query, fields);
   }

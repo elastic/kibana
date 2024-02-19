@@ -15,17 +15,17 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
 
 interface HistogramIndicatorProps {
   type: 'good' | 'total';
-  histogramFields: Field[];
+  histogramFields: FieldSpec[];
   isLoadingIndex: boolean;
 }
 

@@ -11,6 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../rules_client.mock';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -99,7 +100,9 @@ describe('getActionErrorLogRoute', () => {
 
     rulesClient.getActionErrorLog = jest
       .fn()
-      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, '1')
+      );
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

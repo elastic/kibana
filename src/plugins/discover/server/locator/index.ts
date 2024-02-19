@@ -14,6 +14,8 @@ import { getScopedClient } from './service';
 export type { ColumnsFromLocatorFn } from './columns_from_locator';
 export type { SearchSourceFromLocatorFn } from './searchsource_from_locator';
 export type { TitleFromLocatorFn } from './title_from_locator';
+export type { QueryFromLocatorFn } from './query_from_locator';
+export type { FiltersFromLocatorFn } from './filters_from_locator';
 
 /**
  * @internal

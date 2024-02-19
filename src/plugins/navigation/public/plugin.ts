@@ -9,22 +9,29 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
-  NavigationPublicPluginSetup,
-  NavigationPublicPluginStart,
-  NavigationPluginStartDependencies,
+  NavigationPublicSetup,
+  NavigationPublicStart,
+  NavigationPublicSetupDependencies,
+  NavigationPublicStartDependencies,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export class NavigationPublicPlugin
-  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
+  implements
+    Plugin<
+      NavigationPublicSetup,
+      NavigationPublicStart,
+      NavigationPublicSetupDependencies,
+      NavigationPublicStartDependencies
+    >
 {
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): NavigationPublicPluginSetup {
+  public setup(_core: CoreSetup): NavigationPublicSetup {
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -33,9 +40,9 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    core: CoreStart,
-    { unifiedSearch }: NavigationPluginStartDependencies
-  ): NavigationPublicPluginStart {
+    _core: CoreStart,
+    { unifiedSearch }: NavigationPublicStartDependencies
+  ): NavigationPublicStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     /*

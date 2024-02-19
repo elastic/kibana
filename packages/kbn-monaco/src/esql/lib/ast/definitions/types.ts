@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
+import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '../types';
 
 export interface FunctionDefinition {
-  builtin?: boolean;
+  type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
   description: string;
   supportedCommands: string[];
+  supportedOptions?: string[];
   signatures: Array<{
     params: Array<{
       name: string;
@@ -22,13 +23,14 @@ export interface FunctionDefinition {
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
+      literalOnly?: boolean;
     }>;
     infiniteParams?: boolean;
     minParams?: number;
     returnType: string;
     examples?: string[];
   }>;
-  warning?: (...args: ESQLSingleAstItem[]) => string | undefined;
+  validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
 export interface CommandBaseDefinition {
@@ -45,6 +47,7 @@ export interface CommandBaseDefinition {
       optional?: boolean;
       innerType?: string;
       values?: string[];
+      valueDescriptions?: string[];
       literalOnly?: boolean;
       wildcards?: boolean;
     }>;
@@ -55,13 +58,25 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
-  validate?: (option: ESQLCommandOption) => ESQLMessage[];
+  validate?: (
+    option: ESQLCommandOption,
+    command: ESQLCommand,
+    references?: unknown
+  ) => ESQLMessage[];
+}
+
+export interface CommandModeDefinition {
+  name: string;
+  description: string;
+  values: Array<{ name: string; description: string }>;
+  prefix?: string;
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {
   options: CommandOptionsDefinition[];
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
+  modes: CommandModeDefinition[];
 }
 
 export interface Literals {

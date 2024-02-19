@@ -6,12 +6,20 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
-const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
+export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
 // Since version 8.7.0
+
+export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
+
+export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
+
+export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
+
+export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
+
 export const cspBenchmarkRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({
@@ -38,13 +46,9 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
   version: schema.string(),
 });
 
-export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
-
 export const cspBenchmarkRuleSchema = schema.object({
   metadata: cspBenchmarkRuleMetadataSchema,
 });
-
-export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
@@ -107,9 +111,14 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    * benchmark id
    */
   benchmarkId: schema.maybe(
-    schema.oneOf([schema.literal('cis_k8s'), schema.literal('cis_eks'), schema.literal('cis_aws')])
+    schema.oneOf([
+      schema.literal('cis_k8s'),
+      schema.literal('cis_eks'),
+      schema.literal('cis_aws'),
+      schema.literal('cis_azure'),
+      schema.literal('cis_gcp'),
+    ])
   ),
-
   /**
    * package_policy_id
    */
@@ -120,8 +129,6 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    */
   section: schema.maybe(schema.string()),
 });
-
-export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export interface FindCspBenchmarkRuleResponse {
   items: CspBenchmarkRule[];

@@ -8,7 +8,7 @@
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../../saved_objects';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMetaAttributes } from '../lib';
@@ -25,7 +25,7 @@ export async function muteAll(context: RulesClientContext, { id }: { id: string 
 
 async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     id
   );
 
@@ -44,7 +44,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.MUTE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -55,7 +55,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     ruleAuditEvent({
       action: RuleAuditAction.MUTE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -70,7 +70,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
   });
   const updateOptions = { version };
 
-  await partiallyUpdateAlert(
+  await partiallyUpdateRule(
     context.unsecuredSavedObjectsClient,
     id,
     updateAttributes,

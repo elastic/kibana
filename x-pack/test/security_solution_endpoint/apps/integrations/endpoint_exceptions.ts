@@ -11,7 +11,7 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
@@ -26,9 +26,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const unzipPromisify = promisify(unzip);
+  const comboBox = getService('comboBox');
+  const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173184
-  describe.skip('Endpoint Exceptions', function () {
+  describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(10 * 60_000);
@@ -60,7 +61,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const setLastFieldsValue = async ({
       testSubj,
       value,
-      optionSelector = `button[title="${value}"]`,
     }: {
       testSubj: string;
       value: string;
@@ -71,11 +71,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const lastField = fields[fields.length - 1];
       await lastField.click();
 
-      const inputField = await lastField.findByTagName('input');
-      await inputField.type(value);
-
-      const dropdownOptionSelector = `[data-test-subj="comboBoxOptionsList ${testSubj}-optionsList"] ${optionSelector}`;
-      await find.clickByCssSelector(dropdownOptionSelector);
+      await retry.try(
+        async () => {
+          await comboBox.setElement(lastField, value);
+        },
+        async () => {
+          // If the above fails due to an option not existing, create the value custom instead
+          await comboBox.setFilterValue(lastField, value);
+          await pageObjects.common.pressEnterKey();
+        }
+      );
     };
 
     const setLastEntry = async ({
@@ -92,7 +97,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastFieldsValue({
         testSubj: operator === 'matches' ? 'valuesAutocompleteWildcard' : 'valuesAutocompleteMatch',
         value,
-        optionSelector: 'p',
       });
     };
 
@@ -169,7 +173,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastEntry({ field: 'process.executable', operator: 'matches', value: 'ex*' });
 
       await testSubjects.click('addExceptionConfirmButton');
-      await pageObjects.common.closeToast();
+      await toasts.dismiss();
 
       await checkArtifact({
         entries: [
@@ -213,7 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastEntry({ field: 'process.executable', operator: 'is', value: 'something' });
 
       await testSubjects.click('addExceptionConfirmButton');
-      await pageObjects.common.closeToast();
+      await toasts.dismiss();
 
       await checkArtifact({
         entries: [

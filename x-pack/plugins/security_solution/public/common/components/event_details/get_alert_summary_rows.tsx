@@ -52,6 +52,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   {
     id: SENTINEL_ONE_AGENT_ID_FIELD,
+    overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
   // ** //

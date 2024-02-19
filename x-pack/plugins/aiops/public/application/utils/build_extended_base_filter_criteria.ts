@@ -50,6 +50,7 @@ export function buildExtendedBaseFilterCriteria(
               key,
               count: docCount,
               examples: [],
+              regex: '',
             },
           ])
         );
@@ -70,6 +71,7 @@ export function buildExtendedBaseFilterCriteria(
               key: `${selectedSignificantItem.key}`,
               count: selectedSignificantItem.doc_count,
               examples: [],
+              regex: '',
             },
           ])
         );
@@ -97,6 +99,7 @@ export function buildExtendedBaseFilterCriteria(
                 key: `${selectedSignificantItem.key}`,
                 count: selectedSignificantItem.doc_count,
                 examples: [],
+                regex: '',
               },
             ]),
           ],

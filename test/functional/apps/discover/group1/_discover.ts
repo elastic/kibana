@@ -114,10 +114,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('unifiedHistogramQueryHits'); // to cancel out tooltips
+        await testSubjects.click('discoverQueryHits'); // to cancel out tooltips
         const actualInterval = await PageObjects.discover.getChartInterval();
 
-        const expectedInterval = 'Auto';
+        const expectedInterval = 'auto';
         expect(actualInterval).to.be(expectedInterval);
       });
 
@@ -170,8 +170,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show matches when time range is expanded', async () => {
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('view all matches to load', async () => {
+          await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          return !(await testSubjects.exists('discoverNoResultsViewAllMatches'));
+        });
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);
           expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);

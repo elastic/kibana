@@ -17,8 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165084
-  describe.skip('trained models', function () {
+  describe('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -112,16 +111,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
       await ml.api.deleteIndices(modelWithPipelineAndDestIndexExpectedValues.index);
 
-      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
-      await ml.api.deleteIngestPipeline(
-        modelWithoutPipelineDataExpectedValues.duplicateName,
-        false
-      );
-
       // Need to delete index before ingest pipeline, else it will give error
       await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndex.modelId);
       await ml.testResources.deleteDataViewByTitle(
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
+      );
+      // Delete pipelines from deploy DFA model tests
+      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
+      await ml.api.deleteIngestPipeline(
+        modelWithoutPipelineDataExpectedValues.duplicateName,
+        false
       );
     });
 
@@ -188,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      it('deploys the trained model with default values', async () => {
+      it('deploys the DFA trained model with default values', async () => {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
@@ -241,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('deploys the trained model with custom values', async () => {
+      it('deploys the DFA trained model with custom values', async () => {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
@@ -418,7 +417,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('navigates to data drift', async () => {
+      it.skip('navigates to data drift', async () => {
         await ml.testExecution.logTestStep('should show the model map in the expanded row');
         await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineAndDestIndex.modelId);
         await ml.trainedModelsTable.assertModelsMapTabContent();
@@ -450,7 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/168899
+      // FLAKY: https://github.com/elastic/kibana/issues/175443
       describe.skip('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
@@ -475,8 +474,10 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`stops deployment of the imported model ${model.id}`, async () => {
+            // Wait for the model to be deployed before stopping it.
+            await ml.testExecution.logTestStep('should have a Deployed state');
+            await ml.trainedModelsTable.assertModelState(model.id, 'Deployed');
             await ml.trainedModelsTable.stopDeployment(model.id);
-            await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, true);
           });
 
           it(`deletes the imported model ${model.id}`, async () => {

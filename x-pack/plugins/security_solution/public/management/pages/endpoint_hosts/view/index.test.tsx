@@ -181,7 +181,7 @@ describe('when on the endpoint list page', () => {
     });
 
     const renderResult = render();
-    const timelineFlyout = renderResult.queryByTestId('flyoutOverlay');
+    const timelineFlyout = renderResult.queryByTestId('timeline-bottom-bar-title-button');
     expect(timelineFlyout).toBeNull();
   });
 

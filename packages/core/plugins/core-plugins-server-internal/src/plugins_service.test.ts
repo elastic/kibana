@@ -462,40 +462,10 @@ describe('PluginsService', () => {
       expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Plugin \\"explicitly-disabled-plugin-preboot\\" is disabled.",
+            "The following plugins are disabled: \\"explicitly-disabled-plugin-preboot,explicitly-disabled-plugin-standard,another-explicitly-disabled-plugin-preboot,another-explicitly-disabled-plugin-standard\\".",
           ],
           Array [
-            "Plugin \\"explicitly-disabled-plugin-standard\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-required-deps-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-standard]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-standard]",
-          ],
-          Array [
-            "Plugin \\"another-explicitly-disabled-plugin-preboot\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"another-explicitly-disabled-plugin-standard\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-standard]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-nested-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-nested-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-standard]",
+            "Plugins \\"plugin-with-missing-required-deps-preboot,plugin-with-missing-required-deps-standard,plugin-with-disabled-transitive-dep-preboot,plugin-with-disabled-transitive-dep-standard,plugin-with-disabled-nested-transitive-dep-preboot,plugin-with-disabled-nested-transitive-dep-standard,plugin-with-missing-nested-dep-preboot,plugin-with-missing-nested-dep-standard\\" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot,missing-plugin-standard,another-explicitly-disabled-plugin-preboot,another-explicitly-disabled-plugin-standard,plugin-with-disabled-transitive-dep-preboot,plugin-with-disabled-transitive-dep-standard,plugin-with-missing-required-deps-preboot,plugin-with-missing-required-deps-standard].",
           ],
         ]
       `);
@@ -538,12 +508,12 @@ describe('PluginsService', () => {
         await pluginsService.preboot(prebootDeps);
 
         expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
-        Array [
           Array [
-            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot]",
-          ],
-        ]
-      `);
+            Array [
+              "Plugins \\"plugin-with-missing-required-deps-preboot\\" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot].",
+            ],
+          ]
+        `);
       });
     });
 
@@ -1195,8 +1165,10 @@ describe('PluginsService', () => {
   });
 
   describe('plugin initialization', () => {
+    let prebootPlugins: PluginWrapper[];
+    let standardPlugins: PluginWrapper[];
     beforeEach(() => {
-      const prebootPlugins = [
+      prebootPlugins = [
         createPlugin('plugin-1-preboot', {
           type: PluginType.preboot,
           path: 'path-1-preboot',
@@ -1208,7 +1180,7 @@ describe('PluginsService', () => {
           version: 'version-2',
         }),
       ];
-      const standardPlugins = [
+      standardPlugins = [
         createPlugin('plugin-1-standard', {
           path: 'path-1-standard',
           version: 'version-1',
@@ -1329,6 +1301,31 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
+    it('#preboot registers expected static dirs', async () => {
+      prebootDeps.http.staticAssets.getPluginServerPath.mockImplementation(
+        (pluginName: string) => `/static-assets/${pluginName}`
+      );
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
+      await pluginsService.preboot(prebootDeps);
+      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledTimes(prebootPlugins.length * 2);
+      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/static-assets/plugin-1-preboot',
+        expect.any(String)
+      );
+      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/plugins/plugin-1-preboot/assets/{path*}',
+        expect.any(String)
+      );
+      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/static-assets/plugin-2-preboot',
+        expect.any(String)
+      );
+      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/plugins/plugin-2-preboot/assets/{path*}',
+        expect.any(String)
+      );
+    });
+
     it('#setup does initialize `standard` plugins if plugins.initialize is true', async () => {
       config$.next({ plugins: { initialize: true } });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
@@ -1348,6 +1345,32 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(initialized).toBe(false);
+    });
+
+    it('#setup registers expected static dirs', async () => {
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
+      await pluginsService.preboot(prebootDeps);
+      setupDeps.http.staticAssets.getPluginServerPath.mockImplementation(
+        (pluginName: string) => `/static-assets/${pluginName}`
+      );
+      await pluginsService.setup(setupDeps);
+      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledTimes(standardPlugins.length * 2);
+      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/static-assets/plugin-1-standard',
+        expect.any(String)
+      );
+      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/plugins/plugin-1-standard/assets/{path*}',
+        expect.any(String)
+      );
+      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/static-assets/plugin-2-standard',
+        expect.any(String)
+      );
+      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
+        '/plugins/plugin-2-standard/assets/{path*}',
+        expect.any(String)
+      );
     });
   });
 

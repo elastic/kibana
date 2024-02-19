@@ -11,6 +11,7 @@ import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { RequestBody, ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
@@ -19,7 +20,7 @@ export interface AgentExecutorParams {
   actions: ActionsPluginStart;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   esClient: ElasticsearchClient;
@@ -33,6 +34,7 @@ export interface AgentExecutorParams {
   size?: number;
   elserId?: string;
   traceOptions?: TraceOptions;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;

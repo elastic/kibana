@@ -2,33 +2,29 @@
 
 exports[`ML Integrations renders without errors 1`] = `
 <div
-  class="euiPopover emotion-euiPopover"
+  class="euiPopover emotion-euiPopover-inline-block"
 >
-  <div
-    class="euiPopover__anchor css-16vtueo-render"
+  <button
+    aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."
+    class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
+    data-test-subj="uptimeEnableAnomalyBtn"
+    disabled=""
+    type="button"
   >
-    <button
-      aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."
-      class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
-      data-test-subj="uptimeEnableAnomalyBtn"
-      disabled=""
-      type="button"
+    <span
+      class="emotion-euiButtonDisplayContent"
     >
       <span
-        class="emotion-euiButtonDisplayContent"
-      >
-        <span
-          aria-label="Loading"
-          class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-          role="progressbar"
-          style="border-color:#07C currentcolor currentcolor currentcolor"
-        />
-        <span
-          class="eui-textTruncate"
-        />
-      </span>
-    </button>
-  </div>
+        aria-label="Loading"
+        class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+        role="progressbar"
+        style="border-color:#07C currentcolor currentcolor currentcolor"
+      />
+      <span
+        class="eui-textTruncate"
+      />
+    </span>
+  </button>
 </div>
 `;
 

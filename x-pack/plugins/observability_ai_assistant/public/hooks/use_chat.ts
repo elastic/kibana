@@ -8,14 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { MessageRole, type Message } from '../../common';
 import {
   ConversationCreateEvent,
   ConversationUpdateEvent,
+  isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-import type { ObservabilityAIAssistantChatService } from '../types';
+import type {
+  ObservabilityAIAssistantChatService,
+  ObservabilityAIAssistantService,
+} from '../types';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 
@@ -44,6 +49,7 @@ export interface UseChatResult {
 export interface UseChatProps {
   initialMessages: Message[];
   initialConversationId?: string;
+  service: ObservabilityAIAssistantService;
   chatService: ObservabilityAIAssistantChatService;
   connectorId?: string;
   persist: boolean;
@@ -53,7 +59,8 @@ export interface UseChatProps {
 
 export function useChat({
   initialMessages,
-  initialConversationId: initialConversationIdFromProps,
+  initialConversationId,
+  service,
   chatService,
   connectorId,
   onConversationUpdate,
@@ -68,7 +75,9 @@ export function useChat({
 
   useOnce(initialMessages);
 
-  const initialConversationId = useOnce(initialConversationIdFromProps);
+  useOnce(initialConversationId);
+
+  const [conversationId, setConversationId] = useState(initialConversationId);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
@@ -92,12 +101,36 @@ export function useChat({
 
   const handleError = useCallback(
     (error: Error) => {
+      if (error instanceof AbortError) {
+        setChatState(ChatState.Aborted);
+      } else {
+        setChatState(ChatState.Error);
+      }
+
+      if (isTokenLimitReachedError(error)) {
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              content: i18n.translate('xpack.observabilityAiAssistant.tokenLimitError', {
+                defaultMessage:
+                  'The conversation has exceeded the token limit. The maximum token limit is **{tokenLimit}**, but the current conversation has **{tokenCount}** tokens. Please start a new conversation to continue.',
+                values: { tokenLimit: error.meta?.tokenLimit, tokenCount: error.meta?.tokenCount },
+              }),
+              role: MessageRole.Assistant,
+            },
+          },
+        ]);
+
+        return;
+      }
+
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
           defaultMessage: 'Failed to load response from the AI Assistant',
         }),
       });
-      setChatState(ChatState.Error);
     },
     [notifications.toasts]
   );
@@ -123,11 +156,12 @@ export function useChat({
       setChatState(ChatState.Loading);
 
       const next$ = chatService.complete({
+        screenContexts: service.getScreenContexts(),
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
         signal: abortControllerRef.current.signal,
-        conversationId: initialConversationId,
+        conversationId,
       });
 
       function getPendingMessages() {
@@ -188,6 +222,9 @@ export function useChat({
               break;
 
             case StreamingChatResponseEventType.ConversationCreate:
+              setConversationId(event.conversation.id);
+              onConversationUpdateRef.current?.(event);
+              break;
             case StreamingChatResponseEventType.ConversationUpdate:
               onConversationUpdateRef.current?.(event);
               break;
@@ -214,13 +251,14 @@ export function useChat({
       });
     },
     [
-      connectorId,
       chatService,
-      handleSignalAbort,
-      systemMessage,
+      connectorId,
+      conversationId,
       handleError,
+      handleSignalAbort,
       persist,
-      initialConversationId,
+      service,
+      systemMessage,
     ]
   );
 

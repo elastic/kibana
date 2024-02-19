@@ -1,0 +1,7 @@
+TO_GEOPOINT
+
+Converts an input value to a geo_point value.The input can be a single- or multi-valued field or an expression.
+The input type must be a string or a geo_point.A string will only be successfully converted if it respects the
+WKT Point format:
+row wkt = "POINT(42.97109630194 14.7552534413725)"
+| eval pt = to_geopoint(wkt)

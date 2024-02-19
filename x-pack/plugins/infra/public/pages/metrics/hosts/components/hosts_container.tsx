@@ -9,14 +9,14 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { useMetricsDataViewContext } from '../hooks/use_data_view';
+import { useMetricsDataViewContext } from '../hooks/use_metrics_data_view';
 import { UnifiedSearchBar } from './search_bar/unified_search_bar';
 import { HostsContent } from './hosts_content';
 import { ErrorCallout } from './error_callout';
 import { UnifiedSearchProvider } from '../hooks/use_unified_search';
 
 export const HostContainer = () => {
-  const { dataView, loading, error, metricAlias, loadDataView } = useMetricsDataViewContext();
+  const { dataView, loading, error, metricAlias, retry } = useMetricsDataViewContext();
 
   const isLoading = loading || !dataView;
   if (isLoading && !error) {
@@ -42,7 +42,7 @@ export const HostContainer = () => {
           'There was an error trying to create a Data View: {metricAlias}. Try reloading the page.',
         values: { metricAlias },
       })}
-      onTryAgainClick={loadDataView}
+      onTryAgainClick={retry}
       hasTryAgainButton
     />
   ) : (

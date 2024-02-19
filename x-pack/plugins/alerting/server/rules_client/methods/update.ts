@@ -17,7 +17,7 @@ import {
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../common';
+import { parseDuration, getRuleCircuitBreakerErrorMessage, AlertDelay } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -37,6 +37,7 @@ import {
   validateScheduleLimit,
   ValidateScheduleLimitResult,
 } from '../../application/rule/methods/get_schedule_frequency';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -50,6 +51,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
+    alertDelay?: AlertDelay;
   };
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
@@ -80,16 +82,23 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   try {
     alertSavedObject =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
       `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
     // Still attempt to load the object using SOC
-    alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
   }
 
   const {
@@ -127,7 +136,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -138,7 +147,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -210,7 +219,10 @@ async function updateAlert<Params extends RuleTypeParams>(
   currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+  const data = {
+    ...initialData,
+    actions: await addGeneratedActionValues(initialData.actions, context),
+  };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
@@ -277,7 +289,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   try {
     updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       createAttributes,
       {
         id,

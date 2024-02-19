@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-
+import { Router } from '@kbn/shared-ux-router';
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
@@ -16,8 +16,17 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import {
+  type CoreStart,
+  IUiSettingsClient,
+  ApplicationStart,
+  NotificationsStart,
+} from '@kbn/core/public';
 import { Subject } from 'rxjs';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { createBrowserHistory } from 'history';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import type { SloEmbeddableInput } from './types';
 
@@ -27,7 +36,9 @@ interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   application: ApplicationStart;
+  notifications: NotificationsStart;
 }
 
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
@@ -65,22 +76,33 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
-    const { sloId, sloInstanceId } = this.getInput();
+    const { sloId, sloInstanceId, showAllGroupByInstances } = this.getInput();
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={this.deps}>
-          <QueryClientProvider client={queryClient}>
-            <SloOverview
-              onRenderComplete={() => this.onRenderComplete()}
-              sloId={sloId}
-              sloInstanceId={sloInstanceId}
-              reloadSubject={this.reloadSubject}
-            />
-          </QueryClientProvider>
-        </KibanaContextProvider>
+        <Router history={createBrowserHistory()}>
+          <EuiThemeProvider darkMode={true}>
+            <KibanaThemeProvider theme={this.deps.theme}>
+              <KibanaContextProvider services={this.deps}>
+                <QueryClientProvider client={queryClient}>
+                  {showAllGroupByInstances ? (
+                    <SloCardChartList sloId={sloId!} />
+                  ) : (
+                    <SloOverview
+                      onRenderComplete={() => this.onRenderComplete()}
+                      sloId={sloId}
+                      sloInstanceId={sloInstanceId}
+                      reloadSubject={this.reloadSubject}
+                      showAllGroupByInstances={showAllGroupByInstances}
+                    />
+                  )}
+                </QueryClientProvider>
+              </KibanaContextProvider>
+            </KibanaThemeProvider>
+          </EuiThemeProvider>
+        </Router>
       </I18nContext>,
       node
     );

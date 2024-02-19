@@ -41,6 +41,7 @@ export const kibana: ExpressionFunctionKibana = {
       // TODO: But it shouldn't be need.
       ...input,
       type: 'kibana_context',
+      now: getSearchContext().now ?? Date.now(),
       query: [...toArray(getSearchContext().query), ...toArray((input || {}).query)],
       filters: [...(getSearchContext().filters || []), ...((input || {}).filters || [])],
       timeRange: getSearchContext().timeRange || (input ? input.timeRange : undefined),

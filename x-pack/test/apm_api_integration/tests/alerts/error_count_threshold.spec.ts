@@ -33,8 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172764
-  registry.when.skip('error count threshold alert', { config: 'basic', archives: [] }, () => {
+  registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
     const javaErrorMessage = 'a java error';
     const phpErrorMessage = 'a php error';
 
@@ -52,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ],
     };
 
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -97,14 +96,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
-      await Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
+      return Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
     });
 
-    after(async () => {
-      await synthtraceEsClient.clean();
-    });
+    after(() => synthtraceEsClient.clean());
 
-    describe('create rule without kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176948
+    describe.skip('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
       let actionId: string;
@@ -252,7 +250,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create rule with kql filter for opbeans-php', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176964
+    describe.skip('create rule with kql filter for opbeans-php', () => {
       let ruleId: string;
 
       before(async () => {

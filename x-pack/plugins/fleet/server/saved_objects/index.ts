@@ -81,6 +81,7 @@ import {
   migratePackagePolicyToV81102,
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
+import { settingsV1 } from './model_versions/v1';
 
 /*
  * Saved object types and mappings
@@ -88,7 +89,7 @@ import {
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
+export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -104,12 +105,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
         secret_storage_requirements_met: { type: 'boolean' },
+        output_secret_storage_requirements_met: { type: 'boolean' },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
       '7.13.0': migrateSettingsToV7130,
       '8.6.0': migrateSettingsToV860,
+    },
+    modelVersions: {
+      1: settingsV1,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -182,6 +187,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        is_internal: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
@@ -342,6 +348,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                 type: 'keyword',
                 index: false,
               },
+            },
+          },
+        ],
+      },
+      '5': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
             },
           },
         ],
@@ -610,9 +626,22 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_internal: { type: 'boolean', index: false },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
         proxy_id: { type: 'keyword' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
       },
     },
   },
@@ -674,49 +703,54 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
 }
 
+export const OUTPUT_EXLCUDE_AAD_FIELDS = new Set([
+  'output_id',
+  'name',
+  'type',
+  'is_default',
+  'is_default_monitoring',
+  'hosts',
+  'ca_sha256',
+  'ca_trusted_fingerprint',
+  'config',
+  'config_yaml',
+  'is_internal',
+  'is_preconfigured',
+  'proxy_id',
+  'version',
+  'key',
+  'compression',
+  'compression_level',
+  'client_id',
+  'auth_type',
+  'connection_type',
+  'username',
+  'sasl',
+  'partition',
+  'random',
+  'round_robin',
+  'hash',
+  'topics',
+  'headers',
+  'timeout',
+  'broker_timeout',
+  'required_acks',
+  'preset',
+  'secrets',
+]);
+
+export const OUTPUT_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
+  { key: 'password', dangerouslyExposeValue: true },
+]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([
-      { key: 'ssl', dangerouslyExposeValue: true },
-      { key: 'password', dangerouslyExposeValue: true },
-    ]),
-    attributesToExcludeFromAAD: new Set([
-      'output_id',
-      'name',
-      'type',
-      'is_default',
-      'is_default_monitoring',
-      'hosts',
-      'ca_sha256',
-      'ca_trusted_fingerprint',
-      'config',
-      'config_yaml',
-      'is_preconfigured',
-      'proxy_id',
-      'version',
-      'key',
-      'compression',
-      'compression_level',
-      'client_id',
-      'auth_type',
-      'connection_type',
-      'username',
-      'sasl',
-      'partition',
-      'random',
-      'round_robin',
-      'hash',
-      'topics',
-      'headers',
-      'timeout',
-      'broker_timeout',
-      'required_acks',
-      'preset',
-      'secrets',
-    ]),
+    attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
+    attributesToExcludeFromAAD: OUTPUT_EXLCUDE_AAD_FIELDS,
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({

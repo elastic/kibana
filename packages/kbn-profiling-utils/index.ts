@@ -12,6 +12,7 @@ export { ProfilingESField } from './common/elasticsearch';
 export {
   groupStackFrameMetadataByStackTrace,
   describeFrameType,
+  normalizeFrameType,
   FrameType,
   getCalleeFunction,
   getCalleeSource,

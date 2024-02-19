@@ -13,7 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import type { KqlMode } from '../../../store/timeline/model';
+import type { KqlMode } from '../../../store/model';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import type { KueryFilterQuery } from '../../../../../common/types/timeline';

@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useNotifications } from '../../../../../contexts/kibana';

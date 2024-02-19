@@ -7,9 +7,18 @@
 
 import React from 'react';
 import { css, keyframes } from '@emotion/css';
-import { EuiBetaBadge, EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 const fadeInAnimation = keyframes`
@@ -32,6 +41,34 @@ export function WelcomeMessageConnectors({
   connectors: UseGenAIConnectorsResult;
   onSetupConnectorClick?: () => void;
 }) {
+  if (connectors.error) {
+    const isForbiddenError =
+      isHttpFetchError(connectors.error) &&
+      (connectors.error.body as { statusCode: number }).statusCode === 403;
+
+    return (
+      <div className={fadeInClassName}>
+        <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" color="danger" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="danger">
+              {isForbiddenError
+                ? i18n.translate(
+                    'xpack.observabilityAiAssistant.welcomeMessageConnectors.connectorsForbiddenTextLabel',
+                    { defaultMessage: 'Required privileges to get connectors are missing' }
+                  )
+                : i18n.translate(
+                    'xpack.observabilityAiAssistant.welcomeMessageConnectors.connectorsErrorTextLabel',
+                    { defaultMessage: 'Could not load connectors' }
+                  )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+  }
   return !connectors.loading && connectors.connectors?.length === 0 && onSetupConnectorClick ? (
     <div className={fadeInClassName}>
       <EuiText color="subdued" size="s">

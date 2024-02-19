@@ -8,7 +8,7 @@
 
 import type { ESQLColumn, ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../types';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
-import { EDITOR_MARKER } from './constants';
+import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import {
   isColumnItem,
   isAssignment,
@@ -136,10 +136,33 @@ export function collectVariables(
           // just save the entire expression as variable string
           const expressionType = 'number';
           addToVariableOccurrencies(variables, {
-            name: expressionOperation.text,
+            name: expressionOperation.text
+              .replace(TICKS_REGEX, '')
+              .replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK),
             type: expressionType,
             location: expressionOperation.location,
           });
+        }
+      }
+      if (command.name === 'stats') {
+        const commandOptionsWithAssignment = command.args.filter(
+          (arg) => isOptionItem(arg) && arg.name === 'by'
+        ) as ESQLCommandOption[];
+        for (const commandOption of commandOptionsWithAssignment) {
+          const optionAssignOperations = commandOption.args.filter(isAssignment);
+          for (const assignOperation of optionAssignOperations) {
+            if (isColumnItem(assignOperation.args[0])) {
+              const rightHandSideArgType = getAssignRightHandSideType(
+                assignOperation.args[1],
+                fields
+              );
+              addToVariableOccurrencies(variables, {
+                name: assignOperation.args[0].name,
+                type: rightHandSideArgType || 'number' /* fallback to number */,
+                location: assignOperation.args[0].location,
+              });
+            }
+          }
         }
       }
     }

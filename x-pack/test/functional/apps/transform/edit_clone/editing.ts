@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
         resetRetentionPolicy: false,
+        retentionPolicyAvailable: false,
         transformRetentionPolicyField: 'order_date',
         transformRetentionPolicyMaxAge: '1d',
         numFailureRetries: '0',
@@ -84,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
         resetRetentionPolicy: true,
+        retentionPolicyAvailable: true,
         numFailureRetries: '7',
         expected: {
           messageText: 'updated transform.',
@@ -172,15 +174,19 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           await transform.testExecution.logTestStep('should update the transform retention policy');
-          await transform.editFlyout.clickTransformEditRetentionPolicySettings(
-            !testData.resetRetentionPolicy
-          );
 
+          await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(
+            testData.retentionPolicyAvailable
+          );
           if (
-            !testData.resetRetentionPolicy &&
+            testData.retentionPolicyAvailable &&
             testData?.transformRetentionPolicyField &&
             testData?.transformRetentionPolicyMaxAge
           ) {
+            await transform.editFlyout.clickTransformEditRetentionPolicySettings(
+              !testData.resetRetentionPolicy
+            );
+
             await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(
               true
             );
@@ -242,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.table.assertTransformExpandedRowJson(
             'retention_policy',
-            !testData.resetRetentionPolicy
+            testData.retentionPolicyAvailable
           );
           await transform.table.assertTransformExpandedRowJson('updated description');
           await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);

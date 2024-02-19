@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiSwitch,
-  EuiButtonGroup,
-  htmlIdGenerator,
-  EuiColorPaletteDisplay,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
@@ -58,7 +49,6 @@ export function TableDimensionEditor(
 ) {
   const { state, setState, frame, accessor, isInlineEditing } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   if (!column) return null;
   if (column.isTransposed) return null;
@@ -219,59 +209,23 @@ export function TableDimensionEditor(
                 defaultMessage: 'Color',
               })}
             >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                className="lnsDynamicColoringClickable"
+              <PalettePanelContainer
+                palette={displayStops.map(({ color }) => color)}
+                siblingRef={props.panelRef}
+                isInlineEditing={isInlineEditing}
               >
-                <EuiFlexItem>
-                  <EuiColorPaletteDisplay
-                    data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={displayStops.map(({ color }) => color)}
-                    type={FIXED_PROGRESSION}
-                    onClick={() => {
-                      setIsPaletteOpen(!isPaletteOpen);
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="lnsDatatable_dynamicColoring_trigger"
-                    iconType="controlsHorizontal"
-                    onClick={() => {
-                      setIsPaletteOpen(!isPaletteOpen);
-                    }}
-                    size="xs"
-                    flush="both"
-                  >
-                    {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                      defaultMessage: 'Edit',
-                    })}
-                  </EuiButtonEmpty>
-                  <PalettePanelContainer
-                    siblingRef={props.panelRef}
-                    isOpen={isPaletteOpen}
-                    handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-                    title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
-                      defaultMessage: 'Color',
-                    })}
-                    isInlineEditing={isInlineEditing}
-                  >
-                    <CustomizablePalette
-                      palettes={props.paletteService}
-                      activePalette={activePalette}
-                      dataBounds={currentMinMax}
-                      setPalette={(newPalette) => {
-                        setState({
-                          ...state,
-                          columns: updateColumnWith(state, accessor, { palette: newPalette }),
-                        });
-                      }}
-                    />
-                  </PalettePanelContainer>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <CustomizablePalette
+                  palettes={props.paletteService}
+                  activePalette={activePalette}
+                  dataBounds={currentMinMax}
+                  setPalette={(newPalette) => {
+                    setState({
+                      ...state,
+                      columns: updateColumnWith(state, accessor, { palette: newPalette }),
+                    });
+                  }}
+                />
+              </PalettePanelContainer>
             </EuiFormRow>
           )}
         </>

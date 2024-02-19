@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import {
   descriptorToArray,
   SavedObjectDescriptor,
@@ -85,7 +86,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       validateEvent(event, {
         spaceId,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.noop' }],
+        savedObjects: [
+          { type: RULE_SAVED_OBJECT_TYPE, id: alertId, rel: 'primary', type_id: 'test.noop' },
+        ],
         outcome: 'failure',
         message: `test.noop:${alertId}: execution failed`,
         errorMessage: `Unable to decrypt attribute "apiKey" of saved object "${descriptorToArray(
