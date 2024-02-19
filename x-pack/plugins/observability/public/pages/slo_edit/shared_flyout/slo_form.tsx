@@ -30,4 +30,6 @@ function suspendedComponentWithProps<T = unknown>(
   );
 }
 
-export const SloAddFormFlyout = suspendedComponentWithProps(lazy(() => import('./slo_add_form')));
+export const SloAddFormFlyout = suspendedComponentWithProps(
+  lazy(() => import('./slo_add_form_flyout'))
+);

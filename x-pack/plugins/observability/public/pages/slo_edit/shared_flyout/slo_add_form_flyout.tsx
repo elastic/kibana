@@ -7,11 +7,21 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React from 'react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiPortal,
+  EuiFlyoutFooter,
+} from '@elastic/eui';
 import { RecursivePartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
+import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { CreateSLOForm } from '../types';
 import { SloEditForm } from '../components/slo_edit_form';
+
+export const sloEditFormFooterPortal = createHtmlPortalNode();
 
 function SloAddFormFlyout({
   onClose,
@@ -41,9 +51,7 @@ function SloAddFormFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <SloEditForm
-            onSave={() => {
-              onClose();
-            }}
+            onSave={onClose}
             initialValues={
               initialValues
                 ? merge(
@@ -66,6 +74,9 @@ function SloAddFormFlyout({
             }
           />
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <OutPortal node={sloEditFormFooterPortal} />
+        </EuiFlyoutFooter>
       </EuiFlyout>
     </EuiPortal>
   );
