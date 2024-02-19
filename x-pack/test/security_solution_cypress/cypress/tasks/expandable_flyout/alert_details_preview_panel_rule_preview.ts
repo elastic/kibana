@@ -17,8 +17,7 @@ import {
  * Toggle the About Section in Rule Preview panel
  */
 export const toggleRulePreviewAboutSection = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER).click();
 };
 
 /* Definition section */
@@ -27,10 +26,7 @@ export const toggleRulePreviewAboutSection = () => {
  * Toggle the Definition Section in Rule Preview panel
  */
 export const toggleRulePreviewDefinitionSection = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER)
-    .should('be.visible')
-    .click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER).click();
 };
 
 /* Schedule section */
@@ -39,6 +35,5 @@ export const toggleRulePreviewDefinitionSection = () => {
  * Toggle the Schedule Section in Rule Preview panel
  */
 export const toggleRulePreviewScheduleSection = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER).click();
 };

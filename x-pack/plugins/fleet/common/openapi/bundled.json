@@ -1,5 +1,6 @@
 {
   "openapi": "3.0.0",
+  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -18,12 +19,6 @@
       "description": "local"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ],
-  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -6979,6 +6974,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -7043,6 +7042,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -9079,5 +9082,10 @@
         ]
       }
     }
-  }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
 }

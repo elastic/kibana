@@ -156,13 +156,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
         ).to.be('1 detection rule');
 
-        const toastMessage = await (await toasts.toastMessageByTestSubj()).getElement();
-        expect(toastMessage).to.be.ok();
+        const toastMessageElement = await toasts.getElementByIndex();
+        expect(toastMessageElement).to.be.ok();
 
-        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+        const toastMessageTitle = await toastMessageElement.findByTestSubject(
+          'csp:toast-success-title'
+        );
         expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
-        await (await toasts.toastMessageByTestSubj()).clickToastMessageLink();
+        await testSubjects.click('csp:toast-success-link');
 
         const rulePageTitle = await testSubjects.find('header-page-title');
         expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
@@ -183,13 +185,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
         ).to.be('1 detection rule');
 
-        const toastMessage = await (await toasts.toastMessageByTestSubj()).getElement();
+        const toastMessage = await toasts.getElementByIndex();
         expect(toastMessage).to.be.ok();
 
         const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
         expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
-        await (await toasts.toastMessageByTestSubj()).clickToastMessageLink();
+        await testSubjects.click('csp:toast-success-link');
 
         const rulePageTitle = await testSubjects.find('header-page-title');
         expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
@@ -200,7 +202,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
-        await (await toasts.toastMessageByTestSubj()).clickToastMessageLink();
+        await testSubjects.click('csp:toast-success-link');
 
         const rulePageDescription = await testSubjects.find(
           'stepAboutRuleDetailsToggleDescriptionText'
