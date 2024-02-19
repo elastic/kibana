@@ -8,7 +8,7 @@
 
 import Url from 'url';
 import expect from '@kbn/expect';
-import { AppNavLinkStatus, AppStatus, AppUpdatableFields } from '@kbn/core-application-browser';
+import { AppStatus, AppUpdatableFields } from '@kbn/core-application-browser';
 import { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
@@ -47,16 +47,15 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await PageObjects.common.navigateToApp('app_status_start');
     });
 
-    it('can change the navLink status at runtime', async () => {
+    it('can change the visibleIn array at runtime', async () => {
       await setAppStatus({
-        navLinkStatus: AppNavLinkStatus.disabled,
+        visibleIn: ['sideNav'],
       });
       let link = await appsMenu.getLink('App Status');
       expect(link).not.to.eql(undefined);
-      expect(link!.disabled).to.eql(true);
 
       await setAppStatus({
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
       });
       link = await appsMenu.getLink('App Status');
       expect(link).to.eql(undefined);
