@@ -57,7 +57,11 @@ export const CreateSloLinkForValidState = React.memo(
         logsExplorerState?.query && 'query' in logsExplorerState.query
           ? String(logsExplorerState.query.query)
           : undefined;
-      const filters = logsExplorerState?.filters ?? [];
+      const allFilters = getDiscoverFiltersFromState(
+        dataView.id,
+        logsExplorerState.filters,
+        logsExplorerState.controls
+      );
       return {
         indicator: {
           type: 'sli.kql.custom' as const,
@@ -65,7 +69,7 @@ export const CreateSloLinkForValidState = React.memo(
             index: dataView.title,
             timestampField: dataView?.timeFieldName,
             filter:
-              filters.length > 0
+              allFilters.length > 0
                 ? {
                     kqlQuery: query,
                     filters: getDiscoverFiltersFromState(
