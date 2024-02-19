@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { orderBy } from 'lodash';
 
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
@@ -50,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe.only('@ess ES|QL rule type', () => {
+  describe('@ess ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
