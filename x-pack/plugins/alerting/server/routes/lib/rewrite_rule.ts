@@ -37,6 +37,7 @@ export const rewriteRule = ({
   activeSnoozes,
   lastRun,
   nextRun,
+  alertDelay,
   ...rest
 }: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
   ...rest,
@@ -78,4 +79,5 @@ export const rewriteRule = ({
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
+  ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
 });

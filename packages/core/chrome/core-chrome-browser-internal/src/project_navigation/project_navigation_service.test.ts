@@ -28,6 +28,7 @@ const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
   baseUrl: '/app',
   url: `/app/${partial.id ?? 'kibana'}`,
   href: `/app/${partial.id ?? 'kibana'}`,
+  visibleIn: ['globalSearch'],
   ...partial,
 });
 
@@ -236,6 +237,7 @@ describe('initNavigation()', () => {
                   id: 'foo',
                   title: 'FOO',
                   url: '/app/foo',
+                  visibleIn: ['globalSearch'],
                 },
                 href: '/app/foo',
                 id: 'foo',
@@ -302,6 +304,9 @@ describe('initNavigation()', () => {
                 "id": "discover",
                 "title": "DISCOVER",
                 "url": "/app/discover",
+                "visibleIn": Array [
+                  "globalSearch",
+                ],
               },
               "href": "/app/discover",
               "id": "discover",
@@ -317,6 +322,9 @@ describe('initNavigation()', () => {
                 "id": "dashboards",
                 "title": "DASHBOARDS",
                 "url": "/app/dashboards",
+                "visibleIn": Array [
+                  "globalSearch",
+                ],
               },
               "href": "/app/dashboards",
               "id": "dashboards",
@@ -332,6 +340,9 @@ describe('initNavigation()', () => {
                 "id": "visualize",
                 "title": "VISUALIZE",
                 "url": "/app/visualize",
+                "visibleIn": Array [
+                  "globalSearch",
+                ],
               },
               "href": "/app/visualize",
               "id": "visualize",
@@ -792,6 +803,7 @@ describe('getActiveNodes$()', () => {
             baseUrl: '/app',
             url: '/app/item1',
             href: '/app/item1',
+            visibleIn: ['globalSearch'],
           },
         },
       ],
@@ -848,6 +860,7 @@ describe('getActiveNodes$()', () => {
             baseUrl: '/app',
             url: '/app/item1',
             href: '/app/item1',
+            visibleIn: ['globalSearch'],
           },
           getIsActive: expect.any(Function),
         },
