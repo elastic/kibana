@@ -1030,7 +1030,7 @@ describe('validation logic', () => {
       const supportedSignatures = signatures.filter(({ returnType }) =>
         ['number', 'string'].includes(returnType)
       );
-      for (const { params, returnType } of supportedSignatures) {
+      for (const { params, returnType, ...restSign } of supportedSignatures) {
         const correctMapping = params
           .filter(({ optional }) => !optional)
           .map(({ type }) =>
@@ -1042,7 +1042,7 @@ describe('validation logic', () => {
           `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
             // hijacking a bit this function to produce a function call
             getFunctionSignatures(
-              { name, ...rest, signatures: [{ params: correctMapping, returnType }] },
+              { name, ...rest, signatures: [{ params: correctMapping, returnType, ...restSign }] },
               { withTypes: false }
             )[0].declaration
           }${returnType !== 'number' ? ')' : ''} > 0`,
@@ -1059,7 +1059,11 @@ describe('validation logic', () => {
           `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
             // hijacking a bit this function to produce a function call
             getFunctionSignatures(
-              { name, ...rest, signatures: [{ params: wrongFieldMapping, returnType }] },
+              {
+                name,
+                ...rest,
+                signatures: [{ params: wrongFieldMapping, returnType, ...restSign }],
+              },
               { withTypes: false }
             )[0].declaration
           }${returnType !== 'number' ? ')' : ''} > 0`,

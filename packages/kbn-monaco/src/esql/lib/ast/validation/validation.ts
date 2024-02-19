@@ -255,16 +255,16 @@ function extractCompatibleSignaturesForFunction(
   astFunction: ESQLFunction
 ) {
   return fnDef.signatures.filter((def) => {
-    if (def.infiniteParams && astFunction.args.length > 0) {
-      return true;
+    if (def.infiniteParams) {
+      return astFunction.args.length > 0;
     }
-    if (def.minParams && astFunction.args.length >= def.minParams) {
-      return true;
+    if (def.minParams) {
+      return astFunction.args.length >= def.minParams;
     }
-    if (astFunction.args.length === def.params.length) {
-      return true;
-    }
-    return astFunction.args.length === def.params.filter(({ optional }) => !optional).length;
+    return (
+      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
+      astFunction.args.length <= def.params.length
+    );
   });
 }
 
