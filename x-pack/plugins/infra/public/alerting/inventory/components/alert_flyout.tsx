@@ -8,7 +8,6 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
@@ -18,27 +17,16 @@ interface Props {
   visible?: boolean;
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
-  // only shows for AWS when there are accounts info
-  accountId?: string;
-  // only shows for AWS when there are regions info
-  region?: string;
   filter?: string;
-  customMetrics?: SnapshotCustomMetricInput[];
   setVisible(val: boolean): void;
 }
 
-export const AlertFlyout = ({
-  options,
-  nodeType,
-  filter,
-  visible,
-  setVisible,
-  customMetrics = [],
-  accountId = '',
-  region = '',
-}: Props) => {
+export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const { customMetrics = [], accountId, region } = inventoryPrefill;
+
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
@@ -66,16 +54,13 @@ export const AlertFlyout = ({
 
 export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery, accountId, region, customMetrics } = inventoryPrefill;
+  const { nodeType, metric, filterQuery } = inventoryPrefill;
 
   return (
     <AlertFlyout
-      accountId={accountId}
       options={{ metric }}
       nodeType={nodeType}
       filter={filterQuery}
-      region={region}
-      customMetrics={customMetrics}
       visible
       setVisible={onClose}
     />
