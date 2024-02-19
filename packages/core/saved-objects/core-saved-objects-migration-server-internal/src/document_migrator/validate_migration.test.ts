@@ -111,7 +111,7 @@ describe('validateTypeMigrations', () => {
       expect(() => validate({ type })).not.toThrow();
     });
 
-    describe.only('when switchToModelVersionAt is specified', () => {
+    describe('when switchToModelVersionAt is specified', () => {
       it('throws if a migration is specified for a version superior to switchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',

@@ -19,7 +19,6 @@ import {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';
-import { ObjectType } from '@kbn/config-schema';
 
 /**
  * Validates the consistency of the given type for use with the document migrator.
@@ -79,7 +78,6 @@ export function validateTypeMigrations({
 
     Object.entries(schemaMap).forEach(([version, schema]) => {
       assertValidSemver(kibanaVersion, version, type.name);
-      // assertValidSchema(schema, version, type.name); // is this realy needed?
       if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
         throw new Error(
           `Schema for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
@@ -276,10 +274,4 @@ const getMissingVersions = (from: number, to: number, versions: number[]): numbe
     }
   }
   return missing;
-};
-
-const assertValidSchema = (schema: any, version: string, type: string) => {
-  if (!(typeof schema === typeof ObjectType) && schema) {
-    throw new Error(`Invalid schema ${type}.${version}: expected an object, but got ${schema}.`);
-  }
 };
