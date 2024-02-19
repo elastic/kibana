@@ -26,11 +26,11 @@ export function HeaderMenu(): React.ReactElement | null {
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          {ObservabilityAIAssistantActionMenuItem ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
           <EuiHeaderLinks>
             <EuiHeaderLink

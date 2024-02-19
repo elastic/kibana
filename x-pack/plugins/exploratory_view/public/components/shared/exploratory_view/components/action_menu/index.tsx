@@ -30,11 +30,11 @@ export function ExpViewActionMenu(props: Props) {
         <EuiFlexItem>
           <ExpViewActionMenuContent {...props} />
         </EuiFlexItem>
-        <EuiFlexItem>
-          {ObservabilityAIAssistantActionMenuItem ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );

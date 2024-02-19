@@ -90,11 +90,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 </EuiHeaderLink>
               </EuiHeaderLinks>
             </EuiFlexItem>
-            <EuiFlexItem>
-              {ObservabilityAIAssistantActionMenuItem ? (
+            {ObservabilityAIAssistantActionMenuItem ? (
+              <EuiFlexItem>
                 <ObservabilityAIAssistantActionMenuItem />
-              ) : null}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </HeaderMenuPortal>
       )}

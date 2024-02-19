@@ -140,11 +140,11 @@ function MountApmHeaderActionMenu() {
         <EuiFlexItem>
           <ApmHeaderActionMenu />
         </EuiFlexItem>
-        <EuiFlexItem>
-          {ObservabilityAIAssistantActionMenuItem ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );

@@ -102,11 +102,11 @@ export function UXActionMenu({
             <UxInspectorHeaderLink isDev={isDev} />
           </EuiHeaderLinks>
         </EuiFlexItem>
-        <EuiFlexItem>
-          {ObservabilityAIAssistantActionMenuItem ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );

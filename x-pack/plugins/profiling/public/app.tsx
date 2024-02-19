@@ -60,11 +60,11 @@ function MountProfilingActionMenu({
         <EuiFlexItem>
           <ProfilingHeaderActionMenu />
         </EuiFlexItem>
-        <EuiFlexItem>
-          {ObservabilityAIAssistantActionMenuItem ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );
