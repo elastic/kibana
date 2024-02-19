@@ -326,6 +326,10 @@ export function useFetchAgentsData() {
     setSelectedTags: (tags: string[]) => {
       // eslint-disable-next-line no-console
       console.log('setSelectedTags ' + tags);
+      if (tags.length === 0) {
+        // eslint-disable-next-line no-console
+        console.trace();
+      }
       setSelectedTags(tags);
     },
     agentPolicies,
