@@ -174,6 +174,9 @@ export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
+export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
+  'securitySolution:enableAssetCriticality' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
