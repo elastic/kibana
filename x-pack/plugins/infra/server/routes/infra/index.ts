@@ -14,6 +14,7 @@ import {
   GetInfraMetricsResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import { InfraBackendLibs } from '../../lib/infra_types';
+import { getInfraAlertsClient } from './lib/helpers/get_infra_alerts_client';
 import { getHosts } from './lib/host/get_hosts';
 
 export const initInfraMetricsRoute = (libs: InfraBackendLibs) => {
@@ -35,10 +36,20 @@ export const initInfraMetricsRoute = (libs: InfraBackendLibs) => {
 
       try {
         const searchClient = data.search.asScoped(request);
+        const alertsClient = await getInfraAlertsClient({
+          getStartServices: libs.getStartServices,
+          request,
+        });
         const soClient = savedObjects.getScopedClient(request);
         const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
-        const hosts = await getHosts({ searchClient, sourceConfig: source.configuration, params });
+        const hosts = await getHosts({
+          searchClient,
+          alertsClient,
+          sourceConfig: source.configuration,
+          params,
+        });
+
         return response.ok({
           body: GetInfraMetricsResponsePayloadRT.encode(hosts),
         });
