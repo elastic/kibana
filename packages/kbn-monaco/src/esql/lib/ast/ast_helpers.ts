@@ -10,10 +10,7 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import { Token } from 'antlr4';
-import type { ParserRuleContext } from 'antlr4/ParserRuleContext';
-import { ErrorNode } from 'antlr4/tree/ErrorNode';
-import type { TerminalNode } from 'antlr4/tree/TerminalNode';
+import { Token, ErrorNode, type ParserRuleContext, type TerminalNode } from 'antlr4';
 import type {
   ArithmeticUnaryContext,
   DecimalValueContext,
