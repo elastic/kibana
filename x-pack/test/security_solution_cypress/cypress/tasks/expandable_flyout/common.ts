@@ -36,5 +36,5 @@ export const createNewCaseFromExpandableFlyout = () => {
   cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
 
   // NOTE: close pop up to limit interaction with flyout behind
-  cy.get(VIEW_CASE_TOASTER_CLOSE_BUTTON).should('be.visible').click();
+  cy.get(VIEW_CASE_TOASTER_CLOSE_BUTTON).click();
 };

@@ -11,6 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB } from '../../screens/expandable_f
  * Open the Response tab in the document details expandable flyout left section
  */
 export const openResponseTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB).click();
 };
