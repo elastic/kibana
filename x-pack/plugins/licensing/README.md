@@ -96,7 +96,7 @@ class MyPlugin {
       const showLinks = hasRequiredLicense && license.getFeature('name').isAvailable;
 
       appUpdater$.next(() => {
-        navLinkStatus: showLinks ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden
+        status: showLinks ? AppStatus.accessible : AppStatus.inaccessible,
       });
     })
   }

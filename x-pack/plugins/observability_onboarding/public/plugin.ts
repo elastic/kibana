@@ -17,7 +17,6 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import {
   DataPublicPluginSetup,
@@ -71,7 +70,6 @@ export class ObservabilityOnboardingPlugin
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
-      serverless: { enabled: isServerlessEnabled },
     } = config;
 
     const pluginSetupDeps = plugins;
@@ -80,9 +78,6 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: isServerlessEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
         id: PLUGIN_ID,
         title: 'Observability Onboarding',
         order: 8500,
@@ -110,6 +105,7 @@ export class ObservabilityOnboardingPlugin
             config,
           });
         },
+        visibleIn: [],
       });
     }
 
