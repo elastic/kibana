@@ -503,11 +503,11 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
         const signatureStringCorrect = tweakSignatureForRowCommand(
           getFunctionSignatures(
-            { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+            { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
             { withTypes: false }
           )[0].declaration
         );
@@ -519,11 +519,7 @@ describe('validation logic', () => {
           for (const otherName of alias) {
             const signatureStringWithAlias = tweakSignatureForRowCommand(
               getFunctionSignatures(
-                {
-                  name: otherName,
-                  ...defRest,
-                  signatures: [{ params: fieldMapping, ...signRest }],
-                },
+                { name: otherName, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
                 { withTypes: false }
               )[0].declaration
             );
@@ -549,7 +545,7 @@ describe('validation logic', () => {
               {
                 name,
                 ...defRest,
-                signatures: [{ params: fieldMappingWithNestedFunctions, ...signRest }],
+                signatures: [{ params: fieldMappingWithNestedFunctions, returnType }],
               },
               { withTypes: false }
             )[0].declaration
@@ -565,7 +561,7 @@ describe('validation logic', () => {
           );
           const wrongSignatureString = tweakSignatureForRowCommand(
             getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
+              { name, ...defRest, signatures: [{ params: wrongFieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
           );
@@ -1185,16 +1181,12 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, returnType, infiniteParams, minParams } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a_index | eval var = ${
             getFunctionSignatures(
-              {
-                name,
-                ...defRest,
-                signatures: [{ params: fieldMapping, ...signRest }],
-              },
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
           }`,
@@ -1203,7 +1195,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval ${
             getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
           }`,
@@ -1225,7 +1217,7 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithoutLiterals, ...signRest }],
+                  signatures: [{ params: fieldMappingWithoutLiterals, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
@@ -1239,11 +1231,7 @@ describe('validation logic', () => {
         if (alias) {
           for (const otherName of alias) {
             const signatureStringWithAlias = getFunctionSignatures(
-              {
-                name: otherName,
-                ...defRest,
-                signatures: [{ params: fieldMapping, ...signRest }],
-              },
+              { name: otherName, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration;
 
@@ -1269,7 +1257,7 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithNestedFunctions, ...signRest }],
+                  signatures: [{ params: fieldMappingWithNestedFunctions, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
@@ -1285,14 +1273,14 @@ describe('validation logic', () => {
           testErrorsAndWarnings(
             `from a_index | eval ${
               getFunctionSignatures(
-                { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
+                { name, ...defRest, signatures: [{ params: wrongFieldMapping, returnType }] },
                 { withTypes: false }
               )[0].declaration
             }`,
             expectedErrors
           );
 
-          if (!infiniteParams && !signRest.minParams) {
+          if (!infiniteParams && !minParams) {
             // test that additional args are spotted
             const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
               name: 'extraArg',
@@ -1307,7 +1295,7 @@ describe('validation logic', () => {
                   {
                     name,
                     ...defRest,
-                    signatures: [{ params: fieldMappingWithOneExtraArg, ...signRest }],
+                    signatures: [{ params: fieldMappingWithOneExtraArg, returnType }],
                   },
                   { withTypes: false }
                 )[0].declaration
@@ -1328,7 +1316,7 @@ describe('validation logic', () => {
         }
 
         // test that wildcard won't work as arg
-        if (fieldMapping.length === 1 && !signRest.minParams) {
+        if (fieldMapping.length === 1) {
           const fieldMappingWithWildcard = [...fieldMapping];
           fieldMappingWithWildcard[0].name = '*';
 
@@ -1338,7 +1326,7 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithWildcard, ...signRest }],
+                  signatures: [{ params: fieldMappingWithWildcard, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
@@ -1703,17 +1691,17 @@ describe('validation logic', () => {
     ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
 
         const correctSignature = getFunctionSignatures(
-          { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+          { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
           { withTypes: false }
         )[0].declaration;
         testErrorsAndWarnings(`from a_index | stats var = ${correctSignature}`, []);
         testErrorsAndWarnings(`from a_index | stats ${correctSignature}`, []);
 
-        if (signRest.returnType === 'number') {
+        if (returnType === 'number') {
           testErrorsAndWarnings(`from a_index | stats var = round(${correctSignature})`, []);
           testErrorsAndWarnings(`from a_index | stats round(${correctSignature})`, []);
           testErrorsAndWarnings(
@@ -1742,7 +1730,7 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithoutLiterals, ...signRest }],
+                  signatures: [{ params: fieldMappingWithoutLiterals, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
@@ -1756,7 +1744,7 @@ describe('validation logic', () => {
         if (alias) {
           for (const otherName of alias) {
             const signatureStringWithAlias = getFunctionSignatures(
-              { name: otherName, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+              { name: otherName, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration;
 
@@ -1774,7 +1762,7 @@ describe('validation logic', () => {
             {
               name,
               ...defRest,
-              signatures: [{ params: fieldMappingWithNestedBuiltinFunctions, ...signRest }],
+              signatures: [{ params: fieldMappingWithNestedBuiltinFunctions, returnType }],
             },
             { withTypes: false }
           )[0].declaration;
@@ -1798,7 +1786,7 @@ describe('validation logic', () => {
             {
               name,
               ...defRest,
-              signatures: [{ params: fieldMappingWithNestedEvalAndBuiltinFunctions, ...signRest }],
+              signatures: [{ params: fieldMappingWithNestedEvalAndBuiltinFunctions, returnType }],
             },
             { withTypes: false }
           )[0].declaration;
@@ -1867,7 +1855,7 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, ...signRest }],
+                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
@@ -1880,7 +1868,7 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, ...signRest }],
+                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
@@ -1897,7 +1885,7 @@ describe('validation logic', () => {
           testErrorsAndWarnings(
             `from a_index | stats ${
               getFunctionSignatures(
-                { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
+                { name, ...defRest, signatures: [{ params: wrongFieldMapping, returnType }] },
                 { withTypes: false }
               )[0].declaration
             }`,
@@ -1916,7 +1904,7 @@ describe('validation logic', () => {
                   {
                     name,
                     ...defRest,
-                    signatures: [{ params: fieldMappingWithWildcard, ...signRest }],
+                    signatures: [{ params: fieldMappingWithWildcard, returnType }],
                   },
                   { withTypes: false }
                 )[0].declaration
