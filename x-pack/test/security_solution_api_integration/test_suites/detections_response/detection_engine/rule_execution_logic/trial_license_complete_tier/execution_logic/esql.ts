@@ -384,13 +384,11 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        const previewAlertsOrderedByAgentName = orderBy(
-          previewAlerts,
-          ['_source', 'agent.name'],
-          'asc'
-        );
+        const previewAlertsOrderedByAgentName = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name'],
+        });
 
         expect(previewAlertsOrderedByAgentName.length).toBe(3);
         expect(previewAlertsOrderedByAgentName[0]._source).toEqual(
@@ -524,7 +522,11 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['event.ingested'],
+        });
 
         expect(previewAlerts.length).toBe(2);
         expect(previewAlerts[0]._source).toHaveProperty(['event.ingested'], expectedEventIngested);
