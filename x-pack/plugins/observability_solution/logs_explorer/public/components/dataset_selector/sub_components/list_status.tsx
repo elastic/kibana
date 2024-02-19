@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { ReloadDatasets } from '../../../hooks/use_datasets';
 import { errorLabel, noDataRetryLabel } from '../constants';
 import type { Dataset, Integration } from '../../../../common/datasets';
 import { DatasetSkeleton } from './datasets_skeleton';
 
 export interface ListStatusProps {
-  data: Dataset[] | Integration[] | DataViewListItem[] | null;
+  data: Dataset[] | Integration[] | DataViewDescriptor[] | null;
   description: string;
   error: Error | null;
   isLoading: boolean;

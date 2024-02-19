@@ -23,11 +23,11 @@ import {
   inactiveDatasetsLabel,
   loadingDatasetsText,
   noDatasetsTitle,
-} from '../../../common/translations';
-import { useDatasetQualityTable } from '../../hooks';
-import { DescriptiveSwitch } from '../common/descriptive_switch';
+} from '../../../../common/translations';
+import { useDatasetQualityTable } from '../../../hooks';
+import { DescriptiveSwitch } from '../../common/descriptive_switch';
 
-const Flyout = dynamic(() => import('../flyout/flyout'));
+const Flyout = dynamic(() => import('../../flyout/flyout'));
 
 export const Table = () => {
   const {
