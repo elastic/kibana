@@ -76,7 +76,7 @@ export class PainlessTinyMathParser {
 
   replaceCharactersWithAggMap(inputString: string, aggMap: AggMap): string {
     // Use a regular expression to match any character from 'A' to 'Z'
-    const regex = /[A-Z]/g;
+    const regex = /[A-Z]+/g;
 
     return inputString.replace(regex, (match) => {
       const replacement = aggMap[match]; // Get the replacement from the map

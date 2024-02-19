@@ -23,6 +23,16 @@ describe('PainlessTinyMathParser', () => {
     // ✅ checked with Lens Formula editor
     expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
   });
+  it('should parse a simple equation with multi-char aggregation name', () => {
+    const equation = '100 * ABC';
+    const parser = new PainlessTinyMathParser({
+      equation,
+      aggMap: {
+        ABC: 'average(system.cpu.system.pct)',
+      },
+    });
+    expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
+  });
   it('should parse a simple equation with two aggregations A and B', () => {
     const equation = '100 * A + B / 100';
     const parser = new PainlessTinyMathParser({
