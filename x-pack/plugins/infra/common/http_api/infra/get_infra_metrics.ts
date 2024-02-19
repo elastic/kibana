@@ -53,11 +53,16 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   }),
 ]);
 
-export const InfraAssetMetricsItemRT = rt.type({
-  name: rt.string,
-  metrics: rt.array(InfraAssetMetricsRT),
-  metadata: rt.array(InfraAssetMetadataRT),
-});
+export const InfraAssetMetricsItemRT = rt.intersection([
+  rt.type({
+    name: rt.string,
+    metrics: rt.array(InfraAssetMetricsRT),
+    metadata: rt.array(InfraAssetMetadataRT),
+  }),
+  rt.partial({
+    alertsCount: rt.number,
+  }),
+]);
 
 export const GetInfraMetricsResponsePayloadRT = rt.type({
   type: rt.literal('host'),

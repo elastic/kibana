@@ -19,8 +19,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/175608
-  describe.skip('navigation', function () {
+  describe('navigation', function () {
     before(async () => {
       await svlCommonPage.login();
       await svlSecNavigation.navigateToLandingPage();

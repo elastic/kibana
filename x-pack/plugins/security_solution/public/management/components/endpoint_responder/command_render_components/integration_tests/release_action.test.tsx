@@ -24,7 +24,8 @@ import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations'
 
 jest.mock('../../../../../common/experimental_features_service');
 
-describe('When using the release action from response actions console', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/162530
+describe.skip('When using the release action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
