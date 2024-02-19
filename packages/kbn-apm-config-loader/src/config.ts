@@ -93,6 +93,11 @@ export class ApmConfiguration {
     return baseConfig;
   }
 
+  public isUsersRedactionEnabled(): boolean {
+    const { redactUsers = true } = this.getConfigFromKibanaConfig();
+    return redactUsers;
+  }
+
   private getBaseConfig() {
     if (!this.baseConfig) {
       const configFromSources = this.getConfigFromAllSources();
@@ -287,7 +292,8 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const { servicesOverrides, ...configFromKibanaConfig } = this.getConfigFromKibanaConfig();
+    const { servicesOverrides, redactUsers, ...configFromKibanaConfig } =
+      this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
     const config = merge({}, configFromKibanaConfig, configFromEnv);
 
