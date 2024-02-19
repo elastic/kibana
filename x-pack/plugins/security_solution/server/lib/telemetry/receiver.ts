@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import os from 'os';
+import { cloneDeep } from 'lodash';
+
 import type {
   Logger,
   CoreStart,
@@ -124,6 +127,21 @@ export interface ITelemetryReceiver {
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
 
+  /**
+   * Using a PIT executes the given query and returns the results in pages.
+   * The page size is calculated using the mean of a sample of N documents
+   * executing the same query. The query must have a sort attribute.
+   *
+   * @param index The index to search
+   * @param query The query to use
+   * @returns An async generator of pages of results
+   *
+   * @see {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html}
+   * @see {ITelemetryReceiver#setMaxPageSizeBytes}
+   * @see {ITelemetryReceiver#setNumDocsToSample}
+   */
+  paginate<T>(index: string, query: ESSearchRequest): AsyncGenerator<T[], void, unknown>;
+
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
 
   fetchTrustedApplications(): Promise<{
@@ -187,13 +205,16 @@ export interface ITelemetryReceiver {
   getAlertsIndex(): string | undefined;
 
   getExperimentalFeatures(): ExperimentalFeatures | undefined;
+
+  setMaxPageSizeBytes(bytes: number): void;
+  setNumDocsToSample(n: number): void;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
-  private esClient?: ElasticsearchClient;
+  private _esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
   private getIndexForType?: (type: string) => string;
@@ -203,6 +224,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
   private readonly maxRecords = 10_000 as const;
+
+  // default to 2% of host's total memory or 80MiB, whichever is smaller
+  private maxPageSizeBytes: number = Math.min(os.totalmem() * 0.02, 80 * 1024 * 1024);
+  // number of docs to query to estimate the size of a single doc
+  private numDocsToSample: number = 10;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events.receiver');
@@ -220,7 +246,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.alertsIndex = alertsIndex;
     this.agentClient = endpointContextService?.getInternalFleetServices().agent;
     this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
-    this.esClient = core?.elasticsearch.client.asInternalUser;
+    this._esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
     this.packageService = packageService;
     this.soClient =
@@ -261,12 +287,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error(
-        'elasticsearch client is unavailable: cannot retrieve elastic endpoint policy responses'
-      );
-    }
-
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.policy*`,
@@ -306,14 +326,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query, { meta: true });
+    return this.esClient().search(query, { meta: true });
   }
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve elastic endpoint metrics');
-    }
-
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: ENDPOINT_METRICS_INDEX,
@@ -358,14 +374,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query, { meta: true });
+    return this.esClient().search(query, { meta: true });
   }
 
   public async fetchEndpointMetadata(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve elastic endpoint metrics');
-    }
-
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metadata-*`,
@@ -405,13 +417,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query, { meta: true });
+    return this.esClient().search(query, { meta: true });
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
-    }
+    tlog(this.logger, `Searching diagnostic alerts from ${executeFrom} to ${executeTo}`);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
@@ -442,7 +452,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     let response = null;
     while (fetchMore) {
       try {
-        response = await this.esClient.search(query);
+        response = await this.esClient().search(query);
         const numOfHits = response?.hits.hits.length;
 
         if (numOfHits > 0) {
@@ -547,10 +557,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    * @returns The elastic rules
    */
   public async fetchDetectionRules() {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve detection rules');
-    }
-
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
@@ -593,7 +599,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    return this.esClient.search<RuleSearchResult>(query, { meta: true });
+    return this.esClient().search<RuleSearchResult>(query, { meta: true });
   }
 
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
@@ -628,10 +634,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
-    }
-
     tlog(this.logger, `Searching prebuilt rule alerts from ${executeFrom} to ${executeTo}`);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
@@ -743,7 +745,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     let response = null;
     while (fetchMore) {
       try {
-        response = await this.esClient.search(query);
+        response = await this.esClient().search(query);
         const numOfHits = response?.hits.hits.length;
 
         if (numOfHits > 0) {
@@ -779,13 +781,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   private async openPointInTime(indexPattern: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
-    }
-
     const keepAlive = '5m';
     const pitId: OpenPointInTimeResponse['id'] = (
-      await this.esClient.openPointInTime({
+      await this.esClient().openPointInTime({
         index: `${indexPattern}*`,
         keep_alive: keepAlive,
         expand_wildcards: ['open' as const, 'hidden' as const],
@@ -796,28 +794,20 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async closePointInTime(pitId: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
-    }
-
     try {
-      await this.esClient.closePointInTime({ id: pitId });
+      await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
       tlog(this.logger, `Error trying to close point in time: "${pitId}". Error is: "${error}"`);
     }
   }
 
   async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
-    }
-
     // default is from looking at Kibana saved objects and online documentation
     const keepAlive = '5m';
 
     // create and assign an initial point in time
     let pitId: OpenPointInTimeResponse['id'] = (
-      await this.esClient.openPointInTime({
+      await this.esClient().openPointInTime({
         index: `${index}*`,
         keep_alive: keepAlive,
       })
@@ -881,11 +871,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         size: 1000,
       };
 
-      tlog(this.logger, `Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
-
       let response = null;
       try {
-        response = await this.esClient.search<EnhancedAlertEvent>(query);
+        response = await this.esClient().search<EnhancedAlertEvent>(query);
         const numOfHits = response?.hits.hits.length;
 
         if (numOfHits > 0) {
@@ -908,7 +896,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     try {
-      await this.esClient.closePointInTime({ id: pitId });
+      await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
       tlog(
         this.logger,
@@ -949,10 +937,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async fetchTimelineEvents(nodeIds: string[]) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve timeline endpoint events');
-    }
-
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
@@ -989,14 +973,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient.search<SafeEndpointEvent>(query);
+    return this.esClient().search<SafeEndpointEvent>(query);
   }
 
   public async fetchValueListMetaData(_interval: number) {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
-    }
-
     const listQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.lists-*',
@@ -1076,10 +1056,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
       await Promise.all([
-        this.esClient.search(listQuery),
-        this.esClient.search(itemQuery),
-        this.esClient.search(exceptionListQuery),
-        this.esClient.search(indicatorMatchRuleQuery),
+        this.esClient().search(listQuery),
+        this.esClient().search(itemQuery),
+        this.esClient().search(exceptionListQuery),
+        this.esClient().search(indicatorMatchRuleQuery),
       ]);
     const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
     const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
@@ -1096,21 +1076,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
-    }
-
     // @ts-expect-error version.build_date is of type estypes.DateTime
-    return this.esClient.info();
+    return this.esClient().info();
   }
 
   public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve license information');
-    }
-
     try {
-      const ret = (await this.esClient.transport.request({
+      const ret = (await this.esClient().transport.request({
         method: 'GET',
         path: '/_license',
         querystring: {
@@ -1133,5 +1105,83 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
       ...(lic.issuer ? { issuer: lic.issuer } : {}),
     };
+  }
+
+  // calculates the number of documents that can be returned per page
+  // or "-1" if the query returns no documents
+  private async docsPerPage(index: string, query: ESSearchRequest): Promise<number> {
+    const sampleQuery: ESSearchRequest = {
+      query: cloneDeep(query.query),
+      size: this.numDocsToSample,
+      index,
+    };
+    const sampleSizeBytes = await this.esClient()
+      .search<undefined>(sampleQuery)
+      .then((r) => r.hits.hits.reduce((sum, hit) => JSON.stringify(hit._source).length + sum, 0));
+    const docSizeBytes = sampleSizeBytes / this.numDocsToSample;
+
+    if (docSizeBytes === 0) {
+      return -1;
+    }
+
+    return Math.max(Math.floor(this.maxPageSizeBytes / docSizeBytes), 1);
+  }
+
+  public async *paginate<T>(index: string, query: ESSearchRequest) {
+    if (query.sort == null) {
+      throw Error('Not possible to paginate a query without a sort attribute');
+    }
+
+    const size = await this.docsPerPage(index, query);
+    if (size === -1) {
+      return;
+    }
+
+    const pit = {
+      id: await this.openPointInTime(index),
+    };
+    const esQuery = {
+      ...cloneDeep(query),
+      pit,
+      size,
+    };
+    try {
+      do {
+        const response = await this.esClient().search(esQuery);
+        const hits = response?.hits.hits.length ?? 0;
+
+        if (hits === 0) {
+          return;
+        }
+
+        esQuery.search_after = response?.hits.hits[hits - 1]?.sort;
+
+        const data = response?.hits.hits.flatMap((h) =>
+          h._source != null ? ([h._source] as T[]) : []
+        );
+
+        yield data;
+      } while (esQuery.search_after !== undefined);
+    } catch (e) {
+      tlog(this.logger, `Error running paginated query: ${e}`);
+      throw e;
+    } finally {
+      await this.closePointInTime(pit.id);
+    }
+  }
+
+  public setMaxPageSizeBytes(bytes: number) {
+    this.maxPageSizeBytes = bytes;
+  }
+
+  public setNumDocsToSample(n: number) {
+    this.numDocsToSample = n;
+  }
+
+  private esClient(): ElasticsearchClient {
+    if (this._esClient === undefined || this._esClient === null) {
+      throw Error('elasticsearch client is unavailable');
+    }
+    return this._esClient;
   }
 }

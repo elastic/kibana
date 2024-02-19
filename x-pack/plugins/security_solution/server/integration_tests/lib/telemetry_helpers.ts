@@ -33,6 +33,7 @@ import type {
 import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
+import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
 import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
@@ -83,6 +84,30 @@ export function getAsyncTelemetryEventSender(
     }
   } else {
     throw new Error('Telemetry sender not started');
+  }
+}
+
+export function getTelemetryReceiver(
+  spy: jest.SpyInstance<
+    SecuritySolutionPluginStart,
+    [core: CoreStart, plugins: SecuritySolutionPluginStartDependencies]
+  >
+): ITelemetryReceiver {
+  const pluginInstances = spy.mock.instances;
+  if (pluginInstances.length === 0) {
+    throw new Error('security_solution plugin not started');
+  }
+  const plugin = pluginInstances[0];
+  if (plugin instanceof SecuritySolutionPlugin) {
+    /* eslint dot-notation: "off" */
+    const receiver = plugin['telemetryReceiver'];
+    if (receiver instanceof TelemetryReceiver) {
+      return receiver;
+    } else {
+      throw new Error('security_solution plugin not started');
+    }
+  } else {
+    throw new Error('security_solution plugin not started');
   }
 }
 
