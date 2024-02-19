@@ -105,7 +105,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
-      : agentCount > 0 && shownAgents > inactiveShownAgents;
+      : shownAgents > inactiveShownAgents;
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();

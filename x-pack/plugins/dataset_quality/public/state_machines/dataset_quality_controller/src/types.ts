@@ -6,6 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
@@ -15,18 +16,10 @@ import {
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
-export interface FlyoutDataset {
-  rawName: string;
-  type: string;
-  name: string;
-  namespace: string;
-  title: string;
-  integration?: {
-    name: string;
-    title: string;
-    version: string;
-  };
-}
+export type FlyoutDataset = Omit<
+  DataStreamStat,
+  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
+> & { type: string };
 
 interface TableCriteria {
   page: number;
@@ -35,6 +28,23 @@ interface TableCriteria {
     field: SortField;
     direction: Direction;
   };
+}
+
+export interface TimeRangeConfig {
+  from: string;
+  to: string;
+  refresh: {
+    isPaused: boolean;
+    interval: number;
+  };
+}
+
+interface FiltersCriteria {
+  inactive: boolean;
+  fullNames: boolean;
+  timeRange: TimeRangeConfig;
+  integrations: string[];
+  query?: string;
 }
 
 export interface WithTableOptions {
@@ -46,6 +56,10 @@ export interface WithFlyoutOptions {
     dataset?: FlyoutDataset;
     datasetDetails?: DataStreamDetails;
   };
+}
+
+export interface WithFilters {
+  filters: FiltersCriteria;
 }
 
 export interface WithDataStreamStats {
@@ -60,11 +74,17 @@ export interface WithDatasets {
   datasets: DataStreamStat[];
 }
 
-export type DefaultDatasetQualityControllerState = WithTableOptions &
+export interface WithIntegrations {
+  integrations: Integration[];
+}
+
+export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
   Partial<WithDataStreamStats> &
   Partial<WithDegradedDocs> &
   WithFlyoutOptions &
-  WithDatasets;
+  WithDatasets &
+  WithFilters &
+  WithIntegrations;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -116,6 +136,27 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'CLOSE_FLYOUT';
+    }
+  | {
+      type: 'TOGGLE_INACTIVE_DATASETS';
+    }
+  | {
+      type: 'TOGGLE_FULL_DATASET_NAMES';
+    }
+  | {
+      type: 'UPDATE_TIME_RANGE';
+      timeRange: TimeRangeConfig;
+    }
+  | {
+      type: 'REFRESH_DATA';
+    }
+  | {
+      type: 'UPDATE_INTEGRATIONS';
+      integrations: string[];
+    }
+  | {
+      type: 'UPDATE_QUERY';
+      query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

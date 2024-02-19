@@ -8,15 +8,15 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 
-import { validate } from '../../utils';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { update } from './update';
 
+disableTransformsCache();
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;
 
@@ -171,8 +171,6 @@ describe('RPC -> update()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: (contentTypeId: string, version: Version) =>
-          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
       };
 
       return { ctx, storage };

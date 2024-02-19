@@ -30,6 +30,7 @@ import {
   isRuleSnoozed,
   lastRunFromError,
   ruleExecutionStatusToRaw,
+  getEsRequestTimeout,
 } from '../lib';
 import {
   IntervalSchedule,
@@ -257,6 +258,7 @@ export class TaskRunner<
       revision: rule.revision,
       spaceId,
       tags: rule.tags,
+      alertDelay: rule.alertDelay?.active ?? 0,
     };
   }
 
@@ -311,6 +313,7 @@ export class TaskRunner<
       muteAll,
       revision,
       snoozeSchedule,
+      alertDelay,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -401,6 +404,8 @@ export class TaskRunner<
       },
       logger: this.logger,
       abortController: this.searchAbortController,
+      // Set the ES request timeout to the rule task timeout
+      requestTimeout: getEsRequestTimeout(this.logger, this.ruleType.ruleTaskTimeout),
     };
     const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
     const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
@@ -525,6 +530,7 @@ export class TaskRunner<
                 notifyWhen,
                 muteAll,
                 snoozeSchedule,
+                alertDelay,
               },
               logger: this.logger,
               flappingSettings,
@@ -582,6 +588,8 @@ export class TaskRunner<
           notifyWhen === RuleNotifyWhen.CHANGE ||
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
+        alertDelay: alertDelay?.active ?? 0,
+        ruleRunMetricsStore,
       });
     });
 

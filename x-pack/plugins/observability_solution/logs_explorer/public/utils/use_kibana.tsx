@@ -12,11 +12,11 @@ import {
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
-import { LogExplorerStartDeps } from '../types';
+import { LogsExplorerStartDeps } from '../types';
 
-export type PluginKibanaContextValue = CoreStart & LogExplorerStartDeps;
+export type PluginKibanaContextValue = CoreStart & LogsExplorerStartDeps;
 
-export const createKibanaContextForPlugin = (core: CoreStart, plugins: LogExplorerStartDeps) =>
+export const createKibanaContextForPlugin = (core: CoreStart, plugins: LogsExplorerStartDeps) =>
   createKibanaReactContext<PluginKibanaContextValue>({
     ...core,
     ...plugins,
@@ -27,7 +27,7 @@ export const useKibanaContextForPlugin =
 
 export const useKibanaContextForPluginProvider = (
   core: CoreStart,
-  plugins: LogExplorerStartDeps
+  plugins: LogsExplorerStartDeps
 ) => {
   const { Provider } = useMemo(() => createKibanaContextForPlugin(core, plugins), [core, plugins]);
 

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
-import { SearchState } from '../hooks/use_url_search_state';
-import { SortBySelect } from './common/sort_by_select';
-
+import React from 'react';
+import type { SearchState } from '../hooks/use_url_search_state';
+import { SLOSortBy } from './common/sort_by_select';
+import { SloGroupBy } from './slo_list_group_by';
 export type SLOView = 'cardView' | 'listView' | 'compactView';
 
 interface Props {
   onChangeView: (view: SLOView) => void;
+  onStateChange: (newState: Partial<SearchState>) => void;
   sloView: SLOView;
+  state: SearchState;
   sloList?: FindSLOResponse;
   loading: boolean;
-  initialState: SearchState;
-  onStateChange: (newState: Partial<SearchState>) => void;
 }
 
 const toggleButtonsIcons = [
@@ -49,10 +49,10 @@ const toggleButtonsIcons = [
 export function ToggleSLOView({
   sloView,
   onChangeView,
-  sloList,
-  loading,
-  initialState,
   onStateChange,
+  sloList,
+  state,
+  loading,
 }: Props) {
   const total = sloList?.total ?? 0;
   const pageSize = sloList?.perPage ?? 0;
@@ -64,27 +64,32 @@ export function ToggleSLOView({
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.observability.overview.pagination.description"
-            defaultMessage="Showing {currentCount} of {total} {slos}"
-            values={{
-              currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
-              total,
-              slos: (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.observability.overview.slos.label"
-                    defaultMessage="SLOs"
-                  />
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
+        {!state.groupBy && (
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.observability.overview.pagination.description"
+              defaultMessage="Showing {currentCount} of {total} {slos}"
+              values={{
+                currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
+                total,
+                slos: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.observability.overview.slos.label"
+                      defaultMessage="SLOs"
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SortBySelect initialState={initialState} loading={loading} onStateChange={onStateChange} />
+        <SLOSortBy state={state} onStateChange={onStateChange} loading={loading} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SloGroupBy state={state} onStateChange={onStateChange} loading={loading} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
@@ -96,6 +101,7 @@ export function ToggleSLOView({
           idSelected={sloView}
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
+          isDisabled={loading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

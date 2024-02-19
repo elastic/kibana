@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useEffect, useMemo, useState } from 'react';
+import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import moment from 'moment';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout } from '../chat/chat_flyout';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
+  const { plugins } = useKibana().services;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -29,6 +33,30 @@ export function ObservabilityAIAssistantActionMenuItem() {
   );
 
   const initialMessages = useMemo(() => [], []);
+
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.code === 'Semicolon') {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener('keypress', keyboardListener);
+
+    return () => {
+      window.removeEventListener('keypress', keyboardListener);
+    };
+  }, []);
+
+  const { from, to } = plugins.start.data.query.timefilter.timefilter.getTime();
+  useEffect(() => {
+    const start = datemath.parse(from)?.format() ?? moment().subtract(1, 'day').toISOString();
+    const end = datemath.parse(to)?.format() ?? moment().toISOString();
+
+    return service.setScreenContext({
+      screenDescription: `The user is looking at ${window.location.href}. The current time range is ${start} - ${end}.`,
+    });
+  }, [service, from, to]);
 
   if (!service.isEnabled()) {
     return null;

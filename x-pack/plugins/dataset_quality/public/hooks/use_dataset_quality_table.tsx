@@ -8,13 +8,14 @@
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../common/constants';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, NONE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
-import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
+import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
+import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 
 export type Direction = 'asc' | 'desc';
 export type SortField = keyof DataStreamStat;
@@ -33,6 +34,14 @@ export const useDatasetQualityTable = () => {
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
+  const {
+    inactive: showInactiveDatasets,
+    fullNames: showFullDatasetNames,
+    timeRange,
+    integrations,
+    query,
+  } = useSelector(service, (state) => state.context.filters);
+
   const flyout = useSelector(service, (state) => state.context.flyout);
 
   const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
@@ -44,6 +53,16 @@ export const useDatasetQualityTable = () => {
 
   const isDatasetQualityPageIdle = useSelector(service, (state) =>
     state.matches('datasets.loaded.idle')
+  );
+
+  const toggleInactiveDatasets = useCallback(
+    () => service.send({ type: 'TOGGLE_INACTIVE_DATASETS' }),
+    [service]
+  );
+
+  const toggleFullDatasetNames = useCallback(
+    () => service.send({ type: 'TOGGLE_FULL_DATASET_NAMES' }),
+    [service]
   );
 
   const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
@@ -73,6 +92,11 @@ export const useDatasetQualityTable = () => {
     [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
   );
 
+  const isActive = useCallback(
+    (lastActivity: number) => isActiveDataset({ lastActivity, timeRange }),
+    [timeRange]
+  );
+
   const columns = useMemo(
     () =>
       getDatasetQualityTableColumns({
@@ -80,14 +104,44 @@ export const useDatasetQualityTable = () => {
         selectedDataset: flyout?.dataset,
         openFlyout,
         loadingDegradedStats,
+        showFullDatasetNames,
+        isActiveDataset: isActive,
       }),
-    [flyout?.dataset, fieldFormats, loadingDegradedStats, openFlyout]
+    [
+      fieldFormats,
+      flyout?.dataset,
+      openFlyout,
+      loadingDegradedStats,
+      showFullDatasetNames,
+      isActive,
+    ]
   );
+
+  const filteredItems = useMemo(() => {
+    const visibleDatasets = showInactiveDatasets
+      ? datasets
+      : filterInactiveDatasets({ datasets, timeRange });
+
+    const filteredByIntegrations =
+      integrations.length > 0
+        ? visibleDatasets.filter((dataset) => {
+            if (!dataset.integration && integrations.includes(NONE)) {
+              return true;
+            }
+
+            return dataset.integration && integrations.includes(dataset.integration.name);
+          })
+        : visibleDatasets;
+
+    return query
+      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
+      : filteredByIntegrations;
+  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
 
   const pagination = {
     pageIndex: page,
     pageSize: rowsPerPage,
-    totalItemCount: datasets.length,
+    totalItemCount: filteredItems.length,
     hidePerPageOptions: true,
   };
 
@@ -113,13 +167,13 @@ export const useDatasetQualityTable = () => {
 
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sort.field] || sort.field;
-    const sortedItems = orderBy(datasets, overridenSortingField, sort.direction);
+    const sortedItems = orderBy(filteredItems, overridenSortingField, sort.direction);
 
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [sort.field, sort.direction, datasets, page, rowsPerPage]);
+  }, [sort.field, sort.direction, filteredItems, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
+    const startNumberItemsOnPage = rowsPerPage * page + (renderedItems.length ? 1 : 0);
     const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
     return rowsPerPage === 0 ? (
@@ -144,5 +198,9 @@ export const useDatasetQualityTable = () => {
     resultsCount,
     closeFlyout,
     selectedDataset: flyout?.dataset,
+    showInactiveDatasets,
+    showFullDatasetNames,
+    toggleInactiveDatasets,
+    toggleFullDatasetNames,
   };
 };

@@ -37,6 +37,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { isUserSettingsTemplate } from './utils';
 
 interface Properties {
   [key: string]: any;
@@ -120,6 +121,8 @@ export function getTemplate({
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
+
+  template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
 
   return template;
 }
@@ -943,8 +946,12 @@ const getDataStreams = async (
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.indices.rollover({
-      alias: dataStreamName,
+    return esClient.transport.request({
+      method: 'POST',
+      path: `/${dataStreamName}/_rollover`,
+      querystring: {
+        lazy: true,
+      },
     });
   } catch (error) {
     throw new PackageESError(

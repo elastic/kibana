@@ -38,7 +38,7 @@ const startSync = (appState: DiscoverAppStateContainer) => {
 
 const customizationContext: DiscoverCustomizationContext = {
   displayMode: 'standalone',
-  showLogExplorerTabs: false,
+  showLogsExplorerTabs: false,
 };
 
 async function getState(
@@ -439,6 +439,7 @@ describe('Test discover state actions', () => {
         "columns": Array [
           "default_column",
         ],
+        "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "refreshInterval": undefined,

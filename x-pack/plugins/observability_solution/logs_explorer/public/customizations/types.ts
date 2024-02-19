@@ -8,6 +8,7 @@
 import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import { LogDocument } from '../../common/document';
+import { LogsExplorerControllerContext } from '../state_machines/logs_explorer_controller';
 
 export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
 
@@ -15,7 +16,7 @@ export type RenderContentCustomization<Props> = (
   renderPreviousContent: RenderPreviousContent<Props>
 ) => (props: Props) => React.ReactNode;
 
-export interface LogExplorerFlyoutContentProps {
+export interface LogsExplorerFlyoutContentProps {
   actions: {
     addFilter: DocViewRenderProps['filter'];
     addColumn: DocViewRenderProps['onAddColumn'];
@@ -25,8 +26,15 @@ export interface LogExplorerFlyoutContentProps {
   doc: LogDocument;
 }
 
-export interface LogExplorerCustomizations {
+export type OnUknownDataViewSelectionHandler = (context: LogsExplorerControllerContext) => void;
+
+export interface LogsExplorerCustomizationEvents {
+  onUknownDataViewSelection?: OnUknownDataViewSelectionHandler;
+}
+
+export interface LogsExplorerCustomizations {
   flyout?: {
-    renderContent?: RenderContentCustomization<LogExplorerFlyoutContentProps>;
+    renderContent?: RenderContentCustomization<LogsExplorerFlyoutContentProps>;
   };
+  events?: LogsExplorerCustomizationEvents;
 }

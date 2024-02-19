@@ -105,8 +105,9 @@ export type FunctionResponse =
   | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
 export enum FunctionVisibility {
-  System = 'system',
-  User = 'user',
+  AssistantOnly = 'assistantOnly',
+  UserOnly = 'userOnly',
+  Internal = 'internal',
   All = 'all',
 }
 
@@ -125,3 +126,12 @@ export type RegisterContextDefinition = (options: ContextDefinition) => void;
 
 export type ContextRegistry = Map<string, ContextDefinition>;
 export type FunctionRegistry = Map<string, FunctionDefinition>;
+
+export interface ObservabilityAIAssistantScreenContext {
+  screenDescription?: string;
+  data?: Array<{
+    name: string;
+    description: string;
+    value: any;
+  }>;
+}

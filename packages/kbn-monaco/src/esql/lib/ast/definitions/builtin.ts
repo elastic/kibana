@@ -13,13 +13,13 @@ function createMathDefinition(
   name: string,
   types: Array<string | string[]>,
   description: string,
-  warning?: FunctionDefinition['warning']
+  validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
   return {
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'stats'],
     supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
@@ -39,7 +39,7 @@ function createMathDefinition(
         returnType: type,
       };
     }),
-    warning,
+    validate,
   };
 }
 
@@ -51,7 +51,7 @@ function createComparisonDefinition(
     name: string;
     description: string;
   },
-  warning?: FunctionDefinition['warning']
+  validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
   return {
     type: 'builtin' as const,
@@ -59,6 +59,7 @@ function createComparisonDefinition(
     description,
     supportedCommands: ['eval', 'where', 'row'],
     supportedOptions: ['by'],
+    validate,
     signatures: [
       {
         params: [
@@ -153,7 +154,7 @@ export const builtinFunctions: FunctionDefinition[] = [
               type: 'warning' as const,
               code: 'moduleByZero',
               text: i18n.translate('monaco.esql.divide.warning.zeroModule', {
-                defaultMessage: 'Module by zero can return null value: {left}/{right}',
+                defaultMessage: 'Module by zero can return null value: {left}%{right}',
                 values: {
                   left: left.text,
                   right: right.value,
@@ -334,6 +335,31 @@ export const builtinFunctions: FunctionDefinition[] = [
       },
     ],
   },
+  ...[
+    {
+      name: 'is null',
+      description: i18n.translate('monaco.esql.definition.isNullDoc', {
+        defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
+      }),
+    },
+    {
+      name: 'is not null',
+      description: i18n.translate('monaco.esql.definition.isNotNullDoc', {
+        defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
+      }),
+    },
+  ].map<FunctionDefinition>(({ name, description }) => ({
+    type: 'builtin',
+    name,
+    description,
+    supportedCommands: ['eval', 'where', 'row'],
+    signatures: [
+      {
+        params: [{ name: 'left', type: 'any' }],
+        returnType: 'boolean',
+      },
+    ],
+  })),
   {
     type: 'builtin' as const,
     name: '=',
