@@ -80,7 +80,7 @@ export const ImportDataModalComponent = ({
   const [actionConnectorsWarnings, setActionConnectorsWarnings] = useState<WarningSchema[] | []>(
     []
   );
-  const titleElementId = useMemo(() => htmlIdGenerator()(), []);
+  const descriptionElementId = useMemo(() => htmlIdGenerator()(), []);
 
   const [importedActionConnectorsCount, setImportedActionConnectorsCount] = useState<
     number | undefined
@@ -190,7 +190,7 @@ export const ImportDataModalComponent = ({
 
           <EuiModalBody>
             <EuiText size="s">
-              <h4 id={titleElementId}>{description}</h4>
+              <h4 id={descriptionElementId}>{description}</h4>
             </EuiText>
 
             <EuiSpacer size="s" />
@@ -203,7 +203,7 @@ export const ImportDataModalComponent = ({
               display={'large'}
               fullWidth={true}
               isLoading={isImporting}
-              aria-labelledby={titleElementId}
+              aria-labelledby={descriptionElementId}
             />
             <EuiSpacer size="s" />
 
