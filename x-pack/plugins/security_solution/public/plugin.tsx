@@ -19,7 +19,7 @@ import type {
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
@@ -221,10 +221,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
-      // Initializing app as visible to make sure it appears on the Kibana home page, it is hidden when deepLinks update
-      navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
       updater$: this.appUpdater$,
+      visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
@@ -260,7 +258,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: 'siem',
       appRoute: 'app/siem',
       title: 'SIEM',
-      navLinkStatus: 3,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
