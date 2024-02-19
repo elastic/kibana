@@ -24,7 +24,7 @@ export const useEditVisualization = ({
   isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
-  dataView: DataView;
+  dataView?: DataView;
   relativeTimeRange?: TimeRange;
   lensAttributes: TypedLensByValueInput['attributes'];
   isPlainRecord?: boolean;
@@ -32,10 +32,10 @@ export const useEditVisualization = ({
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataView.id || isPlainRecord) {
+    if (!dataView?.id || isPlainRecord) {
       return false;
     }
-    if (!dataView.isTimeBased() || !dataView.getTimeField().visualizable) {
+    if (!dataView?.isTimeBased() || !dataView.getTimeField().visualizable) {
       return false;
     }
 

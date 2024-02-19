@@ -24,7 +24,7 @@ function onFilterCell(
 ) {
   const row = context.rows[rowIndex];
   const value = row.flattened[columnId];
-  const field = context.dataView.fields.getByName(columnId);
+  const field = context.dataView?.fields.getByName(columnId);
 
   if (field && context.onFilter) {
     context.onFilter(field, value, mode);

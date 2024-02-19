@@ -30,7 +30,7 @@ export function getSortForSearchSource({
   includeTieBreaker = false,
 }: {
   sort: SortOrder[] | undefined;
-  dataView: DataView | undefined;
+  dataView?: DataView;
   defaultSortDir: string;
   includeTieBreaker?: boolean;
 }): EsQuerySortValue[] {

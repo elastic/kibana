@@ -37,7 +37,7 @@ export type DataTableColumnTypes = Record<string, string>;
 
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;
-  dataView: DataView;
+  dataView?: DataView;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
 };

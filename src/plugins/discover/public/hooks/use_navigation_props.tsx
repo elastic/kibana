@@ -14,7 +14,7 @@ import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
 export interface UseNavigationProps {
-  dataView: DataView;
+  dataView?: DataView;
   rowIndex: string;
   rowId: string;
   columns: string[];
@@ -77,7 +77,7 @@ export const useNavigationProps = ({
   const [contextViewHref, setContextViewHref] = useState('');
 
   const index = useMemo(
-    () => (dataView.isPersisted() ? dataView.id! : dataView.toSpec(false)),
+    () => (dataView?.isPersisted() ? dataView?.id! : dataView?.toSpec(false)),
     [dataView]
   );
 
@@ -95,6 +95,7 @@ export const useNavigationProps = ({
   );
 
   useEffect(() => {
+    if (!index) return;
     const dataViewId = typeof index === 'object' ? index.id : index;
     services.locator
       .getUrl({ dataViewId, ...buildParams() })
@@ -115,6 +116,8 @@ export const useNavigationProps = ({
   useEffect(() => {
     const params = buildParams();
     const dataViewId = typeof index === 'object' ? index.id : index;
+    if (!index) return;
+
     services.locator
       .getUrl({ dataViewId, ...params })
       .then((referrer) =>
@@ -139,7 +142,7 @@ export const useNavigationProps = ({
 
   const onOpenSingleDoc: MouseEventHandler = useCallback(
     (event) => {
-      if (isModifiedEvent(event)) {
+      if (isModifiedEvent(event) || !index) {
         return;
       }
       event.preventDefault();
@@ -161,6 +164,7 @@ export const useNavigationProps = ({
       }
       event.preventDefault();
       const dataViewId = typeof index === 'object' ? index.id : index;
+      if (!index) return;
       services.locator.getUrl({ dataViewId, ...params }).then((referrer) =>
         services.contextLocator.navigate({
           index,

@@ -25,7 +25,7 @@ import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
-const CELL_CLASS = 'unifiedDataTable__cellValue';
+export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn = ({
   dataView,
@@ -38,7 +38,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
   rows: DataTableRecord[] | undefined;
   useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
@@ -58,7 +58,7 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = dataView.fields.getByName(columnId);
+    const field = dataView?.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
@@ -127,8 +127,9 @@ export const getRenderCellValueFn = ({
         closePopover,
       });
     }
+    console.log({ row, useTopLevelObjectColumns, columnId });
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (field?.type === '_source' || useTopLevelObjectColumns || columnId === '_source') {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -171,7 +172,7 @@ function renderPopoverContent({
   row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
-  dataView: DataView;
+  dataView?: DataView;
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;

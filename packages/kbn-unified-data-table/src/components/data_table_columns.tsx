@@ -99,7 +99,7 @@ function buildEuiGridColumn({
 }: {
   columnName: string;
   columnWidth: number | undefined;
-  dataView: DataView;
+  dataView?: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
@@ -116,7 +116,7 @@ function buildEuiGridColumn({
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
-  const dataViewField = dataView.getFieldByName(columnName);
+  const dataViewField = dataView?.getFieldByName(columnName);
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -158,7 +158,7 @@ function buildEuiGridColumn({
     displayAsText: columnDisplayName,
     actions: {
       showHide:
-        defaultColumns || columnName === dataView.timeFieldName
+        defaultColumns || columnName === dataView?.timeFieldName
           ? false
           : {
               label: i18n.translate('unifiedDataTable.removeColumnLabel', {
@@ -191,7 +191,7 @@ function buildEuiGridColumn({
     visibleCellActions,
   };
 
-  if (column.id === dataView.timeFieldName) {
+  if (column.id === dataView?.timeFieldName) {
     column.display = (
       <DataTableTimeColumnHeaderMemoized
         dataView={dataView}
@@ -246,7 +246,7 @@ export function getEuiGridColumns({
   columnsCellActions?: EuiDataGridColumnCellAction[][];
   rowsCount: number;
   settings: UnifiedDataTableSettings | undefined;
-  dataView: DataView;
+  dataView?: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
@@ -293,11 +293,12 @@ export function getEuiGridColumns({
 
 export function hasSourceTimeFieldValue(
   columns: string[],
-  dataView: DataView,
+  dataView: DataView | undefined,
   columnTypes: DataTableColumnTypes | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
+  if (!dataView) return false;
   const timeFieldName = dataView.timeFieldName;
   if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
     return showTimeCol;
@@ -305,8 +306,12 @@ export function hasSourceTimeFieldValue(
   return timeFieldName in columnTypes;
 }
 
-export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
-  const timeFieldName = dataView.timeFieldName;
+export function getVisibleColumns(
+  columns: string[],
+  dataView: DataView | undefined,
+  showTimeCol: boolean
+) {
+  const timeFieldName = dataView?.timeFieldName;
 
   if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];

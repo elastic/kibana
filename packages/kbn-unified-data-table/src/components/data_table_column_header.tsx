@@ -18,7 +18,7 @@ import type { DataTableColumnTypes } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
-  dataView: DataView;
+  dataView?: DataView;
   columnName: string | null;
   columnDisplayName: string;
   columnTypes?: DataTableColumnTypes;
@@ -36,7 +36,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 }) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {showColumnTokens && (
+      {dataView && showColumnTokens && (
         <DataTableColumnToken
           columnName={columnName}
           columnTypes={columnTypes}
@@ -86,7 +86,7 @@ function getRenderedToken({
     ) : null;
   }
 
-  const dataViewField = dataView.getFieldByName(columnName);
+  const dataViewField = dataView?.getFieldByName(columnName);
 
   if (dataViewField) {
     return <FieldIcon {...getFieldIconProps(dataViewField)} css={fieldIconCss} />;

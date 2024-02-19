@@ -188,7 +188,7 @@ export interface DiscoverStateContainer {
      * Set the currently selected data view
      * @param dataView
      */
-    setDataView: (dataView: DataView) => void;
+    setDataView: (dataView: DataView | undefined) => void;
     /**
      * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
      */
@@ -261,7 +261,7 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
-  const pauseAutoRefreshInterval = async (dataView: DataView) => {
+  const pauseAutoRefreshInterval = async (dataView?: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const state = globalStateContainer.get();
       if (state?.refreshInterval && !state.refreshInterval.pause) {
@@ -272,7 +272,7 @@ export function getDiscoverStateContainer({
       }
     }
   };
-  const setDataView = (dataView: DataView) => {
+  const setDataView = (dataView: DataView | undefined) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);

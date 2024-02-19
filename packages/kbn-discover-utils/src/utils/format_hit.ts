@@ -30,7 +30,7 @@ const formattedHitCache = new WeakMap<
  */
 export function formatHit(
   hit: DataTableRecord,
-  dataView: DataView,
+  dataView: DataView | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
@@ -52,7 +52,7 @@ export function formatHit(
   // put highlighted fields first in the document summary.
   Object.entries(flattened).forEach(([key, val]) => {
     // Retrieve the (display) name of the fields, if it's a mapped field on the data view
-    const field = dataView.fields.getByName(key);
+    const field = dataView?.fields.getByName(key);
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     // Format the raw value using the regular field formatters for that field

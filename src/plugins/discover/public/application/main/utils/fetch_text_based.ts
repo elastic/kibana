@@ -26,7 +26,7 @@ interface TextBasedErrorResponse {
 
 export function fetchTextBased(
   query: Query | AggregateQuery,
-  dataView: DataView,
+  dataView: DataView | undefined,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
   inspectorAdapters: Adapters,

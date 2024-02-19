@@ -67,7 +67,7 @@ export function fetchAll(
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
-    const dataView = searchSource.getField('index')!;
+    const dataView = searchSource.getField('index');
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const recordRawType = getRawRecordType(query);
@@ -191,7 +191,7 @@ export async function fetchMoreDocuments(
     const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
 
-    const dataView = searchSource.getField('index')!;
+    const dataView = searchSource.getField('index');
     const query = getAppState().query;
     const recordRawType = getRawRecordType(query);
 

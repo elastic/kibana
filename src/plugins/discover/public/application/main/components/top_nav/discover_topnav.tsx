@@ -49,7 +49,7 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataView = useInternalStateSelector((state) => state.dataView);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
   const isTextBased = useMemo(() => isTextBasedQuery(query), [query]);
@@ -57,14 +57,15 @@ export const DiscoverTopNav = ({
     // always show the timepicker for text based languages
     return (
       isTextBased ||
-      (!isTextBased && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      (!isTextBased && dataView && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
     );
   }, [dataView, isTextBased]);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
   const canEditDataView =
-    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
+    dataView &&
+    (Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted());
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -203,7 +204,7 @@ export const DiscoverTopNav = ({
     <SearchBar
       {...topNavProps}
       appName="discover"
-      indexPatterns={[dataView]}
+      indexPatterns={dataView ? [dataView] : []}
       onQuerySubmit={updateQuery}
       onCancel={onCancelClick}
       isLoading={isLoading}

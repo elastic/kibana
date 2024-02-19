@@ -85,18 +85,20 @@ export function DataTableDocumentToolbarBtn({
   rows,
   selectedDocs,
   setIsFilterActive,
+  setIsCompareActive,
   setSelectedDocs,
 }: {
   isFilterActive: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
+  setIsCompareActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const getMenuItems = useCallback(() => {
-    return [
+    const menuItems = [
       isFilterActive ? (
         <EuiContextMenuItem
           data-test-subj="dscGridShowAllDocuments"
@@ -128,6 +130,28 @@ export function DataTableDocumentToolbarBtn({
           />
         </EuiContextMenuItem>
       ),
+    ];
+
+    if (selectedDocs.length > 1) {
+      menuItems.push(
+        <EuiContextMenuItem
+          data-test-subj="dscGridCompareSelectedDocuments"
+          key="compareSelectedDocuments"
+          icon="kqlSelector"
+          onClick={() => {
+            setIsSelectionPopoverOpen(false);
+            setIsCompareActive(true);
+          }}
+        >
+          <FormattedMessage
+            id="unifiedDataTable.compareSelectedDocuments"
+            defaultMessage="Compare selected documents"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    menuItems.push(
       <EuiCopy
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
@@ -159,16 +183,11 @@ export function DataTableDocumentToolbarBtn({
         }}
       >
         <FormattedMessage id="unifiedDataTable.clearSelection" defaultMessage="Clear selection" />
-      </EuiContextMenuItem>,
-    ];
-  }, [
-    isFilterActive,
-    rows,
-    selectedDocs,
-    setIsFilterActive,
-    setIsSelectionPopoverOpen,
-    setSelectedDocs,
-  ]);
+      </EuiContextMenuItem>
+    );
+
+    return menuItems;
+  }, [isFilterActive, rows, selectedDocs, setIsCompareActive, setIsFilterActive, setSelectedDocs]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),

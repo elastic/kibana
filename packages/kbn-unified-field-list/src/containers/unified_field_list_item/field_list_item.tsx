@@ -134,7 +134,7 @@ export interface UnifiedFieldListItemProps {
   /**
    * The currently selected data view
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * Callback to add/select the field
    */
@@ -275,6 +275,9 @@ function UnifiedFieldListItemComponent({
   }, [field.name, stateService.creationOptions]);
 
   const renderPopover = () => {
+    if (!dataView) {
+      return null;
+    }
     return (
       <>
         <UnifiedFieldListItemStats

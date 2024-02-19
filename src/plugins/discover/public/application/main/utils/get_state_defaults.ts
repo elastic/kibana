@@ -47,7 +47,7 @@ export function getStateDefaults({
   const dataView = searchSource.getField('index');
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
+  const sort = getSortArray(savedSearch.sort ?? [], dataView);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
 

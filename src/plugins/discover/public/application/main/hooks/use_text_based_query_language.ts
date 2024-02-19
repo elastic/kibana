@@ -87,7 +87,7 @@ export function useTextBasedQueryLanguage({
             if (next.fetchStatus !== FetchStatus.PARTIAL) {
               return;
             }
-            const dataViewObj = stateContainer.internalState.getState().dataView!;
+            const dataViewObj = stateContainer.internalState.getState().dataView;
 
             if (hasResults) {
               // check if state needs to contain column transformation due to a different columns in the resultset
@@ -110,8 +110,10 @@ export function useTextBasedQueryLanguage({
             const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
             const queryChanged = query[language] !== prev.current.query;
             // no need to reset index to state if it hasn't changed
-            const addDataViewToState = Boolean(dataViewObj?.id !== index);
-            if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
+            const addDataViewToState = index !== undefined;
+            const changeViewMode =
+              viewMode !== getValidViewMode({ viewMode, isTextBasedQueryMode: true });
+            if (!queryChanged || (!addDataViewToState && !addColumnsToState && !changeViewMode)) {
               sendComplete();
               return;
             }
@@ -121,7 +123,7 @@ export function useTextBasedQueryLanguage({
               prev.current.columns = nextColumns;
             }
             const nextState = {
-              ...(addDataViewToState && { index: dataViewObj.id }),
+              ...(addDataViewToState && { index: undefined }),
               ...((addColumnsToState || queryChanged) && { columns: nextColumns }),
               ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
                 viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),

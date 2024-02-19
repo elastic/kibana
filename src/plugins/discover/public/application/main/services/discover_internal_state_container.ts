@@ -24,7 +24,7 @@ export interface InternalState {
 }
 
 interface InternalStateTransitions {
-  setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setDataView: (state: InternalState) => (dataView: DataView | undefined) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
@@ -58,7 +58,7 @@ export function getInternalStateContainer() {
       customFilters: [],
     },
     {
-      setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
+      setDataView: (prevState: InternalState) => (nextDataView: DataView | undefined) => ({
         ...prevState,
         dataView: nextDataView,
       }),

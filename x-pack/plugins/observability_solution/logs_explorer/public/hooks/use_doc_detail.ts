@@ -24,7 +24,7 @@ export function useDocDetail(
         doc.raw,
         services.fieldFormats,
         dataView,
-        dataView.fields.getByName(field)
+        dataView?.fields.getByName(field)
       )
     );
   };

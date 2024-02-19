@@ -17,7 +17,7 @@ export interface DataTableContext {
   setExpanded?: (hit?: DataTableRecord) => void;
   rows: DataTableRecord[];
   onFilter?: DocViewFilterFn;
-  dataView: DataView;
+  dataView?: DataView;
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;

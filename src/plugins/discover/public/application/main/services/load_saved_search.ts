@@ -94,7 +94,7 @@ export const loadSavedSearch = async (
         internalStateContainer,
         savedSearch: nextSavedSearch,
       });
-      const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
+      const dataViewDifferentToAppState = stateDataView?.id !== savedSearchDataViewId;
       if (
         !nextSavedSearch.isTextBasedQuery &&
         stateDataView &&
@@ -134,10 +134,10 @@ export const loadSavedSearch = async (
  */
 function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
   const { dataStateContainer, internalStateContainer, services, setDataView } = deps;
-  const savedSearchDataView = savedSearch.searchSource.getField('index')!;
+  const savedSearchDataView = savedSearch.searchSource.getField('index');
 
   setDataView(savedSearchDataView);
-  if (!savedSearchDataView.isPersisted()) {
+  if (savedSearchDataView && !savedSearchDataView.isPersisted()) {
     internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
   }
 
@@ -152,7 +152,9 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   // some filters may not be valid for this context, so update
   // the filter manager with a modified list of valid filters
   const currentFilters = services.filterManager.getFilters();
-  const validFilters = getValidFilters(savedSearchDataView, currentFilters);
+  const validFilters = savedSearchDataView
+    ? getValidFilters(savedSearchDataView, currentFilters)
+    : [];
   if (!isEqual(currentFilters, validFilters)) {
     services.filterManager.setFilters(validFilters);
   }

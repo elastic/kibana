@@ -18,7 +18,7 @@ export const FilterOutButton = ({ property, value }: { property: string; value: 
   const dataView = serviceContext.dataView;
 
   const onFilterOutAction = () => {
-    if (filterManager != null) {
+    if (filterManager != null && dataView) {
       const filter = generateFilters(filterManager, property, [value], '-', dataView);
       filterManager.addFilters(filter);
     }
