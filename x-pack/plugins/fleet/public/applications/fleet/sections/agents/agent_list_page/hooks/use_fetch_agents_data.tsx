@@ -63,6 +63,7 @@ export function useFetchAgentsData() {
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  // eslint-disable-next-line no-console
   console.log('selectedTags ' + selectedTags);
 
   const showInactive = useMemo(() => {
@@ -100,6 +101,7 @@ export function useFetchAgentsData() {
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
   const [allTags, setAllTags] = useState<string[]>();
+  // eslint-disable-next-line no-console
   console.log('allTags ' + allTags);
   const [isLoading, setIsLoading] = useState(false);
   const [shownAgents, setShownAgents] = useState(0);
@@ -200,6 +202,7 @@ export function useFetchAgentsData() {
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
             setAllTags(newAllTags);
+            // eslint-disable-next-line no-console
             console.log('setAllTags ' + newAllTags);
           }
 
@@ -321,6 +324,7 @@ export function useFetchAgentsData() {
     setSelectedStatus,
     selectedTags,
     setSelectedTags: (tags: string[]) => {
+      // eslint-disable-next-line no-console
       console.log('setSelectedTags ' + tags);
       setSelectedTags(tags);
     },
