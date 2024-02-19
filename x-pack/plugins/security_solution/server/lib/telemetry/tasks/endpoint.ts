@@ -18,6 +18,7 @@ import type {
   ESClusterInfo,
   ESLicense,
   Nullable,
+  FleetAgentResponse,
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -37,7 +38,7 @@ import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 // Endpoint agent uses this Policy ID while it's installing.
 const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
 
-const EmptyFleetAgentResponse = {
+const EmptyFleetAgentResponse: FleetAgentResponse = {
   agents: [],
   total: 0,
   page: 0,

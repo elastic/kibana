@@ -36,7 +36,7 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { Agent, AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -68,6 +68,8 @@ import type {
   ValueListItemsResponseAggregation,
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
+  Nullable,
+  FleetAgentResponse,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
@@ -84,27 +86,19 @@ export interface ITelemetryReceiver {
     packageService?: PackageService
   ): Promise<void>;
 
-  getClusterInfo(): ESClusterInfo | undefined;
+  getClusterInfo(): Nullable<ESClusterInfo>;
 
   fetchClusterInfo(): Promise<ESClusterInfo>;
 
-  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+  fetchLicenseInfo(): Promise<Nullable<ESLicense>>;
 
   openPointInTime(indexPattern: string): Promise<string>;
 
   closePointInTime(pitId: string): Promise<void>;
 
-  fetchDetectionRulesPackageVersion(): Promise<Installation | undefined>;
+  fetchDetectionRulesPackageVersion(): Promise<Nullable<Installation>>;
 
-  fetchFleetAgents(): Promise<
-    | {
-        agents: Agent[];
-        total: number;
-        page: number;
-        perPage: number;
-      }
-    | undefined
-  >;
+  fetchFleetAgents(): Promise<Nullable<FleetAgentResponse>>;
 
   fetchEndpointPolicyResponses(
     executeFrom: string,
@@ -260,7 +254,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.packageService?.asInternalUser.getInstallation(PREBUILT_RULES_PACKAGE_NAME);
   }
 
-  public async fetchFleetAgents() {
+  public async fetchFleetAgents(): Promise<Nullable<FleetAgentResponse>> {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve fleet agents');
     }

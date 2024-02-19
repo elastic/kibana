@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Agent } from '@kbn/fleet-plugin/common';
+
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import type { AllowlistFields } from './filterlists/types';
 
@@ -500,4 +502,11 @@ export interface TimelineResult {
   nodes: number;
   events: number;
   timeline: TimelineTelemetryTemplate | undefined;
+}
+
+export interface FleetAgentResponse {
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
 }
