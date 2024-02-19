@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   actionsHeaderTooltipExpandAction,
-  actionsHeaderTooltipMalformedAction,
+  actionsHeaderTooltipDegradedAction,
   actionsHeaderTooltipParagraph,
   actionsHeaderTooltipStacktraceAction,
   actionsLabel,
@@ -64,7 +64,7 @@ export const ActionsColumnTooltip = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <p>{actionsHeaderTooltipMalformedAction}</p>
+              <p>{actionsHeaderTooltipDegradedAction}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
