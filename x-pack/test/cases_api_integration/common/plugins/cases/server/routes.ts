@@ -49,7 +49,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const client = await cases.getCasesClientWithRequest(request);
 
         return response.ok({
-          body: await client.cases.update(request.body as CasesPatchRequest),
+          body: await client.cases.bulkUpdate(request.body as CasesPatchRequest),
         });
       } catch (error) {
         logger.error(`CasesClientUser failure: ${error}`);

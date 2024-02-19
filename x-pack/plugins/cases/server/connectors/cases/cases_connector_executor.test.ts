@@ -1375,6 +1375,28 @@ describe('CasesConnectorExecutor', () => {
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
         });
+
+        it('throws an error if there is an error when fetching configurations', async () => {
+          casesClientMock.configure.get = jest
+            .fn()
+            .mockRejectedValue(new CaseError('get configuration error'));
+
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await expect(() =>
+            connectorExecutor.execute(params)
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"get configuration error"`);
+        });
       });
     });
   });
