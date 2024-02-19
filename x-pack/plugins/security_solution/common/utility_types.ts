@@ -37,13 +37,11 @@ type NonAny = number | boolean | string | symbol | null;
 export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
   runtimeTypes.union([type, runtimeTypes.null]);
 
-export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
+export const stringEnum = <T extends object>(enumObj: T, enumName = 'enum') =>
   new runtimeTypes.Type<T[keyof T], string>(
     enumName,
-    // @ts-expect-error upgrade typescript v4.9.5
     (u): u is T[keyof T] => Object.values(enumObj).includes(u),
     (u, c) =>
-      // @ts-expect-error upgrade typescript v4.9.5
       Object.values(enumObj).includes(u)
         ? runtimeTypes.success(u as T[keyof T])
         : runtimeTypes.failure(u, c),
