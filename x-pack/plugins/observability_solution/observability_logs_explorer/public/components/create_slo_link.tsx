@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { hydrateDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import React, { useMemo, useState } from 'react';
 import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { useActor } from '@xstate/react';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createSLoLabel } from '../../common/translations';
 import {
   ObservabilityLogsExplorerService,
@@ -33,6 +36,10 @@ export const CreateSloLinkForValidState = React.memo(
     const {
       context: { logsExplorerState },
     } = pageState as InitializedPageState;
+
+    const capabilities = useKibana().services?.application?.capabilities;
+
+    const hasWriteCapabilities = !!capabilities?.[sloFeatureId].write ?? false;
 
     const [isCreateFlyoutOpen, setCreateSLOFlyoutOpen] = useState(false);
 
@@ -71,15 +78,29 @@ export const CreateSloLinkForValidState = React.memo(
 
     return (
       <>
-        <EuiHeaderLink
-          color="primary"
-          onClick={() => {
-            setCreateSLOFlyoutOpen(true);
-          }}
-          iconType="visGauge"
+        <EuiToolTip
+          content={
+            !hasWriteCapabilities ? (
+              <FormattedMessage
+                id="xpack.observabilityLogsExplorer.createSLO.tooltip"
+                defaultMessage="You need the SLO feature 'write' capability to create an SLO."
+              />
+            ) : (
+              ''
+            )
+          }
         >
-          {createSLoLabel}
-        </EuiHeaderLink>
+          <EuiHeaderLink
+            isDisabled={!hasWriteCapabilities}
+            color="primary"
+            onClick={() => {
+              setCreateSLOFlyoutOpen(true);
+            }}
+            iconType="visGauge"
+          >
+            {createSLoLabel}
+          </EuiHeaderLink>
+        </EuiToolTip>
         {isCreateFlyoutOpen && (
           <CreateSloFlyout
             onClose={() => setCreateSLOFlyoutOpen(false)}

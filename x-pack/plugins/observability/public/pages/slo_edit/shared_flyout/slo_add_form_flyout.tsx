@@ -7,14 +7,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React from 'react';
-import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiPortal,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { RecursivePartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
@@ -31,54 +24,52 @@ function SloAddFormFlyout({
   initialValues?: RecursivePartial<CreateSLOForm>;
 }) {
   return (
-    <EuiPortal>
-      <EuiFlyout
-        onClose={onClose}
-        aria-labelledby="flyoutSLOAddTitle"
-        size="l"
-        maxWidth={620}
-        ownFocus
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
-            <h3 id="flyoutTitle">
-              <FormattedMessage
-                defaultMessage="Create SLO"
-                id="xpack.observability.sloAdd.flyoutTitle"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <SloEditForm
-            onSave={onClose}
-            initialValues={
-              initialValues
-                ? merge(
-                    {
-                      indicator: {
-                        type: 'sli.kql.custom',
-                      },
-                      objective: {
-                        target: 99,
-                      },
-                      timeWindow: {
-                        duration: '30d',
-                        type: 'rolling',
-                      },
-                      budgetingMethod: 'occurrences',
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="flyoutSLOAddTitle"
+      size="l"
+      maxWidth={620}
+      ownFocus
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
+          <h3 id="flyoutTitle">
+            <FormattedMessage
+              defaultMessage="Create SLO"
+              id="xpack.observability.sloAdd.flyoutTitle"
+            />
+          </h3>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <SloEditForm
+          onSave={onClose}
+          initialValues={
+            initialValues
+              ? merge(
+                  {
+                    indicator: {
+                      type: 'sli.kql.custom',
                     },
-                    { ...initialValues }
-                  )
-                : undefined
-            }
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <OutPortal node={sloEditFormFooterPortal} />
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </EuiPortal>
+                    objective: {
+                      target: 99,
+                    },
+                    timeWindow: {
+                      duration: '30d',
+                      type: 'rolling',
+                    },
+                    budgetingMethod: 'occurrences',
+                  },
+                  { ...initialValues }
+                )
+              : undefined
+          }
+        />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <OutPortal node={sloEditFormFooterPortal} />
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }
 
