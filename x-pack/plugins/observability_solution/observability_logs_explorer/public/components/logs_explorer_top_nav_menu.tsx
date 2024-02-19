@@ -148,11 +148,13 @@ const StatefulTopNav = () => {
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
+        </EuiHeaderSectionItem>
+        <EuiHeaderSectionItem>
+          {ObservabilityAIAssistantActionMenuItem ? (
+            <ObservabilityAIAssistantActionMenuItem />
+          ) : null}
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
     </HeaderMenuPortal>
