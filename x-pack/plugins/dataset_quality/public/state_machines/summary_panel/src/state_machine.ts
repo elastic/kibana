@@ -6,11 +6,17 @@
  */
 
 import { IToasts } from '@kbn/core/public';
+import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { getDateISORange } from '../../../utils';
-import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
+import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
+import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
 import { defaultContext, MAX_RETRIES, RETRY_DELAY_IN_MS } from './defaults';
+import {
+  fetchDatasetsActivityFailedNotifier,
+  fetchDatasetsEstimatedDataFailedNotifier,
+  fetchDatasetsQualityFailedNotifier,
+} from './notifications';
 import {
   DatasetsActivityDetails,
   DatasetsQuality,
@@ -21,11 +27,6 @@ import {
   EstimatedDataDetails,
   Retries,
 } from './types';
-import {
-  fetchDatasetsEstimatedDataFailedNotifier,
-  fetchDatasetsActivityFailedNotifier,
-  fetchDatasetsQualityFailedNotifier,
-} from './notifications';
 
 export const createPureDatasetsSummaryPanelStateMachine = (
   initialContext: DatasetsSummaryPanelContext
@@ -220,10 +221,7 @@ export const createDatasetsSummaryPanelStateMachine = ({
         };
       },
       loadEstimatedData: async (_context) => {
-        const { startDate, endDate } = getDateISORange({
-          from: 'now-24h',
-          to: 'now',
-        });
+        const { startDate, endDate } = getDateISORange(DEFAULT_TIME_RANGE);
         return dataStreamStatsClient.getDataStreamsEstimatedDataInBytes({
           query: {
             type: 'logs',

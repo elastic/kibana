@@ -6,30 +6,31 @@
  */
 
 import { IToasts } from '@kbn/core/public';
+import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { getDateISORange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import {
   DataStreamDetails,
   DataStreamStatServiceResponse,
   GetDataStreamsStatsQuery,
 } from '../../../../common/data_streams_stats';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
+import { mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import { DEFAULT_CONTEXT } from './defaults';
-import {
-  DatasetQualityControllerContext,
-  DatasetQualityControllerEvent,
-  DatasetQualityControllerTypeState,
-  FlyoutDataset,
-} from './types';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   fetchDatasetDetailsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
   noDatasetSelected,
 } from './notifications';
+import {
+  DatasetQualityControllerContext,
+  DatasetQualityControllerEvent,
+  DatasetQualityControllerTypeState,
+  FlyoutDataset,
+} from './types';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext

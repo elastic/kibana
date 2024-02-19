@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getDateRange } from '@kbn/timerange';
 import { DEFAULT_TIME_RANGE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats';
-import { getDateRange } from './get_date_range';
 
 interface FilterInactiveDatasetsOptions {
   datasets: DataStreamStat[];
