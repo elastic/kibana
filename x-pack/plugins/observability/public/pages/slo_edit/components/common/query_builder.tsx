@@ -10,6 +10,7 @@ import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 import { kqlQuerySchema } from '@kbn/slo-schema';
+import { observabilityAppId } from '../../../../../common';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -71,7 +72,7 @@ export function QueryBuilder({
         render={({ field, fieldState }) => (
           <Container>
             <SearchBar
-              appName="Observability"
+              appName={observabilityAppId}
               dataTestSubj={dataTestSubj}
               indexPatterns={dataView ? [dataView] : []}
               isDisabled={!dataView}
@@ -112,6 +113,12 @@ export function QueryBuilder({
                     filters,
                   });
                 }
+              }}
+              onSavedQueryUpdated={(savedQuery) => {
+                field.onChange({
+                  filters: savedQuery.attributes.filters,
+                  kqlQuery: String(savedQuery.attributes.query.query),
+                });
               }}
               showDatePicker={false}
               showSubmitButton={false}
