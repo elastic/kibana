@@ -18,7 +18,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';

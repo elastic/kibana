@@ -22,6 +22,9 @@ export default function (providerContext: FtrProviderContext) {
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
 
+  const prereleasePkgName = 'prerelease';
+  const prereleasePkgVersion = '0.1.0-dev.0+abc';
+
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -44,6 +47,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
     });
     after(async () => {
+      await uninstallPackage(testPkgName, testPkgVersion);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
     const expectedYml = `inputs:
@@ -175,6 +179,14 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/fleet/epm/templates/${testPkgName}/${testPkgVersion}/inputs?format=yml`)
         .expect(200);
       expect(res.text).to.eql(expectedYml);
+    });
+
+    it('returns inputs template for a prerelease package if prerelease=true', async function () {
+      await supertest
+        .get(
+          `/api/fleet/epm/templates/${prereleasePkgName}/${prereleasePkgVersion}/inputs?format=json&prerelease=true`
+        )
+        .expect(200);
     });
 
     it('returns a 404 for a version that does not exists', async function () {

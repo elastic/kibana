@@ -7,33 +7,13 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { mockGlobals } from '../../../utils/testing';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { SourceField } from './source_field';
-
-mockGlobals();
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
 
 const onChange = jest.fn();
 const onBlur = jest.fn();

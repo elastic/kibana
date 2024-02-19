@@ -126,7 +126,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.memoryUsage.treeMap.fetchFailedErrorMessage', {
-          defaultMessage: 'Models memory usage fetch failed',
+          defaultMessage: 'Error loading model memory usage data',
         })
       );
     }

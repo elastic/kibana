@@ -47,7 +47,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -200,7 +200,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <LandingPageComponent />
+          <EmptyPrompt />
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />

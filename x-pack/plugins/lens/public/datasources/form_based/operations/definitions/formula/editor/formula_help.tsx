@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
+import {
+  documentationMap,
+  tinymathFunctions,
+  sections as formulasSections,
+} from '@kbn/lens-formula-docs';
 import { groupBy } from 'lodash';
 import type { IndexPattern } from '../../../../../../types';
-import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
 import { hasFunctionFieldArgument } from '../validation';
 
@@ -32,14 +36,14 @@ function createNewSection(
     label,
     description,
     items: functionsToDocument.sort().map((key) => {
-      const fnDescription = getFunctionDescriptionAndExamples(key, operationDefinitionMap);
+      const fnDescription = getFunctionDescriptionAndExamples(key);
       return {
         label: key,
         description: (
           <>
             <h3>{getFunctionSignatureLabel(key, operationDefinitionMap, false)}</h3>
 
-            {fnDescription ? <Markdown markdown={fnDescription} /> : null}
+            {fnDescription ? <Markdown readOnly>{fnDescription}</Markdown> : null}
           </>
         ),
       };
@@ -47,15 +51,12 @@ function createNewSection(
   };
 }
 
-function getFunctionDescriptionAndExamples(
-  label: string,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
-) {
+function getFunctionDescriptionAndExamples(label: string) {
   if (tinymathFunctions[label]) {
     const [description, examples] = tinymathFunctions[label].help.split(`\`\`\``);
     return `${description.replace(/\n/g, '\n\n')}${examples ? `\`\`\`${examples}\`\`\`` : ''}`;
   }
-  return operationDefinitionMap[label].documentation?.description;
+  return documentationMap[label].documentation?.description;
 }
 
 export function getDocumentationSections({
@@ -79,120 +80,14 @@ export function getDocumentationSections({
   });
 
   helpGroups.push({
-    label: i18n.translate('xpack.lens.formulaFrequentlyUsedHeading', {
-      defaultMessage: 'Common formulas',
-    }),
-    description: i18n.translate('xpack.lens.formulaCommonFormulaDocumentation', {
-      defaultMessage: `The most common formulas are dividing two values to produce a percent. To display accurately, set "value format" to "percent".`,
-    }),
-
-    items: [
-      {
-        label: i18n.translate('xpack.lens.formulaDocumentation.filterRatio', {
-          defaultMessage: 'Filter ratio',
-        }),
-        description: (
-          <Markdown
-            markdown={i18n.translate(
-              'xpack.lens.formulaDocumentation.filterRatioDescription.markdown',
-              {
-                defaultMessage: `### Filter ratio:
-
-Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
-For example, to see how the error rate changes over time:
-
-\`\`\`
-count(kql='response.status_code > 400') / count()
-\`\`\`
-        `,
-
-                description:
-                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              }
-            )}
-          />
-        ),
-      },
-      {
-        label: i18n.translate('xpack.lens.formulaDocumentation.weekOverWeek', {
-          defaultMessage: 'Week over week',
-        }),
-        description: (
-          <Markdown
-            markdown={i18n.translate(
-              'xpack.lens.formulaDocumentation.weekOverWeekDescription.markdown',
-              {
-                defaultMessage: `### Week over week:
-
-Use \`shift='1w'\` to get the value of each grouping from
-the previous week. Time shift should not be used with the *Top values* function.
-
-\`\`\`
-percentile(system.network.in.bytes, percentile=99) /
-percentile(system.network.in.bytes, percentile=99, shift='1w')
-\`\`\`
-        `,
-
-                description:
-                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              }
-            )}
-          />
-        ),
-      },
-      {
-        label: i18n.translate('xpack.lens.formulaDocumentation.percentOfTotal', {
-          defaultMessage: 'Percent of total',
-        }),
-        description: (
-          <Markdown
-            markdown={i18n.translate(
-              'xpack.lens.formulaDocumentation.percentOfTotalDescription.markdown',
-              {
-                defaultMessage: `### Percent of total
-
-Formulas can calculate \`overall_sum\` for all the groupings,
-which lets you convert each grouping into a percent of total:
-
-\`\`\`
-sum(products.base_price) / overall_sum(sum(products.base_price))
-\`\`\`
-        `,
-
-                description:
-                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              }
-            )}
-          />
-        ),
-      },
-      {
-        label: i18n.translate('xpack.lens.formulaDocumentation.recentChange', {
-          defaultMessage: 'Recent change',
-        }),
-        description: (
-          <Markdown
-            markdown={i18n.translate(
-              'xpack.lens.formulaDocumentation.recentChangeDescription.markdown',
-              {
-                defaultMessage: `### Recent change
-
-Use \`reducedTimeRange='30m'\` to add an additional filter on the time range of a metric aligned with the end of the global time range. This can be used to calculate how much a value changed recently.
-
-\`\`\`
-max(system.network.in.bytes, reducedTimeRange="30m")
- - min(system.network.in.bytes, reducedTimeRange="30m")
-\`\`\`
-        `,
-
-                description:
-                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              }
-            )}
-          />
-        ),
-      },
-    ],
+    label: formulasSections.common.label,
+    description: formulasSections.common.description,
+    items: formulasSections.common.items.map(
+      ({ label, description }: { label: string; description: string }) => ({
+        label,
+        description: <Markdown readOnly>{description}</Markdown>,
+      })
+    ),
   });
 
   const {
@@ -203,7 +98,7 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     constants: constantsOperations,
   } = groupBy(getPossibleFunctions(indexPattern), (key) => {
     if (key in operationDefinitionMap) {
-      return operationDefinitionMap[key].documentation?.section;
+      return documentationMap[key].documentation?.section;
     }
     if (key in tinymathFunctions) {
       return tinymathFunctions[key].section;
@@ -213,14 +108,8 @@ max(system.network.in.bytes, reducedTimeRange="30m")
   // Es aggs
   helpGroups.push(
     createNewSection(
-      i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
-        defaultMessage: 'Elasticsearch',
-      }),
-      i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
-        defaultMessage:
-          'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
-      }),
-
+      formulasSections.elasticsearch.label,
+      formulasSections.elasticsearch.description,
       esFunctions,
       operationDefinitionMap
     )
@@ -229,14 +118,8 @@ max(system.network.in.bytes, reducedTimeRange="30m")
   // Calculations aggs
   helpGroups.push(
     createNewSection(
-      i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
-        defaultMessage: 'Column calculations',
-      }),
-      i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSectionDescription', {
-        defaultMessage:
-          'These functions are executed for each row, but are provided with the whole column as context. This is also known as a window function.',
-      }),
-
+      formulasSections.calculations.label,
+      formulasSections.calculations.description,
       calculationFunctions,
       operationDefinitionMap
     )
@@ -244,14 +127,8 @@ max(system.network.in.bytes, reducedTimeRange="30m")
 
   helpGroups.push(
     createNewSection(
-      i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
-        defaultMessage: 'Math',
-      }),
-      i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
-        defaultMessage:
-          'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
-      }),
-
+      formulasSections.math.label,
+      formulasSections.math.description,
       mathOperations,
       operationDefinitionMap
     )
@@ -259,13 +136,8 @@ max(system.network.in.bytes, reducedTimeRange="30m")
 
   helpGroups.push(
     createNewSection(
-      i18n.translate('xpack.lens.formulaDocumentation.comparisonSection', {
-        defaultMessage: 'Comparison',
-      }),
-      i18n.translate('xpack.lens.formulaDocumentation.comparisonSectionDescription', {
-        defaultMessage: 'These functions are used to perform value comparison.',
-      }),
-
+      formulasSections.comparison.label,
+      formulasSections.comparison.description,
       comparisonOperations,
       operationDefinitionMap
     )
@@ -273,13 +145,8 @@ max(system.network.in.bytes, reducedTimeRange="30m")
 
   helpGroups.push(
     createNewSection(
-      i18n.translate('xpack.lens.formulaDocumentation.constantsSection', {
-        defaultMessage: 'Kibana context',
-      }),
-      i18n.translate('xpack.lens.formulaDocumentation.constantsSectionDescription', {
-        defaultMessage:
-          'These functions are used to retrieve Kibana context variables, which are the date histogram `interval`, the current `now` and the selected `time_range` and help you to compute date math operations.',
-      }),
+      formulasSections.context.label,
+      formulasSections.context.description,
       constantsOperations,
       operationDefinitionMap
     )
@@ -287,46 +154,7 @@ max(system.network.in.bytes, reducedTimeRange="30m")
 
   const sections = {
     groups: helpGroups,
-    initialSection: (
-      <Markdown
-        markdown={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
-          defaultMessage: `## How it works
-
-Lens formulas let you do math using a combination of Elasticsearch aggregations and
-math functions. There are three main types of functions:
-
-* Elasticsearch metrics, like \`sum(bytes)\`
-* Time series functions use Elasticsearch metrics as input, like \`cumulative_sum()\`
-* Math functions like \`round()\`
-
-An example formula that uses all of these:
-
-\`\`\`
-round(100 * moving_average(
-average(cpu.load.pct),
-window=10,
-kql='datacenter.name: east*'
-))
-\`\`\`
-
-Elasticsearch functions take a field name, which can be in quotes. \`sum(bytes)\` is the same
-as \`sum('bytes')\`.
-
-Some functions take named arguments, like \`moving_average(count(), window=5)\`.
-
-Elasticsearch metrics can be filtered using KQL or Lucene syntax. To add a filter, use the named
-parameter \`kql='field: value'\` or \`lucene=''\`. Always use single quotes when writing KQL or Lucene
-queries. If your search has a single quote in it, use a backslash to escape, like: \`kql='Women's'\'
-
-Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
-
-Use the symbols +, -, /, and * to perform basic math.
-      `,
-          description:
-            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-        })}
-      />
-    ),
+    initialSection: <Markdown>{formulasSections.howTo}</Markdown>,
   };
 
   return sections;
@@ -369,7 +197,9 @@ export function getFunctionSignatureLabel(
       }
     }
     const extraComma = extraArgs.length ? ', ' : '';
-    return `${name}(${def.documentation?.signature}${extraComma}${extraArgs.join(', ')})`;
+    return `${name}(${documentationMap[name].documentation?.signature}${extraComma}${extraArgs.join(
+      ', '
+    )})`;
   }
   return '';
 }
@@ -396,7 +226,7 @@ export function getHelpTextContent(
   operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
 ): { description: string; examples: string[] } {
   const definition = operationDefinitionMap[type];
-  const description = definition.documentation?.description ?? '';
+  const description = documentationMap[type].documentation?.description ?? '';
 
   // as for the time being just add examples text.
   // Later will enrich with more information taken from the operation definitions.

@@ -196,10 +196,10 @@ export const IndexParamsFields = ({
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'documents'}
-      data-test-subj="documentToIndex"
+      dataTestSubj="documentToIndex"
       inputTargetValue={documentToIndex}
       label={documentsFieldLabel}
-      aria-label={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
+      ariaLabel={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
         defaultMessage: 'Code editor',
       })}
       errors={errors.documents as string[]}

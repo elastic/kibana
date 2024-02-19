@@ -331,7 +331,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.try(async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
+              'demo-stack-redis-01 - Inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -346,7 +346,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await retry.try(async () => {
             const documentTitle = await browser.getTitle();
-            expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+            expect(documentTitle).to.contain(
+              'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+            );
           });
 
           await returnTo(INVENTORY_PATH);

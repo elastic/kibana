@@ -33,11 +33,21 @@ export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
 export const TextCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldTextTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([rt.string, rt.null]),
+    })
+  ),
 ]);
 
 export const ToggleCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldToggleTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([rt.boolean, rt.null]),
+    })
+  ),
 ]);
 
 export const CustomFieldConfigurationRt = rt.union([

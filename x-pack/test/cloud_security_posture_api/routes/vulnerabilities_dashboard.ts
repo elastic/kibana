@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { EcsEvent } from '@kbn/ecs';
+import { EcsEvent } from '@elastic/ecs';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   vulnerabilitiesLatestMock,
@@ -19,7 +19,7 @@ export interface CnvmStatistics {
   highCount?: number;
   mediumCount?: number;
   resourcesScanned?: number;
-  cloudRegions?: number;
+  cloudAccounts?: number;
 }
 
 export interface AccountVulnStats {
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
           highCount: 1,
           mediumCount: 1,
           resourcesScanned: 2,
-          cloudRegions: 1,
+          cloudAccounts: 1,
         },
         vulnTrends: [
           {

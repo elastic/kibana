@@ -35,6 +35,9 @@ export enum Aggregators {
   MIN = 'min',
   MAX = 'max',
   CARDINALITY = 'cardinality',
+  RATE = 'rate',
+  P95 = 'p95',
+  P99 = 'p99',
 }
 export const aggType = fromEnum('Aggregators', Aggregators);
 export type AggType = rt.TypeOf<typeof aggType>;
@@ -106,6 +109,11 @@ export enum InfraFormatterType {
   bits = 'bits',
   percent = 'percent',
 }
+
+// Custom threshold alert types
+
+// Alert fields['kibana.alert.group] type
+export type GroupBy = Array<{ field: string; value: string }>;
 
 /*
  * Utils

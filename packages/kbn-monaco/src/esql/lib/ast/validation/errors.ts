@@ -59,15 +59,20 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
           defaultMessage:
-            'Error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
-          values: { fn: out.fn, numArgs: out.numArgs, passedArgs: out.passedArgs },
+            'Error building [{fn}]: expects {canHaveMoreArgs, plural, =0 {exactly } other {}}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+          values: {
+            fn: out.fn,
+            numArgs: out.numArgs,
+            passedArgs: out.passedArgs,
+            canHaveMoreArgs: out.exactly,
+          },
         }),
       };
     case 'noNestedArgumentSupport':
       return {
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
-            "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
       };
@@ -84,7 +89,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
-            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type {givenType}',
+            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
           values: {
             command: out.command,
             type: out.type,
@@ -104,12 +109,23 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'unsupportedFunction':
+    case 'unsupportedFunctionForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionForCommand', {
           defaultMessage: '{command} does not support function {name}',
           values: {
             command: out.command,
+            name: out.name,
+          },
+        }),
+      };
+    case 'unsupportedFunctionForCommandOption':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionforCommandOption', {
+          defaultMessage: '{command} {option} does not support function {name}',
+          values: {
+            command: out.command,
+            option: out.option,
             name: out.name,
           },
         }),
@@ -146,9 +162,10 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('monaco.esql.validation.unknowAggregateFunction', {
-          defaultMessage: '{command} expects an aggregate function, found [{value}]',
+          defaultMessage:
+            'Expected an aggregate function or group but got [{value}] of type [{type}]',
           values: {
-            command: out.command,
+            type: out.type,
             value: out.value,
           },
         }),
@@ -172,15 +189,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'ccsNotSupportedForCommand':
-      return {
-        message: i18n.translate('monaco.esql.validation.ccsNotSupportedForCommand', {
-          defaultMessage: 'ES|QL does not yet support querying remote indices [{value}]',
-          values: {
-            value: out.value,
-          },
-        }),
-      };
     case 'unsupportedFieldType':
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedFieldType', {
@@ -191,6 +199,41 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
         type: 'warning',
+      };
+    case 'unsupportedSetting':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedSetting', {
+          defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
+          values: {
+            setting: out.setting,
+            expected: out.expected,
+          },
+        }),
+        type: 'error',
+      };
+    case 'unsupportedSettingCommandValue':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedSettingValue', {
+          defaultMessage:
+            'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
+          values: {
+            expected: out.expected,
+            value: out.value,
+            command: out.command,
+          },
+        }),
+        type: 'error',
+      };
+    case 'expectedConstant':
+      return {
+        message: i18n.translate('monaco.esql.validation.expectedConstantValue', {
+          defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
+          values: {
+            given: out.given,
+            fn: out.fn,
+          },
+        }),
+        type: 'error',
       };
   }
   return { message: '' };
@@ -205,13 +248,25 @@ export function getMessageFromId<K extends ErrorTypes>({
   locations: ESQLLocation;
 }): ESQLMessage {
   const { message, type = 'error' } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations);
+  return createMessage(type, message, locations, payload.messageId);
 }
 
-export function createMessage(type: 'error' | 'warning', message: string, location: ESQLLocation) {
+export function createMessage(
+  type: 'error' | 'warning',
+  message: string,
+  location: ESQLLocation,
+  messageId: string
+) {
   return {
     type,
     text: message,
     location,
+    code: messageId,
   };
+}
+
+export function getUnknownTypeLabel() {
+  return i18n.translate('monaco.esql.validation.unknownColumnType', {
+    defaultMessage: 'Unknown type',
+  });
 }

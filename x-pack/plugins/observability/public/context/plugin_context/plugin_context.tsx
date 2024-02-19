@@ -12,6 +12,7 @@ import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observabi
 import type { ConfigSchema } from '../../plugin';
 
 export interface PluginContextValue {
+  isDev?: boolean;
   config: ConfigSchema;
   appMountParameters: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;

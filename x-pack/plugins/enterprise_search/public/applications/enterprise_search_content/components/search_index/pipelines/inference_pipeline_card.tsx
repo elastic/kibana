@@ -33,6 +33,7 @@ import { IndexNameLogic } from '../index_name_logic';
 import { IndexViewLogic } from '../index_view_logic';
 
 import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
+import { MODEL_REDACTED_VALUE } from './ml_inference/utils';
 import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
@@ -188,6 +189,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
   const { modelId, pipelineName, types: modelTypes } = pipeline;
+  const modelIdDisplay = modelId && modelId.length > 0 ? modelId : MODEL_REDACTED_VALUE;
   const modelType = getMLType(modelTypes);
   const modelTitle = getModelDisplayTitle(modelType);
   const isSmallScreen = useIsWithinMaxBreakpoint('s');
@@ -207,15 +209,22 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      {modelId}
+                      {modelIdDisplay}
                     </EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span>
-                      <MLModelTypeBadge type={modelType} />
-                    </span>
-                  </EuiFlexItem>
+                  {modelId && modelId.length > 0 && (
+                    <EuiFlexItem>
+                      <span>
+                        <MLModelTypeBadge type={modelType} />
+                      </span>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {pipeline.sourceFields && pipeline.sourceFields.length > 0 && (
+              <EuiFlexItem>
+                <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

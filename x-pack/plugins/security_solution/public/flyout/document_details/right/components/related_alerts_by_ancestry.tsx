@@ -15,7 +15,7 @@ const ICON = 'warning';
 
 export interface RelatedAlertsByAncestryProps {
   /**
-   * Value of the kibana.alert.ancestors.id field
+   * Id of the document
    */
   documentId: string;
   /**

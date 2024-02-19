@@ -7,13 +7,21 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { typeRt, rangeRt } from '../../types/default_api_types';
+import { DataStreamType } from '../../../common/types';
+import {
+  DataStreamDetails,
+  DataStreamStat,
+  DegradedDocs,
+  Integration,
+} from '../../../common/api_types';
+import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
+import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { DegradedDocs, DataStreamStat, Integration } from '../../../common/api_types';
 import { getIntegrations } from './get_integrations';
+import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -63,7 +71,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
-      rangeRt,
+      t.partial(rangeRt.props),
       typeRt,
       t.partial({
         datasetQuery: t.string,
@@ -92,7 +100,72 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const dataStreamDetailsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DataStreamDetails> {
+    const { context, params } = resources;
+    const { dataStream } = params.path;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const [type, ...datasetQuery] = dataStream.split('-');
+
+    const [dataStreamsStats, dataStreamDetails] = await Promise.all([
+      getDataStreamsStats({
+        esClient,
+        type: type as DataStreamType,
+        datasetQuery: datasetQuery.join('-'),
+      }),
+      getDataStreamDetails({ esClient, dataStream }),
+    ]);
+
+    return {
+      createdOn: dataStreamDetails?.createdOn,
+      lastActivity: dataStreamsStats.items?.[0]?.lastActivity,
+    };
+  },
+});
+
+const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/estimated_data',
+  params: t.type({
+    query: t.intersection([typeRt, rangeRt]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    estimatedDataInBytes: number;
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const estimatedDataInBytes = await getEstimatedDataInBytes({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      estimatedDataInBytes,
+    };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
+  ...dataStreamDetailsRoute,
+  ...estimatedDataInBytesRoute,
 };

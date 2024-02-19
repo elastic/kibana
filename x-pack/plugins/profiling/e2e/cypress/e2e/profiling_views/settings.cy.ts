@@ -39,19 +39,21 @@ describe('Settings page', () => {
     cy.contains('Per vCPU Watts - arm64');
     cy.contains('AWS EDP discount rate (%)');
     cy.contains('Cost per vCPU per hour ($)');
+    cy.contains('Azure discount rate (%)');
+    cy.contains('Show error frames in the Universal Profiling views');
   });
 
   it('updates values', () => {
     cy.visitKibana('/app/profiling/settings');
     cy.contains('Advanced Settings');
     cy.get('[data-test-subj="profilingBottomBarActions"]').should('not.exist');
-    cy.get(`[data-test-subj="advancedSetting-editField-${profilingCo2PerKWH}"]`)
+    cy.get(`[data-test-subj="management-settings-editField-${profilingCo2PerKWH}"]`)
       .clear()
       .type('0.12345');
-    cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
+    cy.get(`[data-test-subj="management-settings-editField-${profilingDatacenterPUE}"]`)
       .clear()
       .type('2.4');
-    cy.get(`[data-test-subj="advancedSetting-editField-${profilingPervCPUWattX86}"]`)
+    cy.get(`[data-test-subj="management-settings-editField-${profilingPervCPUWattX86}"]`)
       .clear()
       .type('20');
     cy.get('[data-test-subj="profilingBottomBarActions"]').should('exist');

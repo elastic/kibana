@@ -65,25 +65,32 @@ export const defaultState = {
 
 export const renderWithReduxStore = (
   ui: ReactElement,
-  options?: RenderOptions,
+  renderOptions?: RenderOptions,
   {
     preloadedState,
     storeDeps,
-  }: { preloadedState: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
+  }: { preloadedState?: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
     preloadedState: {},
     storeDeps: mockStoreDeps(),
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   const { store } = makeLensStore({ preloadedState, storeDeps });
+  const { wrapper, ...options } = renderOptions || {};
+
+  const CustomWrapper = wrapper as React.ComponentType;
 
   const Wrapper: React.FC<{
     children: React.ReactNode;
-  }> = ({ children }) => (
-    <Provider store={store}>
-      <I18nProvider>{children}</I18nProvider>
-    </Provider>
-  );
+  }> = ({ children }) => {
+    return (
+      <Provider store={store}>
+        <I18nProvider>
+          {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
+        </I18nProvider>
+      </Provider>
+    );
+  };
 
   const rtlRender = render(ui, { wrapper: Wrapper, ...options });
 

@@ -8,7 +8,7 @@ APM agents automatically collect performance metrics on HTTP requests, database 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
 
-The *Latency*, *Throughput*, *Failed transaction rate*, *Average duration by span type*, and *Cold start rate*
+The *Latency*, *Throughput*, *Failed transaction rate*, *Time spent by span type*, and *Cold start rate*
 charts display information on all transactions associated with the selected service:
 
 *Latency*::
@@ -38,7 +38,7 @@ These spans will set `event.outcome=failure` and increase the failed transaction
 If there is no HTTP status, both transactions and spans are considered successful unless an error is reported.
 ====
 
-*Average duration by span type*::
+*Time spent by span type*::
 Visualize where your application is spending most of its time.
 For example, is your app spending time in external calls, database processing, or application code execution?
 +
@@ -106,10 +106,10 @@ image::apm/images/apm-transactions-overview.png[Example view of response time di
 [[transaction-duration-distribution]]
 ==== Latency distribution
 
-A plot of all transaction durations for the given time period.
-The screenshot below shows a typical distribution,
+The latency distribution shows a plot of all transaction durations for the given time period.
+The following screenshot shows a typical distribution
 and indicates most of our requests were served quickly -- awesome!
-It's the requests on the right, the ones taking longer than average, that we probably need to focus on.
+The requests on the right are taking longer than average; we probably need to focus on them.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of latency distribution graph]

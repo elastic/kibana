@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Browser } from '../../../../../../../test/functional/services/common/browser';
+import type { Browser } from '@kbn/ftr-common-functional-ui-services';
 import { CommonPageObject } from '../../../../../../../test/functional/page_objects/common_page';
 
 type PerformanceResourceTimingWithHttpStatus = PerformanceResourceTiming & {

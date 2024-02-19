@@ -48,6 +48,7 @@ export type LayerWizard = {
 export type RenderWizardArguments = {
   previewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   mapColors: string[];
+  mostCommonDataViewId?: string;
   // multi-step arguments for wizards that supply 'prerequisiteSteps'
   currentStepId: string | null;
   isOnFinalStep: boolean;

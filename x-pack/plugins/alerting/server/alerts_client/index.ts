@@ -9,3 +9,4 @@ export { type LegacyAlertsClientParams, LegacyAlertsClient } from './legacy_aler
 export { AlertsClient } from './alerts_client';
 export type { AlertRuleData } from './types';
 export { sanitizeBulkErrorResponse } from './lib';
+export { AlertsClientError } from './alerts_client_error';

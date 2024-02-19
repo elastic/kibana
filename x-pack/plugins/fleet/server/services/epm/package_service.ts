@@ -31,7 +31,7 @@ import type {
 } from '../../types';
 import type { FleetAuthzRouteConfig } from '../security/types';
 import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } from '../security';
-import { FleetError, FleetUnauthorizedError } from '../../errors';
+import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
 import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
 import type { InstallResult } from '../../../common';
@@ -43,6 +43,7 @@ import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import { ensureInstalledPackage, getInstallation, getPackages, installPackage } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
+import { getEsPackage } from './archive/storage';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -265,9 +266,31 @@ class PackageClientImpl implements PackageClient {
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
     const authorizationHeader = this.getAuthorizationHeader();
 
+    const installation = await this.getInstallation(packageInfo.name);
+
+    if (!installation) {
+      throw new PackageNotFoundError(`Installation not found for package: ${packageInfo.name}`);
+    }
+
+    const esPackage = await getEsPackage(
+      packageInfo.name,
+      packageInfo.version,
+      installation.package_assets ?? [],
+      this.internalSoClient
+    );
+
+    if (!esPackage) {
+      throw new PackageNotFoundError(`ES package not found for package: ${packageInfo.name}`);
+    }
+
+    const { assetsMap } = esPackage;
+
     const { installedTransforms } = await installTransforms({
-      installablePackage: packageInfo,
-      paths,
+      packageInstallContext: {
+        assetsMap,
+        packageInfo,
+        paths,
+      },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       logger: this.logger,

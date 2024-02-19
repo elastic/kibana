@@ -9,8 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
+import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -22,6 +25,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
+const APM_FEEDBACK_LINK = 'https://ela.st/services-feedback';
 
 /*
  * This template contains:
@@ -56,9 +60,13 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
+  const kibanaEnvironment = useContext(KibanaEnvironmentContext);
   const { http, docLinks, observabilityShared, application } = services;
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
+
+  const aiAssistant = services.observabilityAIAssistant.service;
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -66,7 +74,7 @@ export function ApmMainTemplate({
     return callApmApi('GET /internal/apm/has_data');
   }, []);
 
-  // create static data view on inital load
+  // create static data view on initial load
   useFetcher(
     (callApmApi) => {
       const canCreateDataView =
@@ -97,25 +105,59 @@ export function ApmMainTemplate({
     status === FETCH_STATUS.LOADING ||
     fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
 
+  const hasApmData = !!data?.hasData;
+  const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
+
   const noDataConfig = getNoDataConfig({
     basePath,
     docsLink: docLinks!.links.observability.guide,
-    hasApmData: data?.hasData,
-    hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
+    hasApmData,
+    hasApmIntegrations,
     shouldBypassNoDataScreen,
     loading: isLoading,
     isServerless: config?.serverlessOnboarding,
   });
 
+  useEffect(() => {
+    return aiAssistant.setScreenContext({
+      screenDescription: [
+        hasApmData
+          ? 'The user has APM data.'
+          : 'The user does not have APM data.',
+        hasApmIntegrations
+          ? 'The user has the APM integration installed. '
+          : 'The user does not have the APM integration installed',
+        noDataConfig !== undefined
+          ? 'The user is looking at a screen that tells them they do not have any data.'
+          : '',
+      ].join('\n'),
+    });
+  }, [hasApmData, hasApmIntegrations, noDataConfig, aiAssistant]);
+
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
   ];
 
+  const sanitizedPath = getPathForFeedback(window.location.pathname);
   const pageHeaderTitle = (
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
       <EuiFlexItem grow={false}>
-        {environmentFilter && <ApmEnvironmentFilter />}
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <FeatureFeedbackButton
+              data-test-subj="infraApmFeedbackLink"
+              formUrl={APM_FEEDBACK_LINK}
+              kibanaVersion={kibanaVersion}
+              isCloudEnv={isCloudEnv}
+              isServerlessEnv={isServerlessEnv}
+              sanitizedPath={sanitizedPath}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {environmentFilter && <ApmEnvironmentFilter />}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

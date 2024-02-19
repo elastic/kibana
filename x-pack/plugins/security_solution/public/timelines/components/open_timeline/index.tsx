@@ -74,14 +74,51 @@ export type OpenTimelineOwnProps = OwnProps &
   >;
 
 /** Returns a collection of selected timeline ids */
-export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): string[] =>
-  selectedItems.reduce<string[]>(
-    (validSelections, timelineResult) =>
-      timelineResult.savedObjectId != null
-        ? [...validSelections, timelineResult.savedObjectId]
-        : validSelections,
-    []
+export const getSelectedTimelineIdsAndSearchIds = (
+  selectedItems: OpenTimelineResult[]
+): Array<{ timelineId: string; searchId?: string | null }> => {
+  return selectedItems.reduce<Array<{ timelineId: string; searchId?: string | null }>>(
+    (validSelections, timelineResult) => {
+      if (timelineResult.savedObjectId != null && timelineResult.savedSearchId != null) {
+        return [
+          ...validSelections,
+          { timelineId: timelineResult.savedObjectId, searchId: timelineResult.savedSearchId },
+        ];
+      } else if (timelineResult.savedObjectId != null) {
+        return [...validSelections, { timelineId: timelineResult.savedObjectId }];
+      } else {
+        return validSelections;
+      }
+    },
+    [] as Array<{ timelineId: string; searchId?: string | null }>
   );
+};
+
+interface DeleteTimelinesValues {
+  timelineIds: string[];
+  searchIds: string[];
+}
+
+export const getRequestIds = (
+  timelineIdsWithSearch: Array<{ timelineId: string; searchId?: string | null }>
+) => {
+  return timelineIdsWithSearch.reduce<DeleteTimelinesValues>(
+    (acc, { timelineId, searchId }) => {
+      let requestValues = acc;
+      if (searchId != null) {
+        requestValues = { ...requestValues, searchIds: [...requestValues.searchIds, searchId] };
+      }
+      if (timelineId != null) {
+        requestValues = {
+          ...requestValues,
+          timelineIds: [...requestValues.timelineIds, timelineId],
+        };
+      }
+      return requestValues;
+    },
+    { timelineIds: [], searchIds: [] }
+  );
+};
 
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 // eslint-disable-next-line react/display-name
@@ -208,7 +245,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     // };
 
     const deleteTimelines: DeleteTimelines = useCallback(
-      async (timelineIds: string[]) => {
+      async (timelineIds: string[], searchIds?: string[]) => {
         startTransaction({
           name: timelineIds.length > 1 ? TIMELINE_ACTIONS.BULK_DELETE : TIMELINE_ACTIONS.DELETE,
         });
@@ -225,16 +262,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           );
         }
 
-        await deleteTimelinesByIds(timelineIds);
+        await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
       [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
-      async (timelineIds: string[]) => {
+      async (timelineIds: string[], searchIds?: string[]) => {
         // The type for `deleteTimelines` is incorrect, it returns a Promise
-        await deleteTimelines(timelineIds);
+        await deleteTimelines(timelineIds, searchIds);
       },
       [deleteTimelines]
     );
@@ -242,7 +279,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** Invoked when the user clicks the action to delete the selected timelines */
     const onDeleteSelected: OnDeleteSelected = useCallback(async () => {
       // The type for `deleteTimelines` is incorrect, it returns a Promise
-      await deleteTimelines(getSelectedTimelineIds(selectedItems));
+      const timelineIdsWithSearch = getSelectedTimelineIdsAndSearchIds(selectedItems);
+      const { timelineIds, searchIds } = getRequestIds(timelineIdsWithSearch);
+      await deleteTimelines(timelineIds, searchIds);
 
       // NOTE: we clear the selection state below, but if the server fails to
       // delete a timeline, it will remain selected in the table:

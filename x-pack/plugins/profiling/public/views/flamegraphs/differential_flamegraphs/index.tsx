@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
@@ -49,7 +50,10 @@ export function DifferentialFlameGraphsView() {
 
   const {
     services: { fetchElasticFlamechart },
+    start: { core },
   } = useProfilingDependencies();
+
+  const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
 
   const state = useTimeRangeAsync(
     ({ http }) => {
@@ -59,6 +63,7 @@ export function DifferentialFlameGraphsView() {
           timeFrom: new Date(timeRange.start).getTime(),
           timeTo: new Date(timeRange.end).getTime(),
           kuery,
+          showErrorFrames,
         }),
         comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
@@ -66,6 +71,7 @@ export function DifferentialFlameGraphsView() {
               timeFrom: new Date(comparisonTimeRange.start).getTime(),
               timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
+              showErrorFrames,
             })
           : Promise.resolve(undefined),
       ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
@@ -83,6 +89,7 @@ export function DifferentialFlameGraphsView() {
       comparisonTimeRange.start,
       comparisonTimeRange.end,
       comparisonKuery,
+      showErrorFrames,
     ]
   );
 
@@ -126,9 +133,6 @@ export function DifferentialFlameGraphsView() {
             baseValue={
               state.data?.primaryFlamegraph
                 ? {
-                    duration: totalSeconds,
-                    selfCPU: state.data.primaryFlamegraph.SelfCPU,
-                    totalCPU: state.data.primaryFlamegraph.TotalCPU,
                     totalCount: state.data.primaryFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? baselineTime : baseline,
                     totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2KgsItems[0],
@@ -139,9 +143,6 @@ export function DifferentialFlameGraphsView() {
             comparisonValue={
               state.data?.comparisonFlamegraph
                 ? {
-                    duration: totalComparisonSeconds,
-                    selfCPU: state.data.comparisonFlamegraph.SelfCPU,
-                    totalCPU: state.data.comparisonFlamegraph.TotalCPU,
                     totalCount: state.data.comparisonFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
                     totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2KgsItems[0],

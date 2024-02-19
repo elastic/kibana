@@ -5,17 +5,17 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { type RenderHookResult, renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook, type RenderHookResult } from '@testing-library/react-hooks';
 import { Observable, Subject } from 'rxjs';
 import { MessageRole } from '../../common';
 import {
-  ChatCompletionErrorCode,
-  ConversationCompletionError,
-  StreamingChatResponseEvent,
+  createInternalServerError,
   StreamingChatResponseEventType,
+  StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
+import { mockService } from '../mock';
 import type { ObservabilityAIAssistantChatService } from '../types';
-import { type UseChatResult, useChat, type UseChatProps, ChatState } from './use_chat';
+import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
 import * as useKibanaModule from './use_kibana';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
@@ -70,6 +70,7 @@ describe('useChat', () => {
             },
           ],
           persist: false,
+          service: mockService,
         } as UseChatProps,
       });
     });
@@ -87,7 +88,7 @@ describe('useChat', () => {
   });
 
   describe('when calling next()', () => {
-    let subject: Subject<StreamingChatResponseEvent>;
+    let subject: Subject<StreamingChatResponseEventWithoutError>;
 
     beforeEach(() => {
       hookResult = renderHook(useChat, {
@@ -96,6 +97,7 @@ describe('useChat', () => {
           chatService: mockChatService,
           initialMessages: [],
           persist: false,
+          service: mockService,
         } as UseChatProps,
       });
 
@@ -262,9 +264,7 @@ describe('useChat', () => {
               content: 'good',
             },
           });
-          subject.error(
-            new ConversationCompletionError(ChatCompletionErrorCode.InternalError, 'foo')
-          );
+          subject.error(createInternalServerError('Internal error'));
         });
       });
 

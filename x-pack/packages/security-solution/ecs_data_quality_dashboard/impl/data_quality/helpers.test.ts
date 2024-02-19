@@ -7,7 +7,7 @@
 
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { omit } from 'lodash/fp';
 
 import {
@@ -35,6 +35,9 @@ import {
   getTotalSizeInBytes,
   hasValidTimestampMapping,
   isMappingCompatible,
+  postStorageResult,
+  getStorageResults,
+  StorageResult,
 } from './helpers';
 import {
   hostNameWithTextMapping,
@@ -77,6 +80,8 @@ import {
   PatternRollup,
   UnallowedValueCount,
 } from './types';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 
@@ -97,6 +102,7 @@ describe('helpers', () => {
       ],
       pattern: 'auditbeat-*',
       sameFamily: 0,
+      checkedAt: Date.now(),
     };
 
     it('returns undefined when results is undefined', () => {
@@ -439,134 +445,7 @@ describe('helpers', () => {
      * `indexInvalidValues` is an empty array, because the index does not contain any invalid values
      * `isEcsCompliant` is true, because the index has the expected mapping type, and no unallowed values
      */
-    const happyPathResult: EnrichedFieldMetadata = {
-      allowed_values: [
-        {
-          description:
-            'Events in this category are related to the challenge and response process in which credentials are supplied and verified to allow the creation of a session. Common sources for these logs are Windows event logs and ssh logs. Visualize and analyze events in this category to look for failed logins, and other authentication-related activity.',
-          expected_event_types: ['start', 'end', 'info'],
-          name: 'authentication',
-        },
-        {
-          description:
-            'Events in the configuration category have to deal with creating, modifying, or deleting the settings or parameters of an application, process, or system.\nExample sources include security policy change logs, configuration auditing logging, and system integrity monitoring.',
-          expected_event_types: ['access', 'change', 'creation', 'deletion', 'info'],
-          name: 'configuration',
-        },
-        {
-          description:
-            'The database category denotes events and metrics relating to a data storage and retrieval system. Note that use of this category is not limited to relational database systems. Examples include event logs from MS SQL, MySQL, Elasticsearch, MongoDB, etc. Use this category to visualize and analyze database activity such as accesses and changes.',
-          expected_event_types: ['access', 'change', 'info', 'error'],
-          name: 'database',
-        },
-        {
-          description:
-            'Events in the driver category have to do with operating system device drivers and similar software entities such as Windows drivers, kernel extensions, kernel modules, etc.\nUse events and metrics in this category to visualize and analyze driver-related activity and status on hosts.',
-          expected_event_types: ['change', 'end', 'info', 'start'],
-          name: 'driver',
-        },
-        {
-          description:
-            'This category is used for events relating to email messages, email attachments, and email network or protocol activity.\nEmails events can be produced by email security gateways, mail transfer agents, email cloud service providers, or mail server monitoring applications.',
-          expected_event_types: ['info'],
-          name: 'email',
-        },
-        {
-          description:
-            'Relating to a set of information that has been created on, or has existed on a filesystem. Use this category of events to visualize and analyze the creation, access, and deletions of files. Events in this category can come from both host-based and network-based sources. An example source of a network-based detection of a file transfer would be the Zeek file.log.',
-          expected_event_types: ['change', 'creation', 'deletion', 'info'],
-          name: 'file',
-        },
-        {
-          description:
-            'Use this category to visualize and analyze information such as host inventory or host lifecycle events.\nMost of the events in this category can usually be observed from the outside, such as from a hypervisor or a control plane\'s point of view. Some can also be seen from within, such as "start" or "end".\nNote that this category is for information about hosts themselves; it is not meant to capture activity "happening on a host".',
-          expected_event_types: ['access', 'change', 'end', 'info', 'start'],
-          name: 'host',
-        },
-        {
-          description:
-            'Identity and access management (IAM) events relating to users, groups, and administration. Use this category to visualize and analyze IAM-related logs and data from active directory, LDAP, Okta, Duo, and other IAM systems.',
-          expected_event_types: [
-            'admin',
-            'change',
-            'creation',
-            'deletion',
-            'group',
-            'info',
-            'user',
-          ],
-          name: 'iam',
-        },
-        {
-          description:
-            'Relating to intrusion detections from IDS/IPS systems and functions, both network and host-based. Use this category to visualize and analyze intrusion detection alerts from systems such as Snort, Suricata, and Palo Alto threat detections.',
-          expected_event_types: ['allowed', 'denied', 'info'],
-          name: 'intrusion_detection',
-        },
-        {
-          description:
-            'Malware detection events and alerts. Use this category to visualize and analyze malware detections from EDR/EPP systems such as Elastic Endpoint Security, Symantec Endpoint Protection, Crowdstrike, and network IDS/IPS systems such as Suricata, or other sources of malware-related events such as Palo Alto Networks threat logs and Wildfire logs.',
-          expected_event_types: ['info'],
-          name: 'malware',
-        },
-        {
-          description:
-            'Relating to all network activity, including network connection lifecycle, network traffic, and essentially any event that includes an IP address. Many events containing decoded network protocol transactions fit into this category. Use events in this category to visualize or analyze counts of network ports, protocols, addresses, geolocation information, etc.',
-          expected_event_types: [
-            'access',
-            'allowed',
-            'connection',
-            'denied',
-            'end',
-            'info',
-            'protocol',
-            'start',
-          ],
-          name: 'network',
-        },
-        {
-          description:
-            'Relating to software packages installed on hosts. Use this category to visualize and analyze inventory of software installed on various hosts, or to determine host vulnerability in the absence of vulnerability scan data.',
-          expected_event_types: ['access', 'change', 'deletion', 'info', 'installation', 'start'],
-          name: 'package',
-        },
-        {
-          description:
-            'Use this category of events to visualize and analyze process-specific information such as lifecycle events or process ancestry.',
-          expected_event_types: ['access', 'change', 'end', 'info', 'start'],
-          name: 'process',
-        },
-        {
-          description:
-            'Having to do with settings and assets stored in the Windows registry. Use this category to visualize and analyze activity such as registry access and modifications.',
-          expected_event_types: ['access', 'change', 'creation', 'deletion'],
-          name: 'registry',
-        },
-        {
-          description:
-            'The session category is applied to events and metrics regarding logical persistent connections to hosts and services. Use this category to visualize and analyze interactive or automated persistent connections between assets. Data for this category may come from Windows Event logs, SSH logs, or stateless sessions such as HTTP cookie-based sessions, etc.',
-          expected_event_types: ['start', 'end', 'info'],
-          name: 'session',
-        },
-        {
-          description:
-            "Use this category to visualize and analyze events describing threat actors' targets, motives, or behaviors.",
-          expected_event_types: ['indicator'],
-          name: 'threat',
-        },
-        {
-          description:
-            'Relating to vulnerability scan results. Use this category to analyze vulnerabilities detected by Tenable, Qualys, internal scanners, and other vulnerability management sources.',
-          expected_event_types: ['info'],
-          name: 'vulnerability',
-        },
-        {
-          description:
-            'Relating to web server access. Use this category to create a dashboard of web server/proxy activity from apache, IIS, nginx web servers, etc. Note: events from network observers such as Zeek http log may also be included in this category.',
-          expected_event_types: ['access', 'error', 'info'],
-          name: 'web',
-        },
-      ],
+    const happyPathResultSample: EnrichedFieldMetadata = {
       dashed_name: 'event-category',
       description:
         'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories.',
@@ -586,6 +465,23 @@ describe('helpers', () => {
       isInSameFamily: false,
     };
 
+    /**
+     * Creates expected result matcher based on the happy path result sample. Please, add similar `expect` based assertions to it if anything breaks
+     * with an ECS upgrade, instead of hardcoding the values.
+     */
+    const expectedResult = (extraFields: Record<string, unknown> = {}) =>
+      expect.objectContaining({
+        ...happyPathResultSample,
+        ...extraFields,
+        allowed_values: expect.arrayContaining([
+          expect.objectContaining({
+            description: expect.any(String),
+            name: expect.any(String),
+            expected_event_types: expect.any(Array),
+          }),
+        ]),
+      });
+
     test('it returns the happy path result when the index has no mapping conflicts, and no unallowed values', () => {
       expect(
         getEnrichedFieldMetadata({
@@ -593,7 +489,7 @@ describe('helpers', () => {
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues: noUnallowedValues, // no unallowed values for `event.category` in this index
         })
-      ).toEqual({ ...happyPathResult });
+      ).toEqual(expectedResult());
     });
 
     test('it returns the happy path result when the index has no mapping conflicts, and the unallowedValues map does not contain an entry for the field', () => {
@@ -609,7 +505,7 @@ describe('helpers', () => {
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues: noEntryForEventCategory, // a lookup in this map for the `event.category` field will return undefined
         })
-      ).toEqual({ ...happyPathResult });
+      ).toEqual(expectedResult());
     });
 
     test('it returns a result with the expected `indexInvalidValues` and `isEcsCompliant` when the index has no mapping conflict, but it has unallowed values', () => {
@@ -619,20 +515,21 @@ describe('helpers', () => {
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues, // this index has unallowed values for the event.category field
         })
-      ).toEqual({
-        ...happyPathResult,
-        indexInvalidValues: [
-          {
-            count: 2,
-            fieldName: 'an_invalid_category',
-          },
-          {
-            count: 1,
-            fieldName: 'theory',
-          },
-        ],
-        isEcsCompliant: false, // because there are unallowed values
-      });
+      ).toEqual(
+        expectedResult({
+          indexInvalidValues: [
+            {
+              count: 2,
+              fieldName: 'an_invalid_category',
+            },
+            {
+              count: 1,
+              fieldName: 'theory',
+            },
+          ],
+          isEcsCompliant: false, // because there are unallowed values
+        })
+      );
     });
 
     test('it returns a result with the expected `isEcsCompliant` and `isInSameFamily` when the index type does not match ECS, but NO unallowed values', () => {
@@ -647,12 +544,13 @@ describe('helpers', () => {
           },
           unallowedValues: noUnallowedValues, // no unallowed values for `event.category` in this index
         })
-      ).toEqual({
-        ...happyPathResult,
-        indexFieldType,
-        isEcsCompliant: false, // `keyword` !== `text`
-        isInSameFamily: false, // `keyword` and `text` are not in the same family
-      });
+      ).toEqual(
+        expectedResult({
+          indexFieldType,
+          isEcsCompliant: false, // `keyword` !== `text`
+          isInSameFamily: false, // `keyword` and `text` are not in the same family
+        })
+      );
     });
 
     test('it returns a result with the expected `isEcsCompliant` and `isInSameFamily` when the mapping is is in the same family', () => {
@@ -667,12 +565,13 @@ describe('helpers', () => {
           },
           unallowedValues: noUnallowedValues, // no unallowed values for `event.category` in this index
         })
-      ).toEqual({
-        ...happyPathResult,
-        indexFieldType,
-        isEcsCompliant: false, // `wildcard` !== `keyword`
-        isInSameFamily: true, // `wildcard` and `keyword` are in the same family
-      });
+      ).toEqual(
+        expectedResult({
+          indexFieldType,
+          isEcsCompliant: false, // `wildcard` !== `keyword`
+          isInSameFamily: true, // `wildcard` and `keyword` are in the same family
+        })
+      );
     });
 
     test('it returns a result with the expected `indexInvalidValues`,`isEcsCompliant`, and `isInSameFamily` when the index has BOTH mapping conflicts, and unallowed values', () => {
@@ -687,22 +586,23 @@ describe('helpers', () => {
           },
           unallowedValues, // this index also has unallowed values for the event.category field
         })
-      ).toEqual({
-        ...happyPathResult,
-        indexFieldType,
-        indexInvalidValues: [
-          {
-            count: 2,
-            fieldName: 'an_invalid_category',
-          },
-          {
-            count: 1,
-            fieldName: 'theory',
-          },
-        ],
-        isEcsCompliant: false, // because there are BOTH mapping conflicts and unallowed values
-        isInSameFamily: false, // `text` and `keyword` are not in the same family
-      });
+      ).toEqual(
+        expectedResult({
+          indexFieldType,
+          indexInvalidValues: [
+            {
+              count: 2,
+              fieldName: 'an_invalid_category',
+            },
+            {
+              count: 1,
+              fieldName: 'theory',
+            },
+          ],
+          isEcsCompliant: false, // because there are BOTH mapping conflicts and unallowed values
+          isInSameFamily: false, // `text` and `keyword` are not in the same family
+        })
+      );
     });
 
     test('it returns the expected result for a custom field, i.e. a field that does NOT have an entry in `ecsMetadata`', () => {
@@ -1188,6 +1088,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         '.ds-packetbeat-8.6.1-2023.02.04-000001': {
           docsCount: 1628343,
@@ -1198,6 +1099,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1215,6 +1117,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1225,6 +1128,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1235,6 +1139,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1252,6 +1157,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1262,6 +1168,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1272,6 +1179,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1337,6 +1245,7 @@ describe('helpers', () => {
         markdownComments: ['foo', 'bar', 'baz'],
         pattern: 'packetbeat-*',
         sameFamily: 0,
+        checkedAt: Date.now(),
       };
 
       expect(getErrorSummary(resultWithError)).toEqual({
@@ -1487,6 +1396,83 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
         },
       ]);
+    });
+  });
+
+  describe('postStorageResult', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it posts the result', async () => {
+      const storageResult = { indexName: 'test' } as unknown as StorageResult;
+      await postStorageResult({
+        storageResult,
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        toasts,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify(storageResult),
+        })
+      );
+    });
+
+    test('it throws error', async () => {
+      const storageResult = { indexName: 'test' } as unknown as StorageResult;
+      fetch.mockRejectedValueOnce('test-error');
+      await postStorageResult({
+        httpFetch: fetch,
+        storageResult,
+        abortController: new AbortController(),
+        toasts,
+      });
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
+    });
+  });
+
+  describe('getStorageResults', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it gets the results', async () => {
+      await getStorageResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        pattern: 'auditbeat-*',
+        toasts,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'GET',
+          query: { pattern: 'auditbeat-*' },
+        })
+      );
+    });
+
+    it('should catch error', async () => {
+      fetch.mockRejectedValueOnce('test-error');
+
+      const results = await getStorageResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        pattern: 'auditbeat-*',
+        toasts,
+      });
+
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
+      expect(results).toEqual([]);
     });
   });
 });

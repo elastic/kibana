@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -27,7 +28,7 @@ import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'percentile_rank';
+  operationType: typeof PERCENTILE_RANK_ID;
   params: {
     value: number;
   };
@@ -63,11 +64,9 @@ export const percentileRanksOperation: OperationDefinition<
   { value: number },
   true
 > = {
-  type: 'percentile_rank',
+  type: PERCENTILE_RANK_ID,
   allowAsReference: true,
-  displayName: i18n.translate('xpack.lens.indexPattern.percentileRank', {
-    defaultMessage: 'Percentile rank',
-  }),
+  displayName: PERCENTILE_RANK_NAME,
   input: 'field',
   operationParams: [
     {
@@ -255,20 +254,6 @@ export const percentileRanksOperation: OperationDefinition<
         />
       </FormRow>
     );
-  },
-  documentation: {
-    section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.percentileRanks.signature', {
-      defaultMessage: 'field: string, [value]: number',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.percentileRanks.documentation.markdown', {
-      defaultMessage: `
-Returns the percentage of values which are below a certain value. For example, if a value is greater than or equal to 95% of the observed values it is said to be at the 95th percentile rank
-
-Example: Get the percentage of values which are below of 100:
-\`percentile_rank(bytes, value=100)\`
-      `,
-    }),
   },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.percentileRanks.documentation.quick',

@@ -16,7 +16,6 @@
       "features",
       "triggersActionsUi",
       "kibanaReact",
-      "savedObjects",
       "data",
       "dataViews",
       "kibanaUtils"

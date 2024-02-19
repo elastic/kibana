@@ -12,13 +12,8 @@ import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/serv
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import Ajv, { type ValidateFunction } from 'ajv';
 import { once } from 'lodash';
-import {
-  ContextRegistry,
-  KnowledgeBaseEntryRole,
-  RegisterContextDefinition,
-} from '../../common/types';
+import { KnowledgeBaseEntryRole, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
@@ -27,16 +22,10 @@ import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type {
   ChatRegistrationFunction,
-  FunctionHandlerRegistry,
   ObservabilityAIAssistantResourceNames,
-  RegisterFunction,
   RespondFunctionResources,
 } from './types';
 import { splitKbText } from './util/split_kb_text';
-
-const ajv = new Ajv({
-  strict: false,
-});
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -66,8 +55,6 @@ export function createResourceNamesMap() {
   };
 }
 
-export const ELSER_MODEL_ID = '.elser_model_2';
-
 export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
@@ -84,6 +71,7 @@ type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> }
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
+  private readonly getModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
 
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
@@ -94,13 +82,16 @@ export class ObservabilityAIAssistantService {
     logger,
     core,
     taskManager,
+    getModelId,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
     taskManager: TaskManagerSetupContract;
+    getModelId: () => Promise<string>;
   }) {
     this.core = core;
     this.logger = logger;
+    this.getModelId = getModelId;
 
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
@@ -132,6 +123,8 @@ export class ObservabilityAIAssistantService {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
+      const elserModelId = await this.getModelId();
+
       const esClient = coreStart.elasticsearch.client.asInternalUser;
 
       await esClient.cluster.putComponentTemplate({
@@ -153,7 +146,7 @@ export class ObservabilityAIAssistantService {
           },
           mappings: {
             _meta: {
-              model: ELSER_MODEL_ID,
+              model: elserModelId,
             },
           },
         },
@@ -186,7 +179,7 @@ export class ObservabilityAIAssistantService {
         processors: [
           {
             inference: {
-              model_id: ELSER_MODEL_ID,
+              model_id: elserModelId,
               target_field: 'ml',
               field_map: {
                 text: 'text_field',
@@ -237,6 +230,7 @@ export class ObservabilityAIAssistantService {
         esClient,
         resources: this.resourceNames,
         taskManagerStart: pluginsStart.taskManager,
+        getModelId: this.getModelId,
       });
 
       this.logger.info('Successfully set up index assets');
@@ -277,7 +271,10 @@ export class ObservabilityAIAssistantService {
     return new ObservabilityAIAssistantClient({
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       namespace: spaceId,
-      esClient: coreStart.elasticsearch.client.asInternalUser,
+      esClient: {
+        asInternalUser: coreStart.elasticsearch.client.asInternalUser,
+        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      },
       resources: this.resourceNames,
       logger: this.logger,
       user: {
@@ -289,37 +286,37 @@ export class ObservabilityAIAssistantService {
   }
 
   async getFunctionClient({
+    screenContexts,
     signal,
     resources,
     client,
   }: {
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
   }): Promise<ChatFunctionClient> {
-    const contextRegistry: ContextRegistry = new Map();
-    const functionHandlerRegistry: FunctionHandlerRegistry = new Map();
+    const fnClient = new ChatFunctionClient(screenContexts);
 
-    const validators = new Map<string, ValidateFunction>();
-
-    const registerContext: RegisterContextDefinition = (context) => {
-      contextRegistry.set(context.name, context);
+    const params = {
+      signal,
+      registerContext: fnClient.registerContext.bind(fnClient),
+      registerFunction: fnClient.registerFunction.bind(fnClient),
+      hasFunction: fnClient.hasFunction.bind(fnClient),
+      resources,
+      client,
     };
 
-    const registerFunction: RegisterFunction = (definition, respond) => {
-      validators.set(definition.name, ajv.compile(definition.parameters));
-      functionHandlerRegistry.set(definition.name, { definition, respond });
-    };
     await Promise.all(
       this.registrations.map((fn) =>
-        fn({ signal, registerContext, registerFunction, resources, client }).catch((error) => {
+        fn(params).catch((error) => {
           this.logger.error(`Error registering functions`);
           this.logger.error(error);
         })
       )
     );
 
-    return new ChatFunctionClient(contextRegistry, functionHandlerRegistry, validators);
+    return fnClient;
   }
 
   addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {

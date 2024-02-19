@@ -13,7 +13,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
-import { getElastichsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
 
 interface EsSummaryDocument {
   slo: {
@@ -44,7 +44,12 @@ export interface Sort {
 }
 
 export interface SummarySearchClient {
-  search(kqlQuery: string, sort: Sort, pagination: Pagination): Promise<Paginated<SLOSummary>>;
+  search(
+    kqlQuery: string,
+    filters: string,
+    sort: Sort,
+    pagination: Pagination
+  ): Promise<Paginated<SLOSummary>>;
 }
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
@@ -56,16 +61,30 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
   async search(
     kqlQuery: string,
+    filters: string,
     sort: Sort,
     pagination: Pagination
   ): Promise<Paginated<SLOSummary>> {
+    let parsedFilters: any = {};
+
+    try {
+      parsedFilters = JSON.parse(filters);
+    } catch (e) {
+      this.logger.error(`Failed to parse filters: ${e.message}`);
+    }
+
     try {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         track_total_hits: true,
         query: {
           bool: {
-            filter: [{ term: { spaceId: this.spaceId } }, getElastichsearchQueryOrThrow(kqlQuery)],
+            filter: [
+              { term: { spaceId: this.spaceId } },
+              getElasticsearchQueryOrThrow(kqlQuery),
+              ...(parsedFilters.filter ?? []),
+            ],
+            must_not: [...(parsedFilters.must_not ?? [])],
           },
         },
         sort: {

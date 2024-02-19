@@ -11,7 +11,7 @@ import useThrottle from 'react-use/lib/useThrottle';
 
 import { EuiPanel } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CodeEditor as MonacoCodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor as MonacoCodeEditor } from '@kbn/code-editor';
 
 import { MonacoEditorLangId } from '../types';
 import { useDimensions } from '../../../hooks';

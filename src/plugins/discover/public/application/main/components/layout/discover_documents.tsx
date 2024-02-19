@@ -65,6 +65,7 @@ import { getRenderCustomToolbarWithElements } from '../../../../components/disco
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 const containerStyles = css`
   position: relative;
@@ -111,19 +112,29 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, rowsPerPage, grid, columns, index, sampleSizeState] =
-    useAppStateSelector((state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.index,
-        state.sampleSize,
-      ];
-    });
+  const [
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    index,
+    sampleSizeState,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.index,
+      state.sampleSize,
+    ];
+  });
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -211,6 +222,13 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateHeaderRowHeight = useCallback(
+    (newHeaderRowHeight: number) => {
+      stateContainer.appState.update({ headerRowHeight: newHeaderRowHeight });
+    },
+    [stateContainer]
+  );
+
   const showTimeCol = useMemo(
     () =>
       // for ES|QL we want to show the time column only when is on Document view
@@ -253,6 +271,12 @@ function DiscoverDocumentsComponent({
     ),
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
+
+  const {
+    customCellRenderer: externalCustomRenderers,
+    customGridColumnsConfiguration,
+    customControlColumnsConfiguration,
+  } = useDiscoverCustomization('data_table') || {};
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -400,6 +424,9 @@ function DiscoverDocumentsComponent({
                   onSort={!isTextBasedQuery ? onSort : undefined}
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
+                  configHeaderRowHeight={3}
+                  headerRowHeightState={headerRowHeight}
+                  onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
                   isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
@@ -419,6 +446,9 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
+                  externalCustomRenderers={externalCustomRenderers}
+                  customGridColumnsConfiguration={customGridColumnsConfiguration}
+                  customControlColumnsConfiguration={customControlColumnsConfiguration}
                 />
               </CellActionsProvider>
             </div>

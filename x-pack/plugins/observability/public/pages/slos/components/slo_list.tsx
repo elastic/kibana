@@ -7,26 +7,19 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+import dedent from 'dedent';
+import { groupBy as _groupBy, mapValues } from 'lodash';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
-import { SloListSearchBar, SortDirection, SortField } from './slo_list_search_bar';
-import { SLOView, ToggleSLOView } from './toggle_slo_view';
+import { ToggleSLOView } from './toggle_slo_view';
+import { GroupView } from './grouped_slos/group_view';
+import { useKibana } from '../../../utils/kibana_react';
 
-export interface Props {
-  autoRefresh: boolean;
-}
-
-export function SloList({ autoRefresh }: Props) {
-  const { state, store: storeState } = useUrlSearchState();
-  const [page, setPage] = useState(state.page);
-  const [perPage, setPerPage] = useState(state.perPage);
-  const [query, setQuery] = useState(state.kqlQuery);
-  const [sort, setSort] = useState<SortField>(state.sort.by);
-  const [direction] = useState<SortDirection>(state.sort.direction);
-  const [view, setView] = useState<SLOView>(state.view);
-  const [isCompact, setCompact] = useState<boolean>(state.compact);
+export function SloList() {
+  const { state, onStateChange: storeState } = useUrlSearchState();
+  const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
   const {
     isLoading,
@@ -34,90 +27,113 @@ export function SloList({ autoRefresh }: Props) {
     isError,
     data: sloList,
   } = useFetchSloList({
+    tagsFilter,
+    statusFilter,
     perPage,
+    filters,
     page: page + 1,
-    kqlQuery: query,
-    sortBy: sort,
-    sortDirection: direction,
-    shouldRefetch: autoRefresh,
+    kqlQuery,
+    sortBy: state.sort.by,
+    sortDirection: state.sort.direction,
+    lastRefresh: state.lastRefresh,
   });
 
+  const {
+    observabilityAIAssistant: {
+      service: { setScreenContext },
+    },
+  } = useKibana().services;
   const { results = [], total = 0 } = sloList ?? {};
 
-  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
-  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
-  const handlePageClick = (pageNumber: number) => {
-    setPage(pageNumber);
-    storeState({ page: pageNumber });
+  const onStateChange = (newState: Partial<SearchState>) => {
+    storeState({ page: 0, ...newState });
   };
 
-  const handleChangeQuery = (newQuery: string) => {
-    setPage(0);
-    setQuery(newQuery);
-    storeState({ page: 0, kqlQuery: newQuery });
-  };
+  useEffect(() => {
+    if (!sloList) {
+      return;
+    }
 
-  const handleChangeSort = (newSort: SortField) => {
-    setPage(0);
-    setSort(newSort);
-    storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
-  };
+    const slosByStatus = mapValues(
+      _groupBy(sloList.results, (result) => result.summary.status),
+      (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
+    ) as Record<typeof results[number]['summary']['status'], string>;
 
-  const handleChangeView = (newView: SLOView) => {
-    setView(newView);
-    storeState({ view: newView });
-  };
+    return setScreenContext({
+      screenDescription: dedent(`The user is looking at a list of SLOs.
 
-  const handleToggleCompactView = () => {
-    const newCompact = !isCompact;
-    setCompact(newCompact);
-    storeState({ compact: newCompact });
-  };
+      ${
+        sloList.total >= 1
+          ? `There are ${sloList.total} SLOs. Out of those, ${sloList.results.length} are visible.
+          
+          Violating SLOs:
+          ${slosByStatus.VIOLATED}
+          
+          Degrading SLOs:
+          ${slosByStatus.DEGRADING}
+
+          Healthy SLOs:
+          ${slosByStatus.HEALTHY}
+
+          SLOs without data:
+          ${slosByStatus.NO_DATA}
+          
+          `
+          : ''
+      }
+      `),
+    });
+  }, [sloList, setScreenContext]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
-      <EuiFlexItem grow>
-        <SloListSearchBar
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
-          onChangeQuery={handleChangeQuery}
-          onChangeSort={handleChangeSort}
-          initialState={state}
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ToggleSLOView
+          sloList={sloList}
           sloView={view}
-          onChangeView={handleChangeView}
-          onToggleCompactView={handleToggleCompactView}
-          isCompact={isCompact}
+          onChangeView={(newView) => onStateChange({ view: newView })}
+          onStateChange={onStateChange}
+          state={state}
+          loading={isLoading || isDeletingSlo}
         />
       </EuiFlexItem>
-      <SlosView
-        sloList={results}
-        loading={isLoading || isRefetching}
-        error={isError}
-        isCompact={isCompact}
-        sloView={view}
-      />
-
-      {total > 0 ? (
-        <EuiFlexItem>
-          <EuiTablePagination
-            pageCount={Math.ceil(total / perPage)}
-            activePage={page}
-            onChangePage={handlePageClick}
-            itemsPerPage={perPage}
-            itemsPerPageOptions={[10, 25, 50, 100]}
-            onChangeItemsPerPage={(newPerPage) => {
-              setPerPage(newPerPage);
-              storeState({ perPage: newPerPage });
-            }}
+      {groupBy === 'ungrouped' && (
+        <>
+          <SlosView
+            sloList={results}
+            loading={isLoading || isRefetching}
+            error={isError}
+            sloView={view}
           />
-        </EuiFlexItem>
-      ) : null}
+          {total > 0 ? (
+            <EuiFlexItem>
+              <EuiTablePagination
+                pageCount={Math.ceil(total / perPage)}
+                activePage={page}
+                onChangePage={(newPage) => {
+                  onStateChange({ page: newPage });
+                }}
+                itemsPerPage={perPage}
+                itemsPerPageOptions={[10, 25, 50, 100]}
+                onChangeItemsPerPage={(newPerPage) => {
+                  onStateChange({ perPage: newPerPage });
+                }}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </>
+      )}
+      {groupBy !== 'ungrouped' && (
+        <GroupView
+          sloView={view}
+          groupBy={groupBy}
+          kqlQuery={kqlQuery}
+          sort={state.sort.by}
+          direction={state.sort.direction}
+        />
+      )}
     </EuiFlexGroup>
   );
 }

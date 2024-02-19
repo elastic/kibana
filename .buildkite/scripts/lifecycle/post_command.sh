@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+echo '--- Log out of gcloud'
+./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
+./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+
 echo '--- Agent Debug Info'
 ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 
@@ -29,6 +33,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/session/*.png'
   buildkite-agent artifact upload 'x-pack/test_serverless/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'x-pack/test_serverless/**/screenshots/session/*.png'
+  buildkite-agent artifact upload 'x-pack/test_serverless/**/failure_debug/html/*.html'
   buildkite-agent artifact upload 'x-pack/test/functional/apps/reporting/reports/session/*.pdf'
   buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'

@@ -7,8 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import type {
-  ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import type { UploadActionUIRequestBody } from '../../../../../common/api/endpoint';

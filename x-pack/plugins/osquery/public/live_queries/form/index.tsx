@@ -154,7 +154,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           alert_ids: values.alertIds,
           pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
-          timeout: values.timeout,
+          ...(queryType === 'query' ? { timeout: values.timeout } : {}),
         },
         (value) => !isEmpty(value) || isNumber(value)
       ) as unknown as LiveQueryFormFields;

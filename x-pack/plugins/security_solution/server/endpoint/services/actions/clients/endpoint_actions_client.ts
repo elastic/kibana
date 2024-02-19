@@ -6,8 +6,10 @@
  */
 
 import type { HapiReadableStream } from '../../../../types';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import { updateCases } from '../create/update_cases';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import type { CreateActionPayload } from '../create/types';
 import type {
   ExecuteActionRequestBody,
@@ -17,7 +19,7 @@ import type {
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
 } from '../../../../../common/api/endpoint';
-import { BaseResponseActionsClient } from '../../../lib/response_actions/base_actions_provider';
+import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,
@@ -32,18 +34,20 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  HostMetadataInterface,
   ImmutableObject,
+  HostMetadataInterface,
 } from '../../../../../common/endpoint/types';
 
-export class EndpointActionsClient extends BaseResponseActionsClient {
+export class EndpointActionsClient extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];
     allValid: boolean;
     hosts: HostMetadata[];
   }> {
-    const foundEndpointHosts = await this.options.endpointContext.service
+    const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService()
       .getMetadataForEndpoints(this.options.esClient, [...new Set(ids)]);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
@@ -72,24 +76,25 @@ export class EndpointActionsClient extends BaseResponseActionsClient {
       user: { username: this.options.username },
     };
 
-    const response = await this.options.endpointContext.service
+    const response = await this.options.endpointService
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
-    await this.updateCases(createPayload, agentIds.hosts);
+    await this.updateCases({
+      command,
+      comment: options.comment,
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      actionId: response.id,
+      hosts: agentIds.hosts.map((endpoint: ImmutableObject<HostMetadataInterface>) => {
+        return {
+          hostId: endpoint.agent.id,
+          hostname: endpoint.host.hostname,
+        };
+      }),
+    });
 
     return response as TResponse;
-  }
-
-  protected async updateCases(
-    createActionPayload: CreateActionPayload,
-    endpointData: Array<ImmutableObject<HostMetadataInterface>>
-  ): Promise<void> {
-    return updateCases({
-      casesClient: this.options.casesClient,
-      createActionPayload,
-      endpointData,
-    });
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
@@ -155,7 +160,7 @@ export class EndpointActionsClient extends BaseResponseActionsClient {
   async upload(
     options: UploadActionApiRequestBody
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
-    const fleetFiles = await this.options.endpointContext.service.getFleetToHostFilesClient();
+    const fleetFiles = await this.options.endpointService.getFleetToHostFilesClient();
     const fileStream = options.file as HapiReadableStream;
     const { file: _, parameters: userParams, ...actionPayload } = options;
     const uploadParameters: ResponseActionUploadParameters = {

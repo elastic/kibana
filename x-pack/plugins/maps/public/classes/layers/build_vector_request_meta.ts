@@ -26,7 +26,7 @@ export function buildVectorRequestMeta(
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
     sourceMeta: source.getSyncMeta(dataFilters),
-    applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
+    applyForceRefresh: source.getApplyForceRefresh(),
     isForceRefresh,
     isFeatureEditorOpenForLayer,
   };

@@ -15,7 +15,7 @@ import { maplibregl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
-import { getUISettings } from '../../services';
+import { getThemeService } from '../../services';
 
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
@@ -98,7 +98,7 @@ export class VegaMapView extends VegaBaseView {
     const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
     //
     if (mapStyle) {
-      const isDarkMode: boolean = getUISettings().get('theme:darkMode');
+      const isDarkMode: boolean = getThemeService().getTheme().darkMode;
       return emsTileServiceId
         ? emsTileServiceId
         : await this._serviceSettings.getDefaultTmsLayer(isDarkMode);

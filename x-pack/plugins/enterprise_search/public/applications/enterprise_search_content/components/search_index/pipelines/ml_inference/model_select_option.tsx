@@ -10,6 +10,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelectableOption,
   EuiText,
   EuiTextColor,
   EuiTextTruncate,
@@ -22,12 +23,7 @@ import { TrainedModelHealth } from '../ml_model_health';
 
 import { LicenseBadge } from './license_badge';
 
-export type ModelSelectOptionProps = MlModel & {
-  label: string;
-  checked?: 'on';
-};
-
-export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
+export const ModelSelectOption: React.FC<EuiSelectableOption<MlModel>> = ({
   modelId,
   title,
   description,

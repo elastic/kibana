@@ -51,10 +51,14 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = 150;
 
-const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
-  Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
-    ({ buckets }) => buckets.length > 0
-  );
+const visualizationResponseHasData = (response: VisualizationResponse[]): boolean => {
+  if (response.length === 0) {
+    return false;
+  }
+  return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
+    response[0].aggregations ?? {}
+  ).some(({ buckets }) => buckets.length > 0);
+};
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -112,15 +116,14 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const visualizationResponse = useVisualizationResponse({ visualizationId });
-
+  const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
     }
 
     if (typeof subtitle === 'function') {
-      if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse[0])) {
+      if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse)) {
         return subtitle(0);
       }
       const visualizationCount = visualizationResponse[0].hits.total;

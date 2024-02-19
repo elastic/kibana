@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  CustomCheerio,
-  CustomCheerioStatic,
-} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+import type { CustomCheerio, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -234,6 +231,17 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       if (direction === 'desc') {
         await popoverListItems[2].click();
       }
+    },
+    async clickAlertsPageShowQueryMenuButton() {
+      await testSubjects.click('showQueryBarMenu');
+    },
+    async getAlertsPageQuickFilters() {
+      const queryBarMenuPanel = await find.byCssSelector('[data-test-subj="queryBarMenuPanel"]');
+      const $ = await queryBarMenuPanel.parseDomContent();
+      return $('[data-test-subj^="quick-filters-item"]');
+    },
+    async getAlertsPageAppliedFilters() {
+      return await find.allByCssSelector('[data-test-subj="filter-items-group"] > *');
     },
   };
 }

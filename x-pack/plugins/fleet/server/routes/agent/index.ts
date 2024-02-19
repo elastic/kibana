@@ -6,7 +6,7 @@
  */
 
 import type { FleetAuthz } from '../../../common';
-import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
@@ -351,7 +351,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
   router.versioned
     .get({
-      access: INTERNAL_API_ACCESS,
       path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
       fleetAuthz: {
         fleet: { all: true },
@@ -359,7 +358,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetAgentStatusRequestSchema },
       },
       getAgentStatusForAgentPolicyHandler

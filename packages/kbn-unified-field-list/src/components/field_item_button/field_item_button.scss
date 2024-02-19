@@ -70,3 +70,38 @@
   background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
   color: $euiColorDarkShade;
 }
+
+.unifiedFieldListItemButton__fieldIconContainer {
+  position: relative;
+}
+
+.unifiedFieldListItemButton__fieldIcon {
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+.unifiedFieldListItemButton__fieldIconDrag {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+// A drag handle will appear only on item hover/focus
+.unifiedFieldListItemButton--withDragIcon {
+  .unifiedFieldListItemButton__fieldIconDrag {
+    visibility: visible;
+    opacity: 0;
+  }
+
+  &:hover,
+  &[class*='-isActive'],
+  .domDragDrop__keyboardHandler:focus + & {
+    .unifiedFieldListItemButton__fieldIcon {
+      opacity: 0;
+    }
+    .unifiedFieldListItemButton__fieldIconDrag {
+      opacity: 1;
+    }
+  }
+}

@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, isUndefined, omit } from 'lodash';
+import { defaults, flow, identity, isUndefined, omit, random } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import moment from 'moment';
@@ -260,8 +260,23 @@ export class TaskManagerRunner implements TaskRunner {
       // this allows us to catch tasks that remain in Pending/Finalizing without being
       // cleaned up
       isReadyToRun(this.instance) ? this.instance.task.startedAt : this.instance.timestamp,
-      this.definition.timeout
+      this.timeout
     )!;
+  }
+
+  /*
+   * Gets the timeout of the current task. Uses the timeout
+   * defined by the task type unless this is an ad-hoc task that specifies an override
+   */
+  public get timeout() {
+    if (this.instance.task.schedule) {
+      // recurring tasks should use timeout in task type
+      return this.definition.timeout;
+    }
+
+    return this.instance.task.timeoutOverride
+      ? this.instance.task.timeoutOverride
+      : this.definition.timeout;
   }
 
   /**
@@ -314,15 +329,29 @@ export class TaskManagerRunner implements TaskRunner {
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     // Validate state
-    const validatedTaskInstance = this.validateTaskState(this.instance.task);
+    const stateValidationResult = this.validateTaskState(this.instance.task);
+
+    if (stateValidationResult.error) {
+      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
+        this.processResult(
+          asErr({
+            error: stateValidationResult.error,
+            state: stateValidationResult.taskInstance.state,
+            shouldValidate: false,
+          }),
+          stopTaskTimer()
+        )
+      );
+      if (apmTrans) apmTrans.end('failure');
+      return processedResult;
+    }
 
     const modifiedContext = await this.beforeRun({
-      taskInstance: validatedTaskInstance,
+      taskInstance: stateValidationResult.taskInstance,
     });
-
-    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     this.onTaskEvent(
       asTaskManagerStatEvent(
@@ -411,11 +440,12 @@ export class TaskManagerRunner implements TaskRunner {
   private validateTaskState(taskInstance: ConcreteTaskInstance) {
     const { taskType, id } = taskInstance;
     try {
-      const validatedTask = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
-      return validatedTask;
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+      return { taskInstance: validatedTaskInstance, error: null };
     } catch (error) {
       this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${error.message}`);
-      throw error;
+      return { taskInstance, error };
     }
   }
 
@@ -506,19 +536,15 @@ export class TaskManagerRunner implements TaskRunner {
             attempts,
             retryAt:
               (this.instance.task.schedule
-                ? maxIntervalFromDate(
-                    now,
-                    this.instance.task.schedule.interval,
-                    this.definition.timeout
-                  )
+                ? maxIntervalFromDate(now, this.instance.task.schedule.interval, this.timeout)
                 : this.getRetryDelay({
                     attempts,
                     // Fake an error. This allows retry logic when tasks keep timing out
                     // and lets us set a proper "retryAt" value each time.
                     error: new Error('Task timeout'),
-                    addDuration: this.definition.timeout,
+                    addDuration: this.timeout,
                   })) ?? null,
-            // This is a safe convertion as we're setting the startAt above
+            // This is a safe conversion as we're setting the startAt above
           },
           { validate: false }
         )) as ConcreteTaskInstanceWithStartedAt
@@ -723,6 +749,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.instance = asRan(this.instance.task);
       await this.removeTask();
     } else {
+      const { shouldValidate = true } = unwrap(result);
       this.instance = asRan(
         await this.bufferedTaskStore.update(
           defaults(
@@ -735,7 +762,7 @@ export class TaskManagerRunner implements TaskRunner {
             },
             taskWithoutEnabled(this.instance.task)
           ),
-          { validate: true }
+          { validate: shouldValidate }
         )
       );
     }
@@ -792,7 +819,7 @@ export class TaskManagerRunner implements TaskRunner {
               asErr({
                 ...processedResult,
                 isExpired: taskHasExpired,
-                error: new Error(`Alerting task failed to run.`),
+                error: taskRunError,
               }),
               taskTiming
             )
@@ -931,12 +958,16 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
 }
 
 export function calculateDelay(attempts: number) {
+  // Return 30s for the first retry attempt
   if (attempts === 1) {
-    return 30 * 1000; // 30s
+    return 30 * 1000;
   } else {
-    // get multiples of 5 min
     const defaultBackoffPerFailure = 5 * 60 * 1000;
-    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+    const maxDelay = 60 * 60 * 1000;
+    // For each remaining attempt return an exponential delay with jitter that is capped at 1 hour.
+    // We adjust the attempts by 2 to ensure that delay starts at 5m for the second retry attempt
+    // and increases exponentially from there.
+    return random(Math.min(maxDelay, defaultBackoffPerFailure * Math.pow(2, attempts - 2)));
   }
 }
 

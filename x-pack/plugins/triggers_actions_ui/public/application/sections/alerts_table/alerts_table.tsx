@@ -78,7 +78,7 @@ const Row = styled.div`
 `;
 
 type CustomGridBodyProps = Pick<
-  Parameters<Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>>['0'],
+  Parameters<NonNullable<EuiDataGridProps['renderCustomGridBody']>>['0'],
   'Cell' | 'visibleColumns'
 > & {
   alertsData: FetchAlertData['oldAlertsData'];
@@ -129,6 +129,18 @@ const CustomGridBody = memo(
 );
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
+  const {
+    visibleColumns,
+    onToggleColumn,
+    onResetColumns,
+    updatedAt,
+    browserFields,
+    onChangeVisibleColumns,
+    onColumnResize,
+    showAlertStatusWithFlapping = false,
+    showInspectButton = false,
+  } = props;
+
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [activeRowClasses, setActiveRowClasses] = useState<
     NonNullable<EuiDataGridStyle['rowClasses']>
@@ -153,13 +165,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
     props.maintenanceWindows;
 
-  const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
+  const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
 
   const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
     useActionsColumn({
       options: props.alertsTableConfiguration.useActionsColumn,
     });
-
+  const casesConfig = props.alertsTableConfiguration.cases;
   const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
     alerts,
     columns: props.columns,
@@ -174,7 +186,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     clearSelection,
   } = useBulkActions({
     alerts,
-    casesConfig: props.alertsTableConfiguration.cases,
+    casesConfig,
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,
@@ -205,18 +217,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageIndex: activePage,
     pageSize: props.pageSize,
   });
-
-  const {
-    visibleColumns,
-    onToggleColumn,
-    onResetColumns,
-    updatedAt,
-    browserFields,
-    onChangeVisibleColumns,
-    onColumnResize,
-    showAlertStatusWithFlapping = false,
-    showInspectButton = false,
-  } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
@@ -301,7 +301,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             }
 
             return (
-              <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
                 {renderCustomActionsRow({
                   alert: alerts[visibleRowIndex],
                   ecsAlert: ecsAlertsData[visibleRowIndex],
@@ -405,6 +405,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               cases={cases}
               maintenanceWindows={maintenanceWindows}
               showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+              caseAppId={casesConfig?.appId}
             />
           );
         }
@@ -422,6 +423,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [
       alerts,
       cases,
+      casesConfig?.appId,
       ecsAlertsData,
       isLoading,
       isLoadingCases,
@@ -511,9 +513,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return mergedGridStyle;
   }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
-  const renderCustomGridBody = useCallback<
-    Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>
-  >(
+  const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
     ({ visibleColumns: _visibleColumns, Cell }) => (
       <CustomGridBody
         visibleColumns={_visibleColumns}

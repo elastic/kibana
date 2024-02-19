@@ -5,20 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
+import { renderEmbeddableConsole } from './application/containers/embeddable';
 import {
   AppSetupUIPluginDependencies,
+  AppStartUIPluginDependencies,
   ClientConfigType,
   ConsolePluginSetup,
+  ConsolePluginStart,
   ConsoleUILocatorParams,
+  EmbeddableConsoleProps,
+  EmbeddableConsoleDependencies,
 } from './types';
-import { AutocompleteInfo, setAutocompleteInfo } from './services';
+import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   private readonly autocompleteInfo = new AutocompleteInfo();
+  private _embeddableConsole: EmbeddableConsoleInfo = new EmbeddableConsoleInfo();
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -27,6 +34,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     this.autocompleteInfo.setup(http);
@@ -76,6 +84,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             element,
             theme$,
             autocompleteInfo: this.autocompleteInfo,
+            isMonacoEnabled,
           });
         },
       });
@@ -97,5 +106,38 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     return {};
   }
 
-  public start() {}
+  public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
+    const {
+      ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
+    } = this.ctx.config.get<ClientConfigType>();
+
+    const consoleStart: ConsolePluginStart = {};
+    const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
+      ENABLE_DOCKED_CONSOLE_UI_SETTING_ID
+    );
+    const embeddedConsoleAvailable =
+      isConsoleUiEnabled &&
+      isEmbeddedConsoleEnabled &&
+      core.application.capabilities?.dev_tools?.show === true &&
+      embeddedConsoleUiSetting;
+
+    if (embeddedConsoleAvailable) {
+      consoleStart.renderEmbeddableConsole = (props?: EmbeddableConsoleProps) => {
+        const consoleDeps: EmbeddableConsoleDependencies = {
+          core,
+          usageCollection: deps.usageCollection,
+          setDispatch: (d) => {
+            this._embeddableConsole.setDispatch(d);
+          },
+        };
+        return renderEmbeddableConsole(props, consoleDeps);
+      };
+      consoleStart.isEmbeddedConsoleAvailable = () =>
+        this._embeddableConsole.isEmbeddedConsoleAvailable();
+      consoleStart.openEmbeddedConsole = (content?: string) =>
+        this._embeddableConsole.openEmbeddedConsole(content);
+    }
+
+    return consoleStart;
+  }
 }

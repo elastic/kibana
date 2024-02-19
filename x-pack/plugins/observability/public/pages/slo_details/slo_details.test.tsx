@@ -5,37 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-
-import { useKibana } from '../../utils/kibana_react';
-import { useParams, useLocation } from 'react-router-dom';
-import { useLicense } from '../../hooks/use_license';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
-import { ActiveAlerts } from '../../hooks/slo/active_alerts';
-import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
-import { render } from '../../utils/test_helper';
-import { SloDetailsPage } from './slo_details';
-import { buildSlo } from '../../data/slo/slo';
+import { encode } from '@kbn/rison';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
 } from '../../data/slo/historical_summary_data';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
-import { ALL_VALUE } from '@kbn/slo-schema';
-import { encode } from '@kbn/rison';
+import { buildSlo } from '../../data/slo/slo';
+import { ActiveAlerts } from '../../hooks/slo/active_alerts';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
+import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useLicense } from '../../hooks/use_license';
+import { useKibana } from '../../utils/kibana_react';
+import { render } from '../../utils/test_helper';
+import { SloDetailsPage } from './slo_details';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
-  useLocation: jest.fn(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -48,8 +46,7 @@ jest.mock('../../hooks/slo/use_fetch_historical_summary');
 jest.mock('../../hooks/slo/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
-const useParamsMock = useParams as jest.Mock;
-const useLocationMock = useLocation as jest.Mock;
+
 const useLicenseMock = useLicense as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
@@ -120,13 +117,15 @@ describe('SLO Details Page', () => {
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
     useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
-    useLocationMock.mockReturnValue({ search: '' });
+    jest
+      .spyOn(Router, 'useLocation')
+      .mockReturnValue({ pathname: '/slos/1234', search: '', state: '', hash: '' });
   });
 
   describe('when the incorrect license is found', () => {
     it('navigates to the SLO List page', async () => {
       const slo = buildSlo();
-      useParamsMock.mockReturnValue(slo.id);
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
 
@@ -137,7 +136,7 @@ describe('SLO Details Page', () => {
   });
 
   it('renders the PageNotFound when the SLO cannot be found', async () => {
-    useParamsMock.mockReturnValue('nonexistent');
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: 'nonexistent' });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: undefined });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -148,7 +147,7 @@ describe('SLO Details Page', () => {
 
   it('renders the loading spinner when fetching the SLO', async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: true, data: undefined });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -161,7 +160,7 @@ describe('SLO Details Page', () => {
 
   it('renders the SLO details page with loading charts when summary data is loading', async () => {
     const slo = buildSlo({ id: HEALTHY_STEP_DOWN_ROLLING_SLO });
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
@@ -180,7 +179,7 @@ describe('SLO Details Page', () => {
 
   it('renders the SLO details page with the overview and chart panels', async () => {
     const slo = buildSlo({ id: HEALTHY_STEP_DOWN_ROLLING_SLO });
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -196,7 +195,7 @@ describe('SLO Details Page', () => {
 
   it("renders a 'Edit' button under actions menu", async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -208,7 +207,7 @@ describe('SLO Details Page', () => {
 
   it("renders a 'Create alert rule' button under actions menu", async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -220,7 +219,7 @@ describe('SLO Details Page', () => {
 
   it("renders a 'Manage rules' button under actions menu", async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -232,7 +231,7 @@ describe('SLO Details Page', () => {
 
   it("renders a 'Clone' button under actions menu", async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -257,7 +256,7 @@ describe('SLO Details Page', () => {
 
   it("renders a 'Delete' button under actions menu", async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -287,7 +286,7 @@ describe('SLO Details Page', () => {
 
   it('renders the Overview tab by default', async () => {
     const slo = buildSlo();
-    useParamsMock.mockReturnValue(slo.id);
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
     useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
@@ -306,7 +305,7 @@ describe('SLO Details Page', () => {
   describe('when an APM SLO is loaded', () => {
     it("renders a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
-      useParamsMock.mockReturnValue(slo.id);
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -320,7 +319,7 @@ describe('SLO Details Page', () => {
   describe('when an Custom KQL SLO is loaded', () => {
     it("does not render a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo();
-      useParamsMock.mockReturnValue(slo.id);
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 

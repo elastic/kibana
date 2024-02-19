@@ -146,7 +146,24 @@ export class UptimePlugin
       title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
-      deepLinks: [],
+      deepLinks: [
+        {
+          id: 'overview',
+          title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
+            defaultMessage: 'Overview',
+          }),
+          path: '/',
+          visibleIn: ['globalSearch', 'sideNav'],
+        },
+        {
+          id: 'management',
+          title: i18n.translate('xpack.synthetics.managementPage.linkText', {
+            defaultMessage: 'Management',
+          }),
+          path: '/monitors',
+          visibleIn: ['globalSearch', 'sideNav'],
+        },
+      ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 

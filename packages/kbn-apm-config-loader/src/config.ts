@@ -9,7 +9,6 @@
 import { join } from 'path';
 import { merge } from 'lodash';
 import { execSync } from 'child_process';
-// deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
@@ -92,6 +91,11 @@ export class ApmConfiguration {
     }
 
     return baseConfig;
+  }
+
+  public isUsersRedactionEnabled(): boolean {
+    const { redactUsers = true } = this.getConfigFromKibanaConfig();
+    return redactUsers;
   }
 
   private getBaseConfig() {
@@ -288,7 +292,8 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const { servicesOverrides, ...configFromKibanaConfig } = this.getConfigFromKibanaConfig();
+    const { servicesOverrides, redactUsers, ...configFromKibanaConfig } =
+      this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
     const config = merge({}, configFromKibanaConfig, configFromEnv);
 

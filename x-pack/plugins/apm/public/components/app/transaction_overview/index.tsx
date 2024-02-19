@@ -6,9 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isServerlessAgentName } from '../../../../common/agent_name';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -55,6 +56,15 @@ export function TransactionOverview() {
     false
   );
 
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
+
+  useEffect(() => {
+    return setScreenContext({
+      screenDescription: `The user is looking at the transactions overview for ${serviceName}, and the transaction type is ${transactionType}`,
+    });
+  }, [setScreenContext, serviceName, transactionType]);
+
   return (
     <>
       {!sloCalloutDismissed && (
@@ -91,7 +101,7 @@ export function TransactionOverview() {
       <EuiPanel hasBorder={true}>
         <TransactionsTable
           hideViewTransactionsLink
-          numberOfTransactionsPerPage={25}
+          numberOfTransactionsPerPage={10}
           showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kuery}

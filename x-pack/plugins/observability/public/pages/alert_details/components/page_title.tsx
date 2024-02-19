@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import React from 'react';
 import {
   EuiFlexGroup,
@@ -18,21 +19,18 @@ import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  AlertStatus,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import moment from 'moment';
 import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
-import { ExperimentalBadge } from '../../../components/experimental_badge';
+import { BetaBadge, ExperimentalBadge } from '../../../components/experimental_badge';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -40,6 +38,7 @@ import {
 
 export interface PageTitleProps {
   alert: TopAlert | null;
+  alertStatus?: AlertStatus;
   dataTestSubj: string;
 }
 
@@ -53,7 +52,7 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
-export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
+export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
@@ -62,25 +61,24 @@ export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 
+  const showBetaBadge = alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID;
+
   return (
     <div data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
         {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
         {showExperimentalBadge && <ExperimentalBadge />}
+        {showBetaBadge && <BetaBadge />}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
-          <AlertLifecycleStatusBadge
-            alertStatus={
-              alert.fields[ALERT_STATUS] === 'active'
-                ? ALERT_STATUS_ACTIVE
-                : alert.fields[ALERT_STATUS] === 'recovered'
-                ? ALERT_STATUS_RECOVERED
-                : ALERT_STATUS_UNTRACKED
-            }
-            flapping={alert.fields[ALERT_FLAPPING]}
-          />
+          {alertStatus && (
+            <AlertLifecycleStatusBadge
+              alertStatus={alertStatus}
+              flapping={alert.fields[ALERT_FLAPPING]}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">

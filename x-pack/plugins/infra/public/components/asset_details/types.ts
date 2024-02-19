@@ -60,9 +60,10 @@ export type RenderMode = FlyoutProps | FullPageProps;
 export interface Tab {
   id: ContentTabIds;
   name: string;
+  append?: JSX.Element;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
+export type LinkOptions = 'alertRule' | 'nodeDetails';
 
 export interface AssetDetailsProps {
   assetId: string;

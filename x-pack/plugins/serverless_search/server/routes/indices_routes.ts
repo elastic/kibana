@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
+import { fetchIndex } from '../lib/indices/fetch_index';
 import { RouteDependencies } from '../plugin';
 
 export const registerIndicesRoutes = ({ router, security }: RouteDependencies) => {
@@ -72,6 +73,27 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
         },
         headers: { 'content-type': 'application/json' },
       });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/index/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const body = await fetchIndex(client.asCurrentUser, request.params.indexName);
+      return body
+        ? response.ok({
+            body,
+            headers: { 'content-type': 'application/json' },
+          })
+        : response.notFound();
     }
   );
 

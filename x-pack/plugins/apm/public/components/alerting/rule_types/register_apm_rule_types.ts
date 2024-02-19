@@ -19,6 +19,7 @@ import {
   transactionDurationMessage,
   transactionErrorRateMessage,
 } from '../../../../common/rules/default_action_message';
+import { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -147,14 +148,30 @@ export function registerApmRuleTypes(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    ruleParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_rule_type')
-    ),
-    validate: () => ({
-      errors: [],
-    }),
+    ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
+    validate: validateAnomalyRule,
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
     priority: 90,
   });
+}
+
+function validateAnomalyRule(ruleParams: AlertParams) {
+  const validationResult = { errors: {} };
+  const errors: {
+    anomalyDetectorTypes?: string;
+  } = {};
+  validationResult.errors = errors;
+  if (
+    ruleParams.anomalyDetectorTypes &&
+    ruleParams.anomalyDetectorTypes.length < 1
+  ) {
+    errors.anomalyDetectorTypes = i18n.translate(
+      'xpack.apm.validateAnomalyRule.',
+      {
+        defaultMessage: 'At least one detector type is required',
+      }
+    );
+  }
+  return validationResult;
 }

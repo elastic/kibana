@@ -25,6 +25,22 @@ const nullColumnarViewModel = {
   size1: new Float32Array(),
 };
 
+interface ComparisonNode {
+  FileID: string;
+  FrameType: number;
+  ExeFileName: string;
+  AddressOrLine: number;
+  FunctionName: string;
+  SourceFileName: string;
+  SourceLine: number;
+  CountInclusive: number;
+  CountExclusive: number;
+  SelfAnnualCO2Kgs: number;
+  TotalAnnualCO2Kgs: number;
+  SelfAnnualCostUSD: number;
+  TotalAnnualCostUSD: number;
+}
+
 export function getFlamegraphModel({
   primaryFlamegraph,
   comparisonFlamegraph,
@@ -46,11 +62,10 @@ export function getFlamegraphModel({
 }): {
   key: string;
   viewModel: ColumnarViewModel;
-  comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }>;
+  comparisonNodesById: Record<string, ComparisonNode>;
   legendItems: Array<{ label: string; color: string }>;
 } {
-  const comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }> =
-    {};
+  const comparisonNodesById: Record<string, ComparisonNode> = {};
 
   if (!primaryFlamegraph || !primaryFlamegraph.Label || primaryFlamegraph.Label.length === 0) {
     return {
@@ -97,6 +112,17 @@ export function getFlamegraphModel({
 
     comparisonFlamegraph.ID.forEach((nodeID, index) => {
       comparisonNodesById[nodeID] = {
+        FileID: comparisonFlamegraph.FileID[index],
+        FrameType: comparisonFlamegraph.FrameType[index],
+        ExeFileName: comparisonFlamegraph.ExeFilename[index],
+        AddressOrLine: comparisonFlamegraph.AddressOrLine[index],
+        FunctionName: comparisonFlamegraph.FunctionName[index],
+        SourceFileName: comparisonFlamegraph.SourceFilename[index],
+        SourceLine: comparisonFlamegraph.SourceLine[index],
+        SelfAnnualCO2Kgs: comparisonFlamegraph.SelfAnnualCO2KgsItems[index],
+        TotalAnnualCO2Kgs: comparisonFlamegraph.TotalAnnualCO2KgsItems[index],
+        SelfAnnualCostUSD: comparisonFlamegraph.SelfAnnualCostsUSDItems[index],
+        TotalAnnualCostUSD: comparisonFlamegraph.TotalAnnualCostsUSDItems[index],
         CountInclusive: comparisonFlamegraph.CountInclusive[index],
         CountExclusive: comparisonFlamegraph.CountExclusive[index],
       };

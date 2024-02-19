@@ -54,10 +54,10 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
     NO_DATA: useEuiBackgroundColor('subdued'),
   };
 
-  return colors[status ?? 'NO_DATA'];
+  return { cardColor: colors[status ?? 'NO_DATA'], colors };
 };
 
-const getSubTitle = (slo: SLOWithSummaryResponse) => {
+export const getSubTitle = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
 };
 
@@ -162,16 +162,18 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
 
 export function SloCardChart({
   slo,
+  onClick,
   historicalSliData,
 }: {
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
+  onClick?: () => void;
 }) {
   const {
     application: { navigateToUrl },
   } = useKibana().services;
 
-  const cardColor = useSloCardColor(slo.summary.status);
+  const { cardColor } = useSloCardColor(slo.summary.status);
   const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
 
@@ -181,8 +183,12 @@ export function SloCardChart({
         // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
         baseTheme={LEGACY_DARK_THEME}
         onElementClick={([d]) => {
-          if (isMetricElementEvent(d)) {
-            navigateToUrl(sloDetailsUrl);
+          if (onClick) {
+            onClick();
+          } else {
+            if (isMetricElementEvent(d)) {
+              navigateToUrl(sloDetailsUrl);
+            }
           }
         }}
         locale={i18n.getLocale()}

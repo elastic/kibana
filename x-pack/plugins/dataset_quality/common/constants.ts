@@ -6,6 +6,14 @@
  */
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
+export const DEFAULT_DATASET_TYPE = 'logs';
 
 export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
 export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
+
+export const DEFAULT_SORT_FIELD = 'title';
+export const DEFAULT_SORT_DIRECTION = 'asc';
+
+export const NONE = 'none';
+
+export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
