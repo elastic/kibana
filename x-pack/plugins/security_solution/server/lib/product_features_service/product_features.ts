@@ -12,14 +12,14 @@ import type {
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type {
-  AppFeaturesConfig,
+  ProductFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
 } from '@kbn/security-solution-features';
-import { AppFeaturesConfigMerger } from './app_features_config_merger';
+import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
-export class AppFeatures<T extends string = string, S extends string = string> {
-  private featureConfigMerger: AppFeaturesConfigMerger;
+export class ProductFeatures<T extends string = string, S extends string = string> {
+  private featureConfigMerger: ProductFeaturesConfigMerger;
   private featuresSetup?: FeaturesPluginSetup;
   private readonly registeredActions: Set<string>;
 
@@ -29,7 +29,7 @@ export class AppFeatures<T extends string = string, S extends string = string> {
     private readonly baseKibanaFeature: BaseKibanaFeatureConfig,
     private readonly baseKibanaSubFeatureIds: T[]
   ) {
-    this.featureConfigMerger = new AppFeaturesConfigMerger(this.logger, subFeaturesMap);
+    this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
     this.registeredActions = new Set();
   }
 
@@ -37,22 +37,22 @@ export class AppFeatures<T extends string = string, S extends string = string> {
     this.featuresSetup = featuresSetup;
   }
 
-  public setConfig(appFeatureConfig: AppFeaturesConfig<S>) {
+  public setConfig(productFeatureConfig: ProductFeaturesConfig<S>) {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
       );
     }
 
-    const completeAppFeatureConfig = this.featureConfigMerger.mergeAppFeatureConfigs(
+    const completeProductFeatureConfig = this.featureConfigMerger.mergeProductFeatureConfigs(
       this.baseKibanaFeature,
       this.baseKibanaSubFeatureIds,
-      Array.from(appFeatureConfig.values())
+      Array.from(productFeatureConfig.values())
     );
 
-    this.logger.debug(JSON.stringify(completeAppFeatureConfig));
-    this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
-    this.addRegisteredActions(completeAppFeatureConfig);
+    this.logger.debug(JSON.stringify(completeProductFeatureConfig));
+    this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
+    this.addRegisteredActions(completeProductFeatureConfig);
   }
 
   private addRegisteredActions(config: KibanaFeatureConfig) {

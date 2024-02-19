@@ -14,10 +14,10 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
-import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
@@ -81,7 +81,7 @@ export interface ManifestManagerContext {
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
-  appFeaturesService: AppFeaturesService;
+  productFeaturesService: ProductFeaturesService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -103,7 +103,7 @@ export class ManifestManager {
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
-  protected appFeaturesService: AppFeaturesService;
+  protected productFeaturesService: ProductFeaturesService;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -117,7 +117,7 @@ export class ManifestManager {
     this.packagerTaskPackagePolicyUpdateBatchSize =
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
-    this.appFeaturesService = context.appFeaturesService;
+    this.productFeaturesService = context.productFeaturesService;
   }
 
   /**
@@ -151,9 +151,9 @@ export class ManifestManager {
       let itemsByListId: ExceptionListItemSchema[] = [];
       if (
         (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.appFeaturesService.isEnabled(AppFeatureKey.endpointResponseActions)) ||
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointResponseActions)) ||
         (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.appFeaturesService.isEnabled(AppFeatureKey.endpointArtifactManagement))
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
       ) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
