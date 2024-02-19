@@ -591,7 +591,7 @@ The resulting values for `immutable` and `external_source` when calling these en
 <table>
   <thead>
     <tr>
-      <th>Use case</th>
+      <th>Migration use case</th>
       <th>Current value of <pre>external_source</pre></th>
       <th>Current value of <pre>rule_source_type</pre></th>
       <th>Current value of <pre>immutable</pre></th>
@@ -601,7 +601,7 @@ The resulting values for `immutable` and `external_source` when calling these en
   </thead>
   <tbody>
     <tr>
-      <td>Migrating a <b>custom rule</b> (not migrated yet)</td>
+      <td><b>Custom rule</b> (not migrated yet)</td>
       <td>
         <pre>undefined</pre>
       </td>
@@ -613,14 +613,14 @@ The resulting values for `immutable` and `external_source` when calling these en
       <td>
         <pre>
           {
+            rule_source_type: 'internal',
             immutable: false,
-            rule_source_type: 'internal'
           }
         </pre>
       </td>
     </tr>
     <tr>
-      <td>Migrating a <b>custom rule</b> (already migrated)</td>
+      <td><b>Custom rule</b> (already migrated)</td>
       <td>
         <pre>undefined</pre>
       </td>
@@ -632,24 +632,72 @@ The resulting values for `immutable` and `external_source` when calling these en
       <td>
         <pre>
           {
+            rule_source_type: 'internal',
             immutable: false,
-            rule_source_type: 'internal'
           }
         </pre>
       </td>
     </tr>
     <tr>
-      <td>Migrating a non yet migrated prebuilt rule, no customizations</td>
+      <td><b>Prebuilt rule</b> (not yet migrated, no customizations)</td>
       <td>
         <pre>undefined</pre>
       </td>
+      <td><pre>undefined</pre></td>
       <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
           {
+            rule_source_type: 'external',
             external_source: {
-              repoName: 'elastic_prebuilt',
+              isCustomized: false,
+              ...
+            },
+            immutable: true,
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td><b>Prebuilt rule</b> (not yet migrated, with customizations)</td>
+      <td>
+        <pre>undefined</pre>
+      </td>
+      <td><pre>undefined</pre></td>
+      <td><pre>true</pre></td>
+      <td>Yes</td>
+      <td>
+        <pre>
+          {
+            rule_source_type: 'external',
+            external_source: {
+              isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td><b>Prebuilt rule</b> (already migrated, no customizations)</td>
+      <td>
+        <pre> 
+          {
+            isCustomized: false,
+              ...
+          }
+          </pre>
+      </td>
+      <td><pre>'external'</pre></td>
+      <td><pre>true</pre></td>
+      <td>No</td>
+      <td>
+        <pre>
+          {
+            rule_source_type: 'external',
+            external_source: {
               isCustomized: false,
               ...
             },
@@ -659,15 +707,23 @@ The resulting values for `immutable` and `external_source` when calling these en
       </td>
     </tr>
     <tr>
-      <td>Migrating a non yet migrated prebuilt rule, with customizations</td>
+      <td><b>Prebuilt rule</b> (already migrated, with customizations)</td>
       <td>
-        <pre>undefined</pre>
+        <pre> 
+          {
+            repoName: 'elastic_prebuilt',
+            isCustomized: true,
+              ...
+          }
+          </pre>
       </td>
+      <td><pre>'external'</pre></td>
       <td><pre>true</pre></td>
       <td>Yes</td>
       <td>
         <pre>
           {
+            rule_source_type: 'external',
             external_source: {
               repoName: 'elastic_prebuilt',
               isCustomized: true,
@@ -679,23 +735,23 @@ The resulting values for `immutable` and `external_source` when calling these en
       </td>
     </tr>
     <tr>
-      <td>Migrating a migrated non-customized prebuilt rule, no customizations</td>
+      <td><i>Customized</i> <b>Prebuilt rule</b> (already migrated, no new customizations)</td>
       <td>
         <pre> 
           {
-            repoName: 'elastic_prebuilt',
-            isCustomized: false,
+            isCustomized: true,
               ...
           }
           </pre>
       </td>
+      <td><pre>'external'</pre></td>
       <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
           {
+            rule_source_type: 'external',
             external_source: {
-              repoName: 'elastic_prebuilt',
               isCustomized: false,
               ...
             },
@@ -705,59 +761,7 @@ The resulting values for `immutable` and `external_source` when calling these en
       </td>
     </tr>
     <tr>
-      <td>Migrating a migrated customized prebuilt rule, with customizations</td>
-      <td>
-        <pre> 
-          {
-            repoName: 'elastic_prebuilt',
-            isCustomized: true,
-              ...
-          }
-          </pre>
-      </td>
-      <td><pre>true</pre></td>
-      <td>Yes</td>
-      <td>
-        <pre>
-          {
-            external_source: {
-              repoName: 'elastic_prebuilt',
-              isCustomized: true,
-              ...
-            },
-            immutable: true
-          }
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>Migrating a migrated customized prebuilt rule, no customizations</td>
-      <td>
-        <pre> 
-          {
-            repoName: 'elastic_prebuilt',
-            isCustomized: true,
-              ...
-          }
-          </pre>
-      </td>
-      <td><pre>true</pre></td>
-      <td>No</td>
-      <td>
-        <pre>
-          {
-            external_source: {
-              repoName: 'elastic_prebuilt',
-              isCustomized: false,
-              ...
-            },
-            immutable: true
-          }
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>Invalid case: Migrating a migrated non-customized prebuilt rule, with customizations. <br><br> `immutable` should never be false if `external_source` is defined. Migration should correct this inconsistency.</td>
+      <td>Invalid case: Migrating a migrated non-customized prebuilt rule, with customizations. <br><br> `immutable` should never be false if `rule_source_type` is 'internal' or `external_source` is defined. Migration should correct this inconsistency.</td>
       <td>
         <pre> 
           {
@@ -767,13 +771,14 @@ The resulting values for `immutable` and `external_source` when calling these en
           }
           </pre>
       </td>
+      <td><pre>'internal'</pre></td>
       <td><pre>false</pre></td>
       <td>Yes</td>
       <td>
         <pre>
           {
+            rule_source_type: 'external',
             external_source: {
-              repoName: 'elastic_prebuilt',
               isCustomized: true,
               ...
             },
@@ -838,15 +843,13 @@ _See source of rule params keys: [x-pack/plugins/security_solution/common/detect
 
 Will need to update the `x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts` file, where the `convertRulesFilterToKQL` method is defined. This method is used both in the frontend and in the serverside, and translates rule filter options to KQL filters that Elasticsearch can understand.
 
-Here, we need to update the KQL filters and the logic for fetching Elastic prebuilt and custom rules, relying on `external_rules` but with fallback to `immutable`:
+Here, we need to update the KQL filters and the logic for fetching Elastic prebuilt and custom rules, relying on `rule_source_type` but with fallback to `immutable`:
 
 _Source for `convertRulesFilterToKQL`: [x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts)_
 
-In order to retrieve rules in which the `alert.attributes.params.external_source` field exists, we must rely instead on the existence of `alert.attributes.params.external_source.repo_name`. This is so because  KQL syntax does not allow searching for the existence of an object like `external_source` with the recommended syntax `alert.attributes.params.external_source: *`.
+In order to retrieve Elastic prebuilt rules, we can filter for rules in which `alert.attributes.params.rule_source_type` is `external`, with a fallback to rules in which `alert.attributes.params.immutable` is `true`, for rules which have not had their schema migrated and `rule_source_type` does not still exists for them.
 
-But we can use the `external_source` field's `repo_name` subfield instead, which will always exist within the object (it is required) and replace the KQL filter for `alert.attributes.params.external_source.repo_name: *`. 
-
-This will allow us to retrieve all rules that originate from an external source, or conditionally, from a specific source. For example, using the filter `alert.attributes.params.external_source.repo_name: elastic_prebuilt` should return only prebuilt rules created by Elastic.
+> In the future, we can further distinguish between `external` rules by their source origin. If we introduce a new field within `external_source` that defines their origin (such as `repo_name`, `repo_id`, or similar), we can further filter by Elastic prebuilt rules, or rules that are externally sourced from a repository handled by the user, etc.
 
 ### Rule Management endpoints
 
