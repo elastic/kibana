@@ -74,3 +74,20 @@ export const SMART_FALLBACK_FIELDS = {
 // UI preferences
 export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
 export const DEFAULT_ROWS_PER_PAGE = 100;
+
+// List of prefixes which needs to be filtered out for Display in Content Column
+export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
+  '_', // Filter fields like '_id', '_score'
+  '@timestamp',
+  'agent.',
+  'elastic_agent.',
+  'data_stream.',
+  'ecs.',
+  'host.',
+  'container.',
+  'cloud.',
+  'kubernetes.',
+  'orchestrator.',
+  'log.',
+  'service.',
+];

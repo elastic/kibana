@@ -16,24 +16,27 @@ export const initApm = (
 ) => {
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
   const apmConfig = apmConfigLoader.getConfig(serviceName);
+  const shouldRedactUsers = apmConfigLoader.isUsersRedactionEnabled();
 
   // we want to only load the module when effectively used
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const apm = require('elastic-apm-node');
 
   // Filter out all user PII
-  apm.addFilter((payload: Record<string, any>) => {
-    try {
-      if (payload.context?.user && typeof payload.context.user === 'object') {
-        Object.keys(payload.context.user).forEach((key) => {
-          payload.context.user[key] = '[REDACTED]';
-        });
+  if (shouldRedactUsers) {
+    apm.addFilter((payload: Record<string, any>) => {
+      try {
+        if (payload.context?.user && typeof payload.context.user === 'object') {
+          Object.keys(payload.context.user).forEach((key) => {
+            payload.context.user[key] = '[REDACTED]';
+          });
+        }
+      } catch (e) {
+        // just silently ignore the error
       }
-    } catch (e) {
-      // just silently ignore the error
-    }
-    return payload;
-  });
+      return payload;
+    });
+  }
 
   apm.start(apmConfig);
 };
