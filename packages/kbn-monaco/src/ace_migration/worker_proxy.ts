@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ParseResult } from './grammar';
 import { monaco } from '../monaco_imports';
-import { ConsoleWorker } from './worker';
-import { CONSOLE_LANG_ID } from './constants';
+import { ParserWorker, ParseResult } from './types';
 
-export class WorkerProxyService {
-  private worker: monaco.editor.MonacoWebWorker<ConsoleWorker> | undefined;
+export class WorkerProxyService<IWorker extends ParserWorker> {
+  private worker: monaco.editor.MonacoWebWorker<IWorker> | undefined;
 
   public async getAnnos(modelUri: monaco.Uri): Promise<ParseResult | undefined> {
     if (!this.worker) {
@@ -23,8 +21,8 @@ export class WorkerProxyService {
     return proxy.parse(modelUri.toString());
   }
 
-  public setup() {
-    this.worker = monaco.editor.createWebWorker({ label: CONSOLE_LANG_ID, moduleId: '' });
+  public setup(langId: string) {
+    this.worker = monaco.editor.createWebWorker({ label: langId, moduleId: '' });
   }
 
   public stop() {

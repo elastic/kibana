@@ -6,58 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ConsoleWorker } from './worker';
+import { WorkerProxyService } from '../ace_migration/worker_proxy';
 import { monaco } from '../monaco_imports';
 import { CONSOLE_LANG_ID } from './constants';
-import { WorkerProxyService } from './worker_proxy_service';
+import { setupWorker } from '../ace_migration/setup_worker';
 
 const OWNER = 'CONSOLE_GRAMMAR_CHECKER';
-
+const wps = new WorkerProxyService<ConsoleWorker>();
 monaco.languages.onLanguage(CONSOLE_LANG_ID, async () => {
-  const wps = new WorkerProxyService();
-
-  wps.setup();
-
-  const updateAnnotations = async (model: monaco.editor.IModel): Promise<void> => {
-    if (model.isDisposed()) {
-      return;
-    }
-    const parseResult = await wps.getAnnos(model.uri);
-    if (!parseResult) {
-      return;
-    }
-    const { annotations } = parseResult;
-    monaco.editor.setModelMarkers(
-      model,
-      OWNER,
-      annotations.map(({ at, text, type }) => {
-        const { column, lineNumber } = model.getPositionAt(at);
-        return {
-          startLineNumber: lineNumber,
-          startColumn: column,
-          endLineNumber: lineNumber,
-          endColumn: column,
-          message: text,
-          severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
-        };
-      })
-    );
-  };
-
-  const onModelAdd = (model: monaco.editor.IModel) => {
-    if (model.getLanguageId() !== CONSOLE_LANG_ID) {
-      return;
-    }
-
-    const { dispose } = model.onDidChangeContent(async () => {
-      updateAnnotations(model);
-    });
-
-    model.onWillDispose(() => {
-      dispose();
-    });
-
-    updateAnnotations(model);
-  };
-
-  monaco.editor.onDidCreateModel(onModelAdd);
+  setupWorker(CONSOLE_LANG_ID, OWNER, wps);
 });

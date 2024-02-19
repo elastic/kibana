@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createParser } from './parser';
-export { createParser } from './parser';
-
 export enum AnnoTypes {
   error = 'error',
   warning = 'warning',
 }
-
-export type Parser = ReturnType<typeof createParser>;
 
 export interface Annotation {
   name?: string;
@@ -25,4 +20,10 @@ export interface Annotation {
 
 export interface ParseResult {
   annotations: Annotation[];
+}
+
+export type Parser = (source: string) => ParseResult;
+
+export interface ParserWorker {
+  parse: (model: string) => Promise<ParseResult | undefined>;
 }
