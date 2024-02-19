@@ -928,8 +928,9 @@ export class Embeddable
       this.indexPatterns = indexPatterns;
       this.indexPatternRefs = indexPatternRefs;
       this.activeVisualizationState = activeVisualizationState;
-    } catch {
+    } catch (e) {
       // nothing, errors should be reported via getUserMessages
+      console.log(e);
     }
 
     if (metaInfo?.sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {

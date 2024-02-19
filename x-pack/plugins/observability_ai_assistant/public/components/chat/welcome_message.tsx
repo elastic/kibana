@@ -47,11 +47,7 @@ export function WelcomeMessage({
 
   const {
     application: { navigateToApp, capabilities },
-    plugins: {
-      start: {
-        triggersActionsUi: { getAddConnectorFlyout: ConnectorFlyout },
-      },
-    },
+    plugins: { start },
   } = useKibana().services;
 
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
@@ -122,7 +118,7 @@ export function WelcomeMessage({
       </EuiFlexGroup>
 
       {connectorFlyoutOpen ? (
-        <ConnectorFlyout
+        <start.triggersActionsUi.getAddConnectorFlyout
           featureId={GenerativeAIForObservabilityConnectorFeatureId}
           onConnectorCreated={onConnectorCreated}
           onClose={() => setConnectorFlyoutOpen(false)}

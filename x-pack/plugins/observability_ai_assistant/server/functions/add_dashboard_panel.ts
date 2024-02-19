@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ESQLSearchReponse } from '@kbn/es-types';
+import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import { FunctionRegistrationParameters } from '.';
 
 export function registerAddPanelToDashboardFunction({
@@ -15,7 +17,7 @@ export function registerAddPanelToDashboardFunction({
     {
       name: 'add_dashboard_panel',
       contexts: ['dashboards'],
-      description: `Use this function to add a panel to current dashboard. You should provide same configuration as you would to lens function to render a chart except that this will add a panel to current dashboard.`,
+      description: `Use this function to add a panel to current dashboard. You should extract the lens attributes from the visualize_esql function.`,
       descriptionForUser: 'This function allows the assistant to add a panel to current dashboard.',
       parameters: {
         type: 'object',
@@ -23,19 +25,30 @@ export function registerAddPanelToDashboardFunction({
         properties: {
           config: {
             type: 'string',
-            description:
-              'stringified json of a configuration that would be provided to lens function',
+            description: 'lens attributes of the chart',
           },
         },
         required: ['config'],
       } as const,
     },
     async ({ arguments: { config } }) => {
+      const coreContext = await resources.context.core;
+
+      // @ts-ignore
       window._dashboardAPI.addNewEmbeddable('lens', {
         id: undefined,
-        attributes: config,
+        attributes: {
+          type: 'lens',
+          ...JSON.parse(config),
+        },
       });
-
+      // window._dashboardAPI.addNewPanel({
+      //   panelType: 'lens',
+      //   initialState: {
+      //     attributes: JSON.parse(config),
+      //     id: 'custom',
+      //   },
+      // });
       return {
         content: {},
       };
