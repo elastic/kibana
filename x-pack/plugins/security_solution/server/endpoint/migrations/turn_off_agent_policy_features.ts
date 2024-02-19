@@ -6,27 +6,27 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
 export const turnOffAgentPolicyFeatures = async (
   fleetServices: EndpointInternalFleetServicesInterface,
-  appFeaturesService: AppFeaturesService,
+  productFeaturesService: ProductFeaturesService,
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('endpoint', 'agentPolicyFeatures');
 
-  if (appFeaturesService.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)) {
+  if (productFeaturesService.isEnabled(ProductFeatureSecurityKey.endpointAgentTamperProtection)) {
     log.info(
-      `App feature [${AppFeatureSecurityKey.endpointAgentTamperProtection}] is enabled. Nothing to do!`
+      `App feature [${ProductFeatureSecurityKey.endpointAgentTamperProtection}] is enabled. Nothing to do!`
     );
 
     return;
   }
 
   log.info(
-    `App feature [${AppFeatureSecurityKey.endpointAgentTamperProtection}] is disabled. Checking fleet agent policies for compliance`
+    `App feature [${ProductFeatureSecurityKey.endpointAgentTamperProtection}] is disabled. Checking fleet agent policies for compliance`
   );
 
   const { agentPolicy: agentPolicyService, internalSoClient } = fleetServices;
