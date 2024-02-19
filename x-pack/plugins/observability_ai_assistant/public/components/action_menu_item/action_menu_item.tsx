@@ -71,7 +71,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
           setIsOpen(() => true);
         }}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             {!isOpen || chatService.value ? (
               <AssistantAvatar size="xs" />
