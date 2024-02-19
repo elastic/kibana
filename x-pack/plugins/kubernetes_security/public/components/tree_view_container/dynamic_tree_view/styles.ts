@@ -54,6 +54,10 @@ export const useStyles = (depth: number) => {
         marginLeft: '0 !important',
         fontSize: 'inherit',
       },
+      // Override default EUI max-height - `DynamicTreeView` has its own scrolling container
+      '.euiTreeView__node': {
+        maxBlockSize: 'none',
+      },
     };
 
     return {
