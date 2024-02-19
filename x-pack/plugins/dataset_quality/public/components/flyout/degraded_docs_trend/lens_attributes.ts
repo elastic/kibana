@@ -8,11 +8,11 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-import { DEFAULT_LOGS_DATA_VIEW } from '../../../common/constants';
+import { DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
 import {
-  flyoutDegradedDocsPercentage,
-  flyoutMalformedDocsTrend,
-} from '../../../common/translations';
+  flyoutDegradedDocsPercentageText,
+  flyoutDegradedDocsTrendText,
+} from '../../../../common/translations';
 
 const defaultDataView = {
   id: `${DEFAULT_LOGS_DATA_VIEW}-id`,
@@ -23,7 +23,7 @@ const defaultDataView = {
 export function getLensAttributes(color: string, dataView: DataView = defaultDataView) {
   return {
     visualizationType: 'lnsXY',
-    title: flyoutMalformedDocsTrend,
+    title: flyoutDegradedDocsTrendText,
     references: [
       {
         id: dataView.id!,
@@ -104,7 +104,7 @@ export function getLensAttributes(color: string, dataView: DataView = defaultDat
                   customLabel: true,
                 },
                 col2: {
-                  label: flyoutDegradedDocsPercentage,
+                  label: flyoutDegradedDocsPercentageText,
                   customLabel: true,
                   operationType: 'formula',
                   dataType: 'number',

@@ -21,7 +21,7 @@ import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
-import { MalformedDocs } from './malformed_docs';
+import { DegradedDocs } from './degraded_docs_trend/degraded_docs';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -34,7 +34,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
       <>
         <Header dataStreamStat={dataset} />
         <EuiFlyoutBody>
-          <MalformedDocs dataStream={dataStreamStat?.rawName} timeRange={timeRange} />
+          <DegradedDocs dataStream={dataStreamStat?.rawName} timeRange={timeRange} />
 
           <EuiSpacer />
 

@@ -20,9 +20,11 @@ import {
   EuiIcon,
   EuiCode,
 } from '@elastic/eui';
-import { TimeRangeConfig } from '../../state_machines/dataset_quality_controller';
-import { useDatasetQualityContext } from '../dataset_quality/context';
-import { MalformedDocsTrend } from './malformed_docs_trend';
+
+import { flyoutDegradedDocsText } from '../../../../common/translations';
+import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { useDatasetQualityContext } from '../../dataset_quality/context';
+import { DegradedDocsChart } from './degraded_docs_chart';
 
 const DEFAULT_TIME_RANGE: TimeRangeConfig = {
   from: 'now-24h',
@@ -30,7 +32,7 @@ const DEFAULT_TIME_RANGE: TimeRangeConfig = {
   refresh: { interval: 60_000, isPaused: false },
 };
 
-export function MalformedDocs({
+export function DegradedDocs({
   dataStream,
   timeRange = DEFAULT_TIME_RANGE,
 }: {
@@ -71,14 +73,9 @@ export function MalformedDocs({
           gutterSize="xs"
         >
           <EuiTitle size="s">
-            <EuiText>
-              <FormattedMessage
-                id="xpack.datasetQuality.flyout.malformedDocsTitle"
-                defaultMessage="Malformed docs"
-              />
-            </EuiText>
+            <EuiText>{flyoutDegradedDocsText}</EuiText>
           </EuiTitle>
-          <EuiToolTip content={malformedDocsTooltip}>
+          <EuiToolTip content={degradedDocsTooltip}>
             <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </EuiToolTip>
         </EuiFlexGroup>
@@ -103,7 +100,7 @@ export function MalformedDocs({
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer />
-      <MalformedDocsTrend
+      <DegradedDocsChart
         dataStream={dataStream}
         timeRange={timeRange}
         lastReloadTime={lastReloadTime}
@@ -112,9 +109,9 @@ export function MalformedDocs({
   );
 }
 
-const malformedDocsTooltip = (
+const degradedDocsTooltip = (
   <FormattedMessage
-    id="xpack.datasetQuality.flyoutMalformedDocsTooltip"
+    id="xpack.datasetQuality.flyoutDegradedDocsTooltip"
     defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset."
     values={{
       ignoredProperty: (

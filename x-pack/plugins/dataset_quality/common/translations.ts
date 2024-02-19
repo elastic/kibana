@@ -88,14 +88,21 @@ export const flyoutIntegrationNameText = i18n.translate(
   }
 );
 
-export const flyoutMalformedDocsTrend = i18n.translate(
-  'xpack.datasetQuality.flyoutMalformedDocsViz',
+export const flyoutDegradedDocsText = i18n.translate(
+  'xpack.datasetQuality.flyout.degradedDocsTitle',
   {
-    defaultMessage: 'Malformed documents trend',
+    defaultMessage: 'Degraded docs',
   }
 );
 
-export const flyoutDegradedDocsPercentage = i18n.translate(
+export const flyoutDegradedDocsTrendText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedDocsViz',
+  {
+    defaultMessage: 'Degraded documents trend',
+  }
+);
+
+export const flyoutDegradedDocsPercentageText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsPercentage',
   {
     defaultMessage: 'Degraded docs %',

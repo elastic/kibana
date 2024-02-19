@@ -22,16 +22,26 @@ export function useCreateDataView({ indexPatternString }: UseCreateDataViewProps
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const createDataView = () =>
-      dataViews.create({
+    const retrieveOrCreateDataView = async (indexPattern: string) => {
+      const existingDataView = await dataViews.getIdsWithTitle();
+      const foundDataView = existingDataView.find((dv) => dv.title === indexPattern);
+      if (foundDataView) {
+        return dataViews.get(foundDataView.id);
+      }
+
+      // Create an ad-hoc data view
+      return dataViews.create({
         id: `${indexPatternString}-id`,
         title: indexPatternString,
         allowNoIndex: true,
+        timeFieldName: '@timestamp',
       });
+    };
 
     if (indexPatternString) {
       setIsLoading(true);
-      createDataView()
+
+      retrieveOrCreateDataView(indexPatternString)
         .then((value) => {
           setStateDataView(value);
         })
