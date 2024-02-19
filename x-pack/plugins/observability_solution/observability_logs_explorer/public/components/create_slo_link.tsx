@@ -14,6 +14,7 @@ import { useActor } from '@xstate/react';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import { createSLoLabel } from '../../common/translations';
 import {
   ObservabilityLogsExplorerService,
@@ -63,11 +64,15 @@ export const CreateSloLinkForValidState = React.memo(
           params: {
             index: dataView.title,
             timestampField: dataView?.timeFieldName,
-            good:
+            filter:
               filters.length > 0
                 ? {
                     kqlQuery: query,
-                    filters,
+                    filters: getDiscoverFiltersFromState(
+                      dataView.id,
+                      logsExplorerState.filters,
+                      logsExplorerState.controls
+                    ),
                   }
                 : query,
           },
