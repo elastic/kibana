@@ -178,6 +178,21 @@ describe('output handler', () => {
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
+  it('should return ok on put elasticsearch output in serverless if host url is not passed', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+
+    const res = await putOutputHandler(
+      mockContext,
+      {
+        body: { type: 'elasticsearch', name: 'Renamed output' },
+        params: { outputId: 'output1' },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
   it('should return ok on put elasticsearch output in stateful if host url is different from default', async () => {
     jest
       .spyOn(appContextService, 'getCloud')

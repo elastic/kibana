@@ -38,7 +38,9 @@ import {
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingAzureCostDiscountRate,
   enableInfrastructureProfilingIntegration,
+  apmEnableTransactionProfiling,
   enableInfrastructureHostsCustomDashboards,
 } from '../common/ui_settings_keys';
 
@@ -526,7 +528,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
       defaultMessage: 'AWS EDP discount rate (%)',
     }),
-    value: 6,
+    value: '0',
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
     description: i18n.translate(
@@ -534,6 +536,22 @@ export const uiSettings: Record<string, UiSettings> = {
       {
         defaultMessage:
           "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
+      }
+    ),
+  },
+  [profilingAzureCostDiscountRate]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingAzureCostDiscountRateUiSettingName', {
+      defaultMessage: 'Azure discount rate (%)',
+    }),
+    value: '0',
+    schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+    description: i18n.translate(
+      'xpack.observability.profilingAzureCostDiscountRateUiSettingDescription',
+      {
+        defaultMessage:
+          'If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.',
       }
     ),
   },
@@ -546,10 +564,19 @@ export const uiSettings: Record<string, UiSettings> = {
     description: i18n.translate(
       'xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription',
       {
-        defaultMessage: `Default average cost per CPU core per hour (Non-AWS instances only)`,
+        defaultMessage: `Default Hourly Cost per CPU Core for machines not on AWS or Azure`,
       }
     ),
     schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+  },
+  [apmEnableTransactionProfiling]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
+      defaultMessage: 'Enable Universal Profiling on Transaction view',
+    }),
+    value: false,
+    schema: schema.boolean(),
     requiresPageReload: true,
   },
 };

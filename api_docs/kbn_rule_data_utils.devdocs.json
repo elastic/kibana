@@ -1459,7 +1459,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
+          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1603,6 +1603,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.LOG_THRESHOLD_ALERT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_THRESHOLD_ALERT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"logs.alert.document.count\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.MAX_CASES_PER_ALERT",
         "type": "number",
         "tags": [],
@@ -1687,6 +1702,21 @@
           "\"/rule/:ruleId\""
         ],
         "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SLO_BURN_RATE_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SLO_BURN_RATE_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"slo.rules.burnRate\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1804,7 +1834,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
+          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1853,7 +1883,7 @@
           "\nregistering a new instance of the rule data client\nin a new plugin will require updating the below data structure\nto include the index name where the alerts as data will be written to."
         ],
         "signature": [
-          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; }"
+          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; readonly MONITORING: \"monitoring\"; }"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { getCasesDeepLinks } from './deep_links';
 
 describe('getCasesDeepLinks', () => {
@@ -55,10 +54,10 @@ describe('getCasesDeepLinks', () => {
     const deepLinks = getCasesDeepLinks({
       extend: {
         cases: {
-          searchable: false,
+          visibleIn: [],
         },
         cases_create: {
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
         cases_configure: {
           order: 8002,
@@ -70,13 +69,13 @@ describe('getCasesDeepLinks', () => {
       id: 'cases',
       path: '/cases',
       title: 'Cases',
-      searchable: false,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'cases_create',
           path: '/cases/create',
           title: 'Create',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
         {
           id: 'cases_configure',

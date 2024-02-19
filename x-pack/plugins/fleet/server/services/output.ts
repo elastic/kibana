@@ -73,6 +73,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -1027,6 +1028,8 @@ class OutputService {
         }
       }
     }
+
+    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
