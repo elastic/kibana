@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { isEmpty } from 'lodash/fp';
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
   EuiText,
@@ -55,6 +54,11 @@ import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useAlertSuppression } from '../../logic/use_alert_suppression';
+import {
+  useFiltersStyles,
+  useQueryStyles,
+  useRequiredFieldsStyles,
+} from './rule_definition_section.styles';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -66,10 +70,6 @@ const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
   </EuiText>
 );
 
-const FiltersWidthLimiter = styled.div`
-  max-width: 600px;
-`;
-
 interface FiltersProps {
   filters: Filter[];
   dataViewId?: string;
@@ -78,39 +78,42 @@ interface FiltersProps {
 }
 
 const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }: FiltersProps) => {
+  const flattenedFilters = mapAndFlattenFilters(filters);
+
   const { indexPattern } = useRuleIndexPattern({
     dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
     index: index ?? [],
     dataViewId,
   });
 
-  const flattenedFilters = mapAndFlattenFilters(filters);
+  const styles = useFiltersStyles();
 
   return (
-    <FiltersWidthLimiter>
-      <EuiFlexGroup wrap={true} responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
-        <FilterItems
-          filters={flattenedFilters}
-          indexPatterns={[indexPattern as DataView]}
-          readOnly={true}
-        />
-      </EuiFlexGroup>
-    </FiltersWidthLimiter>
+    <EuiFlexGroup
+      data-test-subj={dataTestSubj}
+      className={styles.flexGroup}
+      wrap
+      responsive={false}
+      gutterSize="xs"
+    >
+      <FilterItems filters={flattenedFilters} indexPatterns={[indexPattern as DataView]} readOnly />
+    </EuiFlexGroup>
   );
 };
-
-const QueryContent = styled.div`
-  white-space: pre-wrap;
-`;
 
 interface QueryProps {
   query: string;
   'data-test-subj'?: string;
 }
 
-const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => (
-  <QueryContent data-test-subj={dataTestSubj}>{query}</QueryContent>
-);
+const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
+  const styles = useQueryStyles();
+  return (
+    <div data-test-subj={dataTestSubj} className={styles.content}>
+      {query}
+    </div>
+  );
+};
 
 interface IndexProps {
   index: string[];
@@ -246,42 +249,40 @@ const RuleType = ({ type }: RuleTypeProps) => (
   <EuiText size="s">{getRuleTypeDescription(type)}</EuiText>
 );
 
-const StyledFieldTypeText = styled(EuiText)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  display: inline;
-`;
-
 interface RequiredFieldsProps {
   requiredFields: RequiredFieldArray;
 }
 
-const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => (
-  <EuiFlexGrid gutterSize={'s'} data-test-subj="requiredFieldsPropertyValue">
-    {requiredFields.map((rF, index) => (
-      <EuiFlexItem grow={false} key={rF.name}>
-        <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
-          <EuiFlexItem grow={false}>
-            <FieldIcon
-              data-test-subj="field-type-icon"
-              type={castEsToKbnFieldTypeName(rF.type)}
-              label={rF.type}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StyledFieldTypeText
-              grow={false}
-              size={'s'}
-              data-test-subj="requiredFieldsPropertyValueItem"
-            >
-              {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
-            </StyledFieldTypeText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
-);
+const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
+  const styles = useRequiredFieldsStyles();
+  return (
+    <EuiFlexGrid data-test-subj="requiredFieldsPropertyValue" gutterSize={'s'}>
+      {requiredFields.map((rF, index) => (
+        <EuiFlexItem grow={false} key={rF.name}>
+          <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
+            <EuiFlexItem grow={false}>
+              <FieldIcon
+                data-test-subj="field-type-icon"
+                type={castEsToKbnFieldTypeName(rF.type)}
+                label={rF.type}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                data-test-subj="requiredFieldsPropertyValueItem"
+                className={styles.fieldTypeText}
+                grow={false}
+                size={'s'}
+              >
+                {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+  );
+};
 
 interface TimelineTitleProps {
   timelineTitle: string;
