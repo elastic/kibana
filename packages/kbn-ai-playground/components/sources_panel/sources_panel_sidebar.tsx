@@ -20,9 +20,9 @@ import { IndicesList } from './indices_list';
 import { AddIndicesField } from './add_indices_field';
 import { FieldsPanel } from './fields_panel';
 
-interface SourcesFlyoutProps {}
+interface SourcesPanelSidebarProps {}
 
-export const SourcesPanel: React.FC<SourcesFlyoutProps> = () => {
+export const SourcesPanelSidebar: React.FC<SourcesPanelSidebarProps> = () => {
   const accordionId = useGeneratedHtmlId({ prefix: 'sourceAccordion' });
   const indices = ['search-index', 'search-books'];
   const [selectedIndices, setSelectedIndices] = React.useState<string[]>([]);
