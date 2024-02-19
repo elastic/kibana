@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
@@ -38,10 +38,12 @@ import { AssetsAccordion } from './assets_accordion';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
+  refetchPackageInfo: () => void;
 }
 
-export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
+export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
+
   const pkgkey = `${name}-${version}`;
   const { spaces, docLinks } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
@@ -59,6 +61,12 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
 
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const forceRefreshAssets = useCallback(() => {
+    if (refetchPackageInfo) {
+      refetchPackageInfo();
+    }
+  }, [refetchPackageInfo]);
 
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
@@ -245,6 +253,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       <DeferredAssetsSection
         deferredInstallations={deferredInstallations}
         packageInfo={packageInfo}
+        forceRefreshAssets={forceRefreshAssets}
       />
       <EuiSpacer size="m" />
     </>
