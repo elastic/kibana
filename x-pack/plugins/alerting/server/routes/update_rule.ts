@@ -52,16 +52,22 @@ const bodySchema = schema.object({
       )
     )
   ),
+  alert_delay: schema.maybe(
+    schema.object({
+      active: schema.number(),
+    })
+  ),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, actions, ...rest } = result.data;
+  const { notify_when: notifyWhen, alert_delay: alertDelay, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
       actions: rewriteActionsReq(actions),
+      alertDelay,
     },
   };
 };
@@ -83,6 +89,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   isSnoozedUntil,
   lastRun,
   nextRun,
+  alertDelay,
   ...rest
 }) => ({
   ...rest,
@@ -115,6 +122,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export const updateRuleRoute = (

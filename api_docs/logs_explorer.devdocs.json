@@ -397,6 +397,28 @@
               ") | (",
               "WithDatasetSelection",
               " & ",
+              "WithControlPanels",
+              " & ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.QueryState",
+                "text": "QueryState"
+              },
+              " & ",
+              {
+                "pluginId": "logsExplorer",
+                "scope": "common",
+                "docId": "kibLogsExplorerPluginApi",
+                "section": "def-common.DisplayOptions",
+                "text": "DisplayOptions"
+              },
+              " & ",
+              "WithDiscoverStateContainer",
+              ") | (",
+              "WithDatasetSelection",
+              " & ",
               "WithControlPanelGroupAPI",
               " & ",
               "WithControlPanels",
@@ -519,6 +541,28 @@
               ") | (",
               "WithDatasetSelection",
               " & ",
+              "WithControlPanels",
+              " & ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.QueryState",
+                "text": "QueryState"
+              },
+              " & ",
+              {
+                "pluginId": "logsExplorer",
+                "scope": "common",
+                "docId": "kibLogsExplorerPluginApi",
+                "section": "def-common.DisplayOptions",
+                "text": "DisplayOptions"
+              },
+              " & ",
+              "WithDiscoverStateContainer",
+              ") | (",
+              "WithDatasetSelection",
+              " & ",
               "WithControlPanelGroupAPI",
               " & ",
               "WithControlPanels",
@@ -571,6 +615,35 @@
       },
       {
         "parentPluginId": "logsExplorer",
+        "id": "def-public.LogsExplorerCustomizationEvents",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogsExplorerCustomizationEvents",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-public.LogsExplorerCustomizationEvents.onUknownDataViewSelection",
+            "type": "Function",
+            "tags": [],
+            "label": "onUknownDataViewSelection",
+            "description": [],
+            "signature": [
+              "OnUknownDataViewSelectionHandler",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogsExplorerCustomizations",
         "type": "Interface",
         "tags": [],
@@ -599,6 +672,27 @@
                 "text": "LogsExplorerFlyoutContentProps"
               },
               "> | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-public.LogsExplorerCustomizations.events",
+            "type": "Object",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "logsExplorer",
+                "scope": "public",
+                "docId": "kibLogsExplorerPluginApi",
+                "section": "def-public.LogsExplorerCustomizationEvents",
+                "text": "LogsExplorerCustomizationEvents"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
@@ -801,6 +895,28 @@
           ") | (",
           "WithDatasetSelection",
           " & ",
+          "WithControlPanels",
+          " & ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.QueryState",
+            "text": "QueryState"
+          },
+          " & ",
+          {
+            "pluginId": "logsExplorer",
+            "scope": "common",
+            "docId": "kibLogsExplorerPluginApi",
+            "section": "def-common.DisplayOptions",
+            "text": "DisplayOptions"
+          },
+          " & ",
+          "WithDiscoverStateContainer",
+          ") | (",
+          "WithDatasetSelection",
+          " & ",
           "WithControlPanelGroupAPI",
           " & ",
           "WithControlPanels",
@@ -856,7 +972,7 @@
           },
           " & { controls: ",
           "ControlOptions",
-          "; datasetSelection: { selectionType: \"all\"; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
+          "; datasetSelection: { selectionType: \"all\"; } | { selectionType: \"dataView\"; selection: { dataView: { id: string; name: string; title: string; dataType: \"unknown\" | \"logs\"; } & { kibanaSpaces?: string[] | undefined; type?: string | undefined; }; }; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
           "Branded",
           "<string, ",
           "IndexPatternBrand",
@@ -896,7 +1012,7 @@
           },
           " & { controls?: ",
           "ControlOptions",
-          " | undefined; datasetSelection?: { selectionType: \"all\"; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
+          " | undefined; datasetSelection?: { selectionType: \"all\"; } | { selectionType: \"dataView\"; selection: { dataView: { id: string; name: string; title: string; dataType: \"unknown\" | \"logs\"; } & { kibanaSpaces?: string[] | undefined; type?: string | undefined; }; }; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
           "Branded",
           "<string, ",
           "IndexPatternBrand",
@@ -1358,7 +1474,7 @@
         "label": "hydrateDatasetSelection",
         "description": [],
         "signature": [
-          "(datasetSelection: { selectionType: \"all\"; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
+          "(datasetSelection: { selectionType: \"all\"; } | { selectionType: \"dataView\"; selection: { dataView: { id: string; name: string; title: string; dataType: \"unknown\" | \"logs\"; } & { kibanaSpaces?: string[] | undefined; type?: string | undefined; }; }; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
           "Branded",
           "<string, ",
           "IndexPatternBrand",
@@ -1383,7 +1499,9 @@
             "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.UnresolvedDatasetSelection",
             "text": "UnresolvedDatasetSelection"
-          }
+          },
+          " | ",
+          "DataViewSelection"
         ],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/hydrate_dataset_selection.ts.ts",
         "deprecated": false,
@@ -1397,7 +1515,7 @@
             "label": "datasetSelection",
             "description": [],
             "signature": [
-              "{ selectionType: \"all\"; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
+              "{ selectionType: \"all\"; } | { selectionType: \"dataView\"; selection: { dataView: { id: string; name: string; title: string; dataType: \"unknown\" | \"logs\"; } & { kibanaSpaces?: string[] | undefined; type?: string | undefined; }; }; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
               "Branded",
               "<string, ",
               "IndexPatternBrand",
@@ -1408,6 +1526,114 @@
               ">; } & { title?: string | undefined; }; }; }"
             ],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/hydrate_dataset_selection.ts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.isDatasetSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "isDatasetSelection",
+        "description": [],
+        "signature": [
+          "(input: any) => input is ",
+          "DatasetSelection"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.isDatasetSelection.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.isDataViewSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "isDataViewSelection",
+        "description": [],
+        "signature": [
+          "(input: any) => input is ",
+          "DataViewSelection"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.isDataViewSelection.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.isUnresolvedDatasetSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "isUnresolvedDatasetSelection",
+        "description": [],
+        "signature": [
+          "(input: any) => input is ",
+          {
+            "pluginId": "logsExplorer",
+            "scope": "common",
+            "docId": "kibLogsExplorerPluginApi",
+            "section": "def-common.UnresolvedDatasetSelection",
+            "text": "UnresolvedDatasetSelection"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.isUnresolvedDatasetSelection.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1728,7 +1954,7 @@
         "label": "DatasetSelectionPlain",
         "description": [],
         "signature": [
-          "{ selectionType: \"all\"; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
+          "{ selectionType: \"all\"; } | { selectionType: \"dataView\"; selection: { dataView: { id: string; name: string; title: string; dataType: \"unknown\" | \"logs\"; } & { kibanaSpaces?: string[] | undefined; type?: string | undefined; }; }; } | { selectionType: \"single\"; selection: { name?: string | undefined; } & { title?: string | undefined; } & { version?: string | undefined; } & { dataset: { name: ",
           "Branded",
           "<string, ",
           "IndexPatternBrand",
@@ -2097,6 +2323,34 @@
           "<{ selectionType: ",
           "LiteralC",
           "<\"all\">; }>, ",
+          "TypeC",
+          "<{ selectionType: ",
+          "LiteralC",
+          "<\"dataView\">; selection: ",
+          "TypeC",
+          "<{ dataView: ",
+          "ExactC",
+          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; name: ",
+          "StringC",
+          "; title: ",
+          "StringC",
+          "; dataType: ",
+          "KeyofC",
+          "<{ logs: null; unknown: null; }>; }>, ",
+          "PartialC",
+          "<{ kibanaSpaces: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; type: ",
+          "StringC",
+          "; }>]>>; }>; }>, ",
           "TypeC",
           "<{ selectionType: ",
           "LiteralC",

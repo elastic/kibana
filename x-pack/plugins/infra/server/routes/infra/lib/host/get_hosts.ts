@@ -11,6 +11,7 @@ import { mapToApiResponse } from '../mapper';
 import { hasFilters } from '../utils';
 import { GetHostsArgs } from '../types';
 import { getAllHosts } from './get_all_hosts';
+import { getHostsAlertsCount } from './get_hosts_alerts_count';
 
 export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsResponsePayload> => {
   const runFilterQuery = hasFilters(args.params.query);
@@ -23,8 +24,23 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     };
   }
 
-  const result = await getAllHosts(args, hostNamesShortList);
-  return mapToApiResponse(args.params, result?.nodes.buckets);
+  const {
+    range: { from, to },
+    limit,
+  } = args.params;
+
+  const [result, alertsCountResponse] = await Promise.all([
+    getAllHosts(args, hostNamesShortList),
+    getHostsAlertsCount({
+      alertsClient: args.alertsClient,
+      hostNamesShortList,
+      from,
+      to,
+      maxNumHosts: limit,
+    }),
+  ]);
+
+  return mapToApiResponse(args.params, result?.nodes.buckets, alertsCountResponse);
 };
 
 const getFilteredHostNames = async (args: GetHostsArgs) => {
