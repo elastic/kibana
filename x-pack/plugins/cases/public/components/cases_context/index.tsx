@@ -15,6 +15,7 @@ import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
+import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
@@ -71,7 +72,7 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
   appTitle?: string;
 }
 
-export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
+export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,
@@ -83,6 +84,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     releasePhase = 'ga',
     getFilesClient,
   },
+  queryClient = casesQueryClient,
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
@@ -103,6 +105,8 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     ),
     releasePhase,
     dispatch,
+    appId,
+    appTitle,
   }));
 
   /**
@@ -148,18 +152,22 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     [getFilesClient, owner]
   );
 
-  return isCasesContextValue(value) ? (
-    <QueryClientProvider client={casesQueryClient}>
-      <CasesContext.Provider value={value}>
-        {applyFilesContext(
-          <>
-            <CasesGlobalComponents state={state} />
-            {children}
-          </>
-        )}
-      </CasesContext.Provider>
-    </QueryClientProvider>
-  ) : null;
+  if (isCasesContextValue(value)) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <CasesContext.Provider value={value}>
+          {applyFilesContext(
+            <>
+              <CasesGlobalComponents state={state} />
+              {children}
+            </>
+          )}
+        </CasesContext.Provider>
+      </QueryClientProvider>
+    );
+  }
+
+  return null;
 };
 CasesProvider.displayName = 'CasesProvider';
 

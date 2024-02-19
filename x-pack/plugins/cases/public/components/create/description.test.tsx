@@ -18,7 +18,7 @@ import { FormTestComponent } from '../../common/test_utils';
 import type { FormSchema } from '@kbn/index-management-plugin/public/shared_imports';
 
 // FLAKY: https://github.com/elastic/kibana/issues/175204
-describe.skip('Description', () => {
+describe('Description', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
@@ -38,6 +38,8 @@ describe.skip('Description', () => {
   });
 
   it('it renders', async () => {
+    // eslint-disable-next-line no-console
+    console.time('Time');
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <Description {...defaultProps} />
@@ -45,6 +47,8 @@ describe.skip('Description', () => {
     );
 
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
+    // eslint-disable-next-line no-console
+    console.timeEnd('Time');
   });
 
   it('it changes the description', async () => {
