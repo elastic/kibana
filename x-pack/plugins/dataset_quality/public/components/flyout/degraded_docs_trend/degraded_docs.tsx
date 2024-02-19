@@ -54,11 +54,11 @@ export function DegradedDocs({
         timeRange: {
           from: durationRange.start,
           to: durationRange.end,
-          refresh: DEFAULT_TIME_RANGE.refresh,
+          refresh: timeRange.refresh ?? DEFAULT_TIME_RANGE.refresh,
         },
       });
     },
-    [service]
+    [service, timeRange.refresh]
   );
 
   return (
