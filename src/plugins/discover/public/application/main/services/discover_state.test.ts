@@ -448,7 +448,6 @@ describe('Test discover state actions', () => {
         "sampleSize": undefined,
         "sort": Array [],
         "timeRange": undefined,
-        "usesAdHocDataView": false,
       }
     `);
     expect(searchSource.getField('index')?.id).toEqual('the-data-view-id');

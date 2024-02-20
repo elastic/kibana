@@ -53,7 +53,8 @@ export const buildStateSubscribe =
 
     if (
       isTextBasedQueryLang &&
-      (nextState.index === undefined || nextState.viewMode === undefined)
+      (nextState.index === undefined || nextState.viewMode === undefined) &&
+      !queryChanged
     ) {
       // this is just used to unset the index/viewmode when switching to a text based query, nothing to do here
       addLog('[appstate] subscribe update ignored for text base ql', {
