@@ -14,13 +14,7 @@ import {
   EuiWrappingPopover,
   IconType,
 } from '@elastic/eui';
-import {
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  SimpleSavedObject,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { noop } from 'lodash';
@@ -50,7 +44,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount() {
         plugins.discover?.locator?.navigate(
           { profile: 'customization-examples' },

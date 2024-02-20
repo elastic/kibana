@@ -353,7 +353,6 @@ packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
-packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
@@ -814,6 +813,7 @@ x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 packages/kbn-timelion-grammar @elastic/kibana-visualizations
+packages/kbn-timerange @elastic/obs-ux-logs-team
 packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/plugins/transform @elastic/ml-ui
@@ -1501,7 +1501,6 @@ x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elas
 x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
-x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/risk_score @elastic/security-entity-analytics
 
 ## Security Solution sub teams - GenAI
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
@@ -1529,6 +1528,12 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
+
+# Security Service Integrations
+x-pack/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
+x-pack/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
+x-pack/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
+x-pack/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
 
 # Kibana design
 # scss overrides should be below this line for specificity

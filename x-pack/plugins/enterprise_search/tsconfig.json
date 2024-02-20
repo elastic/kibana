@@ -66,6 +66,7 @@
     "@kbn/core-capabilities-common",
     "@kbn/react-kibana-context-theme",
     "@kbn/code-editor",
-    "@kbn/console-plugin"
+    "@kbn/console-plugin",
+    "@kbn/core-notifications-browser"
   ]
 }
