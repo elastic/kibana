@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import {
   createLlmProxy,
@@ -114,11 +115,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
 
             await retry.waitFor('Connector created toast', async () => {
-              const count = await toasts.getToastCount();
+              const count = await toasts.getCount();
               return count > 0;
             });
 
-            await toasts.dismissAllToasts();
+            await toasts.dismissAll();
           });
 
           it('creates a connector', async () => {
@@ -188,9 +189,38 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(response.body.conversations.length).to.eql(1);
 
-                expect(response.body.conversations[0].messages.length).to.eql(3);
-
                 expect(response.body.conversations[0].conversation.title).to.be('My title');
+
+                const { messages } = response.body.conversations[0];
+
+                expect(messages.length).to.eql(5);
+
+                const [
+                  systemMessage,
+                  firstUserMessage,
+                  contextRequest,
+                  contextResponse,
+                  assistantResponse,
+                ] = messages.map((msg) => msg.message);
+
+                expect(systemMessage.role).to.eql('system');
+
+                expect(firstUserMessage.content).to.eql('hello');
+
+                expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
+                  name: 'context',
+                  arguments: JSON.stringify({ queries: [], categories: [] }),
+                });
+
+                expect(pick(contextResponse, 'name', 'content')).to.eql({
+                  name: 'context',
+                  content: JSON.stringify({ screen_description: '', learnings: [] }),
+                });
+
+                expect(pick(assistantResponse, 'role', 'content')).to.eql({
+                  role: 'assistant',
+                  content: 'My response',
+                });
 
                 await common.waitUntilUrlIncludes(
                   `/conversations/${response.body.conversations[0].conversation.id}`
@@ -227,7 +257,31 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 
-                  expect(response.body.conversations[0].messages.length).to.eql(5);
+                  const messages = response.body.conversations[0].messages.slice(5);
+
+                  expect(messages.length).to.eql(4);
+
+                  const [userReply, contextRequest, contextResponse, assistantResponse] =
+                    messages.map((msg) => msg.message);
+
+                  expect(userReply.content).to.eql('hello');
+
+                  expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
+                    name: 'context',
+                    arguments: JSON.stringify({ queries: [], categories: [] }),
+                  });
+
+                  expect(pick(contextResponse, 'name', 'content')).to.eql({
+                    name: 'context',
+                    content: JSON.stringify({ screen_description: '', learnings: [] }),
+                  });
+
+                  expect(pick(assistantResponse, 'role', 'content')).to.eql({
+                    role: 'assistant',
+                    content: 'My second response',
+                  });
+
+                  expect(response.body.conversations[0].messages.length).to.eql(9);
                 });
               });
             });

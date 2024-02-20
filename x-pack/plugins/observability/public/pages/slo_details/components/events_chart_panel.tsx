@@ -32,8 +32,8 @@ import {
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { cloneDeep, max, min } from 'lodash';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
@@ -72,7 +72,14 @@ export function EventsChartPanel({ slo, range }: Props) {
         ? `${sloIndicator.params.filter} and ${instanceIdFilter}`
         : instanceIdFilter;
   }
-  const { isLoading, data } = useGetPreviewData(true, sloIndicator, range, slo.objective);
+
+  const { isLoading, data } = useGetPreviewData({
+    range,
+    isValid: true,
+    indicator: slo.indicator,
+    groupBy: slo.groupBy,
+    instanceId: slo.instanceId,
+  });
 
   const dateFormat = uiSettings.get('dateFormat');
 

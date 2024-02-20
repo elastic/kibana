@@ -22,6 +22,7 @@ import { SectionSeparator } from './section_separator';
 import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
+import { ServicesContent } from './services';
 
 export const Overview = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -32,7 +33,6 @@ export const Overview = () => {
     loading: metadataLoading,
     error: fetchMetadataError,
   } = useMetadataStateContext();
-
   const { logs, metrics } = useDataViewsContext();
 
   const isFullPageView = renderMode.mode !== 'flyout';
@@ -78,6 +78,12 @@ export const Overview = () => {
         />
         <SectionSeparator />
       </EuiFlexItem>
+      {asset.type === 'host' ? (
+        <EuiFlexItem grow={false}>
+          <ServicesContent hostName={asset.name} dateRange={state.dateRange} />
+          <SectionSeparator />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
     </EuiFlexGroup>
   );

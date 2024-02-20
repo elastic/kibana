@@ -85,7 +85,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           bool: {
             filter: [
               { term: { spaceId: this.spaceId } },
-              getElastichsearchQueryOrThrow(kqlQuery),
+              getElasticsearchQueryOrThrow(kqlQuery),
               ...(parsedFilters.filter ?? []),
             ],
             must_not: [...(parsedFilters.must_not ?? [])],
