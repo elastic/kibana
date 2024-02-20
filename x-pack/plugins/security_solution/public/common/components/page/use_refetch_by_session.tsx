@@ -6,7 +6,7 @@
  */
 
 import type { MutableRefObject } from 'react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -36,8 +36,8 @@ export const useRefetchByRestartingSession = ({
 
   const session = useRef(data.search.session);
 
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
   const { selectedInspectIndex } = useDeepEqualSelector((state) =>
     inputId === InputsModelId.global
       ? getGlobalQuery(state, queryId)
