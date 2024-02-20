@@ -6,6 +6,7 @@
  */
 
 import { PackageClient } from '@kbn/fleet-plugin/server';
+import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
 import { DataStreamStat, Integration } from '../../../common/api_types';
 
 export async function getIntegrations(options: {
@@ -39,15 +40,24 @@ const getDatasets = async (options: {
   name: string;
   version: string;
 }) => {
-  const { packageClient, name, version } = options;
+  try {
+    const { packageClient, name, version } = options;
 
-  const pkg = await packageClient.getPackage(name, version);
+    const pkg = await packageClient.getPackage(name, version);
 
-  return pkg.packageInfo.data_streams?.reduce(
-    (acc, curr) => ({
-      ...acc,
-      [curr.dataset]: curr.title,
-    }),
-    {}
-  );
+    return pkg.packageInfo.data_streams?.reduce(
+      (acc, curr) => ({
+        ...acc,
+        [curr.dataset]: curr.title,
+      }),
+      {}
+    );
+  } catch (error) {
+    // Custom integration
+    if (error instanceof PackageNotFoundError) {
+      return {};
+    }
+
+    throw error;
+  }
 };
