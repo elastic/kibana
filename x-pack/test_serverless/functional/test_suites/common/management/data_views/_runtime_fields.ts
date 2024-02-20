@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
-        await new Promise((r) => setTimeout(r, 1000 * 10));
+        // await new Promise((r) => setTimeout(r, 1000 * 10));
         await PageObjects.settings.toggleRow('formatRow');
         await PageObjects.settings.setFieldFormat('bytes');
         await testSubjects.find('changeWarning');
