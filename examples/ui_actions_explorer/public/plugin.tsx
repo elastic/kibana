@@ -7,7 +7,7 @@
  */
 
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   PHONE_TRIGGER,
@@ -64,7 +64,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     core.application.register({
       id: 'uiActionsExplorer',
       title: 'Ui Actions Explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');

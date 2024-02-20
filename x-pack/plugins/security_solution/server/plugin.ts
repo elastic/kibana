@@ -120,7 +120,7 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
-import { AppFeaturesService } from './lib/app_features_service/app_features_service';
+import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
@@ -139,7 +139,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly appClientFactory: AppClientFactory;
-  private readonly appFeaturesService: AppFeaturesService;
+  private readonly productFeaturesService: ProductFeaturesService;
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
@@ -163,7 +163,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
-    this.appFeaturesService = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
+    this.productFeaturesService = new ProductFeaturesService(
+      this.logger,
+      this.config.experimentalFeatures
+    );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
@@ -188,12 +191,12 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { appClientFactory, appFeaturesService, pluginContext, config, logger } = this;
+    const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
-    appFeaturesService.init(plugins.features);
+    productFeaturesService.init(plugins.features);
 
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
@@ -220,6 +223,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaBranch: pluginContext.env.packageInfo.branch,
     });
 
+    productFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -493,8 +497,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     featureUsageService.setup(plugins.licensing);
 
     return {
-      setAppFeaturesConfigurator:
-        appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
+      setProductFeaturesConfigurator:
+        productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
       experimentalFeatures: { ...config.experimentalFeatures },
     };
   }
@@ -503,7 +507,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, appFeaturesService } = this;
+    const { config, logger, productFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
 
@@ -566,7 +570,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
-        appFeaturesService,
+        productFeaturesService,
       });
 
       // Migrate artifacts to fleet and then start the manifest task after that is done
@@ -583,13 +587,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         turnOffPolicyProtectionsIfNotSupported(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
-          appFeaturesService,
+          productFeaturesService,
           logger
         );
 
         turnOffAgentPolicyFeatures(
           endpointFleetServicesFactory.asInternalUser(),
-          appFeaturesService,
+          productFeaturesService,
           logger
         );
       });
@@ -635,7 +639,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ),
       createFleetActionsClient,
       esClient: core.elasticsearch.client.asInternalUser,
-      appFeaturesService,
+      productFeaturesService,
       savedObjectsClient,
     });
 

@@ -26,13 +26,14 @@ export type SyntheticsRequest = KibanaRequest<
   Record<string, any>
 >;
 
+export type SupportedMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
 /**
  * Defines the basic properties employed by Uptime routes.
  */
 export interface UMServerRoute<T> {
-  method: 'GET' | 'PUT' | 'POST' | 'DELETE';
+  method: SupportedMethod;
   writeAccess?: boolean;
-  writeAccessOverride?: boolean;
   handler: T;
   validation?: FullValidationConfig<any, any, any>;
   streamHandler?: (

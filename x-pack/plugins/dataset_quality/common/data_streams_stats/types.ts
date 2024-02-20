@@ -7,13 +7,17 @@
 
 import { APIClientRequestParamsOf, APIReturnType } from '../rest';
 import { DataStreamStat } from './data_stream_stat';
+import { Integration } from './integration';
 
 export type GetDataStreamsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/stats`>['params'];
 export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
-export type DataStreamStatServiceResponse = DataStreamStat[];
+export interface DataStreamStatServiceResponse {
+  dataStreamStats: DataStreamStat[];
+  integrations: Integration[];
+}
 export type IntegrationType = GetDataStreamsStatsResponse['integrations'][0];
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0] & {
   integration?: IntegrationType;
