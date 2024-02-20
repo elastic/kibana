@@ -8,6 +8,53 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const t = [
+  {
+    label: 'Findings Page - DataTable',
+    children: [
+      {
+        label: 'SearchBar',
+        children: [
+          {
+            label: 'add filter',
+          },
+          {
+            label: 'remove filter',
+          },
+        ],
+      },
+      {
+        label: 'Table Sort',
+        children: [
+          {
+            label:
+              'sorts by a column, should be case sensitive/insensitive depending on the column',
+          },
+        ],
+      },
+      {
+        label: 'DistributionBar',
+      },
+      {
+        label: 'DataTable features',
+        children: [{ label: 'Edit data view field option is Enabled' }],
+      },
+      {
+        label: 'Findings - Fields selector',
+        children: [
+          { label: 'Add fields to the Findings DataTable' },
+          { label: 'Remove fields from the Findings DataTable' },
+          { label: 'Reset fields to default' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Findings Page - support muting rules',
+    children: [{ label: 'add filter' }],
+  },
+];
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
