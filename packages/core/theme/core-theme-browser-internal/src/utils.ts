@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { Theme } from './src/theme';
-
-export {
-  darkMode,
-  tag,
-  version,
-  euiDarkVars,
-  euiLightVars,
-  euiThemeVars,
-  _setDarkMode,
-} from './src/theme';
+export const createStyleSheet = ({ href }: { href: string }) => {
+  const head = document.getElementsByTagName('head')[0];
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = href;
+  link.media = 'all';
+  head.appendChild(link);
+  return link;
+};
