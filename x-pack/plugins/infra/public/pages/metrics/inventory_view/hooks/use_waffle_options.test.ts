@@ -22,6 +22,8 @@ jest.mock('react-router-dom', () => ({
 let PREFILL_NODETYPE: WaffleOptionsState['nodeType'] | undefined;
 let PREFILL_METRIC: WaffleOptionsState['metric'] | undefined;
 let PREFILL_CUSTOM_METRICS: WaffleOptionsState['customMetrics'] | undefined;
+let PREFILL_ACCOUNT_ID: WaffleOptionsState['accountId'] | undefined;
+let PREFILL_REGION: WaffleOptionsState['region'] | undefined;
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
     inventoryPrefill: {
@@ -34,6 +36,12 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
       setCustomMetrics(customMetrics: WaffleOptionsState['customMetrics']) {
         PREFILL_CUSTOM_METRICS = customMetrics;
       },
+      setAccountId(accountId: WaffleOptionsState['accountId']) {
+        PREFILL_ACCOUNT_ID = accountId;
+      },
+      setRegion(region: WaffleOptionsState['region']) {
+        PREFILL_REGION = region;
+      },
     },
   }),
 }));
@@ -45,6 +53,8 @@ describe('useWaffleOptions', () => {
     PREFILL_NODETYPE = undefined;
     PREFILL_METRIC = undefined;
     PREFILL_CUSTOM_METRICS = undefined;
+    PREFILL_ACCOUNT_ID = undefined;
+    PREFILL_REGION = undefined;
   });
 
   it('should sync the options to the inventory alert preview context', () => {
@@ -61,6 +71,8 @@ describe('useWaffleOptions', () => {
           field: 'hey.system.are.you.good',
         },
       ],
+      accountId: '123456789012',
+      region: 'us-east-1',
     } as WaffleOptionsState;
     act(() => {
       result.current.changeNodeType(newOptions.nodeType);
@@ -77,5 +89,15 @@ describe('useWaffleOptions', () => {
     });
     rerender();
     expect(PREFILL_CUSTOM_METRICS).toEqual(newOptions.customMetrics);
+    act(() => {
+      result.current.changeAccount(newOptions.accountId);
+    });
+    rerender();
+    expect(PREFILL_ACCOUNT_ID).toEqual(newOptions.accountId);
+    act(() => {
+      result.current.changeRegion(newOptions.region);
+    });
+    rerender();
+    expect(PREFILL_REGION).toEqual(newOptions.region);
   });
 });
