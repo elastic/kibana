@@ -9,8 +9,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AIPlaygroundPluginStartDeps, ElasticsearchIndex } from '../types';
+import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const useQueryIndices = (query: string = '') => {
+export const useQueryIndices = (
+  query: string = ''
+): { indices: IndexName[]; isLoading: boolean } => {
   const { services } = useKibana<AIPlaygroundPluginStartDeps>();
 
   const { data, isLoading } = useQuery({
@@ -28,12 +31,9 @@ export const useQueryIndices = (query: string = '') => {
         },
       });
 
-      return response.indices.map((index) => ({
-        label: index.name,
-        key: index.name,
-      }));
+      return response.indices.map((index) => index.name);
     },
   });
 
-  return { options: data || [], isLoading };
+  return { indices: data || [], isLoading };
 };

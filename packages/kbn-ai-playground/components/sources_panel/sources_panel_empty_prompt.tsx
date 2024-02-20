@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesTable } from './indices_table';
+import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const SourcesPanelEmptyPrompt: React.FC = () => {
-  const indices = ['search-index', 'search-books'];
-  const [selectedIndices, setSelectedIndices] = React.useState<string[]>([]);
-  const addIndex = (newIndex: string) => {
+  const [selectedIndices, setSelectedIndices] = React.useState<IndexName[]>([]);
+  const addIndex = (newIndex: IndexName) => {
     setSelectedIndices([...selectedIndices, newIndex]);
   };
-  const removeIndex = (index: string) => {
+  const removeIndex = (index: IndexName) => {
     setSelectedIndices(selectedIndices.filter((indexName) => indexName !== index));
   };
 
@@ -59,11 +51,7 @@ export const SourcesPanelEmptyPrompt: React.FC = () => {
         )}
 
         <EuiFlexItem>
-          <AddIndicesField
-            selectedIndices={selectedIndices}
-            indices={indices}
-            onIndexSelect={addIndex}
-          />
+          <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
