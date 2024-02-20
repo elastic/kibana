@@ -6,10 +6,11 @@ This package contains a flexible sorting function who supports the following typ
 * number
 * version
 * ip addresses (both IPv4 and IPv6) - handles `Others`/strings correcly in this case
-* dates
+* dates (both as number or ISO string)
 * ranges open and closed (number type only for now)
 * null and undefined (always sorted as last entries, no matter the direction)
 * any multi-value version of the types above (version excluded)
+  * for multi-values with different length it wins the first non-zero comparison (see note at the bottom)
 
 The function is intended to use with objects and to simplify the usage with sorting by a specific column/field.
 The functions has been extracted from Lens datatable where it was originally used.
@@ -72,3 +73,33 @@ return <EuiDataGrid
     }}
 />;
 ```
+
+### Multi-value notes
+
+In this section there's some more details about multi-value comparison algorithm used in this package.
+For multi-values of the same length, the first non-zero comparison wins (ASC example):
+
+```
+a: [5, 7]
+b: [1]
+```
+
+`b` comes before `a` as `1 < 5`.
+
+With this other set of data:
+
+```
+a: [1, 2, 3, 5]
+b: [1, 2, 3, 3]
+```
+
+`a` comes before `b` as the first 3 comparisons will return 0, while the last one (`5 > 3`) returns -1.
+
+In case of arrays of different length, the `undefined` value is used for the shortest multi-value:
+
+```
+a; [1, 2]
+b: [1]
+```
+
+In this case `b` wins as on the second comparison `undefined < 2`.
