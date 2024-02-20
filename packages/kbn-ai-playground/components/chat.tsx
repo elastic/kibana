@@ -28,14 +28,10 @@ import { AIPlaygroundPluginStartDeps, ChatForm, ChatFormFields, MessageRole } fr
 import { ChatForm, ChatFormFields, MessageRole } from '../types';
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
-import { OpenAIKeyField } from './open_ai_key_field';
-import { InstructionsField } from './instructions_field';
-import { IncludeCitationsField } from './include_citations_field';
-import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
 
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transformToMessages';
-import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ChatSidebar } from '@kbn/ai-playground/components/chat_sidebar';
 
 export const Chat = () => {
   const { euiTheme } = useEuiTheme();
@@ -153,53 +149,8 @@ export const Chat = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem
-          grow={1}
-          css={{
-            padding: euiTheme.size.l,
-          }}
-        >
-          <Controller
-            name={ChatFormFields.openAIKey}
-            control={control}
-            defaultValue=""
-            render={({ field }) => <OpenAIKeyField apiKey={field.value} onSave={field.onChange} />}
-          />
-
-          <Controller
-            name={ChatFormFields.prompt}
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <InstructionsField value={field.value} onChange={field.onChange} />
-            )}
-          />
-
-          <Controller
-            name={ChatFormFields.citations}
-            control={control}
-            defaultValue={true}
-            render={({ field }) => (
-              <IncludeCitationsField checked={field.value} onChange={field.onChange} />
-            )}
-          />
-
-          <Controller
-            name={ChatFormFields.indices}
-            control={control}
-            defaultValue={[]}
-            render={({ field }) => (
-              <SourcesPanelSidebar
-                selectedIndices={field.value}
-                addIndex={(newIndex: IndexName) => {
-                  field.onChange([...field.value, newIndex]);
-                }}
-                removeIndex={(index: IndexName) => {
-                  field.onChange(field.value.filter((indexName) => indexName !== index));
-                }}
-              />
-            )}
-          />
+        <EuiFlexItem grow={1}>
+          <ChatSidebar control={control} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>

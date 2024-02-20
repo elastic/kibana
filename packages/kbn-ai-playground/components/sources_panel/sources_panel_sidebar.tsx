@@ -8,15 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IndicesList } from './indices_list';
 import { AddIndicesField } from './add_indices_field';
 
@@ -30,37 +22,24 @@ export const SourcesPanelSidebar: React.FC<SourcesPanelSidebarProps> = ({
   selectedIndices,
   addIndex,
   removeIndex,
-}) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'sourceAccordion' });
+}) => (
+  <EuiFlexGroup direction="column">
+    <EuiFlexItem>
+      <EuiCallOut
+        title={i18n.translate('aiPlayground.sources.callout', {
+          defaultMessage: 'Changes here will reset your custom query',
+        })}
+        iconType="warning"
+        size="s"
+      />
+    </EuiFlexItem>
 
-  return (
-    <EuiAccordion
-      id={accordionId}
-      buttonContent={
-        <EuiTitle>
-          <h3>{i18n.translate('aiPlayground.sources.title', { defaultMessage: 'Sources' })}</h3>
-        </EuiTitle>
-      }
-    >
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('aiPlayground.sources.callout', {
-              defaultMessage: 'Changes here will reset your custom query',
-            })}
-            iconType="warning"
-            size="s"
-          />
-        </EuiFlexItem>
+    <EuiFlexItem>
+      <IndicesList indices={selectedIndices} onRemoveClick={removeIndex} hasBorder />
+    </EuiFlexItem>
 
-        <EuiFlexItem>
-          <IndicesList indices={selectedIndices} onRemoveClick={removeIndex} hasBorder />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiAccordion>
-  );
-};
+    <EuiFlexItem>
+      <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
