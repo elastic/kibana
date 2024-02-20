@@ -25,6 +25,10 @@ const BuildingBlockContainer = styled(AdditionalFiltersItem)`
   background: ${({ theme }) => theme.eui.euiColorHighlight};
 `;
 
+const CenterText = styled.span`
+  text-align: center;
+`;
+
 export const AdditionalFiltersAction = ({
   areEventsLoading,
   onShowBuildingBlockAlertsChanged,
@@ -91,16 +95,18 @@ export const AdditionalFiltersAction = ({
       ownFocus
       popoverContent={UtilityBarAdditionalFiltersContent}
     >
-      {i18n.ADDITIONAL_FILTERS_ACTIONS}
-      {additionalFilterCount > 0 && (
-        <>
-          &nbsp;
-          <EuiNotificationBadge
-            data-test-subj="additionalFiltersCountBadge"
-            color="subdued"
-          >{`${additionalFilterCount}`}</EuiNotificationBadge>
-        </>
-      )}
+      <CenterText>
+        {i18n.ADDITIONAL_FILTERS_ACTIONS}
+        {additionalFilterCount > 0 && (
+          <>
+            &nbsp;
+            <EuiNotificationBadge
+              data-test-subj="additionalFiltersCountBadge"
+              color="subdued"
+            >{`${additionalFilterCount}`}</EuiNotificationBadge>
+          </>
+        )}
+      </CenterText>
     </UtilityBarAction>
   );
 };
