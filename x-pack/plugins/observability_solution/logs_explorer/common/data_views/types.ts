@@ -9,18 +9,19 @@ import * as rt from 'io-ts';
 const dataTypeRT = rt.keyof({
   logs: null,
   unknown: null,
+  unresolved: null,
 });
 
 export const dataViewDescriptorRT = rt.exact(
   rt.intersection([
     rt.type({
       id: rt.string,
-      name: rt.string,
-      title: rt.string,
-      dataType: dataTypeRT,
     }),
     rt.partial({
+      dataType: dataTypeRT,
       kibanaSpaces: rt.array(rt.string),
+      name: rt.string,
+      title: rt.string,
       type: rt.string,
     }),
   ])
