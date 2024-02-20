@@ -202,10 +202,14 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(searchProps.rowsPerPageState).toEqual(100);
 
-    expect(searchProps.sampleSizeState).toEqual(250);
+    expect(
+      discoverComponent.find(SavedSearchEmbeddableComponent).prop('fetchedSampleSize')
+    ).toEqual(250);
     searchProps.onUpdateSampleSize!(300);
     await waitOneTick();
-    expect(searchProps.sampleSizeState).toEqual(300);
+    expect(
+      discoverComponent.find(SavedSearchEmbeddableComponent).prop('fetchedSampleSize')
+    ).toEqual(300);
 
     searchProps.onFilter!({ name: 'customer_id', type: 'string', scripted: false }, [17], '+');
     await waitOneTick();
