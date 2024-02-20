@@ -90,13 +90,13 @@ node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.c
 
 echo "--- Upload CDN assets"
 cd target
-gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_QA_KEY")
+gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
 
 CDN_ASSETS_FOLDER=$(mktemp -d)
 tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
-gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
-gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
+gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
+gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
