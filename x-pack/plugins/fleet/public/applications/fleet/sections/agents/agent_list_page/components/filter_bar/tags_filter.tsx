@@ -73,18 +73,19 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       <EuiSelectable
         options={options as any}
         onChange={(newOptions: EuiSelectableOption[]) => {
-          setOptions(newOptions);
           newOptions.forEach((option, index) => {
             if (option.checked !== options[index].checked) {
               const tag = option.key!;
               if (option.checked !== 'on') {
                 removeTagsFilter(tag);
+                return;
               } else {
                 addTagsFilter(tag);
+                return;
               }
-              return;
             }
           });
+          setOptions(newOptions);
         }}
         data-test-subj="agentList.agentPolicyFilterOptions"
         listProps={{
