@@ -6,7 +6,6 @@
  */
 
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -138,13 +137,6 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
  * The route to the overwritten session UI.
  */
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
-
-function assertRequest(request: KibanaRequest) {
-  if (!(request instanceof CoreKibanaRequest)) {
-    throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
-  }
-}
-
 function assertLoginAttempt(attempt: ProviderLoginAttempt) {
   if (!isLoginAttemptWithProviderType(attempt) && !isLoginAttemptWithProviderName(attempt)) {
     throw new Error(
@@ -297,7 +289,6 @@ export class Authenticator {
    * @param attempt Login attempt description.
    */
   async login(request: KibanaRequest, attempt: ProviderLoginAttempt) {
-    assertRequest(request);
     assertLoginAttempt(attempt);
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
@@ -365,8 +356,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
-    assertRequest(request);
-
     const existingSession = await this.getSessionValue(request);
 
     if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
@@ -506,16 +495,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async reauthenticate(request: KibanaRequest) {
-    // "Fake" requests cannot be re-authenticated as there are no sessions associated with them.
-    if (!(request instanceof CoreKibanaRequest)) {
-      this.logger.debug(
-        `Re-authentication is only supported for instances of \`CoreKibanaRequest\`, but got [\`${typeof request}\`] with keys [${
-          request ? Object.keys(request) : []
-        }].`
-      );
-      return AuthenticationResult.notHandled();
-    }
-
     // Return early if request doesn't have any associated session. We retrieve session ID separately from the session
     // content because it doesn't trigger session invalidation for expired sessions.
     const sid = await this.session.getSID(request);
@@ -558,8 +537,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async logout(request: KibanaRequest) {
-    assertRequest(request);
-
     const { value: sessionValue } = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
@@ -598,8 +575,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async acknowledgeAccessAgreement(request: KibanaRequest) {
-    assertRequest(request);
-
     const { value: existingSessionValue } = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
 
