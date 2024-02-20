@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { keyBy, mapValues, once, pick } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
-import { lastValueFrom, type Observable } from 'rxjs';
+import { lastValueFrom, startWith, type Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
 import type { ChatCompletionChunkEvent } from '../../../common/conversation_complete';
@@ -20,6 +20,7 @@ import {
 import { FunctionVisibility, MessageRole } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
+import { createFunctionResponseMessage } from '../../service/util/create_function_response_message';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 
 const readFile = promisify(Fs.readFile);
@@ -162,6 +163,7 @@ export function registerQueryFunction({
               ${VisualizeESQLUserIntention.visualizeDonut}
               ${VisualizeESQLUserIntention.visualizeHeatmap}
               ${VisualizeESQLUserIntention.visualizeLine}
+              ${VisualizeESQLUserIntention.visualizeArea}
               ${VisualizeESQLUserIntention.visualizeTagcloud}
               ${VisualizeESQLUserIntention.visualizeTreemap}
               ${VisualizeESQLUserIntention.visualizeWaffle}
@@ -339,7 +341,8 @@ export function registerQueryFunction({
                 : {}),
             },
           };
-        })
+        }),
+        startWith(createFunctionResponseMessage({ name: 'query', content: { switch: true } }))
       );
     }
   );

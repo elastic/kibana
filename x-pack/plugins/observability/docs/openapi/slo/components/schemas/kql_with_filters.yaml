@@ -1,0 +1,15 @@
+title: KQL with filters
+description: Defines properties for a filter
+oneOf:
+  - description: the KQL query to filter the documents with.
+    type: string
+    example: 'field.environment : "production" and service.name : "my-service"'
+  - type: object
+    properties:
+      kqlQuery:
+        type: string
+      filters:
+        type: array
+        items:
+          $ref: "filter.yaml"
+
