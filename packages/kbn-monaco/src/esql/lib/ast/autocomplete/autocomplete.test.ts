@@ -975,18 +975,34 @@ describe('autocomplete', () => {
       ],
       '('
     );
-    testSuggestions(
-      'from a | eval a=concat(stringField, ',
-      [
-        ...getFieldNamesByType('string'),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
-          'concat',
-        ]),
-      ],
-      ','
-    );
+    // test that comma is correctly added to the suggestions if minParams is not reached yet
+    testSuggestions('from a | eval a=concat( ', [
+      ...getFieldNamesByType('string').map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'concat',
+      ]).map((v) => `${v},`),
+    ]);
+    testSuggestions('from a | eval a=concat(stringField, ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'concat',
+      ]),
+    ]);
     // test that the arg type is correct after minParams
     testSuggestions('from a | eval a=cidr_match(ipField, stringField,', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]),
+    ]);
+    // test that comma is correctly added to the suggestions if minParams is not reached yet
+    testSuggestions('from a | eval a=cidr_match( ', [
+      ...getFieldNamesByType('ip').map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType('eval', 'ip', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]).map((v) => `${v},`),
+    ]);
+    testSuggestions('from a | eval a=cidr_match(ipField, ', [
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
         'cidr_match',

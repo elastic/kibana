@@ -1087,9 +1087,15 @@ async function getFunctionArgsSuggestions(
 
   const arg = node.args[argIndex];
 
+  // the first signature is used as reference
+  const refSignature = fnDefinition.signatures[0];
+
   const hasMoreMandatoryArgs =
-    fnDefinition.signatures[0].params.filter(({ optional }, index) => !optional && index > argIndex)
-      .length > argIndex;
+    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+      argIndex ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
 
   const suggestions = [];
   const noArgDefined = !arg;
