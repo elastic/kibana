@@ -20,7 +20,12 @@ interface Props extends ToolbarProps {
   groupByFields: string[];
 }
 
-export const MetricsAndGroupByToolbarItems = (props: Props) => {
+export const MetricsAndGroupByToolbarItems = ({
+  inventoryPageCallbacks,
+  inventoryPageState,
+  ...props
+}: Props) => {
+  const { context } = inventoryPageState;
   const metricOptions = useMemo(
     () =>
       props.metricTypes.map(toMetricOpt).filter((v) => v) as Array<{ text: string; value: string }>,
@@ -38,26 +43,33 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
         <WaffleMetricControls
           fields={props.createDerivedIndexPattern().fields}
           options={metricOptions}
-          metric={props.metric}
-          onChange={props.changeMetric}
-          onChangeCustomMetrics={props.changeCustomMetrics}
-          customMetrics={props.customMetrics}
+          metric={context.options.metric}
+          onChange={(metric) => inventoryPageCallbacks.updateOptions({ metric })}
+          onChangeCustomMetrics={(customMetrics) =>
+            inventoryPageCallbacks.updateOptions({ customMetrics })
+          }
+          customMetrics={context.options.customMetrics}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <WaffleGroupByControls
           options={groupByOptions}
-          groupBy={props.groupBy}
-          nodeType={props.nodeType}
-          onChange={props.changeGroupBy}
+          groupBy={context.options.groupBy}
+          nodeType={context.options.nodeType}
+          onChange={(groupBy) => inventoryPageCallbacks.updateOptions({ groupBy })}
           fields={props.createDerivedIndexPattern().fields}
-          onChangeCustomOptions={props.changeCustomOptions}
-          customOptions={props.customOptions}
+          onChangeCustomOptions={(customOptions) =>
+            inventoryPageCallbacks.updateOptions({ customOptions })
+          }
+          customOptions={context.options.customOptions}
         />
       </EuiFlexItem>
-      {props.view === 'map' && (
+      {context.options.view === 'map' && (
         <EuiFlexItem grow={false}>
-          <WaffleSortControls sort={props.sort} onChange={props.changeSort} />
+          <WaffleSortControls
+            sort={context.options.sort}
+            onChange={(sort) => inventoryPageCallbacks.updateOptions({ sort })}
+          />
         </EuiFlexItem>
       )}
     </>

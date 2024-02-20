@@ -8,16 +8,33 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
+import {
+  InventoryPageCallbacks,
+  InitializedInventoryPageState,
+} from '../../../../observability_infra/inventory_page/state';
 import { WaffleTimeControls } from './waffle/waffle_time_controls';
 import { SearchBar } from './search_bar';
 
-export const FilterBar = ({ interval }: { interval: string }) => (
+export const FilterBar = ({
+  interval,
+  inventoryPageState: { context },
+  inventoryPageCallbacks,
+}: {
+  interval: string;
+  inventoryPageState: InitializedInventoryPageState;
+  inventoryPageCallbacks: InventoryPageCallbacks;
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" style={{ flexGrow: 0 }}>
     <EuiFlexItem>
       <SearchBar />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <WaffleTimeControls interval={interval} />
+      <WaffleTimeControls
+        interval={interval}
+        currentTime={context.time.currentTime}
+        isAutoReloading={context.time.isAutoReloading}
+        inventoryPageCallbacks={inventoryPageCallbacks}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

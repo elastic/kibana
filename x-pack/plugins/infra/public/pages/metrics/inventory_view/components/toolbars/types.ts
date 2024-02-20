@@ -4,25 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import { MatchedStateFromActor } from '../../../../../observability_logs/xstate_helpers';
 import {
-  SnapshotCustomMetricInput,
-  SnapshotGroupBy,
-  SnapshotMetricInput,
-} from '../../../../../../common/http_api/snapshot_api';
-import { CreateDerivedIndexPattern } from '../../../../../containers/metrics_source';
-import { InfraGroupByOptions } from '../../../../../lib/lib';
-import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
+  InventoryPageCallbacks,
+  InventoryPageStateMachine,
+} from '../../../../../observability_infra/inventory_page/state';
+import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
 
-export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
+import { CreateDerivedIndexPattern } from '../../../../../containers/metrics_source';
+
+type InitializedPageState = MatchedStateFromActor<InventoryPageStateMachine, 'initialized'>;
+
+export interface ToolbarProps {
   createDerivedIndexPattern: CreateDerivedIndexPattern;
-  changeMetric: (payload: SnapshotMetricInput) => void;
-  changeGroupBy: (payload: SnapshotGroupBy) => void;
-  changeCustomOptions: (payload: InfraGroupByOptions[]) => void;
-  changeAccount: (id: string) => void;
-  changeRegion: (name: string) => void;
-  changeSort: (sort: WaffleSortOption) => void;
   accounts: InventoryCloudAccount[];
   regions: string[];
-  changeCustomMetrics: (payload: SnapshotCustomMetricInput[]) => void;
+  inventoryPageCallbacks: InventoryPageCallbacks;
+  inventoryPageState: InitializedPageState;
 }

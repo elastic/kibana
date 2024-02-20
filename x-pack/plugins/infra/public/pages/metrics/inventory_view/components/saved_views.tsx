@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { InventoryView } from '../../../../../common/inventory_views';
+import { InitializedInventoryPageState } from '../../../../observability_infra/inventory_page/state';
 import { useInventoryViews } from '../../../../hooks/use_inventory_views';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 
-export const SavedViews = () => {
-  const { viewState } = useWaffleViewState();
+export const SavedViews = ({
+  inventoryPageState,
+}: {
+  inventoryPageState: InitializedInventoryPageState;
+}) => {
+  const currentView = useMemo(() => getSavedView(inventoryPageState), [inventoryPageState]);
+
   const {
-    currentView,
     views,
     isFetchingViews,
     isFetchingCurrentView,
@@ -41,7 +46,19 @@ export const SavedViews = () => {
       onLoadViews={fetchViews}
       onSetDefaultView={setDefaultViewById}
       onSwitchView={switchViewById}
-      viewState={viewState}
+      viewState={inventoryPageState.context.options}
     />
   );
+};
+
+const getSavedView = (inventoryPageState: InitializedInventoryPageState): InventoryView => {
+  return {
+    id: inventoryPageState.context.savedViewId,
+    attributes: {
+      filterQuery: inventoryPageState.context.filter,
+      name: (inventoryPageState.context.savedViewName ?? 'Default view') as any,
+      autoReload: inventoryPageState.context.time.isAutoReloading,
+      ...inventoryPageState.context.options,
+    },
+  };
 };
