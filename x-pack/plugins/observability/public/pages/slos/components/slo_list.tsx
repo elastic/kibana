@@ -11,14 +11,14 @@ import React, { useEffect } from 'react';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
 import { ToggleSLOView } from './toggle_slo_view';
 import { GroupView } from './grouped_slos/group_view';
 import { useKibana } from '../../../utils/kibana_react';
 
 export function SloList() {
-  const { state, onStateChange: storeState } = useUrlSearchState();
+  const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
   const {
@@ -47,10 +47,6 @@ export function SloList() {
 
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
-  const onStateChange = (newState: Partial<SearchState>) => {
-    storeState({ page: 0, ...newState });
-  };
-
   useEffect(() => {
     if (!sloList) {
       return;
@@ -67,10 +63,10 @@ export function SloList() {
       ${
         sloList.total >= 1
           ? `There are ${sloList.total} SLOs. Out of those, ${sloList.results.length} are visible.
-          
+
           Violating SLOs:
           ${slosByStatus.VIOLATED}
-          
+
           Degrading SLOs:
           ${slosByStatus.DEGRADING}
 
@@ -79,7 +75,7 @@ export function SloList() {
 
           SLOs without data:
           ${slosByStatus.NO_DATA}
-          
+
           `
           : ''
       }

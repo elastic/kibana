@@ -568,6 +568,7 @@ describe('Response actions history', () => {
           'Parameters',
           'Comment',
           'Hostname',
+          'Agent type',
           'Output:',
         ]
       );

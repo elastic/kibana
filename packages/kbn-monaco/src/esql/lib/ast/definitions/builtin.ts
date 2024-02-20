@@ -207,13 +207,14 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
   ].map((op): FunctionDefinition => createComparisonDefinition(op)),
   ...[
+    // Skip the insensitive case equality until it gets restored back
     // new special comparison operator for strings only
-    {
-      name: '=~',
-      description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
-        defaultMessage: 'Case insensitive equality',
-      }),
-    },
+    // {
+    //   name: '=~',
+    //   description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
+    //     defaultMessage: 'Case insensitive equality',
+    //   }),
+    // },
     {
       name: 'like',
       description: i18n.translate('monaco.esql.definition.likeDoc', {
