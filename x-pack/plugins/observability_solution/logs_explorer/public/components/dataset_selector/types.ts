@@ -26,7 +26,12 @@ import {
   INTEGRATIONS_TAB_ID,
   UNCATEGORIZED_TAB_ID,
 } from './constants';
-import { LoadDataViews, ReloadDataViews, SearchDataViews } from '../../hooks/use_data_views';
+import {
+  IsDataViewAvailable,
+  LoadDataViews,
+  ReloadDataViews,
+  SearchDataViews,
+} from '../../hooks/use_data_views';
 import { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
 
 export interface DatasetSelectorProps {
@@ -53,6 +58,8 @@ export interface DatasetSelectorProps {
   isSearchingIntegrations: boolean;
   /* Flag for determining whether ESQL is enabled or not */
   isEsqlEnabled: boolean;
+  /* Used against a data view to assert its availability */
+  isDataViewAvailable: IsDataViewAvailable;
   /* Triggered when retrying to load the data views */
   onDataViewsReload: ReloadDataViews;
   /* Triggered when the data views tab is selected */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useState, useCallback, useEffect, useReducer, useRef } from 'react';
+import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
@@ -309,20 +309,17 @@ export const useMetricsHostsAnomaliesResults = ({
     }
   }, [dispatch, reducerState]);
 
-  const isLoadingMetricsHostsAnomalies = useMemo(
-    () => getMetricsHostsAnomaliesRequest.state === 'pending',
-    [getMetricsHostsAnomaliesRequest.state]
-  );
+  const isPendingMetricsHostsAnomalies =
+    getMetricsHostsAnomaliesRequest.state === 'pending' ||
+    getMetricsHostsAnomaliesRequest.state === 'uninitialized';
 
-  const hasFailedLoadingMetricsHostsAnomalies = useMemo(
-    () => getMetricsHostsAnomaliesRequest.state === 'rejected',
-    [getMetricsHostsAnomaliesRequest.state]
-  );
+  const hasFailedLoadingMetricsHostsAnomalies =
+    getMetricsHostsAnomaliesRequest.state === 'rejected';
 
   return {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,
-    isLoadingMetricsHostsAnomalies,
+    isPendingMetricsHostsAnomalies,
     hasFailedLoadingMetricsHostsAnomalies,
     changeSortOptions,
     sortOptions: reducerState.sortOptions,
