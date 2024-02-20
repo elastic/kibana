@@ -37,7 +37,7 @@ import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
 import {
   createFetchAllArtifactsIterableMock,
@@ -775,7 +775,7 @@ describe('ManifestManager', () => {
         tags: ['policy:all'],
       });
       const context = buildManifestManagerContextMock({}, [
-        AppFeatureSecurityKey.endpointArtifactManagement,
+        ProductFeatureSecurityKey.endpointArtifactManagement,
       ]);
       const manifestManager = new ManifestManager(context);
 
@@ -859,8 +859,8 @@ describe('ManifestManager', () => {
         tags: ['policy:all'],
       });
       const context = buildManifestManagerContextMock({}, [
-        AppFeatureSecurityKey.endpointArtifactManagement,
-        AppFeatureSecurityKey.endpointResponseActions,
+        ProductFeatureSecurityKey.endpointArtifactManagement,
+        ProductFeatureSecurityKey.endpointResponseActions,
       ]);
       const manifestManager = new ManifestManager(context);
 
