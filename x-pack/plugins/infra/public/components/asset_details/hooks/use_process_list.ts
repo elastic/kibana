@@ -10,7 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
@@ -26,7 +26,7 @@ export function useProcessList(
   to: number,
   sortBy: SortBy,
   searchFilter: object,
-  request$?: Subject<() => Promise<unknown>>
+  request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>
 ) {
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern().title;

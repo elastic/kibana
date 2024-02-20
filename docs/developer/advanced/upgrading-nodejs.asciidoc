@@ -13,10 +13,6 @@ Before making a PR to upgrade Node.js, we must first <<start-new-nodejs-build,ge
 The required version of Node.js is listed in several different files throughout the {kib} source code.
 These files must be updated when upgrading Node.js:
 
-  - {kib-repo}blob/{branch}/.ci/Dockerfile[`.ci/Dockerfile`] - The version is specified in the `NODE_VERSION` constant.
-    This is used to pull the relevant image from https://hub.docker.com/_/node[Docker Hub].
-    Note that Docker Hub can take 24+ hours to be updated with the new images after a new release of Node.js, so if you're upgrading Node.js in Kibana just after the official Node.js release, you have to check if the new images are present on Docker Hub.
-    If they are not, and the update is urgent, you can skip this file and update it later once Docker Hub has been updated.
   - {kib-repo}blob/{branch}/.node-version[`.node-version`]
   - {kib-repo}blob/{branch}/.nvmrc[`.nvmrc`]
   - {kib-repo}blob/{branch}/package.json[`package.json`] - The version is specified in the `engines.node` field (if possible, also upgrade `@types/node` to match the new version, both under `devDependencies` and `resolutions`).

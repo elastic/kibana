@@ -833,6 +833,7 @@ class OutputService {
       target.round_robin = null;
       target.hash = null;
       target.topics = null;
+      target.topic = null;
       target.headers = null;
       target.timeout = null;
       target.broker_timeout = null;

@@ -129,30 +129,6 @@ export const kafkaOutputFormValues = {
     selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT,
     value: 'testDefaultTopic',
   },
-  firstTopic: {
-    selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT,
-    value: 'testTopic1',
-  },
-  firstTopicCondition: {
-    selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT,
-    value: 'testCondition: abc',
-  },
-  firstTopicWhen: {
-    selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT,
-    value: 'equals',
-  },
-  secondTopic: {
-    selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT, 1),
-    value: 'testTopic1',
-  },
-  secondTopicCondition: {
-    selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT, 1),
-    value: 'testCondition1: dca',
-  },
-  secondTopicWhen: {
-    selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT, 1),
-    value: 'contains',
-  },
   firstHeaderKey: {
     selector: SETTINGS_OUTPUTS_KAFKA.HEADERS_KEY_INPUT,
     value: 'testKey',
@@ -221,30 +197,6 @@ export const fillInKafkaOutputForm = (create?: boolean) => {
   cy.getBySel(kafkaOutputFormValues.hash.selector).type(kafkaOutputFormValues.hash.value);
   cy.getBySel(kafkaOutputFormValues.defaultTopic.selector).type(
     kafkaOutputFormValues.defaultTopic.value
-  );
-
-  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-
-  cy.getBySel(kafkaOutputFormValues.firstTopic.selector).type(
-    kafkaOutputFormValues.firstTopic.value
-  );
-  cy.getBySel(kafkaOutputFormValues.firstTopicCondition.selector).type(
-    kafkaOutputFormValues.firstTopicCondition.value
-  );
-  cy.getBySel(kafkaOutputFormValues.firstTopicWhen.selector).select(
-    kafkaOutputFormValues.firstTopicWhen.value
-  );
-
-  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-
-  cy.getBySel(kafkaOutputFormValues.secondTopic.selector).type(
-    kafkaOutputFormValues.secondTopic.value
-  );
-  cy.getBySel(kafkaOutputFormValues.secondTopicCondition.selector).type(
-    kafkaOutputFormValues.secondTopicCondition.value
-  );
-  cy.getBySel(kafkaOutputFormValues.secondTopicWhen.selector).select(
-    kafkaOutputFormValues.secondTopicWhen.value
   );
 
   cy.getBySel(kafkaOutputFormValues.firstHeaderKey.selector).type(
