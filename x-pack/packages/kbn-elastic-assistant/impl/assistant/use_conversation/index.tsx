@@ -28,7 +28,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
 };
 
 interface CreateConversationProps {
-  conversationId: string;
+  cTitle: string;
   messages?: Message[];
 }
 
@@ -39,7 +39,7 @@ interface SetApiConfigProps {
 
 interface UseConversation {
   clearConversation: (conversationId: string) => Promise<void>;
-  getDefaultConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
+  getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
   setApiConfig: ({
@@ -109,14 +109,14 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const getDefaultConversation = useCallback(
-    ({ conversationId, messages }: CreateConversationProps): Conversation => {
+    ({ cTitle, messages }: CreateConversationProps): Conversation => {
       const defaultSystemPromptId = getDefaultSystemPrompt({
         allSystemPrompts,
         conversation: undefined,
       })?.id;
 
       const newConversation: Conversation =
-        conversationId === i18n.WELCOME_CONVERSATION_TITLE
+        cTitle === i18n.WELCOME_CONVERSATION_TITLE
           ? WELCOME_CONVERSATION
           : {
               ...DEFAULT_CONVERSATION_STATE,
@@ -124,8 +124,8 @@ export const useConversation = (): UseConversation => {
                 ...DEFAULT_CONVERSATION_STATE.apiConfig,
                 defaultSystemPromptId,
               },
-              id: conversationId,
-              title: conversationId,
+              id: '',
+              title: cTitle,
               messages: messages != null ? messages : [],
             };
       return newConversation;

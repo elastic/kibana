@@ -87,10 +87,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             }
           : c;
 
-        if (
-          newSelectedConversation &&
-          (isNew || newSelectedConversation.id === newSelectedConversation.title)
-        ) {
+        if (newSelectedConversation && (isNew || newSelectedConversation.id === '')) {
           setConversationSettings({
             ...conversationSettings,
             [isNew ? c : newSelectedConversation.title]: newSelectedConversation,

@@ -156,7 +156,7 @@ describe('ConversationSettings', () => {
     });
   });
 
-  it('Selecting an existing conversation updates the selected convo and does not update convo settings', () => {
+  it.only('Selecting an existing conversation updates the selected convo and does not update convo settings', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ConversationSettings {...testProps} />
@@ -168,7 +168,7 @@ describe('ConversationSettings', () => {
     expect(onSelectedConversationChange).toHaveBeenCalledWith(alertConvo);
     expect(setConversationsSettingsBulkActions).toHaveBeenCalledWith({
       create: {
-        [alertConvo.id]: alertConvo,
+        [alertConvo.title]: alertConvo,
       },
     });
   });

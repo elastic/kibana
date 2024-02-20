@@ -160,20 +160,17 @@ const AssistantComponent: React.FC<Props> = ({
   }, [selectedConversationTitle, setConversationTitle]);
 
   const [currentConversation, setCurrentConversation] = useState<Conversation>(
-    getDefaultConversation({ conversationId: selectedConversationTitle })
+    getDefaultConversation({ cTitle: selectedConversationTitle })
   );
 
   const refetchCurrentConversation = useCallback(
     async (cId?: string) => {
-      if (cId === selectedConversationTitle || !conversations[selectedConversationTitle]) {
+      if (cId === '' || !conversations[selectedConversationTitle]) {
         return;
       }
       const updatedConversation = await getConversation(
         cId ?? conversations[selectedConversationTitle].id
       );
-      if (updatedConversation) {
-        setCurrentConversation(updatedConversation);
-      }
       return updatedConversation;
     },
     [conversations, getConversation, selectedConversationTitle]
@@ -302,7 +299,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
-      if (cTitle === cId) {
+      if (cId === '') {
         const updatedConv = await refetchResults();
         if (updatedConv) {
           setCurrentConversation(updatedConv[cTitle]);
@@ -311,7 +308,7 @@ const AssistantComponent: React.FC<Props> = ({
             getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cTitle] })?.id
           );
         }
-      } else if (cId !== cTitle) {
+      } else {
         setSelectedConversationTitle(cTitle);
         const refetchedConversation = await refetchCurrentConversation(cId);
         if (refetchedConversation) {
@@ -320,12 +317,6 @@ const AssistantComponent: React.FC<Props> = ({
         }
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
-        );
-      } else {
-        setSelectedConversationTitle(cTitle);
-        setCurrentConversation(conversations[cTitle]);
-        setEditingSystemPromptId(
-          getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cTitle] })?.id
         );
       }
     },
