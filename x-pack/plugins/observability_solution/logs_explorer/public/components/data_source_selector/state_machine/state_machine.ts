@@ -16,23 +16,23 @@ import {
 import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
-  DatasetsSelectorContext,
-  DatasetsSelectorEvent,
-  DatasetsSelectorStateMachineDependencies,
-  DatasetsSelectorTypestate,
-  DefaultDatasetsSelectorContext,
+  DataSourceSelectorContext,
+  DataSourceSelectorEvent,
+  DataSourceSelectorStateMachineDependencies,
+  DataSourceSelectorTypestate,
+  DefaultDataSourceSelectorContext,
 } from './types';
 
-export const createPureDatasetsSelectorStateMachine = (
-  initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
+export const createPureDataSourceSelectorStateMachine = (
+  initialContext: Partial<DefaultDataSourceSelectorContext> = DEFAULT_CONTEXT
 ) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSACeiACwAmXdQDMANmMB2UwYAcu4wEYH+gDQgAHogdmj5yU9MATmMAVmNjfQcAXyi3NExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kD0QbCwtqSX1TSXNAh0lJQIsQtx0EUycmyTNRm2abSOMYuIwsHHwiUgoaeiYWahy8-iExKVkaipV1TU8EGxsHE2ddc11dBwtAyP7EEN0Q6lMLfS6Ohy6QK6eqzEDxBZJZapNYZLJbWi5LglMT5HgAfQAgsJhOiigI8OjkJieJiSjwDuUOJVTjVzjYftQLA4JsZgm1eoFTG9BlMTL1wqNAiEGfowRDEksUqt0htsoi1NRFGp0GAoJQMFVYDxUAAjZEAdQAkjx8gAJdH8dEAVQAcvkSaIBHwAEpGgBaomQlsxACFKUdqSdqqBzgBaJ6SajCwLA5n+YxTYw8pzGKNWfT6YwPX4OEIi8XzSXJFZpdaZTbbJUqtUa4PavWGk3my18IkkzHogBqRtEBsJpP9ZUDSmDZ0QkX01AM1m6jjzbI+Ke86dMmezulz+ZshYSixLMNlFfluWrqvVmvUDd11EIilgKjUUCNNYv9YKZsxtoEonRAAUv1EYQA3kIMqnHBBOkCagWn0D4bDMIIJlMGweV6a5hTZIF9CsZoWV3SEpVLWE5QRU9lXPOstR1G87wfZVn1fKir2RfIXT4HFW3RI1bR4J0XRJI0+FtQlfT4Hh+AAWRAkBjnAulEDDTMvhCCxs0cO5QhZQIeVUqcggcYJVLMCIHFMAji2hGVy3hKsKNrS81GvW970fRjKMc2BkVETEXRbX0AE10VtTFJNKQ5QNHeTQ0U+wvjaSI7BCLpLE+XQeWsaC4JQsILAZBpolicEi33KyyzhSsFTPBz6xolz6KfF8PPfPBXQxQL0VdZBRBdGS5NpGKEDDdTqBCQwfhwl4nCXbQ6nzUbmkkZ5TCGHpLAs0rpXK0i7KYzy6rotympqqo8HQSgwFQABbLzzS-H9-0A4Dh0imkQ1qSDuhgtd4MQwJkL6WaEAsfwmiGXpcr+SxzKKiVNuIo9bKq+y32ovV6qOvbgzOi7rq8kpfP8oKQrCvqwIGj6QhZb5ksTTcWgaMbdJCLKFzuYJnnsQINqhLaSOPMjFRR5inIO1yGOO1H1Bxy6buRNr0Q6rqerJqKKfOLNGkkGxY30DpYxQgxmanYEnEnRMGQMHmiMPGzKvIrG0do8XGsd6Xztl-GgNENF21JclVbeiCGRsb5-vqSQRVGbp0qBqxrhQyafoCFprYPayKpPRUAFc1BIDA1SoRQAC9IBoptTQtK0eL4gQBJ4ISRJ9IcItk8n3vDcIpyzFpujgkGQYZFM2iMUJWgZ-6swZNOyv5pHT1z-PzyL0uIHLvBjUrrjiVJbte37ZvA7HBSEEMb41zXXRxkMkIfmTIHnGFaNJ4MYIek3HdYZK3mEbtrPqEXgXKAK8y6NgJn5C0HUSbhSpGrDusUJjfAmGEFamYLBAkBgMbwZ8ngg2BCPNkPwZ580RvbHOecgEgLXmAhWSsXTdV6i9NucCIJhnpt8Kwa5fhqW6MlTBXhvCmFGq0Z4aYFymDCMQ3+mdBYAIocvSgJdQH6hRD7DEO8ySiApEw-q8CLgoTDpcR4QQ9ZDBTPYUO3R-rBB+J8FCMM5h7h-rbGRVYIDzC7IoMAAB3a8FcWzV14vxQSwkBx+iPtFD6ZgTY3x6CzdorJh6qVGn8BCV8PjOEKo4wi6dtoCzcR4rxvj16bwCW2O0Dpa6ug9F6Q+Oj24QUBCYVonwB6RzzMlVCD9DBfDuPUMIdhIgXykS4naVV3GYE8T4vx4CibBVCjAkcQcT5DCjC8EEmSuj5l6CmCI0FEx4RwtrOCmYRkZzGaeCZqApnFJoS6dqQVlaMNbroiCqyTB3BQrGOMLNXAP28NcYxa5Yx5h6HrM5eT56KiuTcmZ3tfYaL3n2CJ6s6jWGjICLoSYr71FjlgrM1xwg-HqFcewvQxRfycTbGU2BpRVGoIwVAd4JkMXTlULgKK9FhmSgncGLw1IvBwk8FM6CjD9LMDYFmeYswhAhTQWlKx6WMuZZqJ8bL1AcocC8hpJ9uV-GoGZLkkcsyCt+CmVk0YeGGDsNK0IcrqAKrIEqpligWVqqsuy8Q+htUsN1WEKMXzBEglNX8rBoomSJkyjasadrKU5Nng6j16gHUMWIN5VEGJsS4nxISDRAd6m+sGk4UOjg8orSpvYUIeURVsmaZ8Eli4hj2sdcGFNT402qIRR2fNPrlmDSUpIIwBtMo4UnMKFMEiTZjUCEtfQlxko4WbUmxUSh21gHTWov2nYezIoLX2j6SlgTTlCFmZobI0HCofh0IR2twhpjUhsuCS66XJqZYQDdXb-ZaM5RBSw0Fb4vEjihUYVhJUTsZMGzWdg7BLQccVKluT5XLuoG+j96iOxIoND+k+lhjDRi5iDE1EwDD3wGIlIRC7lJJTaM+xVyaYVFLQ1iTiOat09tgfu84xaTAin5cyemm5uRA1SUIrSeZcE-EHbRp19HCk+KY3m79e7j79rytQS4kwJVX2zJHFM16mgIUFA+q4T642WRIS2+lDH5OdvQ7vHdWHlORPDIZa4t6Z2gbypEHZwmnhCJ1hp1oHQY2yrBGocgEA4CaDhs41YHGVMHq4WDRKnwUroP4cDPDwRQhX0Hl8l49q-7xec4pVS0EEoslSyBz4E7AXhA+EtbW+WKXZPM9I0ibAOCQGK6iyCZk8NHPQYZUIXcHA8gMKPcwVhbD2DNoV1xCoetcrCG5tclXkrVYy9a6M9XctNZ1gVsz8NRn5KqgAC1cktt5anJ5U2ZGpQwZqgZEuPTlxrIdYzzYuULN2os9RXd1SCPDFXqObbxXoamDwzbOAttYFr8H40kL-rI4W+10YXYfADotzgTDTCSitTcN8eTBFDg0cIeUyeAmZF907DtmpOwxhLX78AlkJfDH8G9nQdbGMlZKuCGV0EGtS3lNk-1Cc06hdVKWf3nYNXcidd2uMbpY4+nrKcowWa-BBBrkUGVLg7Z+BI3CtNuZHdi5Cshcil6F0UavGiKv2cMnU94GxBhVJBHHd06mc6DaLga2pCXlvrO3N1A7xAplviAg6PO7Xa4UyRC+B0DBExLajGkwl15fq1OBp8DrNBoavC316dO2d87mgWHT86lVbl1XvUz-2oEeGVp5klYOqbM0sHlujPmUI2tUtwZi9StIlnk2rqgMQMPQ19V3sTNmdcykcIit6M7hodgCeTgr2bofSGX2KjfZP7MjQzANGaBIwdAG9MGCZJJro5+Vp5Ur7JyZRTJ-DSnHwiIDWWQi892R5wU5iM9Z6Z+kKUYggA */
-  createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
+  createMachine<DataSourceSelectorContext, DataSourceSelectorEvent, DataSourceSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
       preserveActionOrder: true,
       predictableActionArguments: true,
-      id: 'DatasetsSelector',
+      id: 'DataSourceSelector',
       type: 'parallel',
       states: {
         popover: {
@@ -275,13 +275,11 @@ export const createPureDatasetsSelectorStateMachine = (
         isDataViewSelection: (context) => isDataViewSelection(context.selection),
         isAllDatasetSelection: (context) =>
           isDatasetSelection(context.selection) && context.selection.selectionType === 'all',
-        isSingleDatasetSelection: (context) =>
-          isDatasetSelection(context.selection) && context.selection.selectionType === 'single',
       },
     }
   );
 
-export const createDatasetsSelectorStateMachine = ({
+export const createDataSourceSelectorStateMachine = ({
   initialContext,
   onDataViewsSearch,
   onDataViewsSort,
@@ -295,8 +293,8 @@ export const createDatasetsSelectorStateMachine = ({
   onUncategorizedSort,
   onSelectionChange,
   onUncategorizedReload,
-}: DatasetsSelectorStateMachineDependencies) =>
-  createPureDatasetsSelectorStateMachine(initialContext).withConfig({
+}: DataSourceSelectorStateMachineDependencies) =>
+  createPureDataSourceSelectorStateMachine(initialContext).withConfig({
     actions: {
       notifySelectionChanged: (context) => {
         return onSelectionChange(context.selection);

@@ -98,9 +98,9 @@ export interface SearchParams {
   sortOrder: SortOrder;
 }
 
-export type DatasetsSelectorSearchParams = Pick<SearchParams, 'name' | 'sortOrder'>;
+export type DataSourceSelectorSearchParams = Pick<SearchParams, 'name' | 'sortOrder'>;
 
-export type DatasetsSelectorSearchHandler = (params: DatasetsSelectorSearchParams) => void;
+export type DataSourceSelectorSearchHandler = (params: DataSourceSelectorSearchParams) => void;
 
 export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
 

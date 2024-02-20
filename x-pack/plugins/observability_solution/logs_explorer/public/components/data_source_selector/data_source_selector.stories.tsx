@@ -20,7 +20,7 @@ import {
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DataSourceSelector } from './data_source_selector';
-import { DataSourceSelectorProps, DatasetsSelectorSearchParams } from './types';
+import { DataSourceSelectorProps, DataSourceSelectorSearchParams } from './types';
 
 const meta: Meta<typeof DataSourceSelector> = {
   component: DataSourceSelector,
@@ -48,7 +48,7 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
     () => AllDatasetSelection.create()
   );
 
-  const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
+  const [search, setSearch] = useState<DataSourceSelectorSearchParams>({
     sortOrder: 'asc',
     name: '',
   });

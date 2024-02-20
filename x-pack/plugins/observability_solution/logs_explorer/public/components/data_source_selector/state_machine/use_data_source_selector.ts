@@ -10,12 +10,12 @@ import { useInterpret, useSelector } from '@xstate/react';
 import {
   ChangePanelHandler,
   DatasetSelectionHandler,
-  DatasetsSelectorSearchHandler,
+  DataSourceSelectorSearchHandler,
   DataViewSelectionHandler,
   PanelId,
 } from '../types';
-import { createDatasetsSelectorStateMachine } from './state_machine';
-import { DatasetsSelectorStateMachineDependencies } from './types';
+import { createDataSourceSelectorStateMachine } from './state_machine';
+import { DataSourceSelectorStateMachineDependencies } from './types';
 
 export const useDataSourceSelector = ({
   initialContext,
@@ -31,9 +31,9 @@ export const useDataSourceSelector = ({
   onUncategorizedSearch,
   onUncategorizedSort,
   onUncategorizedReload,
-}: DatasetsSelectorStateMachineDependencies) => {
-  const datasetsSelectorStateService = useInterpret(() =>
-    createDatasetsSelectorStateMachine({
+}: DataSourceSelectorStateMachineDependencies) => {
+  const dataSourceSelectorStateService = useInterpret(() =>
+    createDataSourceSelectorStateMachine({
       initialContext,
       onDataViewsSearch,
       onDataViewsSort,
@@ -50,81 +50,82 @@ export const useDataSourceSelector = ({
     })
   );
 
-  const isOpen = useSelector(datasetsSelectorStateService, (state) =>
+  const isOpen = useSelector(dataSourceSelectorStateService, (state) =>
     state.matches('popover.open')
   );
 
-  const panelId = useSelector(datasetsSelectorStateService, (state) => state.context.panelId);
-  const search = useSelector(datasetsSelectorStateService, (state) => state.context.search);
-  const selection = useSelector(datasetsSelectorStateService, (state) => state.context.selection);
-  const tabId = useSelector(datasetsSelectorStateService, (state) => state.context.tabId);
+  const panelId = useSelector(dataSourceSelectorStateService, (state) => state.context.panelId);
+  const search = useSelector(dataSourceSelectorStateService, (state) => state.context.search);
+  const selection = useSelector(dataSourceSelectorStateService, (state) => state.context.selection);
+  const tabId = useSelector(dataSourceSelectorStateService, (state) => state.context.tabId);
 
   const switchToIntegrationsTab = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_INTEGRATIONS_TAB' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'SWITCH_TO_INTEGRATIONS_TAB' }),
+    [dataSourceSelectorStateService]
   );
 
   const switchToUncategorizedTab = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
+    [dataSourceSelectorStateService]
   );
 
   const switchToDataViewsTab = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_DATA_VIEWS_TAB' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'SWITCH_TO_DATA_VIEWS_TAB' }),
+    [dataSourceSelectorStateService]
   );
 
   const changePanel = useCallback<ChangePanelHandler>(
     (panelDetails) =>
-      datasetsSelectorStateService.send({
+      dataSourceSelectorStateService.send({
         type: 'CHANGE_PANEL',
         panelId: panelDetails.panelId as PanelId,
       }),
-    [datasetsSelectorStateService]
+    [dataSourceSelectorStateService]
   );
 
   const scrollToIntegrationsBottom = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'SCROLL_TO_INTEGRATIONS_BOTTOM' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'SCROLL_TO_INTEGRATIONS_BOTTOM' }),
+    [dataSourceSelectorStateService]
   );
 
-  const searchByName = useCallback<DatasetsSelectorSearchHandler>(
-    (params) => datasetsSelectorStateService.send({ type: 'SEARCH_BY_NAME', search: params }),
-    [datasetsSelectorStateService]
+  const searchByName = useCallback<DataSourceSelectorSearchHandler>(
+    (params) => dataSourceSelectorStateService.send({ type: 'SEARCH_BY_NAME', search: params }),
+    [dataSourceSelectorStateService]
   );
 
   const selectAllLogs = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOGS' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'SELECT_ALL_LOGS' }),
+    [dataSourceSelectorStateService]
   );
 
   const selectDataset = useCallback<DatasetSelectionHandler>(
-    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_DATASET', selection: dataset }),
-    [datasetsSelectorStateService]
+    (dataset) =>
+      dataSourceSelectorStateService.send({ type: 'SELECT_DATASET', selection: dataset }),
+    [dataSourceSelectorStateService]
   );
 
   const selectDataView = useCallback<DataViewSelectionHandler>(
     (dataViewDescriptor) =>
-      datasetsSelectorStateService.send({
+      dataSourceSelectorStateService.send({
         type: 'SELECT_DATA_VIEW',
         selection: dataViewDescriptor,
       }),
-    [datasetsSelectorStateService]
+    [dataSourceSelectorStateService]
   );
 
-  const sortByOrder = useCallback<DatasetsSelectorSearchHandler>(
-    (params) => datasetsSelectorStateService.send({ type: 'SORT_BY_ORDER', search: params }),
-    [datasetsSelectorStateService]
+  const sortByOrder = useCallback<DataSourceSelectorSearchHandler>(
+    (params) => dataSourceSelectorStateService.send({ type: 'SORT_BY_ORDER', search: params }),
+    [dataSourceSelectorStateService]
   );
 
   const closePopover = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'CLOSE' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'CLOSE' }),
+    [dataSourceSelectorStateService]
   );
 
   const togglePopover = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'TOGGLE' }),
-    [datasetsSelectorStateService]
+    () => dataSourceSelectorStateService.send({ type: 'TOGGLE' }),
+    [dataSourceSelectorStateService]
   );
 
   return {

@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await browser.refresh();
-        await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+        await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
       });
 
       it('should always display the Integrations Uncategorized and Data Views top level tabs', async () => {
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         beforeEach(async () => {
           await browser.refresh();
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
         });
 
         it('should display a list of installed integrations', async () => {
@@ -274,7 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.observabilityLogsExplorer.setupAdditionalIntegrations();
           await browser.refresh();
 
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
 
           // Initially fetched integrations
           await retry.try(async () => {
@@ -306,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           beforeEach(async () => {
             await browser.refresh();
-            await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+            await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
           });
 
           it('should display a list of available datasets', async () => {
@@ -458,7 +458,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await retry.try(async () => {
               const selectorButton =
-                await PageObjects.observabilityLogsExplorer.getDatasetSelectorButton();
+                await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButton();
 
               expect(await selectorButton.getVisibleText()).to.be('[Apache HTTP Server] access');
             });
@@ -473,7 +473,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         beforeEach(async () => {
           await browser.refresh();
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
           await PageObjects.observabilityLogsExplorer
             .getUncategorizedTab()
             .then((tab: WebElementWrapper) => tab.click());
@@ -612,7 +612,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const selectorButton =
-              await PageObjects.observabilityLogsExplorer.getDatasetSelectorButton();
+              await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButton();
 
             expect(await selectorButton.getVisibleText()).to.be(expectedUncategorized[0]);
           });
@@ -626,7 +626,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         beforeEach(async () => {
           await browser.refresh();
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
           await PageObjects.observabilityLogsExplorer
             .getDataViewsTab()
             .then((tab: WebElementWrapper) => tab.click());
@@ -781,7 +781,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         beforeEach(async () => {
           await browser.refresh();
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
         });
 
         it('should restore the latest navigation panel', async () => {
@@ -805,8 +805,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await menuEntries[1].getVisibleText()).to.be('error');
           });
 
-          await PageObjects.observabilityLogsExplorer.closeDatasetSelector();
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.closeDataSourceSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
 
           await retry.try(async () => {
             const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
@@ -832,8 +832,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(integrations).to.eql([initialPackageMap.system]);
           });
 
-          await PageObjects.observabilityLogsExplorer.closeDatasetSelector();
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.closeDataSourceSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
@@ -848,7 +848,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should remember the latest search and restore its results', async () => {
-          await PageObjects.observabilityLogsExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
           await PageObjects.observabilityLogsExplorer.clearSearchField();
 
           await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('apache');

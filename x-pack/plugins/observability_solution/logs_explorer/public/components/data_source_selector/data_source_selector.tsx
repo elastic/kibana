@@ -22,7 +22,7 @@ import {
   UNCATEGORIZED_PANEL_ID,
   UNCATEGORIZED_TAB_ID,
 } from './constants';
-import { useDataSourceSelector } from './state_machine/use_dataset_selector';
+import { useDataSourceSelector } from './state_machine/use_data_source_selector';
 import { SelectorPopover } from './sub_components/selector_popover';
 import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';

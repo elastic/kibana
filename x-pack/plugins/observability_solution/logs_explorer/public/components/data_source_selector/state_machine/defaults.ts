@@ -8,15 +8,15 @@
 import { AllDatasetSelection } from '../../../../common/dataset_selection';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID } from '../constants';
-import { DatasetsSelectorSearchParams } from '../types';
-import { DefaultDatasetsSelectorContext } from './types';
+import { DataSourceSelectorSearchParams } from '../types';
+import { DefaultDataSourceSelectorContext } from './types';
 
-export const defaultSearch: DatasetsSelectorSearchParams = {
+export const defaultSearch: DataSourceSelectorSearchParams = {
   name: '',
   sortOrder: 'asc',
 };
 
-export const DEFAULT_CONTEXT: DefaultDatasetsSelectorContext = {
+export const DEFAULT_CONTEXT: DefaultDataSourceSelectorContext = {
   selection: AllDatasetSelection.create(),
   searchCache: new HashedCache(),
   panelId: INTEGRATIONS_PANEL_ID,

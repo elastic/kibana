@@ -260,19 +260,19 @@ export function ObservabilityLogsExplorerPageObject({
       );
     },
 
-    getDatasetSelector() {
+    getDataSourceSelector() {
       return testSubjects.find('dataSourceSelectorPopover');
     },
 
-    getDatasetSelectorButton() {
+    getDataSourceSelectorButton() {
       return testSubjects.find('dataSourceSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
-    getDatasetSelectorContent() {
+    getDataSourceSelectorContent() {
       return testSubjects.find('dataSourceSelectorContent');
     },
 
-    getDatasetSelectorSearchControls() {
+    getDataSourceSelectorSearchControls() {
       return testSubjects.find('dataSourceSelectorSearchControls');
     },
 
@@ -308,8 +308,8 @@ export function ObservabilityLogsExplorerPageObject({
       return contextMenu.findByClassName('euiContextMenuPanel__title');
     },
 
-    async getDatasetSelectorButtonText() {
-      const button = await this.getDatasetSelectorButton();
+    async getDataSourceSelectorButtonText() {
+      const button = await this.getDataSourceSelectorButton();
       return button.getVisibleText();
     },
 
@@ -345,13 +345,13 @@ export function ObservabilityLogsExplorerPageObject({
       };
     },
 
-    async openDatasetSelector() {
-      const button = await this.getDatasetSelectorButton();
+    async openDataSourceSelector() {
+      const button = await this.getDataSourceSelectorButton();
       return button.click();
     },
 
-    async closeDatasetSelector() {
-      const button = await this.getDatasetSelectorButton();
+    async closeDataSourceSelector() {
+      const button = await this.getDataSourceSelectorButton();
       const isOpen = await testSubjects.exists('dataSourceSelectorContent');
 
       if (isOpen) return button.click();
@@ -362,7 +362,7 @@ export function ObservabilityLogsExplorerPageObject({
         asc: 'Ascending',
         desc: 'Descending',
       };
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const sortingButton = await searchControlsContainer.findByCssSelector(
         `[title=${titleMap[direction]}]`
       );
@@ -371,14 +371,14 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     async getSearchFieldValue() {
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       return searchField.getAttribute('value');
     },
 
     async typeSearchFieldWith(name: string) {
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       await searchField.clearValueWithKeyboard();
@@ -386,7 +386,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     async clearSearchField() {
-      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchControlsContainer = await this.getDataSourceSelectorSearchControls();
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       return searchField.clearValueWithKeyboard();

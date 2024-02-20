@@ -19,77 +19,77 @@ import {
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { DatasetsSelectorSearchParams, PanelId, TabId } from '../types';
+import { DataSourceSelectorSearchParams, PanelId, TabId } from '../types';
 
-export interface DefaultDatasetsSelectorContext {
+export interface DefaultDataSourceSelectorContext {
   selection: DatasetSelection | DataViewSelection;
   tabId: TabId;
   panelId: PanelId;
-  searchCache: IHashedCache<PanelId | TabId, DatasetsSelectorSearchParams>;
-  search: DatasetsSelectorSearchParams;
+  searchCache: IHashedCache<PanelId | TabId, DataSourceSelectorSearchParams>;
+  search: DataSourceSelectorSearchParams;
 }
 
-export type DatasetsSelectorTypestate =
+export type DataSourceSelectorTypestate =
   | {
       value: 'popover';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.closed';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open.hist';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open.integrationsTab';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open.integrationsTab.listingIntegrations';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open.integrationsTab.listingIntegrationStreams';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open.uncategorizedTab';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'popover.open.dataViewsTab';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'selection';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'selection.validatingSelection';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'selection.single';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'selection.dataView';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     }
   | {
       value: 'selection.all';
-      context: DefaultDatasetsSelectorContext;
+      context: DefaultDataSourceSelectorContext;
     };
 
-export type DatasetsSelectorContext = DatasetsSelectorTypestate['context'];
+export type DataSourceSelectorContext = DataSourceSelectorTypestate['context'];
 
-export type DatasetsSelectorEvent =
+export type DataSourceSelectorEvent =
   | {
       type: 'CLOSE';
     }
@@ -125,15 +125,15 @@ export type DatasetsSelectorEvent =
     }
   | {
       type: 'SEARCH_BY_NAME';
-      search: DatasetsSelectorSearchParams;
+      search: DataSourceSelectorSearchParams;
     }
   | {
       type: 'SORT_BY_ORDER';
-      search: DatasetsSelectorSearchParams;
+      search: DataSourceSelectorSearchParams;
     };
 
-export interface DatasetsSelectorStateMachineDependencies {
-  initialContext?: Partial<DefaultDatasetsSelectorContext>;
+export interface DataSourceSelectorStateMachineDependencies {
+  initialContext?: Partial<DefaultDataSourceSelectorContext>;
   onDataViewsSearch: SearchDataViews;
   onDataViewsSort: SearchDataViews;
   onIntegrationsLoadMore: LoadMoreIntegrations;

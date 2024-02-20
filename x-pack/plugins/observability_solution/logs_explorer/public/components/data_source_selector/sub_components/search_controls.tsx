@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SortOrder } from '../../../../common/latest';
 import { DATA_SOURCE_SELECTOR_WIDTH, sortOptions, sortOrdersLabel } from '../constants';
-import { DatasetsSelectorSearchHandler, DatasetsSelectorSearchParams } from '../types';
+import { DataSourceSelectorSearchHandler, DataSourceSelectorSearchParams } from '../types';
 
 interface SearchControlsProps {
   isLoading: boolean;
-  onSearch: DatasetsSelectorSearchHandler;
-  onSort: DatasetsSelectorSearchHandler;
-  search: DatasetsSelectorSearchParams;
+  onSearch: DataSourceSelectorSearchHandler;
+  onSort: DataSourceSelectorSearchHandler;
+  search: DataSourceSelectorSearchParams;
 }
 
 export const SearchControls = ({ search, onSearch, onSort, isLoading }: SearchControlsProps) => {
@@ -28,7 +28,7 @@ export const SearchControls = ({ search, onSearch, onSort, isLoading }: SearchCo
   };
 
   const handleSortChange = (id: string) => {
-    const newSearch = { ...search, sortOrder: id as DatasetsSelectorSearchParams['sortOrder'] };
+    const newSearch = { ...search, sortOrder: id as DataSourceSelectorSearchParams['sortOrder'] };
     onSort(newSearch);
   };
 
