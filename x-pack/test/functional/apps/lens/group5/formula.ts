@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -135,6 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'formula',
         formula: `asdf`,
       });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql('asdf');
 
       await PageObjects.lens.assertMessageListContains('Field asdf was not found.', 'error');
     });
