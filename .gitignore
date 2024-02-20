@@ -81,9 +81,6 @@ package-lock.json
 npm-debug.log*
 .tern-project
 .nyc_output
-.ci/pipeline-library/build/
-.ci/runbld
-.ci/bash_standard_lib.sh
 .gradle
 .vagrant
 .envrc
