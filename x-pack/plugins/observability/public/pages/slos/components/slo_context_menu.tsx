@@ -82,7 +82,7 @@ export function SLOContextMenu({
               <span>{label}</span>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="syntheticsOverviewGroupButton">
+          <EuiFlexItem grow={false} data-test-subj="sloOverviewGroupButton">
             <EuiPopover
               id={singleContextMenuPopoverId}
               button={button}
@@ -90,6 +90,7 @@ export function SLOContextMenu({
               closePopover={() => setIsPopoverOpen(false)}
               panelPaddingSize="none"
               anchorPosition="downLeft"
+              aria-label={label}
             >
               <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
             </EuiPopover>
@@ -114,6 +115,7 @@ export function ContextMenuItem({
   return (
     <EuiContextMenuItem
       size="s"
+      aria-label={option.label}
       key={option.value}
       icon={getIconType(option.checked)}
       onClick={() => {
