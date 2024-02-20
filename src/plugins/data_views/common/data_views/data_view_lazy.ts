@@ -7,6 +7,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { each, cloneDeep, pickBy, mapValues, omit } from 'lodash';
@@ -37,18 +38,15 @@ interface DataViewDeps {
 }
 
 interface GetFieldsParams {
-  type?: string[];
-  // metaFields?: string[]; // this should probably be a field type
-  // rollupIndex?: string;
-  // allowNoIndex?: boolean;
-  // indexFilter?: QueryDslQueryContainer;
-  // todo
-  // includeUnmapped?: boolean;
+  indexFilter?: QueryDslQueryContainer;
+  unmapped?: boolean;
   fieldName?: string[]; // supports wildcard
   mapped?: boolean;
   scripted?: boolean;
   runtime?: boolean;
   forceRefresh?: boolean;
+  metaFields?: boolean;
+  fieldTypes?: string[];
 }
 
 type DataViewFieldMap = Record<string, DataViewField>;
@@ -62,24 +60,16 @@ export class DataViewLazy extends AbstractDataView {
     this.apiClient = config.apiClient;
   }
 
-  /*
-  pattern: string;
-  type?: string;
-  metaFields?: string[];
-  rollupIndex?: string;
-  allowNoIndex?: boolean;
-  indexFilter?: QueryDslQueryContainer;
-  includeUnmapped?: boolean;
-  fields?: string[];
-  */
   // todo sort alphabetically
   async getFields({
     mapped = true,
     scripted = true,
     runtime = true,
-    type,
     fieldName = ['*'],
     forceRefresh = false,
+    unmapped,
+    indexFilter,
+    metaFields = true,
   }: GetFieldsParams) {
     let mappedResult: DataViewFieldMap = {};
     let scriptedResult: DataViewFieldMap = {};
@@ -91,9 +81,11 @@ export class DataViewLazy extends AbstractDataView {
         ? fieldName
         : fieldsMatchFieldsRequested(Object.keys(this.runtimeFieldMap), fieldName);
       mappedResult = await this.getMappedFields({
-        type,
         fieldName: fieldsToRequest,
         forceRefresh,
+        unmapped,
+        indexFilter,
+        metaFields,
       });
     }
 
@@ -375,24 +367,27 @@ export class DataViewLazy extends AbstractDataView {
     return dataViewFields;
   }
 
+  // todo test rollup, metaFields
   private async getMappedFields({
     fieldName,
-    type,
     forceRefresh = false,
+    unmapped: includeUnmapped,
+    indexFilter,
+    metaFields,
+    fieldTypes,
   }: Omit<GetFieldsParams, 'mapped' | 'scripted' | 'runtime'>) {
-    // map spec to class
-    // look at refreshFieldsFn
+    // todo look at refreshFieldsFn
     const response = await this.apiClient.getFieldsForWildcard({
       pattern: this.getIndexPattern(),
-      // rollupIndex: getFieldParams.rollupIndex,
+      metaFields: metaFields ? this.metaFields : undefined,
+      type: this.type,
+      rollupIndex: this.typeMeta?.params?.rollup_index,
       fields: fieldName || ['*'],
-      // maybe rename this to 'types'
-      type: type?.join(','), // this might need stricter type
-      // allowNoIndex: true,
-      // indexFilter: getFieldParams.indexFilter,
-      // I think this should always be true
-      // includeUnmapped: true,
+      allowNoIndex: true, // todo research this
+      indexFilter,
+      includeUnmapped,
       forceRefresh,
+      fieldTypes,
     });
 
     // const dataViewFields: DataViewField[] = [];
@@ -401,8 +396,8 @@ export class DataViewLazy extends AbstractDataView {
       // keep existing field object, make sure content is fresh
       const fld = this.fieldCache.get(field.name);
       if (fld) {
-        // update a bunch of things
-        // I wonder if there's a more clever way to do this
+        // todo - am I copying whole spec?
+        // get fresh attributes
         fld.spec.aggregatable = field.aggregatable;
         fld.spec.conflictDescriptions = field.conflictDescriptions;
         fld.spec.esTypes = field.esTypes;
@@ -442,15 +437,12 @@ export class DataViewLazy extends AbstractDataView {
     );
   }
 
-  // get computed fields WITHOUT looking at the field list
-  // getComputedFields(fields: DataViewField[]) {
-  // perhaps this should only work with fields already loaded
   async getComputedFields({ fieldNames = ['*'] }: { fieldNames: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
 
     const fieldMap = await this.getFields({
       fieldName: fieldNames,
-      type: ['date', 'date_nanos'],
+      fieldTypes: ['date', 'date_nanos'],
       scripted: false,
       runtime: false,
     });

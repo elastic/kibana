@@ -47,6 +47,7 @@ interface FieldCapsApiParams {
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
+  fieldTypes?: string[];
 }
 
 /**
@@ -72,6 +73,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     },
     fields = ['*'],
     expandWildcards,
+    fieldTypes,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -81,6 +83,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         ignore_unavailable: true,
         index_filter: indexFilter,
         expand_wildcards: expandWildcards,
+        types: fieldTypes,
         ...fieldCapsOptions,
       },
       { meta: true }
