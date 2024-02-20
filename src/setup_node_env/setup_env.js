@@ -13,5 +13,6 @@ require('./harden');
 
 require('symbol-observable');
 require('source-map-support').install();
+require('./cpu_profiling');
 require('./node_version_validator');
 require('./openssl_legacy_provider');
