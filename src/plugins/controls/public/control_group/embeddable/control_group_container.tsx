@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
@@ -16,7 +14,7 @@ import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
 
-import { OverlayRef, Toast } from '@kbn/core/public';
+import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -27,6 +25,7 @@ import {
   persistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
+import { ControlsStorageService } from '../../services/storage/types';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
@@ -58,8 +57,6 @@ import {
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { getNextPanelOrder } from './control_group_helpers';
-import { ControlGroupStrings } from '../control_group_strings';
-import { ControlsStorageService } from '../../services/storage/types';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -99,7 +96,6 @@ export class ControlGroupContainer extends Container<
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
   private invalidSelectionsState: { [childId: string]: boolean };
-  private invalidSelectionsToast?: Toast;
 
   public diffingSubscription: Subscription = new Subscription();
 
@@ -183,46 +179,8 @@ export class ControlGroupContainer extends Container<
   public canShowInvalidSelectionsWarning = () =>
     this.storageService.getShowInvalidSelectionWarning() ?? true;
 
-  public supressInvalidSelectionsWarning = () => {
+  public suppressInvalidSelectionsWarning = () => {
     this.storageService.setShowInvalidSelectionWarning(false);
-  };
-
-  public showInvalidSelectionsToast = () => {
-    if (!this.canShowInvalidSelectionsWarning()) return;
-    const {
-      core: { notifications, theme, i18n },
-    } = pluginServices.getServices();
-
-    // remove any existing toasts to avoid a toast storm
-    if (this.invalidSelectionsToast) {
-      notifications.toasts.remove(this.invalidSelectionsToast);
-    }
-
-    this.invalidSelectionsToast = notifications.toasts.addWarning({
-      title: ControlGroupStrings.invalidControlWarning.title,
-      text: toMountPoint(
-        <>
-          <p>{ControlGroupStrings.invalidControlWarning.text}</p>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                color="text"
-                onClick={() => {
-                  this.supressInvalidSelectionsWarning();
-                  if (this.invalidSelectionsToast) {
-                    notifications.toasts.remove(this.invalidSelectionsToast);
-                  }
-                }}
-              >
-                {ControlGroupStrings.invalidControlWarning.dismissButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>,
-        { theme, i18n }
-      ),
-    });
   };
 
   public reportInvalidSelections = ({
@@ -234,11 +192,14 @@ export class ControlGroupContainer extends Container<
   }) => {
     this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
 
-    const childrenHaveInvalidSelections = Object.keys(this.getInput().panels).some((childId) => {
+    const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+      this.getInput().panels
+    ).idsInOrder.filter((childId) => {
       return this.invalidSelectionsState[childId];
     });
-
-    this.dispatch.setControlsHaveInvalidSelections(childrenHaveInvalidSelections);
+    this.dispatch.setControlWithInvalidSelectionsId(
+      childrenWithInvalidSelections.length > 0 ? childrenWithInvalidSelections[0] : undefined
+    );
   };
 
   private setupSubscriptions = () => {
@@ -295,8 +256,6 @@ export class ControlGroupContainer extends Container<
   }
 
   public reload() {
-    // reset invalid selections state on reload
-    this.dispatch.setControlsHaveInvalidSelections(undefined);
     super.reload();
   }
 

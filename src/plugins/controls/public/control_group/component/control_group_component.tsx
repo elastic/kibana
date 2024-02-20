@@ -8,6 +8,10 @@
 
 import '../control_group.scss';
 
+import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
+
 import {
   closestCenter,
   DndContext,
@@ -25,11 +29,17 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
-
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTourStep,
+} from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { ControlGroupStrings } from '../control_group_strings';
@@ -47,15 +57,12 @@ export const ControlGroup = () => {
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
-  const controlsHaveInvalidSelections = contextSelect(
-    (state) => state.componentState.controlsHaveInvalidSelections
+  const controlWithInvalidSelectionsId = contextSelect(
+    (state) => state.componentState.controlWithInvalidSelectionsId
   );
-
-  useEffect(() => {
-    if (controlsHaveInvalidSelections) {
-      controlGroup.showInvalidSelectionsToast();
-    }
-  }, [controlGroup, controlsHaveInvalidSelections]);
+  const [tourStepOpen, setTourStepOpen] = useState<boolean>(true);
+  const [suppressTourChecked, setSuppressTourChecked] = useState<boolean>(false);
+  const [renderTourStep, setRenderTourStep] = useState(false);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -69,6 +76,90 @@ export const ControlGroup = () => {
         }, [] as string[]),
     [panels]
   );
+
+  useEffect(() => {
+    /**
+     * This forces the tour step to get unmounted so that it can attach to the new invalid
+     * control - otherwise, the anchor will remain attached to the old invalid control
+     */
+    setRenderTourStep(false);
+    setTimeout(() => setRenderTourStep(true), 100);
+  }, [controlWithInvalidSelectionsId]);
+
+  const tourStep = useMemo(() => {
+    if (
+      !renderTourStep ||
+      !controlGroup.canShowInvalidSelectionsWarning() ||
+      !tourStepOpen ||
+      !controlWithInvalidSelectionsId
+    ) {
+      return null;
+    }
+
+    return (
+      <EuiTourStep
+        step={1}
+        stepsTotal={1}
+        minWidth={300}
+        maxWidth={300}
+        display="block"
+        isStepOpen={true}
+        repositionOnScroll
+        onFinish={() => {}}
+        panelPaddingSize="m"
+        anchorPosition="downCenter"
+        panelClassName="controlGroup--invalidSelectionsTour"
+        anchor={`#controlFrame--${controlWithInvalidSelectionsId}`}
+        title={
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="warning" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {ControlGroupStrings.invalidControlWarning.getTourTitle(
+                panels[controlWithInvalidSelectionsId].type
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        content={ControlGroupStrings.invalidControlWarning.getTourContent()}
+        footerAction={[
+          <EuiCheckbox
+            compressed
+            checked={suppressTourChecked}
+            id={'controlGroup--suppressTourCheckbox'}
+            className="controlGroup--suppressTourCheckbox"
+            onChange={(e) => setSuppressTourChecked(e.target.checked)}
+            label={
+              <EuiText size="xs" className="controlGroup--suppressTourCheckboxLabel">
+                {ControlGroupStrings.invalidControlWarning.getSuppressTourLabel()}
+              </EuiText>
+            }
+          />,
+          <EuiButtonEmpty
+            size="xs"
+            flush="right"
+            color="text"
+            onClick={() => {
+              setTourStepOpen(false);
+              if (suppressTourChecked) {
+                controlGroup.suppressInvalidSelectionsWarning();
+              }
+            }}
+          >
+            {ControlGroupStrings.invalidControlWarning.getDismissButton()}
+          </EuiButtonEmpty>,
+        ]}
+      />
+    );
+  }, [
+    panels,
+    controlGroup,
+    tourStepOpen,
+    renderTourStep,
+    suppressTourChecked,
+    controlWithInvalidSelectionsId,
+  ]);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const draggingIndex = useMemo(
@@ -126,6 +217,7 @@ export const ControlGroup = () => {
             alignItems="center"
             data-test-subj="controls-group"
           >
+            {tourStep}
             <EuiFlexItem>
               <DndContext
                 onDragStart={({ active }) => setDraggingId(active.id)}

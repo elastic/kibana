@@ -11,18 +11,39 @@ import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
   invalidControlWarning: {
-    title: i18n.translate('controls.controlGroup.invalidControlWarning.title', {
-      defaultMessage: 'Some control selections are returning no results.',
-    }),
-    text: i18n.translate('controls.controlGroup.invalidControlWarning.text', {
-      defaultMessage: 'Remove them for complete results.',
-    }),
-    dismissButtonLabel: i18n.translate(
-      'controls.controlGroup.invalidControlWarning.dismissButtonLabel',
-      {
-        defaultMessage: 'Do not show again',
+    getTourTitle: (controlType: string) => {
+      switch (controlType) {
+        case RANGE_SLIDER_CONTROL: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepTitle.rangeSlider',
+            {
+              defaultMessage: 'Invalid range selection',
+            }
+          );
+        }
+        default: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepTitle.default',
+            {
+              defaultMessage: 'Invalid selections',
+            }
+          );
+        }
       }
-    ),
+    },
+    getTourContent: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.tourStepContent', {
+        defaultMessage:
+          'Some selections are returning no results. To see the full results, change your selections.',
+      }),
+    getDismissButton: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.dismissButtonLabel', {
+        defaultMessage: 'Dismiss',
+      }),
+    getSuppressTourLabel: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.suppressTourLabel', {
+        defaultMessage: "Don't show again",
+      }),
   },
   manageControl: {
     getFlyoutCreateTitle: () =>
