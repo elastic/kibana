@@ -36,9 +36,9 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
     mapSlosToOptions(initialSlos)
   );
   const [searchValue, setSearchValue] = useState<string>('');
-  const query = `${searchValue.replaceAll(' ', '*')}*`;
+  const query = `${searchValue}*`;
   const { isLoading, data: sloList } = useFetchSloList({
-    kqlQuery: `slo.name: ${query} or slo.instanceId: ${query}`,
+    kqlQuery: `slo.name: (${query}) or slo.instanceId.text: (${query})`,
     perPage: 100,
   });
 
