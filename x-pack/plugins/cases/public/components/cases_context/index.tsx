@@ -12,6 +12,8 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
+
+import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
@@ -63,7 +65,7 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
+export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,
@@ -75,6 +77,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     releasePhase = 'ga',
     getFilesClient,
   },
+  queryClient = casesQueryClient,
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());

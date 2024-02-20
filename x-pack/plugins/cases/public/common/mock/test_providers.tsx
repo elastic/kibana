@@ -191,8 +191,9 @@ export const createAppMockRenderer = ({
                 releasePhase,
                 getFilesClient,
               }}
+              queryClient={queryClient}
             >
-              <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+              {children}
             </CasesProvider>
           </MemoryRouter>
         </ThemeProvider>
