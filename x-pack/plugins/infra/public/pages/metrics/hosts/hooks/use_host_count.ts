@@ -32,16 +32,29 @@ export const useHostCount = () => {
       const filters: QueryDslQueryContainer = {
         bool: {
           ...query.bool,
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'event.module': 'system',
+                    },
+                  },
+                  {
+                    term: {
+                      'metricset.module': 'system',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
           filter: [
             ...query.bool.filter,
             {
               exists: {
                 field: 'host.name',
-              },
-            },
-            {
-              term: {
-                'event.module': 'system',
               },
             },
             {

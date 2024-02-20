@@ -31,15 +31,6 @@ export const createFilters = ({
       ? extrafilterClause
       : [extrafilterClause]
     : [];
-
-  const systemMetricsFilter = [
-    {
-      term: {
-        'event.module': 'system',
-      },
-    },
-  ];
-
   const hostNamesFilter =
     hostNamesShortList.length > 0
       ? [
@@ -54,7 +45,6 @@ export const createFilters = ({
   return [
     ...hostNamesFilter,
     ...extraFilterList,
-    ...systemMetricsFilter,
     {
       range: {
         '@timestamp': {
@@ -93,6 +83,27 @@ export const runQuery = <T>(
         throw error;
       })
     );
+};
+
+export const systemMetricsFilter = {
+  must: [
+    {
+      bool: {
+        should: [
+          {
+            term: {
+              'event.module': 'system',
+            },
+          },
+          {
+            term: {
+              'metricset.module': 'system',
+            },
+          },
+        ],
+      },
+    },
+  ],
 };
 
 export const getInventoryModelAggregations = (
