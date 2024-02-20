@@ -6,10 +6,17 @@
  */
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiLoadingSpinner,
+  useCurrentEuiBreakpoint,
+} from '@elastic/eui';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
@@ -31,19 +38,15 @@ export const defaultFlyoutState: FlyoutState = {
 
 export const OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY = 'observabilityAIAssistant_flyoutState';
 
+const buttonLabelClassName = css`
+  display: none;
+`;
+
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
-  const {
-    plugins: {
-      start: {
-        data: {
-          query: {
-            timefilter: { timefilter },
-          },
-        },
-      },
-    },
-  } = useKibana().services;
+  const breakpoint = useCurrentEuiBreakpoint();
+
+  const { plugins } = useKibana().services;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -69,7 +72,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { from, to } = timefilter.getTime();
+  const { from, to } = plugins.start.data.query.timefilter.timefilter.getTime();
 
   useEffect(() => {
     const start = datemath.parse(from)?.format() ?? moment().subtract(1, 'day').toISOString();
@@ -123,7 +126,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
         disabled={chatService.loading}
         onClick={handleToggleOpen}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             {isOpen && !chatService.value ? (
               <EuiLoadingSpinner size="m" />
@@ -131,7 +134,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
               <AssistantAvatar size="xs" />
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className={breakpoint === 'xs' ? buttonLabelClassName : ''}>
             {i18n.translate('xpack.observabilityAiAssistant.actionMenuItemLabel', {
               defaultMessage: 'AI Assistant',
             })}

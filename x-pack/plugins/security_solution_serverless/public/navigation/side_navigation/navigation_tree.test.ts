@@ -26,6 +26,7 @@ const chromeNavLink1: ChromeNavLink = {
   href: '/link1',
   url: '/link1',
   baseUrl: '',
+  visibleIn: [],
 };
 const chromeNavLink2: ChromeNavLink = {
   id: `${APP_UI_ID}:${link2.id}`,
@@ -33,6 +34,7 @@ const chromeNavLink2: ChromeNavLink = {
   href: '/link2',
   url: '/link2',
   baseUrl: '',
+  visibleIn: [],
 };
 const chromeNavLink3: ChromeNavLink = {
   id: link3.id,
@@ -40,6 +42,7 @@ const chromeNavLink3: ChromeNavLink = {
   href: '/link3',
   url: '/link3',
   baseUrl: '',
+  visibleIn: [],
 };
 
 describe('formatNavigationTree', () => {
