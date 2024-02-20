@@ -71,7 +71,11 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
     createIndexApiSuccess: async ({ indexName }, breakpoint) => {
       if (values.connector) {
         await breakpoint(500);
-        actions.attachIndex({ connectorId: values.connector?.id, indexName });
+        actions.attachIndex({
+          connectorId: values.connector?.id,
+          indexName,
+          isNative: values.connector?.is_native,
+        });
       }
     },
   }),

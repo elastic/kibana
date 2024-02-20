@@ -99,7 +99,6 @@ export const ConnectorConfiguration: React.FC = () => {
                       indexName={indexName}
                       hasApiKey={!!index.connector.api_key_id}
                       isNative={false}
-                      secretId={null}
                     />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',

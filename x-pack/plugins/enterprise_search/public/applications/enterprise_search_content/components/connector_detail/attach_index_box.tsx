@@ -51,7 +51,11 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     if (selectedIndex?.shouldCreate) {
       createIndex({ indexName: selectedIndex.label, language: selectedLanguage ?? null });
     } else if (selectedIndex) {
-      attachIndex({ connectorId: connector.id, indexName: selectedIndex.label });
+      attachIndex({
+        connectorId: connector.id,
+        indexName: selectedIndex.label,
+        isNative: connector.is_native,
+      });
     }
   };
 

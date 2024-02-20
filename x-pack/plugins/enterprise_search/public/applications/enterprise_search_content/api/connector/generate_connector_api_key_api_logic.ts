@@ -18,16 +18,13 @@ export interface ApiKey {
 export const generateApiKey = async ({
   indexName,
   isNative,
-  secretId,
 }: {
   indexName: string;
   isNative: boolean;
-  secretId: string | null;
 }) => {
   const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
   const params = {
     is_native: isNative,
-    secret_id: secretId,
   };
   return await HttpLogic.values.http.post<ApiKey>(route, {
     body: JSON.stringify(params),

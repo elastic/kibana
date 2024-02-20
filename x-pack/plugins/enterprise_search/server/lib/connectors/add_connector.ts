@@ -96,7 +96,7 @@ export const addConnector = async (
     input.isNative &&
     input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
   ) {
-    await generateApiKey(client, index, true, null);
+    await generateApiKey(client, index, true);
   }
 
   return connector;

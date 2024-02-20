@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
+  CONNECTORS_INDEX,
   deleteConnectorById,
   deleteConnectorSecret,
   fetchConnectorById,
@@ -32,6 +33,7 @@ import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
+import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
@@ -646,6 +648,9 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
       validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
         params: schema.object({
           connectorId: schema.string(),
           indexName: schema.string(),
@@ -655,6 +660,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId, indexName } = request.params;
+      const { is_native: isNative } = request.body;
 
       try {
         await client.asCurrentUser.transport.request({
@@ -664,6 +670,16 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           method: 'PUT',
           path: `/_connector/${connectorId}/_index_name`,
         });
+
+        if (isNative) {
+          // generateApiKey will search for the connector based on index_name, so we need to refresh the index before that.
+          await client.asCurrentUser.transport.request({
+            method: 'POST',
+            path: `/${CONNECTORS_INDEX}/_refresh`,
+          });
+          await generateApiKey(client, indexName, true);
+        }
+
         return response.ok();
       } catch (error) {
         if (isIndexNotFoundException(error)) {
