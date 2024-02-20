@@ -22,7 +22,6 @@ import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { ManageMonitorsBtn } from './manage_monitors_btn';
-import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -41,8 +40,6 @@ export function ActionMenuContent(): React.ReactElement {
   const kibana = useKibana();
 
   const { basePath } = useUptimeSettingsContext();
-  const { observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem } = {} } =
-    useUptimeStartPlugins();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
@@ -121,7 +118,6 @@ export function ActionMenuContent(): React.ReactElement {
         {ADD_DATA_LABEL}
       </EuiHeaderLink>
       <InspectorHeaderLink />
-      {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
     </EuiHeaderLinks>
   );
 }

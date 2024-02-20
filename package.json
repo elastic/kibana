@@ -805,6 +805,7 @@
     "@kbn/threat-intelligence-plugin": "link:x-pack/plugins/threat_intelligence",
     "@kbn/timelines-plugin": "link:x-pack/plugins/timelines",
     "@kbn/timelion-grammar": "link:packages/kbn-timelion-grammar",
+    "@kbn/timerange": "link:packages/kbn-timerange",
     "@kbn/tinymath": "link:packages/kbn-tinymath",
     "@kbn/transform-plugin": "link:x-pack/plugins/transform",
     "@kbn/translations-plugin": "link:x-pack/plugins/translations",

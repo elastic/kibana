@@ -6308,6 +6308,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/timerange@link:packages/kbn-timerange":
+  version "0.0.0"
+  uid ""
+
 "@kbn/tinymath@link:packages/kbn-tinymath":
   version "0.0.0"
   uid ""
