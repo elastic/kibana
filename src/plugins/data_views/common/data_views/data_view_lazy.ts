@@ -78,16 +78,14 @@ export class DataViewLazy extends AbstractDataView {
   fields?: string[];
   */
   // sort alphabetically
-  async getFields(
-    {
-      mapped = true,
-      scripted = true,
-      runtime = true,
-      type,
-      fieldName = ['*'],
-      forceRefresh = false,
-    }: GetFieldsParams // todo implement
-  ) {
+  async getFields({
+    mapped = true,
+    scripted = true,
+    runtime = true,
+    type,
+    fieldName = ['*'],
+    forceRefresh = false,
+  }: GetFieldsParams) {
     let mappedResult: DataViewFieldMap = {};
     let scriptedResult: DataViewFieldMap = {};
     let runtimeResult: DataViewFieldMap = {};
@@ -104,12 +102,13 @@ export class DataViewLazy extends AbstractDataView {
         forceRefresh,
       });
     }
-    // todo test which field type is given preference
+
+    // todo support name wildcard
     if (scripted) {
       scriptedResult = this.getScriptedFields({ fieldName });
     }
 
-    // todo add tests for runtime field on mapped field
+    // todo support name wildcard
     if (runtime) {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
@@ -117,7 +116,6 @@ export class DataViewLazy extends AbstractDataView {
     return { ...scriptedResult, ...mappedResult, ...runtimeResult };
   }
 
-  // todo test that this is working
   private getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
     // getRuntimeFieldSpecMap flattens composites into a list of fields
     Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
@@ -227,7 +225,6 @@ export class DataViewLazy extends AbstractDataView {
   removeRuntimeField(name: string) {
     const existingField = this.fieldCache.get(name);
 
-    // todo is there test coverage?
     if (existingField && existingField.isMapped) {
       // mapped field, remove runtimeField definition
       existingField.runtimeField = undefined;
@@ -493,8 +490,8 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    const records = this.runtimeFieldMap;
-    return records as estypes.MappingRuntimeFields; // todo - why set the type?
+    // @ts-expect-error composite type is not yet supported by es client but it can be forced
+    return this.runtimeFieldMap;
   }
 
   private toSpecShared(includeFields = true): DataViewSpec {
