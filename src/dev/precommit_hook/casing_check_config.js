@@ -40,7 +40,6 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
-  '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',

@@ -212,10 +212,8 @@ export function XYChart({
   syncTooltips,
   syncCursor,
   shouldUseVeil,
-
   useLegacyTimeAxis,
   renderComplete,
-
   uiState,
   timeFormat,
   overrides,
@@ -1021,7 +1019,7 @@ export function XYChart({
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}
-              formatter={xAxisFormatter}
+              timeFormat={timeFormat}
               isHorizontal={shouldRotate}
               paddingMap={linesPaddings}
               isBarChart={filteredBarLayers.length > 0}

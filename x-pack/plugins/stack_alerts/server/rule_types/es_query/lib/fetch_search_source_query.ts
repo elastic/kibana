@@ -144,6 +144,9 @@ export function updateSearchSource(
   }
 
   const searchSourceChild = searchSource.createChild();
+  if (!isGroupAgg) {
+    searchSourceChild.setField('trackTotalHits', true);
+  }
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [
     {
