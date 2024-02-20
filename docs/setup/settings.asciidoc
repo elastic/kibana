@@ -467,6 +467,11 @@ default is `true`. *Default: `deprecated`*
 The number of milliseconds to wait before closing an
 inactive socket. *Default: `"120000"`*
 
+[[server-payloadTimeout]] `server.payloadTimeout`::
+Sets the maximum time allowed for the client to transmit the request payload (body) before giving up
+and responding with a Request Timeout (408) error response.
+*Default: `"20000"`*
+
 [[server-ssl-cert-key]] `server.ssl.certificate` and `server.ssl.key`::
 Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
