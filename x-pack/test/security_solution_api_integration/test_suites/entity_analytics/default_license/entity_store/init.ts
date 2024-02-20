@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should install resources on init call', async () => {
-        const latestIndexName = '.entities.entities-default';
+        const latestIndexName = '.items-entities.entities-default';
 
         await entityStoreRoutes.init();
 

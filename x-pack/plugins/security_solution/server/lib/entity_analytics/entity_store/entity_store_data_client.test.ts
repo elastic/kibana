@@ -41,7 +41,7 @@ describe('EntityStoreDataClient', () => {
       logger,
       esClient,
       options: {
-        index: '.entities.entities-default',
+        index: '.items-entities.entities-default',
         mappings: {
           dynamic: 'strict',
           properties: {

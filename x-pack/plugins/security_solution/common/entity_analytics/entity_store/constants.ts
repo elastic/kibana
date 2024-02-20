@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const entityStoreBaseIndexName = '.entities';
+export const entityStoreBaseIndexName = '.items-entities';
 
 export const getEntityStoreIndex = (spaceId = 'default') =>
   `${entityStoreBaseIndexName}.entities-${spaceId}`;

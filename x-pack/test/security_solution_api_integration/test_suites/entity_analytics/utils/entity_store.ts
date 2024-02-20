@@ -47,7 +47,7 @@ const deleteEntityStoreIndices = async ({
 }) => {
   try {
     await es.indices.delete({
-      index: [`.entities.entities-${namespace}`],
+      index: [`.items-entities.entities-${namespace}`],
     });
   } catch (e) {
     log.warning(`Error deleting entity store indices: ${e.message}`);

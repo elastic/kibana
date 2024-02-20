@@ -14,7 +14,7 @@ import {
 } from './constants';
 
 const getTransformDestinationIndex = (name: string) => {
-  return `.entities.entity-composites.${name}`;
+  return `.items-entities.entity-composites.${name}`;
 };
 
 export const maybeCreateAndStartEntityTransform = async ({
