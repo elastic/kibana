@@ -27,6 +27,7 @@ import { parseUrlParams } from './utils/parse_url_params';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { getLocalStorageKey } from './utils';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -182,8 +183,11 @@ const useAllCasesLocalStorage = (): [
   const { appId } = useCasesContext();
 
   const [state, setState] = useLocalStorage<AllCasesTableState>(
-    getAllCasesTableStateLocalStorageKey(appId),
-    { queryParams: DEFAULT_QUERY_PARAMS, filterOptions: DEFAULT_FILTER_OPTIONS }
+    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableState, appId),
+    {
+      queryParams: DEFAULT_QUERY_PARAMS,
+      filterOptions: DEFAULT_FILTER_OPTIONS,
+    }
   );
 
   const sanitizedState = sanitizeState(state);
@@ -198,9 +202,4 @@ const useAllCasesLocalStorage = (): [
     },
     setState,
   ];
-};
-
-const getAllCasesTableStateLocalStorageKey = (appId: string) => {
-  const key = LOCAL_STORAGE_KEYS.casesTableState;
-  return `${appId}.${key}`;
 };

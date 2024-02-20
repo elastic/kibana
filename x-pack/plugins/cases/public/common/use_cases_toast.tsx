@@ -140,13 +140,18 @@ export const useCasesToast = () => {
         ? OWNER_INFO[theCase.owner].appId
         : appId;
 
-      const url = getUrlForApp(appIdToNavigateTo, {
-        deepLinkId: 'cases',
-        path: generateCaseViewPath({ detailName: theCase.id }),
-      });
+      const url =
+        appIdToNavigateTo != null
+          ? getUrlForApp(appIdToNavigateTo, {
+              deepLinkId: 'cases',
+              path: generateCaseViewPath({ detailName: theCase.id }),
+            })
+          : null;
 
       const onViewCaseClick = () => {
-        navigateToUrl(url);
+        if (url) {
+          navigateToUrl(url);
+        }
       };
 
       const renderTitle = getToastTitle({ theCase, title, attachments });

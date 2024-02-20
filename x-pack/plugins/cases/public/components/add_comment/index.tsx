@@ -75,7 +75,7 @@ export const AddComment = React.memo(
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner, appId } = useCasesContext();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
-      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
+      const draftStorageKey = getMarkdownEditorStorageKey({ appId, caseId, commentId: id });
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,

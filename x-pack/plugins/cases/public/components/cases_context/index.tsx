@@ -36,7 +36,7 @@ import { casesQueryClient } from './query_client';
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
-interface CasesContextValue {
+export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
@@ -138,7 +138,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
   );
 
   return (
-    <QueryClientProvider client={casesQueryClient}>
+    <QueryClientProvider client={queryClient}>
       <CasesContext.Provider value={value}>
         {applyFilesContext(
           <>
