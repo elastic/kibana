@@ -73,15 +73,17 @@ const ServerlessTopNav = () => {
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <ConnectedOnboardingLink />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
+      {ObservabilityAIAssistantActionMenuItem ? (
+        <EuiHeaderSection>
+          <ObservabilityAIAssistantActionMenuItem />
+        </EuiHeaderSection>
+      ) : null}
     </EuiHeader>
   );
 };
@@ -153,12 +155,14 @@ const StatefulTopNav = () => {
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiHeaderSectionItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiHeaderSectionItem>
+        ) : null}
       </EuiHeaderSection>
     </HeaderMenuPortal>
   );

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, ReportingExampleLocatorDefinition } from '../common';
 import { SetupDeps, StartDeps, MyForwardableState } from './types';
 
@@ -20,7 +14,7 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

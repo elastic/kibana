@@ -21,7 +21,7 @@ const rightSpacing = css`
 `;
 
 export const DataViewMenuItem = ({ dataView }: DataViewMenuItemProps) => {
-  if (dataView.dataType === 'logs') {
+  if (dataView.isLogsDataType()) {
     return <span>{dataView.name}</span>;
   }
 
