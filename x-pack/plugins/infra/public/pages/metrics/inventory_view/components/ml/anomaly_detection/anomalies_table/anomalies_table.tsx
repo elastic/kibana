@@ -30,7 +30,7 @@ import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/pub
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
@@ -199,7 +199,7 @@ interface Props {
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
   // subject to watch the completition of the request
-  request$?: Subject<() => Promise<unknown>>;
+  request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -291,7 +291,7 @@ export const AnomaliesTable = ({
     changeSortOptions: hostChangeSort,
     fetchNextPage: hostFetchNextPage,
     fetchPreviousPage: hostFetchPrevPage,
-    isLoadingMetricsHostsAnomalies: hostLoading,
+    isPendingMetricsHostsAnomalies: hostLoading,
   } = useMetricsHostsAnomaliesResults(anomalyParams);
   const {
     metricsK8sAnomalies,
@@ -300,7 +300,7 @@ export const AnomaliesTable = ({
     changeSortOptions: k8sChangeSort,
     fetchNextPage: k8sFetchNextPage,
     fetchPreviousPage: k8sPreviousPage,
-    isLoadingMetricsK8sAnomalies: k8sLoading,
+    isPendingMetricsK8sAnomalies: k8sLoading,
   } = useMetricsK8sAnomaliesResults(anomalyParams);
   const page = useMemo(
     () => (jobType === 'hosts' ? hostPage : k8sPage),
