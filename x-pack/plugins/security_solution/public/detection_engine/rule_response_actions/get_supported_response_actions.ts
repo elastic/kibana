@@ -44,9 +44,9 @@ export const responseActionTypes: ResponseActionType[] = [
     name: 'Osquery',
     iconClass: 'logoOsquery',
   },
-  {
-    id: ResponseActionTypesEnum['.endpoint'],
-    name: 'Elastic Defend',
-    iconClass: 'logoSecurity',
-  },
+  // {
+  //   id: ResponseActionTypesEnum['.endpoint'],
+  //   name: 'Elastic Defend',
+  //   iconClass: 'logoSecurity',
+  // },
 ];
