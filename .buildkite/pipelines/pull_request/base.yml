@@ -132,6 +132,7 @@ steps:
   - command: .buildkite/scripts/steps/build_api_docs.sh
     label: 'Check Types and Build API Docs'
     agents:
+      provider: gcp
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-4
