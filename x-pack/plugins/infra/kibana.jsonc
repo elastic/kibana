@@ -33,9 +33,10 @@
       "uiActions",
       "unifiedSearch",
       "usageCollection",
-      "visTypeTimeseries"
+      "visTypeTimeseries",
+      "apmDataAccess"
     ],
-    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess"],
+    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess", "licenseManagement"],
     "requiredBundles": [
       "unifiedSearch",
       "observability",

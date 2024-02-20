@@ -7,4 +7,5 @@
 
 export * from './use_dataset_quality_table';
 export * from './use_dataset_quality_flyout';
-export * from './use_link_to_log_explorer';
+export * from './use_link_to_logs_explorer';
+export * from './use_summary_panel';

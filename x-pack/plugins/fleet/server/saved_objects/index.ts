@@ -89,7 +89,7 @@ import { settingsV1 } from './model_versions/v1';
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
+export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -626,9 +626,22 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_internal: { type: 'boolean', index: false },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
         proxy_id: { type: 'keyword' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
       },
     },
   },
@@ -690,50 +703,54 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
 }
 
+export const OUTPUT_EXLCUDE_AAD_FIELDS = new Set([
+  'output_id',
+  'name',
+  'type',
+  'is_default',
+  'is_default_monitoring',
+  'hosts',
+  'ca_sha256',
+  'ca_trusted_fingerprint',
+  'config',
+  'config_yaml',
+  'is_internal',
+  'is_preconfigured',
+  'proxy_id',
+  'version',
+  'key',
+  'compression',
+  'compression_level',
+  'client_id',
+  'auth_type',
+  'connection_type',
+  'username',
+  'sasl',
+  'partition',
+  'random',
+  'round_robin',
+  'hash',
+  'topics',
+  'headers',
+  'timeout',
+  'broker_timeout',
+  'required_acks',
+  'preset',
+  'secrets',
+]);
+
+export const OUTPUT_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
+  { key: 'password', dangerouslyExposeValue: true },
+]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([
-      { key: 'ssl', dangerouslyExposeValue: true },
-      { key: 'password', dangerouslyExposeValue: true },
-    ]),
-    attributesToExcludeFromAAD: new Set([
-      'output_id',
-      'name',
-      'type',
-      'is_default',
-      'is_default_monitoring',
-      'hosts',
-      'ca_sha256',
-      'ca_trusted_fingerprint',
-      'config',
-      'config_yaml',
-      'is_internal',
-      'is_preconfigured',
-      'proxy_id',
-      'version',
-      'key',
-      'compression',
-      'compression_level',
-      'client_id',
-      'auth_type',
-      'connection_type',
-      'username',
-      'sasl',
-      'partition',
-      'random',
-      'round_robin',
-      'hash',
-      'topics',
-      'headers',
-      'timeout',
-      'broker_timeout',
-      'required_acks',
-      'preset',
-      'secrets',
-    ]),
+    attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
+    attributesToExcludeFromAAD: OUTPUT_EXLCUDE_AAD_FIELDS,
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({

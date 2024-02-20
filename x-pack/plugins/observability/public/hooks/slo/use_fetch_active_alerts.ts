@@ -82,7 +82,7 @@ export function useFetchActiveAlerts({
                   bool: {
                     filter: [
                       { term: { 'slo.id': sloId } },
-                      { term: { 'slo.instanceId': instanceId } },
+                      ...(instanceId === '*' ? [] : [{ term: { 'slo.instanceId': instanceId } }]),
                     ],
                   },
                 })),
@@ -92,7 +92,7 @@ export function useFetchActiveAlerts({
             aggs: {
               perSloId: {
                 multi_terms: {
-                  size: sloIdsAndInstanceIds.length,
+                  size: 10000,
                   terms: [{ field: 'slo.id' }, { field: 'slo.instanceId' }],
                 },
               },

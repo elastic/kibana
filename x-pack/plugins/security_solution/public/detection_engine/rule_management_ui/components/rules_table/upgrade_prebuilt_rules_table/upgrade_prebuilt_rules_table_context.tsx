@@ -7,8 +7,9 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
+import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -84,6 +85,8 @@ export interface UpgradePrebuiltRulesTableState {
   selectedRules: RuleUpgradeInfoForReview[];
 }
 
+export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
+
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeOneRule: (ruleId: string) => void;
@@ -119,6 +122,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   const isJsonPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
     'jsonPrebuiltRulesDiffingEnabled'
+  );
+
+  const isPerFieldPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
+    'perFieldPrebuiltRulesDiffingEnabled'
   );
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -268,27 +275,60 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   ]);
 
   const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
-    const activeRule =
-      isJsonPrebuiltRulesDiffingEnabled &&
-      previewedRule &&
-      filteredRules.find(({ id }) => id === previewedRule.id);
+    const activeRule = previewedRule && filteredRules.find(({ id }) => id === previewedRule.id);
 
     if (!activeRule) {
       return [];
     }
 
     return [
-      {
-        id: 'updates',
-        name: ruleDetailsI18n.UPDATES_TAB_LABEL,
-        content: (
-          <TabContentPadding>
-            <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
-          </TabContentPadding>
-        ),
-      },
+      ...(isPerFieldPrebuiltRulesDiffingEnabled
+        ? [
+            {
+              id: 'updates',
+              name: (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}
+                >
+                  <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+                </EuiToolTip>
+              ),
+              content: (
+                <TabContentPadding>
+                  <PerFieldRuleDiffTab ruleDiff={activeRule.diff} />
+                </TabContentPadding>
+              ),
+            },
+          ]
+        : []),
+      ...(isJsonPrebuiltRulesDiffingEnabled
+        ? [
+            {
+              id: 'jsonViewUpdates',
+              name: (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}
+                >
+                  <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+                </EuiToolTip>
+              ),
+              content: (
+                <TabContentPadding>
+                  <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
+                </TabContentPadding>
+              ),
+            },
+          ]
+        : []),
     ];
-  }, [previewedRule, filteredRules, isJsonPrebuiltRulesDiffingEnabled]);
+  }, [
+    previewedRule,
+    filteredRules,
+    isJsonPrebuiltRulesDiffingEnabled,
+    isPerFieldPrebuiltRulesDiffingEnabled,
+  ]);
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
@@ -305,6 +345,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           <RuleDetailsFlyout
             rule={previewedRule}
             size={isJsonPrebuiltRulesDiffingEnabled ? 'l' : 'm'}
+            id={PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR}
             dataTestSubj="updatePrebuiltRulePreview"
             closeFlyout={closeRulePreview}
             ruleActions={

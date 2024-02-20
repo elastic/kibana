@@ -9,9 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
   deleteConnectorById,
+  deleteConnectorSecret,
   fetchConnectorById,
   fetchConnectors,
-  fetchSyncJobsByConnectorId,
+  fetchSyncJobs,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -52,9 +53,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
-          index_name: schema.string(),
+          index_name: schema.maybe(schema.string()),
           is_native: schema.boolean(),
           language: schema.nullable(schema.string()),
+          name: schema.maybe(schema.string()),
           service_type: schema.maybe(schema.string()),
         }),
       },
@@ -64,9 +66,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       try {
         const body = await addConnector(client, {
           deleteExistingConnector: request.body.delete_existing_connector,
-          indexName: request.body.index_name,
+          indexName: request.body.index_name ?? null,
           isNative: request.body.is_native,
           language: request.body.language,
+          name: request.body.name ?? null,
           serviceType: request.body.service_type,
         });
         return response.ok({ body });
@@ -248,7 +251,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchSyncJobsByConnectorId(
+      const result = await fetchSyncJobs(
         client.asCurrentUser,
         request.params.connectorId,
         request.query.from,
@@ -545,7 +548,32 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       });
     })
   );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
 
+      let connectorResult;
+      try {
+        connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
+      } catch (error) {
+        throw error;
+      }
+      return response.ok({
+        body: {
+          connector: connectorResult,
+        },
+      });
+    })
+  );
   router.delete(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}',
@@ -564,17 +592,24 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { shouldDeleteIndex } = request.query;
 
       let connectorResponse;
-      let indexNameToDelete;
       try {
-        if (shouldDeleteIndex) {
-          const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-          indexNameToDelete = connector?.value.index_name;
-        }
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+        const indexNameToDelete = shouldDeleteIndex ? connector?.index_name : null;
+        const apiKeyId = connector?.api_key_id;
+        const secretId = connector?.api_key_secret_id;
+
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
+
         if (indexNameToDelete) {
           await deleteIndexPipelines(client, indexNameToDelete);
           await deleteAccessControlIndex(client, indexNameToDelete);
           await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+        }
+        if (apiKeyId) {
+          await client.asCurrentUser.security.invalidateApiKey({ ids: [apiKeyId] });
+        }
+        if (secretId) {
+          await deleteConnectorSecret(client.asCurrentUser, secretId);
         }
       } catch (error) {
         if (isResourceNotFoundException(error)) {
@@ -605,6 +640,42 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
 
       return response.ok({ body: connectorResponse });
+    })
+  );
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId, indexName } = request.params;
+
+      try {
+        await client.asCurrentUser.transport.request({
+          body: {
+            index_name: indexName,
+          },
+          method: 'PUT',
+          path: `/_connector/${connectorId}/_index_name`,
+        });
+        return response.ok();
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: `Could not find index ${indexName}`,
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 }

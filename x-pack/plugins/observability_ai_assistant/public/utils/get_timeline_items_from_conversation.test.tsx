@@ -25,6 +25,7 @@ describe('getTimelineItemsFromConversation', () => {
       hasConnector: true,
       messages: [],
       chatState: ChatState.Ready,
+      onActionClick: jest.fn(),
     });
 
     expect(items.length).toBe(1);
@@ -57,6 +58,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
     it('excludes the system message', () => {
@@ -114,7 +116,7 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'recall',
+                name: 'context',
                 arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.Assistant,
               },
@@ -124,11 +126,12 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'recall',
+              name: 'context',
               content: JSON.stringify([]),
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -155,7 +158,7 @@ describe('getTimelineItemsFromConversation', () => {
         ),
       });
 
-      expect(container.textContent).toBe('requested the function recall');
+      expect(container.textContent).toBe('requested the function context');
     });
 
     it('formats the function response', () => {
@@ -181,7 +184,7 @@ describe('getTimelineItemsFromConversation', () => {
         ),
       });
 
-      expect(container.textContent).toBe('executed the function recall');
+      expect(container.textContent).toBe('executed the function context');
     });
   });
   describe('with a render function', () => {
@@ -227,6 +230,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -261,7 +265,8 @@ describe('getTimelineItemsFromConversation', () => {
       expect(mockChatService.renderFunction).toHaveBeenCalledWith(
         'my_render_function',
         JSON.stringify({ foo: 'bar' }),
-        { content: '[]', name: 'my_render_function', role: 'user' }
+        { content: '[]', name: 'my_render_function', role: 'user' },
+        expect.any(Function)
       );
 
       expect(container.textContent).toEqual('Rendered');
@@ -313,6 +318,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -384,6 +390,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -425,6 +432,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -453,7 +461,7 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'recall',
+                name: 'context',
                 arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.User,
               },
@@ -463,7 +471,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'recall',
+              name: 'context',
               content: JSON.stringify([]),
             },
           },
@@ -475,6 +483,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -532,6 +541,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
           ...extraMessages,
         ],
+        onActionClick: jest.fn(),
       });
     };
 

@@ -1,0 +1,45 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  eventsPerCycle: 1000
+  dataset: "fake_logs"
+
+schedule:
+  - template: "good"
+    start: "now-90m"
+    end: "now-75m"
+    eventsPerCycle: 1000
+    randomness: 0.1
+  - template: "bad"
+    start: "now-75m"
+    end: "now-60m"
+    randomness: 0.1
+    eventsPerCycle:
+      start: 1000
+      end: 5000
+      method: "exp"
+  - template: "bad"
+    start: "now-60m"
+    end: "now-45m"
+    eventsPerCycle: 5000
+    randomness: 0.1
+  - template: "good"
+    start: "now-45m"
+    end: "now-30m"
+    eventsPerCycle:
+      start: 5000
+      end: 1000
+      method: "exp"
+    randomness: 0.1
+  - template: "good"
+    start: "now-30m"
+    end: false
+    eventsPerCycle: 1000
+    randomness: 0.1
+
+

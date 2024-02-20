@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -61,10 +62,12 @@ const ConfirmModal: React.FC<{
   </EuiConfirmModal>
 );
 
-export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> = ({
-  hasApiKey,
-  indexName,
-}) => {
+export const ApiKeyConfig: React.FC<{
+  hasApiKey: boolean;
+  indexName: string;
+  isNative: boolean;
+  secretId: string | null;
+}> = ({ hasApiKey, indexName, isNative, secretId }) => {
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data, status } = useValues(GenerateConnectorApiKeyApiLogic);
   useEffect(() => {
@@ -76,7 +79,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
     if (hasApiKey || data) {
       setIsModalVisible(true);
     } else {
-      makeRequest({ indexName });
+      makeRequest({ indexName, isNative, secretId });
     }
   };
 
@@ -87,7 +90,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
   };
 
   const onConfirm = () => {
-    makeRequest({ indexName });
+    makeRequest({ indexName, isNative, secretId });
     setIsModalVisible(false);
   };
 
@@ -96,23 +99,38 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
       <EuiFlexItem>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
-            {
-              defaultMessage:
-                'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
-              values: {
-                apiKeyName: `${indexName}-connector`,
-                indexName,
-              },
-            }
-          )}
+          {isNative
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
+                {
+                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To rollover your API key, click "Generate API key".`,
+                  values: {
+                    apiKeyName: `${indexName}-connector`,
+                    indexName,
+                  },
+                }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
+                {
+                  defaultMessage:
+                    'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
+                  values: {
+                    apiKeyName: `${indexName}-connector`,
+                    indexName,
+                  },
+                }
+              )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={clickGenerateApiKey} isLoading={status === Status.LOADING}>
+            <EuiButton
+              onClick={clickGenerateApiKey}
+              isLoading={status === Status.LOADING}
+              isDisabled={indexName.length === 0}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
                 {
@@ -128,7 +146,15 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
         <>
           <EuiSpacer />
           <EuiFlexItem>
-            <ApiKey apiKey={data?.encoded} label="API Key" />
+            <ApiKey
+              apiKey={data?.encoded}
+              label={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.apiKeyConfig.apiKey.apiKeyLabel"
+                  defaultMessage="API Key"
+                />
+              }
+            />
           </EuiFlexItem>
         </>
       )}

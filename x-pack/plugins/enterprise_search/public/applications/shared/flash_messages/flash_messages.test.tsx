@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../__mocks__/kea_logic';
+import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCallOut, EuiGlobalToastList } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FlashMessages, Toasts } from './flash_messages';
+import { FlashMessages } from './flash_messages';
 
 describe('FlashMessages', () => {
   it('renders an array of callouts', () => {
@@ -22,7 +24,13 @@ describe('FlashMessages', () => {
       {
         type: 'error',
         message: 'Whoa nelly!',
-        description: <div data-test-subj="error">Something went wrong</div>,
+        description: (
+          <div data-test-subj="error">
+            {i18n.translate('xpack.enterpriseSearch..div.somethingWentWrongLabel', {
+              defaultMessage: 'Something went wrong',
+            })}
+          </div>
+        ),
       },
       { type: 'info', message: 'Everything is fine, nothing is ruined' },
       { type: 'warning', message: 'Uh oh' },
@@ -44,45 +52,14 @@ describe('FlashMessages', () => {
     const wrapper = shallow(
       <FlashMessages>
         <button data-test-subj="testing">
-          Some action - you could even clear flash messages here
+          <FormattedMessage
+            id="xpack.enterpriseSearch..button.someActionYouLabel"
+            defaultMessage="Some action - you could even clear flash messages here"
+          />
         </button>
       </FlashMessages>
     );
 
     expect(wrapper.find('[data-test-subj="testing"]').text()).toContain('Some action');
-  });
-});
-
-describe('Toasts', () => {
-  const actions = { dismissToastMessage: jest.fn() };
-  beforeAll(() => setMockActions(actions));
-
-  it('renders an EUI toast list', () => {
-    const mockToasts = [
-      { id: 'test', title: 'Hello world!!' },
-      {
-        color: 'success',
-        iconType: 'check',
-        title: 'Success!',
-        toastLifeTimeMs: 500,
-        id: 'successToastId',
-      },
-      {
-        color: 'danger',
-        iconType: 'error',
-        title: 'Oh no!',
-        text: <div data-test-subj="error">Something went wrong</div>,
-        id: 'errorToastId',
-      },
-    ];
-    setMockValues({ toastMessages: mockToasts });
-
-    const wrapper = shallow(<Toasts />);
-    const euiToastList = wrapper.find(EuiGlobalToastList);
-
-    expect(euiToastList).toHaveLength(1);
-    expect(euiToastList.prop('toasts')).toEqual(mockToasts);
-    expect(euiToastList.prop('dismissToast')).toEqual(actions.dismissToastMessage);
-    expect(euiToastList.prop('toastLifeTimeMs')).toEqual(5000);
   });
 });

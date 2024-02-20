@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
@@ -29,16 +32,17 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import type { Observable } from 'rxjs';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
   Message,
+  ObservabilityAIAssistantScreenContext,
   PendingMessage,
 } from '../common/types';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
@@ -50,17 +54,21 @@ export type { PendingMessage };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
-  chat: (options: {
-    messages: Message[];
-    connectorId: string;
-    function?: 'none' | 'auto';
-    signal: AbortSignal;
-  }) => Observable<StreamingChatResponseEventWithoutError>;
+  chat: (
+    name: string,
+    options: {
+      messages: Message[];
+      connectorId: string;
+      function?: 'none' | 'auto';
+      signal: AbortSignal;
+    }
+  ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    messages: Message[];
-    connectorId: string;
-    persist: boolean;
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
+    connectorId: string;
+    messages: Message[];
+    persist: boolean;
     signal: AbortSignal;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
@@ -70,7 +78,8 @@ export interface ObservabilityAIAssistantChatService {
   renderFunction: (
     name: string,
     args: string | undefined,
-    response: { data?: string; content?: string }
+    response: { data?: string; content?: string },
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
 }
 
@@ -82,11 +91,14 @@ export interface ObservabilityAIAssistantService {
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
+  setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
+  getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
+  onActionClick: ChatActionClickHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<
@@ -101,6 +113,7 @@ export type ChatRegistrationRenderFunction = ({}: {
 export interface ConfigSchema {}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
   lens: LensPublicSetup;
@@ -111,6 +124,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   lens: LensPublicStart;
@@ -119,6 +133,7 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   ml: MlPluginStart;
 }
 

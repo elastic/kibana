@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CreateLogExplorerControllerFactory } from './create_controller';
+import type { CreateLogsExplorerControllerFactory } from './create_controller';
 
-export const createLogExplorerControllerLazyFactory: CreateLogExplorerControllerFactory =
+export const createLogsExplorerControllerLazyFactory: CreateLogsExplorerControllerFactory =
   (dependencies) => async (args) => {
-    const { createLogExplorerControllerFactory } = await import('./create_controller');
+    const { createLogsExplorerControllerFactory } = await import('./create_controller');
 
-    return createLogExplorerControllerFactory(dependencies)(args);
+    return createLogsExplorerControllerFactory(dependencies)(args);
   };

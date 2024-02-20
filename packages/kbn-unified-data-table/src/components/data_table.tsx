@@ -51,12 +51,15 @@ import {
   ValueToStringConverter,
   DataTableColumnTypes,
   CustomCellRenderer,
+  CustomGridColumnsConfiguration,
+  CustomControlColumnConfiguration,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
+  getAllControlColumns,
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
@@ -69,10 +72,12 @@ import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
   DEFAULT_ROWS_PER_PAGE,
   GRID_STYLE,
+  ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+import { useRowHeight } from '../hooks/use_row_height';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
@@ -127,9 +132,17 @@ export interface UnifiedDataTableProps {
    */
   showColumnTokens?: boolean;
   /**
+   * Optional value for providing configuration setting for UnifiedDataTable header row height
+   */
+  configHeaderRowHeight?: number;
+  /**
    * Determines number of rows of a column header
    */
-  headerRowHeight?: number;
+  headerRowHeightState?: number;
+  /**
+   * Update header row height state
+   */
+  onUpdateHeaderRowHeight?: (headerRowHeight: number) => void;
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -207,6 +220,10 @@ export interface UnifiedDataTableProps {
    */
   controlColumnIds?: string[];
   /**
+   * Optional value for providing configuration setting for UnifiedDataTable row height
+   */
+  configRowHeight?: number;
+  /**
    * Row height from state
    */
   rowHeightState?: number;
@@ -268,10 +285,6 @@ export interface UnifiedDataTableProps {
     columnTypes?: DataTableColumnTypes
   ) => JSX.Element | undefined;
   /**
-   * Optional value for providing configuration setting for UnifiedDataTable rows height
-   */
-  configRowHeight?: number;
-  /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
   showMultiFields?: boolean;
@@ -330,6 +343,14 @@ export interface UnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
+   * An optional settings for customising the column
+   */
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  /**
+   * An optional settings to control which columns to render as trailing and leading control columns
+   */
+  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
+  /**
    * Name of the UnifiedDataTable consumer component or application
    */
   consumer?: string;
@@ -362,7 +383,9 @@ export const UnifiedDataTable = ({
   columns,
   columnTypes,
   showColumnTokens,
-  headerRowHeight,
+  configHeaderRowHeight,
+  headerRowHeightState,
+  onUpdateHeaderRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -413,6 +436,8 @@ export const UnifiedDataTable = ({
   gridStyleOverride,
   rowLineHeightOverride,
   cellActionsMetadata,
+  customGridColumnsConfiguration,
+  customControlColumnsConfiguration,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -654,6 +679,29 @@ export const UnifiedDataTable = ({
     metadata: cellActionsMetadata,
   });
 
+  const {
+    rowHeight: headerRowHeight,
+    rowHeightLines: headerRowHeightLines,
+    onChangeRowHeight: onChangeHeaderRowHeight,
+    onChangeRowHeightLines: onChangeHeaderRowHeightLines,
+  } = useRowHeight({
+    storage,
+    consumer,
+    key: 'dataGridHeaderRowHeight',
+    configRowHeight: configHeaderRowHeight ?? 1,
+    rowHeightState: headerRowHeightState,
+    onUpdateRowHeight: onUpdateHeaderRowHeight,
+  });
+
+  const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
+    storage,
+    consumer,
+    key: 'dataGridRowHeight',
+    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+    rowHeightState,
+    onUpdateRowHeight,
+  });
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
@@ -677,26 +725,30 @@ export const UnifiedDataTable = ({
         columnTypes,
         showColumnTokens,
         headerRowHeight,
+        headerRowHeightLines,
+        customGridColumnsConfiguration,
       }),
     [
-      onFilter,
-      visibleColumns,
-      columnsCellActions,
-      displayedRows,
-      dataView,
-      settings,
-      defaultColumns,
-      isSortEnabled,
-      isPlainRecord,
-      uiSettings,
-      toastNotifications,
-      dataViewFieldEditor,
-      valueToStringConverter,
-      editField,
-      visibleCellActions,
       columnTypes,
       showColumnTokens,
       headerRowHeight,
+      columnsCellActions,
+      customGridColumnsConfiguration,
+      dataView,
+      dataViewFieldEditor,
+      defaultColumns,
+      displayedRows.length,
+      editField,
+      headerRowHeightLines,
+      isPlainRecord,
+      isSortEnabled,
+      onFilter,
+      settings,
+      toastNotifications,
+      uiSettings,
+      valueToStringConverter,
+      visibleCellActions,
+      visibleColumns,
     ]
   );
 
@@ -747,19 +799,31 @@ export const UnifiedDataTable = ({
         onSort: onTableSort,
       };
     }
-    return { columns: sortingColumns, onSort: () => {} };
+    return {
+      columns: sortingColumns,
+      onSort: () => {},
+    };
   }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  const leadingControlColumns = useMemo(() => {
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
     return externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
-  }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
+
+  const controlColumnsConfig = customControlColumnsConfiguration?.({
+    controlColumns: getAllControlColumns(),
+  });
+
+  const customLeadingControlColumn =
+    controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
+  const customTrailingControlColumn =
+    controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
 
   const additionalControls = useMemo(() => {
     if (!externalAdditionalControls && !usedSelectedDocs.length) {
@@ -801,13 +865,21 @@ export const UnifiedDataTable = ({
 
     if (onUpdateRowHeight) {
       options.allowDensity = false;
-      options.allowRowHeight = true;
     }
 
-    if (onUpdateSampleSize) {
+    if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
+      options.allowRowHeight = false;
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <UnifiedDataTableAdditionalDisplaySettings
+          rowHeight={rowHeight}
+          rowHeightLines={rowHeightLines}
+          onChangeRowHeight={onChangeRowHeight}
+          onChangeRowHeightLines={onChangeRowHeightLines}
+          headerRowHeight={headerRowHeight}
+          headerRowHeightLines={headerRowHeightLines}
+          onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+          onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
           maxAllowedSampleSize={maxAllowedSampleSize}
           sampleSize={sampleSizeState}
           onChangeSampleSize={onUpdateSampleSize}
@@ -816,7 +888,21 @@ export const UnifiedDataTable = ({
     }
 
     return Object.keys(options).length ? options : undefined;
-  }, [maxAllowedSampleSize, sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
+  }, [
+    headerRowHeight,
+    headerRowHeightLines,
+    maxAllowedSampleSize,
+    onChangeHeaderRowHeight,
+    onChangeHeaderRowHeightLines,
+    onChangeRowHeight,
+    onChangeRowHeightLines,
+    onUpdateHeaderRowHeight,
+    onUpdateRowHeight,
+    onUpdateSampleSize,
+    rowHeight,
+    rowHeightLines,
+    sampleSizeState,
+  ]);
 
   const inMemory = useMemo(() => {
     return isPlainRecord && columns.length
@@ -846,11 +932,7 @@ export const UnifiedDataTable = ({
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
-    rowHeightState,
-    onUpdateRowHeight,
-    storage,
-    configRowHeight,
-    consumer,
+    rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
   });
 
@@ -908,7 +990,7 @@ export const UnifiedDataTable = ({
             columns={euiGridColumns}
             columnVisibility={columnsVisibility}
             data-test-subj="docTable"
-            leadingControlColumns={leadingControlColumns}
+            leadingControlColumns={customLeadingControlColumn}
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}
@@ -922,7 +1004,7 @@ export const UnifiedDataTable = ({
             gridStyle={gridStyleOverride ?? GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
             renderCustomToolbar={renderCustomToolbarFn}
-            trailingControlColumns={trailingControlColumns}
+            trailingControlColumns={customTrailingControlColumn}
           />
         </div>
         {loadingState !== DataLoadingState.loading &&

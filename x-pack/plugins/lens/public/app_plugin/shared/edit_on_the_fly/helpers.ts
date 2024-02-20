@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
-import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { Suggestion } from '../../../types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
-export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginStartDependencies) => {
+export const getQueryColumns = async (
+  query: AggregateQuery,
+  deps: LensPluginStartDependencies,
+  abortController?: AbortController
+) => {
   // Fetching only columns for ES|QL for performance reasons with limit 0
   // Important note: ES doesnt return the warnings for 0 limit,
   // I am skipping them in favor of performance now
@@ -25,7 +28,12 @@ export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginSta
   if ('esql' in performantQuery && performantQuery.esql) {
     performantQuery.esql = `${performantQuery.esql} | limit 0`;
   }
-  const table = await fetchFieldsFromESQL(performantQuery, deps.expressions);
+  const table = await fetchFieldsFromESQL(
+    performantQuery,
+    deps.expressions,
+    undefined,
+    abortController
+  );
   return table?.columns;
 };
 
@@ -35,7 +43,8 @@ export const getSuggestions = async (
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
-  setErrors: (errors: Error[]) => void
+  setErrors: (errors: Error[]) => void,
+  abortController?: AbortController
 ) => {
   try {
     let indexPattern = '';
@@ -56,7 +65,7 @@ export const getSuggestions = async (
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
-    const columns = await getQueryColumns(query, deps);
+    const columns = await getQueryColumns(query, deps, abortController);
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
@@ -72,68 +81,15 @@ export const getSuggestions = async (
 
     const firstSuggestion = allSuggestions[0];
 
-    const attrs = getLensAttributes({
+    const attrs = getLensAttributesFromSuggestion({
       filters: [],
       query,
       suggestion: firstSuggestion,
       dataView,
-    });
+    }) as TypedLensByValueInput['attributes'];
     return attrs;
   } catch (e) {
     setErrors([e]);
   }
   return undefined;
-};
-
-export const getLensAttributes = ({
-  filters,
-  query,
-  suggestion,
-  dataView,
-}: {
-  filters: Filter[];
-  query: Query | AggregateQuery;
-  suggestion: Suggestion | undefined;
-  dataView?: DataView;
-}) => {
-  const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
-  const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
-  const datasourceStates =
-    suggestion && suggestion.datasourceState
-      ? {
-          [suggestion.datasourceId!]: {
-            ...suggestionDatasourceState,
-          },
-        }
-      : {
-          formBased: {},
-        };
-  const visualization = suggestionVisualizationState;
-  const attributes = {
-    title: suggestion
-      ? suggestion.title
-      : i18n.translate('xpack.lens.config.suggestion.title', {
-          defaultMessage: 'New suggestion',
-        }),
-    references: [
-      {
-        id: dataView?.id ?? '',
-        name: `textBasedLanguages-datasource-layer-suggestion`,
-        type: 'index-pattern',
-      },
-    ],
-    state: {
-      datasourceStates,
-      filters,
-      query,
-      visualization,
-      ...(dataView &&
-        dataView.id &&
-        !dataView.isPersisted() && {
-          adHocDataViews: { [dataView.id]: dataView.toSpec(false) },
-        }),
-    },
-    visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
-  } as TypedLensByValueInput['attributes'];
-  return attributes;
 };

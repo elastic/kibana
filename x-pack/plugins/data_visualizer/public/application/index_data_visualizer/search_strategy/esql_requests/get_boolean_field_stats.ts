@@ -76,7 +76,7 @@ export const getESQLBooleanFieldStats = async ({
               trueCount = row[0];
             }
             return {
-              key_as_string: row[1]?.toString(),
+              key_as_string: row[1] === false ? 'false' : 'true',
               doc_count: row[0],
               percent: row[0] / topValuesSampleSize,
             };

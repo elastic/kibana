@@ -9,7 +9,7 @@
 import Path from 'path';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { Cluster } from '@kbn/es';
+import { Cluster, ServerlessProjectType } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
@@ -27,6 +27,8 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
+
+const projectType: ServerlessProjectType = 'es';
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
@@ -79,6 +81,7 @@ function createServerlessES() {
     es,
     start: async () => {
       await es.runServerless({
+        projectType,
         basePath: ES_BASE_PATH_DIR,
         port: esPort,
         background: true,
