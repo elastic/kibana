@@ -61,5 +61,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
       });
     });
+
+    // describe('TODO - Cloud Dashboard', () => {
+    //   it('todo - displays accurate summary compliance score', async () => {});
+    // });
   });
 }

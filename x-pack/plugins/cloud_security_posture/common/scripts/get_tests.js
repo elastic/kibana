@@ -42,12 +42,20 @@ const directoryPaths = [
 const toIdFormat = (text) => text.toLowerCase().replace(/\s+/g, '-');
 
 const getCleanLine = (line) => {
-  if (line.includes("', ")) {
-    return line.split("', ")[0] + "')";
+  const cleanLine = line;
+
+  if (cleanLine.includes('// ')) {
+    return cleanLine.replace('// ', '');
   }
-  if (line.includes('`, ')) {
-    return line.split('`, ')[0] + '`)';
+
+  if (cleanLine.includes("', ")) {
+    return cleanLine.split("', ")[0] + "')";
   }
+  if (cleanLine.includes('`, ')) {
+    return cleanLine.split('`, ')[0] + '`)';
+  }
+
+  return cleanLine;
 };
 
 const getTags = (filePath, testSuits) => {
@@ -118,20 +126,21 @@ const processFile = (filePath) => {
   });
 
   // Extracts relevant data from the matched line and adds it to the testSuits array
-  rl.on('line', (line) => {
-    const match = line.match(regex);
+  rl.on('line', (rawLine) => {
+    const match = rawLine.match(regex);
     if (match) {
       const [fullMatch] = match;
       const type = fullMatch.startsWith('describe') ? 'describe' : 'it';
-      const label = line.trim().replace(/^[^`']*['`]([^'`]*)['`].*$/, '$1');
-      const isSkipped = line.includes('.skip(') || line.includes('.skip(`');
-      const isTodo = line.includes('todo') || line.includes('TODO');
+      const label = rawLine.trim().replace(/^[^`']*['`]([^'`]*)['`].*$/, '$1');
+      const isSkipped = rawLine.includes('.skip(') || rawLine.includes('.skip(`');
+      const isTodo = rawLine.includes('todo') || rawLine.includes('TODO');
+      const line = getCleanLine(rawLine);
       const indent = (line.match(/^\s*/) || [''])[0].length;
 
       testSuits.push({
         id: toIdFormat(label),
-        rawLine: line,
-        line: getCleanLine(line),
+        rawLine,
+        line,
         label,
         indent,
         type,
@@ -147,6 +156,7 @@ const processFile = (filePath) => {
       const logData = {
         filePath,
         fileName: path.basename(filePath),
+        directory: directoryPaths.find((dir) => filePath.startsWith(dir)),
         tags: getTags(filePath, testSuits),
         lines: testSuits.map((testSuit) => (testSuit ? getCleanLine(testSuit.rawLine) : null)),
         testSuits,
