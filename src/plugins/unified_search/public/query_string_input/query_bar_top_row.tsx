@@ -219,6 +219,7 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
+    const [isChatVisible, setIsChatVisible] = useState(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -713,6 +714,8 @@ export const QueryBarTopRow = React.memo(
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
+            setIsAiChatVisible={setIsChatVisible}
+            isAiChatVisible={isChatVisible}
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}

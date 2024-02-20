@@ -44,6 +44,10 @@ import type {
 } from '../common/types';
 import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import type { PendingMessage } from '../common/types';
+import type { StreamingChatResponseEvent } from '../common/conversation_complete';
+import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import type { UseChatResult, UseChatProps } from './hooks/use_chat';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
@@ -147,4 +151,5 @@ export interface ObservabilityAIAssistantPluginStart {
       RefAttributes<{}>
   > | null;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
+  useChat: (props: UseChatProps) => UseChatResult;
 }

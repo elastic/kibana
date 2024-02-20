@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 
 export let core: CoreStart;
 
@@ -20,6 +21,7 @@ interface ServiceDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -39,7 +41,8 @@ export const setKibanaServices = (
   kibanaCore: CoreStart,
   dataViews: DataViewsPublicPluginStart,
   expressions: ExpressionsStart,
-  indexManagement?: IndexManagementPluginSetup
+  indexManagement?: IndexManagementPluginSetup,
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart
 ) => {
   core = kibanaCore;
   core.theme.theme$.subscribe(({ darkMode }) => {
@@ -49,6 +52,7 @@ export const setKibanaServices = (
       dataViews,
       expressions,
       indexManagementApiService: indexManagement?.apiService,
+      observabilityAIAssistant,
     });
   });
 };

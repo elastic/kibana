@@ -39,6 +39,7 @@ import {
   EuiOutsideClickDetector,
   EuiToolTip,
 } from '@elastic/eui';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
 import {
@@ -60,9 +61,12 @@ import {
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
+import { Chat } from './ai_chat';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
-import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
+import { useAbortableAsync } from './hooks/use_abortable_async';
+import { AssistantAvatar } from './assistant_avatar';
+// import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 
 import './overwrite.scss';
 
@@ -109,6 +113,8 @@ export interface TextBasedLanguagesEditorProps {
   editorIsInline?: boolean;
   /** Disables the submit query action*/
   disableSubmitAction?: boolean;
+  isAiChatVisible?: boolean;
+  setIsAiChatVisible?: (status: boolean) => void;
 
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
@@ -121,6 +127,7 @@ interface TextBasedEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -168,6 +175,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
+  isAiChatVisible,
+  setIsAiChatVisible,
   allowQueryCancellation,
   hideTimeFilterInfo,
 }: TextBasedLanguagesEditorProps) {
@@ -175,8 +184,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    observabilityAIAssistant,
+    docLinks,
+  } = kibana.services;
+  const chatService = useAbortableAsync(
+    ({ signal }) => {
+      return observabilityAIAssistant?.service?.start({ signal });
+    },
+    [observabilityAIAssistant]
+  );
+
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -188,6 +210,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
+
+  const [isChatVisible, setIsChatVisible] = useState(isAiChatVisible);
+
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [editorMessages, setEditorMessages] = useState<{
@@ -551,6 +576,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, onTextLangQueryChange]
   );
 
+  const onHumanLanguageRun = useCallback(
+    (predictedQueryString: string) => {
+      setCode(predictedQueryString);
+      // setIsChatVisible(false);
+      onTextLangQueryChange({ [language]: predictedQueryString } as AggregateQuery);
+      editor1.current?.setValue(predictedQueryString);
+      setTimeout(() => {
+        onTextLangQuerySubmit({ [language]: predictedQueryString } as AggregateQuery);
+      }, 1000);
+    },
+    [onTextLangQueryChange, language, onTextLangQuerySubmit]
+  );
+
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections(language);
@@ -560,6 +598,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       getDocumentation();
     }
   }, [language, documentationSections]);
+
+  if (!chatService.value) {
+    return null;
+  }
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -679,6 +721,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   />
                 </TooltipWrapper>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType={!isChatVisible ? AssistantAvatar : 'esqlVis'}
+                  color="text"
+                  size="xs"
+                  isDisabled={!observabilityAIAssistant}
+                  onClick={() => {
+                    setIsChatVisible(!isChatVisible);
+                  }}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -707,6 +760,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       size="s"
                       onClick={() => {
                         expandCodeEditor(false);
+                        setIsAiChatVisible?.(false);
                         updateLinesFromModel = false;
                       }}
                     />
@@ -747,6 +801,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         responsive={false}
         css={{ margin: '0 0 1px 0' }}
         ref={containerRef}
+        direction={isChatVisible ? 'column' : 'row'}
       >
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
@@ -755,143 +810,168 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 restoreInitialMode();
               }}
             >
-              <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem
-                  data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
-                  className={editorClassName}
-                >
-                  <div css={styles.editorContainer}>
-                    {!isCompactFocused && (
-                      <EuiBadge
-                        color={euiTheme.colors.lightShade}
-                        css={styles.linesBadge}
-                        data-test-subj="TextBasedLangEditor-inline-lines-badge"
-                      >
-                        {i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
-                          {
-                            defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                            values: { count: lines },
-                          }
+              <>
+                {isChatVisible && observabilityAIAssistant && chatService.value && (
+                  <Chat
+                    chatService={chatService.value}
+                    observabilityAIAssistant={observabilityAIAssistant}
+                    height={editorHeight}
+                    onHumanLanguageRun={onHumanLanguageRun}
+                    containerCSS={styles.bottomContainer}
+                    textAreaCSS={styles.editorContainer}
+                    timelineCSS={styles.timelineContainer}
+                    resizeRef={resizeRef}
+                    resizableCSS={styles.resizableContainer}
+                  />
+                )}
+                {!isChatVisible && (
+                  <div ref={resizeRef} css={styles.resizableContainer}>
+                    <EuiFlexItem
+                      data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
+                      className={editorClassName}
+                    >
+                      <div css={styles.editorContainer}>
+                        {!isCompactFocused && (
+                          <EuiBadge
+                            color={euiTheme.colors.lightShade}
+                            css={styles.linesBadge}
+                            data-test-subj="TextBasedLangEditor-inline-lines-badge"
+                          >
+                            {i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
+                              {
+                                defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                                values: { count: lines },
+                              }
+                            )}
+                          </EuiBadge>
                         )}
-                      </EuiBadge>
-                    )}
-                    {!isCompactFocused && editorMessages.errors.length > 0 && (
-                      <ErrorsWarningsCompactViewPopover
-                        items={editorMessages.errors}
-                        type="error"
-                        onErrorClick={onErrorClick}
-                        popoverCSS={styles.errorsBadge}
-                      />
-                    )}
-                    {!isCompactFocused &&
-                      editorMessages.warnings.length > 0 &&
-                      editorMessages.errors.length === 0 && (
-                        <ErrorsWarningsCompactViewPopover
-                          items={editorMessages.warnings}
-                          type="warning"
-                          onErrorClick={onErrorClick}
-                          popoverCSS={styles.errorsBadge}
+                        {!isCompactFocused && editorMessages.errors.length > 0 && (
+                          <EuiBadge
+                            color={euiTheme.colors.danger}
+                            css={styles.errorsBadge}
+                            iconType="error"
+                            iconSide="left"
+                            data-test-subj="TextBasedLangEditor-inline-errors-badge"
+                            title={i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.errorCountTitle',
+                              {
+                                defaultMessage:
+                                  '{count} {count, plural, one {error} other {errors}} found',
+                                values: { count: editorMessages.errors.length },
+                              }
+                            )}
+                          >
+                            {editorMessages.errors.length}
+                          </EuiBadge>
+                        )}
+                        {!isCompactFocused &&
+                          editorMessages.warnings.length > 0 &&
+                          editorMessages.errors.length === 0 && (
+                            <EuiBadge
+                              color={euiTheme.colors.warning}
+                              css={styles.errorsBadge}
+                              iconType="warning"
+                              iconSide="left"
+                              data-test-subj="TextBasedLangEditor-inline-warning-badge"
+                              title={i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.warningCountTitle',
+                                {
+                                  defaultMessage:
+                                    '{count} {count, plural, one {warning} other {warnings}} found',
+                                  values: { count: editorMessages.warnings.length },
+                                }
+                              )}
+                            >
+                              {editorMessages.warnings.length}
+                            </EuiBadge>
+                          )}
+                        <CodeEditor
+                          languageId={languageId(language)}
+                          value={codeOneLiner || code}
+                          options={codeEditorOptions}
+                          width="100%"
+                          suggestionProvider={suggestionProvider}
+                          codeActions={codeActionProvider}
+                          hoverProvider={{
+                            provideHover: (model, position, token) => {
+                              if (isCompactFocused || !hoverProvider?.provideHover) {
+                                return { contents: [] };
+                              }
+                              return hoverProvider?.provideHover(model, position, token);
+                            },
+                          }}
+                          onChange={onQueryUpdate}
+                          editorDidMount={(editor) => {
+                            editor1.current = editor;
+                            const model = editor.getModel();
+                            if (model) {
+                              editorModel.current = model;
+                            }
+                            if (isCodeEditorExpanded) {
+                              lines = model?.getLineCount() || 1;
+                            }
+
+                            editor.onDidChangeModelContent((e) => {
+                              if (updateLinesFromModel) {
+                                lines = model?.getLineCount() || 1;
+                              }
+                              const currentPosition = editor.getPosition();
+                              const content = editorModel.current?.getValueInRange({
+                                startLineNumber: 0,
+                                startColumn: 0,
+                                endLineNumber: currentPosition?.lineNumber ?? 1,
+                                endColumn: currentPosition?.column ?? 1,
+                              });
+                              if (content) {
+                                codeRef.current = content || editor.getValue();
+                              }
+                            });
+
+                            editor.onDidFocusEditorText(() => {
+                              onEditorFocus();
+                            });
+
+                            editor.onKeyDown(() => {
+                              onEditorFocus();
+                            });
+
+                            // on CMD/CTRL + Enter submit the query
+                            editor.addCommand(
+                              // eslint-disable-next-line no-bitwise
+                              monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                              onQuerySubmit
+                            );
+                            if (!isCodeEditorExpanded) {
+                              editor.onDidContentSizeChange((e) => {
+                                updateHeight(editor);
+                              });
+                            }
+                          }}
                         />
-                      )}
-                    <CodeEditor
-                      languageId={languageId(language)}
-                      value={codeOneLiner || code}
-                      options={codeEditorOptions}
-                      width="100%"
-                      suggestionProvider={suggestionProvider}
-                      hoverProvider={{
-                        provideHover: (model, position, token) => {
-                          if (isCompactFocused || !hoverProvider?.provideHover) {
-                            return { contents: [] };
-                          }
-                          return hoverProvider?.provideHover(model, position, token);
-                        },
-                      }}
-                      codeActions={codeActionProvider}
-                      onChange={onQueryUpdate}
-                      editorDidMount={(editor) => {
-                        editor1.current = editor;
-                        const model = editor.getModel();
-                        if (model) {
-                          editorModel.current = model;
-                        }
-                        if (isCodeEditorExpanded) {
-                          lines = model?.getLineCount() || 1;
-                        }
-
-                        editor.onDidChangeModelContent((e) => {
-                          if (updateLinesFromModel) {
-                            lines = model?.getLineCount() || 1;
-                          }
-                          const currentPosition = editor.getPosition();
-                          const content = editorModel.current?.getValueInRange({
-                            startLineNumber: 0,
-                            startColumn: 0,
-                            endLineNumber: currentPosition?.lineNumber ?? 1,
-                            endColumn: currentPosition?.column ?? 1,
-                          });
-                          if (content) {
-                            codeRef.current = content || editor.getValue();
-                          }
-                        });
-
-                        // this is fixing a bug between the EUIPopover and the monaco editor
-                        // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                        // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                        // and the user needs to click again the editor.
-                        // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                        editor.onMouseDown(() => {
-                          setTimeout(() => {
-                            editor.focus();
-                          }, 100);
-                        });
-
-                        editor.onDidFocusEditorText(() => {
-                          onEditorFocus();
-                        });
-
-                        editor.onKeyDown(() => {
-                          onEditorFocus();
-                        });
-
-                        // on CMD/CTRL + Enter submit the query
-                        editor.addCommand(
-                          // eslint-disable-next-line no-bitwise
-                          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                          onQuerySubmit
-                        );
-                        if (!isCodeEditorExpanded) {
-                          editor.onDidContentSizeChange((e) => {
-                            updateHeight(editor);
-                          });
-                        }
-                      }}
-                    />
-                    {isCompactFocused && !isCodeEditorExpanded && (
-                      <EditorFooter
-                        lines={lines}
-                        containerCSS={styles.bottomContainer}
-                        {...editorMessages}
-                        onErrorClick={onErrorClick}
-                        runQuery={() => {
-                          if (editorMessages.errors.some((e) => e.source !== 'client')) {
-                            onQuerySubmit();
-                          }
-                        }}
-                        detectTimestamp={detectTimestamp}
-                        editorIsInline={editorIsInline}
-                        disableSubmitAction={disableSubmitAction}
-                        hideRunQueryText={hideRunQueryText}
-                        isSpaceReduced={isSpaceReduced}
-                        isLoading={isQueryLoading}
-                        allowQueryCancellation={allowQueryCancellation}
-                        hideTimeFilterInfo={hideTimeFilterInfo}
-                      />
-                    )}
+                        {isCompactFocused && !isCodeEditorExpanded && !isChatVisible && (
+                          <EditorFooter
+                            lines={lines}
+                            containerCSS={styles.bottomContainer}
+                            {...editorMessages}
+                            onErrorClick={onErrorClick}
+                            runQuery={() => {
+                              if (editorMessages.errors.some((e) => e.source !== 'client')) {
+                                onQuerySubmit();
+                              }
+                            }}
+                            detectTimestamp={detectTimestamp}
+                            editorIsInline={editorIsInline}
+                            disableSubmitAction={disableSubmitAction}
+                            hideRunQueryText={hideRunQueryText || isChatVisible}
+                            isSpaceReduced={isSpaceReduced}
+                          />
+                        )}
+                      </div>
+                    </EuiFlexItem>
                   </div>
-                </EuiFlexItem>
-              </div>
+                )}
+              </>
             </EuiOutsideClickDetector>
           )}
         </EuiResizeObserver>
@@ -953,8 +1033,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         ),
                         size: 'm',
                         css: {
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
+                          borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
                           borderLeft: 'transparent !important',
@@ -964,20 +1043,43 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   </EuiFlexItem>
                 )}
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType={AssistantAvatar}
+                  color="text"
+                  size="m"
+                  css={{
+                    ...(documentationSections
+                      ? {
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                        }
+                      : {
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                        }),
+                    backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                    border: '1px solid rgb(17 43 134 / 10%) !important',
+                  }}
+                  isDisabled={!observabilityAIAssistant}
+                  onClick={() => {
+                    setIsAiChatVisible?.(true);
+                    expandCodeEditor(true);
+                  }}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isCodeEditorExpanded && (
+      {isCodeEditorExpanded && !isChatVisible && (
         <EditorFooter
           lines={lines}
           containerCSS={styles.bottomContainer}
           onErrorClick={onErrorClick}
-          runQuery={() => {
-            onQuerySubmit();
-          }}
+          runQuery={onQuerySubmit}
           detectTimestamp={detectTimestamp}
-          hideRunQueryText={hideRunQueryText}
+          hideRunQueryText={hideRunQueryText || isChatVisible}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
