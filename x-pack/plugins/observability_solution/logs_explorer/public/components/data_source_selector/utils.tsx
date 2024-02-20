@@ -10,7 +10,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
-  DATA_VIEW_POPOVER_CONTENT_WIDTH,
+  DATA_SOURCE_SELECTOR_WIDTH,
   noDatasetsDescriptionLabel,
   noDatasetsLabel,
   noDataViewsDescriptionLabel,
@@ -22,7 +22,7 @@ import { DatasetSelectionHandler } from './types';
 import ListStatus, { ListStatusProps } from './sub_components/list_status';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
-  maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
+  maxWidth: fullWidth ? undefined : DATA_SOURCE_SELECTOR_WIDTH,
 });
 
 interface IntegrationsTreeParams {
@@ -65,7 +65,7 @@ export const buildIntegrationsTree = ({
       integrationsTree.panels.push({
         id: integration.id,
         title,
-        width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+        width: DATA_SOURCE_SELECTOR_WIDTH,
         items: datasets.map((dataset) => ({
           name: dataset.title,
           onClick: () => onDatasetSelected(dataset),
@@ -78,12 +78,12 @@ export const buildIntegrationsTree = ({
   );
 };
 
-export const createAllLogDatasetsItem = () => {
-  const allLogDataset = Dataset.createAllLogsDataset();
+export const createAllLogsItem = () => {
+  const allLogs = Dataset.createAllLogsDataset();
   return {
-    'data-test-subj': 'dataSourceSelectorshowAllLogs',
-    iconType: allLogDataset.iconType,
-    name: allLogDataset.title,
+    'data-test-subj': 'dataSourceSelectorShowAllLogs',
+    iconType: allLogs.iconType,
+    name: allLogs.title,
   };
 };
 

@@ -118,7 +118,7 @@ export type DatasetsSelectorEvent =
       selection: DataViewDescriptor;
     }
   | {
-      type: 'SELECT_ALL_LOGS_DATASET';
+      type: 'SELECT_ALL_LOGS';
     }
   | {
       type: 'SCROLL_TO_INTEGRATIONS_BOTTOM';

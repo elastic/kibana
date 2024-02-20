@@ -49,7 +49,7 @@ export const createPureDatasetsSelectorStateMachine = (
               on: {
                 CLOSE: 'closed',
                 TOGGLE: 'closed',
-                SELECT_ALL_LOGS_DATASET: 'closed',
+                SELECT_ALL_LOGS: 'closed',
               },
               states: {
                 hist: {
@@ -160,7 +160,7 @@ export const createPureDatasetsSelectorStateMachine = (
             },
             single: {
               on: {
-                SELECT_ALL_LOGS_DATASET: {
+                SELECT_ALL_LOGS: {
                   actions: ['storeAllSelection', 'notifySelectionChanged'],
                   target: 'all',
                 },
@@ -187,7 +187,7 @@ export const createPureDatasetsSelectorStateMachine = (
             },
             dataView: {
               on: {
-                SELECT_ALL_LOGS_DATASET: {
+                SELECT_ALL_LOGS: {
                   actions: ['storeAllSelection', 'notifySelectionChanged'],
                   target: 'all',
                 },

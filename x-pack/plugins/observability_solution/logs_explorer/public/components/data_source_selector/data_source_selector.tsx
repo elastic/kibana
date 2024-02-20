@@ -14,7 +14,7 @@ import {
   dataViewsLabel,
   DATA_VIEWS_PANEL_ID,
   DATA_VIEWS_TAB_ID,
-  DATA_VIEW_POPOVER_CONTENT_WIDTH,
+  DATA_SOURCE_SELECTOR_WIDTH,
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
@@ -76,7 +76,7 @@ export function DataSourceSelector({
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
-    selectAllLogDataset,
+    selectAllLogs,
     selectDataset,
     selectDataView,
     sortByOrder,
@@ -242,7 +242,7 @@ export function DataSourceSelector({
           {
             id: INTEGRATIONS_PANEL_ID,
             title: integrationsLabel,
-            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            width: DATA_SOURCE_SELECTOR_WIDTH,
             items: integrationItems,
           },
           ...integrationPanels,
@@ -260,7 +260,7 @@ export function DataSourceSelector({
           {
             id: UNCATEGORIZED_PANEL_ID,
             title: uncategorizedLabel,
-            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            width: DATA_SOURCE_SELECTOR_WIDTH,
             items: uncategorizedItems,
           },
         ]}
@@ -276,7 +276,7 @@ export function DataSourceSelector({
           {
             id: DATA_VIEWS_PANEL_ID,
             title: dataViewsLabel,
-            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            width: DATA_SOURCE_SELECTOR_WIDTH,
             items: dataViewsItems,
           },
         ]}
@@ -286,7 +286,7 @@ export function DataSourceSelector({
       />
       <EuiHorizontalRule margin="none" />
       <SelectorFooter>
-        <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogDataset} />
+        <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogs} />
         {isEsqlEnabled && <ESQLButton {...discoverEsqlUrlProps} />}
       </SelectorFooter>
     </SelectorPopover>

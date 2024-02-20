@@ -20,10 +20,10 @@ import {
   DataViewSelection,
   isDataViewSelection,
 } from '../../../../common/dataset_selection';
-import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID } from '../constants';
+import { DATA_SOURCE_SELECTOR_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
-const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
+const panelStyle = { width: DATA_SOURCE_SELECTOR_WIDTH };
 interface SelectorPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;

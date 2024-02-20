@@ -93,8 +93,8 @@ export const useDataSourceSelector = ({
     [datasetsSelectorStateService]
   );
 
-  const selectAllLogDataset = useCallback(
-    () => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOGS_DATASET' }),
+  const selectAllLogs = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOGS' }),
     [datasetsSelectorStateService]
   );
 
@@ -141,7 +141,7 @@ export const useDataSourceSelector = ({
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
-    selectAllLogDataset,
+    selectAllLogs,
     selectDataset,
     selectDataView,
     sortByOrder,

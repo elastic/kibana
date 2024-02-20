@@ -65,12 +65,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should always display the "Show all logs" action', async () => {
-        const allLogDatasetButton =
-          await PageObjects.observabilityLogsExplorer.getAllLogDatasetsButton();
+        const allLogsButton = await PageObjects.observabilityLogsExplorer.getAllLogssButton();
 
-        const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
+        const allLogsTitle = await allLogsButton.getVisibleText();
 
-        expect(allLogDatasetTitle).to.be('Show all logs');
+        expect(allLogsTitle).to.be('Show all logs');
       });
 
       describe('when open on the integrations tab', () => {
