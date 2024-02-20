@@ -33,7 +33,16 @@
       "usageCollection",
       "bfetch"
     ],
-    "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
+    "optionalPlugins": [
+      "cloud",
+      "data",
+      "fleet",
+      "home",
+      "ml",
+      "serverless",
+      "spaces",
+      "telemetry"
+    ],
     "requiredBundles": [
       "data",
       "fleet",
