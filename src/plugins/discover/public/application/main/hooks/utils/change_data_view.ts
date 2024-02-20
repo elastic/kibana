@@ -13,7 +13,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
 import { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
@@ -29,12 +28,10 @@ export async function changeDataView(
     services,
     internalState,
     appState,
-    dataState,
   }: {
     services: DiscoverServices;
     internalState: DiscoverInternalStateContainer;
     appState: DiscoverAppStateContainer;
-    dataState: DiscoverDataStateContainer;
   }
 ) {
   addLog('[ui] changeDataView', { id });
@@ -43,7 +40,7 @@ export async function changeDataView(
   const state = appState.getState();
   let nextDataView: DataView | null = null;
   // switch to the loading state of Discover Data, to make sure loading indication is displayed when loading the new data view
-  dataState.reset();
+  internalState.transitions.setDataViewLoading(true);
 
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
@@ -68,4 +65,5 @@ export async function changeDataView(
       internalState.transitions.setExpandedDoc(undefined);
     }
   }
+  internalState.transitions.setDataViewLoading(false);
 }

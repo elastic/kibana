@@ -81,7 +81,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
+    state.dataView!,
+    state.dataViewLoading,
+  ]);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -223,12 +226,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           onDropFieldToTable={onDropFieldToTable}
           panelsToggle={panelsToggle}
         />
-        {resultState === 'loading' && <LoadingSpinner />}
+        {(resultState === 'loading' || dataViewLoading) && <LoadingSpinner />}
       </>
     );
   }, [
     currentColumns,
     dataView,
+    dataViewLoading,
     docLinks,
     isPlainRecord,
     mainContainer,
@@ -243,8 +247,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const isLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
-    documentState.fetchStatus === FetchStatus.PARTIAL;
-
+    documentState.fetchStatus === FetchStatus.PARTIAL ||
+    dataViewLoading;
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
     sendErrorMsg(stateContainer.dataState.data$.documents$);

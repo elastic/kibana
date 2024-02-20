@@ -454,7 +454,6 @@ export function getDiscoverStateContainer({
       services,
       internalState: internalStateContainer,
       appState: appStateContainer,
-      dataState: dataStateContainer,
     });
   };
   /**

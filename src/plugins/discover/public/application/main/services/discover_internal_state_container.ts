@@ -17,14 +17,16 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface InternalState {
   dataView: DataView | undefined;
+  dataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
 }
 
-interface InternalStateTransitions {
+export interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
@@ -52,6 +54,7 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
+      dataViewLoading: false,
       adHocDataViews: [],
       savedDataViews: [],
       expandedDoc: undefined,
@@ -61,6 +64,10 @@ export function getInternalStateContainer() {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
+      }),
+      setDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
+        ...prevState,
+        dataViewLoading: loading,
       }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,

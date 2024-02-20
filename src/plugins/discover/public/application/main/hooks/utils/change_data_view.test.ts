@@ -15,6 +15,8 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { PureTransitionsToTransitions } from '@kbn/kibana-utils-plugin/common/state_containers';
+import { InternalStateTransitions } from '../../services/discover_internal_state_container';
 
 const setupTestParams = (dataView: DataView | undefined) => {
   const savedSearch = savedSearchMock;
@@ -26,12 +28,13 @@ const setupTestParams = (dataView: DataView | undefined) => {
   discoverState.internalState.transitions.setDataView(savedSearch.searchSource.getField('index')!);
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
   discoverState.appState.update = jest.fn();
-  discoverState.dataState.reset = jest.fn();
+  discoverState.internalState.transitions = {
+    setDataViewLoading: jest.fn(),
+  } as unknown as Readonly<PureTransitionsToTransitions<InternalStateTransitions>>;
   return {
     services,
     appState: discoverState.appState,
     internalState: discoverState.internalState,
-    dataState: discoverState.dataState,
   };
 };
 
@@ -44,7 +47,7 @@ describe('changeDataView', () => {
       index: 'data-view-with-user-default-column-id',
       sort: [['@timestamp', 'desc']],
     });
-    expect(params.dataState.reset).toHaveBeenCalled();
+    expect(params.internalState.transitions.setDataViewLoading).toBeCalledTimes(2);
   });
 
   it('should set the right app state when a valid data view to switch to is given', async () => {
@@ -55,13 +58,13 @@ describe('changeDataView', () => {
       index: 'data-view-with-various-field-types-id',
       sort: [['data', 'desc']],
     });
-    expect(params.dataState.reset).toHaveBeenCalled();
+    expect(params.internalState.transitions.setDataViewLoading).toBeCalledTimes(2);
   });
 
   it('should not set the app state when an invalid data view to switch to is given', async () => {
     const params = setupTestParams(undefined);
     await changeDataView('data-view-with-various-field-types', params);
     expect(params.appState.update).not.toHaveBeenCalled();
-    expect(params.dataState.reset).toHaveBeenCalled();
+    expect(params.internalState.transitions.setDataViewLoading).toBeCalledTimes(2);
   });
 });
