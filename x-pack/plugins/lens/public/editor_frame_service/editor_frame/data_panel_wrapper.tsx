@@ -194,7 +194,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     <>
       <Easteregg query={externalContext?.query} />
       {DataPanelComponent && (
-        <div className="lnsDataPanelWrapper">{DataPanelComponent(datasourceProps)}</div>
+        <div className="lnsDataPanelWrapper" data-test-subj="lnsDataPanelWrapper">
+          {DataPanelComponent(datasourceProps)}
+        </div>
       )}
     </>
   );
