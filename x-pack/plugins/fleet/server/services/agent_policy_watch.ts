@@ -22,7 +22,6 @@ import { pick } from 'lodash';
 import type { LicenseService } from '../../common/services/license';
 
 import type { AgentPolicy } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
@@ -75,69 +74,63 @@ export class PolicyWatcher {
   }
 
   public async watch(license: ILicense) {
-    let page = 1;
-    let response: {
-      items: AgentPolicy[];
-      total: number;
-      page: number;
-      perPage: number;
-    };
+    const agentPolicies: Array<Partial<AgentPolicy>> = [];
 
-    do {
-      try {
-        response = await agentPolicyService.list(this.makeInternalSOClient(this.soStart), {
-          page: page++,
-          perPage: 100,
-          kuery: AGENT_POLICY_SAVED_OBJECT_TYPE,
-        });
-      } catch (e) {
-        this.logger.warn(
-          `Unable to verify agent policies in line with license change: failed to fetch agent policies: ${e.message}`
-        );
-        return;
+    const agentPolicyFetcher = agentPolicyService.fetchAllAgentPolicies(
+      this.makeInternalSOClient(this.soStart),
+      { fields: ['is_protected', 'id'] }
+    );
+
+    try {
+      for await (const agentPolicy of agentPolicyFetcher) {
+        agentPolicies.push(...agentPolicy);
       }
-      const updatedPolicyIds: string[] = [];
-      for (const policy of response.items as AgentPolicy[]) {
-        let updatePolicy = pick(policy, ['is_protected']) as Partial<AgentPolicy>;
+    } catch (e) {
+      this.logger.warn(
+        `Unable to verify agent policies in line with license change: failed to fetch agent policies: ${e.message}`
+      );
+      return;
+    }
 
-        try {
-          if (!isAgentPolicyValidForLicense(updatePolicy, license)) {
-            updatePolicy = unsetAgentPolicyAccordingToLicenseLevel(updatePolicy, license);
+    const updatedPolicyIds: string[] = [];
+    for (const policy of agentPolicies as AgentPolicy[]) {
+      let updatePolicy = pick(policy, ['is_protected']) as Partial<AgentPolicy>;
+
+      try {
+        if (!isAgentPolicyValidForLicense(updatePolicy, license)) {
+          updatePolicy = unsetAgentPolicyAccordingToLicenseLevel(updatePolicy, license);
+          try {
+            this.logger.info('Updating agent policies per license change');
+            await agentPolicyService.update(
+              this.makeInternalSOClient(this.soStart),
+              this.esClient,
+              policy.id,
+              updatePolicy
+            );
+            // accumulate list of policies updated
+            updatedPolicyIds.push(policy.id);
+          } catch (e) {
+            // try again for transient issues
             try {
-              this.logger.info('Updating agent policies per license change');
               await agentPolicyService.update(
                 this.makeInternalSOClient(this.soStart),
                 this.esClient,
                 policy.id,
                 updatePolicy
               );
-              // accumulate list of policies updated
-              updatedPolicyIds.push(policy.id);
-            } catch (e) {
-              // try again for transient issues
-              try {
-                await agentPolicyService.update(
-                  this.makeInternalSOClient(this.soStart),
-                  this.esClient,
-                  policy.id,
-                  updatePolicy
-                );
-              } catch (ee) {
-                this.logger.warn(
-                  `Unable to remove platinum features from agent policy ${policy.id}`
-                );
-                this.logger.warn(ee);
-              }
+            } catch (ee) {
+              this.logger.warn(`Unable to remove platinum features from agent policy ${policy.id}`);
+              this.logger.warn(ee);
             }
           }
-        } catch (error) {
-          this.logger.warn(
-            `Failure while attempting to verify features for agent policy [${policy.id}]`
-          );
-          this.logger.warn(error);
         }
+      } catch (error) {
+        this.logger.warn(
+          `Failure while attempting to verify features for agent policy [${policy.id}]`
+        );
+        this.logger.warn(error);
       }
-      this.logger.info(`Agent policies updated by license change: [${updatedPolicyIds.join()}]`);
-    } while (response.page * response.perPage < response.total);
+    }
+    this.logger.info(`Agent policies updated by license change: [${updatedPolicyIds.join()}]`);
   }
 }

@@ -619,6 +619,8 @@ export class FleetPlugin
         getByIds: agentPolicyService.getByIDs,
         turnOffAgentTamperProtections:
           agentPolicyService.turnOffAgentTamperProtections.bind(agentPolicyService),
+        fetchAllAgentPolicies: agentPolicyService.fetchAllAgentPolicies,
+        fetchAllAgentPolicyIds: agentPolicyService.fetchAllAgentPolicyIds,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {

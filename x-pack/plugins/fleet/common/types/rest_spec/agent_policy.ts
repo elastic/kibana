@@ -83,3 +83,13 @@ export interface GetFullAgentConfigMapResponse {
 export interface GetFullAgentManifestResponse {
   item: string;
 }
+
+export type AgentPolicyClientFetchAllAgentPoliciesOptions = Pick<
+  ListWithKuery,
+  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
+> & { fields?: string[] };
+
+export type AgentPolicyClientFetchAllAgentPolicyIdsOptions = Pick<
+  ListWithKuery,
+  'perPage' | 'kuery'
+>;

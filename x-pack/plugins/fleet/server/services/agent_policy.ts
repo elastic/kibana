@@ -66,6 +66,8 @@ import {
   FLEET_ELASTIC_AGENT_PACKAGE,
 } from '../../common/constants';
 import type {
+  AgentPolicyClientFetchAllAgentPoliciesOptions,
+  AgentPolicyClientFetchAllAgentPolicyIdsOptions,
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
   Installation,
@@ -102,6 +104,7 @@ import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
+import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -1312,14 +1315,15 @@ class AgentPolicyService {
     updatedPolicies: Array<Partial<AgentPolicy>> | null;
     failedPolicies: Array<{ id: string; error: Error | SavedObjectError }>;
   }> {
-    const { saved_objects: agentPoliciesWithEnabledAgentTamperProtection } =
-      await soClient.find<AgentPolicySOAttributes>({
-        type: SAVED_OBJECT_TYPE,
-        page: 1,
-        perPage: SO_SEARCH_LIMIT,
-        filter: normalizeKuery(SAVED_OBJECT_TYPE, 'ingest-agent-policies.is_protected: true'),
-        fields: ['revision'],
-      });
+    const agentPolicyFetcher = this.fetchAllAgentPolicies(soClient, {
+      kuery: 'ingest-agent-policies.is_protected: true',
+    });
+
+    const agentPoliciesWithEnabledAgentTamperProtection = [];
+
+    for await (const agentPolicy of agentPolicyFetcher) {
+      agentPoliciesWithEnabledAgentTamperProtection.push(...agentPolicy);
+    }
 
     if (agentPoliciesWithEnabledAgentTamperProtection.length === 0) {
       return {
@@ -1331,13 +1335,13 @@ class AgentPolicyService {
     const { saved_objects: updatedAgentPolicies } =
       await soClient.bulkUpdate<AgentPolicySOAttributes>(
         agentPoliciesWithEnabledAgentTamperProtection.map((agentPolicy) => {
-          const { id, attributes } = agentPolicy;
+          const { id, revision } = agentPolicy;
           return {
             id,
             type: SAVED_OBJECT_TYPE,
             attributes: {
               is_protected: false,
-              revision: attributes.revision + 1,
+              revision: revision + 1,
               updated_at: new Date().toISOString(),
               updated_by: 'system',
             },
@@ -1370,6 +1374,66 @@ class AgentPolicyService {
     );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
+  }
+
+  public fetchAllAgentPolicyIds(
+    soClient: SavedObjectsClientContract,
+    { perPage = 1000, kuery = undefined }: AgentPolicyClientFetchAllAgentPolicyIdsOptions = {}
+  ): AsyncIterable<string[]> {
+    return createSoFindIterable<{}>({
+      soClient,
+      findRequest: {
+        type: SAVED_OBJECT_TYPE,
+        perPage,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        fields: ['id'],
+        filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      },
+      resultsMapper: (data) => {
+        return data.saved_objects.map((agentPolicySO) => {
+          auditLoggingService.writeCustomSoAuditLog({
+            action: 'find',
+            id: agentPolicySO.id,
+            savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          });
+          return agentPolicySO.id;
+        });
+      },
+    });
+  }
+
+  public fetchAllAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    {
+      perPage = 1000,
+      kuery,
+      sortOrder = 'asc',
+      sortField = 'created_at',
+      fields = [],
+    }: AgentPolicyClientFetchAllAgentPoliciesOptions = {}
+  ): AsyncIterable<AgentPolicy[]> {
+    return createSoFindIterable<AgentPolicySOAttributes>({
+      soClient,
+      findRequest: {
+        type: SAVED_OBJECT_TYPE,
+        sortField,
+        sortOrder,
+        perPage,
+        fields,
+        filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      },
+      resultsMapper(data) {
+        return data.saved_objects.map((agentPolicySO) => {
+          auditLoggingService.writeCustomSoAuditLog({
+            action: 'find',
+            id: agentPolicySO.id,
+            savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          });
+          return { id: agentPolicySO.id, ...agentPolicySO.attributes };
+        });
+      },
+    });
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {

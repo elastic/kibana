@@ -183,6 +183,15 @@ describe('UninstallTokenService', () => {
     });
   }
 
+  function mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt = true, items?: string[]) {
+    const so = getDefaultSO(canEncrypt);
+    const so2 = getDefaultSO2(canEncrypt);
+
+    agentPolicyService.fetchAllAgentPolicyIds = jest.fn(async function* () {
+      yield items || [so.attributes.policy_id, so2.attributes.policy_id];
+    });
+  }
+
   function setupMocks(canEncrypt: boolean = true) {
     mockContext = createAppContextStartContractMock();
     mockContext.encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup({
@@ -420,6 +429,8 @@ describe('UninstallTokenService', () => {
         const so = getDefaultSO(canEncrypt);
         const so2 = getDefaultSO2(canEncrypt);
 
+        mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
+
         const tokensMap = await uninstallTokenService.getAllHashedTokens();
         expect(tokensMap).toEqual({
           [so.attributes.policy_id]: hashToken(getToken(so, canEncrypt)),
@@ -444,6 +455,8 @@ describe('UninstallTokenService', () => {
           });
 
           it('does not create new token when calling generateTokensForAllPolicies', async () => {
+            mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
+
             await uninstallTokenService.generateTokensForAllPolicies();
             expect(soClientMock.bulkCreate).not.toBeCalled();
           });
@@ -501,6 +514,8 @@ describe('UninstallTokenService', () => {
           it('creates a new token when calling generateTokensForAllPolicies', async () => {
             const so = getDefaultSO(canEncrypt);
             const so2 = getDefaultSO2(canEncrypt);
+
+            mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies(true);
             expect(soClientMock.bulkCreate).toBeCalledWith([
@@ -577,6 +592,8 @@ describe('UninstallTokenService', () => {
           const so = getDefaultSO(canEncrypt);
           const so2 = getDefaultSO2(canEncrypt);
 
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
+
           await uninstallTokenService.generateTokensForAllPolicies();
           expect(soClientMock.bulkCreate).toBeCalledWith([
             {
@@ -610,6 +627,7 @@ describe('UninstallTokenService', () => {
         });
 
         it('generateTokensForAllPolicies should not generate token if agentTamperProtectionEnabled: false', async () => {
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
           await uninstallTokenService.generateTokensForAllPolicies();
           expect(soClientMock.bulkCreate).not.toBeCalled();
         });
@@ -633,6 +651,8 @@ describe('UninstallTokenService', () => {
         it('returns null if all of the tokens are available', async () => {
           mockCreatePointInTimeFinderAsInternalUser();
 
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
+
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
           ).resolves.toBeNull();
@@ -641,6 +661,9 @@ describe('UninstallTokenService', () => {
         describe('avoiding `too_many_nested_clauses` error', () => {
           it('performs one query if number of policies is smaller than batch size', async () => {
             mockCreatePointInTimeFinderAsInternalUser();
+
+            mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
+
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
             expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(1);
@@ -657,6 +680,8 @@ describe('UninstallTokenService', () => {
             appContextService.getConfig().setup = { uninstallTokenVerificationBatchSize: 1 };
 
             mockCreatePointInTimeFinderAsInternalUser();
+
+            mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
@@ -683,6 +708,11 @@ describe('UninstallTokenService', () => {
         it('returns error if any of the tokens is missing', async () => {
           mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
 
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt, [
+            okaySO.attributes.policy_id,
+            missingTokenSO2.attributes.policy_id,
+          ]);
+
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
           ).resolves.toStrictEqual({
@@ -694,6 +724,11 @@ describe('UninstallTokenService', () => {
 
         it('returns error if some of the tokens cannot be decrypted', async () => {
           mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
+
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt, [
+            okaySO.attributes.policy_id,
+            errorWithDecryptionSO2.attributes.policy_id,
+          ]);
 
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
@@ -708,6 +743,11 @@ describe('UninstallTokenService', () => {
             errorWithDecryptionSO2,
           ]);
 
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt, [
+            errorWithDecryptionSO1.attributes.policy_id,
+            errorWithDecryptionSO2.attributes.policy_id,
+          ]);
+
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
           ).resolves.toStrictEqual({
@@ -719,6 +759,8 @@ describe('UninstallTokenService', () => {
           esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
             .fn()
             .mockRejectedValueOnce('some error');
+
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
@@ -767,6 +809,8 @@ describe('UninstallTokenService', () => {
           esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
             .fn()
             .mockRejectedValueOnce(responseError);
+
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()

@@ -14,6 +14,10 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { Subject } from 'rxjs';
 
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+
+import type { AgentPolicy } from '../../common';
+
 import { LicenseService } from '../../common/services';
 
 import { createAgentPolicyMock } from '../../common/mocks';
@@ -22,7 +26,6 @@ import { PolicyWatcher } from './agent_policy_watch';
 import { agentPolicyService } from './agent_policy';
 
 jest.mock('./agent_policy');
-
 const agentPolicySvcMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 describe('Agent Policy-Changing license watcher', () => {
@@ -31,7 +34,6 @@ describe('Agent Policy-Changing license watcher', () => {
   const esStartMock = elasticsearchServiceMock.createStart();
 
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
-  const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
 
   it('is activated on license changes', () => {
@@ -59,49 +61,15 @@ describe('Agent Policy-Changing license watcher', () => {
     licenseEmitter.complete();
   });
 
-  it('pages through all agent policies', async () => {
-    const TOTAL = 247;
-
-    // set up the mocked agent policy service to return and do what we want
-    agentPolicySvcMock.list
-      .mockResolvedValueOnce({
-        items: Array.from({ length: 100 }, () => createAgentPolicyMock()),
-        total: TOTAL,
-        page: 1,
-        perPage: 100,
-      })
-      .mockResolvedValueOnce({
-        items: Array.from({ length: 100 }, () => createAgentPolicyMock()),
-        total: TOTAL,
-        page: 2,
-        perPage: 100,
-      })
-      .mockResolvedValueOnce({
-        items: Array.from({ length: TOTAL - 200 }, () => createAgentPolicyMock()),
-        total: TOTAL,
-        page: 3,
-        perPage: 100,
+  it('alters no-longer-licensed features', async () => {
+    const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
+      jest.fn(async function* (soClient: SavedObjectsClientContract) {
+        yield items;
       });
 
-    const pw = new PolicyWatcher(soStartMock, esStartMock, logger);
-    await pw.watch(Gold); // just manually trigger with a given license
-
-    expect(agentPolicySvcMock.list.mock.calls.length).toBe(3); // should have asked for 3 pages of resuts
-
-    // Assert: on the first call to agentPolicy.list, we asked for page 1
-    expect(agentPolicySvcMock.list.mock.calls[0][1].page).toBe(1);
-    expect(agentPolicySvcMock.list.mock.calls[1][1].page).toBe(2); // second call, asked for page 2
-    expect(agentPolicySvcMock.list.mock.calls[2][1].page).toBe(3); // etc
-  });
-
-  it('alters no-longer-licensed features', async () => {
-    // mock an agent policy with agent tamper protection enabled
-    agentPolicySvcMock.list.mockResolvedValueOnce({
-      items: [createAgentPolicyMock({ is_protected: true })],
-      total: 1,
-      page: 1,
-      perPage: 100,
-    });
+    agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+      createAgentPolicyMock({ is_protected: true }),
+    ]);
 
     const pw = new PolicyWatcher(soStartMock, esStartMock, logger);
 
