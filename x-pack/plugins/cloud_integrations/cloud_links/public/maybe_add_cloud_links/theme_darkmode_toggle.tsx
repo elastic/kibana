@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
@@ -31,17 +32,24 @@ interface Props {
 export const ThemeDarkModeToggle = ({ security, core }: Props) => {
   return (
     <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <ThemeDarkModeToggleUi uiSettingsClient={core.uiSettings} />
+      <ThemeDarkModeToggleUi uiSettingsClient={core.uiSettings} theme={core.theme} />
     </UserProfilesKibanaProvider>
   );
 };
 
-function ThemeDarkModeToggleUi({ uiSettingsClient }: { uiSettingsClient: IUiSettingsClient }) {
+function ThemeDarkModeToggleUi({
+  uiSettingsClient,
+  theme,
+}: {
+  uiSettingsClient: IUiSettingsClient;
+  theme: ThemeServiceStart;
+}) {
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
   const { euiTheme } = useEuiTheme();
 
   const { isVisible, toggle, isDarkModeOn, colorScheme } = useThemeDarkmodeToggle({
     uiSettingsClient,
+    theme,
   });
 
   if (!isVisible) {

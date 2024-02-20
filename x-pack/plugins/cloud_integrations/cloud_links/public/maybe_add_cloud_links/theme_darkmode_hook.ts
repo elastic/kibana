@@ -8,13 +8,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
+  theme: ThemeServiceStart;
 }
 
-export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
+export const useThemeDarkmodeToggle = ({ uiSettingsClient, theme }: Deps) => {
   const [isDarkModeOn, setIsDarkModeOn] = useState(false);
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
@@ -55,17 +57,17 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   );
 
   useEffect(() => {
-    let updatedValue = false;
+    let updatedValue;
 
     if (typeof colorScheme !== 'string') {
       // User profile does not have yet any preference -> default to space dark mode value
-      updatedValue = uiSettingsClient.get('theme:darkMode') ?? false;
+      updatedValue = theme.getTheme().darkMode;
     } else {
       updatedValue = colorScheme === 'dark';
     }
 
     setIsDarkModeOn(updatedValue);
-  }, [colorScheme, uiSettingsClient]);
+  }, [colorScheme, theme]);
 
   return {
     isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
