@@ -10,9 +10,9 @@ import {
   type AppUpdater,
   type CoreStart,
   type AppDeepLink,
-  AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
@@ -249,9 +249,7 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const serverlessNavLinkStatus = this.isServerlessEnv
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden;
+      const visibleIn: AppDeepLinkLocations[] = this.isServerlessEnv ? ['globalSearch'] : [];
 
       return [
         {
@@ -260,7 +258,7 @@ export class Plugin implements InfraClientPluginClass {
             defaultMessage: 'Inventory',
           }),
           path: '/inventory',
-          navLinkStatus: serverlessNavLinkStatus,
+          visibleIn,
         },
         ...(hostsEnabled
           ? [
@@ -270,7 +268,7 @@ export class Plugin implements InfraClientPluginClass {
                   defaultMessage: 'Hosts',
                 }),
                 path: '/hosts',
-                navLinkStatus: serverlessNavLinkStatus,
+                visibleIn,
               },
             ]
           : []),
@@ -316,11 +314,18 @@ export class Plugin implements InfraClientPluginClass {
 
         const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
-        return renderApp(coreStart, { ...plugins }, pluginStart, this.config, params, {
-          kibanaVersion: this.kibanaVersion,
-          isCloudEnv,
-          isServerlessEnv,
-        });
+        return renderApp(
+          coreStart,
+          { ...plugins, licenseManagement: pluginsSetup.licenseManagement },
+          pluginStart,
+          this.config,
+          params,
+          {
+            kibanaVersion: this.kibanaVersion,
+            isCloudEnv,
+            isServerlessEnv,
+          }
+        );
       },
     });
 
@@ -330,7 +335,7 @@ export class Plugin implements InfraClientPluginClass {
       id: 'infra',
       appRoute: '/app/infra',
       title: 'infra',
-      navLinkStatus: 3,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./apps/legacy_app');
 

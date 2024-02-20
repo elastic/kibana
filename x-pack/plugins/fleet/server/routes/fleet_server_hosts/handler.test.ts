@@ -114,6 +114,18 @@ describe('fleet server hosts handler', () => {
     expect(res).toEqual({ body: { item: { id: 'host1' } } });
   });
 
+  it('should return ok on put in serverless if host urls are not passed', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+
+    const res = await putFleetServerHostHandler(
+      mockContext,
+      { body: { name: ['Renamed'] }, params: { outputId: 'host1' } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'host1' } } });
+  });
+
   it('should return ok on put in stateful if host url is different from default', async () => {
     jest
       .spyOn(appContextService, 'getCloud')
