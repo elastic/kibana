@@ -16,7 +16,7 @@ export const triggerTestNowMonitor = async ({
   configId: string;
   name: string;
 }): Promise<TestNowResponse | undefined> => {
-  return await apiService.get(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`);
+  return await apiService.post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`);
 };
 
 export const runOnceMonitor = async ({
