@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '@kbn/bfetch-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
@@ -40,7 +40,7 @@ export class BfetchExplorerPlugin implements Plugin {
     core.application.register({
       id: 'bfetch-explorer',
       title: 'bfetch explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core, explorer),
     });
 
