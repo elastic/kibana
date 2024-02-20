@@ -34,11 +34,11 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
   const removeTagsFilter = (tag: string) => {
     // eslint-disable-next-line no-console
     console.log('removeTagsFilter: ' + tag);
-    // eslint-disable-next-line no-console
-    console.log('selectedTags: ' + selectedTags);
     if (selectedTags.length === 0) {
       return;
     }
+    // eslint-disable-next-line no-console
+    console.log('onSelectedTagsChange: ' + selectedTags.filter((t) => t !== tag));
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
@@ -82,18 +82,21 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       <EuiSelectable
         options={options as any}
         onChange={(newOptions: EuiSelectableOption[]) => {
-          setOptions(newOptions);
+          // eslint-disable-next-line no-console
+          console.log('EuiSelectable onChange newOptions: ' + JSON.stringify(newOptions, null, 2));
           newOptions.forEach((option, index) => {
             if (option.checked !== options[index].checked) {
               const tag = option.key!;
               if (option.checked !== 'on') {
                 removeTagsFilter(tag);
+                return;
               } else {
                 addTagsFilter(tag);
+                return;
               }
-              return;
             }
           });
+          setOptions(newOptions);
         }}
         data-test-subj="agentList.agentPolicyFilterOptions"
         listProps={{
