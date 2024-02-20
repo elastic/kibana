@@ -1081,6 +1081,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.CONSOLE_LANG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONSOLE_LANG_ID",
+        "description": [],
+        "signature": [
+          "\"console\""
+        ],
+        "path": "packages/kbn-monaco/src/console/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.ESQL_LANG_ID",
         "type": "string",
         "tags": [],
