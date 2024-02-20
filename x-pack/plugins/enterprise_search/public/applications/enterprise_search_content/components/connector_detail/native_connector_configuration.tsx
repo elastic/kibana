@@ -182,9 +182,9 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.refreshApiKeyTitle',
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
                     {
-                      defaultMessage: 'Refresh API key',
+                      defaultMessage: 'Manage API key',
                     }
                   ),
                   titleSize: 'xs',

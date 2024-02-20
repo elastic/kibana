@@ -102,7 +102,7 @@ export const ApiKeyConfig: React.FC<{
             ? i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
                 {
-                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To refresh your API key, click "Refresh API key".`,
+                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To refresh your API key, click "Generate API key".`,
                   values: {
                     apiKeyName: `${indexName}-connector`,
                     indexName,
@@ -154,7 +154,7 @@ export const ApiKeyConfig: React.FC<{
             'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.missing',
             {
               defaultMessage:
-                'This connector is missing an API key. Try clicking "Refresh API key" to regenerate it.',
+                'This connector is missing an API key. Click "Generate API key" to regenerate it.',
             }
           )}
         />
@@ -170,7 +170,7 @@ export const ApiKeyConfig: React.FC<{
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
                 {
-                  defaultMessage: isNative ? 'Rollover API key' : 'Generate API key',
+                  defaultMessage: 'Generate API key',
                 }
               )}
             </EuiButton>
