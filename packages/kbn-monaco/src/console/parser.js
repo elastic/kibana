@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable prettier/prettier,prefer-const,no-throw-literal,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
+/* eslint-disable prettier/prettier,prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
 
 export const createParser = () => {
 
