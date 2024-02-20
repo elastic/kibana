@@ -44,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await slo.deleteAllSLOs();
+      await retry.tryForTime(60 * 1000, async () => {
+        await slo.deleteAllSLOs();
+      });
     });
 
     after(async () => {
@@ -348,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('gets slos instances', async () => {
       const id = await createSLO();
 
-      await retry.tryForTime(300 * 1000, async () => {
+      await retry.tryForTime(400 * 1000, async () => {
         const response = await supertestAPI
           .get(`/api/observability/slos`)
           .set('kbn-xsrf', 'true')

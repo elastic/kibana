@@ -50,7 +50,7 @@ export const sloKeys = {
   preview: (
     indicator: Indicator,
     range: { start: number; end: number },
-    groupings: Record<string, unknown>
+    groupings?: Record<string, unknown>
   ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
 };
 
