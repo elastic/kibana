@@ -95,6 +95,7 @@ export const ControlGroup = () => {
     ) {
       return null;
     }
+    const invalidControlType = panels[controlWithInvalidSelectionsId].type;
 
     return (
       <EuiTourStep
@@ -116,13 +117,11 @@ export const ControlGroup = () => {
               <EuiIcon type="warning" color="warning" />
             </EuiFlexItem>
             <EuiFlexItem>
-              {ControlGroupStrings.invalidControlWarning.getTourTitle(
-                panels[controlWithInvalidSelectionsId].type
-              )}
+              {ControlGroupStrings.invalidControlWarning.getTourTitle(invalidControlType)}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        content={ControlGroupStrings.invalidControlWarning.getTourContent()}
+        content={ControlGroupStrings.invalidControlWarning.getTourContent(invalidControlType)}
         footerAction={[
           <EuiCheckbox
             compressed

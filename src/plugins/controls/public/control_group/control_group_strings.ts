@@ -31,11 +31,29 @@ export const ControlGroupStrings = {
         }
       }
     },
-    getTourContent: () =>
-      i18n.translate('controls.controlGroup.invalidControlWarning.tourStepContent', {
-        defaultMessage:
-          'Some selections are returning no results. To see the full results, change your selections.',
-      }),
+    getTourContent: (controlType: string) => {
+      switch (controlType) {
+        case RANGE_SLIDER_CONTROL: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepContent.rangeSlider',
+            {
+              defaultMessage:
+                'The selected range is returning no results. To see the full results, change your selected range.',
+            }
+          );
+        }
+        default: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepContent.default',
+            {
+              defaultMessage:
+                'Some selections are returning no results. To see the full results, change your selections.',
+            }
+          );
+        }
+      }
+    },
+
     getDismissButton: () =>
       i18n.translate('controls.controlGroup.invalidControlWarning.dismissButtonLabel', {
         defaultMessage: 'Dismiss',
