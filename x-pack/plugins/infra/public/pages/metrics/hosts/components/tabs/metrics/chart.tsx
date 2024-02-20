@@ -38,7 +38,7 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
 
   const filters = useMemo(() => {
     return shouldUseSearchCriteria
-      ? searchCriteria.filters
+      ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
       : [
           buildCombinedHostsFilter({
             field: 'host.name',
@@ -46,7 +46,13 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
             dataView,
           }),
         ];
-  }, [shouldUseSearchCriteria, searchCriteria.filters, currentPage, dataView]);
+  }, [
+    shouldUseSearchCriteria,
+    searchCriteria.filters,
+    searchCriteria.panelFilters,
+    currentPage,
+    dataView,
+  ]);
 
   return (
     <LensChart
