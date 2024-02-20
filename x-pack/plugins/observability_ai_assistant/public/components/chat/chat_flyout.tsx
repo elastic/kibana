@@ -27,8 +27,8 @@ import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 import { ConversationList } from './conversation_list';
-import type { Conversation, Message } from '../../../common/types';
 import { ChatInlineEditingContent } from './chat_inline_edit';
+import type { Conversation, Message } from '../../../common/types';
 
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
 const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;

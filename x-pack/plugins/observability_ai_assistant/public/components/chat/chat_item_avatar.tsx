@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { UserAvatar } from '@kbn/user-profile-components';
+import { css } from '@emotion/css';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { AssistantAvatar } from '../assistant_avatar';
@@ -17,6 +18,13 @@ interface ChatAvatarProps {
   role: MessageRole;
   loading: boolean;
 }
+
+const assistantAvatarClassName = css`
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
 
 export function ChatItemAvatar({ currentUser, role, loading }: ChatAvatarProps) {
   const isLoading = loading || !currentUser;
@@ -32,7 +40,14 @@ export function ChatItemAvatar({ currentUser, role, loading }: ChatAvatarProps) 
     case MessageRole.Assistant:
     case MessageRole.Elastic:
     case MessageRole.Function:
-      return <EuiAvatar name="Elastic Assistant" iconType={AssistantAvatar} color="subdued" />;
+      return (
+        <EuiAvatar
+          name="Elastic Assistant"
+          iconType={AssistantAvatar}
+          color="subdued"
+          className={assistantAvatarClassName}
+        />
+      );
 
     case MessageRole.System:
       return <EuiAvatar name="system" iconType="dot" color="subdued" />;

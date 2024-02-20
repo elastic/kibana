@@ -47,7 +47,6 @@ const fullHeightClassName = css`
 
 const timelineClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
-  white-space: break-spaces;
   ${scrollBarStyles}
 `;
 
@@ -472,7 +471,6 @@ export function ChatBody({
           flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
-          showLinkToConversationsApp={showLinkToConversationsApp}
           title={title}
           onCopyConversation={handleCopyConversation}
           onSaveTitle={(newTitle) => {

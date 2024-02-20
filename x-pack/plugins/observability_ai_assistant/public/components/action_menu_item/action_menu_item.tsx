@@ -23,10 +23,13 @@ import { useKibana } from '../../hooks/use_kibana';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout, FlyoutPositionMode } from '../chat/chat_flyout';
 import { useFlyoutState } from '../../hooks/use_flyout_state';
+import type { Message } from '../../../common/types';
 
 const buttonLabelClassName = css`
   display: none;
 `;
+
+const initialMessages = [] as Message[];
 
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
@@ -129,7 +132,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
           <ChatFlyout
             initialConversationId={flyoutState.conversationId}
             initialTitle=""
-            initialMessages={[]}
+            initialMessages={initialMessages}
             initialFlyoutPositionMode={flyoutState.flyoutPositionMode}
             isOpen={isOpen}
             startedFrom="appTopNavbar"

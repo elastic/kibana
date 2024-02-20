@@ -47,7 +47,6 @@ export function ChatHeader({
   flyoutPositionMode,
   licenseInvalid,
   loading,
-  showLinkToConversationsApp,
   title,
   onCopyConversation,
   onSaveTitle,
@@ -60,7 +59,6 @@ export function ChatHeader({
   flyoutPositionMode?: FlyoutPositionMode;
   licenseInvalid: boolean;
   loading: boolean;
-  showLinkToConversationsApp: boolean;
   title: string;
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
@@ -159,10 +157,17 @@ export function ChatHeader({
                     anchorPosition="downLeft"
                     button={
                       <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel',
-                          { defaultMessage: 'Flyout mode' }
-                        )}
+                        content={
+                          flyoutPositionMode === 'overlay'
+                            ? i18n.translate(
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel',
+                                { defaultMessage: 'Dock chat' }
+                              )
+                            : i18n.translate(
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel',
+                                { defaultMessage: 'Undock chat' }
+                              )
+                        }
                         display="block"
                       >
                         <EuiButtonIcon
@@ -243,7 +248,6 @@ export function ChatHeader({
                 connectors={connectors}
                 conversationId={conversationId}
                 disabled={licenseInvalid}
-                showLinkToConversationsApp={showLinkToConversationsApp}
                 onCopyConversationClick={onCopyConversation}
               />
             </EuiFlexItem>
