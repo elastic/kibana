@@ -99,6 +99,5 @@ export async function typedSearch<
   esClient: ElasticsearchClient,
   params: TParams
 ): Promise<ESSearchResponse<DocumentSource, TParams>> {
-  console.log(JSON.stringify(params));
   return (await esClient.search(params)) as unknown as ESSearchResponse<DocumentSource, TParams>;
 }
