@@ -80,11 +80,13 @@ export const fetchMlModels = async (
 
   // Undeployed placeholder models might be in the Downloading phase; let's evaluate this with a call
   // We must do this one by one because the API doesn't support fetching multiple models with include=definition_status
+  const enrichmentCalls = [];
   for (const model of models) {
     if (model.isPromoted && !model.isPlaceholder && !model.hasStats) {
-      await enrichModelWithDownloadStatus(model, trainedModelsProvider);
+      enrichmentCalls.push(enrichModelWithDownloadStatus(model, trainedModelsProvider));
     }
   }
+  await Promise.all(enrichmentCalls);
 
   // Pin ELSER to the top, then E5 below, then the rest of the models sorted alphabetically
   return models.sort(sortModels);
@@ -147,22 +149,22 @@ const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModel
   return model;
 };
 
-const enrichModelWithDownloadStatus = async (
-  model: MlModel,
-  trainedModelsProvider: MlTrainedModels
-) => {
-  const modelConfigWithDefinitionStatus = await trainedModelsProvider.getTrainedModels({
-    model_id: model.modelId,
-    include: 'definition_status',
-  });
-
-  if (modelConfigWithDefinitionStatus && modelConfigWithDefinitionStatus.count > 0) {
-    // We're using NotDeployed for downloaded models. Downloaded is also a valid status, but we want to have the same
-    // status badge as for 3rd party models.
-    model.deploymentState = modelConfigWithDefinitionStatus.trained_model_configs[0].fully_defined
-      ? MlModelDeploymentState.NotDeployed
-      : MlModelDeploymentState.Downloading;
-  }
+const enrichModelWithDownloadStatus = (model: MlModel, trainedModelsProvider: MlTrainedModels) => {
+  return trainedModelsProvider
+    .getTrainedModels({
+      model_id: model.modelId,
+      include: 'definition_status',
+    })
+    .then((modelConfigWithDefinitionStatus) => {
+      if (modelConfigWithDefinitionStatus && modelConfigWithDefinitionStatus.count > 0) {
+        // We're using NotDeployed for downloaded models. Downloaded is also a valid status, but we want to have the same
+        // status badge as for 3rd party models.
+        model.deploymentState = modelConfigWithDefinitionStatus.trained_model_configs[0]
+          .fully_defined
+          ? MlModelDeploymentState.NotDeployed
+          : MlModelDeploymentState.Downloading;
+      }
+    });
 };
 
 const mergeModel = (model: MlModel, models: MlModel[]) => {
