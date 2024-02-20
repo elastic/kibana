@@ -16,8 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
   // set to true to show tech preview badge on sentinel one connector
   sentinelOneConnectorOn: true,
   // set to true to show beta badge on sentinel one connector
-  // TODO: set to true when 8.13 is ready
-  sentinelOneConnectorOnBeta: false,
+  sentinelOneConnectorOnBeta: true,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
