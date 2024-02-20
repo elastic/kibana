@@ -126,8 +126,9 @@ export const eqlExecutor = async ({
     const events = response.hits.events;
     const sequences = response.hits.sequences;
 
+    // before for sequence we need to create util fn that generate interesected fields instead source t
+    // then pass to suppression
     if (isAlertSuppressionActive) {
-      console.log('response.hits.total', response.hits.total);
       const alertSuppression = completeRule.ruleParams.alertSuppression;
       createResult = await bulkCreateSuppressedAlertsInMemory({
         enrichedEvents: events ?? [], // Will be changed once the sequence query is handled
@@ -139,7 +140,7 @@ export const eqlExecutor = async ({
         ruleExecutionLogger,
         tuple,
         alertSuppression,
-        wrapSuppressedHits,
+        wrapSuppressedHits, // maybe we need another one for sequence that utilize the wrapsequencefactory to create the shellalerts with the suppression
         alertTimestampOverride,
         alertWithSuppression,
       });
