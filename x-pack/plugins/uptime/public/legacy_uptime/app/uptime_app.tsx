@@ -143,7 +143,10 @@ const Application = (props: UptimeAppProps) => {
                                 <InspectorContextProvider>
                                   <UptimeAlertsFlyoutWrapper />
                                   <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
+                                  <ActionMenu
+                                    appMountParameters={appMountParameters}
+                                    observabilityAIAssistant={startPlugins.observabilityAIAssistant}
+                                  />
                                 </InspectorContextProvider>
                               </RedirectAppLinks>
                             </div>

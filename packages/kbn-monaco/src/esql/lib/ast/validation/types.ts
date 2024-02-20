@@ -103,7 +103,7 @@ export interface ValidationErrors {
   };
   unknownAggregateFunction: {
     message: string;
-    type: { command: string; value: string };
+    type: { type: string; value: string };
   };
   wildcardNotSupportedForCommand: {
     message: string;
@@ -124,6 +124,10 @@ export interface ValidationErrors {
   unsupportedSettingCommandValue: {
     message: string;
     type: { command: string; value: string; expected: string };
+  };
+  expectedConstant: {
+    message: string;
+    type: { fn: string; given: string };
   };
 }
 

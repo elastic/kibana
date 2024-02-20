@@ -170,6 +170,10 @@ async function validateOutputServerless(
     throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
   }
   // Elasticsearch outputs must have the default host URL in serverless.
+  // No need to validate on update if hosts are not passed.
+  if (outputId && !output.hosts) {
+    return;
+  }
   const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
   let originalOutput;
   if (outputId) {

@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const TABLE_COLUMN_LABEL = {
+  alertsCount: i18n.translate('xpack.infra.hostsViewPage.table.alertsColumnHeader', {
+    defaultMessage: 'Active alerts',
+  }),
+
   title: i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
     defaultMessage: 'Name',
   }),

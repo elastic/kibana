@@ -25,7 +25,7 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
   const loading = hostsLoading || hostCountLoading;
 
   const filters = shouldUseSearchCriteria
-    ? searchCriteria.filters
+    ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
     : [
         buildCombinedHostsFilter({
           field: 'host.name',

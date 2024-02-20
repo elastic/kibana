@@ -114,6 +114,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableAssetCriticality': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

@@ -9428,7 +9428,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -9558,6 +9558,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "allowHidden",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.includeEmptyFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "includeEmptyFields",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -18458,6 +18472,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "forceRefresh",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.includeEmptyFields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeEmptyFields",
             "description": [],
             "signature": [
               "boolean | undefined"

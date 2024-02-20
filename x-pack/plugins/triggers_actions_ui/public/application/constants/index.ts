@@ -50,6 +50,8 @@ export enum SORT_ORDERS {
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
 
+export const DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE: number = 25;
+
 export const DEFAULT_RULE_INTERVAL = '1m';
 
 export const RULE_EXECUTION_LOG_COLUMN_IDS = [

@@ -16,7 +16,7 @@ export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noData
 });
 
 export const noDatasetsTitle = i18n.translate('xpack.datasetQuality.noDatasetsTitle', {
-  defaultMessage: 'There is no data to display.',
+  defaultMessage: 'No matching data streams found',
 });
 
 export const loadingDatasetsText = i18n.translate('xpack.datasetQuality.loadingDatasetsText', {

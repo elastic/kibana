@@ -162,10 +162,12 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
 
 export function SloCardChart({
   slo,
+  onClick,
   historicalSliData,
 }: {
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
+  onClick?: () => void;
 }) {
   const {
     application: { navigateToUrl },
@@ -181,8 +183,12 @@ export function SloCardChart({
         // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
         baseTheme={LEGACY_DARK_THEME}
         onElementClick={([d]) => {
-          if (isMetricElementEvent(d)) {
-            navigateToUrl(sloDetailsUrl);
+          if (onClick) {
+            onClick();
+          } else {
+            if (isMetricElementEvent(d)) {
+              navigateToUrl(sloDetailsUrl);
+            }
           }
         }}
         locale={i18n.getLocale()}

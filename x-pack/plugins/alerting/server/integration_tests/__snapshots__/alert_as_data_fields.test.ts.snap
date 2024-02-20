@@ -9115,7 +9115,34 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: transform_health 1`] = `
 Object {
-  "fieldMap": Object {},
+  "fieldMap": Object {
+    "kibana.alert.results": Object {
+      "array": true,
+      "dynamic": false,
+      "properties": Object {
+        "description": Object {
+          "type": "text",
+        },
+        "health_status": Object {
+          "type": "keyword",
+        },
+        "issues": Object {
+          "type": "object",
+        },
+        "node_name": Object {
+          "type": "keyword",
+        },
+        "transform_id": Object {
+          "type": "keyword",
+        },
+        "transform_state": Object {
+          "type": "keyword",
+        },
+      },
+      "required": false,
+      "type": "object",
+    },
+  },
 }
 `;
 
@@ -9233,7 +9260,91 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_jobs_health 1`] = `
 Object {
-  "fieldMap": Object {},
+  "fieldMap": Object {
+    "kibana.alert.datafeed_results": Object {
+      "array": true,
+      "dynamic": false,
+      "properties": Object {
+        "datafeed_id": Object {
+          "type": "keyword",
+        },
+        "datafeed_state": Object {
+          "type": "keyword",
+        },
+        "job_id": Object {
+          "type": "keyword",
+        },
+        "job_state": Object {
+          "type": "keyword",
+        },
+      },
+      "required": false,
+      "type": "object",
+    },
+    "kibana.alert.delayed_data_results": Object {
+      "array": true,
+      "dynamic": false,
+      "properties": Object {
+        "annotation": Object {
+          "type": "text",
+        },
+        "end_timestamp": Object {
+          "type": "date",
+        },
+        "job_id": Object {
+          "type": "keyword",
+        },
+        "missed_docs_count": Object {
+          "type": "long",
+        },
+      },
+      "required": false,
+      "type": "object",
+    },
+    "kibana.alert.job_errors_results": Object {
+      "array": true,
+      "dynamic": false,
+      "properties": Object {
+        "errors": Object {
+          "type": "object",
+        },
+        "job_id": Object {
+          "type": "keyword",
+        },
+      },
+      "required": false,
+      "type": "object",
+    },
+    "kibana.alert.mml_results": Object {
+      "array": true,
+      "dynamic": false,
+      "properties": Object {
+        "job_id": Object {
+          "type": "keyword",
+        },
+        "log_time": Object {
+          "type": "date",
+        },
+        "memory_status": Object {
+          "type": "keyword",
+        },
+        "model_bytes": Object {
+          "type": "long",
+        },
+        "model_bytes_exceeded": Object {
+          "type": "long",
+        },
+        "model_bytes_memory_limit": Object {
+          "type": "long",
+        },
+        "peak_model_bytes": Object {
+          "type": "long",
+        },
+      },
+      "required": false,
+      "type": "object",
+    },
+  },
 }
 `;
 

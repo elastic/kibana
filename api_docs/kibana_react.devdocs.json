@@ -1040,6 +1040,18 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
           },
           {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/application.tsx"
           },
