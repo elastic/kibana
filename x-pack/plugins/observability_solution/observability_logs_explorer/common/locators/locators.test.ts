@@ -8,21 +8,25 @@
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorParams,
+  ObsLogsExplorerDataViewLocatorParams,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { AllDatasetsLocatorDefinition } from './all_datasets/all_datasets_locator';
-import { SingleDatasetLocatorDefinition } from './single_dataset';
-import { DatasetLocatorDependencies } from './types';
+import { AllDatasetsLocatorDefinition } from './all_datasets_locator';
+import { DataViewLocatorDefinition } from './data_view_locator';
+import { SingleDatasetLocatorDefinition } from './single_dataset_locator';
+import { ObsLogsExplorerLocatorDependencies } from './types';
 
 const setup = async () => {
-  const dep: DatasetLocatorDependencies = {
+  const dep: ObsLogsExplorerLocatorDependencies = {
     useHash: false,
   };
   const allDatasetsLocator = new AllDatasetsLocatorDefinition(dep);
+  const dataViewLocator = new DataViewLocatorDefinition(dep);
   const singleDatasetLocator = new SingleDatasetLocatorDefinition(dep);
 
   return {
     allDatasetsLocator,
+    dataViewLocator,
     singleDatasetLocator,
   };
 };
@@ -42,7 +46,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying time range', async () => {
+    it('should allow specifying time range', async () => {
       const params: AllDatasetsLocatorParams = {
         timeRange,
       };
@@ -56,7 +60,7 @@ describe('Observability Logs Explorer Locators', () => {
         state: {},
       });
     });
-    it('should allow specifiying query', async () => {
+    it('should allow specifying query', async () => {
       const params: AllDatasetsLocatorParams = {
         query: {
           language: 'kuery',
@@ -74,7 +78,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying refresh interval', async () => {
+    it('should allow specifying refresh interval', async () => {
       const params: AllDatasetsLocatorParams = {
         refreshInterval: {
           pause: false,
@@ -136,6 +140,120 @@ describe('Observability Logs Explorer Locators', () => {
     });
   });
 
+  describe('Data View Locator', () => {
+    it('should create a link with correct index', async () => {
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation({
+        id: 'data-view-id',
+      });
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(datasetSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),v:1)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying time range', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        timeRange,
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(datasetSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),time:(from:now-30m,to:now),v:1)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying query', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        query: {
+          language: 'kuery',
+          query: 'foo',
+        },
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(datasetSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),query:(language:kuery,query:foo),v:1)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying refresh interval', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        refreshInterval: {
+          pause: false,
+          value: 666,
+        },
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(datasetSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),refreshInterval:(pause:!f,value:666),v:1)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying columns', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        columns: [{ field: '_source', type: 'document-field' }],
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(columns:!((field:_source,type:document-field)),datasetSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),v:1)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying filters', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        filters: [
+          {
+            meta: {
+              alias: 'foo',
+              disabled: false,
+              negate: false,
+            },
+          },
+          {
+            meta: {
+              alias: 'bar',
+              disabled: false,
+              negate: false,
+            },
+          },
+        ],
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location.path).toMatchInlineSnapshot(
+        `"/?pageState=(datasetSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),filters:!((meta:(alias:foo,disabled:!f,negate:!f)),(meta:(alias:bar,disabled:!f,negate:!f))),v:1)"`
+      );
+    });
+  });
+
   describe('Single Dataset Locator', () => {
     const integration = 'Test';
     const dataset = 'test-*';
@@ -153,7 +271,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying time range', async () => {
+    it('should allow specifying time range', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
@@ -170,7 +288,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying query', async () => {
+    it('should allow specifying query', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
@@ -190,7 +308,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying refresh interval', async () => {
+    it('should allow specifying refresh interval', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
@@ -210,7 +328,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying columns', async () => {
+    it('should allow specifying columns', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
@@ -227,7 +345,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying filters', async () => {
+    it('should allow specifying filters', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
         dataset,
