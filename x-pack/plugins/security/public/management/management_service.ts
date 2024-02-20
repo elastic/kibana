@@ -45,9 +45,9 @@ export class ManagementService {
   private license!: SecurityLicense;
   private licenseFeaturesSubscription?: Subscription;
   private securitySection?: ManagementSection;
-  private userManagementEnabled: boolean;
-  private roleManagementEnabled: boolean;
-  private roleMappingManagementEnabled: boolean;
+  private readonly userManagementEnabled: boolean;
+  private readonly roleManagementEnabled: boolean;
+  private readonly roleMappingManagementEnabled: boolean;
 
   constructor(config: ConfigType) {
     this.userManagementEnabled = !config.ui || config.ui.userManagementEnabled;
