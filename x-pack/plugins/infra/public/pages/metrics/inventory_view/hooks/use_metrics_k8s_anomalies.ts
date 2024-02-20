@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useState, useCallback, useEffect, useReducer, useRef } from 'react';
+import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import {
   Sort,
@@ -289,17 +289,11 @@ export const useMetricsK8sAnomaliesResults = ({
     }
   }, [dispatch, reducerState]);
 
-  const isPendingMetricsK8sAnomalies = useMemo(
-    () =>
-      getMetricsK8sAnomaliesRequest.state === 'pending' ||
-      getMetricsK8sAnomaliesRequest.state === 'uninitialized',
-    [getMetricsK8sAnomaliesRequest.state]
-  );
+  const isPendingMetricsK8sAnomalies =
+    getMetricsK8sAnomaliesRequest.state === 'pending' ||
+    getMetricsK8sAnomaliesRequest.state === 'uninitialized';
 
-  const hasFailedLoadingMetricsK8sAnomalies = useMemo(
-    () => getMetricsK8sAnomaliesRequest.state === 'rejected',
-    [getMetricsK8sAnomaliesRequest.state]
-  );
+  const hasFailedLoadingMetricsK8sAnomalies = getMetricsK8sAnomaliesRequest.state === 'rejected';
 
   return {
     metricsK8sAnomalies,
