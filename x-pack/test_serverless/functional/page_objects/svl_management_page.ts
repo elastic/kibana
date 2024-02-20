@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlManagementPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function SvlManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
