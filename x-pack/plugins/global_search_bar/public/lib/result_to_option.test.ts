@@ -112,6 +112,7 @@ describe('resultToOption', () => {
           id: 'known',
           name: 'Known',
           description: 'Known',
+          managed: false,
           color: '#000000',
         };
       }
