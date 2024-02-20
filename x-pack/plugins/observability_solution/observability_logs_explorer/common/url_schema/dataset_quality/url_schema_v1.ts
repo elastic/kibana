@@ -56,6 +56,16 @@ export const filtersRT = rt.exact(
   rt.partial({
     inactive: rt.boolean,
     fullNames: rt.boolean,
+    timeRange: rt.strict({
+      from: rt.string,
+      to: rt.string,
+      refresh: rt.strict({
+        isPaused: rt.boolean,
+        interval: rt.number,
+      }),
+    }),
+    integrations: rt.array(rt.string),
+    query: rt.string,
   })
 );
 
