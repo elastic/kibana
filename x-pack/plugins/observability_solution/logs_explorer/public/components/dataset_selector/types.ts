@@ -34,7 +34,7 @@ import {
 } from '../../hooks/use_data_views';
 import { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
 
-export interface DatasetSelectorProps {
+export interface DataSourceSelectorProps {
   /* The generic data stream list */
   datasets: Dataset[] | null;
   /* Any error occurred to show when the user preview the generic data streams */

@@ -17,7 +17,7 @@ import {
 import { createDatasetsSelectorStateMachine } from './state_machine';
 import { DatasetsSelectorStateMachineDependencies } from './types';
 
-export const useDatasetSelector = ({
+export const useDataSourceSelector = ({
   initialContext,
   onDataViewsSearch,
   onDataViewsSort,

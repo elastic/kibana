@@ -19,12 +19,12 @@ import {
   SelectionChange,
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
-import { DatasetSelector } from './dataset_selector';
-import { DatasetSelectorProps, DatasetsSelectorSearchParams } from './types';
+import { DataSourceSelector } from './dataset_selector';
+import { DataSourceSelectorProps, DatasetsSelectorSearchParams } from './types';
 
-const meta: Meta<typeof DatasetSelector> = {
-  component: DatasetSelector,
-  title: 'logs_explorer/DatasetSelector',
+const meta: Meta<typeof DataSourceSelector> = {
+  component: DataSourceSelector,
+  title: 'logs_explorer/DataSourceSelector',
   decorators: [(wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>],
   argTypes: {
     datasetsError: {
@@ -43,7 +43,7 @@ const meta: Meta<typeof DatasetSelector> = {
 };
 export default meta;
 
-const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
+const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
   const [datasetSelection, setDatasetSelection] = useState<DatasetSelection | DataViewSelection>(
     () => AllDatasetSelection.create()
   );
@@ -94,7 +94,7 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
   } = args;
 
   return (
-    <DatasetSelector
+    <DataSourceSelector
       {...args}
       datasets={Boolean(datasetsError || isLoadingUncategorized) ? [] : sortedDatasets}
       dataViews={Boolean(dataViewsError || isLoadingDataViews) ? [] : sortedDataViews}
@@ -114,7 +114,7 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
   );
 };
 
-export const Basic = DatasetSelectorTemplate.bind({});
+export const Basic = DataSourceSelectorTemplate.bind({});
 Basic.args = {
   datasetsError: null,
   dataViewsError: null,

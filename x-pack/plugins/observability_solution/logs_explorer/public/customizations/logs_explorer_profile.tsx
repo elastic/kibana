@@ -22,7 +22,7 @@ import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
-const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomDataSourceSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogsExplorerProfileCustomizationsDeps {
@@ -53,7 +53,7 @@ export const createLogsExplorerProfileCustomizations =
     await waitFor(service, (state) => state.matches('initialized'), { timeout: 30000 });
 
     /**
-     * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
+     * Replace the DataViewPicker with a custom `DataSourceSelector` to pick integrations streams
      * Prepend the search bar with custom filter control groups depending on the selected dataset
      */
     customizations.set({
@@ -63,7 +63,7 @@ export const createLogsExplorerProfileCustomizations =
 
         return (
           <KibanaContextProviderForPlugin>
-            <LazyCustomDatasetSelector
+            <LazyCustomDataSourceSelector
               controller={controller}
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}

@@ -7,7 +7,7 @@
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import React from 'react';
-import { DatasetSelector } from '../components/dataset_selector';
+import { DataSourceSelector } from '../components/dataset_selector';
 import { LogsExplorerController } from '../controller';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { useDatasetSelection } from '../hooks/use_dataset_selection';
@@ -17,11 +17,11 @@ import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integ
 import { IDatasetsClient } from '../services/datasets';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
-interface CustomDatasetSelectorProps {
+interface CustomDataSourceSelectorProps {
   logsExplorerControllerStateService: LogsExplorerControllerStateService;
 }
 
-export const CustomDatasetSelector = withProviders(({ logsExplorerControllerStateService }) => {
+export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerStateService }) => {
   const { datasetSelection, handleDatasetSelectionChange } = useDatasetSelection(
     logsExplorerControllerStateService
   );
@@ -63,7 +63,7 @@ export const CustomDatasetSelector = withProviders(({ logsExplorerControllerStat
   const { isEsqlEnabled, discoverEsqlUrlProps } = useEsql({ datasetSelection });
 
   return (
-    <DatasetSelector
+    <DataSourceSelector
       datasets={datasets}
       datasetSelection={datasetSelection}
       datasetsError={datasetsError}
@@ -98,21 +98,21 @@ export const CustomDatasetSelector = withProviders(({ logsExplorerControllerStat
 });
 
 // eslint-disable-next-line import/no-default-export
-export default CustomDatasetSelector;
+export default CustomDataSourceSelector;
 
-export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
+export type CustomDataSourceSelectorBuilderProps = CustomDataSourceSelectorProps & {
   controller: LogsExplorerController;
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
 };
 
-function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
+function withProviders(Component: React.FunctionComponent<CustomDataSourceSelectorProps>) {
   return function ComponentWithProviders({
     controller,
     datasetsClient,
     dataViews,
     logsExplorerControllerStateService,
-  }: CustomDatasetSelectorBuilderProps) {
+  }: CustomDataSourceSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>

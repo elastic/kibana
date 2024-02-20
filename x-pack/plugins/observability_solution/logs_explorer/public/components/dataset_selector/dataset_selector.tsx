@@ -22,12 +22,12 @@ import {
   UNCATEGORIZED_PANEL_ID,
   UNCATEGORIZED_TAB_ID,
 } from './constants';
-import { useDatasetSelector } from './state_machine/use_dataset_selector';
+import { useDataSourceSelector } from './state_machine/use_dataset_selector';
 import { SelectorPopover } from './sub_components/selector_popover';
 import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
-import { DatasetSelectorProps } from './types';
+import { DataSourceSelectorProps } from './types';
 import {
   buildIntegrationsTree,
   createDataViewsStatusItem,
@@ -35,7 +35,7 @@ import {
   createUncategorizedStatusItem,
 } from './utils';
 
-export function DatasetSelector({
+export function DataSourceSelector({
   datasets,
   datasetSelection,
   datasetsError,
@@ -65,7 +65,7 @@ export function DatasetSelector({
   onUncategorizedSearch,
   onUncategorizedSort,
   onUncategorizedTabClick,
-}: DatasetSelectorProps) {
+}: DataSourceSelectorProps) {
   const {
     panelId,
     search,
@@ -84,7 +84,7 @@ export function DatasetSelector({
     switchToUncategorizedTab,
     switchToDataViewsTab,
     togglePopover,
-  } = useDatasetSelector({
+  } = useDataSourceSelector({
     initialContext: { selection: datasetSelection },
     onDataViewsSearch,
     onDataViewsSort,
