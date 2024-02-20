@@ -144,12 +144,3 @@ export function registerGetSLOListFunction({
     }
   );
 }
-
-// how to pass space id to assistant
-// how to add labels to table
-// how to add links to apps to your responses
-
-// improving natural language model, having to provide more context
-
-// What I've learned
-// match labels from the results of one function to the parameters of another function. Ex: alertStart
