@@ -32,6 +32,7 @@ import {
   makeFloatString,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
 } from '../utils/utils';
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
@@ -126,9 +127,10 @@ export const eqlExecutor = async ({
     const sequences = response.hits.sequences;
 
     if (isAlertSuppressionActive) {
+      console.log('response.hits.total', response.hits.total);
       const alertSuppression = completeRule.ruleParams.alertSuppression;
       createResult = await bulkCreateSuppressedAlertsInMemory({
-        enrichedEvents: events ?? [],
+        enrichedEvents: events ?? [], // Will be changed once the sequence query is handled
         toReturn: result,
         wrapHits,
         bulkCreate,
@@ -141,9 +143,6 @@ export const eqlExecutor = async ({
         alertTimestampOverride,
         alertWithSuppression,
       });
-      if (createResult.warningMessages) {
-        result.warningMessages.push(createResult.warningMessages);
-      }
     } else {
       const newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> =
         sequences !== undefined
@@ -165,10 +164,13 @@ export const eqlExecutor = async ({
         })
       );
       addToSearchAfterReturn({ current: result, next: createResult });
-      if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
-        result.warningMessages.push(getMaxSignalsWarning());
-      }
     }
+    const maxSignalsWarning = isAlertSuppressionActive
+      ? getSuppressionMaxSignalsWarning()
+      : getMaxSignalsWarning();
+
+    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals)
+      result.warningMessages.push(maxSignalsWarning);
 
     return result;
   });

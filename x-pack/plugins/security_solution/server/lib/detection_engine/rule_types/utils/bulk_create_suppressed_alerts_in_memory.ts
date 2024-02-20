@@ -66,7 +66,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
 }: BulkCreateSuppressedAlertsParams) => {
   // max signals for suppression includes suppressed and created alerts
   // this allows to lift max signals limitation to higher value
-  // and can detects threats beyond default max_signals value
+  // and can detects events beyond default max_signals value
   const suppressionMaxSignals = MAX_SIGNALS_SUPPRESSION_MULTIPLIER * tuple.maxSignals;
 
   const suppressionDuration = alertSuppression?.duration;
@@ -118,10 +118,8 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     (toReturn.suppressedAlertsCount ?? 0) + toReturn.createdSignalsCount >= suppressionMaxSignals ||
     toReturn.createdSignalsCount >= tuple.maxSignals;
 
-  // TODO validate warning cases
   return {
     ...bulkCreateResult,
     alertsWereTruncated,
-    warningMessages: alertsWereTruncated ? getSuppressionMaxSignalsWarning() : '',
   };
 };

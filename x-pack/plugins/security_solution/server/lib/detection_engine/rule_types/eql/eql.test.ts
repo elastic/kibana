@@ -59,6 +59,10 @@ describe('eql_executor', () => {
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: false,
       });
       expect(result.warningMessages).toEqual([
         `The following exceptions won't be applied to rule execution: ${

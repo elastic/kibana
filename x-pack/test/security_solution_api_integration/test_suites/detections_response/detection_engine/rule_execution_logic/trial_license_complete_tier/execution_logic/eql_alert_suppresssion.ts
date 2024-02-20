@@ -53,7 +53,6 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
 
-  // TODO remove the only
   describe('@ess @serverless EQL type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
@@ -1354,12 +1353,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // TODO fix it
-      it.skip('should NOT suppress more than limited number (max_signals x5)', async () => {
+      // Given that EQL rules have a maximum size for querying documents up to 100,
+      // even increasing the suppressed alerts limit by five times
+      // the suppression max signals won't have an effect
+      it('should NOT suppress more than the limited size', async () => {
         const id = uuidv4();
 
         await indexGeneratedSourceDocuments({
-          docsCount: 700,
+          docsCount: 150, // the eql query max size is 100
           seed: (index) => ({
             id,
             '@timestamp': `2020-10-28T06:50:00.${index}Z`,
@@ -1388,7 +1389,6 @@ export default ({ getService }: FtrProviderContext) => {
           invocationCount: 1,
         });
 
-        console.log(logs);
         expect(logs[0].warnings).toEqual(
           expect.arrayContaining([getSuppressionMaxAlertsWarning()])
         );
@@ -1407,11 +1407,11 @@ export default ({ getService }: FtrProviderContext) => {
               value: ['agent-a'],
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 99,
         });
       });
-      // TODO fix it
-      it.skip('should generate to max_signals alerts', async () => {
+
+      it('should generate to max_signals alerts', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T06:05:00.000Z';
         const secondTimestamp = '2020-10-28T06:10:00.000Z';
