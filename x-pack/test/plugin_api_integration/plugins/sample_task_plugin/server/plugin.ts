@@ -167,6 +167,37 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleAdHocTaskTimingOut: {
+        title: 'Sample Ad-Hoc Task that Times Out',
+        description: 'A sample task that times out.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          let isCancelled: boolean = false;
+          return {
+            async run() {
+              // wait for 15 seconds
+              await new Promise((r) => setTimeout(r, 15000));
+
+              if (!isCancelled) {
+                const [{ elasticsearch }] = await core.getStartServices();
+                await elasticsearch.client.asInternalUser.index({
+                  index: '.kibana_task_manager_test_result',
+                  body: {
+                    type: 'task',
+                    taskType: 'sampleAdHocTaskTimingOut',
+                    taskId: taskInstance.id,
+                  },
+                  refresh: true,
+                });
+              }
+            },
+            async cancel() {
+              isCancelled = true;
+            },
+          };
+        },
+      },
       sampleRecurringTaskWhichHangs: {
         title: 'Sample Recurring Task that Hangs for a minute',
         description: 'A sample task that Hangs for a minute on each run.',

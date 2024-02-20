@@ -62,6 +62,7 @@ export function initRoutes(
             params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
             state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
             id: schema.maybe(schema.string()),
+            timeoutOverride: schema.maybe(schema.string()),
           }),
         }),
       },

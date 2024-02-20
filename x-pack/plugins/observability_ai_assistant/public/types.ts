@@ -32,6 +32,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
   ContextDefinition,
@@ -112,6 +113,7 @@ export type ChatRegistrationRenderFunction = ({}: {
 export interface ConfigSchema {}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
   lens: LensPublicSetup;
@@ -122,6 +124,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   lens: LensPublicStart;

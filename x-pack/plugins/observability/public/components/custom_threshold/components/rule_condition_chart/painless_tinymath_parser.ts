@@ -75,13 +75,16 @@ export class PainlessTinyMathParser {
   }
 
   replaceCharactersWithAggMap(inputString: string, aggMap: AggMap): string {
-    // Use a regular expression to match any character from 'A' to 'Z'
-    const regex = /[A-Z]/g;
+    let parsedInputString = inputString;
+    // Iterate over aggregation names and replace them with equation
+    Object.keys(aggMap)
+      .sort()
+      .reverse()
+      .forEach((metricName) => {
+        parsedInputString = parsedInputString.replaceAll(metricName, aggMap[metricName]);
+      });
 
-    return inputString.replace(regex, (match) => {
-      const replacement = aggMap[match]; // Get the replacement from the map
-      return replacement ? replacement : match; // Use the replacement or the original character
-    });
+    return parsedInputString;
   }
 
   parseCondition(condition: string): string {

@@ -39,20 +39,6 @@ export class ToastsService extends FtrService {
     return { title, message };
   }
 
-  public async toastMessageByTestSubj(testSubj = 'csp:toast-success') {
-    const testSubjSvc = this.testSubjects;
-    return {
-      async getElement(): Promise<WebElementWrapper> {
-        return await testSubjSvc.find(testSubj);
-      },
-      async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
-        const element = await this.getElement();
-        const link = await element.findByTestSubject(linkTestSubj);
-        await link.click();
-      },
-    };
-  }
-
   /**
    * Dismiss a specific toast from the toast list. Since toasts usually should time out themselves,
    * you only need to call this for permanent toasts (e.g. error toasts).
@@ -123,7 +109,7 @@ export class ToastsService extends FtrService {
     });
   }
 
-  public async getElementByIndex(index: number): Promise<WebElementWrapper> {
+  public async getElementByIndex(index: number = 1): Promise<WebElementWrapper> {
     return await (await this.getGlobalList()).findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 
