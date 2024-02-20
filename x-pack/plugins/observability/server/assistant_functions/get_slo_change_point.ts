@@ -38,7 +38,8 @@ const parameters = {
     },
     start: {
       type: 'string',
-      description: 'Optional start of the time range, in Elasticsearch date math, like `now-24h`.',
+      description:
+        'Optional start of the time range, in Elasticsearch date math, like `now-24h`. DO NOT use application context',
     },
     end: {
       type: 'string',
@@ -58,7 +59,8 @@ const parameters = {
     },
     'kibana.alert.start': {
       type: 'string',
-      description: 'Optional start of an alert associated with the given SLO',
+      description:
+        'Optional start of an alert associated with the given SLO provided via `kibana.alert.start`',
     },
     metricOperation: {
       type: 'string',
@@ -91,7 +93,7 @@ export function registerGetSLOChangeDetectionFunction({
         
         Visualise changes in the underlying data for a given SLO. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips.
         
-        Include the observed period. For example, if the observed period is "24h" the output should be "over the past 24 hours".
+        Include the observed period via the "observedPeriodStart" and "observedPeriodEnd" key.
 
         Always include the 'metricOperation' as well, in plain english, before the field names. For example, if the 'metricOperation' is "avg", this is the "average" and applies to all fields.
         Example "average field1, field2, and field3"
@@ -112,12 +114,12 @@ export function registerGetSLOChangeDetectionFunction({
       const {
         'slo.name': name,
         'slo.id': id,
-        longWindow,
         start,
         end,
         'kibana.alert.start': alertStart,
         metricOperation = 'avg',
       } = args;
+
       const sloChangePoint = new SLOChangePoint(
         sloClient,
         uiSettingsClient,
@@ -127,7 +129,6 @@ export function registerGetSLOChangeDetectionFunction({
         name,
         id,
         alertStart,
-        longWindow,
         metricOperation
       );
       await sloChangePoint.setup();
@@ -156,9 +157,13 @@ export function registerGetSLOChangeDetectionFunction({
       );
 
       const changes = results.map((result) => ({
-        changedAtApproximateTime: moment(result.aggregations?.change_point_request?.bucket?.key)
-          .tz(sloChangePoint.timezone!)
-          .format(sloChangePoint.dateFormat),
+        changedAtApproximateTime: !Object.keys(
+          result.aggregations?.change_point_request?.type
+        ).includes('stationary')
+          ? moment(result.aggregations?.change_point_request?.bucket?.key)
+              .tz(sloChangePoint.timezone!)
+              .format(sloChangePoint.dateFormat)
+          : null,
         typeOfChange: result.aggregations?.change_point_request?.type,
         fieldName: result.fieldName,
       }));
@@ -194,7 +199,6 @@ export class SLOChangePoint {
     private name?: string,
     private id?: string,
     private alertStart?: string,
-    private longWindow?: string,
     private metricOperation? = 'avg'
   ) {}
 
@@ -265,10 +269,8 @@ export class SLOChangePoint {
   }
 
   public get alertWindowStart() {
-    if (this.alertStart && this.longWindow) {
-      return datemath
-        .parse(`now-${this.longWindow}`, { forceNow: new Date(this.alertStart) })
-        ?.toISOString();
+    if (this.alertStart) {
+      return datemath.parse(`now-24h`, { forceNow: new Date(this.alertStart) })?.toISOString();
     }
     return null;
   }
@@ -284,11 +286,11 @@ export class SLOChangePoint {
 
   public setTimeBounds() {
     this.checkTimeBuckets();
+    this.timeBuckets?.setInterval('auto');
     this.timeBuckets?.setBounds({
       min: moment(this.absoluteStartTime.start),
       max: moment(this.absoluteStartTime.end),
     });
-    this.timeBuckets?.setInterval('auto');
   }
 
   public get bucketInterval() {
@@ -377,25 +379,3 @@ export interface GetSLOChangePointFunctionResponse {
   content: any;
   data: any;
 }
-
-// how to pass space id to assistant
-// how to add labels to table
-// how to add links to apps to your responses
-
-// improving natural language model, having to provide more context
-
-// how do I let the user know that their given field cannot be used for change point detection
-
-// TODO: Fetch alerts for given SLOs
-
-// Can determine lookback time based on alert window.
-
-// link to change point detection docs
-
-// omit the change point value, it's not relevant compared to the time
-
-// What I've learned
-// * Running change point detection from the alert start minus the long window can be misleading
-
-// Issues
-// Visualization sometimes does not match results

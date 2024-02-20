@@ -37,7 +37,7 @@ export function registerContextFunction({
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
-        additionalProperties: true,
+        additionalProperties: false,
         properties: {
           queries: {
             type: 'array',
