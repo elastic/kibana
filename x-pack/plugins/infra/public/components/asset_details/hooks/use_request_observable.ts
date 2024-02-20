@@ -7,14 +7,17 @@
 
 import { useEffect, useMemo } from 'react';
 import { map, mergeMap, filter } from 'rxjs/operators';
-import { catchError, of, from, Subject, withLatestFrom } from 'rxjs';
+import { catchError, of, from, BehaviorSubject, withLatestFrom } from 'rxjs';
 import { useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext } from './use_date_picker';
 
 export const useRequestObservable = <T>() => {
   const { requestState$, isAutoRefreshRequestPending$ } = useLoadingStateContext();
   const { autoRefreshConfig$ } = useDatePickerContext();
-  const request$ = useMemo(() => new Subject<() => Promise<T>>(), []);
+  const request$ = useMemo(
+    () => new BehaviorSubject<(() => Promise<T>) | undefined>(undefined),
+    []
+  );
 
   useEffect(() => {
     // Subscribe to updates in the request$

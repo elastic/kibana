@@ -1744,10 +1744,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.0.0":
-  version "93.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.0.0.tgz#43ba256d94f3d3acddee23427c9fa5285a43d7e4"
-  integrity sha512-Q5gY9roWZsB1At0rxG5d9M5P7+J4hfv8fzvuqNHoVjIxbeibHRCSq2TtOQcSUjhKE5Tu/BIZijzuYX8vITGaSQ==
+"@elastic/eui@93.1.1":
+  version "93.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.1.1.tgz#03c9667456664978c3477abef52afd6aceb48ebf"
+  integrity sha512-YnmNST8PmgAyeahDFTUTpToiBAc6gOyK/RSSqx6NTxCmUCwXnV7Oog9TUHlQ8tYGLjfFXrAja6Msy0X2VuxHOA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -6306,6 +6306,10 @@
   uid ""
 
 "@kbn/timelion-grammar@link:packages/kbn-timelion-grammar":
+  version "0.0.0"
+  uid ""
+
+"@kbn/timerange@link:packages/kbn-timerange":
   version "0.0.0"
   uid ""
 

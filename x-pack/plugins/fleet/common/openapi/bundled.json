@@ -8308,7 +8308,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8317,6 +8322,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8822,7 +8829,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8831,6 +8843,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
