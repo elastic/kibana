@@ -55,21 +55,14 @@ export const AssetDetailPage = () => {
     return <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />;
 
   return (
-    <MetricsPageTemplate
-      hasData={metricIndicesExist}
-      pageSectionProps={{
-        paddingSize: 'none',
+    <AssetDetails
+      assetId={nodeId}
+      assetType={nodeType}
+      tabs={commonFlyoutTabs}
+      renderMode={{
+        mode: 'page',
       }}
-    >
-      <AssetDetails
-        assetId={nodeId}
-        assetType={nodeType}
-        tabs={commonFlyoutTabs}
-        renderMode={{
-          mode: 'page',
-        }}
-        metricAlias={source.configuration.metricAlias}
-      />
-    </MetricsPageTemplate>
+      metricAlias={source.configuration.metricAlias}
+    />
   );
 };

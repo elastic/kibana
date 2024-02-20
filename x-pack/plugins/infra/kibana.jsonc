@@ -36,7 +36,17 @@
       "visTypeTimeseries",
       "apmDataAccess"
     ],
-    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess", "licenseManagement"],
+    "optionalPlugins": [
+      "spaces",
+      "ml",
+      "home",
+      "embeddable",
+      "osquery",
+      "cloud",
+      "profilingDataAccess",
+      "licenseManagement",
+      "serverless"
+    ],
     "requiredBundles": [
       "unifiedSearch",
       "observability",
@@ -46,7 +56,7 @@
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls",
+      "controls"
     ]
   }
 }

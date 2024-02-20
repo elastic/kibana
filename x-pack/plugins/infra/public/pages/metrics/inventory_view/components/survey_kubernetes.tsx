@@ -6,11 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { KibanaEnvironmentContext } from '../../../../hooks/use_kibana';
+import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
 const KUBERNETES_FEEDBACK_LINK = 'https://ela.st/k8s-feedback';
@@ -19,7 +19,7 @@ export const SurveyKubernetes = () => {
   const [isToastSeen, setIsToastSeen] = useLocalStorage(KUBERNETES_TOAST_STORAGE_KEY, false);
   const markToastAsSeen = () => setIsToastSeen(true);
 
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
 
   return (
     <>
