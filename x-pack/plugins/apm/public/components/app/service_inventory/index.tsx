@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
@@ -18,7 +18,7 @@ import {
 } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
@@ -29,6 +29,7 @@ import { isTimeComparison } from '../../shared/time_comparison/get_comparison_op
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
 import { SortFunction } from '../../shared/managed_table';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -264,6 +265,33 @@ export function ServiceInventory() {
     },
     [tiebreakerField]
   );
+
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
+
+  useEffect(() => {
+    if (isFailure(mainStatisticsStatus)) {
+      return setScreenContext({
+        screenDescription: 'The services have failed to load',
+      });
+    }
+
+    if (isPending(mainStatisticsStatus)) {
+      return setScreenContext({
+        screenDescription: 'The services are still loading',
+      });
+    }
+
+    return setScreenContext({
+      data: [
+        {
+          name: 'services',
+          description: 'The list of services that the user is looking at',
+          value: mainStatisticsData.items,
+        },
+      ],
+    });
+  }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
   return (
     <>

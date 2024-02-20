@@ -80,6 +80,11 @@ const defaultCoreSystemParams = {
         version: '1.2.3',
       },
     },
+    logging: {
+      root: {
+        level: 'debug',
+      },
+    },
     version: 'version',
   } as any,
 };
@@ -192,40 +197,27 @@ describe('constructor', () => {
   });
 
   describe('logging system', () => {
-    it('instantiate the logging system with the correct level when in dev mode', () => {
+    it('instantiate the logging system with the correct level', () => {
       const envMode: EnvironmentMode = {
         name: 'development',
         dev: true,
         prod: false,
       };
-      const injectedMetadata = { env: { mode: envMode } } as any;
+      const injectedMetadata = {
+        ...defaultCoreSystemParams.injectedMetadata,
+        env: { mode: envMode },
+      } as any;
 
       createCoreSystem({
         injectedMetadata,
       });
 
       expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
-      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
-        logLevel: 'all',
-      });
+      expect(LoggingSystemConstructor).toHaveBeenCalledWith(
+        defaultCoreSystemParams.injectedMetadata.logging
+      );
     });
-    it('instantiate the logging system with the correct level when in production mode', () => {
-      const envMode: EnvironmentMode = {
-        name: 'production',
-        dev: false,
-        prod: true,
-      };
-      const injectedMetadata = { env: { mode: envMode } } as any;
 
-      createCoreSystem({
-        injectedMetadata,
-      });
-
-      expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
-      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
-        logLevel: 'warn',
-      });
-    });
     it('retrieves the logger factory from the logging system', () => {
       createCoreSystem({});
       expect(MockLoggingSystem.asLoggerFactory).toHaveBeenCalledTimes(1);

@@ -230,7 +230,7 @@
           "category_1_count": 1,
           "category_2_score": 220,
           "category_2_count": 1,
-          "criticality_level": "very_important",
+          "criticality_level": "extreme_impact",
           "notes": [],
           "inputs": [
             {
@@ -438,7 +438,7 @@
           "category_1_count": 1,
           "category_2_score": 220,
           "category_2_count": 1,
-          "criticality_level": "very_important",
+          "criticality_level": "extreme_impact",
           "notes": [],
           "inputs": [
             {
@@ -730,7 +730,7 @@
           "category_1_count": 1,
           "category_2_score": 220,
           "category_2_count": 1,
-          "criticality_level": "very_important",
+          "criticality_level": "extreme_impact",
           "notes": [],
           "inputs": [
             {
@@ -944,7 +944,7 @@
           "category_1_count": 1,
           "category_2_score": 220,
           "category_2_count": 1,
-          "criticality_level": "very_important",
+          "criticality_level": "extreme_impact",
           "notes": [],
           "inputs": [
             {

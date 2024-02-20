@@ -80,14 +80,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if passed kuery is not correct', async () => {
+      it('with enableStrictKQLValidation should return 400 if passed kuery is not correct', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });
 
-      it('should return 400 if passed kuery is invalid', async () => {
+      it('with enableStrictKQLValidation should return 400 if passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
@@ -972,8 +972,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      // Skipped as cannot force install the system and agent integrations as part of policy creation https://github.com/elastic/kibana/issues/137450
-      it.skip('should return a 200 if updating monitoring_enabled on a policy', async () => {
+      it('should return a 200 if updating monitoring_enabled on a policy', async () => {
         const fetchPackageList = async () => {
           const response = await supertest
             .get('/api/fleet/epm/packages')
@@ -1017,6 +1016,7 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Updated description',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
+            force: true,
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -1029,6 +1029,7 @@ export default function (providerContext: FtrProviderContext) {
           description: 'Updated description',
           namespace: 'default',
           is_managed: false,
+          is_protected: false,
           revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',

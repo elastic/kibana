@@ -24,6 +24,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -56,10 +57,21 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -92,6 +104,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -120,10 +133,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -156,6 +180,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -188,10 +213,21 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -224,6 +260,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -252,10 +289,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -288,6 +336,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -316,10 +365,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -352,6 +412,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -384,10 +445,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -420,6 +492,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -448,10 +521,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -484,6 +568,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -512,10 +597,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -553,6 +649,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -585,10 +682,21 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -621,6 +729,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -649,10 +758,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -690,6 +810,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -722,10 +843,21 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -763,6 +895,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -791,10 +924,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -827,6 +971,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -855,10 +1000,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -896,6 +1052,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -928,10 +1085,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -969,6 +1137,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -997,10 +1166,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -1038,6 +1218,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -1066,10 +1247,21 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],

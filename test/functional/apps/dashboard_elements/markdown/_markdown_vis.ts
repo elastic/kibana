@@ -39,10 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(h1Txt).to.equal('Heading 1');
       });
 
-      it('should not render html in markdown as html', async function () {
-        const expected = 'Heading 1\n<h3>Inline HTML that should not be rendered as html</h3>';
+      it('should not render html in markdown', async function () {
         const actual = await PageObjects.visChart.getMarkdownText();
-        expect(actual).to.equal(expected);
+        expect(actual).to.equal('Heading 1');
       });
 
       it('should auto apply changes if auto mode is turned on', async function () {

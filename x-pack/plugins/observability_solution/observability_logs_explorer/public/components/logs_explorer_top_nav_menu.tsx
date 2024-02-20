@@ -26,6 +26,7 @@ import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
+import { AlertsPopover } from './alerts_popover';
 
 export const LogsExplorerTopNavMenu = () => {
   const {
@@ -67,15 +68,19 @@ const ServerlessTopNav = () => {
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
+            <AlertsPopover />
+            <VerticalRule />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <ConnectedOnboardingLink />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
+      {ObservabilityAIAssistantActionMenuItem ? (
+        <EuiHeaderSection>
+          <ObservabilityAIAssistantActionMenuItem />
+        </EuiHeaderSection>
+      ) : null}
     </EuiHeader>
   );
 };
@@ -143,12 +148,16 @@ const StatefulTopNav = () => {
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
+            <AlertsPopover />
+            <VerticalRule />
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiHeaderSectionItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiHeaderSectionItem>
+        ) : null}
       </EuiHeaderSection>
     </HeaderMenuPortal>
   );

@@ -9,7 +9,6 @@ import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 
 import {
-  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   HttpSetup,
@@ -215,10 +214,9 @@ export class ReportingPublicPlugin
         });
       },
       title: 'Reporting redirect app',
-      searchable: false,
       chromeless: true,
       exactRoute: true,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
     });
 
     uiActionsSetup.addTriggerAction(

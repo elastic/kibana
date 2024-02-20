@@ -28,6 +28,11 @@ export function SettingsTab() {
     observabilityAIAssistant,
   } = useAppContext();
 
+  // If the AI Assistant is not available, don't render the settings tab
+  if (!observabilityAIAssistant) {
+    return null;
+  }
+
   const {
     connectors = [],
     selectedConnector,
@@ -157,6 +162,7 @@ export function SettingsTab() {
             )}
           >
             <EuiFormRow
+              style={{ alignSelf: 'end', width: '80%' }}
               fullWidth
               label={i18n.translate(
                 'aiAssistantManagementObservability.settingsPage.selectConnectorLabel',

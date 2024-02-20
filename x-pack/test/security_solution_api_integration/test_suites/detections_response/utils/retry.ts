@@ -6,7 +6,7 @@
  */
 
 import { RetryService } from '@kbn/ftr-common-functional-services';
-
+import type { ToolingLog } from '@kbn/tooling-log';
 /**
  * Retry wrapper for async supertests, with a maximum number of retries.
  * You can pass in a function that executes a supertest test, and make assertions
@@ -44,15 +44,19 @@ import { RetryService } from '@kbn/ftr-common-functional-services';
 export const retry = async <T>({
   test,
   retryService,
+  utilityName,
   retries = 2,
   timeout = 30000,
   retryDelay = 200,
+  log,
 }: {
   test: () => Promise<T>;
+  utilityName: string;
   retryService: RetryService;
   retries?: number;
   timeout?: number;
   retryDelay?: number;
+  log: ToolingLog;
 }): Promise<T> => {
   let retryAttempt = 0;
   const response = await retryService.tryForTime(
@@ -61,12 +65,23 @@ export const retry = async <T>({
       if (retryAttempt > retries) {
         // Log error message if we reached the maximum number of retries
         // but don't throw an error, return it to break the retry loop.
-        return new Error('Reached maximum number of retries for test.');
+        const errorMessage = `Reached maximum number of retries for test: ${
+          retryAttempt - 1
+        }/${retries}`;
+        log?.error(errorMessage);
+        return new Error(JSON.stringify(errorMessage));
       }
 
       retryAttempt = retryAttempt + 1;
 
-      return test();
+      // Catch the error thrown by the test and log it, then throw it again
+      // to cause `tryForTime` to retry.
+      try {
+        return await test();
+      } catch (error) {
+        log.error(`Retrying ${utilityName}: ${error}`);
+        throw error;
+      }
     },
     undefined,
     retryDelay
