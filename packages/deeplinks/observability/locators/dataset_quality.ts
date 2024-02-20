@@ -10,5 +10,24 @@ import { SerializableRecord } from '@kbn/utility-types';
 
 export const DATASET_QUALITY_LOCATOR_ID = 'DATASET_QUALITY_LOCATOR';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityLocatorParams extends SerializableRecord {}
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type RefreshInterval = {
+  isPaused: boolean;
+  interval: number;
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type TimeRangeConfig = {
+  from: string;
+  to: string;
+  refresh: RefreshInterval;
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type Filters = {
+  timeRange: TimeRangeConfig;
+};
+
+export interface DatasetQualityLocatorParams extends SerializableRecord {
+  filters?: Filters;
+}

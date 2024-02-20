@@ -67,8 +67,6 @@ const ServerlessTopNav = () => {
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
             <VerticalRule />
-            <ConnectedDatasetQualityLink />
-            <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
             <AlertsPopover />
@@ -150,8 +148,6 @@ const StatefulTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
-            <VerticalRule />
-            <ConnectedDatasetQualityLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />

@@ -10,8 +10,8 @@ import {
   DatasetQualityLocatorParams,
   DATASET_QUALITY_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { DatasetQualityLocatorDependencies } from '../types';
+import { DatasetQualityLocatorDependencies } from './types';
+import { constructDatasetQualityLocatorPath } from './utils';
 
 export type DatasetQualityLocator = LocatorPublic<DatasetQualityLocatorParams>;
 
@@ -23,10 +23,6 @@ export class DatasetQualityLocatorDefinition
   constructor(protected readonly deps: DatasetQualityLocatorDependencies) {}
 
   public readonly getLocation = async (params: DatasetQualityLocatorParams) => {
-    return {
-      app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-      path: '/dataset-quality',
-      state: {},
-    };
+    return constructDatasetQualityLocatorPath(params);
   };
 }

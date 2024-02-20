@@ -11,7 +11,7 @@ import {
   SingleDatasetLocatorParams,
   ObsLogsExplorerDataViewLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { DatasetQualityLocatorDefinition } from './dataset_quality';
+import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
 import { AllDatasetsLocatorDefinition } from './all_datasets_locator';
 import { DataViewLocatorDefinition } from './data_view_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset_locator';
@@ -386,7 +386,31 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-        path: '/dataset-quality',
+        path: '/dataset-quality?pageState=(v:1)',
+        state: {},
+      });
+    });
+
+    it('should create a link with correct timeRange', async () => {
+      const refresh = {
+        isPaused: false,
+        interval: 0,
+      };
+      const locatorParams = {
+        filters: {
+          timeRange: {
+            ...timeRange,
+            refresh,
+          },
+        },
+      };
+      const { datasetQualityLocator } = await setup();
+
+      const location = await datasetQualityLocator.getLocation(locatorParams);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: '/dataset-quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(interval:0,isPaused:!f),to:now)),v:1)',
         state: {},
       });
     });
