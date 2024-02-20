@@ -13,5 +13,5 @@ export interface ConfigType {
     userManagementEnabled: boolean;
     roleMappingManagementEnabled: boolean;
   };
-  roleManagementEnabled: boolean;
+  roleManagementEnabled: boolean | undefined;
 }

@@ -50,10 +50,9 @@ export class ManagementService {
   private readonly roleMappingManagementEnabled: boolean;
 
   constructor(config: ConfigType) {
-    this.userManagementEnabled = !config.ui || config.ui.userManagementEnabled;
-    this.roleManagementEnabled =
-      config.roleManagementEnabled === undefined || config.roleManagementEnabled;
-    this.roleMappingManagementEnabled = !config.ui || config.ui.roleMappingManagementEnabled;
+    this.userManagementEnabled = config.ui?.userManagementEnabled !== false;
+    this.roleManagementEnabled = config.roleManagementEnabled !== false;
+    this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
   }
 
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
