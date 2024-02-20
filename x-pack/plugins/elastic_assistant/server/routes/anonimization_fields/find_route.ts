@@ -20,6 +20,8 @@ import {
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import { SearchEsAnonymizationFieldsSchema } from '../../anonymization_fields_data_client/types';
+import { transformESToAnonymizationFields } from '../../anonymization_fields_data_client/helpers';
 
 export const findAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,
@@ -55,7 +57,7 @@ export const findAnonymizationFieldsRoute = (
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
-          const result = await dataClient?.findAnonymizationFields({
+          const result = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -64,7 +66,19 @@ export const findAnonymizationFieldsRoute = (
             fields: query.fields,
           });
 
-          return response.ok({ body: result });
+          if (result) {
+            return response.ok({
+              body: {
+                perPage: result.perPage,
+                page: result.page,
+                total: result.total,
+                data: transformESToAnonymizationFields(result.data),
+              },
+            });
+          }
+          return response.ok({
+            body: { perPage: query.per_page, page: query.page, data: [], total: 0 },
+          });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

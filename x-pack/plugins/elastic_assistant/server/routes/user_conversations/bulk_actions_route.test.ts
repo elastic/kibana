@@ -28,6 +28,7 @@ describe('Perform bulk action route', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockConversation = getFindConversationsResultWithSingleHit().data[0];
   const mockUser1 = {
+    profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
     username: 'my_username',
     authentication_realm: {
       type: 'my_realm_type',
@@ -64,7 +65,7 @@ describe('Perform bulk action route', () => {
       const response = await server.inject(
         getConversationsBulkActionRequest(
           [getCreateConversationSchemaMock()],
-          [getUpdateConversationSchemaMock()],
+          [getUpdateConversationSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
           ['99403909-ca9b-49ba-9d7a-7e5320e68d05']
         ),
         requestContextMock.convertContext(context)
@@ -98,15 +99,15 @@ describe('Perform bulk action route', () => {
         errors: [
           {
             message: 'mocked validation message',
-            conversation: { id: 'failed-conversation-id-1', title: 'Detect Root/Admin Users' },
+            document: { id: 'failed-conversation-id-1', name: 'Detect Root/Admin Users' },
           },
           {
             message: 'mocked validation message',
-            conversation: { id: 'failed-conversation-id-2', title: 'Detect Root/Admin Users' },
+            document: { id: 'failed-conversation-id-2', name: 'Detect Root/Admin Users' },
           },
           {
             message: 'test failure',
-            conversation: { id: 'failed-conversation-id-3', title: 'Detect Root/Admin Users' },
+            document: { id: 'failed-conversation-id-3', name: 'Detect Root/Admin Users' },
           },
         ],
         total: 5,
@@ -117,7 +118,7 @@ describe('Perform bulk action route', () => {
       const response = await server.inject(
         getConversationsBulkActionRequest(
           [getCreateConversationSchemaMock()],
-          [getUpdateConversationSchemaMock()],
+          [getUpdateConversationSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
           ['99403909-ca9b-49ba-9d7a-7e5320e68d05']
         ),
         requestContextMock.convertContext(context)

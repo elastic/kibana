@@ -13,8 +13,6 @@ import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
 import { AssistantResourceNames } from '../types';
 import { AIAssistantConversationsDataClient } from '../conversations_data_client';
-import { AIAssistantPromtsDataClient } from '../promts_data_client';
-import { AIAssistantAnonymizationFieldsDataClient } from '../anonymization_fields_data_client';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -25,6 +23,7 @@ import {
 import { conversationsFieldMap } from '../conversations_data_client/conversations_configuration_type';
 import { assistantPromptsFieldMap } from '../promts_data_client/prompts_configuration_type';
 import { assistantAnonymizationFieldsFieldMap } from '../anonymization_fields_data_client/anonymization_fields_configuration_type';
+import { AIAssistantDataClient } from '../ai_assistant_data_client.ts';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -243,14 +242,14 @@ export class AIAssistantService {
 
   public async createAIAssistantPromptsDataClient(
     opts: CreateAIAssistantClientParams
-  ): Promise<AIAssistantPromtsDataClient | null> {
+  ): Promise<AIAssistantDataClient | null> {
     const res = await this.checkResourcesInstallation(opts);
 
     if (res === null) {
       return null;
     }
 
-    return new AIAssistantPromtsDataClient({
+    return new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,
@@ -262,14 +261,14 @@ export class AIAssistantService {
 
   public async createAIAssistantAnonymizationFieldsDataClient(
     opts: CreateAIAssistantClientParams
-  ): Promise<AIAssistantAnonymizationFieldsDataClient | null> {
+  ): Promise<AIAssistantDataClient | null> {
     const res = await this.checkResourcesInstallation(opts);
 
     if (res === null) {
       return null;
     }
 
-    return new AIAssistantAnonymizationFieldsDataClient({
+    return new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,

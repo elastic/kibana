@@ -10,11 +10,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { estypes } from '@elastic/elasticsearch';
 import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { SearchEsAnonymizationFieldsSchema } from './types';
-import { transformESToAnonymizationFields } from './helpers';
 
-interface FindAnonymizationFieldsOptions {
+interface FindOptions {
   filter?: string;
   fields?: string[];
   perPage: number;
@@ -22,20 +19,27 @@ interface FindAnonymizationFieldsOptions {
   sortField?: string;
   sortOrder?: estypes.SortOrder;
   esClient: ElasticsearchClient;
-  anonymizationFieldsIndex: string;
+  index: string;
   runtimeMappings?: MappingRuntimeFields | undefined;
 }
 
-export const findAnonymizationFields = async ({
+export interface FindResponse<T> {
+  data: estypes.SearchResponse<T, Record<string, estypes.AggregationsAggregate>>;
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export const findDocuments = async <TSearchSchema>({
   esClient,
   filter,
   page,
   perPage,
   sortField,
-  anonymizationFieldsIndex,
+  index,
   fields,
   sortOrder,
-}: FindAnonymizationFieldsOptions): Promise<FindAnonymizationFieldsResponse> => {
+}: FindOptions): Promise<FindResponse<TSearchSchema>> => {
   const query = getQueryFilter({ filter });
   let sort: Sort | undefined;
   const ascOrDesc = sortOrder ?? ('asc' as const);
@@ -48,7 +52,7 @@ export const findAnonymizationFields = async ({
       },
     };
   }
-  const response = await esClient.search<SearchEsAnonymizationFieldsSchema>({
+  const response = await esClient.search<TSearchSchema>({
     body: {
       query,
       track_total_hits: true,
@@ -57,12 +61,12 @@ export const findAnonymizationFields = async ({
     _source: true,
     from: (page - 1) * perPage,
     ignore_unavailable: true,
-    index: anonymizationFieldsIndex,
+    index,
     seq_no_primary_term: true,
     size: perPage,
   });
   return {
-    data: transformESToAnonymizationFields(response),
+    data: response,
     page,
     perPage,
     total:

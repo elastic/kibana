@@ -29,10 +29,14 @@ import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
+  transformESToAnonymizationFields,
   transformToCreateScheme,
   transformToUpdateScheme,
 } from '../../anonymization_fields_data_client/helpers';
-import { UpdateAnonymizationFieldSchema } from '../../anonymization_fields_data_client/types';
+import {
+  SearchEsAnonymizationFieldsSchema,
+  UpdateAnonymizationFieldSchema,
+} from '../../anonymization_fields_data_client/types';
 
 export interface BulkOperationError {
   message: string;
@@ -157,7 +161,7 @@ export const bulkActionAnonymizationFieldsRoute = (
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findAnonymizationFields({
+            const result = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
               perPage: 100,
               page: 1,
               filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
@@ -165,11 +169,11 @@ export const bulkActionAnonymizationFieldsRoute = (
                 .join(' OR ')})`,
               fields: ['field'],
             });
-            if (result?.data != null && result.data.length > 0) {
+            if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `anonymization for field: "${result.data
-                  .map((c) => c.field)
+                body: `anonymization for field: "${result.data.hits.hits
+                  .map((c) => c._id)
                   .join(',')}" already exists`,
               });
             }
@@ -196,13 +200,13 @@ export const bulkActionAnonymizationFieldsRoute = (
             authenticatedUser,
           });
 
-          const created = await dataClient?.findAnonymizationFields({
+          const created = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
             page: 1,
             perPage: 1000,
             filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
             fields: ['id'],
           });
-          const updated = await dataClient?.findAnonymizationFields({
+          const updated = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
             page: 1,
             perPage: 1000,
             filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
@@ -210,8 +214,8 @@ export const bulkActionAnonymizationFieldsRoute = (
           });
 
           return buildBulkResponse(response, {
-            updated: updated?.data,
-            created: created?.data,
+            updated: updated?.data ? transformESToAnonymizationFields(updated.data) : [],
+            created: created?.data ? transformESToAnonymizationFields(created.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

@@ -28,9 +28,8 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AssistantFeatures, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { AIAssistantConversationsDataClient } from './conversations_data_client';
-import { AIAssistantPromtsDataClient } from './promts_data_client';
-import { AIAssistantAnonymizationFieldsDataClient } from './anonymization_fields_data_client';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
+import { AIAssistantDataClient } from './ai_assistant_data_client.ts';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -99,8 +98,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
-  getAIAssistantPromptsDataClient: () => Promise<AIAssistantPromtsDataClient | null>;
-  getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantAnonymizationFieldsDataClient | null>;
+  getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
 }
 /**

@@ -19,6 +19,8 @@ import {
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import { SearchEsPromptsSchema } from '../../promts_data_client/types';
+import { transformESToPrompts } from '../../promts_data_client/helpers';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
@@ -46,7 +48,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
-          const result = await dataClient?.findPrompts({
+          const result = await dataClient?.findDocuments<SearchEsPromptsSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -55,7 +57,19 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             fields: query.fields,
           });
 
-          return response.ok({ body: result });
+          if (result) {
+            return response.ok({
+              body: {
+                perPage: result.perPage,
+                page: result.page,
+                total: result.total,
+                data: transformESToPrompts(result.data),
+              },
+            });
+          }
+          return response.ok({
+            body: { perPage: query.per_page, page: query.page, data: [], total: 0 },
+          });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

@@ -11,16 +11,12 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
-
-import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-
-import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
 import { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_client/helpers';
-import { findPrompts } from './find_prompts';
+import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
+import { FindResponse, findDocuments } from './find';
 
-export interface AIAssistantPromtsDataClientParams {
+export interface AIAssistantDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
   spaceId: string;
@@ -29,21 +25,18 @@ export interface AIAssistantPromtsDataClientParams {
   currentUser: AuthenticatedUser | null;
 }
 
-/**
- * Class for use for prompts that are used for AI assistant.
- */
-export class AIAssistantPromtsDataClient {
-  /** Kibana space id the anonymization fields are part of */
+export class AIAssistantDataClient {
+  /** Kibana space id the document index are part of */
   private readonly spaceId: string;
 
-  /** User creating, modifying, deleting, or updating a anonymization fields */
+  /** User creating, modifying, deleting, or updating a document */
   private readonly currentUser: AuthenticatedUser | null;
 
   private writerCache: Map<string, DocumentsDataWriter> = new Map();
 
   private indexTemplateAndPattern: IIndexPatternString;
 
-  constructor(private readonly options: AIAssistantPromtsDataClientParams) {
+  constructor(private readonly options: AIAssistantDataClientParams) {
     this.indexTemplateAndPattern = getIndexTemplateAndPattern(
       this.options.indexPatternsResorceName,
       this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
@@ -75,16 +68,13 @@ export class AIAssistantPromtsDataClient {
     return writer;
   }
 
-  public getReader = async (options: { spaceId?: string } = {}) => {
+  public getReader = async <TResponse>(options: { spaceId?: string } = {}) => {
     const indexPatterns = this.indexTemplateAndPattern.alias;
 
     return {
-      search: async <
-        TSearchRequest extends ESSearchRequest,
-        TAnonymizationFieldDoc = Partial<PromptResponse>
-      >(
+      search: async <TSearchRequest extends ESSearchRequest, TDoc = Partial<TResponse>>(
         request: TSearchRequest
-      ): Promise<ESSearchResponse<TAnonymizationFieldDoc, TSearchRequest>> => {
+      ): Promise<ESSearchResponse<TDoc, TSearchRequest>> => {
         try {
           const esClient = await this.options.elasticsearchClientPromise;
           return (await esClient.search({
@@ -92,7 +82,7 @@ export class AIAssistantPromtsDataClient {
             index: indexPatterns,
             ignore_unavailable: true,
             seq_no_primary_term: true,
-          })) as unknown as ESSearchResponse<TAnonymizationFieldDoc, TSearchRequest>;
+          })) as unknown as ESSearchResponse<TDoc, TSearchRequest>;
         } catch (err) {
           this.options.logger.error(
             `Error performing search in AIAssistantDataClient - ${err.message}`
@@ -103,7 +93,7 @@ export class AIAssistantPromtsDataClient {
     };
   };
 
-  public findPrompts = async ({
+  public findDocuments = async <TSearchSchema>({
     perPage,
     page,
     sortField,
@@ -117,16 +107,16 @@ export class AIAssistantPromtsDataClient {
     sortOrder?: string;
     filter?: string;
     fields?: string[];
-  }): Promise<FindPromptsResponse> => {
+  }): Promise<Promise<FindResponse<TSearchSchema>>> => {
     const esClient = await this.options.elasticsearchClientPromise;
-    return findPrompts({
+    return findDocuments<TSearchSchema>({
       esClient,
       fields,
       page,
       perPage,
       filter,
       sortField,
-      anonymizationFieldsIndex: this.indexTemplateAndPattern.alias,
+      index: this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
     });
   };
