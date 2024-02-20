@@ -219,52 +219,6 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
-      sampleRecurringTaskWithInvalidIndirectParam: {
-        title: 'Sample Recurring Task that has invalid indirect params',
-        description: 'A sample task that returns invalid params in loadIndirectParams all the time',
-        maxAttempts: 1,
-        createTaskRunner: () => ({
-          async loadIndirectParams() {
-            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
-          },
-          async run() {
-            return { state: {}, schedule: { interval: '1s' }, hasError: true };
-          },
-        }),
-        indirectParamsSchema: schema.object({
-          param: schema.string(),
-        }),
-      },
-      sampleOneTimeTaskWithInvalidIndirectParam: {
-        title: 'Sample One Time Task that has invalid indirect params',
-        description:
-          'A sample task that returns invalid params in loadIndirectParams all the time and throws error in the run method',
-        maxAttempts: 1,
-        createTaskRunner: () => ({
-          async loadIndirectParams() {
-            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
-          },
-          async run() {
-            throwRetryableError(new Error('Retry'), true);
-          },
-        }),
-        indirectParamsSchema: schema.object({
-          param: schema.string(),
-        }),
-      },
-      sampleTaskWithParamsSchema: {
-        title: 'Sample Task That has paramsSchema',
-        description: 'A sample task that has paramsSchema to validate params',
-        maxAttempts: 1,
-        paramsSchema: schema.object({
-          param: schema.string(),
-        }),
-        createTaskRunner: () => ({
-          async run() {
-            throwRetryableError(new Error('Retry'), true);
-          },
-        }),
-      },
       taskToDisable: {
         title: 'Task used for testing it being disabled',
         description: '',
