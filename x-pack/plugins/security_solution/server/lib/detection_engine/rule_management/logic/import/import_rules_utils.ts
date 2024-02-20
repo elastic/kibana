@@ -23,6 +23,7 @@ import { readRules } from '../crud/read_rules';
 import { updateRules } from '../crud/update_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
+import { wrapInMacrotask } from '../../utils/wrap_in_macrotask';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 
 export type PromiseFromStreams = RuleToImport | Error;
@@ -148,7 +149,7 @@ export const importRules = async ({
   };
 
   for (const rulesChunk of ruleChunks) {
-    const chunkImportRuleResponses = await Promise.all(rulesChunk.map(importRule));
+    const chunkImportRuleResponses = await Promise.all(rulesChunk.map(wrapInMacrotask(importRule)));
 
     for (const importRuleResponse of chunkImportRuleResponses) {
       importRuleResponses.push(importRuleResponse);
