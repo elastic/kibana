@@ -48,7 +48,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         <EuiFormRow
           helpText={
             <FormattedMessage
-              id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
+              id="reporting.share.screenCapturePanelContent.optimizeForPrintingHelpText"
               defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
             />
           }
@@ -56,7 +56,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
           <EuiSwitch
             label={
               <FormattedMessage
-                id="share.screenCapturePanelContent.optimizeForPrintingLabel"
+                id="reporting.share.screenCapturePanelContent.optimizeForPrintingLabel"
                 defaultMessage="Optimize for printing"
               />
             }
@@ -73,7 +73,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         <EuiFormRow
           helpText={
             <FormattedMessage
-              id="share.screenCapturePanelContent.canvasLayoutHelpText"
+              id="reporting.share.screenCapturePanelContent.canvasLayoutHelpText"
               defaultMessage="Remove borders and footer logo"
             />
           }
@@ -81,7 +81,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
           <EuiSwitch
             label={
               <FormattedMessage
-                id="share.screenCapturePanelContent.canvasLayoutLabel"
+                id="reporting.share.screenCapturePanelContent.canvasLayoutLabel"
                 defaultMessage="Full page layout"
               />
             }

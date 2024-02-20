@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 
 const i18nTexts = {
-  title: i18n.translate('share.panelContent.unsavedStateErrorTitle', {
+  title: i18n.translate('reporting.share.panelContent.unsavedStateErrorTitle', {
     defaultMessage: 'Unsaved work',
   }),
 };
@@ -30,7 +30,7 @@ export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
       <EuiText size="s">
         <p>
           <FormattedMessage
-            id="share.panelContent.unsavedStateErrorText"
+            id="reporting.share.panelContent.unsavedStateErrorText"
             defaultMessage="Save your work before copying this URL."
           />
         </p>

@@ -17,7 +17,7 @@ interface Props {
 }
 
 const i18nTexts = {
-  title: i18n.translate('share.panelContent.unsavedStateAndExceedsMaxLengthTitle', {
+  title: i18n.translate('reporting.share.panelContent.unsavedStateAndExceedsMaxLengthTitle', {
     defaultMessage: 'URL too long',
   }),
 };
@@ -29,7 +29,7 @@ export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) =>
         {isUnsaved ? (
           <span data-test-subj="urlTooLongTrySavingMessage">
             <FormattedMessage
-              id="share.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
+              id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
               defaultMessage="This URL cannot be copied. Try saving your work."
             />
           </span>
@@ -37,7 +37,7 @@ export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) =>
           // Reaching this state is essentially just an error and should result in a user contacting us.
           <span data-test-subj="urlTooLongErrorMessage">
             <FormattedMessage
-              id="share.panelContent.unsavedStateAndExceedsMaxLengthDescription"
+              id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthDescription"
               defaultMessage="This URL cannot be copied."
             />
           </span>
