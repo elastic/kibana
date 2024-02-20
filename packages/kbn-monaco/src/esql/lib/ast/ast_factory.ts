@@ -63,7 +63,7 @@ export class AstListener implements ESQLParserListener {
     const commandAst = createCommand('show', ctx);
 
     this.ast.push(commandAst);
-    commandAst.text = ctx.text;
+    commandAst.text = ctx.getText();
     commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
   }
 
@@ -76,7 +76,7 @@ export class AstListener implements ESQLParserListener {
     const commandAst = createCommand('show', ctx);
     this.ast.push(commandAst);
     // update the text
-    commandAst.text = ctx.text;
+    commandAst.text = ctx.getText();
     commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
   }
 
@@ -120,7 +120,10 @@ export class AstListener implements ESQLParserListener {
     const metadataContent =
       metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
     if (metadataContent) {
-      const option = createOption(metadataContent.METADATA().text.toLowerCase(), metadataContent);
+      const option = createOption(
+        metadataContent.METADATA().getText().toLowerCase(),
+        metadataContent
+      );
       commandAst.args.push(option);
       option.args.push(...collectAllColumnIdentifiers(metadataContent));
     }

@@ -41,7 +41,7 @@ export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand
   return {
     type: 'command',
     name,
-    text: ctx.text,
+    text: ctx.getText(),
     args: [],
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
@@ -51,16 +51,16 @@ export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand
 export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList {
   return {
     type: 'list',
-    name: ctx.text,
+    name: ctx.getText(),
     values,
-    text: ctx.text,
+    text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
 }
 
 export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueContext): ESQLLiteral {
-  const text = ctx.text;
+  const text = ctx.getText();
   return {
     type: 'literal',
     literalType: 'number',
@@ -76,8 +76,8 @@ export function createFakeMultiplyLiteral(ctx: ArithmeticUnaryContext): ESQLLite
   return {
     type: 'literal',
     literalType: 'number',
-    text: ctx.text,
-    name: ctx.text,
+    text: ctx.getText(),
+    name: ctx.getText(),
     value: ctx.PLUS() ? 1 : -1,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
@@ -112,7 +112,7 @@ export function createLiteral(
   if (!node) {
     return;
   }
-  const text = node.text;
+  const text = node.getText();
   return {
     type: 'literal',
     literalType: type,
@@ -120,18 +120,20 @@ export function createLiteral(
     name: text,
     value: type === 'number' ? Number(text) : text,
     location: getPosition(node.symbol),
-    incomplete: isMissingText(node.text),
+    incomplete: isMissingText(node.getText()),
   };
 }
 
 export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {
   return {
     type: 'timeInterval',
-    quantity: Number(ctx.integerValue().text),
-    unit: ctx.UNQUOTED_IDENTIFIER().text,
-    text: ctx.text,
+    quantity: Number(ctx.integerValue().INTEGER_LITERAL().getText()),
+    unit: ctx.UNQUOTED_IDENTIFIER().symbol.text,
+    text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
-    name: `${ctx.integerValue().text} ${ctx.UNQUOTED_IDENTIFIER().text}`,
+    name: `${ctx.integerValue().INTEGER_LITERAL().getText()} ${
+      ctx.UNQUOTED_IDENTIFIER().symbol.text
+    }`,
     incomplete: Boolean(ctx.exception),
   };
 }
@@ -144,7 +146,7 @@ export function createFunction(
   return {
     type: 'function',
     name,
-    text: ctx.text,
+    text: ctx.getText(),
     location: customPosition ?? getPosition(ctx.start, ctx.stop),
     args: [],
     incomplete: Boolean(ctx.exception),
@@ -229,9 +231,9 @@ function safeBackticksRemoval(text: string | undefined) {
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
   return (
-    getUnquotedText(ctx)?.text ||
-    safeBackticksRemoval(getQuotedText(ctx)?.text) ||
-    safeBackticksRemoval(ctx.text) // for some reason some quoted text is not detected correctly by the parser
+    getUnquotedText(ctx)?.getText() ||
+    safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
+    safeBackticksRemoval(ctx.getText()) // for some reason some quoted text is not detected correctly by the parser
   );
 }
 
@@ -285,21 +287,21 @@ export function createSource(
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
   return {
     type: 'column',
-    name: ctx.text,
-    text: ctx.text,
+    name: ctx.getText(),
+    text: ctx.getText(),
     location: getPosition(ctx.symbol),
-    incomplete: ctx.text === '',
+    incomplete: ctx.getText() === '',
     quoted: false,
   };
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   const text = sanifyIdentifierString(ctx);
-  const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.text));
+  const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
     name: text,
-    text: ctx.text,
+    text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
     quoted: hasQuotes,
@@ -310,7 +312,7 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
   return {
     type: 'option',
     name,
-    text: ctx.text,
+    text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     args: [],
     incomplete: Boolean(ctx.exception || ctx.children?.some((c) => c instanceof ErrorNode)),
