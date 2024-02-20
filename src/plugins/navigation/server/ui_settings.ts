@@ -49,9 +49,6 @@ const categoryLabel = i18n.translate('navigation.uiSettings.categoryLabel', {
  * uiSettings definitions for Navigation
  */
 export const getUiSettings = (config: NavigationConfig): Record<string, UiSettingsParams> => {
-  if (!config.solutionNavigation.featureOn) {
-    return {};
-  }
   return {
     [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: {
       category: [categoryLabel],

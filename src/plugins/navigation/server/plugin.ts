@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { UiSettingsParams } from '@kbn/core/types';
 
 import type { NavigationConfig } from './config';
 import type {
@@ -29,12 +30,37 @@ export class NavigationServerPlugin
 
   setup(core: CoreSetup, plugins: NavigationServerSetupDependencies) {
     const config = this.initializerContext.config.get<NavigationConfig>();
-    core.uiSettings.registerGlobal(getUiSettings(config));
+
+    if (config.solutionNavigation.featureOn) {
+      core.uiSettings.registerGlobal(getUiSettings(config));
+    }
 
     return {};
   }
 
   start(core: CoreStart, plugins: NavigationServerStartDependencies) {
+    const config = this.initializerContext.config.get<NavigationConfig>();
+
+    if (!config.solutionNavigation.featureOn) {
+      this.removeUiSettings(core, getUiSettings(config));
+    }
+
     return {};
+  }
+
+  /**
+   * Remove UI settings values that might have been set when the feature was enabled.
+   * If the feature is disabled in kibana.yml, we want to remove the settings from the
+   * saved objects.
+   *
+   * @param core CoreStart
+   * @param uiSettings Navigation UI settings
+   */
+  private removeUiSettings(core: CoreStart, uiSettings: Record<string, UiSettingsParams>) {
+    const savedObjectsClient = core.savedObjects.createInternalRepository();
+    const uiSettingsClient = core.uiSettings.globalAsScopedToClient(savedObjectsClient);
+
+    const keys = Object.keys(uiSettings);
+    return uiSettingsClient.removeMany(keys, { validateKeys: false });
   }
 }
