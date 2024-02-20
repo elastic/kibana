@@ -60,7 +60,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177336
+  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('errors distribution', () => {
       const { appleTransaction, bananaTransaction } = config;
       before(async () => {
