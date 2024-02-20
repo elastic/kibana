@@ -49,7 +49,7 @@ export const useCreateTimeline = ({
   const dispatch = useDispatch();
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
-  );
+  ) ?? { id: '', patternList: [] };
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
