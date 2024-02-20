@@ -78,7 +78,7 @@ export function getLeadControlColumns(canSetExpandedDoc: boolean) {
 }
 
 function buildEuiGridColumn({
-  withFirstColumnTimeField,
+  numberOfColumns,
   columnName,
   columnWidth = 0,
   dataView,
@@ -98,7 +98,7 @@ function buildEuiGridColumn({
   headerRowHeight,
   customGridColumnsConfiguration,
 }: {
-  withFirstColumnTimeField: boolean;
+  numberOfColumns: number;
   columnName: string;
   columnWidth: number | undefined;
   dataView: DataView;
@@ -201,7 +201,7 @@ function buildEuiGridColumn({
         headerRowHeight={headerRowHeight}
       />
     );
-    if (withFirstColumnTimeField) {
+    if (numberOfColumns > 1) {
       column.initialWidth = defaultTimeColumnWidth;
     }
   }
@@ -270,11 +270,11 @@ export function getEuiGridColumns({
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
-  const withFirstColumnTimeField = columns.length > 1 && columns[0] === dataView.timeFieldName;
+  const numberOfColumns = columns.length;
 
   return columns.map((column, columnIndex) =>
     buildEuiGridColumn({
-      withFirstColumnTimeField,
+      numberOfColumns,
       columnName: column,
       columnCellActions: columnsCellActions?.[columnIndex],
       columnWidth: getColWidth(column),
