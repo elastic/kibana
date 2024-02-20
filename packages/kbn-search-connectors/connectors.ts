@@ -163,7 +163,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     name: i18n.translate('searchConnectors.content.nativeConnectors.redis.name', {
       defaultMessage: 'Redis',
     }),
-    serviceType: 'notion',
+    serviceType: 'redis',
   },
   {
     iconPath: 'salesforce.svg',

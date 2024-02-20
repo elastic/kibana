@@ -154,6 +154,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: 'https://www.postgresql.org/docs/',
     icon: CONNECTOR_ICONS.postgresql,
   },
+  redis: {
+    docsUrl: docLinks.connectorsRedis,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.redis,
+    platinumOnly: true,
+  },
   s3: {
     docsUrl: docLinks.connectorsS3,
     externalAuthDocsUrl: 'https://docs.aws.amazon.com/s3/index.html',
