@@ -5297,7 +5297,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5640,7 +5644,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
