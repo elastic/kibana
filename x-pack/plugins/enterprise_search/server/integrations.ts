@@ -1015,9 +1015,12 @@ export const registerEnterpriseSearchIntegrations = (
       title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.notionTitle', {
         defaultMessage: 'Notion',
       }),
-      description: i18n.translate('xpack.enterpriseSearch.integrations.connectors.notionDescription', {
-        defaultMessage: 'Search over your content on Notion.',
-      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.notionDescription',
+        {
+          defaultMessage: 'Search over your content on Notion.',
+        }
+      ),
       categories: [
         'enterprise_search',
         'elastic_stack',
@@ -1043,9 +1046,12 @@ export const registerEnterpriseSearchIntegrations = (
       title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.redisTitle', {
         defaultMessage: 'Redis',
       }),
-      description: i18n.translate('xpack.enterpriseSearch.integrations.connectors.redisDescription', {
-        defaultMessage: 'Search over your content on Redis.',
-      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.redisDescription',
+        {
+          defaultMessage: 'Search over your content on Redis.',
+        }
+      ),
       categories: [
         'enterprise_search',
         'elastic_stack',
