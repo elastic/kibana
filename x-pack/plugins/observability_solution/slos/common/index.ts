@@ -6,4 +6,4 @@
  */
 
 export const PLUGIN_ID = 'slos';
-export const PLUGIN_NAME = 'slos';
+export const PLUGIN_NAME = 'SLOs NEW';
