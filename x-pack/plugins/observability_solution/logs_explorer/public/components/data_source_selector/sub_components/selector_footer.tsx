@@ -29,7 +29,7 @@ interface ShowAllLogsProps {
 
 export const SelectorFooter = (props: DatasetsAllActionProps) => {
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} data-test-subj="datasetSelectorSearchFooter">
+    <EuiPanel paddingSize="s" hasShadow={false} data-test-subj="dataSourceSelectorSearchFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" {...props} />
     </EuiPanel>
   );

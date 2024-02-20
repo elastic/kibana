@@ -261,19 +261,19 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getDatasetSelector() {
-      return testSubjects.find('datasetSelectorPopover');
+      return testSubjects.find('dataSourceSelectorPopover');
     },
 
     getDatasetSelectorButton() {
-      return testSubjects.find('datasetSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
+      return testSubjects.find('dataSourceSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
     getDatasetSelectorContent() {
-      return testSubjects.find('datasetSelectorContent');
+      return testSubjects.find('dataSourceSelectorContent');
     },
 
     getDatasetSelectorSearchControls() {
-      return testSubjects.find('datasetSelectorSearchControls');
+      return testSubjects.find('dataSourceSelectorSearchControls');
     },
 
     getIntegrationsContextMenu() {
@@ -281,7 +281,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getIntegrationsTab() {
-      return testSubjects.find('datasetSelectorIntegrationsTab');
+      return testSubjects.find('dataSourceSelectorIntegrationsTab');
     },
 
     getUncategorizedContextMenu() {
@@ -289,7 +289,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getUncategorizedTab() {
-      return testSubjects.find('datasetSelectorUncategorizedTab');
+      return testSubjects.find('dataSourceSelectorUncategorizedTab');
     },
 
     getDataViewsContextMenu() {
@@ -301,7 +301,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getDataViewsTab() {
-      return testSubjects.find('datasetSelectorDataViewsTab');
+      return testSubjects.find('dataSourceSelectorDataViewsTab');
     },
 
     getPanelTitle(contextMenu: WebElementWrapper) {
@@ -321,7 +321,7 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     getAllLogDatasetsButton() {
-      return testSubjects.find('datasetSelectorshowAllLogs');
+      return testSubjects.find('dataSourceSelectorshowAllLogs');
     },
 
     getUnmanagedDatasetsButton() {
@@ -352,7 +352,7 @@ export function ObservabilityLogsExplorerPageObject({
 
     async closeDatasetSelector() {
       const button = await this.getDatasetSelectorButton();
-      const isOpen = await testSubjects.exists('datasetSelectorContent');
+      const isOpen = await testSubjects.exists('dataSourceSelectorContent');
 
       if (isOpen) return button.click();
     },
@@ -398,18 +398,18 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     assertLoadingSkeletonExists() {
-      return testSubjects.existOrFail('datasetSelectorSkeleton');
+      return testSubjects.existOrFail('dataSourceSelectorSkeleton');
     },
 
     async assertListStatusEmptyPromptExistsWithTitle(title: string) {
-      const [listStatus] = await testSubjects.findAll('datasetSelectorListStatusEmptyPrompt');
+      const [listStatus] = await testSubjects.findAll('dataSourceSelectorListStatusEmptyPrompt');
       const promptTitle = await listStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be(title);
     },
 
     async assertListStatusErrorPromptExistsWithTitle(title: string) {
-      const listStatus = await testSubjects.find('datasetSelectorListStatusErrorPrompt');
+      const listStatus = await testSubjects.find('dataSourceSelectorListStatusErrorPrompt');
       const promptTitle = await listStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be(title);

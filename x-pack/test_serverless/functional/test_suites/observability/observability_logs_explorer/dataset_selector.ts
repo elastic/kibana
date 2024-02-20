@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const noUncategorizedTitle = 'No data streams found';
 
   describe('Dataset Selector', function () {
-    // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="datasetSelectorPopoverButton"])
+    // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="dataSourceSelectorPopoverButton"])
     this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.login();

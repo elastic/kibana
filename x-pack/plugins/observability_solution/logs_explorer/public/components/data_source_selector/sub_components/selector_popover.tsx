@@ -42,7 +42,7 @@ export const SelectorPopover = ({
   return (
     <EuiPopover
       id={POPOVER_ID}
-      data-test-subj="datasetSelectorPopover"
+      data-test-subj="dataSourceSelectorPopover"
       anchorPosition={isMobile ? 'downCenter' : 'downLeft'}
       button={
         <EuiButton
@@ -51,7 +51,7 @@ export const SelectorPopover = ({
           iconSide="right"
           onClick={onClick}
           fullWidth={isMobile}
-          data-test-subj="datasetSelectorPopoverButton"
+          data-test-subj="dataSourceSelectorPopoverButton"
         >
           {isDataViewSelection(selection) ? (
             <DataViewPopoverContent dataViewSelection={selection} />
@@ -69,7 +69,7 @@ export const SelectorPopover = ({
         paddingSize="none"
         hasShadow={false}
         css={panelStyle}
-        data-test-subj="datasetSelectorContent"
+        data-test-subj="dataSourceSelectorContent"
       >
         {children}
       </EuiPanel>

@@ -181,7 +181,7 @@ export function DataSourceSelector({
       id: INTEGRATIONS_TAB_ID,
       name: integrationsLabel,
       onClick: switchToIntegrationsTab,
-      'data-test-subj': 'datasetSelectorIntegrationsTab',
+      'data-test-subj': 'dataSourceSelectorIntegrationsTab',
     },
     {
       id: UNCATEGORIZED_TAB_ID,
@@ -190,7 +190,7 @@ export function DataSourceSelector({
         onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
         switchToUncategorizedTab();
       },
-      'data-test-subj': 'datasetSelectorUncategorizedTab',
+      'data-test-subj': 'dataSourceSelectorUncategorizedTab',
     },
     {
       id: DATA_VIEWS_TAB_ID,
@@ -199,7 +199,7 @@ export function DataSourceSelector({
         onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
         switchToDataViewsTab();
       },
-      'data-test-subj': 'datasetSelectorDataViewsTab',
+      'data-test-subj': 'dataSourceSelectorDataViewsTab',
     },
   ];
 

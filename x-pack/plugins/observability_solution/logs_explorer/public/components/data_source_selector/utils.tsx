@@ -81,7 +81,7 @@ export const buildIntegrationsTree = ({
 export const createAllLogDatasetsItem = () => {
   const allLogDataset = Dataset.createAllLogsDataset();
   return {
-    'data-test-subj': 'datasetSelectorshowAllLogs',
+    'data-test-subj': 'dataSourceSelectorshowAllLogs',
     iconType: allLogDataset.iconType,
     name: allLogDataset.title,
   };
