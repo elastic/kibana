@@ -16,7 +16,7 @@ export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noData
 });
 
 export const noDatasetsTitle = i18n.translate('xpack.datasetQuality.noDatasetsTitle', {
-  defaultMessage: 'There is no data to display.',
+  defaultMessage: 'No matching data streams found',
 });
 
 export const loadingDatasetsText = i18n.translate('xpack.datasetQuality.loadingDatasetsText', {
@@ -81,6 +81,80 @@ export const flyoutIntegrationNameText = i18n.translate(
   'xpack.datasetQuality.flyoutIntegrationNameText',
   {
     defaultMessage: 'Name',
+  }
+);
+
+/*
+Summary Panel
+*/
+
+export const summaryPanelLast24hText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelLast24hText',
+  {
+    defaultMessage: 'Last 24h',
+  }
+);
+
+export const summaryPanelQualityText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityText',
+  {
+    defaultMessage: 'Datasets Quality',
+  }
+);
+
+export const summaryPanelQualityTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityTooltipText',
+  {
+    defaultMessage: 'Quality is based on the percentage of degraded docs in a dataset.',
+  }
+);
+
+export const summaryPanelQualityPoorText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityPoorText',
+  {
+    defaultMessage: 'Poor',
+  }
+);
+
+export const summaryPanelQualityDegradedText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityDegradedText',
+  {
+    defaultMessage: 'Degraded',
+  }
+);
+
+export const summaryPanelQualityGoodText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityGoodText',
+  {
+    defaultMessage: 'Good',
+  }
+);
+
+export const summaryPanelDatasetsActivityText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelDatasetsActivityText',
+  {
+    defaultMessage: 'Active Datasets',
+  }
+);
+
+export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
+  {
+    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+  }
+);
+
+export const summaryPanelEstimatedDataText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelEstimatedDataText',
+  {
+    defaultMessage: 'Estimated Data',
+  }
+);
+
+export const summaryPanelEstimatedDataTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
+  {
+    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
   }
 );
 

@@ -403,6 +403,22 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
+            "description": [
+              "\nDocument explorer header row height option"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverAppState.rowsPerPage",
             "type": "number",
             "tags": [],
@@ -942,7 +958,15 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined; }, isUpdate?: boolean | undefined) => void; onChangeDataView: (id: string) => Promise<void>; setDataView: (dataView: ",
+              " | undefined; }, isUpdate?: boolean | undefined) => void; onChangeDataView: (id: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<void>; setDataView: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",

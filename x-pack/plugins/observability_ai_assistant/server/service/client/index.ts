@@ -169,21 +169,21 @@ export class ObservabilityAIAssistantClient {
 
           const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
 
-          const recallFirst =
-            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('recall');
+          const contextFirst =
+            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('context');
 
           const isAssistantMessageWithFunctionRequest =
             lastMessage?.message.role === MessageRole.Assistant &&
             !!lastMessage?.message.function_call?.name;
 
-          if (recallFirst) {
+          if (contextFirst) {
             const addedMessage = {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
                 content: '',
                 function_call: {
-                  name: 'recall',
+                  name: 'context',
                   arguments: JSON.stringify({
                     queries: [],
                     categories: [],
@@ -201,28 +201,30 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
+            const functions =
+              numFunctionsCalled >= MAX_FUNCTION_CALLS
+                ? []
+                : functionClient
+                    .getFunctions()
+                    .filter((fn) => {
+                      const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+                      return (
+                        visibility === FunctionVisibility.All ||
+                        visibility === FunctionVisibility.AssistantOnly
+                      );
+                    })
+                    .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+
             const response$ = (
               await this.chat(
-                lastMessage.message.name && lastMessage.message.name !== 'recall'
+                lastMessage.message.name && lastMessage.message.name !== 'context'
                   ? 'function_response'
                   : 'user_message',
                 {
                   messages: nextMessages,
                   connectorId,
                   signal,
-                  functions:
-                    numFunctionsCalled >= MAX_FUNCTION_CALLS
-                      ? []
-                      : functionClient
-                          .getFunctions()
-                          .filter((fn) => {
-                            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
-                            return (
-                              visibility === FunctionVisibility.All ||
-                              visibility === FunctionVisibility.AssistantOnly
-                            );
-                          })
-                          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+                  functions,
                 }
               )
             ).pipe(emitWithConcatenatedMessage(), shareReplay());
@@ -311,37 +313,7 @@ export class ObservabilityAIAssistantClient {
               return;
             }
 
-            const functionResponseIsObservable = isObservable(functionResponse);
-
-            const functionResponseMessage = {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                name: lastMessage.message.function_call!.name,
-                ...(functionResponseIsObservable
-                  ? { content: '{}' }
-                  : {
-                      content: JSON.stringify(functionResponse.content || {}),
-                      data: functionResponse.data
-                        ? JSON.stringify(functionResponse.data)
-                        : undefined,
-                    }),
-                role: MessageRole.User,
-              },
-            };
-
-            this.dependencies.logger.debug(
-              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
-            );
-
-            nextMessages = nextMessages.concat(functionResponseMessage);
-
-            subscriber.next({
-              type: StreamingChatResponseEventType.MessageAdd,
-              message: functionResponseMessage,
-              id: v4(),
-            });
-
-            if (functionResponseIsObservable) {
+            if (isObservable(functionResponse)) {
               const shared = functionResponse.pipe(shareReplay());
 
               shared.subscribe({
@@ -364,6 +336,28 @@ export class ObservabilityAIAssistantClient {
 
               return await next(nextMessages.concat(messageEvents.map((event) => event.message)));
             }
+
+            const functionResponseMessage = {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                name: lastMessage.message.function_call!.name,
+
+                content: JSON.stringify(functionResponse.content || {}),
+                data: functionResponse.data ? JSON.stringify(functionResponse.data) : undefined,
+                role: MessageRole.User,
+              },
+            };
+
+            this.dependencies.logger.debug(
+              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
+            );
+            nextMessages = nextMessages.concat(functionResponseMessage);
+
+            subscriber.next({
+              type: StreamingChatResponseEventType.MessageAdd,
+              message: functionResponseMessage,
+              id: v4(),
+            });
 
             span?.end();
 

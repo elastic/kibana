@@ -9,6 +9,7 @@ import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  kqlQuerySchema,
   SLOResponse,
 } from '@kbn/slo-schema';
 
@@ -48,7 +49,7 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(slo: SLOResponse): string
   if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
-  if (filter && filter.length > 0) {
+  if (filter && kqlQuerySchema.is(filter) && filter.length > 0) {
     kueryParams.push(filter);
   }
   if (groupBy !== ALL_VALUE && instanceId !== ALL_VALUE) {

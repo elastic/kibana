@@ -6168,7 +6168,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alert_route.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7620,6 +7624,14 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
@@ -8167,6 +8179,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -13443,10 +13459,6 @@
                 "path": "x-pack/plugins/ml/server/routes/management.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
               },
@@ -13457,6 +13469,10 @@
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -13760,6 +13776,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_installed_integrations/route.ts"
               },
               {
@@ -13841,6 +13861,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/security_integrations/cribl/routes/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14222,16 +14246,16 @@
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -14821,10 +14845,6 @@
                 "path": "x-pack/plugins/ml/server/routes/alerting.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
               },
@@ -14835,6 +14855,10 @@
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
