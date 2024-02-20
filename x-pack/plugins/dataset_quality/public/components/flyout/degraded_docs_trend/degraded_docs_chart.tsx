@@ -14,7 +14,7 @@ import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { indexNameToDataStreamParts } from '../../../../common/utils';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
-import { DatasetQualityTimeRange } from '../../../state_machines/dataset_quality_controller';
+import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { useCreateDataView } from '../../../hooks';
 import { getLensAttributes } from './lens_attributes';
@@ -32,7 +32,7 @@ export function DegradedDocsChart({
   lastReloadTime,
 }: {
   dataStream?: string;
-  timeRange: DatasetQualityTimeRange;
+  timeRange: TimeRangeConfig;
   lastReloadTime: number;
 }) {
   const {
