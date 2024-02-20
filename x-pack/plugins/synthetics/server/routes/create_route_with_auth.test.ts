@@ -6,9 +6,37 @@
  */
 
 import { createSyntheticsRouteWithAuth } from './create_route_with_auth';
+import { SupportedMethod } from './types';
+
+const methods: SupportedMethod[][] = [['GET'], ['POST'], ['PUT'], ['DELETE']];
 
 describe('createSyntheticsRouteWithAuth', () => {
-  it('should create a route with auth', () => {
+  it.each(
+    methods
+      .map<[SupportedMethod, boolean]>((m) => [m[0], true])
+      .concat(methods.map((m) => [m[0], false]))
+  )('%s methods continues to support the writeAccess %s flag', (mStr, writeAccess) => {
+    const method: SupportedMethod = mStr as SupportedMethod;
+    const route = createSyntheticsRouteWithAuth(() => ({
+      method,
+      path: '/foo',
+      validate: {},
+      writeAccess,
+      handler: async () => {
+        return { success: true };
+      },
+    }));
+
+    expect(route).toEqual({
+      method,
+      path: '/foo',
+      validate: {},
+      handler: expect.any(Function),
+      writeAccess,
+    });
+  });
+
+  it('by default allows read access for GET by default', () => {
     const route = createSyntheticsRouteWithAuth(() => ({
       method: 'GET',
       path: '/foo',
@@ -27,11 +55,9 @@ describe('createSyntheticsRouteWithAuth', () => {
     });
   });
 
-  it.each([['POST'], ['PUT'], ['DELETE']])(
-    'requires write permissions for %s requests',
+  it.each(methods.filter((m) => m[0] !== 'GET'))(
+    'by default requires write access for %s route requests',
     (method) => {
-      if (method !== 'POST' && method !== 'PUT' && method !== 'DELETE')
-        throw Error('Invalid method');
       const route = createSyntheticsRouteWithAuth(() => ({
         method,
         path: '/foo',
@@ -47,31 +73,6 @@ describe('createSyntheticsRouteWithAuth', () => {
         validate: {},
         handler: expect.any(Function),
         writeAccess: true,
-      });
-    }
-  );
-
-  it.each([['POST'], ['PUT'], ['DELETE']])(
-    'allows write access override for %s requests',
-    (method) => {
-      if (method !== 'POST' && method !== 'PUT' && method !== 'DELETE')
-        throw Error('Invalid method');
-      const route = createSyntheticsRouteWithAuth(() => ({
-        method,
-        path: '/foo',
-        validate: {},
-        handler: async () => {
-          return { success: true };
-        },
-        writeAccessOverride: true,
-      }));
-
-      expect(route).toEqual({
-        method,
-        path: '/foo',
-        validate: {},
-        handler: expect.any(Function),
-        writeAccess: undefined,
       });
     }
   );
