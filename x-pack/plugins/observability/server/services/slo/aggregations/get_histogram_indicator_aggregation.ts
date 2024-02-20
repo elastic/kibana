@@ -6,7 +6,6 @@
  */
 
 import { HistogramIndicator } from '@kbn/slo-schema';
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getElasticsearchQueryOrThrow } from '../transform_generators/common';
 
 type HistogramIndicatorDef =
@@ -16,7 +15,7 @@ type HistogramIndicatorDef =
 export class GetHistogramIndicatorAggregation {
   constructor(private indicator: HistogramIndicator) {}
 
-  private buildAggregation(indicator: HistogramIndicatorDef): AggregationsAggregationContainer {
+  private buildAggregation(indicator: HistogramIndicatorDef) {
     const filter = indicator.filter
       ? getElasticsearchQueryOrThrow(indicator.filter)
       : { match_all: {} };
@@ -64,10 +63,7 @@ export class GetHistogramIndicatorAggregation {
     };
   }
 
-  private buildBucketScript(
-    type: 'good' | 'total',
-    indicator: HistogramIndicatorDef
-  ): AggregationsAggregationContainer {
+  private buildBucketScript(type: 'good' | 'total', indicator: HistogramIndicatorDef) {
     if (indicator.aggregation === 'value_count') {
       return {
         bucket_script: {
@@ -88,7 +84,13 @@ export class GetHistogramIndicatorAggregation {
     };
   }
 
-  public execute({ type, aggregationKey }: { type: 'good' | 'total'; aggregationKey: string }) {
+  public execute<T extends 'good' | 'total', A extends string>({
+    type,
+    aggregationKey,
+  }: {
+    type: T;
+    aggregationKey: A;
+  }) {
     const indicatorDef = this.indicator.params[type];
     return {
       [`_${type}`]: this.buildAggregation(indicatorDef),

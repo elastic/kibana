@@ -9,6 +9,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } fro
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
@@ -16,6 +17,11 @@ import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+
+const SERVICE_NAME_FIELD = 'indicator.params.service';
+const ENV_NAME_FIELD = 'indicator.params.environment';
+const TRANSACTION_TYPE_FIELD = 'indicator.params.transactionType';
+const TRANSACTION_NAME_FIELD = 'indicator.params.transactionName';
 
 export function ApmLatencyIndicatorTypeForm() {
   const { control, watch, getFieldState, setValue } = useFormContext<CreateSLOForm>();
@@ -30,6 +36,16 @@ export function ApmLatencyIndicatorTypeForm() {
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,
   });
+
+  const serviceName = watch(SERVICE_NAME_FIELD);
+
+  useEffect(() => {
+    if (serviceName) {
+      setValue(ENV_NAME_FIELD, ALL_VALUE);
+      setValue(TRANSACTION_TYPE_FIELD, ALL_VALUE);
+      setValue(TRANSACTION_NAME_FIELD, ALL_VALUE);
+    }
+  }, [serviceName, setValue]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -46,7 +62,7 @@ export function ApmLatencyIndicatorTypeForm() {
             }
           )}
           fieldName="service.name"
-          name="indicator.params.service"
+          name={SERVICE_NAME_FIELD}
           dataTestSubj="apmLatencyServiceSelector"
           tooltip={
             <EuiIconTip
@@ -68,7 +84,7 @@ export function ApmLatencyIndicatorTypeForm() {
             }
           )}
           fieldName="service.environment"
-          name="indicator.params.environment"
+          name={ENV_NAME_FIELD}
           dataTestSubj="apmLatencyEnvironmentSelector"
         />
       </EuiFlexGroup>
@@ -85,7 +101,7 @@ export function ApmLatencyIndicatorTypeForm() {
             }
           )}
           fieldName="transaction.type"
-          name="indicator.params.transactionType"
+          name={TRANSACTION_TYPE_FIELD}
           dataTestSubj="apmLatencyTransactionTypeSelector"
         />
         <FieldSelector
@@ -99,7 +115,7 @@ export function ApmLatencyIndicatorTypeForm() {
             }
           )}
           fieldName="transaction.name"
-          name="indicator.params.transactionName"
+          name={TRANSACTION_NAME_FIELD}
           dataTestSubj="apmLatencyTransactionNameSelector"
         />
       </EuiFlexGroup>

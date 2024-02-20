@@ -70,7 +70,7 @@ const historicalSummarySchema = t.intersection([
 const previewDataSchema = t.intersection([
   t.type({
     date: dateType,
-    sliValue: t.number,
+    sliValue: t.union([t.number, t.null]),
   }),
   t.partial({
     events: t.type({

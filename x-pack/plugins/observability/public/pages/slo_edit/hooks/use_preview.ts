@@ -13,7 +13,9 @@ import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 export function useDebouncedGetPreviewData(
   isIndicatorValid: boolean,
   indicator: Indicator,
-  range: { start: number; end: number }
+  range: { start: number; end: number },
+  groupBy?: string,
+  groupBySampleSize?: number
 ) {
   const serializedIndicator = JSON.stringify(indicator);
   const [indicatorState, setIndicatorState] = useState<string>(serializedIndicator);
@@ -33,5 +35,7 @@ export function useDebouncedGetPreviewData(
     isValid: isIndicatorValid,
     indicator: JSON.parse(indicatorState),
     range,
+    groupBy,
+    groupBySampleSize,
   });
 }
