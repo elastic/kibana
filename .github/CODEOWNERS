@@ -577,6 +577,7 @@ x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-m
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/plugins/observability @elastic/obs-ux-management-team
+x-pack/plugins/observability_solution/slos @elastic/obs-ux-management-team
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team

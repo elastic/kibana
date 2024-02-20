@@ -1542,6 +1542,8 @@
       "@kbn/shared-ux-utility/*": ["packages/kbn-shared-ux-utility/*"],
       "@kbn/slo-schema": ["x-pack/packages/kbn-slo-schema"],
       "@kbn/slo-schema/*": ["x-pack/packages/kbn-slo-schema/*"],
+      "@kbn/slos-plugin": ["x-pack/plugins/observability_solution/slos"],
+      "@kbn/slos-plugin/*": ["x-pack/plugins/observability_solution/slos/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/plugins/snapshot_restore"],
       "@kbn/snapshot-restore-plugin/*": ["x-pack/plugins/snapshot_restore/*"],
       "@kbn/some-dev-log": ["packages/kbn-some-dev-log"],

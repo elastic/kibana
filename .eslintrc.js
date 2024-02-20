@@ -875,6 +875,7 @@ module.exports = {
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/slos/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -897,6 +898,7 @@ module.exports = {
         'x-pack/plugins/apm/**/*.stories.*',
         'x-pack/plugins/observability/**/*.stories.*',
         'x-pack/plugins/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/slos/**/*.stories',
       ],
       rules: {
         'react/function-component-definition': [
@@ -918,6 +920,7 @@ module.exports = {
         'x-pack/plugins/observability_ai_assistant/**/*.tsx',
         'x-pack/plugins/observability_onboarding/**/*.tsx',
         'x-pack/plugins/observability_shared/**/*.tsx',
+        'x-pack/plugins/observability_solution/slos/**/*.tsx',
         'x-pack/plugins/profiling/**/*.tsx',
         'x-pack/plugins/synthetics/**/*.tsx',
         'x-pack/plugins/ux/**/*.tsx',
@@ -936,6 +939,7 @@ module.exports = {
         'x-pack/plugins/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_onboarding/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/slos/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/synthetics/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/ux/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
