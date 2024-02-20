@@ -1851,6 +1851,10 @@
       "timeout": {
         "type": "integer"
       },
+      "topic": {
+        "index": false,
+        "type": "text"
+      },
       "topics": {
         "dynamic": false,
         "properties": {
@@ -2403,6 +2407,9 @@
       },
       "title": {
         "type": "text"
+      },
+      "titleKeyword": {
+        "type": "keyword"
       }
     }
   },

@@ -40,11 +40,12 @@ export function PromptEditorNaturalLanguage({
   const handleResizeTextArea = useCallback(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.minHeight = 'auto';
-      textAreaRef.current.style.minHeight = textAreaRef.current?.scrollHeight + 'px';
-    }
 
-    if (textAreaRef.current?.scrollHeight) {
-      onChangeHeight(textAreaRef.current.scrollHeight);
+      const cappedHeight = Math.min(textAreaRef.current?.scrollHeight, 350);
+
+      textAreaRef.current.style.minHeight = cappedHeight + 'px';
+
+      onChangeHeight(cappedHeight);
     }
   }, [onChangeHeight]);
 
@@ -54,11 +55,17 @@ export function PromptEditorNaturalLanguage({
     if (textarea) {
       textarea.focus();
     }
-  }, [handleResizeTextArea]);
+  }, []);
 
   useEffect(() => {
     handleResizeTextArea();
   }, [handleResizeTextArea]);
+
+  useEffect(() => {
+    if (prompt === undefined) {
+      handleResizeTextArea();
+    }
+  }, [handleResizeTextArea, prompt]);
 
   return (
     <EuiTextArea

@@ -29,6 +29,14 @@
     "@kbn/router-utils",
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
+    "@kbn/ui-theme",
+    "@kbn/core-notifications-browser",
+    "@kbn/formatters",
+    "@kbn/data-service",
+    "@kbn/observability-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/timerange"
   ],
   "exclude": [
     "target/**/*",

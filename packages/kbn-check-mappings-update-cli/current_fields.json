@@ -549,6 +549,7 @@
     "shipper",
     "ssl",
     "timeout",
+    "topic",
     "topics",
     "topics.topic",
     "topics.when",
@@ -716,7 +717,8 @@
   ],
   "query": [
     "description",
-    "title"
+    "title",
+    "titleKeyword"
   ],
   "risk-engine-configuration": [
     "dataViewId",

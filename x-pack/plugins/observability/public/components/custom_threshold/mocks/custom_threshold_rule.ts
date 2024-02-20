@@ -10,10 +10,7 @@ import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { CustomThresholdAlertFields } from '../types';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
-import {
-  CustomThresholdAlert,
-  CustomThresholdRule,
-} from '../components/alert_details_app_section/alert_details_app_section';
+import { CustomThresholdAlert, CustomThresholdRule } from '../components/types';
 
 export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}
@@ -247,7 +244,7 @@ export const buildCustomThresholdAlert = (
       },
       'kibana.alert.evaluation.values': [2500, 5],
       'kibana.alert.group': [{ field: 'host.name', value: 'host-1' }],
-      'kibana.alert.rule.category': 'Custom threshold (Beta)',
+      'kibana.alert.rule.category': 'Custom threshold',
       'kibana.alert.rule.consumer': 'alerts',
       'kibana.alert.rule.execution.uuid': '62dd07ef-ead9-4b1f-a415-7c83d03925f7',
       'kibana.alert.rule.name': 'One condition',

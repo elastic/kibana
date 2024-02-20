@@ -7,16 +7,19 @@
 
 import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  ENABLE_ASSET_CRITICALITY_SETTING,
+  RISK_SCORE_PREVIEW_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-  dataGeneratorFactory,
-} from '../../../detections_response/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   assetCriticalityRouteHelpersFactory,
   buildDocument,
@@ -34,6 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const previewRiskScores = async ({
@@ -66,6 +70,12 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
+    before(async () => {
+      await kibanaServer.uiSettings.update({
+        [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+      });
+    });
+
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -563,7 +573,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await assetCriticalityRoutes.upsert({
             id_field: 'host.name',
             id_value: 'host-1',
-            criticality_level: 'very_important',
+            criticality_level: 'extreme_impact',
           });
         });
 
@@ -585,7 +595,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              criticality_level: 'very_important',
+              criticality_level: 'extreme_impact',
               criticality_modifier: 2.0,
               calculated_level: 'Unknown',
               calculated_score: 21,

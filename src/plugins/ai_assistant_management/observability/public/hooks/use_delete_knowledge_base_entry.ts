@@ -20,7 +20,7 @@ export function useDeleteKnowledgeBaseEntry() {
     notifications: { toasts },
   } = useAppContext();
   const queryClient = useQueryClient();
-  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
 
   return useMutation<unknown, ServerError, { id: string }>(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
