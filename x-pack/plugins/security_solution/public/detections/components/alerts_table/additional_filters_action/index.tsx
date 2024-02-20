@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiNotificationBadge } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { UtilityBarAction } from '../../../../common/components/utility_bar';
@@ -79,6 +79,9 @@ export const AdditionalFiltersAction = ({
     ]
   );
 
+  const additionalFilterCount =
+    (showBuildingBlockAlerts ? 1 : 0) + (showOnlyThreatIndicatorAlerts ? 1 : 0);
+
   return (
     <UtilityBarAction
       dataTestSubj="additionalFilters"
@@ -89,6 +92,12 @@ export const AdditionalFiltersAction = ({
       popoverContent={UtilityBarAdditionalFiltersContent}
     >
       {i18n.ADDITIONAL_FILTERS_ACTIONS}
+      {additionalFilterCount > 0 && (
+        <>
+          &nbsp;
+          <EuiNotificationBadge color="subdued">{`${additionalFilterCount}`}</EuiNotificationBadge>
+        </>
+      )}
     </UtilityBarAction>
   );
 };
