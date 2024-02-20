@@ -16,7 +16,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
-  method: 'GET',
+  method: 'POST',
   path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
   validate: {
     params: schema.object({
