@@ -26,7 +26,7 @@ export type DatasetQualityTableOptions = Partial<
 
 export type DatasetQualityFlyoutOptions = Omit<WithFlyoutOptions['flyout'], 'datasetDetails'>;
 
-export type DatasetQualityFilterOptions = Partial<Omit<WithFilters['filters'], 'timeRange'>>;
+export type DatasetQualityFilterOptions = Partial<WithFilters['filters']>;
 
 export interface DatasetQualityPublicState {
   table: DatasetQualityTableOptions;

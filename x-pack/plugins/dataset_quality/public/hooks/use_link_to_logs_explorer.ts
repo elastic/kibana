@@ -10,7 +10,9 @@ import {
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { useSelector } from '@xstate/react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -23,11 +25,16 @@ export const useLinkToLogsExplorer = ({
     services: { share },
   } = useKibanaContextForPlugin();
 
+  const { service } = useDatasetQualityContext();
+  const {
+    timeRange: { from, to },
+  } = useSelector(service, (state) => state.context.filters);
+
   const params: SingleDatasetLocatorParams = {
     dataset: dataStreamStat.name,
     timeRange: {
-      from: 'now-1d',
-      to: 'now',
+      from,
+      to,
     },
     integration: dataStreamStat.integration?.name,
     filterControls: {
