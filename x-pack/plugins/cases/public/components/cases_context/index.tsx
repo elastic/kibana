@@ -32,14 +32,14 @@ import { casesContextReducer, getInitialCasesContextState } from './cases_contex
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
-export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
+type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
-export interface CasesContextValue {
+interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
-  appId: string;
-  appTitle: string;
+  appId?: string;
+  appTitle?: string;
   permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
@@ -62,11 +62,6 @@ export interface CasesContextProps
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
-
-export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {
-  appId?: string;
-  appTitle?: string;
-}
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
@@ -139,7 +134,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     [getFilesClient, owner]
   );
 
-  return isCasesContextValue(value) ? (
+  return (
     <QueryClientProvider client={casesQueryClient}>
       <CasesContext.Provider value={value}>
         {applyFilesContext(
@@ -150,13 +145,10 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         )}
       </CasesContext.Provider>
     </QueryClientProvider>
-  ) : null;
+  );
 };
-CasesProvider.displayName = 'CasesProvider';
 
-function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
-  return value.appId != null && value.appTitle != null && value.permissions != null;
-}
+CasesProvider.displayName = 'CasesProvider';
 
 // eslint-disable-next-line import/no-default-export
 export default CasesProvider;
