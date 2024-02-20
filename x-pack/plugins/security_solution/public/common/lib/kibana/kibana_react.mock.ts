@@ -52,6 +52,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contractStartServicesMock } from '../../../mocks';
 import { getDefaultConfigSettings } from '../../../../common/config_settings';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -220,6 +221,7 @@ export const createStartServicesMock = (
     uiActions: uiActionsPluginMock.createStartContract(),
     savedSearch: savedSearchPluginMock.createStartContract(),
     setHeaderActionMenu: mockSetHeaderActionMenu,
+    fieldFormats: fieldFormatsMock,
   } as unknown as StartServices;
 };
 
