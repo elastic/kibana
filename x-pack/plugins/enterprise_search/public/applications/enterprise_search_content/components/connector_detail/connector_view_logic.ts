@@ -95,15 +95,6 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   path: ['enterprise_search', 'content', 'connector_view_logic'],
-  reducers: {
-    syncTriggeredLocally: [
-      false,
-      {
-        fetchIndexApiSuccess: () => false,
-        startSyncApiSuccess: () => true,
-      },
-    ],
-  },
   selectors: ({ selectors }) => ({
     connector: [
       () => [selectors.connectorData],
