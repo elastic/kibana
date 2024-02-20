@@ -45,7 +45,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(Number(result[0].pValue)).to.be.lessThan(1);
       expect(result[0].type).to.eql('distribution_change');
 
-      await elasticChart.waitForRenderComplete('aiopChangePointPreviewChart > xyVisChart');
+      await ml.testExecution.logTestStep('Check the change point chart is rendered');
+      await elasticChart.waitForRenderComplete('aiopChangePointPreviewChart > xyVisChart', 5000);
       const chartState = await elasticChart.getChartDebugData(
         'aiopChangePointPreviewChart > xyVisChart',
         0,
