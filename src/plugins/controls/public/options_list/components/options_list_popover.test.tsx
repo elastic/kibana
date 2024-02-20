@@ -123,7 +123,7 @@ describe('Options list popover', () => {
       expect(
         within(validSelection).getByTestId('optionsList-document-count-badge')
       ).toHaveTextContent('75');
-      const title = popover.getByTestId('optionList__ignoredSelectionLabel');
+      const title = popover.getByTestId('optionList__invalidSelectionLabel');
       expect(title).toHaveTextContent('Invalid selection');
       const invalidSelection = popover.getByTestId('optionsList-control-invalid-selection-woof');
       expect(invalidSelection).toHaveTextContent('woof. Checked option.');
@@ -139,7 +139,7 @@ describe('Options list popover', () => {
           invalidSelections: ['woof', 'meow'],
         },
       });
-      const title = popover.getByTestId('optionList__ignoredSelectionLabel');
+      const title = popover.getByTestId('optionList__invalidSelectionLabel');
       expect(title).toHaveTextContent('Invalid selections');
     });
   });
