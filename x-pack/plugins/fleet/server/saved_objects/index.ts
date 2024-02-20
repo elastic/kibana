@@ -230,6 +230,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             random: { type: 'boolean' },
           },
         },
+        topic: { type: 'text', index: false },
         topics: {
           dynamic: false,
           properties: {
@@ -358,6 +359,16 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
+      },
+      '6': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              topic: { type: 'text', index: false },
             },
           },
         ],
@@ -730,6 +741,7 @@ export const OUTPUT_EXLCUDE_AAD_FIELDS = new Set([
   'random',
   'round_robin',
   'hash',
+  'topic',
   'topics',
   'headers',
   'timeout',
