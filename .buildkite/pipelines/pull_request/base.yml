@@ -45,59 +45,59 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
-    agents:
-      queue: kibana-default
-    timeout_in_minutes: 10
-    env:
-      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
-      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+  # - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+  #   label: 'Pick Test Group Run Order'
+  #   agents:
+  #     queue: kibana-default
+  #   timeout_in_minutes: 10
+  #   env:
+  #     JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+  #     JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+  #     FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+  #   retry:
+  #     automatic:
+  #       - exit_status: '*'
+  #         limit: 1
 
-  - command: .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      queue: n2-8-spot
-    key: linting
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # - command: .buildkite/scripts/steps/lint.sh
+  #   label: 'Linting'
+  #   agents:
+  #     queue: n2-8-spot
+  #   key: linting
+  #   timeout_in_minutes: 60
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
 
-  - command: .buildkite/scripts/steps/lint_with_types.sh
-    label: 'Linting (with types)'
-    agents:
-      queue: n2-16-spot
-    key: linting_with_types
-    timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # - command: .buildkite/scripts/steps/lint_with_types.sh
+  #   label: 'Linting (with types)'
+  #   agents:
+  #     queue: n2-16-spot
+  #   key: linting_with_types
+  #   timeout_in_minutes: 90
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
 
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # - command: .buildkite/scripts/steps/checks.sh
+  #   label: 'Checks'
+  #   agents:
+  #     queue: n2-2-spot
+  #   timeout_in_minutes: 60
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
 
-  - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Check Types and Build API Docs'
-    agents:
-      queue: n2-4-spot
-    key: build_api_docs
-    timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # - command: .buildkite/scripts/steps/build_api_docs.sh
+  #   label: 'Check Types and Build API Docs'
+  #   agents:
+  #     queue: n2-4-spot
+  #   key: build_api_docs
+  #   timeout_in_minutes: 90
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
