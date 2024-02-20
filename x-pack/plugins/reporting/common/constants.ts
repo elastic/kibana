@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// Export Type Sets
 import {
   CSV_JOB_TYPE,
   CSV_JOB_TYPE_DEPRECATED,
@@ -26,6 +25,7 @@ import {
   PNG_REPORT_TYPE_V2,
 } from '@kbn/reporting-export-types-png-common';
 
+// Export Type Sets
 export const reportTypes = [
   CSV_REPORT_TYPE,
   CSV_REPORT_TYPE_V2,
@@ -52,3 +52,7 @@ export const USES_HEADLESS_JOB_TYPES = [
 ];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
+
+// Test Subjects
+export const REPORT_TABLE_ID = 'reportJobListing';
+export const REPORT_TABLE_ROW_ID = 'reportJobRow';

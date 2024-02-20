@@ -7,11 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { checkLicense } from '@kbn/reporting-public';
-import { ReportingAPIClient } from '@kbn/reporting-public';
+import React from 'react';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { ReportingAPIClient, checkLicense } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams =
@@ -125,9 +124,11 @@ export const reportingScreenshotShareProvider = ({
       objectType,
       sharingData,
     };
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unknown> }): boolean =>
-      sharingData.locatorParams != null;
+    const isJobV2Params = ({
+      sharingData: _sharingData,
+    }: {
+      sharingData: Record<string, unknown>;
+    }) => _sharingData.locatorParams != null;
 
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;

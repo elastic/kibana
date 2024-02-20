@@ -5597,10 +5597,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-share@link:packages/kbn-reporting/public/share":
-  version "0.0.0"
-  uid ""
-
 "@kbn/resizable-layout-examples-plugin@link:examples/resizable_layout_examples":
   version "0.0.0"
   uid ""

@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { getSharedComponents } from '@kbn/reporting-share';
+import { getSharedComponents } from '@kbn/reporting-public/share';
 import { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { ReportingSetup } from '.';
 
