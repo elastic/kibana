@@ -10,7 +10,7 @@ import type {
   DatasetSelection,
   SelectionChange,
   DataViewSelection,
-} from '../../../common/dataset_selection';
+} from '../../../common/data_source_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
 import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';

@@ -15,7 +15,7 @@ import {
   AllDatasetSelection,
   isDatasetSelection,
   isDataViewSelection,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {

@@ -17,7 +17,7 @@ import {
   DatasetSelection,
   DataViewSelection,
   SelectionChange,
-} from '../../../common/dataset_selection';
+} from '../../../common/data_source_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DataSourceSelector } from './data_source_selector';
 import { DataSourceSelectorProps, DataSourceSelectorSearchParams } from './types';

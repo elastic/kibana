@@ -9,7 +9,7 @@ import {
   DatasetSelection,
   DataViewSelection,
   isDatasetSelection,
-} from '../../common/dataset_selection';
+} from '../../common/data_source_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export interface DiscoverEsqlUrlProps {

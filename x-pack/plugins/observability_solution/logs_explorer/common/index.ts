@@ -21,8 +21,8 @@ export {
   isDataViewSelection,
   isUnresolvedDatasetSelection,
   UnresolvedDatasetSelection,
-} from './dataset_selection';
-export type { DataSourceSelectionPlain } from './dataset_selection';
+} from './data_source_selection';
+export type { DataSourceSelectionPlain } from './data_source_selection';
 export type {
   ChartDisplayOptions,
   DisplayOptions,

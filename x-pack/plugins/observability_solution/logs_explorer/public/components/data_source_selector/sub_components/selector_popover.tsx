@@ -19,7 +19,7 @@ import {
   DatasetSelection,
   DataViewSelection,
   isDataViewSelection,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 import { DATA_SOURCE_SELECTOR_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 

@@ -19,7 +19,7 @@ import type {
   DatasetSelection,
   DataViewSelection,
   SingleDatasetSelection,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 
 export interface WithDatasetSelection {
   datasetSelection: DatasetSelection | DataViewSelection;

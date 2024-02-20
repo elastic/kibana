@@ -7,7 +7,7 @@
 
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { SelectionChange } from '../../common/dataset_selection';
+import { SelectionChange } from '../../common/data_source_selection';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 export const useDatasetSelection = (

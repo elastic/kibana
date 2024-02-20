@@ -10,7 +10,7 @@ import {
   DatasetSelection,
   DataViewSelection,
   SelectionChange,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {

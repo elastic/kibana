@@ -15,7 +15,7 @@ import {
   isUnresolvedDatasetSelection,
   SingleDatasetSelection,
   UnresolvedDatasetSelection,
-} from '../../../../../common/dataset_selection';
+} from '../../../../../common/data_source_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 

@@ -12,7 +12,7 @@ import {
   isDatasetSelection,
   isDataViewSelection,
   SingleDatasetSelection,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
