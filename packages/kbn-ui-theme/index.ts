@@ -8,4 +8,12 @@
 
 export type { Theme } from './src/theme';
 
-export { darkMode, euiDarkVars, euiLightVars, euiThemeVars, tag, version } from './src/theme';
+export {
+  darkMode,
+  tag,
+  version,
+  euiDarkVars,
+  euiLightVars,
+  euiThemeVars,
+  _setDarkMode,
+} from './src/theme';
