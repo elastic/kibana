@@ -68,7 +68,8 @@
     "@kbn/visualization-utils",
     "@kbn/field-types",
     "@kbn/es-types",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/data-plugin"
   ],
   "exclude": ["target/**/*"]
 }

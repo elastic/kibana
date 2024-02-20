@@ -250,7 +250,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create rule with kql filter for opbeans-php', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176964
+    describe.skip('create rule with kql filter for opbeans-php', () => {
       let ruleId: string;
 
       before(async () => {

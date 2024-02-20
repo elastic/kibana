@@ -229,7 +229,7 @@ export function UnifiedSearchBar({
   const onRefreshChange = ({
     isPaused,
     refreshInterval,
-  }: OnRefreshChangeProps) => {
+  }: Partial<OnRefreshChangeProps>) => {
     const existingQueryParams = toQuery(location.search);
     const updatedQueryParams = {
       ...existingQueryParams,

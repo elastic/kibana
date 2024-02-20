@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import { BehaviorSubject } from 'rxjs';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
@@ -114,7 +113,7 @@ export class Plugin
       title: i18n.translate('xpack.exploratoryView.appTitle', {
         defaultMessage: 'Exploratory View',
       }),
-      searchable: false,
+      visibleIn: [],
       updater$: appUpdater$,
       keywords: [
         'observability',
@@ -136,10 +135,6 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ExploratoryViewPublicPluginsStart) {
-    this.appUpdater$.next(() => ({
-      navLinkStatus: AppNavLinkStatus.hidden,
-    }));
-
     return {
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),

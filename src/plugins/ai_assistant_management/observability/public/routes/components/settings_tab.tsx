@@ -162,6 +162,7 @@ export function SettingsTab() {
             )}
           >
             <EuiFormRow
+              style={{ alignSelf: 'end', width: '80%' }}
               fullWidth
               label={i18n.translate(
                 'aiAssistantManagementObservability.settingsPage.selectConnectorLabel',
