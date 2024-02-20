@@ -24,9 +24,11 @@ container.style.width = '1000px';
 container.style.height = '1000px';
 container.getBoundingClientRect = jest.fn(() => {
   return {
-    width: '1000',
-    height: '1000',
-  };
+    width: 1000,
+    height: 1000,
+    x: 0,
+    y: 0,
+  } as DOMRect;
 });
 
 const TestComponent = () => {
