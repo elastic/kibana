@@ -60,7 +60,7 @@ export const unresolvedDatasetSelectionPlainRT = rt.type({
   selection: unresolvedDatasetSelectionPayloadRT,
 });
 
-export const datasetSelectionPlainRT = rt.union([
+export const dataSourceSelectionPlainRT = rt.union([
   allDatasetSelectionPlainRT,
   dataViewSelectionPlainRT,
   singleDatasetSelectionPlainRT,
@@ -72,13 +72,13 @@ export type DataViewSelectionPayload = rt.TypeOf<typeof dataViewSelectionPayload
 export type UnresolvedDatasetSelectionPayload = rt.TypeOf<
   typeof unresolvedDatasetSelectionPayloadRT
 >;
-export type DatasetSelectionPlain = rt.TypeOf<typeof datasetSelectionPlainRT>;
+export type DataSourceSelectionPlain = rt.TypeOf<typeof dataSourceSelectionPlainRT>;
 
 export type DataViewSpecWithId = DataViewSpec & {
   id: string;
 };
 
-export interface DatasetSelectionStrategy {
+export interface DataSourceSelectionStrategy {
   toDataviewSpec(): DataViewSpecWithId;
-  toPlainSelection(): DatasetSelectionPlain;
+  toPlainSelection(): DataSourceSelectionPlain;
 }

@@ -6,9 +6,9 @@
  */
 
 import { Dataset } from '../datasets';
-import { DatasetSelectionStrategy } from './types';
+import { DataSourceSelectionStrategy } from './types';
 
-export class AllDatasetSelection implements DatasetSelectionStrategy {
+export class AllDatasetSelection implements DataSourceSelectionStrategy {
   selectionType: 'all';
   selection: {
     dataset: Dataset;

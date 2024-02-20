@@ -9,7 +9,7 @@ import {
   availableControlsPanels,
   controlPanelConfigs,
   ControlPanels,
-  hydrateDatasetSelection,
+  hydrateDataSourceSelection,
 } from '../../common';
 import {
   DEFAULT_CONTEXT,
@@ -47,7 +47,7 @@ export const getContextFromPublicState = (
   controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
   datasetSelection:
     publicState.datasetSelection != null
-      ? hydrateDatasetSelection(publicState.datasetSelection)
+      ? hydrateDataSourceSelection(publicState.datasetSelection)
       : DEFAULT_CONTEXT.datasetSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,

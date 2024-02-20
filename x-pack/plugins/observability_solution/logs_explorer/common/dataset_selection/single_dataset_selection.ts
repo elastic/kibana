@@ -6,9 +6,9 @@
  */
 
 import { Dataset } from '../datasets';
-import { DatasetSelectionStrategy, SingleDatasetSelectionPayload } from './types';
+import { DataSourceSelectionStrategy, SingleDatasetSelectionPayload } from './types';
 
-export class SingleDatasetSelection implements DatasetSelectionStrategy {
+export class SingleDatasetSelection implements DataSourceSelectionStrategy {
   selectionType: 'single';
   selection: {
     name?: string;

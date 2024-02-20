@@ -35,8 +35,6 @@ export const isDataViewSelection = (input: any): input is DataViewSelection => {
 export * from './all_dataset_selection';
 export * from './data_view_selection';
 export * from './single_dataset_selection';
-export * from './single_dataset_selection';
 export * from './unresolved_dataset_selection';
-export * from './errors';
-export * from './hydrate_dataset_selection.ts';
+export * from './hydrate_data_source_selection';
 export * from './types';

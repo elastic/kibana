@@ -16,7 +16,6 @@ import { DoneInvokeEvent } from 'xstate';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
-  DatasetEncodingError,
   DatasetSelection,
   DataViewSelection,
   SingleDatasetSelection,
@@ -206,5 +205,4 @@ export type LogsExplorerControllerEvent =
   | DoneInvokeEvent<DatasetSelection | DataViewSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
-  | DoneInvokeEvent<DatasetEncodingError>
   | DoneInvokeEvent<Error>;

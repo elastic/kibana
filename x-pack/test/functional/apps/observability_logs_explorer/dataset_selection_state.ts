@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { decodeOrThrow, indexPatternRt } from '@kbn/io-ts-utils';
-import { DatasetSelectionPlain } from '@kbn/logs-explorer-plugin/common';
+import { DataSourceSelectionPlain } from '@kbn/logs-explorer-plugin/common';
 import { FtrProviderContext } from './config';
 
-const azureActivityDatasetSelection: DatasetSelectionPlain = {
+const azureActivityDatasetSelection: DataSourceSelectionPlain = {
   selection: {
     dataset: {
       name: decodeOrThrow(indexPatternRt)('logs-azure.activitylogs-*'),

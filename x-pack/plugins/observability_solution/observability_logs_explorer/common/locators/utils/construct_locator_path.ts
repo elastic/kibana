@@ -14,7 +14,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import {
   AvailableControlPanels,
   availableControlsPanels,
-  DatasetSelectionPlain,
+  DataSourceSelectionPlain,
   SMART_FALLBACK_FIELDS,
 } from '@kbn/logs-explorer-plugin/common';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
@@ -27,7 +27,7 @@ import { deepCompactObject } from '../../utils/deep_compact_object';
 type ControlsPageState = NonNullable<logsExplorerUrlSchemaV1.UrlSchema['controls']>;
 
 interface LocatorPathConstructionParams {
-  datasetSelection: DatasetSelectionPlain;
+  datasetSelection: DataSourceSelectionPlain;
   locatorParams: DatasetLocatorParams;
   useHash: boolean;
 }

@@ -6,9 +6,9 @@
  */
 
 import { DataViewDescriptor } from '../data_views/models/data_view_descriptor';
-import { DatasetSelectionStrategy, DataViewSelectionPayload } from './types';
+import { DataSourceSelectionStrategy, DataViewSelectionPayload } from './types';
 
-export class DataViewSelection implements DatasetSelectionStrategy {
+export class DataViewSelection implements DataSourceSelectionStrategy {
   selectionType: 'dataView';
   selection: {
     dataView: DataViewDescriptor;

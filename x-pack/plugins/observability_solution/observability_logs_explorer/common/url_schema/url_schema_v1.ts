@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { availableControlsPanels, datasetSelectionPlainRT } from '@kbn/logs-explorer-plugin/common';
+import {
+  availableControlsPanels,
+  dataSourceSelectionPlainRT,
+} from '@kbn/logs-explorer-plugin/common';
 import * as rt from 'io-ts';
 
 const allowedNamesRT = rt.keyof({
@@ -131,7 +134,7 @@ export const urlSchemaRT = rt.exact(
     v: rt.literal(1),
     breakdownField: rt.union([rt.string, rt.null]),
     columns: columnsRT,
-    datasetSelection: datasetSelectionPlainRT,
+    datasetSelection: dataSourceSelectionPlainRT,
     filters: filtersRT,
     query: queryRT,
     refreshInterval: refreshIntervalRT,

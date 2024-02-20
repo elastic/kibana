@@ -8,17 +8,17 @@
 import { AllDatasetSelection } from './all_dataset_selection';
 import { DataViewSelection } from './data_view_selection';
 import { SingleDatasetSelection } from './single_dataset_selection';
-import { DatasetSelectionPlain } from './types';
+import { DataSourceSelectionPlain } from './types';
 import { UnresolvedDatasetSelection } from './unresolved_dataset_selection';
 
-export const hydrateDatasetSelection = (datasetSelection: DatasetSelectionPlain) => {
-  if (datasetSelection.selectionType === 'all') {
+export const hydrateDataSourceSelection = (dataSourceSelection: DataSourceSelectionPlain) => {
+  if (dataSourceSelection.selectionType === 'all') {
     return AllDatasetSelection.create();
-  } else if (datasetSelection.selectionType === 'single') {
-    return SingleDatasetSelection.fromSelection(datasetSelection.selection);
-  } else if (datasetSelection.selectionType === 'dataView') {
-    return DataViewSelection.fromSelection(datasetSelection.selection);
+  } else if (dataSourceSelection.selectionType === 'single') {
+    return SingleDatasetSelection.fromSelection(dataSourceSelection.selection);
+  } else if (dataSourceSelection.selectionType === 'dataView') {
+    return DataViewSelection.fromSelection(dataSourceSelection.selection);
   } else {
-    return UnresolvedDatasetSelection.fromSelection(datasetSelection.selection);
+    return UnresolvedDatasetSelection.fromSelection(dataSourceSelection.selection);
   }
 };
