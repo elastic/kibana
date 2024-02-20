@@ -9,8 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
@@ -57,6 +58,8 @@ import type {
 } from '../../../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../create/types';
 import { stringify } from '../../../../utils/stringify';
+import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
+import { EMPTY_COMMENT } from '../../../../utils/translations';
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -79,6 +82,8 @@ export interface ResponseActionsClientUpdateCasesOptions {
   alertIds?: string[];
   /** Comment to include in the Case attachment */
   comment?: string;
+  /** The id of the action that was taken */
+  actionId: string;
 }
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
@@ -119,6 +124,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     caseIds = [],
     alertIds = [],
     comment = '',
+    actionId,
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
       this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
@@ -166,32 +172,43 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
-    // Create an attachment for each case that includes info. about the response actions taken against the hosts
-    const attachments = allCases.map(() => ({
-      type: AttachmentType.actions,
-      comment,
-      actions: {
-        targets: hosts.map(({ hostId: endpointId, hostname }) => ({ endpointId, hostname })),
-        type: command,
+    const attachments: CaseAttachments = [
+      {
+        type: AttachmentType.externalReference,
+        externalReferenceId: actionId,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.elasticSearchDoc,
+        },
+        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        externalReferenceMetadata: {
+          targets: hosts.map(({ hostId: endpointId, hostname }) => {
+            return {
+              endpointId,
+              hostname,
+              agentType: this.agentType,
+            };
+          }),
+          command,
+          comment: comment || EMPTY_COMMENT,
+        },
+        owner: APP_ID,
       },
-      owner: APP_ID,
-    })) as BulkCreateArgs['attachments'];
+    ];
 
     const casesUpdateResponse = await Promise.all(
-      allCases.map((caseId) =>
-        casesClient.attachments
-          .bulkCreate({
+      allCases.map(async (caseId) => {
+        try {
+          return await casesClient.attachments.bulkCreate({
             caseId,
             attachments,
-          })
-          .catch((err) => {
-            // Log any error, BUT: do not fail execution
-            this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
-            );
-            return null;
-          })
-      )
+          });
+        } catch (err) {
+          this.log.warn(
+            `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
+          );
+          return null;
+        }
+      })
     );
 
     this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);

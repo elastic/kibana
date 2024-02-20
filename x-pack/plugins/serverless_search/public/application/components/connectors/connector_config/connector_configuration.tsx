@@ -36,13 +36,14 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
     const step =
       connector.status === ConnectorStatus.CREATED
         ? 'link'
-        : connector.status === ConnectorStatus.NEEDS_CONFIGURATION
+        : connector.status === ConnectorStatus.NEEDS_CONFIGURATION &&
+          Object.keys(connector.configuration || {}).length > 0
         ? 'configure'
         : connector.status === ConnectorStatus.CONFIGURED
         ? 'connect'
         : 'connected';
     setCurrentStep(step);
-  }, [connector.status, setCurrentStep]);
+  }, [connector.status, setCurrentStep, connector.configuration]);
   const steps: EuiStepsHorizontalProps['steps'] = [
     {
       title: i18n.translate('xpack.serverlessSearch.connectors.config.linkToElasticTitle', {

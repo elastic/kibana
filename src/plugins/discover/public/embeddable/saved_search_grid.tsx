@@ -101,7 +101,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         renderDocumentView={renderDocumentView}
         renderCustomToolbar={renderCustomToolbar}
         showColumnTokens
-        headerRowHeight={3}
+        configHeaderRowHeight={3}
       />
     </SavedSearchEmbeddableBase>
   );

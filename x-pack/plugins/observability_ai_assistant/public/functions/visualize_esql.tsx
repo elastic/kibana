@@ -22,25 +22,34 @@ import type {
   TypedLensByValueInput,
   InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   VisualizeESQLFunctionArguments,
   VisualizeESQLUserIntention,
 } from '../../common/functions/visualize_esql';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from '../context/observability_ai_assistant_multipane_flyout_provider';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '../types';
-import {
-  type ChatActionClickHandler,
-  ChatActionClickType,
-  ChatFlyoutSecondSlotHandler,
-} from '../components/chat/types';
+import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
+
+enum ChartType {
+  XY = 'XY',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heat map',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tag cloud',
+  Waffle = 'Waffle',
+}
 
 interface VisualizeLensResponse {
   content: DatatableColumn[];
@@ -63,14 +72,8 @@ interface VisualizeESQLProps {
    * If not given, the embeddable gets them from the suggestions api
    */
   userOverrides?: unknown;
-  /** Optional, should be passed if the embeddable is rendered in a flyout
-   * If not given, the inline editing push flyout won't open
-   * The code will be significantly improved,
-   * if this is addressed https://github.com/elastic/eui/issues/7443
-   */
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   /** User's preferation chart type as it comes from the model */
-  preferredChartType?: string;
+  preferredChartType?: ChartType;
 }
 
 function generateId() {
@@ -85,7 +88,6 @@ export function VisualizeESQL({
   query,
   onActionClick,
   userOverrides,
-  chatFlyoutSecondSlotHandler,
   preferredChartType,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
@@ -95,10 +97,10 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return dataViews.create({
-      title: indexPattern,
-    });
+    return getESQLAdHocDataview(indexPattern, dataViews);
   }, [indexPattern]);
+
+  const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(
@@ -137,19 +139,14 @@ export function VisualizeESQL({
         },
       };
 
-      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataViewAsync.value);
+      const chartSuggestions = lensHelpersAsync.value.suggestions(
+        context,
+        dataViewAsync.value,
+        [],
+        preferredChartType
+      );
       if (chartSuggestions?.length) {
-        let [suggestion] = chartSuggestions;
-
-        if (chartSuggestions.length > 1 && preferredChartType) {
-          const suggestionFromModel = chartSuggestions.find(
-            (s) =>
-              s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
-          );
-          if (suggestionFromModel) {
-            suggestion = suggestionFromModel;
-          }
-        }
+        const [suggestion] = chartSuggestions;
 
         const attrs = getLensAttributesFromSuggestion({
           filters: [],
@@ -290,17 +287,6 @@ export function VisualizeESQL({
   );
 }
 
-enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-}
-
 export function registerVisualizeQueryRenderFunction({
   service,
   registerRenderFunction,
@@ -316,11 +302,10 @@ export function registerVisualizeQueryRenderFunction({
       arguments: { query, userOverrides, intention },
       response,
       onActionClick,
-      chatFlyoutSecondSlotHandler,
     }: Parameters<RenderFunction<VisualizeESQLFunctionArguments, {}>>[0]) => {
       const { content } = response as VisualizeLensResponse;
 
-      let preferredChartType: string | undefined;
+      let preferredChartType: ChartType | undefined;
 
       switch (intention) {
         case VisualizeESQLUserIntention.executeAndReturnResults:
@@ -344,6 +329,10 @@ export function registerVisualizeQueryRenderFunction({
           preferredChartType = ChartType.Line;
           break;
 
+        case VisualizeESQLUserIntention.visualizeArea:
+          preferredChartType = ChartType.Area;
+          break;
+
         case VisualizeESQLUserIntention.visualizeTagcloud:
           preferredChartType = ChartType.Tagcloud;
           break;
@@ -361,16 +350,17 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
+      const trimmedQuery = query.trim();
+
       return (
         <VisualizeESQL
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}
           columns={content}
-          query={query}
+          query={trimmedQuery}
           onActionClick={onActionClick}
           userOverrides={userOverrides}
-          chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
           preferredChartType={preferredChartType}
         />
       );

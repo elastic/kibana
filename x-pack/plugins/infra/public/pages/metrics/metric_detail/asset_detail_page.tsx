@@ -65,7 +65,6 @@ export const AssetDetailPage = () => {
         assetId={nodeId}
         assetType={nodeType}
         tabs={commonFlyoutTabs}
-        links={['apmServices']}
         renderMode={{
           mode: 'page',
         }}

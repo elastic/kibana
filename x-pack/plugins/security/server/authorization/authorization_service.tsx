@@ -57,7 +57,6 @@ export { Actions } from './actions';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
-  buildNumber: number;
   http: HttpServiceSetup;
   capabilities: CapabilitiesSetup;
   getClusterClient: () => Promise<IClusterClient>;
@@ -100,7 +99,6 @@ export class AuthorizationService {
     http,
     capabilities,
     packageVersion,
-    buildNumber,
     getClusterClient,
     license,
     loggers,
@@ -179,7 +177,7 @@ export class AuthorizationService {
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToString(
           <ResetSessionPage
-            buildNumber={buildNumber}
+            staticAssets={http.staticAssets}
             basePath={http.basePath}
             logoutUrl={http.basePath.prepend(
               `/api/security/logout?${querystring.stringify({ next })}`

@@ -17,13 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Management landing page', function () {
     this.tags('smoke');
     before(async () => {
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page', async () => {

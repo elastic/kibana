@@ -120,10 +120,16 @@ describe('Discover documents layout', () => {
       }),
     };
 
+    const customControlColumnsConfiguration = () => ({
+      leadingControlColumns: [],
+      trailingControlColumns: [],
+    });
+
     const customization: DiscoverCustomization = {
       id: 'data_table',
       customCellRenderer,
       customGridColumnsConfiguration,
+      customControlColumnsConfiguration,
     };
 
     customisationService.set(customization);
@@ -134,6 +140,9 @@ describe('Discover documents layout', () => {
     expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
     expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
       customGridColumnsConfiguration
+    );
+    expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
+      customControlColumnsConfiguration
     );
   });
 });

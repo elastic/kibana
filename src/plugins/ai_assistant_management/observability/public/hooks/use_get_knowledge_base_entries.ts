@@ -21,7 +21,7 @@ export function useGetKnowledgeBaseEntries({
 }) {
   const { observabilityAIAssistant } = useAppContext();
 
-  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],

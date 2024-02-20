@@ -36,7 +36,7 @@ import {
   showMultiBucketAnomalyTooltip,
   getMultiBucketImpactTooltipValue,
 } from '../../../util/chart_utils';
-import { getTimeBucketsFromCache } from '../../../util/time_buckets';
+import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -53,6 +53,7 @@ import {
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
@@ -113,6 +114,7 @@ class TimeseriesChartIntl extends Component {
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
     detectorIndex: PropTypes.number,
+    embeddableMode: PropTypes.bool,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
@@ -132,6 +134,9 @@ class TimeseriesChartIntl extends Component {
     tableData: PropTypes.object,
     sourceIndicesWithGeoFields: PropTypes.object.isRequired,
   };
+
+  static contextType = context;
+  getTimeBuckets;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
@@ -154,6 +159,10 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
+    this.getTimeBuckets = timeBucketsServiceFactory(
+      this.context.services.uiSettings
+    ).getTimeBuckets;
+
     const { svgWidth } = this.props;
 
     this.vizWidth = svgWidth - margin.left - margin.right;
@@ -295,7 +304,12 @@ class TimeseriesChartIntl extends Component {
     chartElement.selectAll('*').remove();
 
     if (typeof selectedJob !== 'undefined') {
-      this.fieldFormat = mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
+      this.fieldFormat = this.context?.services?.mlServices?.mlFieldFormatService
+        ? this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+            selectedJob.job_id,
+            detectorIndex
+          )
+        : mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
     } else {
       return;
     }
@@ -367,7 +381,7 @@ class TimeseriesChartIntl extends Component {
         );
       })
       .remove();
-    d3.select('.temp-axis-label').remove();
+    chartElement.select('.temp-axis-label').remove();
 
     margin.left = Math.max(maxYAxisLabelWidth, 40);
     this.vizWidth = Math.max(svgWidth - margin.left - margin.right, 0);
@@ -586,6 +600,7 @@ class TimeseriesChartIntl extends Component {
 
   renderFocusChart() {
     const {
+      embeddableMode,
       focusAggregationInterval,
       focusAnnotationData: focusAnnotationDataOriginalPropValue,
       focusChartData,
@@ -614,12 +629,12 @@ class TimeseriesChartIntl extends Component {
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
     const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
-    const focusChart = d3.select('.focus-chart');
+    const chartElement = d3.select(this.rootNode);
+    const focusChart = chartElement.select('.focus-chart');
 
     // Update the plot interval labels.
     const focusAggInt = focusAggregationInterval.expression;
     const bucketSpan = selectedJob.analysis_config.bucket_span;
-    const chartElement = d3.select(this.rootNode);
     chartElement.select('.zoom-aggregation-interval').text(
       i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel', {
         defaultMessage: '(aggregation interval: {focusAggInt}, bucket span: {bucketSpan})',
@@ -726,7 +741,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -761,8 +776,10 @@ class TimeseriesChartIntl extends Component {
       this.props.annotationUpdatesService
     );
 
-    // disable brushing (creation of annotations) when annotations aren't shown
-    focusChart.select('.mlAnnotationBrush').style('display', showAnnotations ? null : 'none');
+    // disable brushing (creation of annotations) when annotations aren't shown or when in embeddable mode
+    focusChart
+      .select('.mlAnnotationBrush')
+      .style('display', !showAnnotations || embeddableMode ? 'none' : null);
 
     focusChart.select('.values-line').attr('d', this.focusValuesLine(data));
     drawLineChartDots(data, focusChart, this.focusValuesLine);
@@ -771,7 +788,7 @@ class TimeseriesChartIntl extends Component {
     // These are used for displaying tooltips on mouseover.
     // Don't render dots where value=null (data gaps, with no anomalies)
     // or for multi-bucket anomalies.
-    const dots = d3
+    const dots = chartElement
       .select('.focus-chart-markers')
       .selectAll('.metric-value')
       .data(
@@ -822,7 +839,7 @@ class TimeseriesChartIntl extends Component {
       });
 
     // Render cross symbols for any multi-bucket anomalies.
-    const multiBucketMarkers = d3
+    const multiBucketMarkers = chartElement
       .select('.focus-chart-markers')
       .selectAll('.multi-bucket')
       .data(
@@ -857,7 +874,7 @@ class TimeseriesChartIntl extends Component {
       .attr('class', (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
     // Add rectangular markers for any scheduled events.
-    const scheduledEventMarkers = d3
+    const scheduledEventMarkers = chartElement
       .select('.focus-chart-markers')
       .selectAll('.scheduled-event-marker')
       .data(data.filter((d) => d.scheduledEvents !== undefined));
@@ -898,7 +915,7 @@ class TimeseriesChartIntl extends Component {
         .attr('d', this.focusValuesLine(focusForecastData))
         .classed('hidden', !showForecast);
 
-      const forecastDots = d3
+      const forecastDots = chartElement
         .select('.focus-chart-markers.forecast')
         .selectAll('.metric-value')
         .data(focusForecastData);
@@ -1007,7 +1024,7 @@ class TimeseriesChartIntl extends Component {
     const chartElement = d3.select(this.rootNode);
     chartElement.selectAll('.focus-zoom a').on('click', function () {
       d3.event.preventDefault();
-      setZoomInterval(d3.select(this).attr('data-ms'));
+      setZoomInterval(this.getAttribute('data-ms'));
     });
   }
 
@@ -1129,7 +1146,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', brushChartHeight);
 
     // Add x axis.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1328,6 +1345,7 @@ class TimeseriesChartIntl extends Component {
           </svg>
         </div>`);
 
+    const that = this;
     function brushing() {
       const brushExtent = brush.extent();
       mask.reveal(brushExtent);
@@ -1345,11 +1363,11 @@ class TimeseriesChartIntl extends Component {
       topBorder.attr('width', topBorderWidth);
 
       const isEmpty = brush.empty();
-      d3.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
+      const chartElement = d3.select(that.rootNode);
+      chartElement.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
     }
     brushing();
 
-    const that = this;
     function brushed() {
       const isEmpty = brush.empty();
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
@@ -1478,18 +1496,19 @@ class TimeseriesChartIntl extends Component {
   // Sets the extent of the brush on the context chart to the
   // supplied from and to Date objects.
   setContextBrushExtent = (from, to) => {
+    const chartElement = d3.select(this.rootNode);
     const brush = this.brush;
     const brushExtent = brush.extent();
 
     const newExtent = [from, to];
     brush.extent(newExtent);
-    brush(d3.select('.brush'));
+    brush(chartElement.select('.brush'));
 
     if (
       newExtent[0].getTime() !== brushExtent[0].getTime() ||
       newExtent[1].getTime() !== brushExtent[1].getTime()
     ) {
-      brush.event(d3.select('.brush'));
+      brush.event(chartElement.select('.brush'));
     }
   };
 
@@ -1867,12 +1886,13 @@ class TimeseriesChartIntl extends Component {
       anomalyTime,
       focusAggregationInterval
     );
+    const chartElement = d3.select(this.rootNode);
 
     // Render an additional highlighted anomaly marker on the focus chart.
     // TODO - plot anomaly markers for cases where there is an anomaly due
     // to the absence of data and model plot is enabled.
     if (markerToSelect !== undefined) {
-      const selectedMarker = d3
+      const selectedMarker = chartElement
         .select('.focus-chart-markers')
         .selectAll('.focus-chart-highlighted-marker')
         .data([markerToSelect]);
@@ -1905,7 +1925,6 @@ class TimeseriesChartIntl extends Component {
 
       // Display the chart tooltip for this marker.
       // Note the values of the record and marker may differ depending on the levels of aggregation.
-      const chartElement = d3.select(this.rootNode);
       const anomalyMarker = chartElement.selectAll(
         '.focus-chart-markers .anomaly-marker.highlighted'
       );
@@ -1916,7 +1935,8 @@ class TimeseriesChartIntl extends Component {
   }
 
   unhighlightFocusChartAnomaly() {
-    d3.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
+    const chartElement = d3.select(this.rootNode);
+    chartElement.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
     this.props.tooltipService.hide();
   }
 

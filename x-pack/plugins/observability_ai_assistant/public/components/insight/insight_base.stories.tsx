@@ -12,12 +12,12 @@ import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InsightBase as Component, InsightBaseProps } from './insight_base';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
-import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { FeedbackButtons } from '../feedback_buttons';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
+import { ActionsMenu } from './actions_menu';
 
 export default {
   component: Component,
@@ -37,17 +37,18 @@ const defaultProps: InsightBaseProps = {
   ],
   loading: false,
   controls: (
-    <ConnectorSelectorBase
-      connectors={
-        [
+    <ActionsMenu
+      connectors={{
+        connectors: [
           { id: 'gpt-4', name: 'GPT-4' },
           { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-        ] as FindActionResult[]
-      }
-      selectedConnector="gpt-4"
-      loading={false}
-      selectConnector={() => {}}
-      reloadConnectors={() => {}}
+        ] as FindActionResult[],
+        selectedConnector: 'gpt-4',
+        loading: false,
+        selectConnector: () => {},
+        reloadConnectors: () => {},
+      }}
+      onEditPrompt={() => {}}
     />
   ),
   onToggle: () => {},
@@ -87,6 +88,7 @@ Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursu
       }
     />
   ),
+  isOpen: false,
 };
 
 export const Insight = Template.bind({});

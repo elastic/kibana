@@ -105,6 +105,7 @@ export function useConversation({
     initialMessages,
     initialConversationId,
     chatService,
+    service,
     connectorId,
     onConversationUpdate: (event) => {
       setDisplayedConversationId(event.conversation.id);

@@ -17,10 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'timePicker',
     'dashboard',
-    'settings',
     'discover',
     'common',
     'header',
+    'svlCommonPage',
   ]);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });

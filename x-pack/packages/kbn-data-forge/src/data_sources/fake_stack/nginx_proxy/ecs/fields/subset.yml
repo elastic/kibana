@@ -7,6 +7,12 @@ fields:
     fields:
       level: {}
       logger: {}
+  http:
+    fields:
+      response:
+        fields:
+          status_code: {}
+          bytes: {}
   host:
     fields:
       name: {}

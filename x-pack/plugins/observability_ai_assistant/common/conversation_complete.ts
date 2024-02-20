@@ -14,6 +14,7 @@ export enum StreamingChatResponseEventType {
   ConversationUpdate = 'conversationUpdate',
   MessageAdd = 'messageAdd',
   ChatCompletionError = 'chatCompletionError',
+  BufferFlush = 'bufferFlush',
 }
 
 type StreamingChatResponseEventBase<
@@ -76,6 +77,13 @@ export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
   }
 >;
 
+export type BufferFlushEvent = StreamingChatResponseEventBase<
+  StreamingChatResponseEventType.BufferFlush,
+  {
+    data?: string;
+  }
+>;
+
 export type StreamingChatResponseEvent =
   | ChatCompletionChunkEvent
   | ConversationCreateEvent
@@ -129,7 +137,14 @@ export function createConversationNotFoundError() {
   );
 }
 
-export function createInternalServerError(originalErrorMessage: string) {
+export function createInternalServerError(
+  originalErrorMessage: string = i18n.translate(
+    'xpack.observabilityAiAssistant.chatCompletionError.internalServerError',
+    {
+      defaultMessage: 'An internal server error occurred',
+    }
+  )
+) {
   return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
 }
 

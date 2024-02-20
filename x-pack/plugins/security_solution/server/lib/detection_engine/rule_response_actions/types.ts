@@ -6,11 +6,17 @@
  */
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { CreateActionPayload } from '../../../endpoint/services/actions/create/types';
 
 export type Alert = ParsedTechnicalFields & {
   _id: string;
   agent?: AlertAgent;
-  process?: { pid: string };
+  host?: {
+    name: string;
+  };
+  process?: {
+    pid: string;
+  };
 };
 
 export interface AlertAgent {
@@ -25,3 +31,8 @@ export interface AlertWithAgent extends Alert {
 export interface ResponseActionAlerts {
   alerts: AlertWithAgent[];
 }
+
+export type AlertsAction = Pick<
+  CreateActionPayload,
+  'alert_ids' | 'endpoint_ids' | 'hosts' | 'parameters' | 'error'
+>;

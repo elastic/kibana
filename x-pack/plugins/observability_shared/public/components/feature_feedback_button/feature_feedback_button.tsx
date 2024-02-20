@@ -23,25 +23,47 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed (you manage)';
 };
 
-const getSurveyFeedbackURL = (
-  formUrl: string,
-  kibanaVersion?: string,
-  deploymentType?: string,
-  sanitizedPath?: string
-) => {
+const getSurveyFeedbackURL = ({
+  formUrl,
+  formConfig,
+  kibanaVersion,
+  deploymentType,
+  sanitizedPath,
+}: {
+  formUrl: string;
+  formConfig?: FormConfig;
+  kibanaVersion?: string;
+  deploymentType?: string;
+  sanitizedPath?: string;
+}) => {
   const url = new URL(formUrl);
   if (kibanaVersion) {
-    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
+    url.searchParams.append(
+      formConfig?.kibanaVersionQueryParam || KIBANA_VERSION_QUERY_PARAM,
+      kibanaVersion
+    );
   }
   if (deploymentType) {
-    url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
+    url.searchParams.append(
+      formConfig?.kibanaDeploymentTypeQueryParam || KIBANA_DEPLOYMENT_TYPE_PARAM,
+      deploymentType
+    );
   }
   if (sanitizedPath) {
-    url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
+    url.searchParams.append(
+      formConfig?.sanitizedPathQueryParam || SANITIZED_PATH_PARAM,
+      sanitizedPath
+    );
   }
 
   return url.href;
 };
+
+interface FormConfig {
+  kibanaVersionQueryParam?: string;
+  kibanaDeploymentTypeQueryParam?: string;
+  sanitizedPathQueryParam?: string;
+}
 
 interface FeatureFeedbackButtonProps {
   formUrl: string;
@@ -53,10 +75,12 @@ interface FeatureFeedbackButtonProps {
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
   sanitizedPath?: string;
+  formConfig?: FormConfig;
 }
 
 export const FeatureFeedbackButton = ({
   formUrl,
+  formConfig,
   'data-test-subj': dts,
   onClickCapture,
   defaultButton,
@@ -78,7 +102,13 @@ export const FeatureFeedbackButton = ({
 
   return (
     <EuiButton
-      href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType, sanitizedPath)}
+      href={getSurveyFeedbackURL({
+        formUrl,
+        formConfig,
+        kibanaVersion,
+        deploymentType,
+        sanitizedPath,
+      })}
       target="_blank"
       color={defaultButton ? undefined : 'warning'}
       iconType={defaultButton ? undefined : 'editorComment'}

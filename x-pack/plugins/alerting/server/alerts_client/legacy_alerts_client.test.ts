@@ -245,6 +245,7 @@ describe('Legacy Alerts Client', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       notifyOnActionGroupChange: true,
       maintenanceWindowIds: ['window-id1', 'window-id2'],
+      alertDelay: 5,
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -275,13 +276,15 @@ describe('Legacy Alerts Client', () => {
       },
       true,
       'default',
+      5,
       {},
       {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
       {},
-      {}
+      {},
+      null
     );
 
     expect(logAlerts).toHaveBeenCalledWith({

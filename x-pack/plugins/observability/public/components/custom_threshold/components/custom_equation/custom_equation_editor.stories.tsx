@@ -8,6 +8,7 @@
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import {
   Aggregators,
@@ -70,6 +71,7 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
     const validationObject = validateCustomThreshold({
       criteria: [expression as CustomMetricExpressionParams],
       searchConfiguration: {},
+      uiSettings: {} as IUiSettingsClient,
     });
     setErrors(validationObject.errors[0]);
   }, [expression]);

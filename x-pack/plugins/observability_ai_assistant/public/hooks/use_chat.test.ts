@@ -13,6 +13,7 @@ import {
   StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
+import { mockService } from '../mock';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
 import * as useKibanaModule from './use_kibana';
@@ -69,6 +70,7 @@ describe('useChat', () => {
             },
           ],
           persist: false,
+          service: mockService,
         } as UseChatProps,
       });
     });
@@ -95,6 +97,7 @@ describe('useChat', () => {
           chatService: mockChatService,
           initialMessages: [],
           persist: false,
+          service: mockService,
         } as UseChatProps,
       });
 

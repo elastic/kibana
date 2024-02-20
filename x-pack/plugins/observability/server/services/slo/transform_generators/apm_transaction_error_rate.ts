@@ -11,7 +11,8 @@ import {
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { estypes } from '@elastic/elasticsearch';
+import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
@@ -21,7 +22,6 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
-import { Query } from './types';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -68,7 +68,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const queryFilter: Query[] = [
+    const queryFilter: estypes.QueryDslQueryContainer[] = [
       {
         range: {
           '@timestamp': {
@@ -111,7 +111,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     if (indicator.params.filter) {
-      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {

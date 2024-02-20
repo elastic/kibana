@@ -85,6 +85,7 @@
     "@kbn/code-editor",
     "@kbn/managed-content-badge",
     "@kbn/presentation-publishing",
+    "@kbn/saved-objects-finder-plugin",
     "@kbn/esql-utils",
   ],
   "exclude": [

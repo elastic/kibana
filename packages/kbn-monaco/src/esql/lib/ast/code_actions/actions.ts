@@ -13,10 +13,16 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { getAllFunctions, isSourceItem, shouldBeQuotedText } from '../shared/helpers';
+import {
+  getAllFunctions,
+  getCommandDefinition,
+  isSourceItem,
+  shouldBeQuotedText,
+} from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { AstProviderFn, ESQLAst, ESQLCommand } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
@@ -81,25 +87,13 @@ export function getMetaFieldsRetriever(
 
 export const getCompatibleFunctionDefinitions = (
   command: string,
-  option: string | undefined,
-  returnTypes?: string[],
-  ignored: string[] = []
+  option: string | undefined
 ): string[] => {
   const fnSupportedByCommand = getAllFunctions({ type: ['eval', 'agg'] }).filter(
     ({ name, supportedCommands, supportedOptions }) =>
-      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-      !ignored.includes(name)
+      option ? supportedOptions?.includes(option) : supportedCommands.includes(command)
   );
-  if (!returnTypes) {
-    return fnSupportedByCommand.map(({ name }) => name);
-  }
-  return fnSupportedByCommand
-    .filter((mathDefinition) =>
-      mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
-      )
-    )
-    .map(({ name }) => name);
+  return fnSupportedByCommand.map(({ name }) => name);
 };
 
 function createAction(
@@ -198,7 +192,7 @@ async function getQuotableActionForColumns(
   const actions = [];
   if (shouldBeQuotedText(errorText)) {
     const availableFields = new Set(await getFieldsByType('any'));
-    const solution = `\`${errorText}\``;
+    const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
     if (availableFields.has(errorText) || availableFields.has(solution)) {
       actions.push(
         createAction(
@@ -289,6 +283,32 @@ async function getSpellingActionForMetadata(
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   const possibleMetafields = await getSpellingPossibilities(getMetaFields, errorText);
   return wrapIntoSpellingChangeAction(error, uri, possibleMetafields);
+}
+
+async function getSpellingActionForEnrichMode(
+  error: monaco.editor.IMarkerData,
+  uri: monaco.Uri,
+  queryString: string,
+  ast: ESQLAst,
+  _callbacks: Callbacks
+) {
+  const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
+  const commandContext =
+    ast.find((command) => command.location.max > error.endColumn) || ast[ast.length - 1];
+  if (!commandContext) {
+    return [];
+  }
+  const commandDef = getCommandDefinition(commandContext.name);
+  const allModes =
+    commandDef.modes?.flatMap(({ values, prefix }) =>
+      values.map(({ name }) => `${prefix || ''}${name}`)
+    ) || [];
+  const possibleEnrichModes = await getSpellingPossibilities(async () => allModes, errorText);
+  // if no possible solution is found, push all modes
+  if (!possibleEnrichModes.length) {
+    possibleEnrichModes.push(...allModes);
+  }
+  return wrapIntoSpellingChangeAction(error, uri, possibleEnrichModes);
 }
 
 function wrapIntoSpellingChangeAction(
@@ -413,6 +433,16 @@ export async function getActions(
             model.uri
           )
         );
+        break;
+      case 'unsupportedSettingCommandValue':
+        const enrichModeSpellChanges = await getSpellingActionForEnrichMode(
+          error,
+          model.uri,
+          innerText,
+          ast,
+          callbacks
+        );
+        actions.push(...enrichModeSpellChanges);
         break;
       default:
         break;

@@ -7,7 +7,13 @@
     "server": false,
     "browser": true,
     "requiredPlugins": ["management"],
-    "optionalPlugins": ["actions", "home", "observabilityAIAssistant", "serverless"],
+    "optionalPlugins": [
+      "actions",
+      "home",
+      "observabilityAIAssistant",
+      "serverless",
+      "enterpriseSearch"
+    ],
     "requiredBundles": ["kibanaReact"]
   }
 }

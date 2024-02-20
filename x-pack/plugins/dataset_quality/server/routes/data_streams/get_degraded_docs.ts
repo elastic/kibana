@@ -21,8 +21,8 @@ import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
-  start: number;
-  end: number;
+  start?: number;
+  end?: number;
   datasetQuery?: string;
   after?: {
     dataset: string;

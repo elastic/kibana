@@ -15,6 +15,11 @@ import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
   ObservabilityLogsExplorerLocators,
   ObservabilityLogsExplorerLocationState,
@@ -41,6 +46,11 @@ export interface ObservabilityLogsExplorerStartDeps {
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch?: UnifiedSearchPublicPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
+  dataViewEditor?: DataViewEditorStart;
+  lens?: LensPublicStart;
   share: SharePluginStart;
   datasetQuality: DatasetQualityPluginStart;
 }

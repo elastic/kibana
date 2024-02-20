@@ -8,7 +8,10 @@
 
 import type { Token } from 'antlr4ts';
 
-export function getPosition(token: Token | undefined, lastToken?: Token | undefined) {
+export function getPosition(
+  token: Pick<Token, 'startIndex' | 'stopIndex'> | undefined,
+  lastToken?: Pick<Token, 'stopIndex'> | undefined
+) {
   if (!token || token.startIndex < 0) {
     return { min: 0, max: 0 };
   }

@@ -37,7 +37,6 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'itemIsEditable'
 > & {
   title: string;
   description?: string;
@@ -74,7 +73,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
-  itemIsEditable,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -120,7 +118,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}
-          itemIsEditable={itemIsEditable}
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}

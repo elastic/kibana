@@ -5,71 +5,31 @@
  * 2.0.
  */
 
-import { difference } from 'lodash';
-import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../../common/ui/types';
-import type { CasesColumnSelection } from '../types';
-import type { CasesColumnsConfiguration } from '../use_cases_columns_configuration';
+import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 
-export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): PartialQueryParams => {
-  const urlParams: PartialQueryParams = {
-    ...(parsedUrlParams.sortField && { sortField: parsedUrlParams.sortField }),
-    ...(parsedUrlParams.sortOrder && { sortOrder: parsedUrlParams.sortOrder }),
-  };
+export const isFlattenCustomField = (key: string): boolean =>
+  key.startsWith(CUSTOM_FIELD_KEY_PREFIX);
 
-  const intPage = parsedUrlParams.page && parseInt(parsedUrlParams.page, 10);
-  const intPerPage = parsedUrlParams.perPage && parseInt(parsedUrlParams.perPage, 10);
+export const flattenCustomFieldKey = (key: string): string => `${CUSTOM_FIELD_KEY_PREFIX}${key}`;
 
-  // page=0 is deliberately ignored
-  if (intPage) {
-    urlParams.page = intPage;
+export const deflattenCustomFieldKey = (key: string): string =>
+  key.replace(CUSTOM_FIELD_KEY_PREFIX, '');
+
+export const stringToInteger = (value?: string | number): number | undefined => {
+  const num = Number(value);
+
+  if (isNaN(num)) {
+    return;
   }
 
-  // perPage=0 is deliberately ignored
-  if (intPerPage) {
-    urlParams.perPage = intPerPage;
-  }
-
-  return urlParams;
+  return num;
 };
 
-export const mergeSelectedColumnsWithConfiguration = ({
-  selectedColumns,
-  casesColumnsConfig,
-}: {
-  selectedColumns: CasesColumnSelection[];
-  casesColumnsConfig: CasesColumnsConfiguration;
-}): CasesColumnSelection[] => {
-  const result = selectedColumns.reduce((accumulator, { field, isChecked }) => {
-    if (
-      field in casesColumnsConfig &&
-      casesColumnsConfig[field].field !== '' &&
-      casesColumnsConfig[field].canDisplay
-    ) {
-      accumulator.push({
-        field: casesColumnsConfig[field].field,
-        name: casesColumnsConfig[field].name,
-        isChecked,
-      });
-    }
-    return accumulator;
-  }, [] as CasesColumnSelection[]);
+export const stringToIntegerWithDefault = (
+  value: string | number,
+  defaultValue: number
+): number | undefined => {
+  const valueAsInteger = stringToInteger(value);
 
-  // This will include any new customFields and/or changes to the case attributes
-  const missingColumns = difference(
-    Object.keys(casesColumnsConfig),
-    selectedColumns.map(({ field }) => field)
-  );
-
-  missingColumns.forEach((field) => {
-    // can be an empty string
-    if (casesColumnsConfig[field].field && casesColumnsConfig[field].canDisplay) {
-      result.push({
-        field: casesColumnsConfig[field].field,
-        name: casesColumnsConfig[field].name,
-        isChecked: casesColumnsConfig[field].isCheckedDefault,
-      });
-    }
-  });
-
-  return result;
+  return valueAsInteger && valueAsInteger > 0 ? valueAsInteger : defaultValue;
 };

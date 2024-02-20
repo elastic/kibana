@@ -25,6 +25,7 @@ import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import { useKibana } from '../../hooks/use_kibana';
+import { isSupportedConnectorType } from '../../../common/connectors';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -68,7 +69,7 @@ export function WelcomeMessage({
   const onConnectorCreated = (createdConnector: ActionConnector) => {
     setConnectorFlyoutOpen(false);
 
-    if (createdConnector.actionTypeId === '.gen-ai') {
+    if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
     }
 
@@ -86,7 +87,7 @@ export function WelcomeMessage({
         className={fullHeightClassName}
       >
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={breakpoint === 'xl' ? 'l' : 'l' ? 'l' : 's'} />
+          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
 
           <EuiImage
             src={ctaImage}
@@ -96,7 +97,7 @@ export function WelcomeMessage({
 
           <EuiSpacer size="m" />
 
-          <EuiTitle size={breakpoint === 'xl' ? 'm' : 'l' ? 'm' : 's'}>
+          <EuiTitle size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'}>
             <h2>
               {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
                 defaultMessage: 'Welcome to the AI Assistant for Observability',

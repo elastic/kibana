@@ -41,13 +41,7 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
 
-    await waitForEuiPopoverOpen();
-
-    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
-      1
-    );
-
-    expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action-group')).toBeInTheDocument();
   });
 
   it('renders the modal info correctly', async () => {

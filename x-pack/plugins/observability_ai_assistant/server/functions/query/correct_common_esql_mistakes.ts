@@ -178,7 +178,7 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
 
     const correctedFormattedQuery = formattedCommands.join('\n| ');
 
-    const originalFormattedQuery = commands.join('\n| ');
+    const originalFormattedQuery = commands.map((cmd) => cmd.command).join('\n| ');
 
     if (originalFormattedQuery !== correctedFormattedQuery) {
       log.debug(`Modified query from: ${originalFormattedQuery}\nto:\n${correctedFormattedQuery}`);

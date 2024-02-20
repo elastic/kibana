@@ -142,14 +142,14 @@ export SYNTHETICS_REMOTE_KIBANA_URL
 DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
 export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
-GCS_SA_CDN_QA_KEY="$(vault_get gcs-sa-cdn-qa key)"
-export GCS_SA_CDN_QA_KEY
+GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
+export GCS_SA_CDN_KEY
 
-GCS_SA_CDN_QA_EMAIL="$(vault_get gcs-sa-cdn-qa email)"
-export GCS_SA_CDN_QA_EMAIL
+GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
+export GCS_SA_CDN_EMAIL
 
-GCS_SA_CDN_QA_BUCKET="$(vault_get gcs-sa-cdn-qa bucket)"
-export GCS_SA_CDN_QA_BUCKET
+GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
+export GCS_SA_CDN_BUCKET
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
@@ -166,6 +166,16 @@ export GCS_SA_CDN_QA_BUCKET
 BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
+
+# Export key for accessing bazel remote cache's GCS bucket
+BAZEL_REMOTE_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-gcs.json"
+export BAZEL_REMOTE_CACHE_CREDENTIALS_FILE
+vault_get kibana-ci-bazel-remote-cache-sa-key key | base64 -d > "$BAZEL_REMOTE_CACHE_CREDENTIALS_FILE"
+
+# Setup GCS Service Account Proxy for CI
+KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
+export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
+vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

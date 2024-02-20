@@ -147,4 +147,24 @@ describe('HeaderActionMenu', () => {
     expect(unmounts.FOO).toHaveBeenCalledTimes(1);
     expect(unmounts.BAR).not.toHaveBeenCalled();
   });
+
+  it('calls mount point `unmount` when unmounts', () => {
+    const TestComponent = () => {
+      const mounter = useHeaderActionMenuMounter(menuMount$);
+      return <HeaderActionMenu mounter={mounter} />;
+    };
+    component = mount(<TestComponent />);
+
+    act(() => {
+      menuMount$.next(createMountPoint('FOO'));
+    });
+    refresh();
+
+    expect(Object.keys(unmounts)).toEqual(['FOO']);
+    expect(unmounts.FOO).not.toHaveBeenCalled();
+
+    component.unmount();
+
+    expect(unmounts.FOO).toHaveBeenCalledTimes(1);
+  });
 });

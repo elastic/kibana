@@ -22,10 +22,8 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
-  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -44,7 +42,7 @@ import {
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 
-function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
+export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
@@ -219,10 +217,6 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-export function getCommandMode(settingName: CommandModeDefinition['name']) {
-  return [ccqMode].find(({ name }) => name === settingName);
-}
-
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {
   if (item.literalType !== 'string') {
     return argTypes === item.literalType;
@@ -381,11 +375,14 @@ export function isEqualType(
       // anything goes, so avoid any effort here
       return true;
     }
+    // perform a double check, but give priority to the non trimmed version
     const hit = getColumnHit(item.name, references);
-    if (!hit) {
+    const hitTrimmed = getColumnHit(item.name.replace(/\s/g, ''), references);
+    const validHit = hit || hitTrimmed;
+    if (!validHit) {
       return false;
     }
-    const wrappedTypes = Array.isArray(hit.type) ? hit.type : [hit.type];
+    const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     return wrappedTypes.some((ct) => argType === ct);
   }
 }
@@ -431,6 +428,11 @@ function getWildcardPosition(name: string) {
 export function hasWildcard(name: string) {
   return name.includes('*');
 }
+export function isVariable(
+  column: ESQLRealField | ESQLVariable | undefined
+): column is ESQLVariable {
+  return Boolean(column && 'location' in column);
+}
 export function hasCCSSource(name: string) {
   return name.includes(':');
 }
@@ -443,7 +445,7 @@ export function columnExists(
     return { hit: true, nameHit: column.name };
   }
   if (column.quoted) {
-    const trimmedName = column.name.replace(/\s/g, '');
+    const trimmedName = column.name.replace(/`/g, '``').replace(/\s/g, '');
     if (variables.has(trimmedName)) {
       return { hit: true, nameHit: trimmedName };
     }

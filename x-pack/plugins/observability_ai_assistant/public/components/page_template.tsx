@@ -36,6 +36,7 @@ export function ObservabilityAIAssistantPageTemplate({ children }: { children: R
         contentProps: {
           className: pageSectionContentClassName,
         },
+        paddingSize: 'none',
       }}
     >
       {children}

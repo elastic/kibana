@@ -11,7 +11,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules - Prebuilt Rules Management', function () {
     loadTestFile(require.resolve('./get_prebuilt_rules_status'));
     loadTestFile(require.resolve('./get_prebuilt_timelines_status'));
-    loadTestFile(require.resolve('./install_and_upgrade_prebuilt_rules'));
+    loadTestFile(require.resolve('./install_prebuilt_rules'));
+    loadTestFile(require.resolve('./install_prebuilt_rules_with_historical_versions'));
+    loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
+    loadTestFile(require.resolve('./upgrade_prebuilt_rules_with_historical_versions'));
     loadTestFile(require.resolve('./fleet_integration'));
   });
 };

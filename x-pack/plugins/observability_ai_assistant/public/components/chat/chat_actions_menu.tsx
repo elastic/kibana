@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getSettingsHref } from '../../utils/get_settings_href';
@@ -52,16 +52,24 @@ export function ChatActionsMenu({
     <EuiPopover
       isOpen={isOpen}
       button={
-        <EuiButtonIcon
-          data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
-          disabled={disabled}
-          iconType="boxesVertical"
-          onClick={toggleActionsMenu}
-          aria-label={i18n.translate(
-            'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.menuLabel',
-            { defaultMessage: 'Menu' }
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.observabilityAiAssistant.chatActionsMenu.euiToolTip.moreActionsLabel',
+            { defaultMessage: 'More actions' }
           )}
-        />
+          display="block"
+        >
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
+            disabled={disabled}
+            iconType="boxesVertical"
+            onClick={toggleActionsMenu}
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.menuLabel',
+              { defaultMessage: 'Menu' }
+            )}
+          />
+        </EuiToolTip>
       }
       panelPaddingSize="none"
       closePopover={toggleActionsMenu}

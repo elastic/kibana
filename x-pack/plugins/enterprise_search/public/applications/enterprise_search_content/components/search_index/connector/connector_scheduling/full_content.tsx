@@ -216,7 +216,11 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
               <ConnectorCronEditor
                 disabled={isGated}
                 frequencyBlockList={
-                  type === SyncJobType.ACCESS_CONTROL || type === SyncJobType.FULL ? [] : undefined
+                  type === SyncJobType.ACCESS_CONTROL ||
+                  type === SyncJobType.FULL ||
+                  type === SyncJobType.INCREMENTAL
+                    ? []
+                    : undefined
                 }
                 scheduling={scheduling[type]}
                 type={type}

@@ -13,7 +13,7 @@ import { omit } from 'lodash';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './types';
+import type { ChatActionClickHandler } from './types';
 import type { ObservabilityAIAssistantChatService } from '../../types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
 import { ChatItem } from './chat_item';
@@ -54,7 +54,6 @@ export interface ChatTimelineProps {
   chatState: ChatState;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (message: Message, feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -69,7 +68,6 @@ export function ChatTimeline({
   hasConnector,
   currentUser,
   startedFrom,
-  chatFlyoutSecondSlotHandler,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -86,7 +84,6 @@ export function ChatTimeline({
       currentUser,
       startedFrom,
       chatState,
-      chatFlyoutSecondSlotHandler,
       onActionClick,
     });
 
@@ -110,16 +107,7 @@ export function ChatTimeline({
     }
 
     return consolidatedChatItems;
-  }, [
-    chatService,
-    hasConnector,
-    messages,
-    currentUser,
-    startedFrom,
-    chatState,
-    chatFlyoutSecondSlotHandler,
-    onActionClick,
-  ]);
+  }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState, onActionClick]);
 
   return (
     <EuiCommentList
