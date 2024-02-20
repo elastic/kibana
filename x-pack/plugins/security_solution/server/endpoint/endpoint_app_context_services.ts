@@ -50,7 +50,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services/actions/create/types';
-import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -79,7 +79,7 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
   esClient: ElasticsearchClient;
-  appFeaturesService: AppFeaturesService;
+  productFeaturesService: ProductFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -117,17 +117,17 @@ export class EndpointAppContextService {
         featureUsageService,
         endpointMetadataService,
         esClient,
-        appFeaturesService,
+        productFeaturesService,
         savedObjectsClient,
       } = dependencies;
 
       registerIngestCallback(
         'agentPolicyCreate',
-        getAgentPolicyCreateCallback(logger, appFeaturesService)
+        getAgentPolicyCreateCallback(logger, productFeaturesService)
       );
       registerIngestCallback(
         'agentPolicyUpdate',
-        getAgentPolicyUpdateCallback(logger, appFeaturesService)
+        getAgentPolicyUpdateCallback(logger, productFeaturesService)
       );
 
       registerIngestCallback(
@@ -140,7 +140,7 @@ export class EndpointAppContextService {
           licenseService,
           exceptionListsClient,
           this.setupDependencies.cloud,
-          appFeaturesService
+          productFeaturesService
         )
       );
 
@@ -158,7 +158,7 @@ export class EndpointAppContextService {
           endpointMetadataService,
           this.setupDependencies.cloud,
           esClient,
-          appFeaturesService
+          productFeaturesService
         )
       );
 
@@ -194,9 +194,17 @@ export class EndpointAppContextService {
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+    if (!this.startDependencies?.productFeaturesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      this.startDependencies.productFeaturesService
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {

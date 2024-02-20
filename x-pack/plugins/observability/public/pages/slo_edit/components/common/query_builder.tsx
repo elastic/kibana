@@ -8,8 +8,10 @@
 import { EuiFormRow } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import styled from 'styled-components';
 import { kqlQuerySchema } from '@kbn/slo-schema';
+import { observabilityAppId } from '../../../../../common';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -59,6 +61,7 @@ export function QueryBuilder({
       }
       labelAppend={!required ? <OptionalText /> : undefined}
       isInvalid={getFieldState(name).invalid}
+      error={getFieldState(name).error?.message}
       fullWidth
     >
       <Controller
@@ -67,11 +70,20 @@ export function QueryBuilder({
         control={control}
         rules={{
           required: Boolean(required) && Boolean(dataView),
+          validate: (value) => {
+            try {
+              if (!dataView) return;
+              const ast = fromKueryExpression(String(value));
+              toElasticsearchQuery(ast, dataView);
+            } catch (e) {
+              return e.message;
+            }
+          },
         }}
         render={({ field, fieldState }) => (
           <Container>
             <SearchBar
-              appName="Observability"
+              appName={observabilityAppId}
               dataTestSubj={dataTestSubj}
               indexPatterns={dataView ? [dataView] : []}
               isDisabled={!dataView}
@@ -79,6 +91,16 @@ export function QueryBuilder({
               query={{
                 query: kqlQuerySchema.is(field.value) ? String(field.value) : field.value.kqlQuery,
                 language: 'kuery',
+              }}
+              onQueryChange={(value) => {
+                if (kqlQuerySchema.is(field.value)) {
+                  field.onChange(String(value.query?.query));
+                } else {
+                  field.onChange({
+                    ...(field.value ?? {}),
+                    kqlQuery: String(value.query?.query),
+                  });
+                }
               }}
               onQuerySubmit={(value) => {
                 if (kqlQuerySchema.is(field.value)) {
@@ -102,6 +124,12 @@ export function QueryBuilder({
                     filters,
                   });
                 }
+              }}
+              onSavedQueryUpdated={(savedQuery) => {
+                field.onChange({
+                  filters: savedQuery.attributes.filters,
+                  kqlQuery: String(savedQuery.attributes.query.query),
+                });
               }}
               showDatePicker={false}
               showSubmitButton={false}
