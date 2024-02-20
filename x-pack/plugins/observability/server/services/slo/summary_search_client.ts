@@ -14,6 +14,7 @@ import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/const
 import { SLOId, Status, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getFlattenedGroupings } from './utils';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
 
 interface EsSummaryDocument {
   slo: {

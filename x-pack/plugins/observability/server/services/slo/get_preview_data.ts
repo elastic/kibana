@@ -38,6 +38,7 @@ interface Options {
   interval: string;
   instanceId?: string;
   groupBy?: string;
+  groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
   constructor(private esClient: ElasticsearchClient) {}
@@ -47,11 +48,7 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
+    this.getGroupingsFilter(options, filter);
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -145,11 +142,7 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
+    this.getGroupingsFilter(options, filter);
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -242,11 +235,7 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
+    this.getGroupingsFilter(options, filter);
 
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -305,11 +294,7 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
+    this.getGroupingsFilter(options, filter);
 
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -371,11 +356,7 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
+    this.getGroupingsFilter(options, filter);
 
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -422,11 +403,7 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
+    this.getGroupingsFilter(options, filter);
 
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -469,6 +446,21 @@ export class GetPreviewData {
     }));
   }
 
+  private getGroupingsFilter(options: options, filter: estypes.QueryDslQueryContainer[]) {
+    const groupingsKeys = Object.keys(options.groupings || []);
+    if (groupingsKeys.length) {
+      groupingsKeys.forEach((key) => {
+        filter.push({
+          term: { [key]: options.groupings[key] },
+        });
+      });
+    } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
+  }
+
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
       // If the time range is 24h or less, then we want to use a 1m bucket for the
@@ -490,6 +482,7 @@ export class GetPreviewData {
         instanceId: params.instanceId,
         range: params.range,
         groupBy: params.groupBy,
+        groupings: params.groupings,
         interval: `${bucketSize}m`,
       };
 

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -57,27 +56,11 @@ export function EventsChartPanel({ slo, range }: Props) {
     isDateHistogram: true,
   });
 
-  const instanceIdFilter =
-    slo.instanceId !== ALL_VALUE
-      ? `${Object.keys(slo.groupings)
-          .map((key) => {
-            return `${key} : "${slo.groupings[key]}"`;
-          })
-          .join(' AND ')}`
-      : null;
-  const sloIndicator = cloneDeep(slo.indicator);
-  if (instanceIdFilter) {
-    sloIndicator.params.filter =
-      !!sloIndicator.params.filter && sloIndicator.params.filter.length > 0
-        ? `${sloIndicator.params.filter} and ${instanceIdFilter}`
-        : instanceIdFilter;
-  }
-
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,
     indicator: slo.indicator,
-    groupBy: slo.groupBy,
+    groupings: slo.groupings,
     instanceId: slo.instanceId,
   });
 

@@ -77,6 +77,7 @@ const getPreviewDataParamsSchema = t.type({
       objective: objectiveSchema,
       instanceId: t.string,
       groupBy: t.string,
+      groupings: t.record(t.string, t.unknown),
     }),
   ]),
 });
