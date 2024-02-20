@@ -125,7 +125,6 @@ export class RenderingService {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
     };
-    const buildNum = env.packageInfo.buildNum;
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
@@ -191,7 +190,6 @@ export class RenderingService {
         darkMode: mode,
         themeVersion,
         baseHref: staticAssetsHrefBase,
-        buildNum,
       });
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,

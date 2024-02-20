@@ -46,11 +46,7 @@ export const getScriptPaths = ({
   }
 };
 
-export const getCommonStylesheetPaths = ({
-  baseHref,
-}: {
-  baseHref: string;
-}) => {
+export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => {
   const bundlesHref = getBundlesHref(baseHref);
   return [
     `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
@@ -62,11 +58,9 @@ export const getThemeStylesheetPaths = ({
   darkMode,
   themeVersion,
   baseHref,
-  buildNum,
 }: {
   darkMode: boolean;
   themeVersion: UiSharedDepsNpm.ThemeVersion;
-  buildNum: number;
   baseHref: string;
 }) => {
   const bundlesHref = getBundlesHref(baseHref);

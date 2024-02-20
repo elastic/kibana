@@ -61,7 +61,6 @@ describe('getStylesheetPaths', () => {
             darkMode: true,
             themeVersion: 'v8',
             baseHref: '/base-path/buildShaShort',
-            buildNum: 17,
           })
         ).toMatchInlineSnapshot(`
           Array [
@@ -83,7 +82,6 @@ describe('getStylesheetPaths', () => {
             darkMode: false,
             themeVersion: 'v8',
             baseHref: '/base-path/buildShaShort',
-            buildNum: 69,
           })
         ).toMatchInlineSnapshot(`
           Array [
