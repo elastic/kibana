@@ -101,13 +101,15 @@ gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 echo "--- Validate CDN assets"
 cd $CDN_ASSETS_FOLDER
 shopt -s globstar
-for CDN_ASSET in **/*
-do
+(
+for CDN_ASSET in **/*; do
+  ((i=i%20)); ((i++==0)) && wait
   if [[ -f "$CDN_ASSET" ]]; then
     echo -n "Testing $CDN_ASSET..."
     curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_QA_CDN/$CDN_ASSET"
   fi
 done
+)
 shopt -u globstar
 cd -
 
