@@ -84,7 +84,7 @@ export const reportingCsvShareProvider = ({
     }
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
-      const panelTitle = i18n.translate('share.shareContextMenu.csvReportsButtonLabel', {
+      const panelTitle = i18n.translate('share.reporting.ContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
 
