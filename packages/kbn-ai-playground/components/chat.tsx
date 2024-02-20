@@ -38,11 +38,13 @@ export const Chat = () => {
   const form = useForm<ChatForm>();
   const {
     control,
+    watch,
     formState: { isValid, isSubmitting },
     resetField,
     handleSubmit,
   } = form;
   const { messages, append, stop: stopRequest } = useChat();
+  const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
 
   const onSubmit = async (data: ChatForm) => {
     await append(
@@ -152,7 +154,7 @@ export const Chat = () => {
           </EuiFlexItem>
 
           <EuiFlexItem grow={1}>
-            <ChatSidebar />
+            <ChatSidebar selectedIndicesCount={selectedIndicesCount} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>

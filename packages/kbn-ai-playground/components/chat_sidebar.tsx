@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -19,7 +20,11 @@ import { i18n } from '@kbn/i18n';
 import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
-export const ChatSidebar: React.FC = () => {
+interface ChatSidebarProps {
+  selectedIndicesCount: number;
+}
+
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }) => {
   const { euiTheme } = useEuiTheme();
   const accordions = [
     {
@@ -32,6 +37,16 @@ export const ChatSidebar: React.FC = () => {
     {
       id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
       title: i18n.translate('aiPlayground.sidebar.sourceTitle', { defaultMessage: 'Sources' }),
+      extraAction: !!selectedIndicesCount && (
+        <EuiText size="xs">
+          <p>
+            {i18n.translate('aiPlayground.sidebar.sourceIndicesCount', {
+              defaultMessage: '{count, number} {count, plural, one {Index} other {Indices}}',
+              values: { count: Number(selectedIndicesCount) },
+            })}
+          </p>
+        </EuiText>
+      ),
       children: <SourcesPanelSidebar />,
     },
   ];
@@ -39,7 +54,7 @@ export const ChatSidebar: React.FC = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {accordions.map(({ id, title, children }, index) => (
+      {accordions.map(({ id, title, extraAction, children }, index) => (
         <EuiFlexItem
           key={id}
           css={{
@@ -56,6 +71,7 @@ export const ChatSidebar: React.FC = () => {
                 <h5>{title}</h5>
               </EuiTitle>
             }
+            extraAction={extraAction}
             buttonProps={{ paddingSize: 'l' }}
             forceState={openAccordionId === id ? 'open' : 'closed'}
             onToggle={() => setOpenAccordionId(openAccordionId === id ? '' : id)}
