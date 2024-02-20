@@ -24,8 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingFunctional.teardownEcommerce();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/172599
-    describe.skip('Dashboard: Download CSV file', () => {
+    describe('Dashboard: Download CSV file', () => {
       it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
