@@ -207,14 +207,6 @@ export const navigationTree: NavigationTreeDefinition = {
               breadcrumbStatus: 'hidden',
             },
             {
-              link: 'synthetics:management',
-              title: i18n.translate('xpack.severlessObservability.nav.synthetics.monitorsItem', {
-                defaultMessage: 'Monitors',
-              }),
-              id: 'synthetics-management',
-              breadcrumbStatus: 'hidden',
-            },
-            {
               link: 'synthetics:certificates',
               title: i18n.translate(
                 'xpack.severlessObservability.nav.synthetics.certificatesItem',
@@ -223,14 +215,6 @@ export const navigationTree: NavigationTreeDefinition = {
                 }
               ),
               id: 'synthetics-certificates',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'synthetics:settings',
-              title: i18n.translate('xpack.severlessObservability.nav.synthetics.settingsItem', {
-                defaultMessage: 'Settings',
-              }),
-              id: 'synthetics-settings',
               breadcrumbStatus: 'hidden',
             },
           ],

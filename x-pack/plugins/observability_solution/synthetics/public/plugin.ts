@@ -158,17 +158,17 @@ export class UptimePlugin
         {
           id: 'overview',
           title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
-            defaultMessage: 'Overview',
+            defaultMessage: 'Monitors',
           }),
           path: '/',
           visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
-          id: 'management',
-          title: i18n.translate('xpack.synthetics.monitorsPage.linkText', {
-            defaultMessage: 'Monitors',
+          id: 'certificates',
+          title: i18n.translate('xpack.synthetics.deepLink.certificatesPage.linkText', {
+            defaultMessage: 'TLS Certificates',
           }),
-          path: '/monitors',
+          path: '/certificates',
           visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
