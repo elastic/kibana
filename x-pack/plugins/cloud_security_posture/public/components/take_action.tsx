@@ -112,17 +112,6 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
                   ruleCount: data.numberOfRules,
                 }}
               />
-              {data.numberOfDetectionRules > 0 ? (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.csp.flyout.ruleEnabledToastDetectionRulesCount"
-                    defaultMessage="and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
-                    values={{
-                      detectionRuleCount: data.numberOfDetectionRules,
-                    }}
-                  />
-                </strong>
-              ) : undefined}
             </>
           ) : (
             <>
