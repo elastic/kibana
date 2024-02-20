@@ -11,8 +11,8 @@ import type {
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { LocatorParams } from './url';
 import { JOB_STATUS } from './constants';
+import type { LocatorParams } from './url';
 
 export * from './url';
 

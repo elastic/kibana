@@ -17,12 +17,13 @@ import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { ExportType } from '@kbn/reporting-server';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { ExportType } from '@kbn/reporting-server';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
-import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
 import { ContentStream, getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
@@ -33,7 +34,6 @@ import {
 } from '../../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
