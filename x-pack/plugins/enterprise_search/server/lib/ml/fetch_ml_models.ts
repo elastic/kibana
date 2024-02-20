@@ -80,12 +80,9 @@ export const fetchMlModels = async (
 
   // Undeployed placeholder models might be in the Downloading phase; let's evaluate this with a call
   // We must do this one by one because the API doesn't support fetching multiple models with include=definition_status
-  const enrichmentCalls = [];
-  for (const model of models) {
-    if (model.isPromoted && !model.isPlaceholder && !model.hasStats) {
-      enrichmentCalls.push(enrichModelWithDownloadStatus(model, trainedModelsProvider));
-    }
-  }
+  const enrichmentCalls = models
+    .filter((model) => model.isPromoted && !model.isPlaceholder && !model.hasStats)
+    .map((model) => enrichModelWithDownloadStatus(model, trainedModelsProvider));
   await Promise.all(enrichmentCalls);
 
   // Pin ELSER to the top, then E5 below, then the rest of the models sorted alphabetically
