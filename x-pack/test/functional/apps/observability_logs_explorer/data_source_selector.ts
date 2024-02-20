@@ -5,7 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { FtrProviderContext } from './config';
 
 const initialPackageMap = {
   apache: 'Apache HTTP Server',
@@ -14,7 +15,7 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const expectedDataViews = ['logs-*', 'metrics-*'];
+const expectedDataViews = ['logs-*', 'logstash-*', 'metrics-*'];
 const sortedExpectedDataViews = expectedDataViews.slice().sort();
 
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
@@ -23,27 +24,21 @@ const expectedUncategorized = uncategorized.map((dataset) => dataset.split('-')[
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'observabilityLogsExplorer',
-    'svlCommonPage',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'observabilityLogsExplorer']);
 
   const noIntegrationsTitle = 'No integrations found';
   const noUncategorizedTitle = 'No data streams found';
 
-  describe('Dataset Selector', function () {
-    // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="dataSourceSelectorPopoverButton"])
-    this.tags(['failsOnMKI']);
+  describe('DataSourceSelector', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('as consistent behavior', () => {
@@ -56,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogsExplorer.openDatasetSelector();
       });
 
-      it('should always display the Integrations, Uncategorized and Data Views top level tabs', async () => {
+      it('should always display the Integrations Uncategorized and Data Views top level tabs', async () => {
         const integrationsTab = await PageObjects.observabilityLogsExplorer.getIntegrationsTab();
         const uncategorizedTab = await PageObjects.observabilityLogsExplorer.getUncategorizedTab();
         const dataViewsTab = await PageObjects.observabilityLogsExplorer.getDataViewsTab();
@@ -107,7 +102,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should display an empty prompt for no integrations', async () => {
           const menuEntries = await PageObjects.observabilityLogsExplorer
             .getIntegrationsContextMenu()
-            .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+            .then((menu: WebElementWrapper) =>
+              PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+            );
 
           expect(menuEntries.length).to.be(0);
           await PageObjects.observabilityLogsExplorer.assertListStatusEmptyPromptExistsWithTitle(
@@ -169,7 +166,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const uncategorizedEntries = await PageObjects.observabilityLogsExplorer
             .getUncategorizedContextMenu()
-            .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+            .then((menu: WebElementWrapper) =>
+              PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+            );
 
           expect(uncategorizedEntries.length).to.be(0);
 
@@ -321,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               const [panelTitleNode, integrationDatasetEntries] =
                 await PageObjects.observabilityLogsExplorer
                   .getIntegrationsContextMenu()
-                  .then((menu) =>
+                  .then((menu: WebElementWrapper) =>
                     Promise.all([
                       PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
                       PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
@@ -343,7 +342,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const panelTitleNode = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+                );
 
               expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             });
@@ -353,7 +354,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const menuEntries = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+                );
 
               expect(await menuEntries[0].getVisibleText()).to.be('access');
               expect(await menuEntries[1].getVisibleText()).to.be('error');
@@ -364,7 +367,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const menuEntries = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+                );
 
               expect(await menuEntries[0].getVisibleText()).to.be('error');
               expect(await menuEntries[1].getVisibleText()).to.be('access');
@@ -375,7 +380,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const menuEntries = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+                );
 
               expect(await menuEntries[0].getVisibleText()).to.be('access');
               expect(await menuEntries[1].getVisibleText()).to.be('error');
@@ -391,7 +398,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const panelTitleNode = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+                );
 
               expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             });
@@ -399,7 +408,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const menuEntries = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+                );
 
               expect(await menuEntries[0].getVisibleText()).to.be('access');
               expect(await menuEntries[1].getVisibleText()).to.be('error');
@@ -410,7 +421,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const menuEntries = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+                );
 
               expect(menuEntries.length).to.be(1);
               expect(await menuEntries[0].getVisibleText()).to.be('error');
@@ -426,7 +439,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const panelTitleNode = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+                );
 
               expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             });
@@ -434,7 +449,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               const menuEntries = await PageObjects.observabilityLogsExplorer
                 .getIntegrationsContextMenu()
-                .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+                .then((menu: WebElementWrapper) =>
+                  PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+                );
 
               expect(await menuEntries[0].getVisibleText()).to.be('access');
               menuEntries[0].click();
@@ -460,14 +477,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogsExplorer.openDatasetSelector();
           await PageObjects.observabilityLogsExplorer
             .getUncategorizedTab()
-            .then((tab) => tab.click());
+            .then((tab: WebElementWrapper) => tab.click());
         });
 
         it('should display a list of available datasets', async () => {
           await retry.try(async () => {
             const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) =>
+              .then((menu: WebElementWrapper) =>
                 Promise.all([
                   PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
                   PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
@@ -485,7 +502,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
           });
@@ -495,7 +514,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -507,7 +528,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[2]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -519,7 +542,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -531,7 +556,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
           });
@@ -539,7 +566,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
@@ -551,7 +580,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(menuEntries.length).to.be(1);
             expect(await menuEntries[0].getVisibleText()).to.be('retail');
@@ -562,7 +593,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
 
             expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
           });
@@ -570,7 +603,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getUncategorizedContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             menuEntries[0].click();
@@ -593,14 +628,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.observabilityLogsExplorer.openDatasetSelector();
-          await PageObjects.observabilityLogsExplorer.getDataViewsTab().then((tab) => tab.click());
+          await PageObjects.observabilityLogsExplorer
+            .getDataViewsTab()
+            .then((tab: WebElementWrapper) => tab.click());
         });
 
         it('should display a list of available data views', async () => {
           await retry.try(async () => {
             const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) =>
+              .then((menu: WebElementWrapper) =>
                 Promise.all([
                   PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
                   PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
@@ -614,6 +651,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ).to.be('Data Views');
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
           });
         });
 
@@ -621,7 +659,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
 
             expect(
               await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
@@ -635,10 +675,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[1]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
           // Test back ascending order
@@ -646,10 +689,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
           });
         });
 
@@ -657,7 +703,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
 
             expect(
               await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
@@ -669,10 +717,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
           });
 
           await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('logs');
@@ -680,10 +731,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
-            expect(menuEntries.length).to.be(1);
+            expect(menuEntries.length).to.be(2);
             expect(await menuEntries[0].getVisibleText()).to.be('logs-*');
+            expect(await menuEntries[1].getVisibleText()).to.be('logstash-*');
           });
         });
 
@@ -691,7 +745,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const panelTitleNode = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+              );
 
             expect(
               await PageObjects.observabilityLogsExplorer.getDataViewsContextMenuTitle(
@@ -703,15 +759,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getDataViewsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
-            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
-            menuEntries[1].click();
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+            menuEntries[2].click();
           });
 
           await retry.try(async () => {
             expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
-              expectedDataViews[1]
+              expectedDataViews[2]
             );
           });
         });
@@ -736,7 +794,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
               .getIntegrationsContextMenu()
-              .then((menu) =>
+              .then((menu: WebElementWrapper) =>
                 Promise.all([
                   PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
                   PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
@@ -754,7 +812,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
               .getIntegrationsContextMenu()
-              .then((menu) =>
+              .then((menu: WebElementWrapper) =>
                 Promise.all([
                   PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
                   PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
@@ -806,7 +864,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogsExplorer
               .getIntegrationsContextMenu()
-              .then((menu) =>
+              .then((menu: WebElementWrapper) =>
                 Promise.all([
                   PageObjects.observabilityLogsExplorer.getPanelTitle(menu),
                   PageObjects.observabilityLogsExplorer.getPanelEntries(menu),
@@ -823,7 +881,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getIntegrationsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             expect(menuEntries.length).to.be(1);
             expect(await menuEntries[0].getVisibleText()).to.be('error');
@@ -832,7 +892,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Navigate back to integrations
           const panelTitleNode = await PageObjects.observabilityLogsExplorer
             .getIntegrationsContextMenu()
-            .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
+            .then((menu: WebElementWrapper) =>
+              PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
+            );
           panelTitleNode.click();
 
           await retry.try(async () => {
@@ -849,7 +911,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogsExplorer
               .getIntegrationsContextMenu()
-              .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
+              .then((menu: WebElementWrapper) =>
+                PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
+              );
 
             const searchValue = await PageObjects.observabilityLogsExplorer.getSearchFieldValue();
             expect(searchValue).to.eql('err');

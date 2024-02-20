@@ -12,7 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./app'));
     loadTestFile(require.resolve('./columns_selection'));
     loadTestFile(require.resolve('./dataset_selection_state'));
-    loadTestFile(require.resolve('./dataset_selector'));
+    loadTestFile(require.resolve('./data_source_selector'));
     loadTestFile(require.resolve('./filter_controls'));
     loadTestFile(require.resolve('./flyout'));
     loadTestFile(require.resolve('./header_menu'));
