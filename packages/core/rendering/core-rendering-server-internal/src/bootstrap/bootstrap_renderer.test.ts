@@ -269,6 +269,23 @@ describe('bootstrapRenderer', () => {
         darkMode: true,
       });
     });
+
+    it('calls getThemeTag with the correct parameters when darkMode is `system`', async () => {
+      uiSettingsClient.get.mockResolvedValue('system');
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        themeVersion: 'v8',
+        darkMode: false,
+      });
+    });
   });
 
   describe('when the auth status is `unauthenticated`', () => {
