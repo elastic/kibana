@@ -15,7 +15,12 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
+import { Readable } from 'stream';
+import {
+  getGenAiTokenTracking,
+  getResponseBodyChunksFromStream,
+  shouldTrackGenAiToken,
+} from './gen_ai_token_tracking';
 import {
   validateConfig,
   validateConnector,
@@ -338,12 +343,12 @@ export class ActionExecutor {
 
         // start genai extension
         if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
-          getGenAiTokenTracking({
-            actionTypeId,
-            logger,
-            result,
-            validatedParams,
-          })
+          const data =
+            result.data instanceof Readable
+              ? await getResponseBodyChunksFromStream(result.data, logger)
+              : result.data;
+
+          getGenAiTokenTracking({ actionTypeId, logger, data, validatedParams })
             .then((tokenTracking) => {
               if (tokenTracking != null) {
                 set(event, 'kibana.action.execution.gen_ai.usage', {

@@ -7,6 +7,10 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import {
+  getGenAiTokenTracking,
+  getResponseBodyChunksFromStream,
+} from '@kbn/actions-plugin/server/lib/gen_ai_token_tracking';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -501,6 +505,24 @@ export class ObservabilityAIAssistantClient {
         actionId: connectorId,
         params: subAction,
       });
+
+      const data = getResponseBodyChunksFromStream(
+        executeResult.data as Readable,
+        this.dependencies.logger
+      );
+
+      try {
+        const genAiTokenTracking = await getGenAiTokenTracking({
+          actionTypeId: connector.actionTypeId,
+          data,
+          logger: this.dependencies.logger,
+          validatedParams: subAction,
+        });
+
+        console.log({ genAiTokenTracking });
+      } catch (e) {
+        console.log('could not get tokens');
+      }
 
       this.dependencies.logger.debug(
         `Received action client response: ${executeResult.status} (took: ${Math.round(

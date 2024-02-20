@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { encode } from 'gpt-tokenizer';
-import { Readable } from 'stream';
-import { finished } from 'stream/promises';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 
@@ -29,14 +26,12 @@ export interface InvokeBody {
  */
 export async function getTokenCountFromInvokeStream({
   actionTypeId,
-  responseStream,
+  responseBodyChunks,
   body,
-  logger,
 }: {
   actionTypeId: string;
-  responseStream: Readable;
+  responseBodyChunks: unknown[];
   body: InvokeBody;
-  logger: Logger;
 }): Promise<{
   total: number;
   prompt: number;
@@ -51,8 +46,10 @@ export async function getTokenCountFromInvokeStream({
       .join('\n')
   ).length;
 
-  const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-  const parsedResponse = await parser(responseStream, logger);
+  const parsedResponse =
+    actionTypeId === '.bedrock'
+      ? parseBedrockChunks(responseBodyChunks as Uint8Array[])
+      : parseOpenAIChunks(responseBodyChunks as string[]);
 
   const completionTokens = encode(parsedResponse).length;
   return {
@@ -62,43 +59,13 @@ export async function getTokenCountFromInvokeStream({
   };
 }
 
-type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
-
-const parseBedrockStream: StreamParser = async (responseStream, logger) => {
-  const responseBuffer: Uint8Array[] = [];
-  responseStream.on('data', (chunk) => {
-    // special encoding for bedrock, do not attempt to convert to string
-    responseBuffer.push(chunk);
-  });
-  try {
-    await finished(responseStream);
-  } catch (e) {
-    logger.error('An error occurred while calculating streaming response tokens');
-  }
-  return parseBedrockBuffer(responseBuffer);
-};
-
-const parseOpenAIStream: StreamParser = async (responseStream, logger) => {
-  let responseBody: string = '';
-  responseStream.on('data', (chunk) => {
-    // no special encoding, can safely use toString and append to responseBody
-    responseBody += chunk.toString();
-  });
-  try {
-    await finished(responseStream);
-  } catch (e) {
-    logger.error('An error occurred while calculating streaming response tokens');
-  }
-  return parseOpenAIResponse(responseBody);
-};
-
 /**
  * Parses a Bedrock buffer from an array of chunks.
  *
  * @param {Uint8Array[]} chunks - Array of Uint8Array chunks to be parsed.
  * @returns {string} - Parsed string from the Bedrock buffer.
  */
-const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
+const parseBedrockChunks = (chunks: Uint8Array[]): string => {
   // Initialize an empty Uint8Array to store the concatenated buffer.
   let bedrockBuffer: Uint8Array = new Uint8Array(0);
 
@@ -170,8 +137,10 @@ function getMessageLength(buffer: Uint8Array): number {
   return view.getUint32(0, false);
 }
 
-const parseOpenAIResponse = (responseBody: string) =>
-  responseBody
+const parseOpenAIChunks = (responseBodyChunks: string[]) =>
+  responseBodyChunks
+    .map((chunk) => chunk.toString())
+    .join('')
     .split('\n')
     .filter((line) => {
       return line.startsWith('data: ') && !line.endsWith('[DONE]');
