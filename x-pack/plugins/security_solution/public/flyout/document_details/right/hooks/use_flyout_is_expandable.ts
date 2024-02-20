@@ -12,6 +12,8 @@ import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { isEcsAllowedValue } from '../utils/event_utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EventKind } from '../../shared/constants/event_kinds';
 
 export interface UseShowEventOverviewParams {
   /**
@@ -25,9 +27,11 @@ export interface UseShowEventOverviewParams {
 }
 
 /**
- * Hook to return true if overview should be visible
+ * Hook used on the right panel to decide if the flyout has an expanded section.
+ * This also helps deciding if the overview section should be displayed.
+ * The hook looks at the `event.kind` and `event.category` fields of the document.
  */
-export const useShowEventOverview = ({
+export const useFlyoutIsExpandable = ({
   getFieldsData,
   dataAsNestedObject,
 }: UseShowEventOverviewParams): boolean => {
@@ -41,10 +45,24 @@ export const useShowEventOverview = ({
     isEcsAllowedValue('event.category', category)
   );
 
+  const expandableEventFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableEventFlyoutEnabled'
+  );
+
   return useMemo(() => {
-    if (eventKind === 'event') {
+    // alert document: always show overview
+    if (eventKind === EventKind.signal) {
+      return true;
+    }
+    // do not show overview for non-alert if feature flag is disabled
+    if (!expandableEventFlyoutEnabled) {
+      return false;
+    }
+    // event document: show overview when event category is ecs compliant or event renderer is available
+    if (eventKind === EventKind.event) {
       return eventCategoryInECS || renderer != null;
     }
+    // non-event document: show overview when event kind is ecs compliant or event renderer is available
     return eventKindInECS || renderer != null;
-  }, [eventKind, eventCategoryInECS, eventKindInECS, renderer]);
+  }, [expandableEventFlyoutEnabled, eventKind, eventCategoryInECS, eventKindInECS, renderer]);
 };

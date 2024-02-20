@@ -5,16 +5,50 @@
  * 2.0.
  */
 
-import { useShowEventOverview } from './use_show_event_overview';
+import { useFlyoutIsExpandable } from './use_flyout_is_expandable';
 import { renderHook } from '@testing-library/react-hooks';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const getFieldsData = jest.fn();
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-describe('showEventOverview', () => {
-  describe('event renderer is not available', () => {
+describe('useFlyoutIsExpandable', () => {
+  it('always return ture when event.kind is signal (alert document)', () => {
     const dataAsNestedObject = {} as unknown as Ecs;
+    getFieldsData.mockImplementation((field: string) => {
+      if (field === 'event.kind') {
+        return 'signal';
+      }
+    });
+    const hookResult = renderHook(() =>
+      useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject }).valueOf()
+    );
+    expect(hookResult.result.current).toBe(true);
+  });
 
+  it('always return false when event.kind is not signal and feature flag is off', () => {
+    const dataAsNestedObject = {} as unknown as Ecs;
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+    getFieldsData.mockImplementation((field: string) => {
+      if (field === 'event.kind') {
+        return 'signal';
+      }
+    });
+    const hookResult = renderHook(() =>
+      useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject }).valueOf()
+    );
+    expect(hookResult.result.current).toBe(true);
+  });
+
+  describe('event renderer is not available', () => {
+    beforeEach(() => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    });
+    const dataAsNestedObject = {} as unknown as Ecs;
     describe('event.kind is not event', () => {
       it('should return true if event.kind is in ecs allowed values', () => {
         getFieldsData.mockImplementation((field: string) => {
@@ -23,7 +57,7 @@ describe('showEventOverview', () => {
           }
         });
         const hookResult = renderHook(() =>
-          useShowEventOverview({ getFieldsData, dataAsNestedObject }).valueOf()
+          useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject }).valueOf()
         );
         expect(hookResult.result.current).toBe(true);
       });
@@ -35,7 +69,7 @@ describe('showEventOverview', () => {
           }
         });
         const hookResult = renderHook(() =>
-          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+          useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject })
         );
         expect(hookResult.result.current).toBe(false);
       });
@@ -43,7 +77,7 @@ describe('showEventOverview', () => {
       it('should return false if event.kind is notavailable', () => {
         getFieldsData.mockImplementation(() => {});
         const hookResult = renderHook(() =>
-          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+          useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject })
         );
         expect(hookResult.result.current).toBe(false);
       });
@@ -60,7 +94,7 @@ describe('showEventOverview', () => {
           }
         });
         const hookResult = renderHook(() =>
-          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+          useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject })
         );
         expect(hookResult.result.current).toBe(true);
       });
@@ -75,7 +109,7 @@ describe('showEventOverview', () => {
           }
         });
         const hookResult = renderHook(() =>
-          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+          useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject })
         );
         expect(hookResult.result.current).toBe(false);
       });
@@ -86,7 +120,7 @@ describe('showEventOverview', () => {
           }
         });
         const hookResult = renderHook(() =>
-          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+          useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject })
         );
         expect(hookResult.result.current).toBe(false);
       });
@@ -95,9 +129,13 @@ describe('showEventOverview', () => {
 
   describe('event renderer is available', () => {
     const dataAsNestedObject = { event: { module: ['suricata'] } } as unknown as Ecs;
+    beforeEach(() => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    });
+
     it('should return true', () => {
       const hookResult = renderHook(() =>
-        useShowEventOverview({ getFieldsData, dataAsNestedObject })
+        useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject })
       );
       expect(hookResult.result.current).toBe(true);
     });

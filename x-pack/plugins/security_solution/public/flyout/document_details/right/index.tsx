@@ -16,10 +16,7 @@ import { PanelContent } from './content';
 import type { RightPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { PanelFooter } from './footer';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useShowEventOverview } from './hooks/use_show_event_overview';
-import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
+import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
@@ -41,18 +38,13 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
     useRightPanelContext();
-  const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
 
-  const expandableEventFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableEventFlyoutEnabled'
-  );
-  const showEventOverview =
-    useShowEventOverview({ getFieldsData, dataAsNestedObject }) && expandableEventFlyoutEnabled;
+  const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
   const tabsDisplayed = useMemo(() => {
-    return isEventKindSignal || showEventOverview
+    return flyoutIsExpandable
       ? [tabs.overviewTab, tabs.tableTab, tabs.jsonTab]
       : [tabs.tableTab, tabs.jsonTab];
-  }, [isEventKindSignal, showEventOverview]);
+  }, [flyoutIsExpandable]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
@@ -89,7 +81,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
-      <PanelNavigation flyoutIsExpandable={isEventKindSignal || showEventOverview} />
+      <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}
