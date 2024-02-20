@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows a suggestion when searching for a term matching a type', async () => {
         await navigationalSearch.searchFor('dashboard');
 
- const dashboardTypeSearchResult = await retry.try(async () => {
+        const dashboardTypeSearchResult = await retry.try(async () => {
           await navigationalSearch.searchFor('dashboard');
           const results = await navigationalSearch.getDisplayedResults();
           // will throw if results not found
