@@ -49,7 +49,7 @@ export const ListStatus = ({
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.logsExplorer.datasetSelector.noDataError"
+            id="xpack.logsExplorer.dataSourceSelector.noDataError"
             defaultMessage="An {error} occurred while getting your data. Please retry."
             values={{
               error: (
