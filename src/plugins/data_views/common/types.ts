@@ -315,6 +315,7 @@ export interface GetFieldsOptions {
   allowHidden?: boolean;
   forceRefresh?: boolean;
   fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -462,6 +463,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

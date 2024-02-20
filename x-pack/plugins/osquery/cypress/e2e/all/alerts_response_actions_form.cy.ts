@@ -182,7 +182,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
 
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+    cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,

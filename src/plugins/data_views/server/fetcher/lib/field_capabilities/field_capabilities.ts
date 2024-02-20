@@ -25,6 +25,7 @@ interface FieldCapabilitiesParams {
   fields?: string[];
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -47,6 +48,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fields,
     expandWildcards,
     fieldTypes,
+    includeEmptyFields,
   } = params;
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
@@ -56,6 +58,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fields,
     expandWildcards,
     fieldTypes,
+    includeEmptyFields,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

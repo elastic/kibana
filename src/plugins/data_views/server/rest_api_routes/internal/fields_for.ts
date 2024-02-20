@@ -56,6 +56,7 @@ export interface IQuery {
   fields?: string[];
   allow_hidden?: boolean;
   field_types?: string[];
+  include_empty_fields?: boolean;
 }
 
 export const querySchema = schema.object({
@@ -70,6 +71,7 @@ export const querySchema = schema.object({
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   allow_hidden: schema.maybe(schema.boolean()),
   field_types: schema.maybe(schema.arrayOf(schema.string())),
+  include_empty_fields: schema.maybe(schema.boolean()),
 });
 
 const fieldSubTypeSchema = schema.object({
@@ -101,6 +103,7 @@ const FieldDescriptorSchema = schema.object({
   conflictDescriptions: schema.maybe(
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
+  defaultFormatter: schema.maybe(schema.string()),
 });
 
 export const validate: FullValidationConfig<any, any, any> = {
@@ -137,6 +140,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       include_unmapped: includeUnmapped,
       allow_hidden: allowHidden,
       field_types: fieldTypes,
+      include_empty_fields: includeEmptyFields,
     } = request.query;
 
     // not available to get request
@@ -164,6 +168,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         fieldTypes,
         indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
         allowHidden,
+        includeEmptyFields,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 

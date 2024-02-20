@@ -21,6 +21,7 @@ import {
   enableAgentExplorerView,
   apmEnableProfilingIntegration,
   apmEnableTableSearchBar,
+  apmEnableTransactionProfiling,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -57,7 +58,9 @@ function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
   ];
 
   if (isProfilingIntegrationEnabled) {
-    keys.push(apmEnableProfilingIntegration);
+    keys.push(
+      ...[apmEnableProfilingIntegration, apmEnableTransactionProfiling]
+    );
   }
 
   return keys;

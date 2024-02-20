@@ -9,7 +9,7 @@ import { TimesliceMetricIndicator, timesliceMetricMetricDef } from '@kbn/slo-sch
 import * as t from 'io-ts';
 import { assertNever } from '@kbn/std';
 
-import { getElastichsearchQueryOrThrow } from '../transform_generators';
+import { getElasticsearchQueryOrThrow } from '../transform_generators';
 
 type TimesliceMetricDef = TimesliceMetricIndicator['params']['metric'];
 type TimesliceMetricMetricDef = t.TypeOf<typeof timesliceMetricMetricDef>;
@@ -85,7 +85,7 @@ export class GetTimesliceMetricIndicatorAggregation {
   private buildMetricAggregations(metricDef: TimesliceMetricDef) {
     return metricDef.metrics.reduce((acc, metric) => {
       const filter = metric.filter
-        ? getElastichsearchQueryOrThrow(metric.filter)
+        ? getElasticsearchQueryOrThrow(metric.filter)
         : { match_all: {} };
       const aggs = { metric: this.buildAggregation(metric) };
       return {

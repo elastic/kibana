@@ -1290,31 +1290,24 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeNavLink.disabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabled",
+            "id": "def-common.ChromeNavLink.visibleIn",
+            "type": "Array",
+            "tags": [
+              "default"
+            ],
+            "label": "visibleIn",
             "description": [
-              "\nDisables a link from being clickable.\n"
+              "\nList of locations where the nav link should be visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
             ],
             "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeNavLink.hidden",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidden",
-            "description": [
-              "\nHides a link from the navigation."
-            ],
-            "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLinkLocations",
+                "text": "AppDeepLinkLocations"
+              },
+              "[]"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,

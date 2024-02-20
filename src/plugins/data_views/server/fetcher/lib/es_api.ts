@@ -48,6 +48,7 @@ interface FieldCapsApiParams {
   fields?: string[];
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -74,6 +75,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     fields = ['*'],
     expandWildcards,
     fieldTypes,
+    includeEmptyFields,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -84,6 +86,8 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         index_filter: indexFilter,
         expand_wildcards: expandWildcards,
         types: fieldTypes,
+        // @ts-expect-error
+        include_empty_fields: includeEmptyFields ?? true,
         ...fieldCapsOptions,
       },
       { meta: true }

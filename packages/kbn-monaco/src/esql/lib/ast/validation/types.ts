@@ -47,7 +47,7 @@ export interface ValidationErrors {
   };
   wrongArgumentNumber: {
     message: string;
-    type: { fn: string; numArgs: number; passedArgs: number };
+    type: { fn: string; numArgs: number; passedArgs: number; exactly: number };
   };
   unknownColumn: {
     message: string;
@@ -103,7 +103,7 @@ export interface ValidationErrors {
   };
   unknownAggregateFunction: {
     message: string;
-    type: { command: string; value: string };
+    type: { type: string; value: string };
   };
   wildcardNotSupportedForCommand: {
     message: string;
@@ -123,7 +123,11 @@ export interface ValidationErrors {
   };
   unsupportedSettingCommandValue: {
     message: string;
-    type: { command: string; setting: string; value: string; expected: string };
+    type: { command: string; value: string; expected: string };
+  };
+  expectedConstant: {
+    message: string;
+    type: { fn: string; given: string };
   };
 }
 
