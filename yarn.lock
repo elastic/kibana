@@ -5597,7 +5597,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-share@link:packages/kbn-reporting-share":
+"@kbn/reporting-share@link:packages/kbn-reporting/public/share":
   version "0.0.0"
   uid ""
 

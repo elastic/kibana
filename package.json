@@ -639,7 +639,7 @@
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/reporting-public": "link:packages/kbn-reporting/public",
     "@kbn/reporting-server": "link:packages/kbn-reporting/server",
-    "@kbn/reporting-share": "link:packages/kbn-reporting-share",
+    "@kbn/reporting-share": "link:packages/kbn-reporting/public/share",
     "@kbn/resizable-layout": "link:packages/kbn-resizable-layout",
     "@kbn/resizable-layout-examples-plugin": "link:examples/resizable_layout_examples",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
