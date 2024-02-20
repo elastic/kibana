@@ -11,11 +11,9 @@ import { union } from 'lodash';
 export const fieldMatchesFieldsRequested = (
   fieldName: string,
   fieldsRequested: string[]
-  // todo match wildcard
 ): boolean => (fieldsRequested.includes('*') ? true : fieldsRequested.includes(fieldName));
 
 export const fieldsMatchFieldsRequested = (
   fieldName: string[],
   fieldsRequested: string[]
-  // todo match wildcard
 ): string[] => (fieldsRequested.includes('*') ? fieldName : union(fieldName, fieldsRequested));

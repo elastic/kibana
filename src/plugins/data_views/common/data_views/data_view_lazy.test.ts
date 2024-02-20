@@ -532,8 +532,9 @@ describe('DataViewLazy', () => {
       expect(restoredPattern.id).toEqual(dataViewLazy.id);
       expect(restoredPattern.getIndexPattern()).toEqual(dataViewLazy.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(dataViewLazy.timeFieldName);
-      // todo
-      // expect(restoredPattern.fields.length).toEqual(dataViewLazy.fields.length);
+      expect((await restoredPattern.getFields({ fieldName: ['*'] })).length).toEqual(
+        (await dataViewLazy.getFields({ fieldName: ['*'] })).length
+      );
     });
 
     test('creating from spec does not contain references to spec', () => {
