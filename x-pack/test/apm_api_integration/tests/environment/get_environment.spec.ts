@@ -19,7 +19,8 @@ export default function environmentsAPITests({ getService }: FtrProviderContext)
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('environments when data is loaded', { config: 'basic', archives: [] }, async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177305
+  registry.when.skip('environments when data is loaded', { config: 'basic', archives: [] }, async () => {
     before(async () => {
       await generateData({
         synthtraceEsClient,
