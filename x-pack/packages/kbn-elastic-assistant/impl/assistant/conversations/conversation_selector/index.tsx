@@ -141,9 +141,9 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
-      (cId: string) => {
-        onConversationDeleted(cId);
-        if (selectedConversationTitle === cId) {
+      (deletedTitle: string) => {
+        onConversationDeleted(deletedTitle);
+        if (selectedConversationTitle === deletedTitle) {
           const prevConversationTitle = getPreviousConversationTitle(
             conversationTitles,
             selectedConversationTitle
@@ -237,7 +237,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value, id } = option;
+      const { label, value } = option;
+
       return (
         <EuiFlexGroup
           alignItems="center"
@@ -272,7 +273,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    onDelete(id ?? '');
+                    onDelete(label ?? '');
                   }}
                   data-test-subj="delete-option"
                   css={css`

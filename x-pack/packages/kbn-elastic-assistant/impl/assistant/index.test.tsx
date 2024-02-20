@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -60,22 +60,16 @@ const mockData = {
     apiConfig: {},
   },
 };
-
+const mockDeleteConvo = jest.fn();
 const mockUseConversation = {
-  getConversation: jest
-    .fn()
-    .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' }),
+  getConversation: jest.fn(),
   getDefaultConversation: jest.fn().mockReturnValue(mockData.Welcome),
-  deleteConversation: () => {},
+  deleteConversation: mockDeleteConvo,
 };
 
 describe('Assistant', () => {
   beforeAll(() => {
-    (useConversation as jest.Mock).mockReturnValue({
-      getConversation: jest.fn(),
-      getDefaultConversation: jest.fn().mockReturnValue(mockData.Welcome),
-      deleteConversation: () => {},
-    });
+    (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     jest.mocked(useConnectorSetup).mockReturnValue({
       comments: [],
       prompt: <></>,
@@ -181,6 +175,23 @@ describe('Assistant', () => {
         })
       );
     });
+
+    it('should delete conversation when delete button is clicked', async () => {
+      renderAssistant();
+      await act(async () => {
+        fireEvent.click(
+          within(screen.getByTestId('conversation-selector')).getByTestId(
+            'comboBoxToggleListButton'
+          )
+        );
+      });
+
+      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+      expect(mockDeleteConvo).toHaveBeenCalledWith('Welcome Id');
+    });
   });
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation title to local storage', async () => {
@@ -241,7 +252,12 @@ describe('Assistant', () => {
     });
     it('should fetch current conversation when id has value', async () => {
       const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation: jest
+          .fn()
+          .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' }),
+      });
       renderAssistant();
 
       const previousConversationButton = screen.getByLabelText('Previous conversation');
