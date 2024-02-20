@@ -16,8 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/172984
-  describe.skip('change point detection', async function () {
+  describe('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -43,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(result.length).to.eql(1);
-      expect(parseInt(result[0].pValue, 10)).to.eql(0);
+      expect(Number(result[0].pValue)).to.be.lessThan(1);
       expect(result[0].type).to.eql('distribution_change');
 
       await elasticChart.waitForRenderComplete('aiopChangePointPreviewChart > xyVisChart');
