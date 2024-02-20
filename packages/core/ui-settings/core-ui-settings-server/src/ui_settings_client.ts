@@ -53,7 +53,7 @@ export interface IUiSettingsClient {
   /**
    * Removes multiple uiSettings values by keys.
    */
-  removeMany: (keys: string[]) => Promise<void>;
+  removeMany: (keys: string[], options?: { validateKeys?: boolean }) => Promise<void>;
   /**
    * Shows whether the uiSettings value set by the user.
    */

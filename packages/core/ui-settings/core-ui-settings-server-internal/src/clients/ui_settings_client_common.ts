@@ -64,7 +64,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     return userProvided;
   }
 
-  async setMany(changes: Record<string, any>) {
+  async setMany(changes: Record<string, any>, options: { validateKeys?: boolean } = {}) {
     this.cache.del();
     this.onWriteHook(changes);
     await this.write({ changes });
@@ -78,12 +78,12 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     await this.set(key, null);
   }
 
-  async removeMany(keys: string[]) {
+  async removeMany(keys: string[], options: { validateKeys?: boolean } = {}) {
     const changes: Record<string, null> = {};
     keys.forEach((key) => {
       changes[key] = null;
     });
-    await this.setMany(changes);
+    await this.setMany(changes, options);
   }
 
   private assertUpdateAllowed(key: string) {

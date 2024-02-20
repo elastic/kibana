@@ -108,5 +108,18 @@ describe('ui settings global client', () => {
       );
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
+
+    it('does not throws if validateKeys option is set to "false"', async () => {
+      const { uiSettingsClient, savedObjectsClient } = setup();
+      const setSettings = async () => {
+        await uiSettingsClient.setMany(
+          { settingZ: 'cde', settingC: true },
+          { validateKeys: false }
+        );
+        return 'done';
+      };
+      expect(setSettings()).resolves.toBe('done');
+      expect(savedObjectsClient.update).toHaveBeenCalled();
+    });
   });
 });
