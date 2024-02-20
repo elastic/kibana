@@ -15,7 +15,8 @@ export type CloudSecurityUsageCollectorType =
   | 'Rules'
   | 'Installation'
   | 'Alerts'
-  | 'Cloud Accounts';
+  | 'Cloud Accounts'
+  | 'Muted Rules';
 
 export type CloudProviderKey = 'cis_eks' | 'cis_gke' | 'cis_k8s' | 'cis_ake';
 export type CloudbeatConfigKeyType =
@@ -32,6 +33,7 @@ export interface CspmUsage {
   installation_stats: CloudSecurityInstallationStats[];
   alerts_stats: CloudSecurityAlertsStats[];
   cloud_account_stats: CloudSecurityAccountsStats[];
+  muted_rules_stats: MutedRulesStats[];
 }
 
 export interface PackageSetupStatus {
@@ -75,9 +77,11 @@ export interface CloudSecurityAccountsStats {
   cloud_provider: string | null;
   package_policy_id: string | null;
   posture_management_stats?: CloudPostureAccountsStats;
+  posture_management_stats_enabled_rules?: CloudPostureAccountsStats;
   kspm_stats?: KSPMAccountsStats;
   latest_doc_count: number;
   latest_doc_updated_timestamp: string;
+  has_muted_rules?: boolean;
 }
 export interface CloudPostureAccountsStats {
   posture_score: number;
@@ -213,4 +217,16 @@ export interface AccountEntity {
   resources: {
     pods_count: Value;
   };
+}
+
+export interface MutedRulesStats {
+  id: string;
+  name: string;
+  section: string;
+  version: string;
+  benchmark_id: string;
+  benchmark_name: string;
+  benchmark_version: string;
+  posture_type: string;
+  rule_number: string;
 }

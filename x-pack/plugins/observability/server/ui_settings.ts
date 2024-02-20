@@ -20,6 +20,7 @@ import {
   apmTraceExplorerTab,
   apmLabsButton,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -30,13 +31,17 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
-  profilingUseLegacyCo2Calculation,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingAzureCostDiscountRate,
+  enableInfrastructureProfilingIntegration,
+  apmEnableTransactionProfiling,
+  enableInfrastructureHostsCustomDashboards,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -236,6 +241,38 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
   },
+  [enableInfrastructureProfilingIntegration]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
+      defaultMessage: 'Universal Profiling integration in Infrastructure',
+    }),
+    value: true,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
+      {
+        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
+      }
+    ),
+    schema: schema.boolean(),
+  },
+  [enableInfrastructureHostsCustomDashboards]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureHostsCustomDashboards', {
+      defaultMessage: 'Custom dashboards for Host Details in Infrastructure',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureHostsCustomDashboardsDescription',
+      {
+        defaultMessage:
+          '{betaLabel} Enable option to link custom dashboards in the Host Details view.',
+        values: {
+          betaLabel: `<em>[${betaLabel}]</em>`,
+        },
+      }
+    ),
+    schema: schema.boolean(),
+  },
   [enableAwsLambdaMetrics]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
@@ -261,6 +298,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
       defaultMessage: '{betaLabel} Enables Agent explorer view.',
+      values: {
+        betaLabel: `<em>[${betaLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableTableSearchBar]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTableSearchBar', {
+      defaultMessage: 'Instant table search',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
+      defaultMessage:
+        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
       values: {
         betaLabel: `<em>[${betaLabel}]</em>`,
       },
@@ -381,6 +435,15 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     requiresPageReload: false,
   },
+  [profilingShowErrorFrames]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingShowErrorFramesSettingName', {
+      defaultMessage: 'Show error frames in the Universal Profiling views',
+    }),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
   [profilingPervCPUWattX86]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingPervCPUWattX86UiSettingName', {
@@ -415,9 +478,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
-      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey  
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey
       </br></br>
-      You can also use the PUE that corresponds with your cloud provider: 
+      You can also use the PUE that corresponds with your cloud provider:
       <ul style="list-style-type: none;margin-left: 4px;">
         <li><strong>AWS:</strong> 1.135</li>
         <li><strong>GCP:</strong> 1.1</li>
@@ -444,7 +507,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.000379069,
     description: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingDescription', {
-      defaultMessage: `Carbon intensity measures how clean your data center electricity is.  
+      defaultMessage: `Carbon intensity measures how clean your data center electricity is.
       Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
       Use the cloud carbon footprint {datasheetLink} to update this value according to your region. Defaults to US East (N. Virginia).`,
       values: {
@@ -460,20 +523,12 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
   },
-  [profilingUseLegacyCo2Calculation]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingUseLegacyCo2Calculation', {
-      defaultMessage: 'Use legacy CO2 and Dollar cost calculations in Universal Profiling',
-    }),
-    value: false,
-    schema: schema.boolean(),
-  },
   [profilingAWSCostDiscountRate]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
       defaultMessage: 'AWS EDP discount rate (%)',
     }),
-    value: 6,
+    value: '0',
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
     description: i18n.translate(
@@ -481,6 +536,22 @@ export const uiSettings: Record<string, UiSettings> = {
       {
         defaultMessage:
           "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
+      }
+    ),
+  },
+  [profilingAzureCostDiscountRate]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingAzureCostDiscountRateUiSettingName', {
+      defaultMessage: 'Azure discount rate (%)',
+    }),
+    value: '0',
+    schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+    description: i18n.translate(
+      'xpack.observability.profilingAzureCostDiscountRateUiSettingDescription',
+      {
+        defaultMessage:
+          'If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.',
       }
     ),
   },
@@ -493,10 +564,19 @@ export const uiSettings: Record<string, UiSettings> = {
     description: i18n.translate(
       'xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription',
       {
-        defaultMessage: `Default average cost per CPU core per hour (Non-AWS instances only)`,
+        defaultMessage: `Default Hourly Cost per CPU Core for machines not on AWS or Azure`,
       }
     ),
     schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+  },
+  [apmEnableTransactionProfiling]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
+      defaultMessage: 'Enable Universal Profiling on Transaction view',
+    }),
+    value: false,
+    schema: schema.boolean(),
     requiresPageReload: true,
   },
 };

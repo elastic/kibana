@@ -8,7 +8,7 @@
 import { of } from 'rxjs';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { chromeServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { chromeServiceMock, coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
@@ -41,10 +41,7 @@ export function createServicesMock() {
     ...uiSettingsMock,
   };
 
-  const theme = {
-    theme$: of({ darkMode: false }),
-  };
-
+  const theme = themeServiceMock.createSetupContract({ darkMode: false });
   corePluginMock.theme = theme;
 
   const dataPlugin = dataPluginMock.createStartContract();

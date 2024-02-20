@@ -31,6 +31,11 @@ export function runCli() {
             default: 'zod_operation_schema' as const,
             choices: AVAILABLE_TEMPLATES,
           })
+          .option('skipLinting', {
+            describe: 'Whether linting should be skipped',
+            type: 'boolean',
+            default: false,
+          })
           .showHelpOnFail(false),
       (argv) => {
         generate(argv).catch((err) => {

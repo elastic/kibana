@@ -21,14 +21,13 @@ export const allowedExperimentalValues = Object.freeze({
   kubernetesEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
+   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
 
@@ -71,6 +70,16 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionUploadEnabled: true,
 
+  /*
+   * Enables Automated Endpoint Process actions
+   */
+  automatedProcessActionsEnabled: false,
+
+  /**
+   * Enables the ability to send Response actions to SentinelOne
+   */
+  responseActionsSentinelOneV1Enabled: false,
+
   /**
    * Enables top charts on Alerts Page
    */
@@ -94,16 +103,24 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
-   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   * Enables the new user details flyout displayed on the Alerts table.
    *
    **/
-  newUserDetailsFlyout: false,
+  newUserDetailsFlyout: true,
+
+  /*
+   * Enables the Managed User section inside the new user details flyout.
+   * To see this section you also need newUserDetailsFlyout flag enabled.
+   *
+   **/
+  newUserDetailsFlyoutManagedUser: false,
+
+  /*
+   * Enables the new host details flyout displayed on the Alerts table.
+   *
+   **/
+  newHostDetailsFlyout: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -126,11 +143,6 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
@@ -142,10 +154,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskEnginePrivilegesRouteEnabled: true,
 
-  /*
-   * Enables experimental Entity Analytics Asset Criticality feature
+  /**
+   * Enables alerts suppression for indicator match rules
    */
-  entityAnalyticsAssetCriticalityEnabled: false,
+  alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /*
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -155,14 +167,45 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables SentinelOne manual host manipulation actions
    */
-  sentinelOneManualHostActionsEnabled: false,
+  sentinelOneManualHostActionsEnabled: true,
+
+  /*
+   * Enables experimental Crowdstrike integration data to be available in Analyzer
+   */
+  crowdstrikeDataInAnalyzerEnabled: false,
 
   /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/169160
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Dec 06, 2023 in https://github.com/elastic/kibana/pull/172535
+   * Turned: on Dec 20, 2023 in https://github.com/elastic/kibana/pull/173368
+   * Expires: on Feb 20, 2024
    */
-  jsonPrebuiltRulesDiffingEnabled: false,
+  jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/166489
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Feb 12, 2023 in https://github.com/elastic/kibana/pull/174564
+   */
+  perFieldPrebuiltRulesDiffingEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

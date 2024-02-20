@@ -25,6 +25,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
   buildNum: 42,
   buildSha: 'buildSha',
+  buildShaShort: 'buildShaShort',
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
   dist: false,
   version: '8.0.0',
@@ -62,7 +63,7 @@ describe('bootstrapRenderer', () => {
       auth,
       packageInfo,
       uiPlugins,
-      baseHref: '/base-path',
+      baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
     });
   });
 
@@ -336,7 +337,7 @@ describe('bootstrapRenderer', () => {
       expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
         isAnonymousPage,
         uiPlugins,
-        bundlesHref: '/base-path/42/bundles',
+        bundlesHref: '/base-path/buildShaShort/bundles',
       });
     });
   });
@@ -355,7 +356,7 @@ describe('bootstrapRenderer', () => {
 
     expect(getJsDependencyPathsMock).toHaveBeenCalledTimes(1);
     expect(getJsDependencyPathsMock).toHaveBeenCalledWith(
-      '/base-path/42/bundles',
+      '/base-path/buildShaShort/bundles',
       pluginsBundlePaths
     );
   });

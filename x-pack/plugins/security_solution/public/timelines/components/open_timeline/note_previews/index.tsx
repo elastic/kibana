@@ -24,7 +24,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { appActions } from '../../../../common/store/app';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';

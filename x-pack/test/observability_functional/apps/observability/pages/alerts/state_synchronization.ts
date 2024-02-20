@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await assertAlertsPageState({
         kuery: '',
         // workflowStatus: 'Open',
-        timeRange: 'Last 15 minutes',
+        timeRange: 'Last 24 hours',
       });
     });
 

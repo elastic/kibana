@@ -85,8 +85,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       themeVersion,
       darkMode,
     });
-    const buildHash = packageInfo.buildNum;
-    const bundlesHref = getBundlesHref(baseHref, String(buildHash));
+    const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,

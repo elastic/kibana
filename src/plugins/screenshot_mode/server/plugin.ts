@@ -9,15 +9,23 @@
 import type { Plugin, CoreSetup } from '@kbn/core/server';
 import type {
   ScreenshotModeRequestHandlerContext,
-  ScreenshotModePluginSetup,
-  ScreenshotModePluginStart,
+  ScreenshotModeServerSetup,
+  ScreenshotModeServerStart,
+  ScreenshotModeServerSetupDependencies,
+  ScreenshotModeServerStartDependencies,
 } from './types';
 import { isScreenshotMode } from './is_screenshot_mode';
 
 export class ScreenshotModePlugin
-  implements Plugin<ScreenshotModePluginSetup, ScreenshotModePluginStart>
+  implements
+    Plugin<
+      ScreenshotModeServerSetup,
+      ScreenshotModeServerStart,
+      ScreenshotModeServerSetupDependencies,
+      ScreenshotModeServerStartDependencies
+    >
 {
-  public setup(core: CoreSetup): ScreenshotModePluginSetup {
+  public setup(core: CoreSetup): ScreenshotModeServerSetup {
     core.http.registerRouteHandlerContext<ScreenshotModeRequestHandlerContext, 'screenshotMode'>(
       'screenshotMode',
       (ctx, req) => {
@@ -39,7 +47,7 @@ export class ScreenshotModePlugin
     };
   }
 
-  public start(): ScreenshotModePluginStart {
+  public start(): ScreenshotModeServerStart {
     return {
       isScreenshotMode,
     };

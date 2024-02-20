@@ -412,6 +412,8 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
@@ -420,6 +422,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
+    authorizationHeader,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -579,12 +582,12 @@ export const getInputsHandler: FleetRequestHandler<
 
   try {
     const { pkgName, pkgVersion } = request.params;
-    const { format } = request.query;
+    const { format, prerelease } = request.query;
     let body;
     if (format === 'json') {
-      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json');
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json', prerelease);
     } else if (format === 'yml' || format === 'yaml') {
-      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml');
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml', prerelease);
     }
     return response.ok({ body });
   } catch (error) {

@@ -1,0 +1,12 @@
+summary: Response from a pushToService action for a Webhook - Case Management connector.
+value:
+  connector_id: 1824b5b8-c005-4dcc-adac-57f92db46459
+  data:
+    id: 100665
+    title: TEST-29034
+    url: https://example.com/browse/TEST-29034
+    pushedDate: 2023-12-05T19:43:36.360Z
+    comments:
+      - commentId: 1
+        pushedDate: 2023-12-05T19:43:36.360Z
+  status: ok

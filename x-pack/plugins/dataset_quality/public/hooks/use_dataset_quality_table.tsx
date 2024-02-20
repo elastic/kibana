@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { find, orderBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useSelector } from '@xstate/react';
+import { orderBy } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, NONE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
-import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
+import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
+import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
+import { useKibanaContextForPlugin } from '../utils';
+import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 
-const DEFAULT_SORT_FIELD = 'title';
-const DEFAULT_SORT_DIRECTION = 'desc';
-type DIRECTION = 'asc' | 'desc';
-type SORT_FIELD = keyof DataStreamStat;
+export type Direction = 'asc' | 'desc';
+export type SortField = keyof DataStreamStat;
 
-const sortingOverrides: Partial<{ [key in SORT_FIELD]: SORT_FIELD }> = {
+const sortingOverrides: Partial<{ [key in SortField]: SortField }> = {
+  ['title']: 'name',
   ['size']: 'sizeBytes',
 };
 
@@ -27,92 +29,178 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
-  const defaultTimeRange = getDefaultTimeRange();
+  const { service } = useDatasetQualityContext();
 
-  const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
-  const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
-  const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
-    async () =>
-      client.getDataStreamsDegradedStats({
-        start: defaultTimeRange.from,
-        end: defaultTimeRange.to,
-      }),
-    []
+  const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+
+  const {
+    inactive: showInactiveDatasets,
+    fullNames: showFullDatasetNames,
+    timeRange,
+    integrations,
+    query,
+  } = useSelector(service, (state) => state.context.filters);
+
+  const flyout = useSelector(service, (state) => state.context.flyout);
+
+  const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const loadingDegradedStats = useSelector(service, (state) =>
+    state.matches('degradedDocs.fetching')
+  );
+
+  const datasets = useSelector(service, (state) => state.context.datasets);
+
+  const isDatasetQualityPageIdle = useSelector(service, (state) =>
+    state.matches('datasets.loaded.idle')
+  );
+
+  const toggleInactiveDatasets = useCallback(
+    () => service.send({ type: 'TOGGLE_INACTIVE_DATASETS' }),
+    [service]
+  );
+
+  const toggleFullDatasetNames = useCallback(
+    () => service.send({ type: 'TOGGLE_FULL_DATASET_NAMES' }),
+    [service]
+  );
+
+  const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
+  const openFlyout = useCallback(
+    (selectedDataset: FlyoutDataset) => {
+      if (flyout?.dataset?.rawName === selectedDataset.rawName) {
+        service.send({
+          type: 'CLOSE_FLYOUT',
+        });
+
+        return;
+      }
+
+      if (isDatasetQualityPageIdle) {
+        service.send({
+          type: 'OPEN_FLYOUT',
+          dataset: selectedDataset,
+        });
+        return;
+      }
+
+      service.send({
+        type: 'SELECT_NEW_DATASET',
+        dataset: selectedDataset,
+      });
+    },
+    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
+  );
+
+  const isActive = useCallback(
+    (lastActivity: number) => isActiveDataset({ lastActivity, timeRange }),
+    [timeRange]
   );
 
   const columns = useMemo(
-    () => getDatasetQualitTableColumns({ fieldFormats, loadingDegradedStats }),
-    [fieldFormats, loadingDegradedStats]
+    () =>
+      getDatasetQualityTableColumns({
+        fieldFormats,
+        selectedDataset: flyout?.dataset,
+        openFlyout,
+        loadingDegradedStats,
+        showFullDatasetNames,
+        isActiveDataset: isActive,
+      }),
+    [
+      fieldFormats,
+      flyout?.dataset,
+      openFlyout,
+      loadingDegradedStats,
+      showFullDatasetNames,
+      isActive,
+    ]
   );
 
+  const filteredItems = useMemo(() => {
+    const visibleDatasets = showInactiveDatasets
+      ? datasets
+      : filterInactiveDatasets({ datasets, timeRange });
+
+    const filteredByIntegrations =
+      integrations.length > 0
+        ? visibleDatasets.filter((dataset) => {
+            if (!dataset.integration && integrations.includes(NONE)) {
+              return true;
+            }
+
+            return dataset.integration && integrations.includes(dataset.integration.name);
+          })
+        : visibleDatasets;
+
+    return query
+      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
+      : filteredByIntegrations;
+  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
+
   const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: data.length,
+    pageIndex: page,
+    pageSize: rowsPerPage,
+    totalItemCount: filteredItems.length,
     hidePerPageOptions: true,
   };
 
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort?: { field: SORT_FIELD; direction: DIRECTION };
+      sort?: { field: SortField; direction: Direction };
     }) => {
-      setPageIndex(options.page.index);
-      setPageSize(options.page.size);
-      setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
-      setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
+      service.send({
+        type: 'UPDATE_TABLE_CRITERIA',
+        criteria: {
+          page: options.page.index,
+          rowsPerPage: options.page.size,
+          sort: {
+            field: options.sort?.field || DEFAULT_SORT_FIELD,
+            direction: options.sort?.direction || DEFAULT_SORT_DIRECTION,
+          },
+        },
+      });
     },
-    []
+    [service]
   );
 
-  const sort = {
-    sort: { field: sortField, direction: sortDirection },
-  };
-
   const renderedItems = useMemo(() => {
-    const overridenSortingField = sortingOverrides[sortField] || sortField;
-    const mergedData = data.map((dataStream) => {
-      const degradedDocs = find(degradedStats, { dataset: dataStream.name });
+    const overridenSortingField = sortingOverrides[sort.field] || sort.field;
+    const sortedItems = orderBy(filteredItems, overridenSortingField, sort.direction);
 
-      return {
-        ...dataStream,
-        degradedDocs: degradedDocs?.percentage,
-      };
-    });
-
-    const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
-
-    return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, degradedStats, sortField, sortDirection, pageIndex, pageSize]);
+    return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  }, [sort.field, sort.direction, filteredItems, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
-    const endNumberItemsOnPage = pageSize * pageIndex + renderedItems.length;
+    const startNumberItemsOnPage = rowsPerPage * page + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
-    return pageSize === 0 ? (
+    return rowsPerPage === 0 ? (
       <strong>{tableSummaryAllText}</strong>
     ) : (
       <>
         <strong>
           {startNumberItemsOnPage}-{endNumberItemsOnPage}
         </strong>{' '}
-        {tableSummaryOfText} {data.length}
+        {tableSummaryOfText} {datasets.length}
       </>
     );
-  }, [data.length, pageIndex, pageSize, renderedItems.length]);
+  }, [rowsPerPage, page, renderedItems.length, datasets.length]);
 
   return {
-    sort,
+    sort: { sort },
     onTableChange,
     pagination,
     renderedItems,
     columns,
     loading,
     resultsCount,
+    closeFlyout,
+    selectedDataset: flyout?.dataset,
+    showInactiveDatasets,
+    showFullDatasetNames,
+    toggleInactiveDatasets,
+    toggleFullDatasetNames,
   };
 };

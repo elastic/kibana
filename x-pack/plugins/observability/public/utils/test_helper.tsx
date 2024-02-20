@@ -34,7 +34,6 @@ const defaultConfig: ConfigSchema = {
     alertDetails: {
       metrics: { enabled: false },
       uptime: { enabled: false },
-      observability: { enabled: false },
     },
   },
 };
@@ -62,6 +61,7 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
           exploratoryView: {
             createExploratoryViewUrl: jest.fn(),
             getAppDataView: jest.fn(),
+            // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
             ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
           },
         }}

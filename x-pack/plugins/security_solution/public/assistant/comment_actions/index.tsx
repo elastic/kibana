@@ -17,7 +17,7 @@ import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
 import { TimelineId } from '../../../common/types';
 import { updateAndAssociateNode } from '../../timelines/components/notes/helpers';
-import { timelineActions } from '../../timelines/store/timeline';
+import { timelineActions } from '../../timelines/store';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 

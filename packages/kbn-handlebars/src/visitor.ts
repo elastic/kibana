@@ -405,6 +405,18 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return this.resolvePath(data, path);
   }
 
+  private pushToOutputWithEscapeCheck(result: any, node: ProcessableNodeWithPathParts) {
+    if (
+      !(node as hbs.AST.MustacheStatement).escaped ||
+      this.compileOptions.noEscape === true ||
+      typeof result !== 'string'
+    ) {
+      this.output.push(result);
+    } else {
+      this.output.push(Handlebars.escapeExpression(result));
+    }
+  }
+
   private processSimpleNode(node: ProcessableNodeWithPathParts) {
     const path = node.path;
     // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
@@ -415,7 +427,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     if (isBlock(node)) {
       this.blockValue(node, lambdaResult);
     } else {
-      this.output.push(lambdaResult);
+      this.pushToOutputWithEscapeCheck(lambdaResult, node);
     }
   }
 
@@ -435,7 +447,6 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private processHelperNode(node: ProcessableNodeWithPathParts) {
     const path = node.path;
     const name = path.parts[0];
-
     if (this.compileOptions.knownHelpers && this.compileOptions.knownHelpers[name]) {
       this.invokeKnownHelper(node);
     } else if (this.compileOptions.knownHelpersOnly) {
@@ -455,7 +466,8 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const helper = this.setupHelper(node, name);
     // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
     const result = helper.fn!.call(helper.context, ...helper.params, helper.options);
-    this.output.push(result);
+
+    this.pushToOutputWithEscapeCheck(result, node);
   }
 
   // Pops off the helper's parameters, invokes the helper,
@@ -482,7 +494,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
     const result = helper.fn!.call(helper.context, ...helper.params, helper.options);
 
-    this.output.push(result);
+    this.pushToOutputWithEscapeCheck(result, node);
   }
 
   private invokePartial(partial: hbs.AST.PartialStatement | hbs.AST.PartialBlockStatement) {

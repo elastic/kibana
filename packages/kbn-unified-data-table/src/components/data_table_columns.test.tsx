@@ -8,7 +8,9 @@
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import React from 'react';
 import {
+  deserializeHeaderRowHeight,
   getEuiGridColumns,
   getVisibleColumns,
   hasSourceTimeFieldValue,
@@ -17,6 +19,7 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
+import { ROWS_HEIGHT_OPTIONS } from '../constants';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
@@ -37,6 +40,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -58,6 +62,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -79,6 +84,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -255,6 +261,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -281,6 +288,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -309,6 +317,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -338,6 +347,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -350,6 +360,69 @@ describe('Data table columns', function () {
         },
       });
       expect(gridColumns[1].schema).toBe('numeric');
+    });
+
+    it('returns columns in correct format when column customisation is provided', async () => {
+      const gridColumns = getEuiGridColumns({
+        columns,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+      });
+
+      const extensionGridColumn = gridColumns[0];
+      extensionGridColumn.display = <span>test</span>;
+      const customGridColumnsConfiguration = {
+        extension: () => extensionGridColumn,
+      };
+
+      const customizedGridColumns = getEuiGridColumns({
+        columns,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        customGridColumnsConfiguration,
+      });
+
+      expect(customizedGridColumns).toMatchSnapshot();
+    });
+  });
+
+  describe('deserializeHeaderRowHeight', () => {
+    it('returns undefined for auto', () => {
+      expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.auto)).toBe(undefined);
+    });
+
+    it('returns 1 for single', () => {
+      expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.single)).toBe(1);
+    });
+
+    it('returns the value for other values', () => {
+      expect(deserializeHeaderRowHeight(2)).toBe(2);
     });
   });
 });

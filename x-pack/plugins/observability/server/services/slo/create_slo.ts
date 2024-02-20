@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -83,6 +84,32 @@ export class CreateSLO {
     return this.toResponse(slo);
   }
 
+  public inspect(params: CreateSLOParams): {
+    slo: CreateSLOParams;
+    pipeline: Record<string, any>;
+    rollUpTransform: TransformPutTransformRequest;
+    summaryTransform: TransformPutTransformRequest;
+    temporaryDoc: Record<string, any>;
+  } {
+    const slo = this.toSLO(params);
+    validateSLO(slo);
+
+    const rollUpTransform = this.transformManager.inspect(slo);
+    const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId);
+
+    const summaryTransform = this.summaryTransformManager.inspect(slo);
+
+    const temporaryDoc = createTempSummaryDocument(slo, this.spaceId);
+
+    return {
+      pipeline,
+      temporaryDoc,
+      summaryTransform,
+      rollUpTransform,
+      slo,
+    };
+  }
+
   private toSLO(params: CreateSLOParams): SLO {
     const now = new Date();
     return {
@@ -92,7 +119,7 @@ export class CreateSLO {
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
-      revision: 1,
+      revision: params.revision ?? 1,
       enabled: true,
       tags: params.tags ?? [],
       createdAt: now,

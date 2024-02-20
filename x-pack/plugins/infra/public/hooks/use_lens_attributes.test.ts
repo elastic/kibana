@@ -8,37 +8,28 @@
 import 'jest-canvas-mock';
 import { renderHook } from '@testing-library/react-hooks';
 import { useLensAttributes } from './use_lens_attributes';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps } from '../types';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
+import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 
 jest.mock('@kbn/kibana-react-plugin/public');
+
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+jest.mock('@kbn/lens-embeddable-utils/config_builder');
+const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 
-const mockDataView = {
-  id: 'mock-id',
-  title: 'mock-title',
-  timeFieldName: '@timestamp',
-  isPersisted: () => false,
-  getName: () => 'mock-data-view',
-  toSpec: () => ({}),
-  fields: [],
-  metaFields: [],
-} as unknown as jest.Mocked<DataView>;
-
-const normalizedLoad1m = {
+const normalizedLoad1m: LensBaseLayer = {
   label: 'Normalized Load',
   value: 'average(system.load.1) / max(system.load.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
+  format: 'percent',
+  decimals: 0,
 };
 
 const lensPluginMockStart = lensPluginMock.createStartContract();
@@ -46,174 +37,49 @@ const mockUseKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...coreMock.createStart(),
+      dataViews: { ...dataViewPluginMocks.createStartContract() },
       lens: { ...lensPluginMockStart },
     } as Partial<CoreStart> & Partial<InfraClientStartDeps>,
   } as unknown as KibanaReactContextValue<Partial<CoreStart> & Partial<InfraClientStartDeps>>);
 };
 
-describe('useHostTable hook', () => {
+describe('useLensAttributes hook', () => {
+  const params: LensConfig = {
+    chartType: 'xy',
+    layers: [
+      {
+        type: 'series',
+        yAxis: [normalizedLoad1m],
+        xAxis: '@timestamp',
+        seriesType: 'line',
+      },
+      {
+        type: 'reference',
+        yAxis: [
+          {
+            value: '1',
+          },
+        ],
+      },
+    ],
+    title: 'Injected Normalized Load',
+    dataset: {
+      index: 'mock-id',
+    },
+  };
   beforeEach(() => {
     mockUseKibana();
   });
 
   it('should return the basic lens attributes', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useLensAttributes({
-        visualizationType: 'lnsXY',
-        layers: [
-          {
-            data: [normalizedLoad1m],
-            options: {
-              buckets: {
-                type: 'date_histogram',
-              },
-              breakdown: {
-                field: 'host.name',
-                type: 'top_values',
-                params: {
-                  size: 10,
-                },
-              },
-            },
-            layerType: 'data',
-          },
-          {
-            data: [
-              {
-                value: '1',
-                format: {
-                  id: 'percent',
-                  params: {
-                    decimals: 0,
-                  },
-                },
-              },
-            ],
-            layerType: 'referenceLine',
-          },
-        ],
-        title: 'Injected Normalized Load',
-        dataView: mockDataView,
-      })
-    );
+    const { waitForNextUpdate } = renderHook(() => useLensAttributes(params));
     await waitForNextUpdate();
 
-    const { state, title } = result.current.attributes ?? {};
-    const { datasourceStates } = state ?? {};
-
-    expect(title).toBe('Injected Normalized Load');
-    expect(datasourceStates).toEqual({
-      formBased: {
-        layers: {
-          layer_0: {
-            columnOrder: ['aggs_breakdown', 'x_date_histogram', 'formula_accessor_0_0'],
-            columns: {
-              aggs_breakdown: {
-                dataType: 'string',
-                isBucketed: true,
-                label: 'Top 10 values of host.name',
-                operationType: 'terms',
-                params: {
-                  exclude: [],
-                  excludeIsRegex: false,
-                  include: [],
-                  includeIsRegex: false,
-                  missingBucket: false,
-                  orderBy: {
-                    fallback: false,
-                    type: 'alphabetical',
-                  },
-                  orderDirection: 'asc',
-                  otherBucket: false,
-                  parentFormat: {
-                    id: 'terms',
-                  },
-                  size: 10,
-                },
-                scale: 'ordinal',
-                sourceField: 'host.name',
-              },
-              x_date_histogram: {
-                dataType: 'date',
-                isBucketed: true,
-                label: '@timestamp',
-                operationType: 'date_histogram',
-                params: {
-                  interval: 'auto',
-                },
-                scale: 'interval',
-                sourceField: '@timestamp',
-              },
-              formula_accessor_0_0: {
-                customLabel: true,
-                dataType: 'number',
-                filter: undefined,
-                isBucketed: false,
-                label: 'Normalized Load',
-                operationType: 'formula',
-                params: {
-                  format: {
-                    id: 'percent',
-                    params: {
-                      decimals: 0,
-                    },
-                  },
-                  formula: 'average(system.load.1) / max(system.load.cores)',
-                  isFormulaBroken: true,
-                },
-                reducedTimeRange: undefined,
-                references: [],
-                timeScale: undefined,
-              },
-            },
-            indexPatternId: 'mock-id',
-          },
-          layer_1_reference: {
-            columnOrder: ['formula_accessor_1_0_reference_column'],
-            columns: {
-              formula_accessor_1_0_reference_column: {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                isStaticValue: true,
-                label: 'Reference',
-                operationType: 'static_value',
-                params: {
-                  format: {
-                    id: 'percent',
-                    params: {
-                      decimals: 0,
-                    },
-                  },
-                  value: '1',
-                },
-                references: [],
-                scale: 'ratio',
-              },
-            },
-            incompleteColumns: {},
-            linkToLayers: [],
-            sampling: 1,
-          },
-        },
-      },
-    });
+    expect(LensConfigBuilderMock.mock.instances[0].build).toHaveBeenCalledWith(params);
   });
 
   it('should return extra actions', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useLensAttributes({
-        title: 'Chart',
-        visualizationType: 'lnsXY',
-        layers: [
-          {
-            data: [normalizedLoad1m],
-            layerType: 'data',
-          },
-        ],
-        dataView: mockDataView,
-      })
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useLensAttributes(params));
     await waitForNextUpdate();
 
     const extraActions = result.current.getExtraActions({

@@ -10,20 +10,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import { ObservabilitySharedStart } from '../../../plugin';
 
-export interface ProfilingEmbeddableProps<T> {
-  data?: T;
-  embeddableFactoryId: string;
-  isLoading: boolean;
-  height?: string;
-}
-
 export function ProfilingEmbeddable<T>({
   embeddableFactoryId,
-  data,
-  isLoading,
   height,
   ...props
-}: ProfilingEmbeddableProps<T>) {
+}: T & { embeddableFactoryId: string; height?: string }) {
   const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
   const [embeddable, setEmbeddable] = useState<any>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -31,11 +22,7 @@ export function ProfilingEmbeddable<T>({
   useEffect(() => {
     async function createEmbeddable() {
       const factory = embeddablePlugin?.getEmbeddableFactory(embeddableFactoryId);
-      const input = {
-        id: 'embeddable_profiling',
-        data,
-        isLoading,
-      };
+      const input = { ...props, id: 'embeddable_profiling' };
       const embeddableObject = await factory?.create(input);
       setEmbeddable(embeddableObject);
     }
@@ -51,14 +38,10 @@ export function ProfilingEmbeddable<T>({
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.updateInput({
-        data,
-        isLoading,
-        ...props,
-      });
+      embeddable.updateInput(props);
       embeddable.reload();
     }
-  }, [data, embeddable, isLoading, props]);
+  }, [embeddable, props]);
 
   return (
     <div

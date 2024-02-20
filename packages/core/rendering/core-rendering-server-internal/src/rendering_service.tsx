@@ -38,6 +38,7 @@ import {
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
   getScriptPaths,
+  getBrowserLoggingConfig,
 } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
@@ -194,13 +195,13 @@ export class RenderingService {
       });
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
-      buildNum,
     });
     const scriptPaths = getScriptPaths({
       darkMode,
       baseHref: staticAssetsHrefBase,
-      buildNum,
     });
+
+    const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
@@ -228,6 +229,7 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
+        logging: loggingConfig,
         env,
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,

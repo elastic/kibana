@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { KibanaUtilsSetup, KibanaUtilsStart } from './plugin';
+import { KibanaUtilsPublicSetup, KibanaUtilsPublicStart } from './plugin';
 
-export type Setup = jest.Mocked<KibanaUtilsSetup>;
-export type Start = jest.Mocked<KibanaUtilsStart>;
+export type Setup = jest.Mocked<KibanaUtilsPublicSetup>;
+export type Start = jest.Mocked<KibanaUtilsPublicStart>;
 
 const createSetupContract = (): Setup => {
-  return {
-    setVersion: jest.fn(),
-  };
+  return undefined;
 };
 
 const createStartContract = (): Start => {

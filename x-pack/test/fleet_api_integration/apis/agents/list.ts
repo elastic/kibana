@@ -17,10 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
-  // Failing: See https://github.com/elastic/kibana/issues/170690
-  // Failing: See https://github.com/elastic/kibana/issues/170690
-  // Failing: See https://github.com/elastic/kibana/issues/170690
-  describe.skip('fleet_list_agent', () => {
+
+  describe('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest
@@ -89,11 +87,11 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return a 400 when given an invalid "kuery" value', async () => {
+    it('with enableStrictKQLValidation should return a 400 when given an invalid "kuery" value', async () => {
       await supertest.get(`/api/fleet/agents?kuery='test%3A'`).expect(400);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
@@ -159,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
             dataset: 'elastic_agent.elastic_agent',
           },
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component1' },
           system: {
             process: {
               memory: {
@@ -179,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         document: {
           '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component2' },
           data_stream: {
             namespace: 'default',
             type: 'metrics',

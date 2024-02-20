@@ -21,14 +21,14 @@ export const ORG_ID_LABEL = i18n.translate('xpack.stackConnectors.components.res
 export const API_KEY_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.resilient.apiKeyId',
   {
-    defaultMessage: 'API Key ID',
+    defaultMessage: 'API key ID',
   }
 );
 
 export const API_KEY_SECRET_LABEL = i18n.translate(
   'xpack.stackConnectors.components.resilient.apiKeySecret',
   {
-    defaultMessage: 'API Key Secret',
+    defaultMessage: 'API key secret',
   }
 );
 

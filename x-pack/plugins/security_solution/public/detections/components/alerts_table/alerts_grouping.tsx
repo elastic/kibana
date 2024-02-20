@@ -76,8 +76,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
 
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
-      onGroupChange: (param: { groupByField: string; tableId: string }) => {
-        telemetry.reportAlertsGroupingChanged(param);
+      onGroupChange: ({ groupByField, tableId }: { groupByField: string; tableId: string }) => {
+        telemetry.reportAlertsGroupingChanged({ groupByField, tableId });
       },
       onGroupToggle: (param: {
         isOpen: boolean;
@@ -116,8 +116,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onOptionsChange,
     tracker: track,
   });
-
-  const groupInRedux = useDeepEqualSelector((state) => groupIdSelector()(state, props.tableId));
+  const groupId = useMemo(() => groupIdSelector(), []);
+  const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
   useEffect(() => {
     // only ever set to `none` - siem only handles group selector when `none` is selected
     if (isNoneGroup(selectedGroups)) {

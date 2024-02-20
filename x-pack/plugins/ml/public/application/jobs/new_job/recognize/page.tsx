@@ -234,21 +234,22 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         );
       } catch (e) {
         setSaveState(SAVE_STATE.FAILED);
-        // eslint-disable-next-line no-console
-        console.error('Error setting up module', e);
         const { toasts } = notifications;
-        toasts.addDanger({
+        toasts.addError(e, {
           title: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningTitle', {
             defaultMessage: 'Error setting up module {moduleId}',
             values: { moduleId },
           }),
-          text: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription', {
-            defaultMessage:
-              'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
-            values: {
-              count: jobs.length,
-            },
-          }),
+          toastMessage: i18n.translate(
+            'xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription',
+            {
+              defaultMessage:
+                'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+              values: {
+                count: jobs.length,
+              },
+            }
+          ),
         });
       }
     },

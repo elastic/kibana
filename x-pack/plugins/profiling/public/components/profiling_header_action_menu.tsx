@@ -17,7 +17,6 @@ import qs from 'query-string';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import url from 'url';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view';
 
@@ -81,7 +80,6 @@ export function ProfilingHeaderActionMenu() {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
-      <ObservabilityAIAssistantActionMenuItem />
     </EuiHeaderLinks>
   );
 }

@@ -19,7 +19,6 @@ import {
   EuiTabbedContentTab,
   EuiTitle,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -131,27 +130,15 @@ export const ConfigurePipeline: React.FC = () => {
                 <EuiSpacer />
               </>
             )}
-            <EuiSpacer size="s" />
-            <EuiTitle size="xxxs">
-              <h6>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
-                  { defaultMessage: 'Select a trained ML Model' }
-                )}
-              </h6>
-            </EuiTitle>
-            {formErrors.modelStatus !== undefined && (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiText size="xs">
-                  <p>
-                    <EuiTextColor color="danger">{formErrors.modelStatus}</EuiTextColor>
-                  </p>
-                </EuiText>
-              </>
-            )}
-            <EuiSpacer size="xs" />
-            <ModelSelect />
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
+                { defaultMessage: 'Select a trained ML Model' }
+              )}
+            >
+              <ModelSelect />
+            </EuiFormRow>
           </EuiForm>
         </>
       ),

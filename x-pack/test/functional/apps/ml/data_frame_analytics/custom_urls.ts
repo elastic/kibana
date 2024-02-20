@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.api.createAndRunDFAJob(dfaJobConfig);
+      await ml.api.createAndRunDFAJob(dfaJobConfig, 3 * 60 * 1000);
     });
 
     after(async () => {

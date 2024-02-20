@@ -13,7 +13,6 @@ describe('getScriptPaths', () => {
     expect(
       getScriptPaths({
         baseHref: '/base-path',
-        buildNum: 17,
         darkMode: 'system',
       })
     ).toEqual(['/base-path/ui/legacy_theme.js']);
@@ -23,7 +22,6 @@ describe('getScriptPaths', () => {
     expect(
       getScriptPaths({
         baseHref: '/base-path',
-        buildNum: 17,
         darkMode: true,
       })
     ).toEqual([]);
@@ -33,7 +31,6 @@ describe('getScriptPaths', () => {
     expect(
       getScriptPaths({
         baseHref: '/base-path',
-        buildNum: 17,
         darkMode: false,
       })
     ).toEqual([]);
@@ -45,7 +42,6 @@ describe('getCommonStylesheetPaths', () => {
     expect(
       getCommonStylesheetPaths({
         baseHref: '/base-path',
-        buildNum: 17,
       })
     ).toMatchInlineSnapshot(`
       Array [
@@ -64,13 +60,16 @@ describe('getStylesheetPaths', () => {
           getThemeStylesheetPaths({
             darkMode: true,
             themeVersion: 'v8',
-            baseHref: '/base-path',
+            baseHref: '/base-path/buildShaShort',
             buildNum: 17,
           })
         ).toMatchInlineSnapshot(`
           Array [
             "/base-path/17/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.dark.css",
             "/base-path/ui/legacy_dark_theme.min.css",
+            "/base-path/buildShaShort/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.dark.css",
+            "/base-path/buildShaShort/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
+            "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
           ]
         `);
       });
@@ -83,7 +82,7 @@ describe('getStylesheetPaths', () => {
           getThemeStylesheetPaths({
             darkMode: false,
             themeVersion: 'v8',
-            baseHref: '/base-path',
+            baseHref: '/base-path/buildShaShort',
             buildNum: 69,
           })
         ).toMatchInlineSnapshot(`

@@ -24,7 +24,7 @@ import { Unsubscribe } from 'redux';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter } from '@kbn/es-query';
+import { Query, type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -344,14 +344,14 @@ export class MapEmbeddable
     return getLayerList(this._savedMap.getStore().getState());
   }
 
-  public async getFilters() {
+  public getFilters() {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );
     return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
 
-  public async getQuery() {
+  public getQuery(): Query | undefined {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );

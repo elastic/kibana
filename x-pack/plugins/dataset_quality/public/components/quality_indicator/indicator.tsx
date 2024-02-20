@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import { EuiHealth } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { InfoIndicators, QualityIndicators } from '../common';
 
-export function QualityIndicator({ quality }: { quality: 'good' | 'degraded' | 'poor' }) {
-  const { euiTheme } = useEuiTheme();
-
-  const qualityColors = {
-    poor: euiTheme.colors.dangerText,
-    degraded: euiTheme.colors.warningText,
-    good: euiTheme.colors.successText,
+export function QualityIndicator({
+  quality,
+  description,
+}: {
+  quality: QualityIndicators;
+  description: string | ReactNode;
+}) {
+  const qualityColors: Record<QualityIndicators, InfoIndicators> = {
+    poor: 'danger',
+    degraded: 'warning',
+    good: 'success',
   };
 
-  return <EuiIcon type="dot" color={qualityColors[quality]} />;
+  return <EuiHealth color={qualityColors[quality]}>{description}</EuiHealth>;
 }

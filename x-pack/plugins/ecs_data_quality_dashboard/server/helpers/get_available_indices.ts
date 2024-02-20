@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const getRequestBody = ({
   indexPattern,

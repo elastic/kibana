@@ -54,7 +54,8 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
-interface DiscoverStateContainerParams {
+
+export interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
@@ -182,7 +183,7 @@ export interface DiscoverStateContainer {
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
-    onChangeDataView: (id: string) => Promise<void>;
+    onChangeDataView: (id: string | DataView) => Promise<void>;
     /**
      * Set the currently selected data view
      * @param dataView
@@ -356,6 +357,7 @@ export function getDiscoverStateContainer({
       dataStateContainer,
       internalStateContainer,
       savedSearchContainer,
+      globalStateContainer,
       services,
       setDataView,
     });
@@ -570,6 +572,7 @@ function createUrlGeneratorState({
       : data.query.timefilter.timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     columns: appState.columns,
+    grid: appState.grid,
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,

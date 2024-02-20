@@ -17,6 +17,7 @@ import { fixEslint } from './lib/fix_eslint';
 import { formatOutput } from './lib/format_output';
 import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
+import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
 import type { OpenApiDocument } from './parser/openapi_types';
 import { initTemplateService, TemplateName } from './template_service/template_service';
@@ -25,10 +26,18 @@ export interface GeneratorConfig {
   rootDir: string;
   sourceGlob: string;
   templateName: TemplateName;
+  skipLinting?: boolean;
 }
 
 export const generate = async (config: GeneratorConfig) => {
-  const { rootDir, sourceGlob, templateName } = config;
+  const { rootDir, sourceGlob, templateName, skipLinting } = config;
+
+  if (!skipLinting) {
+    await lint({
+      rootDir,
+      sourceGlob,
+    });
+  }
 
   console.log(chalk.bold(`Generating API route schemas`));
   console.log(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { takeRight } from 'lodash';
 import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
 import type {
   ActionGroup,
@@ -15,7 +16,11 @@ import type {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import {
+  AlertsClientError,
+  IRuleTypeAlerts,
+  RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -53,7 +58,7 @@ export type AnomalyDetectionAlertBaseContext = AlertInstanceContext & {
 // Flattened alert payload for alert-as-data
 export type AnomalyDetectionAlertPayload = {
   job_id: string;
-  anomaly_score?: number;
+  anomaly_score?: number[];
   is_interim?: boolean;
   anomaly_timestamp?: number;
   top_records?: any;
@@ -87,6 +92,8 @@ export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
 
 export const ANOMALY_DETECTION_AAD_INDEX_NAME = 'ml.anomaly-detection';
 
+const ANOMALY_SCORE_HISTORY_LIMIT = 20;
+
 export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
   context: ANOMALY_DETECTION_AAD_INDEX_NAME,
   mappings: {
@@ -96,7 +103,7 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
         array: false,
         required: true,
       },
-      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.DOUBLE, array: false, required: false },
+      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.DOUBLE, array: true, required: false },
       [ALERT_ANOMALY_IS_INTERIM]: { type: ES_FIELD_TYPES.BOOLEAN, array: false, required: false },
       [ALERT_ANOMALY_TIMESTAMP]: { type: ES_FIELD_TYPES.DATE, array: false, required: false },
       [ALERT_TOP_RECORDS]: {
@@ -166,12 +173,18 @@ export function registerAnomalyDetectionAlertType({
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
-      defaultMessage: 'Anomaly detection alert',
+      defaultMessage: 'Anomaly detection',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
     validate: {
       params: mlAnomalyDetectionAlertParams,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: mlAnomalyDetectionAlertParams,
+      },
     },
     actionVariables: {
       context: [
@@ -249,7 +262,9 @@ export function registerAnomalyDetectionAlertType({
       );
 
       const { alertsClient } = services;
-      if (!alertsClient) return { state: {} };
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
       const executionResult = await execute(params, spaceId);
 
@@ -258,20 +273,42 @@ export function registerAnomalyDetectionAlertType({
       const { isHealthy, name, context, payload } = executionResult;
 
       if (!isHealthy) {
-        alertsClient.report({
+        const { alertDoc } = alertsClient.report({
           id: name,
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
+        });
+
+        let resultPayload = {
+          [ALERT_URL]: payload[ALERT_URL],
+          [ALERT_REASON]: payload[ALERT_REASON],
+          [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
+          [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
+          [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
+          [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
+          [ALERT_TOP_RECORDS]: payload.top_records,
+          [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
+          [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
+        };
+
+        if (alertDoc) {
+          let anomalyScore = alertDoc[ALERT_ANOMALY_SCORE] ?? [];
+          if (typeof anomalyScore === 'number') {
+            // alert doc has been created before 8.13 with the latest anomaly score only
+            anomalyScore = [anomalyScore];
+          }
+          resultPayload = {
+            ...resultPayload,
+            [ALERT_ANOMALY_SCORE]: takeRight(
+              [...anomalyScore, ...(payload.anomaly_score ?? [])],
+              ANOMALY_SCORE_HISTORY_LIMIT
+            ),
+          };
+        }
+
+        alertsClient.setAlertData({
+          id: name,
           context,
-          payload: {
-            [ALERT_URL]: payload[ALERT_URL],
-            [ALERT_REASON]: payload[ALERT_REASON],
-            [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
-            [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
-            [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
-            [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
-            [ALERT_TOP_RECORDS]: payload.top_records,
-            [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-          },
+          payload: resultPayload,
         });
       }
 

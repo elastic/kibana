@@ -22,10 +22,10 @@ import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData } from '../plugin';
+import { PluginsStart, ClientData, ESConfig } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
@@ -50,7 +50,7 @@ export const renderApp = (
     params: AppMountParameters;
     plugins: PluginsStart;
   },
-  { config, data }: { config: ClientConfigType; data: ClientData }
+  { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
   const {
     access,
@@ -66,7 +66,7 @@ export const renderApp = (
     workplaceSearch,
   } = data;
   const { history } = params;
-  const { application, chrome, http, uiSettings } = core;
+  const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
   const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
@@ -106,6 +106,8 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    console: plugins.console,
+    esConfig,
     data: plugins.data,
     guidedOnboarding,
     history,
@@ -136,7 +138,7 @@ export const renderApp = (
     http,
     readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
 
   ReactDOM.render(
     <I18nProvider>
@@ -156,7 +158,6 @@ export const renderApp = (
                   searchOAuth={searchOAuth}
                   workplaceSearch={workplaceSearch}
                 />
-                <Toasts />
               </Router>
             </Provider>
           </CloudContext>
@@ -198,5 +199,5 @@ export const renderHeaderActions = (
     </I18nProvider>,
     kibanaHeaderEl
   );
-  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
+  return () => ReactDOM.render(<></>, kibanaHeaderEl);
 };

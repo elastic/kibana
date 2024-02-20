@@ -6,7 +6,6 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { MaintenanceWindow } from '../../pages/maintenance_windows/types';
 import { updateMaintenanceWindow } from './update';
 
 const http = httpServiceMock.createStartContract();
@@ -28,7 +27,7 @@ describe('updateMaintenanceWindow', () => {
     };
     http.post.mockResolvedValueOnce(apiResponse);
 
-    const maintenanceWindow: MaintenanceWindow = {
+    const updateParams = {
       title: 'test',
       duration: 1,
       rRule: {
@@ -43,9 +42,9 @@ describe('updateMaintenanceWindow', () => {
     const result = await updateMaintenanceWindow({
       http,
       maintenanceWindowId: '123',
-      maintenanceWindow,
+      updateParams,
     });
-    expect(result).toEqual(maintenanceWindow);
+    expect(result).toEqual(updateParams);
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/maintenance_window/123",

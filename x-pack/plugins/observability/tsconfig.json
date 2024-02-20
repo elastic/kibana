@@ -96,7 +96,19 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/serverless",
     "@kbn/dashboard-plugin",
-    "@kbn/calculate-auto"
+    "@kbn/calculate-auto",
+    "@kbn/presentation-util-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/es-types",
+    "@kbn/ingest-pipelines-plugin",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/field-formats-plugin",
+    "@kbn/aiops-utils",
+    "@kbn/event-annotation-common",
+    "@kbn/controls-plugin",
+    "@kbn/core-lifecycle-browser"
   ],
   "exclude": [
     "target/**/*"

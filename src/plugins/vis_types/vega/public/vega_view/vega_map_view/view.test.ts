@@ -24,7 +24,7 @@ import {
   setInjectedVars,
   setData,
   setNotifications,
-  setUISettings,
+  setThemeService,
   setDataViews,
 } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
@@ -121,7 +121,7 @@ describe('vega_map_view/view', () => {
     setData(dataPluginStart);
     setDataViews(dataViewsStart);
     setNotifications(coreStart.notifications);
-    setUISettings(coreStart.uiSettings);
+    setThemeService(coreStart.theme);
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();

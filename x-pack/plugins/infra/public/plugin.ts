@@ -10,9 +10,9 @@ import {
   type AppUpdater,
   type CoreStart,
   type AppDeepLink,
-  AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
@@ -27,8 +27,8 @@ import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embedd
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
   type InfraLocators,
-  LogsLocatorDefinition,
-  NodeLogsLocatorDefinition,
+  InfraLogsLocatorDefinition,
+  InfraNodeLogsLocatorDefinition,
 } from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
@@ -128,7 +128,7 @@ export class Plugin implements InfraClientPluginClass {
                       entries: [
                         {
                           label: 'Explorer',
-                          app: 'observability-log-explorer',
+                          app: 'observability-logs-explorer',
                           path: '/',
                           isBetaFeature: true,
                         },
@@ -179,13 +179,15 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     // Register Locators
-    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
-    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
-      new NodeLogsLocatorDefinition({ core })
-    );
+    const logsLocator = this.config.featureFlags.logsUIEnabled
+      ? pluginsSetup.share.url.locators.create(new InfraLogsLocatorDefinition({ core }))
+      : undefined;
+    const nodeLogsLocator = this.config.featureFlags.logsUIEnabled
+      ? pluginsSetup.share.url.locators.create(new InfraNodeLogsLocatorDefinition({ core }))
+      : undefined;
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core, logsLocator)
+      createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
 
     if (this.config.featureFlags.logsUIEnabled) {
@@ -247,9 +249,7 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const serverlessNavLinkStatus = this.isServerlessEnv
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden;
+      const visibleIn: AppDeepLinkLocations[] = this.isServerlessEnv ? ['globalSearch'] : [];
 
       return [
         {
@@ -258,7 +258,7 @@ export class Plugin implements InfraClientPluginClass {
             defaultMessage: 'Inventory',
           }),
           path: '/inventory',
-          navLinkStatus: serverlessNavLinkStatus,
+          visibleIn,
         },
         ...(hostsEnabled
           ? [
@@ -268,7 +268,7 @@ export class Plugin implements InfraClientPluginClass {
                   defaultMessage: 'Hosts',
                 }),
                 path: '/hosts',
-                navLinkStatus: serverlessNavLinkStatus,
+                visibleIn,
               },
             ]
           : []),
@@ -316,10 +316,15 @@ export class Plugin implements InfraClientPluginClass {
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp(
           coreStart,
-          { ...plugins, kibanaVersion: this.kibanaVersion, isCloudEnv, isServerlessEnv },
+          { ...plugins, licenseManagement: pluginsSetup.licenseManagement },
           pluginStart,
           this.config,
-          params
+          params,
+          {
+            kibanaVersion: this.kibanaVersion,
+            isCloudEnv,
+            isServerlessEnv,
+          }
         );
       },
     });
@@ -330,7 +335,7 @@ export class Plugin implements InfraClientPluginClass {
       id: 'infra',
       appRoute: '/app/infra',
       title: 'infra',
-      navLinkStatus: 3,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./apps/legacy_app');
 

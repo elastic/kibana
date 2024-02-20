@@ -6,6 +6,7 @@
  */
 
 import { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
 import type { LatestTaskStateSchema } from './task_state';
 
@@ -30,7 +31,7 @@ export const getHealth = async (
   const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
@@ -48,7 +49,7 @@ export const getHealth = async (
   const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Execute}`,
     fields: ['executionStatus'],
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
@@ -66,7 +67,7 @@ export const getHealth = async (
   const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Read}`,
     fields: ['executionStatus'],
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
@@ -84,7 +85,7 @@ export const getHealth = async (
   const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: 'not alert.attributes.executionStatus.status:error',
     fields: ['executionStatus'],
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     namespaces: ['*'],
@@ -107,7 +108,9 @@ export const getAlertingHealthStatus = async (
   savedObjects: SavedObjectsServiceStart,
   stateRuns: number
 ) => {
-  const alertingHealthStatus = await getHealth(savedObjects.createInternalRepository(['alert']));
+  const alertingHealthStatus = await getHealth(
+    savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])
+  );
   const state: LatestTaskStateSchema = {
     runs: stateRuns + 1,
     health_status: alertingHealthStatus.decryptionHealth.status,

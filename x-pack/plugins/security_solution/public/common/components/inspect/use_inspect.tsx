@@ -33,13 +33,14 @@ export const useInspect = ({
 }: UseInspectModalProps) => {
   const dispatch = useDispatch();
 
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { loading, inspect, selectedInspectIndex, isInspected } = useDeepEqualSelector((state) =>
-    inputId === InputsModelId.global
-      ? getGlobalQuery(state, queryId)
-      : getTimelineQuery(state, queryId)
-  );
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const { loading, inspect, selectedInspectIndex, isInspected, searchSessionId } =
+    useDeepEqualSelector((state) =>
+      inputId === InputsModelId.global
+        ? getGlobalQuery(state, queryId)
+        : getTimelineQuery(state, queryId)
+    );
 
   const handleClick = useCallback(() => {
     if (onClick) {
@@ -51,9 +52,10 @@ export const useInspect = ({
         inputId,
         isInspected: true,
         selectedInspectIndex: inspectIndex,
+        searchSessionId,
       })
     );
-  }, [onClick, dispatch, queryId, inputId, inspectIndex]);
+  }, [onClick, dispatch, queryId, inputId, inspectIndex, searchSessionId]);
 
   const handleCloseModal = useCallback(() => {
     if (onCloseInspect != null) {
@@ -65,29 +67,48 @@ export const useInspect = ({
         inputId,
         isInspected: false,
         selectedInspectIndex: inspectIndex,
+        searchSessionId,
       })
     );
-  }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex]);
+  }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex, searchSessionId]);
 
-  let request: string | null = null;
-  let additionalRequests: string[] | null = null;
-  if (inspect != null && inspect.dsl.length > 0) {
-    if (multiple) {
-      [request, ...additionalRequests] = inspect.dsl;
-    } else {
-      request = inspect.dsl[inspectIndex];
+  const request = useMemo(() => {
+    if (inspect != null && inspect.dsl.length > 0) {
+      if (multiple) {
+        return inspect.dsl[0];
+      } else {
+        return inspect.dsl[inspectIndex];
+      }
     }
-  }
+    return null;
+  }, [inspectIndex, multiple, inspect]);
 
-  let response: string | null = null;
-  let additionalResponses: string[] | null = null;
-  if (inspect != null && inspect.response.length > 0) {
+  const additionalRequests = useMemo(() => {
     if (multiple) {
-      [response, ...additionalResponses] = inspect.response;
+      return inspect?.dsl.slice(1);
     } else {
-      response = inspect.response[inspectIndex];
+      return null;
     }
-  }
+  }, [multiple, inspect]);
+
+  const response = useMemo(() => {
+    if (inspect != null && inspect.response.length > 0) {
+      if (multiple) {
+        return inspect.response[0];
+      } else {
+        return inspect.response[inspectIndex];
+      }
+    }
+    return null;
+  }, [inspectIndex, multiple, inspect]);
+
+  const additionalResponses = useMemo(() => {
+    if (multiple) {
+      return inspect?.response.slice(1);
+    } else {
+      return null;
+    }
+  }, [multiple, inspect]);
 
   const isShowingModal = useMemo(
     () => !loading && selectedInspectIndex === inspectIndex && isInspected,

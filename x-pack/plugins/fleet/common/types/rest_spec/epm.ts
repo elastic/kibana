@@ -217,6 +217,7 @@ export interface GetInputsTemplatesRequest {
   };
   query: {
     format: 'json' | 'yml' | 'yaml';
+    prerelease?: boolean;
   };
 }
 

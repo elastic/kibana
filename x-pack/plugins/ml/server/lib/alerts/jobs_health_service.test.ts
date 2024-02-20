@@ -254,6 +254,10 @@ describe('JobsHealthService', () => {
           message: 'No errors in the jobs messages.',
           results: [],
         },
+        payload: {
+          'kibana.alert.job_errors_results': [],
+          'kibana.alert.reason': 'No errors in the jobs messages.',
+        },
         isHealthy: true,
         name: 'Errors in job messages',
       },
@@ -310,6 +314,18 @@ describe('JobsHealthService', () => {
           ],
           message: 'Job test_job_01 is suffering from delayed data.',
         },
+        payload: {
+          'kibana.alert.delayed_data_results': [
+            {
+              annotation:
+                'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              job_id: 'test_job_01',
+              missed_docs_count: 11,
+            },
+          ],
+          'kibana.alert.reason': 'Job test_job_01 is suffering from delayed data.',
+        },
       },
     ]);
   });
@@ -365,6 +381,17 @@ describe('JobsHealthService', () => {
           ],
           message: 'Datafeed is not started for job test_job_02',
         },
+        payload: {
+          'kibana.alert.datafeed_results': [
+            {
+              datafeed_id: 'test_datafeed_02',
+              datafeed_state: 'stopped',
+              job_id: 'test_job_02',
+              job_state: 'opened',
+            },
+          ],
+          'kibana.alert.reason': 'Datafeed is not started for job test_job_02',
+        },
       },
       {
         isHealthy: false,
@@ -382,6 +409,21 @@ describe('JobsHealthService', () => {
             },
           ],
           message:
+            'Job test_job_01 reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.',
+        },
+        payload: {
+          'kibana.alert.mml_results': [
+            {
+              job_id: 'test_job_01',
+              log_time: 1626935914540,
+              memory_status: 'hard_limit',
+              model_bytes: 1000000,
+              model_bytes_exceeded: 200000,
+              model_bytes_memory_limit: 800000,
+              peak_model_bytes: 1000000,
+            },
+          ],
+          'kibana.alert.reason':
             'Job test_job_01 reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.',
         },
       },
@@ -407,6 +449,25 @@ describe('JobsHealthService', () => {
           ],
           message: 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
         },
+        payload: {
+          'kibana.alert.delayed_data_results': [
+            {
+              annotation:
+                'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              job_id: 'test_job_01',
+              missed_docs_count: 11,
+            },
+            {
+              annotation:
+                'Datafeed has missed 8 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              job_id: 'test_job_02',
+              missed_docs_count: 8,
+            },
+          ],
+          'kibana.alert.reason': 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
+        },
       },
       {
         isHealthy: true,
@@ -414,6 +475,10 @@ describe('JobsHealthService', () => {
         context: {
           message: 'No errors in the jobs messages.',
           results: [],
+        },
+        payload: {
+          'kibana.alert.job_errors_results': [],
+          'kibana.alert.reason': 'No errors in the jobs messages.',
         },
       },
     ]);

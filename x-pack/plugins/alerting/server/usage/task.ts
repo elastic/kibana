@@ -20,6 +20,7 @@ import {
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -90,7 +91,7 @@ export function telemetryTaskRunner(
     const getAlertIndex = () =>
       core
         .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.getIndexForType('alert'));
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType(RULE_SAVED_OBJECT_TYPE));
 
     return {
       async run() {

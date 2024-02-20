@@ -108,7 +108,7 @@ export const createOrUpdateComponentTemplate = async ({
   template,
   totalFieldsLimit,
 }: CreateOrUpdateComponentTemplateOpts) => {
-  logger.info(`Installing component template ${template.name}`);
+  logger.debug(`Installing component template ${template.name}`);
 
   try {
     await createOrUpdateComponentTemplateHelper(esClient, template, totalFieldsLimit, logger);

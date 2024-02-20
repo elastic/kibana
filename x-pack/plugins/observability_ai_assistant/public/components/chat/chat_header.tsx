@@ -4,24 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPopover,
+  EuiToolTip,
   useEuiTheme,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatActionsMenu } from './chat_actions_menu';
-import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
-import { useUnmountAndRemountWhenPropChanges } from '../../hooks/use_unmount_and_remount_when_prop_changes';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import type { FlyoutWidthMode } from './chat_flyout';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -33,89 +35,184 @@ const chatHeaderClassName = css`
   padding-bottom: 12px;
 `;
 
+const chatHeaderMobileClassName = css`
+  padding-top: 8px;
+  padding-bottom: 8px;
+`;
+
 export function ChatHeader({
-  title,
-  loading,
-  licenseInvalid,
   connectors,
-  connectorsManagementHref,
   conversationId,
-  knowledgeBase,
-  startedFrom,
-  onSaveTitle,
+  flyoutWidthMode,
+  licenseInvalid,
+  loading,
+  showLinkToConversationsApp,
+  title,
   onCopyConversation,
+  onSaveTitle,
+  onToggleFlyoutWidthMode,
 }: {
-  title: string;
-  loading: boolean;
-  licenseInvalid: boolean;
   connectors: UseGenAIConnectorsResult;
-  connectorsManagementHref: string;
   conversationId?: string;
-  knowledgeBase: UseKnowledgeBaseResult;
-  startedFrom?: StartedFrom;
+  flyoutWidthMode?: FlyoutWidthMode;
+  licenseInvalid: boolean;
+  loading: boolean;
+  showLinkToConversationsApp: boolean;
+  title: string;
   onCopyConversation: () => void;
-  onSaveTitle?: (title: string) => void;
+  onSaveTitle: (title: string) => void;
+  onToggleFlyoutWidthMode?: (newFlyoutWidthMode: FlyoutWidthMode) => void;
 }) {
-  const hasTitle = !!title;
-
-  const displayedTitle = !connectors.selectedConnector
-    ? ASSISTANT_SETUP_TITLE
-    : licenseInvalid
-    ? UPGRADE_LICENSE_TITLE
-    : title || EMPTY_CONVERSATION_TITLE;
-
   const theme = useEuiTheme();
+  const breakpoint = useCurrentEuiBreakpoint();
 
-  // Component only works uncontrolled at the moment, so need to unmount and remount on prop change.
-  // https://github.com/elastic/eui/issues/7084
-  const shouldRender = useUnmountAndRemountWhenPropChanges(displayedTitle);
+  const router = useObservabilityAIAssistantRouter();
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [newTitle, setNewTitle] = useState(title);
+
+  useEffect(() => {
+    setNewTitle(title);
+  }, [title]);
+
+  const handleToggleFlyoutWidthMode = () => {
+    onToggleFlyoutWidthMode?.(flyoutWidthMode === 'side' ? 'full' : 'side');
+  };
+
+  const handleNavigateToConversations = () => {
+    if (conversationId) {
+      router.push('/conversations/{conversationId}', {
+        path: {
+          conversationId,
+        },
+        query: {},
+      });
+    } else {
+      router.push('/conversations/new', { path: {}, query: {} });
+    }
+  };
 
   return (
     <EuiPanel
       borderRadius="none"
+      className={breakpoint === 'xs' ? chatHeaderMobileClassName : chatHeaderClassName}
       hasBorder={false}
       hasShadow={false}
-      paddingSize="m"
-      className={chatHeaderClassName}
+      paddingSize={breakpoint === 'xs' ? 's' : 'm'}
     >
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="s" />}
+          {loading ? (
+            <EuiLoadingSpinner size={breakpoint === 'xs' ? 'm' : 'l'} />
+          ) : (
+            <AssistantAvatar size={breakpoint === 'xs' ? 'xs' : 's'} />
+          )}
         </EuiFlexItem>
 
         <EuiFlexItem grow className={minWidthClassName}>
-          {shouldRender ? (
-            <EuiInlineEditTitle
-              heading="h2"
-              size="s"
-              defaultValue={displayedTitle}
-              className={css`
-                color: ${hasTitle ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
-              `}
-              inputAriaLabel={i18n.translate(
-                'xpack.observabilityAiAssistant.chatHeader.editConversationInput',
-                { defaultMessage: 'Edit conversation' }
-              )}
-              editModeProps={{ inputProps: { inputRef } }}
-              isReadOnly={
-                !conversationId ||
-                !connectors.selectedConnector ||
-                licenseInvalid ||
-                !Boolean(onSaveTitle)
+          <EuiInlineEditTitle
+            heading="h2"
+            size={breakpoint === 'xs' ? 'xs' : 's'}
+            value={newTitle}
+            className={css`
+              color: ${!!title ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
+            `}
+            inputAriaLabel={i18n.translate(
+              'xpack.observabilityAiAssistant.chatHeader.editConversationInput',
+              { defaultMessage: 'Edit conversation' }
+            )}
+            isReadOnly={
+              !conversationId ||
+              !connectors.selectedConnector ||
+              licenseInvalid ||
+              !Boolean(onSaveTitle)
+            }
+            onChange={(e) => {
+              setNewTitle(e.currentTarget.nodeValue || '');
+            }}
+            onSave={(e) => {
+              if (onSaveTitle) {
+                onSaveTitle(e);
               }
-              onSave={onSaveTitle}
-            />
-          ) : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ChatActionsMenu
-            connectors={connectors}
-            disabled={licenseInvalid}
-            conversationId={conversationId}
-            onCopyConversationClick={onCopyConversation}
+            }}
+            onCancel={(previousTitle: string) => {
+              setNewTitle(previousTitle);
+            }}
           />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {flyoutWidthMode && onToggleFlyoutWidthMode ? (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    anchorPosition="downLeft"
+                    button={
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.observabilityAiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+                          { defaultMessage: 'Navigate to conversations' }
+                        )}
+                        display="block"
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
+                            { defaultMessage: 'Navigate to conversations' }
+                          )}
+                          data-test-subj="observabilityAiAssistantChatHeaderButton"
+                          iconType="discuss"
+                          onClick={handleNavigateToConversations}
+                        />
+                      </EuiToolTip>
+                    }
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    anchorPosition="downLeft"
+                    button={
+                      <EuiToolTip
+                        content={
+                          flyoutWidthMode === 'side'
+                            ? i18n.translate(
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.expandFlyoutWidthModeLabel',
+                                { defaultMessage: 'Expand flyout' }
+                              )
+                            : i18n.translate(
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.collapseFlyoutWidthModeLabel',
+                                { defaultMessage: 'Collapse flyout' }
+                              )
+                        }
+                        display="block"
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.toggleFlyoutWidthModeLabel',
+                            { defaultMessage: 'Toggle flyout width mode' }
+                          )}
+                          data-test-subj="observabilityAiAssistantChatHeaderButton"
+                          iconType={flyoutWidthMode === 'side' ? 'expand' : 'minimize'}
+                          onClick={handleToggleFlyoutWidthMode}
+                        />
+                      </EuiToolTip>
+                    }
+                  />
+                </EuiFlexItem>
+              </>
+            ) : null}
+
+            <EuiFlexItem grow={false}>
+              <ChatActionsMenu
+                connectors={connectors}
+                conversationId={conversationId}
+                disabled={licenseInvalid}
+                showLinkToConversationsApp={showLinkToConversationsApp}
+                onCopyConversationClick={onCopyConversation}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

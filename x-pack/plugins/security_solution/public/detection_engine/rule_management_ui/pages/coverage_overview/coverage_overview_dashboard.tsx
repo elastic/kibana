@@ -40,7 +40,12 @@ const CoverageOverviewDashboardComponent = () => {
       <EuiSpacer />
       <EuiFlexGroup gutterSize="m" className="eui-xScroll">
         {data?.mitreTactics.map((tactic) => (
-          <EuiFlexGroup direction="column" key={tactic.id} gutterSize="s">
+          <EuiFlexGroup
+            data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}
+            direction="column"
+            key={tactic.id}
+            gutterSize="s"
+          >
             <EuiFlexItem grow={false}>
               <CoverageOverviewTacticPanel tactic={tactic} />
             </EuiFlexItem>

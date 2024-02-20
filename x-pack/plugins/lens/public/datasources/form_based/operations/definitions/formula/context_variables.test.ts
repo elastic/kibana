@@ -34,20 +34,6 @@ function createLayer<T extends ConstantsIndexPatternColumn>(
   };
 }
 
-function createExpression(type: 'interval' | 'now' | 'time_range', value: number) {
-  return [
-    {
-      type: 'function',
-      function: 'mathColumn',
-      arguments: {
-        id: ['col1'],
-        name: [`Constant: ${type}`],
-        expression: [String(value)],
-      },
-    },
-  ];
-}
-
 describe('context variables', () => {
   describe('interval', () => {
     describe('getErrorMessages', () => {
@@ -124,53 +110,6 @@ describe('context variables', () => {
         ).toBeUndefined();
       });
     });
-    describe('toExpression', () => {
-      it('should return 0 if no dateRange is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            { now: new Date(), targetBars: 100 }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 0)));
-      });
-
-      it('should return 0 if no targetBars is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-              now: new Date(),
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 0)));
-      });
-
-      it('should return a valid value > 0 if both dateRange and targetBars is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-              now: new Date(),
-              targetBars: 100,
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 86400000)));
-      });
-    });
   });
   describe('time_range', () => {
     describe('getErrorMessages', () => {
@@ -202,35 +141,6 @@ describe('context variables', () => {
         ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
       });
     });
-
-    describe('toExpression', () => {
-      it('should return 0 if no dateRange is passed', () => {
-        expect(
-          timeRangeOperation.toExpression(
-            createLayer('time_range'),
-            'col1',
-            createMockedIndexPattern(),
-            { now: new Date(), targetBars: 100 }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('time_range', 0)));
-      });
-
-      it('should return a valid value > 0 if dateRange is passed', () => {
-        expect(
-          timeRangeOperation.toExpression(
-            createLayer('time_range'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('time_range', 31536000000)));
-      });
-    });
   });
   describe('now', () => {
     describe('getErrorMessages', () => {
@@ -238,17 +148,6 @@ describe('context variables', () => {
         expect(
           nowOperation.getErrorMessage!(createLayer('now'), 'col1', createMockedIndexPattern())
         ).toBeUndefined();
-      });
-    });
-
-    describe('toExpression', () => {
-      it('should return the now value when passed', () => {
-        const now = new Date();
-        expect(
-          nowOperation.toExpression(createLayer('now'), 'col1', createMockedIndexPattern(), {
-            now,
-          })
-        ).toEqual(expect.arrayContaining(createExpression('now', +now)));
       });
     });
   });

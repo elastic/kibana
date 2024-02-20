@@ -1,4 +1,4 @@
-title: Create traacking containment rule request
+title: Create tracking containment rule request
 description: > 
   A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index.
   In the event that an entity is contained within a boundary, an alert may be generated.  
@@ -12,6 +12,8 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   consumer:
     $ref: 'consumer.yaml'
   enabled:

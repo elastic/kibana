@@ -11,7 +11,9 @@ import {
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
+import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
@@ -21,7 +23,6 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { APMTransactionDurationIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
-import { Query } from './types';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -68,7 +69,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter: Query[] = [
+    const queryFilter: estypes.QueryDslQueryContainer[] = [
       {
         range: {
           '@timestamp': {
@@ -111,7 +112,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {
@@ -137,7 +138,10 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
+  private buildAggregations(
+    slo: SLO,
+    indicator: APMTransactionDurationIndicator
+  ): Record<string, AggregationsAggregationContainer> {
     // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)
     const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
@@ -145,9 +149,11 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       _numerator: {
         range: {
           field: 'transaction.duration.histogram',
+          keyed: true,
           ranges: [
             {
               to: truncatedThreshold,
+              key: 'target',
             },
           ],
         },
@@ -155,7 +161,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       'slo.numerator': {
         bucket_script: {
           buckets_path: {
-            numerator: `_numerator['*-${truncatedThreshold}.0']>_count`,
+            numerator: `_numerator['target']>_count`,
           },
           script: 'params.numerator',
         },

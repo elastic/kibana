@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { tinymathFunctions, getTypeI18n } from '@kbn/lens-formula-docs';
 import type { Query } from '@kbn/es-query';
 import {
   isAbsoluteTimeShift,
@@ -24,11 +25,9 @@ import {
   findMathNodes,
   findVariables,
   getOperationParams,
-  getTypeI18n,
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  tinymathFunctions,
 } from './util';
 
 import type {

@@ -8,7 +8,6 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "savedObjects",
       "kibanaReact",
       "contentManagement",
       "embeddable",
@@ -16,6 +15,7 @@
       "dataViews",
       "uiActions"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "requiredBundles": ["savedObjects"],
   }
 }

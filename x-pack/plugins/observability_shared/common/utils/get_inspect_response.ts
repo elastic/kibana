@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
 import { Request } from '@kbn/inspector-plugin/common';
@@ -157,12 +158,13 @@ export function getInspectResponse({
   operationName: string;
   startTime: number;
 }): InspectResponse[0] {
-  const id = `${operationName} (${kibanaRequest.route.path})`;
+  const name = `${operationName} (${kibanaRequest.route.path})`;
+  const id = `${name} ${uuidv4()}`;
 
   return {
     id,
     json: esRequestParams.body ?? esRequestParams,
-    name: id,
+    name,
     response: {
       json: esError ? esError.originalError : esResponse,
     },

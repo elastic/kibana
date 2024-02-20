@@ -731,26 +731,34 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/utils/storybook_decorator.tsx"
+                "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
               },
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
               },
               {
                 "plugin": "globalSearchBar",
                 "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
@@ -865,6 +873,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/mock.tsx"
               },
               {
                 "plugin": "observabilityAIAssistant",

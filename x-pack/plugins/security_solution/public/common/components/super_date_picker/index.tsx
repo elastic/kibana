@@ -24,7 +24,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { isQueryInput } from '../../store/inputs/helpers';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { useUiSetting$ } from '../../lib/kibana';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -86,6 +86,10 @@ interface OwnProps {
 }
 
 export type SuperDatePickerProps = OwnProps & PropsFromRedux;
+
+const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+  newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+};
 
 export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
   ({
@@ -160,10 +164,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       },
       [fromStr, toStr, duration, policy, setDuration, id, stopAutoReload, startAutoReload, queries]
     );
-
-    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-    };
 
     const onTimeChange = useCallback(
       ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {

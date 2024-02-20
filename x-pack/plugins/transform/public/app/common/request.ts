@@ -271,7 +271,9 @@ export const getCreateTransformRequestBody = (
       }
     : {}),
   // conditionally add retention policy settings
-  ...(transformDetailsState.isRetentionPolicyEnabled
+  ...(transformDetailsState.isRetentionPolicyEnabled &&
+  transformDetailsState.retentionPolicyDateField !== '' &&
+  transformDetailsState.retentionPolicyMaxAge !== ''
     ? {
         retention_policy: {
           time: {

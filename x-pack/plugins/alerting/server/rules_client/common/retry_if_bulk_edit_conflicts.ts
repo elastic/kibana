@@ -14,6 +14,7 @@ import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
 import { RuleAttributes } from '../../data/rule/types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
@@ -70,7 +71,7 @@ export const retryIfBulkEditConflicts = async (
 
     const conflictErrorMap = resultSavedObjects.reduce<Map<string, { message: string }>>(
       (acc, item) => {
-        if (item.type === 'alert' && item?.error?.statusCode === 409) {
+        if (item.type === RULE_SAVED_OBJECT_TYPE && item?.error?.statusCode === 409) {
           return acc.set(item.id, { message: item.error.message });
         }
         return acc;

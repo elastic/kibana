@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,37 +25,40 @@ export function SloOutdatedCallout() {
   const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });
   if (!isLoading && data && data.total > 0) {
     return (
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
-        title={i18n.translate('xpack.observability.slo.outdatedSloCallout.title', {
-          defaultMessage: '{total} Outdated SLOs Detected',
-          values: {
-            total: data.total,
-          },
-        })}
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.observability.slo.outdatedSloCallout.message"
-            defaultMessage="We've noticed that you have {total} outdated SLO definitions, these SLOs will not be running or alerting until you've reset them. Please click the button below to review the SLO definitions; you can choose to either reset the SLO definition or remove it."
-            values={{ total: data.total }}
-          />
-        </p>
-        <p>
-          <EuiButton
-            color="warning"
-            data-test-subj="o11ySloOutdatedCalloutViewOutdatedSloDefinitionsButton"
-            fill
-            onClick={handleClick}
-          >
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.observability.slo.outdatedSloCallout.title', {
+            defaultMessage: '{total} Outdated SLOs Detected',
+            values: {
+              total: data.total,
+            },
+          })}
+        >
+          <p>
             <FormattedMessage
-              id="xpack.observability.outdatedSloCallout.buttonLabel"
-              defaultMessage="Review Outdated SLO Definitions"
+              id="xpack.observability.slo.outdatedSloCallout.message"
+              defaultMessage="We've noticed that you have {total} outdated SLO definitions, these SLOs will not be running or alerting until you've reset them. Please click the button below to review the SLO definitions; you can choose to either reset the SLO definition or remove it."
+              values={{ total: data.total }}
             />
-          </EuiButton>
-        </p>
-      </EuiCallOut>
+          </p>
+          <p>
+            <EuiButton
+              color="warning"
+              data-test-subj="o11ySloOutdatedCalloutViewOutdatedSloDefinitionsButton"
+              fill
+              onClick={handleClick}
+            >
+              <FormattedMessage
+                id="xpack.observability.outdatedSloCallout.buttonLabel"
+                defaultMessage="Review Outdated SLO Definitions"
+              />
+            </EuiButton>
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
     );
   }
   return null;

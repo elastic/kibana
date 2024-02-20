@@ -1,13 +1,16 @@
-[[maps-connect-to-ems]]
-== Connect to Elastic Maps Service
-
+:ems: Elastic Maps Service
 :ems-docker-repo: docker.elastic.co/elastic-maps-service/elastic-maps-server-ubi8
 :ems-docker-image: {ems-docker-repo}:{version}
 :ems-headers-url: https://deployment-host
 
-https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
+[[maps-connect-to-ems]]
+== Connect to {ems}
+
+https://www.elastic.co/elastic-maps-service[{ems} (EMS)] is a service that hosts
 tile layers and vector shapes of administrative boundaries.
 If you are using Kibana's out-of-the-box settings, Maps is already configured to use EMS.
+
+If you are on a restricted or fully air-gapped environment, you may need to configure your firewall to enable access to EMS resources. Find below details on the domains and HTTP headers used by {ems}. Alternatively, {ems} can be <<disable-ems, disabled>> or <<elastic-maps-server, installed locally>>.
 
 [float]
 === Domains
@@ -57,7 +60,8 @@ include::headers/file-data.asciidoc[]
 
 
 [float]
-=== Disable Elastic Maps Service
+[id=disable-ems]
+=== Disable {ems}
 
 You might experience EMS connection issues if your Kibana server or browser are on a private network or
 behind a firewall. If this happens, you can disable the EMS connection to avoid unnecessary EMS requests.
@@ -69,11 +73,13 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 
 [float]
 [id=elastic-maps-server]
-=== Host Elastic Maps Service locally
+=== Host {ems} locally
 
-If you cannot connect to Elastic Maps Service from the {kib} server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
+NOTE: Find more details about installing Elastic components in an air-gapped environment in the {stack-ref}/air-gapped-install.html[Elastic Stack documentation].
 
-{hosted-ems} is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your {es} cluster for license validation, you have the option to download and configure a more detailed basemaps database.
+If you cannot connect to {ems} from the {kib} server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
+
+{hosted-ems} is a self-managed version of {ems} offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your {es} cluster for license validation, you have the option to download and configure a more detailed basemaps database.
 
 You can use +docker pull+ to download the {hosted-ems} image from the Elastic Docker registry.
 

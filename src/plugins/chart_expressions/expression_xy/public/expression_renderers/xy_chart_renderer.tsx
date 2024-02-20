@@ -26,7 +26,12 @@ import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  type ChartSizeEvent,
+  type ChartSizeSpec,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
@@ -215,6 +220,10 @@ export const getXyChartRenderer = ({
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
+    const setChartSize = (data: ChartSizeSpec) => {
+      const event: ChartSizeEvent = { name: 'chartSize', data };
+      handlers.event(event);
+    };
 
     const layerCellValueActions = await getLayerCellValueActions(
       getDataLayers(config.args.layers),
@@ -275,8 +284,10 @@ export const getXyChartRenderer = ({
               syncColors={config.syncColors}
               syncTooltips={config.syncTooltips}
               syncCursor={config.syncCursor}
+              shouldUseVeil={handlers.shouldUseSizeTransitionVeil()}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
+              setChartSize={setChartSize}
             />
           </div>
         </I18nProvider>

@@ -13,12 +13,14 @@ import {
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClient,
 } from '@kbn/core/server';
-import { LogExplorerLocatorParams, LOG_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -26,13 +28,19 @@ import { i18n } from '@kbn/i18n';
 import {
   ApmRuleType,
   ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SloOrphanSummaryCleanupTask } from './services/slo/tasks/orphan_summary_cleanup_task';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -67,10 +75,12 @@ interface PluginSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
+  taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
 }
 
@@ -80,12 +90,14 @@ const o11yRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
+  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -99,8 +111,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-    const logExplorerLocator =
-      plugins.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
+    const logsExplorerLocator =
+      plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -177,7 +189,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         },
         {
           name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
-            defaultMessage: 'Case Settings',
+            defaultMessage: 'Case settings',
           }),
           privilegeGroups: [
             {
@@ -188,7 +200,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
                     {
-                      defaultMessage: 'Edit Case Settings',
+                      defaultMessage: 'Edit case settings',
                     }
                   ),
                   includeIn: 'all',
@@ -334,7 +346,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
       alertsLocator,
-      logExplorerLocator,
+      logsExplorerLocator,
     });
     registerSloUsageCollector(plugins.usageCollection);
 
@@ -361,11 +373,16 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
       sloInstaller.install();
     });
-
     /**
      * Register a config for the observability guide
      */
     plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
+    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
+      plugins.taskManager,
+      this.logger,
+      config
+    );
 
     return {
       getAlertDetailsConfig() {
@@ -379,7 +396,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: PluginStart) {
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+  }
 
   public stop() {}
 }

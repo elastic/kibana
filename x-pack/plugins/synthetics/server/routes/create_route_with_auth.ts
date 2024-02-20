@@ -11,13 +11,23 @@ import {
   LICENSE_NOT_ACTIVE_ERROR,
   LICENSE_NOT_SUPPORTED_ERROR,
 } from '../../common/constants';
-import { SyntheticsRestApiRouteFactory, SyntheticsRoute, SyntheticsRouteHandler } from './types';
+import {
+  SupportedMethod,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRoute,
+  SyntheticsRouteHandler,
+} from './types';
+
+function getDefaultWriteAccessFlag(method: SupportedMethod) {
+  // if the method is not GET, it defaults to requiring write access
+  return method !== 'GET';
+}
 
 export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
   routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {
   const restRoute = routeCreator();
-  const { handler, method, path, options, ...rest } = restRoute;
+  const { handler, method, path, options, writeAccess, ...rest } = restRoute;
   const licenseCheckHandler: SyntheticsRouteHandler<ClientContract> = async ({
     context,
     response,
@@ -49,6 +59,7 @@ export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
     options,
     handler: licenseCheckHandler,
     ...rest,
+    writeAccess: writeAccess ?? getDefaultWriteAccessFlag(method),
   };
 };
 

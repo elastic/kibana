@@ -10,6 +10,10 @@ import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from '../../test_utils';
 import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
+import {
+  AnomalyDetectorType,
+  getAnomalyDetectorIndex,
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
@@ -24,7 +28,10 @@ describe('Transaction duration anomaly alert', () => {
         ml: undefined,
       });
 
-      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
+      const params = {
+        anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
+      };
 
       await executor({ params });
 
@@ -52,7 +59,10 @@ describe('Transaction duration anomaly alert', () => {
         ml,
       });
 
-      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
+      const params = {
+        anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
+      };
 
       await executor({ params });
       expect(
@@ -87,7 +97,17 @@ describe('Transaction duration anomaly alert', () => {
                   {
                     doc_count: 1,
                     latest_score: {
-                      top: [{ metrics: { record_score: 0, job_id: '1' } }],
+                      top: [
+                        {
+                          metrics: {
+                            record_score: 0,
+                            job_id: '1',
+                            detector_index: getAnomalyDetectorIndex(
+                              AnomalyDetectorType.txLatency
+                            ),
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -105,6 +125,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
         windowSize: 5,
         windowUnit: 'm',
       };
@@ -143,6 +164,7 @@ describe('Transaction duration anomaly alert', () => {
               anomaly_groups: {
                 buckets: [
                   {
+                    key: ['apm.anomaly', 'foo', 'development', 'type-foo'],
                     latest_score: {
                       top: [
                         {
@@ -151,12 +173,16 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '1',
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
+                            detector_index: getAnomalyDetectorIndex(
+                              AnomalyDetectorType.txLatency
+                            ),
                           },
                         },
                       ],
                     },
                   },
                   {
+                    key: ['apm.anomaly', 'bar', 'production', 'type-bar'],
                     latest_score: {
                       top: [
                         {
@@ -165,6 +191,9 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '2',
                             parttition_field_value: 'bar',
                             by_field_value: 'type-bar',
+                            detector_index: getAnomalyDetectorIndex(
+                              AnomalyDetectorType.txLatency
+                            ),
                           },
                         },
                       ],
@@ -185,6 +214,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
         windowSize: 5,
         windowUnit: 'm',
       };
@@ -204,7 +234,7 @@ describe('Transaction duration anomaly alert', () => {
         threshold: 'minor',
         triggerValue: 'critical',
         reason:
-          'critical anomaly with a score of 80 was detected in the last 5 mins for foo.',
+          'critical latency anomaly with a score of 80, was detected in the last 5 mins for foo.',
         viewInAppUrl:
           'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
         alertDetailsUrl: 'mockedAlertsLocator > getLocation',

@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom } from 'rxjs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import type { IConfigService } from '@kbn/config';
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import {
+  config as loggingConfigDef,
+  type LoggingConfigWithBrowserType,
+} from '@kbn/core-logging-server-internal';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 
 export const getSettingValue = <T>(
@@ -23,15 +30,12 @@ export const getSettingValue = <T>(
   return convert(value);
 };
 
-export const getBundlesHref = (baseHref: string, buildNr: string): string =>
-  `${baseHref}/${buildNr}/bundles`;
+export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
 
 export const getScriptPaths = ({
   baseHref,
-  buildNum,
   darkMode,
 }: {
-  buildNum: number;
   baseHref: string;
   darkMode: DarkModeValue;
 }) => {
@@ -44,12 +48,10 @@ export const getScriptPaths = ({
 
 export const getCommonStylesheetPaths = ({
   baseHref,
-  buildNum,
 }: {
-  buildNum: number;
   baseHref: string;
 }) => {
-  const bundlesHref = getBundlesHref(baseHref, String(buildNum));
+  const bundlesHref = getBundlesHref(baseHref);
   return [
     `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
     `${baseHref}/ui/legacy_styles.css`,
@@ -67,7 +69,7 @@ export const getThemeStylesheetPaths = ({
   buildNum: number;
   baseHref: string;
 }) => {
-  const bundlesHref = getBundlesHref(baseHref, String(buildNum));
+  const bundlesHref = getBundlesHref(baseHref);
   return [
     ...(darkMode
       ? [
@@ -83,4 +85,13 @@ export const getThemeStylesheetPaths = ({
           `${baseHref}/ui/legacy_light_theme.min.css`,
         ]),
   ];
+};
+
+export const getBrowserLoggingConfig = async (
+  configService: IConfigService
+): Promise<BrowserLoggingConfig> => {
+  const loggingConfig = await firstValueFrom(
+    configService.atPath<LoggingConfigWithBrowserType>(loggingConfigDef.path)
+  );
+  return loggingConfig.browser;
 };

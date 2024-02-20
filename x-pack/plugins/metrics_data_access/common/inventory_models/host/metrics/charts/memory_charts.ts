@@ -6,19 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const memoryUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'memoryUsageBreakdown',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           {
             ...formulas.memoryCache,
             label: i18n.translate(
@@ -47,25 +51,23 @@ export const memoryUsageBreakdown = {
             ),
           },
         ],
-        options: {
-          seriesType: 'area_stacked',
-        },
-        layerType: 'data',
       },
     ],
-    visualOptions: {
-      legend: {
-        isVisible: true,
-        position: 'bottom',
-        legendSize: 50 as any,
-      },
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
-      },
+    fittingFunction: 'Linear',
+    legend: {
+      position: 'bottom',
+      show: true,
     },
-    visualizationType: 'lnsXY',
-    dataView,
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };

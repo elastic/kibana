@@ -14,7 +14,6 @@ import {
   App,
   AppDeepLink,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -25,9 +24,10 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -44,7 +44,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -67,6 +67,7 @@ import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/pu
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -101,7 +102,7 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
-      observability: {
+      observability?: {
         enabled: boolean;
       };
     };
@@ -113,6 +114,7 @@ export interface ConfigSchema {
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
@@ -123,6 +125,7 @@ export interface ObservabilityPublicPluginsSetup {
   uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -135,6 +138,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
+  fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -153,6 +157,8 @@ export interface ObservabilityPublicPluginsStart {
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
+  presentationUtil?: PresentationUtilPluginStart;
+  theme: CoreStart['theme'];
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -169,6 +175,17 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
 
+  private lazyRegisterAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
+      './components/alerts_table/register_alerts_table_configuration'
+    );
+  }
+
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
   private readonly deepLinks: AppDeepLink[] = [
@@ -179,7 +196,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'rules',
@@ -187,7 +204,7 @@ export class Plugin
             defaultMessage: 'Rules',
           }),
           path: RULES_PATH,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
       ],
     },
@@ -196,7 +213,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.slosLinkTitle', {
         defaultMessage: 'SLOs',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       order: 8002,
       path: SLOS_PATH,
     },
@@ -205,15 +222,13 @@ export class Plugin
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesCreate]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesConfigure]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
+          visibleIn: [],
         },
       },
     }),
@@ -246,15 +261,14 @@ export class Plugin
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
-    const logExplorerLocator =
-      pluginsSetup.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
+    const logsExplorerLocator =
+      pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
@@ -299,12 +313,18 @@ export class Plugin
         'user',
         'experience',
       ],
-      searchable: !Boolean(pluginsSetup.serverless),
+      visibleIn: Boolean(pluginsSetup.serverless)
+        ? ['home', 'kibanaOverview']
+        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
     };
 
     coreSetup.application.register(app);
 
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logExplorerLocator);
+    registerObservabilityRuleTypes(
+      this.observabilityRuleTypeRegistry,
+      coreSetup.uiSettings,
+      logsExplorerLocator
+    );
 
     const assertPlatinumLicense = async () => {
       const licensing = await pluginsSetup.licensing;
@@ -370,47 +390,69 @@ export class Plugin
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(appUpdater$).pipe(
-        map((value) => {
-          const deepLinks = value(app)?.deepLinks ?? [];
+        mergeMap((value) =>
+          from(coreSetup.getStartServices()).pipe(
+            map(([coreStart, pluginsStart]) => {
+              const deepLinks = value(app)?.deepLinks ?? [];
 
-          const overviewLink = !Boolean(pluginsSetup.serverless)
-            ? [
-                {
-                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
-                    defaultMessage: 'Overview',
-                  }),
+              const overviewLink = !Boolean(pluginsSetup.serverless)
+                ? [
+                    {
+                      label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                        defaultMessage: 'Overview',
+                      }),
+                      app: observabilityAppId,
+                      path: OVERVIEW_PATH,
+                    },
+                  ]
+                : [];
+
+              const isAiAssistantEnabled =
+                pluginsStart.observabilityAIAssistant.service.isEnabled();
+
+              const aiAssistantLink =
+                isAiAssistantEnabled &&
+                !Boolean(pluginsSetup.serverless) &&
+                Boolean(pluginsSetup.observabilityAIAssistant)
+                  ? [
+                      {
+                        label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+                          defaultMessage: 'AI Assistant',
+                        }),
+                        app: 'observabilityAIAssistant',
+                        path: '/conversations/new',
+                      },
+                    ]
+                  : [];
+
+              // Reformat the visible links to be NavigationEntry objects instead of
+              // AppDeepLink objects.
+              //
+              // In our case the deep links and sections being registered are the
+              // same, and the logic to hide them based on flags or capabilities is
+              // the same, so we just want to make a new list with the properties
+              // needed by `registerSections`, which are different than the
+              // properties used by the deepLinks.
+              //
+              // See https://github.com/elastic/kibana/issues/103325.
+              const otherLinks: NavigationEntry[] = deepLinks
+                .filter((link) => (link.visibleIn ?? []).length > 0)
+                .map((link) => ({
                   app: observabilityAppId,
-                  path: OVERVIEW_PATH,
+                  label: link.title,
+                  path: link.path ?? '',
+                }));
+
+              return [
+                {
+                  label: '',
+                  sortKey: 100,
+                  entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
                 },
-              ]
-            : [];
-
-          // Reformat the visible links to be NavigationEntry objects instead of
-          // AppDeepLink objects.
-          //
-          // In our case the deep links and sections being registered are the
-          // same, and the logic to hide them based on flags or capabilities is
-          // the same, so we just want to make a new list with the properties
-          // needed by `registerSections`, which are different than the
-          // properties used by the deepLinks.
-          //
-          // See https://github.com/elastic/kibana/issues/103325.
-          const otherLinks: NavigationEntry[] = deepLinks
-            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .map((link) => ({
-              app: observabilityAppId,
-              label: link.title,
-              path: link.path ?? '',
-            }));
-
-          return [
-            {
-              label: '',
-              sortKey: 100,
-              entries: [...overviewLink, ...otherLinks],
-            },
-          ];
-        })
+              ];
+            })
+          )
+        )
       )
     );
 
@@ -429,35 +471,19 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
+      return registerAlertsTableConfiguration(
+        alertsTableConfigurationRegistry,
+        this.observabilityRuleTypeRegistry,
+        config
+      );
+    });
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
-    });
-
-    const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getAlertsTableConfiguration } = await import(
-        './components/alerts_table/get_alerts_table_configuration'
-      );
-      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-
-    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
-    });
-
-    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
-      const { getSloAlertsTableConfiguration } = await import(
-        './components/alerts_table/slo/get_slo_alerts_table_configuration'
-      );
-      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {

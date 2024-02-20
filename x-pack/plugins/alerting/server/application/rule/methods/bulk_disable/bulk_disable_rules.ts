@@ -11,6 +11,7 @@ import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule, RawRuleAction } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -49,7 +50,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     throw Boom.badRequest(`Error validating bulk disable data - ${error.message}`);
   }
 
-  const { ids, filter } = options;
+  const { ids, filter, untrack = false } = options;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DISABLE' });
@@ -71,7 +72,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode }),
+          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -119,7 +120,13 @@ export const bulkDisableRules = async <Params extends RuleParams>(
 
 const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  {
+    filter,
+    untrack = false,
+  }: {
+    filter: KueryNode | null;
+    untrack: boolean;
+  }
 ) => {
   const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'true');
 
@@ -132,7 +139,7 @@ const bulkDisableRulesWithOCC = async (
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
           filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
@@ -150,7 +157,9 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            await untrackRuleAlerts(context, rule.id, rule.attributes);
+            if (untrack) {
+              await untrackRuleAlerts(context, rule.id, rule.attributes);
+            }
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
@@ -200,7 +209,7 @@ const bulkDisableRulesWithOCC = async (
               ruleAuditEvent({
                 action: RuleAuditAction.DISABLE,
                 outcome: 'unknown',
-                savedObject: { type: 'alert', id: rule.id },
+                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
               })
             );
           } catch (error) {

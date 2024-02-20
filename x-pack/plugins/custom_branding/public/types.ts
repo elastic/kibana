@@ -5,6 +5,13 @@
  * 2.0.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CustomBrandingPluginSetup {}
+export interface CustomBrandingPublicSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CustomBrandingPluginStart {}
+export interface CustomBrandingPublicStart {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CustomBrandingPublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CustomBrandingPublicStartDependencies {}

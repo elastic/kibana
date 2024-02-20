@@ -10,6 +10,7 @@
     "requiredPlugins": [
       "alerting",
       "actions",
+      "data",
       "dataViews",
       "features",
       "lens",
@@ -20,10 +21,12 @@
       "share",
       "taskManager",
       "triggersActionsUi",
-      "dataViews"
+      "uiActions",
+      "dataViews",
+      "ml"
     ],
-    "requiredBundles": [ "kibanaReact", "kibanaUtils"],
-    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }
 }

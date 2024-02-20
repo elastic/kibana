@@ -9,9 +9,11 @@ import React, { useCallback, useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { capitalize } from 'lodash';
-import { FieldValueSuggestions } from '@kbn/exploratory-view-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import {
+  useInspectorContext,
+  FieldValueSuggestions,
+} from '@kbn/observability-shared-plugin/public';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';

@@ -198,7 +198,7 @@ describe('Assignees', () => {
     });
 
     act(() => {
-      userEvent.click(screen.getByText('Turtle'));
+      userEvent.click(screen.getByText('Turtle'), undefined, { skipPointerEventsCheck: true });
     });
 
     // ensure that the similar user is still available for selection

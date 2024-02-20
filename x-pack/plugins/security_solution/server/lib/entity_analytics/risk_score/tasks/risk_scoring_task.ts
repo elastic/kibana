@@ -18,7 +18,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { AfterKeys, IdentifierType } from '../../../../../common/entity_analytics/risk_engine';
+import {
+  type AfterKeys,
+  type IdentifierType,
+  RiskScoreEntity,
+} from '../../../../../common/entity_analytics/risk_engine';
 import type { StartPlugins } from '../../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
@@ -31,12 +35,15 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
-import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine/types';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
 } from '../../../telemetry/event_based/events';
+import {
+  AssetCriticalityDataClient,
+  assetCriticalityServiceFactory,
+} from '../../asset_criticality';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -71,6 +78,18 @@ export const registerRiskScoringTask = ({
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+
+      const assetCriticalityDataClient = new AssetCriticalityDataClient({
+        esClient,
+        logger,
+        namespace,
+      });
+
+      const assetCriticalityService = assetCriticalityServiceFactory({
+        assetCriticalityDataClient,
+        uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+      });
+
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
@@ -87,6 +106,7 @@ export const registerRiskScoringTask = ({
       });
 
       return riskScoreServiceFactory({
+        assetCriticalityService,
         esClient,
         logger,
         riskEngineDataClient,

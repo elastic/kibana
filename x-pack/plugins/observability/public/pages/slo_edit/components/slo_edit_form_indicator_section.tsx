@@ -7,7 +7,7 @@
 
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
@@ -28,8 +28,10 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
   const { control, watch } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
-  const getIndicatorTypeForm = () => {
-    switch (watch('indicator.type')) {
+  const indicatorType = watch('indicator.type');
+
+  const indicatorTypeForm = useMemo(() => {
+    switch (indicatorType) {
       case 'sli.kql.custom':
         return <CustomKqlIndicatorTypeForm />;
       case 'sli.apm.transactionDuration':
@@ -45,7 +47,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
       default:
         return null;
     }
-  };
+  }, [indicatorType]);
 
   return (
     <EuiPanel
@@ -57,11 +59,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
     >
       {!isEditMode && (
         <>
-          <EuiFormRow
-            label={i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
-              defaultMessage: 'Choose the SLI type',
-            })}
-          >
+          <EuiFormRow label={indicatorLabel}>
             <Controller
               name="indicator.type"
               control={control}
@@ -72,6 +70,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
                   required
                   data-test-subj="sloFormIndicatorTypeSelect"
                   options={SLI_OPTIONS}
+                  aria-label={indicatorLabel}
                 />
               )}
             />
@@ -79,7 +78,11 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
           <EuiSpacer size="xxl" />
         </>
       )}
-      {getIndicatorTypeForm()}
+      {indicatorTypeForm}
     </EuiPanel>
   );
 }
+
+const indicatorLabel = i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
+  defaultMessage: 'Choose the SLI type',
+});
