@@ -34,9 +34,6 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
   const removeTagsFilter = (tag: string) => {
     // eslint-disable-next-line no-console
     console.log('removeTagsFilter: ' + tag);
-    if (selectedTags.length === 0) {
-      return;
-    }
     // eslint-disable-next-line no-console
     console.log('onSelectedTagsChange: ' + selectedTags.filter((t) => t !== tag));
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
