@@ -11,7 +11,6 @@ import type { FilterBasedSimpleQuery } from './types';
 import { isDefaultQuery } from './default_query';
 
 const boolRequiredAttributes = ['filter', 'must', 'must_not'];
-// const boolAttributes = ['filter', 'must', 'must_not', 'should'];
 
 // should identify variants of
 // `{ bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } }`
