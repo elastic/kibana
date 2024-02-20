@@ -10,6 +10,7 @@ import versionCompare from 'compare-versions';
 import valid from 'semver/functions/valid';
 import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import moment from 'moment';
 
 type CompareFn<T extends unknown> = (
   v1: T | undefined,
@@ -18,18 +19,47 @@ type CompareFn<T extends unknown> = (
   formatter: FieldFormat
 ) => number;
 
-const numberCompare: CompareFn<number> = (v1, v2) => (v1 ?? -Infinity) - (v2 ?? -Infinity);
+// Catches null, undefined and NaN
+const isInvalidValue = (value: unknown): value is null | undefined =>
+  value == null || (typeof value === 'number' && Number.isNaN(value));
+
+const handleInvalidValues = (v1: unknown, v2: unknown) => {
+  if (isInvalidValue(v1)) {
+    if (isInvalidValue(v2)) {
+      return 0;
+    }
+    return -1;
+  }
+  if (isInvalidValue(v2)) {
+    return 1;
+  }
+  return undefined;
+};
+
+const numberCompare: CompareFn<number> = (v1, v2) => handleInvalidValues(v1, v2) ?? v1! - v2!;
+
+const dateCompare: CompareFn<number | string> = (v1, v2) => {
+  const mV1 = moment(v1);
+  const mV2 = moment(v2);
+  if (!mV1.isValid() || isInvalidValue(v1)) {
+    if (!mV2.isValid() || isInvalidValue(v2)) {
+      return 0;
+    }
+    return -1;
+  }
+  if (!mV2.isValid() || isInvalidValue(v2)) {
+    return 1;
+  }
+  if (mV1.isSame(mV2)) {
+    return 0;
+  }
+  return mV1.isBefore(mV2) ? -1 : 1;
+};
 
 const stringComparison: CompareFn<string> = (v1, v2, _, formatter) => {
   const aString = formatter.convert(v1);
   const bString = formatter.convert(v2);
-  if (v1 == null) {
-    return -1;
-  }
-  if (v2 == null) {
-    return 1;
-  }
-  return aString.localeCompare(bString);
+  return handleInvalidValues(v1, v2) ?? aString.localeCompare(bString);
 };
 
 // The maximum length of a IP is 39 chars for a IPv6
@@ -89,7 +119,7 @@ function isIPv6Address(ip: IPv4 | IPv6): ip is IPv6 {
 }
 
 function getSafeIpAddress(ip: string | undefined, directionFactor: number) {
-  if (ip == null || !ipaddr.isValid(ip)) {
+  if (isInvalidValue(ip) || !ipaddr.isValid(ip)) {
     // if ip is null, then it's a part of an array ip value
     // therefore the comparison might be between a single value [ipA, undefined] vs multiple values ip [ipA, ipB]
     // set in this case -1 for the undefined of the former to force it to be always before
@@ -177,17 +207,18 @@ function getUndefinedHandler(
   ) => {
     const valueA = rowA[sortBy];
     const valueB = rowB[sortBy];
-    if (valueA != null && valueB != null && !Number.isNaN(valueA) && !Number.isNaN(valueB)) {
-      return sortingCriteria(rowA, rowB, direction);
-    }
+    // do not use the utility above as null at root level is handled differently
+    // than null/undefined within an array type
     if (valueA == null || Number.isNaN(valueA)) {
+      if (valueB == null || Number.isNaN(valueB)) {
+        return 0;
+      }
       return 1;
     }
     if (valueB == null || Number.isNaN(valueB)) {
       return -1;
     }
-
-    return 0;
+    return sortingCriteria(rowA, rowB, direction);
   };
 }
 
@@ -198,7 +229,10 @@ export function getSortingCriteria(
 ) {
   const arrayValueHandler = createArrayValuesHandler(sortBy, formatter);
 
-  if (['number', 'date'].includes(type || '')) {
+  if (type === 'date') {
+    return getUndefinedHandler(sortBy, arrayValueHandler(dateCompare));
+  }
+  if (type === 'number') {
     return getUndefinedHandler(sortBy, arrayValueHandler(numberCompare));
   }
   // this is a custom type, and can safely assume the gte and lt fields are all numbers or undefined
