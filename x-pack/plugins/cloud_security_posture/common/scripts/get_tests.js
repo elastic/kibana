@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/**
+ * Dedicated app for output visualization: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c
+ * Just copy the generated content of 'cso_test_log.json' into the 'data.json' file in the dedicated app
+ * */
+
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
