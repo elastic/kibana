@@ -39,6 +39,10 @@ const runtimeField = {
   type: 'string',
 };
 
+const toSpecGetAllFields = {
+  fieldParams: { fieldName: ['*'] },
+};
+
 // helper function to create index patterns
 function create(id: string, spec?: DataViewSpec) {
   const {
@@ -256,10 +260,12 @@ describe('DataViewLazy', () => {
       } as FieldFormat;
       dataViewLazy.getFormatterForField = () => formatter;
       dataViewLazy.setFieldFormat('bytes', { id: 'bytes' });
-      expect((await dataViewLazy.toSpec()).fieldFormats).toEqual({ bytes: { id: 'bytes' } });
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldFormats).toEqual({
+        bytes: { id: 'bytes' },
+      });
 
       dataViewLazy.deleteFieldFormat('bytes');
-      expect((await dataViewLazy.toSpec()).fieldFormats).toEqual({});
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldFormats).toEqual({});
     });
   });
 
@@ -329,27 +335,29 @@ describe('DataViewLazy', () => {
     test('add and remove runtime field to existing field', async () => {
       fieldCapsResponse = fieldCapsResponse.filter((field) => field.name === '@tags');
       await dataViewLazy.addRuntimeField('@tags', runtimeWithAttrs);
-      expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
         '@tags': runtime,
         runtime_field: runtimeField.runtimeField,
       });
-      const field = (await dataViewLazy.toSpec())!.fields!['@tags'];
+      const field = (await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['@tags'];
       expect(field.runtimeField).toEqual(runtime);
       expect(field.count).toEqual(5);
       expect(field.format).toEqual({
         id: 'bytes',
       });
       expect(field.customLabel).toEqual('custom name');
-      expect((await dataViewLazy.toSpec()).fieldAttrs!['@tags']).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['@tags']).toEqual({
         customLabel: 'custom name',
         count: 5,
       });
 
       dataViewLazy.removeRuntimeField('@tags');
-      expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
       });
-      expect((await dataViewLazy.toSpec())!.fields!['@tags'].runtimeField).toBeUndefined();
+      expect(
+        (await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['@tags'].runtimeField
+      ).toBeUndefined();
     });
 
     // todo - mapped fields need to override runtime fields
@@ -394,18 +402,20 @@ describe('DataViewLazy', () => {
 
     test('add and remove runtime field as new field', async () => {
       dataViewLazy.addRuntimeField('new_field', runtimeWithAttrs);
-      expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
         new_field: runtime,
       });
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
-      expect((await dataViewLazy.toSpec())!.fields!.new_field.runtimeField).toEqual(runtime);
+      expect(
+        (await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!.new_field.runtimeField
+      ).toEqual(runtime);
 
       dataViewLazy.removeRuntimeField('new_field');
-      expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
       });
-      expect((await dataViewLazy.toSpec())!.fields!.new_field).toBeUndefined();
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!.new_field).toBeUndefined();
     });
 
     test('add and remove a custom label from a runtime field', async () => {
@@ -426,28 +436,28 @@ describe('DataViewLazy', () => {
     test('add and remove composite runtime field as new fields', async () => {
       const fieldCount = Object.values(await dataViewLazy.getFields({})).length;
       await dataViewLazy.addRuntimeField('new_field', runtimeCompositeWithAttrs);
-      expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
         new_field: runtimeComposite,
         runtime_field: runtimeField.runtimeField,
       });
       expect(Object.values(await dataViewLazy.getFields({})).length - fieldCount).toEqual(2);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
-      expect((await dataViewLazy.toSpec())!.fields!['new_field.a']).toBeDefined();
-      expect((await dataViewLazy.toSpec())!.fields!['new_field.b']).toBeDefined();
-      expect((await dataViewLazy.toSpec()).fieldAttrs!['new_field.a']).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.a']).toBeDefined();
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.b']).toBeDefined();
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.a']).toEqual({
         count: 3,
         customLabel: 'custom name a',
       });
-      expect((await dataViewLazy.toSpec()).fieldAttrs!['new_field.b']).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.b']).toEqual({
         count: 4,
         customLabel: 'custom name b',
       });
 
       dataViewLazy.removeRuntimeField('new_field');
-      expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
       });
-      expect((await dataViewLazy.toSpec())!.fields!.new_field).toBeUndefined();
+      expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!.new_field).toBeUndefined();
     });
 
     test('should not allow runtime field with * in name', async () => {
@@ -498,11 +508,11 @@ describe('DataViewLazy', () => {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as unknown as FieldFormat;
       dataViewLazy.getFormatterForField = () => formatter;
-      expect(await dataViewLazy.toSpec()).toMatchSnapshot();
+      expect(await dataViewLazy.toSpec(toSpecGetAllFields)).toMatchSnapshot();
     });
 
     test('can optionally exclude fields', async () => {
-      expect(await dataViewLazy.toSpec(false)).toMatchSnapshot();
+      expect(await dataViewLazy.toSpec()).toMatchSnapshot();
     });
 
     test('can restore from spec', async () => {
@@ -510,7 +520,7 @@ describe('DataViewLazy', () => {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as unknown as FieldFormat;
       dataViewLazy.getFormatterForField = () => formatter;
-      const spec = await dataViewLazy.toSpec();
+      const spec = await dataViewLazy.toSpec(toSpecGetAllFields);
       const restoredPattern = new DataViewLazy({
         spec,
         fieldFormats: fieldFormatsMock,

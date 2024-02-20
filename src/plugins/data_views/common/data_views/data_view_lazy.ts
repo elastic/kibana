@@ -7,15 +7,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  FieldFormatsStartCommon,
-  // SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { each, cloneDeep, pickBy, mapValues, omit } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
-// import type { TimeBasedDataView } from './data_view';
 import { DataViewField } from '../fields';
 import { DataViewLazyFieldCache, createDataViewFieldCache } from './data_view_lazy_field_cache';
 import { fieldMatchesFieldsRequested, fieldsMatchFieldsRequested } from './data_view_lazy_util';
@@ -29,7 +25,6 @@ import type {
   RuntimeType,
   FieldSpec,
   IDataViewsApiClient,
-  // FieldAttrs,
 } from '../types';
 import { removeFieldAttrs } from './utils';
 
@@ -77,7 +72,7 @@ export class DataViewLazy extends AbstractDataView {
   includeUnmapped?: boolean;
   fields?: string[];
   */
-  // sort alphabetically
+  // todo sort alphabetically
   async getFields({
     mapped = true,
     scripted = true,
@@ -92,7 +87,6 @@ export class DataViewLazy extends AbstractDataView {
     // need to know if runtime fields are also mapped
     if (mapped || runtime) {
       // if we just need runtime fields, we can ask for the set of runtime fields specifically
-      // todo test intersection of runtime and mapped fields
       const fieldsToRequest = mapped
         ? fieldName
         : fieldsMatchFieldsRequested(Object.keys(this.runtimeFieldMap), fieldName);
@@ -103,12 +97,10 @@ export class DataViewLazy extends AbstractDataView {
       });
     }
 
-    // todo support name wildcard
     if (scripted) {
       scriptedResult = this.getScriptedFields({ fieldName });
     }
 
-    // todo support name wildcard
     if (runtime) {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
@@ -533,19 +525,16 @@ export class DataViewLazy extends AbstractDataView {
    * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
    * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public async toSpec(includeFields = true): Promise<DataViewSpec> {
-    const getFieldsAsMap = async () => {
+  public async toSpec(params: { fieldParams?: GetFieldsParams } = {}): Promise<DataViewSpec> {
+    const spec = this.toSpecShared(!!params.fieldParams);
+
+    if (params.fieldParams) {
       const fields: DataViewFieldSpecMap = {};
-      const fldMap = await this.getFields({ fieldName: ['*'] });
+      const fldMap = await this.getFields(params.fieldParams);
       Object.values(fldMap).forEach((field) => {
         fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
       });
-      return fields;
-    };
-
-    const spec = this.toSpecShared(includeFields);
-    if (includeFields) {
-      spec.fields = await getFieldsAsMap();
+      spec.fields = fields;
     }
 
     return spec;
@@ -577,7 +566,6 @@ export class DataViewLazy extends AbstractDataView {
    * returns true if dataview contains TSDB fields
    */
   async isTSDBMode() {
-    // todo this could be more efficient
     return await this.getFields({ fieldName: ['*'] }).then((fields) =>
       Object.values(fields).some((field) => field.timeSeriesDimension || field.timeSeriesMetric)
     );
@@ -586,7 +574,6 @@ export class DataViewLazy extends AbstractDataView {
   removeScriptedField(fieldName: string) {
     this.deleteScriptedFieldInternal(fieldName);
     this.fieldCache.clear(fieldName);
-    // todo also remove from any lists
   }
 
   // todo this might be duplicating work in abstract / internal
