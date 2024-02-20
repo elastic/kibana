@@ -64,7 +64,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     try {
       const newMonitorId = id ?? uuidV4();
 
-      const monitorWithNamespace = hydrateMonitorFields({
+      const monitorWithNamespace = await hydrateMonitorFields({
         normalizedMonitor,
         routeContext,
         newMonitorId,

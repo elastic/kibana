@@ -297,16 +297,18 @@ describe('browser fields', () => {
 });
 
 describe('formatHeartbeatRequest', () => {
-  it('uses heartbeat id', () => {
+  it('uses heartbeat id', async () => {
     const monitorId = 'test-monitor-id';
     const heartbeatId = 'test-custom-heartbeat-id';
-    const actual = formatHeartbeatRequest(
+    const actual = await formatHeartbeatRequest(
       {
         monitor: testBrowserConfig as SyntheticsMonitor,
         configId: monitorId,
         heartbeatId,
         spaceId: 'test-space-id',
       },
+      // @ts-expect-error not checking logger functionality
+      jest.fn(),
       '{"a":"param"}'
     );
     expect(actual).toEqual({
@@ -326,15 +328,17 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('uses monitor id when custom heartbeat id is not defined', () => {
+  it('uses monitor id when custom heartbeat id is not defined', async () => {
     const monitorId = 'test-monitor-id';
-    const actual = formatHeartbeatRequest(
+    const actual = await formatHeartbeatRequest(
       {
         monitor: testBrowserConfig as SyntheticsMonitor,
         configId: monitorId,
         heartbeatId: monitorId,
         spaceId: 'test-space-id',
       },
+      // @ts-expect-error not checking logger functionality
+      jest.fn(),
       JSON.stringify({ key: 'value' })
     );
     expect(actual).toEqual({
@@ -355,16 +359,19 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('sets project fields as null when project id is not defined', () => {
+  it('sets project fields as null when project id is not defined', async () => {
     const monitorId = 'test-monitor-id';
     const monitor = { ...testBrowserConfig, project_id: undefined } as SyntheticsMonitor;
-    const actual = formatHeartbeatRequest({
-      monitor,
-      configId: monitorId,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
-
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor,
+        configId: monitorId,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      // @ts-expect-error not checking logger functionality
+      jest.fn()
+    );
     expect(actual).toEqual({
       ...monitor,
       id: monitorId,
@@ -382,15 +389,19 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('sets project fields as null when project id is empty', () => {
+  it('sets project fields as null when project id is empty', async () => {
     const monitorId = 'test-monitor-id';
     const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
-    const actual = formatHeartbeatRequest({
-      monitor,
-      configId: monitorId,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor,
+        configId: monitorId,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      // @ts-expect-error not checking logger functionality
+      jest.fn()
+    );
 
     expect(actual).toEqual({
       ...monitor,
@@ -409,15 +420,19 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('supports run once', () => {
+  it('supports run once', async () => {
     const monitorId = 'test-monitor-id';
-    const actual = formatHeartbeatRequest({
-      monitor: testBrowserConfig as SyntheticsMonitor,
-      configId: monitorId,
-      runOnce: true,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor: testBrowserConfig as SyntheticsMonitor,
+        configId: monitorId,
+        runOnce: true,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      // @ts-expect-error not checking logger functionality
+      jest.fn()
+    );
 
     expect(actual).toEqual({
       ...testBrowserConfig,
@@ -436,16 +451,20 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('supports test_run_id', () => {
+  it('supports test_run_id', async () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
-    const actual = formatHeartbeatRequest({
-      monitor: testBrowserConfig as SyntheticsMonitor,
-      configId: monitorId,
-      testRunId,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor: testBrowserConfig as SyntheticsMonitor,
+        configId: monitorId,
+        testRunId,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      // @ts-expect-error not checking logger functionality
+      jest.fn()
+    );
 
     expect(actual).toEqual({
       ...testBrowserConfig,
@@ -464,16 +483,20 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('supports empty params', () => {
+  it('supports empty params', async () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
-    const actual = formatHeartbeatRequest({
-      monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
-      configId: monitorId,
-      testRunId,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
+        configId: monitorId,
+        testRunId,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      // @ts-expect-error not checking logger functionality
+      jest.fn()
+    );
 
     expect(actual).toEqual({
       ...testBrowserConfig,
