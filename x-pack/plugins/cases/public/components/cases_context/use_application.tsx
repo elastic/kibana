@@ -13,12 +13,19 @@ interface UseApplicationReturn {
   appTitle: string | undefined;
 }
 
+const isBehaviorSubjectObservable = <T,>(
+  observable: Observable<T>
+): observable is BehaviorSubject<T> => 'value' in observable;
+
 /**
  * Checks if the observable is stateful and, in case, sets up `useObservable` with an initial value
  */
 const useStatefulObservable = <T,>(observable: Observable<T>) => {
-  const defaultValue = 'value' in observable ? (observable as BehaviorSubject<T>).value : undefined;
-  return useObservable(observable, defaultValue);
+  let initialValue: T | undefined;
+  if (isBehaviorSubjectObservable(observable)) {
+    initialValue = observable.value;
+  }
+  return useObservable(observable, initialValue);
 };
 
 export const useApplication = (): UseApplicationReturn => {
