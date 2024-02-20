@@ -66,6 +66,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
       { name: 'cloud.provider', value: 'aws' },
     ],
     name: 'host-0',
+    alertsCount: 0,
   },
   {
     metrics: [
@@ -103,6 +104,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
       { name: 'host.ip', value: '243.86.94.22' },
     ],
     name: 'host-1',
+    alertsCount: 0,
   },
 ];
 
@@ -152,6 +154,7 @@ describe('useHostTable hook', () => {
         diskSpaceUsage: 0.2040001,
         memoryFree: 34359.738368,
         normalizedLoad1m: 239.2040001,
+        alertsCount: 0,
       },
       {
         name: 'host-1',
@@ -169,6 +172,7 @@ describe('useHostTable hook', () => {
         diskSpaceUsage: 0.5400000214576721,
         memoryFree: 9.194304,
         normalizedLoad1m: 100,
+        alertsCount: 0,
       },
     ];
 

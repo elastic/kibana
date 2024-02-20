@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataViewSpecWithId } from '../../dataset_selection';
 import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
@@ -16,6 +15,10 @@ const LOGS_ALLOWLIST: Allowlist = [
   buildIndexPatternRegExp(['logs', 'auditbeat', 'filebeat', 'winbeat']),
   // Add more strings or regex patterns as needed
 ];
+
+type DataViewDescriptorFactoryParams = Omit<DataViewDescriptorType, 'kibanaSpaces'> & {
+  namespaces?: string[];
+};
 
 export class DataViewDescriptor {
   id: DataViewDescriptorType['id'];
@@ -55,9 +58,9 @@ export class DataViewDescriptor {
     };
   }
 
-  public static create({ id, namespaces, title, type, name }: DataViewListItem) {
+  public static create({ id, namespaces, title, type, name }: DataViewDescriptorFactoryParams) {
     const nameWithFallbackTitle = name ?? title;
-    const dataType = DataViewDescriptor.#extractDataType(title);
+    const dataType = title ? DataViewDescriptor.#extractDataType(title) : 'unresolved';
     const kibanaSpaces = namespaces;
 
     return new DataViewDescriptor({
@@ -84,6 +87,10 @@ export class DataViewDescriptor {
 
   public isUnknownDataType() {
     return this.dataType === 'unknown';
+  }
+
+  public isUnresolvedDataType() {
+    return this.dataType === 'unresolved';
   }
 }
 
