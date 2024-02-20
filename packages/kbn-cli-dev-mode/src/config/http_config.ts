@@ -30,6 +30,9 @@ export const httpConfigSchema = schema.object(
     socketTimeout: schema.number({
       defaultValue: 120000,
     }),
+    payloadTimeout: schema.number({
+      defaultValue: 20000,
+    }),
     cors: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       allowCredentials: schema.boolean({ defaultValue: false }),
@@ -53,6 +56,7 @@ export class HttpConfig implements IHttpConfig {
   shutdownTimeout: Duration;
   keepaliveTimeout: number;
   socketTimeout: number;
+  payloadTimeout: number;
   cors: ICorsConfig;
   ssl: ISslConfig;
   restrictInternalApis: boolean;
@@ -64,6 +68,7 @@ export class HttpConfig implements IHttpConfig {
     this.maxPayload = rawConfig.maxPayload;
     this.shutdownTimeout = rawConfig.shutdownTimeout;
     this.keepaliveTimeout = rawConfig.keepaliveTimeout;
+    this.payloadTimeout = rawConfig.payloadTimeout;
     this.socketTimeout = rawConfig.socketTimeout;
     this.cors = rawConfig.cors;
     this.ssl = new SslConfig(rawConfig.ssl);
