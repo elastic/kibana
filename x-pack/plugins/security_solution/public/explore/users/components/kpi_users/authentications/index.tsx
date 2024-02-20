@@ -12,10 +12,11 @@ import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../../common/
 import { kpiUserAuthenticationsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
-import { ID } from '../../../containers/users/authentications';
 import { KpiBaseComponent } from '../../../../components/kpi';
 import * as i18n from './translations';
 import type { UsersKpiProps } from '../types';
+
+const ID = 'usersKpiAuthentications';
 
 enum ChartColors {
   authenticationsSuccess = '#54B399',
