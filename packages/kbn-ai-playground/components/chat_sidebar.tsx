@@ -16,19 +16,10 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../types';
-import { OpenAIKeyField } from './open_ai_key_field';
-import { InstructionsField } from './instructions_field';
-import { IncludeCitationsField } from './include_citations_field';
 import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
-import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
-interface ChatSidebarProps {
-  control: Control<ChatForm>;
-}
-
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ control }) => {
+export const ChatSidebar: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const accordions = [
     {
@@ -36,56 +27,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ control }) => {
       title: i18n.translate('aiPlayground.sidebar.summarizationTitle', {
         defaultMessage: 'Summarization',
       }),
-      children: (
-        <>
-          <Controller
-            name={ChatFormFields.openAIKey}
-            control={control}
-            defaultValue=""
-            render={({ field }) => <OpenAIKeyField apiKey={field.value} onSave={field.onChange} />}
-          />
-
-          <Controller
-            name={ChatFormFields.prompt}
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <InstructionsField value={field.value} onChange={field.onChange} />
-            )}
-          />
-
-          <Controller
-            name={ChatFormFields.citations}
-            control={control}
-            defaultValue={true}
-            render={({ field }) => (
-              <IncludeCitationsField checked={field.value} onChange={field.onChange} />
-            )}
-          />
-        </>
-      ),
+      children: <SummarizationPanel />,
     },
     {
       id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
       title: i18n.translate('aiPlayground.sidebar.sourceTitle', { defaultMessage: 'Sources' }),
-      children: (
-        <Controller
-          name={ChatFormFields.indices}
-          control={control}
-          defaultValue={[]}
-          render={({ field }) => (
-            <SourcesPanelSidebar
-              selectedIndices={field.value}
-              addIndex={(newIndex: IndexName) => {
-                field.onChange([...field.value, newIndex]);
-              }}
-              removeIndex={(index: IndexName) => {
-                field.onChange(field.value.filter((indexName: string) => indexName !== index));
-              }}
-            />
-          )}
-        />
-      ),
+      children: <SourcesPanelSidebar />,
     },
   ];
   const [openAccordionId, setOpenAccordionId] = useState(accordions[0].id);
