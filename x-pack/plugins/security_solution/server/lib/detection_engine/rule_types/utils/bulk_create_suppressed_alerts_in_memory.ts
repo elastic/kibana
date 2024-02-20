@@ -13,7 +13,7 @@ import type {
   SignalSourceHit,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
-import { addToSearchAfterReturn, getSuppressionMaxSignalsWarning } from './utils';
+import { addToSearchAfterReturn } from './utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
