@@ -58,9 +58,20 @@ export function SloListItem({
                 <EuiFlexItem>
                   <EuiText size="s">
                     {slo.summary ? (
-                      <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                        {slo.name}
-                      </a>
+                      <>
+                        <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                          {slo.name}
+                        </a>
+                        <EuiFlexGroup>
+                          {Object.entries(slo.groupings).map(([key, value]) => (
+                            <EuiFlexItem grow={false} key={key}>
+                              <EuiText size="s">
+                                <strong>{key}</strong>: {value}
+                              </EuiText>
+                            </EuiFlexItem>
+                          ))}
+                        </EuiFlexGroup>
+                      </>
                     ) : (
                       <span>{slo.name}</span>
                     )}
