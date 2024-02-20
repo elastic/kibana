@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 import {
   EuiFormRow,
   EuiSelect,
@@ -129,7 +129,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
   const isDeprecatedActionConnector = actionConnector?.isDeprecated;
   const [choices, setChoices] = useState<Fields>(defaultFields);
-  const [eventAction, setEventAction] = useState<EventAction | undefined>(undefined);
+  const [eventAction, setEventAction] = useState<EventAction>(EventAction.TRIGGER);
 
   const isTestTriggerAction =
     executionMode === ActionConnectorMode.Test && eventAction === EventAction.TRIGGER;
@@ -138,38 +138,29 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
-  const { incident, comments } = useMemo(() => {
-    if (isTestResolveAction) {
-      return {
-        incident: { ...actionParams.subActionParams?.incident, short_description: undefined },
-        comments: undefined,
-      } as unknown as ServiceNowITSMActionParams['subActionParams'];
-    }
-
-    return (
-      actionParams.subActionParams ??
-      ({
-        incident: {},
-        comments:
-          (selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED) ||
-          isTestTriggerAction
-            ? []
-            : undefined,
-      } as unknown as ServiceNowITSMActionParams['subActionParams'])
-    );
-  }, [
-    actionParams.subActionParams,
-    selectedActionGroupId,
-    isTestTriggerAction,
-    isTestResolveAction,
-  ]);
-
   const showAllIncidentDetails =
     (selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED) ||
     isTestTriggerAction;
   const showOnlyCorrelationId =
     (selectedActionGroupId && selectedActionGroupId === ACTION_GROUP_RECOVERED) ||
     isTestResolveAction;
+
+  if (isTestTriggerAction && !actionParams.subAction) {
+    editAction('subAction', 'pushToService', index);
+  }
+
+  const { incident, comments } = useMemo(
+    () =>
+      actionParams.subActionParams ??
+      ({
+        incident: {},
+        comments:
+          selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED
+            ? []
+            : undefined,
+      } as unknown as ServiceNowITSMActionParams['subActionParams']),
+    [actionParams.subActionParams, selectedActionGroupId]
+  );
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -227,6 +218,24 @@ const ServiceNowParamsFields: React.FunctionComponent<
     onSuccess: onChoicesSuccess,
   });
 
+  const handleEventActionChange = useCallback(
+    (value: EventAction) => {
+      if (!value) {
+        return;
+      }
+
+      setEventAction(value);
+
+      if (value === EventAction.RESOLVE) {
+        editAction('subAction', 'closeIncident', index);
+        return;
+      }
+
+      editAction('subAction', 'pushToService', index);
+    },
+    [setEventAction, editAction, index]
+  );
+
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
       actionConnectorRef.current = actionConnector.id;
@@ -249,26 +258,18 @@ const ServiceNowParamsFields: React.FunctionComponent<
         index
       );
     }
+
+    if (
+      (isTestResolveAction || isTestTriggerAction) &&
+      (!isEmpty(actionParams.subActionParams?.incident) ||
+        actionParams.subActionParams?.comments?.length)
+    ) {
+      editAction('subActionParams', { incident: {}, comments: undefined }, index);
+      return;
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector]);
-
-  const handleEventActionChange = useCallback(
-    (value: EventAction) => {
-      if (!value) {
-        return;
-      }
-
-      setEventAction(value);
-
-      if (value === EventAction.RESOLVE) {
-        editAction('subAction', 'closeIncident', index);
-        return;
-      }
-
-      editAction('subAction', 'pushToService', index);
-    },
-    [setEventAction, editAction, index]
-  );
+  }, [actionConnector, isTestResolveAction, isTestTriggerAction]);
 
   return (
     <>
@@ -278,8 +279,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
             fullWidth
             data-test-subj="eventActionSelect"
             options={eventActionOptions}
-            hasNoInitialSelection={isUndefined(eventAction)}
-            value={eventAction ?? ''}
+            value={eventAction}
             onChange={(e) => handleEventActionChange(e.target.value as EventAction)}
           />
         </EuiFormRow>

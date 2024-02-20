@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
+import { merge } from 'lodash';
 
 import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from '../lib/servicenow/types';
-import { merge } from 'lodash';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 
 jest.mock('../lib/servicenow/use_get_choices');
@@ -396,10 +396,14 @@ describe('ServiceNowITSMParamsFields renders', () => {
       const changeEvent = { target: { value: 'resolve' } } as React.ChangeEvent<HTMLSelectElement>;
       const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newDefaultProps} />);
 
+      expect(editAction.mock.calls[0][1]).toEqual('pushToService');
+
       const theField = wrapper.find('[data-test-subj="eventActionSelect"]').first();
       theField.prop('onChange')!(changeEvent);
 
-      expect(editAction.mock.calls[0][1]).toEqual('closeIncident');
+      waitFor(() => {
+        expect(editAction.mock.calls[0][1]).toEqual('closeIncident');
+      });
 
       wrapper.update();
 
@@ -413,6 +417,30 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(wrapper.find('[data-test-subj="correlation_displayInput"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeFalsy();
+    });
+
+    test('resets form fields on action change', () => {
+      const changeEvent = { target: { value: 'resolve' } } as React.ChangeEvent<HTMLSelectElement>;
+      const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newDefaultProps} />);
+
+      const correlationIdField = wrapper.find('input[data-test-subj="correlation_idInput"]');
+
+      correlationIdField.simulate('change', {
+        target: { value: 'updated correlation id' },
+      });
+
+      waitFor(() => {
+        expect(correlationIdField.contains('updated correlation id')).toBe(true);
+      });
+
+      const theField = wrapper.find('[data-test-subj="eventActionSelect"]').first();
+      theField.prop('onChange')!(changeEvent);
+
+      wrapper.update();
+
+      waitFor(() => {
+        expect(correlationIdField.contains('')).toBe(true);
+      });
     });
   });
 });
