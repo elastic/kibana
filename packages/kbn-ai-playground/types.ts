@@ -44,6 +44,7 @@ export enum ChatFormFields {
   citations = 'citations',
   prompt = 'prompt',
   openAIKey = 'api_key',
+  indices = 'indices',
 }
 
 export interface ChatForm {
@@ -51,6 +52,7 @@ export interface ChatForm {
   [ChatFormFields.prompt]: string;
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.openAIKey]: string;
+  [ChatFormFields.indices]: IndexName[];
 }
 
 export interface AIPlaygroundPluginStartDeps {

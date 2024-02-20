@@ -35,6 +35,7 @@ import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
 
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transformToMessages';
+import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const Chat = () => {
   const { euiTheme } = useEuiTheme();
@@ -52,7 +53,7 @@ export const Chat = () => {
       {
         data: {
           prompt: data[ChatFormFields.prompt],
-          indices: 'workplace_index',
+          indices: data[ChatFormFields.indices].join(),
           api_key: data[ChatFormFields.openAIKey],
           citations: data[ChatFormFields.citations].toString(),
         },
@@ -183,7 +184,22 @@ export const Chat = () => {
             )}
           />
 
-          <SourcesPanelSidebar />
+          <Controller
+            name={ChatFormFields.indices}
+            control={control}
+            defaultValue={[]}
+            render={({ field }) => (
+              <SourcesPanelSidebar
+                selectedIndices={field.value}
+                addIndex={(newIndex: IndexName) => {
+                  field.onChange([...field.value, newIndex]);
+                }}
+                removeIndex={(index: IndexName) => {
+                  field.onChange(field.value.filter((indexName) => indexName !== index));
+                }}
+              />
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>
