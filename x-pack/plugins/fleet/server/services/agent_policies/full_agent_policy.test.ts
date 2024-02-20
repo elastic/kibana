@@ -822,7 +822,7 @@ ssl.test: 123
     `);
   });
 
-  it('should works with kafka output', () => {
+  it('should work with kafka output', () => {
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
       hosts: ['test:9999'],
