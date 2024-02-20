@@ -83,7 +83,13 @@ describe('Assistant', () => {
 
     jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
-    const connectors: unknown[] = [{}];
+    const connectors: unknown[] = [
+      {
+        id: 'hi',
+        name: 'OpenAI connector',
+        actionTypeId: '.gen-ai',
+      },
+    ];
     jest.mocked(useLoadConnectors).mockReturnValue({
       isSuccess: true,
       data: connectors,
