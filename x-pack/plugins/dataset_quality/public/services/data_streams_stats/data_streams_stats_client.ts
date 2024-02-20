@@ -8,13 +8,14 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { find, merge } from 'lodash';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsEstimatedDataInBytesResponseRt,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
+import { DEFAULT_DATASET_TYPE, NONE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -57,7 +58,15 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       return merge({}, statsItem, { integration });
     });
 
-    return mergedDataStreamsStats.map(DataStreamStat.create);
+    const uncategorizedDatasets = dataStreamsStats.some((dataStream) => !dataStream.integration);
+
+    return {
+      dataStreamStats: mergedDataStreamsStats.map(DataStreamStat.create),
+      integrations: (uncategorizedDatasets
+        ? [...integrations, { name: NONE, title: 'None' }]
+        : integrations
+      ).map(Integration.create),
+    };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {

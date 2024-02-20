@@ -87,6 +87,10 @@ interface OwnProps {
 
 export type SuperDatePickerProps = OwnProps & PropsFromRedux;
 
+const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+  newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+};
+
 export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
   ({
     duration,
@@ -160,10 +164,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       },
       [fromStr, toStr, duration, policy, setDuration, id, stopAutoReload, startAutoReload, queries]
     );
-
-    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-    };
 
     const onTimeChange = useCallback(
       ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {
