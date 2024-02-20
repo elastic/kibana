@@ -53,7 +53,10 @@ export const buildStateSubscribe =
 
     if (isTextBasedQueryLang && nextState.index === undefined) {
       // this is just used to unset the index when switching to a text based query, nothing to do here
-      addLog('[appstate] subscribe update ignored due just change to undefined index', { prevState, nextState });
+      addLog('[appstate] subscribe update ignored due just change to undefined index', {
+        prevState,
+        nextState,
+      });
       return;
     }
     if (isEqualState(prevState, nextState) && !queryChanged) {
