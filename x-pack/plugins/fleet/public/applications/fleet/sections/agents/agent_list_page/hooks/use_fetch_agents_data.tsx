@@ -63,8 +63,6 @@ export function useFetchAgentsData() {
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  // eslint-disable-next-line no-console
-  console.log('selectedTags ' + selectedTags);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
@@ -101,8 +99,6 @@ export function useFetchAgentsData() {
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
   const [allTags, setAllTags] = useState<string[]>();
-  // eslint-disable-next-line no-console
-  console.log('allTags ' + allTags);
   const [isLoading, setIsLoading] = useState(false);
   const [shownAgents, setShownAgents] = useState(0);
   const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
@@ -202,8 +198,6 @@ export function useFetchAgentsData() {
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
             setAllTags(newAllTags);
-            // eslint-disable-next-line no-console
-            console.log('setAllTags ' + newAllTags);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
@@ -323,15 +317,7 @@ export function useFetchAgentsData() {
     selectedStatus,
     setSelectedStatus,
     selectedTags,
-    setSelectedTags: (tags: string[]) => {
-      // eslint-disable-next-line no-console
-      console.log('setSelectedTags ' + tags);
-      if (tags.length === 0) {
-        // eslint-disable-next-line no-console
-        console.trace();
-      }
-      setSelectedTags(tags);
-    },
+    setSelectedTags,
     agentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,

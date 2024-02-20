@@ -26,15 +26,20 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
 
   const addTagsFilter = (tag: string) => {
-    onSelectedTagsChange([...selectedTags, tag]);
     // eslint-disable-next-line no-console
-    console.log('addTagsFilter: ' + [...selectedTags, tag]);
+    console.log('addTagsFilter: ' + tag);
+    onSelectedTagsChange([...selectedTags, tag]);
   };
 
   const removeTagsFilter = (tag: string) => {
-    onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
     // eslint-disable-next-line no-console
-    console.log('removeTagsFilter: ' + selectedTags.filter((t) => t !== tag));
+    console.log('removeTagsFilter: ' + tag);
+    // eslint-disable-next-line no-console
+    console.log('selectedTags: ' + selectedTags);
+    if (selectedTags.length === 0) {
+      return;
+    }
+    onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
   const getOptions = useCallback((): EuiSelectableOption[] => {
