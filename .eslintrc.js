@@ -875,6 +875,7 @@ module.exports = {
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/slos/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -897,6 +898,7 @@ module.exports = {
         'x-pack/plugins/apm/**/*.stories.*',
         'x-pack/plugins/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/slos/**/*.stories',
       ],
       rules: {
         'react/function-component-definition': [
@@ -920,6 +922,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability_onboarding/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_shared/**/*.tsx',
         'x-pack/plugins/observability_solution/profiling/**/*.tsx',
+        'x-pack/plugins/observability_solution/slos/**/*.tsx',
         'x-pack/plugins/observability_solution/synthetics/**/*.tsx',
         'x-pack/plugins/observability_solution/ux/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
@@ -939,6 +942,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability_onboarding/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/slos/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/synthetics/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/ux/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',

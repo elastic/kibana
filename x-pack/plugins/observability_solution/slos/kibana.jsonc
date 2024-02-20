@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/slos-plugin",
+  "owner": "@elastic/obs-ux-management-team",
+  "plugin": {
+    "id": "slos",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "slos"
+    ],
+    "requiredPlugins": [
+      "observability",
+      "observabilityShared",
+      "ruleRegistry",
+      "triggersActionsUi",
+      "unifiedSearch",
+      "uiActions",
+      "lens",
+      "embeddable",
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "presentationUtil",
+      "licensing"
+    ]
+  }
+}

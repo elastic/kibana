@@ -789,6 +789,9 @@ It leverages universal configuration and other APIs in the serverless plugin to 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
 
+{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/slos/README.md[slos]
+|This plugin contains the SLO components.
+
 
 |{kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]
 |or
