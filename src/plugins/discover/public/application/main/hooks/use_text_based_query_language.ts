@@ -126,7 +126,7 @@ export function useTextBasedQueryLanguage({
               ...(addDataViewToState && { index: undefined }),
               ...((addColumnsToState || queryChanged) && { columns: nextColumns }),
               ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
-                viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+                viewMode: undefined,
               }),
             };
             await stateContainer.appState.replaceUrlState(nextState);

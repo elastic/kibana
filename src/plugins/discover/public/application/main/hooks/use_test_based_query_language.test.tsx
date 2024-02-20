@@ -107,14 +107,14 @@ describe('useTextBasedQueryLanguage', () => {
     stateContainer.dataState.data$.documents$.next(msgComplete);
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
-  test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
+  test('should change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
       viewMode: VIEW_MODE.AGGREGATED_LEVEL,
     });
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      viewMode: undefined,
       columns: [],
     });
   });
