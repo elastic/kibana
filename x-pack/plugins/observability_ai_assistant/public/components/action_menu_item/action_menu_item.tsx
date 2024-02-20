@@ -9,7 +9,6 @@ import moment from 'moment';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import datemath from '@elastic/datemath';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,20 +22,7 @@ import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_as
 import { useKibana } from '../../hooks/use_kibana';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout, FlyoutPositionMode } from '../chat/chat_flyout';
-
-interface FlyoutState {
-  conversationId: string;
-  flyoutPositionMode: FlyoutPositionMode;
-  isOpen: boolean;
-}
-
-export const defaultFlyoutState: FlyoutState = {
-  conversationId: '',
-  flyoutPositionMode: 'overlay',
-  isOpen: false,
-};
-
-export const OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY = 'observabilityAIAssistant_flyoutState';
+import { useFlyoutState } from '../../hooks/use_flyout_state';
 
 const buttonLabelClassName = css`
   display: none;
@@ -47,6 +33,8 @@ export function ObservabilityAIAssistantActionMenuItem() {
   const breakpoint = useCurrentEuiBreakpoint();
 
   const { plugins } = useKibana().services;
+
+  const { flyoutState, setFlyoutState, removeFlyoutState } = useFlyoutState();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -60,17 +48,11 @@ export function ObservabilityAIAssistantActionMenuItem() {
     [service, isOpen]
   );
 
-  const [flyoutState = defaultFlyoutState, setFlyoutState, removeFlyoutState] = useLocalStorage(
-    OBSERVABILITY_AI_ASSISTANT_LOCAL_STORAGE_KEY,
-    defaultFlyoutState
-  );
-
   useEffect(() => {
     if (flyoutState?.isOpen) {
       setIsOpen(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [flyoutState?.isOpen]);
 
   const { from, to } = plugins.start.data.query.timefilter.timefilter.getTime();
 
