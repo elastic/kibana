@@ -20,6 +20,18 @@ export const createDatasetSelectionRestoreFailedNotifier = (toasts: IToasts) => 
     ),
   });
 
+export const createDataViewSelectionRestoreFailedNotifier = (toasts: IToasts) => () =>
+  toasts.addWarning({
+    title: i18n.translate(
+      'xpack.logsExplorer.datasetSelection.restoreDataViewSelectionFailedToastTitle',
+      { defaultMessage: "We couldn't restore your data view selection." }
+    ),
+    text: i18n.translate(
+      'xpack.logsExplorer.datasetSelection.restoreDataViewSelectionFailedToastMessage',
+      { defaultMessage: 'We switched to "All log datasets" as the default selection.' }
+    ),
+  });
+
 export const createCreateDataViewFailedNotifier = (toasts: IToasts) => () =>
   toasts.addWarning({
     title: i18n.translate(

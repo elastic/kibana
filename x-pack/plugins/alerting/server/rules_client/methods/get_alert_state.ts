@@ -38,7 +38,7 @@ export async function getAlertState(
         context.logger.warn(`Task (${rule.scheduledTaskId}) not found`);
       } else {
         context.logger.warn(
-          `An error occurred when getting the task state for (${rule.scheduledTaskId})`
+          `An error occurred when getting the task state for (${rule.scheduledTaskId}): ${e.message}`
         );
       }
     }

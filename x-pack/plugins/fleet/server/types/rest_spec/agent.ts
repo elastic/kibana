@@ -115,6 +115,7 @@ export const PostAgentUpgradeRequestSchema = {
       validate: validateVersion,
     }),
     force: schema.maybe(schema.boolean()),
+    skipRateLimitCheck: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -124,6 +125,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
+    skipRateLimitCheck: schema.maybe(schema.boolean()),
     rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
     start_time: schema.maybe(
       schema.string({
