@@ -250,7 +250,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('calculates retryAt by timeout if it exceeds the schedule when running a recurring task', async () => {
+    test('calculates retryAt by task type timeout if it exceeds the schedule when running a recurring task', async () => {
       const timeoutMinutes = 1;
       const intervalSeconds = 20;
       const id = _.random(1, 20).toString();
@@ -262,6 +262,44 @@ describe('TaskManagerRunner', () => {
           schedule: {
             interval: `${intervalSeconds}s`,
           },
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `${timeoutMinutes}m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      await runner.markTaskAsRunning();
+
+      expect(store.update).toHaveBeenCalledTimes(1);
+      const instance = store.update.mock.calls[0][0];
+
+      expect(instance.retryAt!.getTime()).toEqual(
+        instance.startedAt!.getTime() + timeoutMinutes * 60 * 1000
+      );
+      expect(instance.enabled).not.toBeDefined();
+    });
+
+    test('does not calculate retryAt by task instance timeout if defined for a recurring task', async () => {
+      const timeoutMinutes = 1;
+      const timeoutOverrideSeconds = 90;
+      const intervalSeconds = 20;
+      const id = _.random(1, 20).toString();
+      const initialAttempts = _.random(0, 2);
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          id,
+          attempts: initialAttempts,
+          schedule: {
+            interval: `${intervalSeconds}s`,
+          },
+          timeoutOverride: `${timeoutOverrideSeconds}s`,
           enabled: true,
         },
         definitions: {
@@ -324,6 +362,51 @@ describe('TaskManagerRunner', () => {
       );
       expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
         maxRunAt + timeoutMinutes * 60 * 1000
+      );
+
+      expect(instance.enabled).not.toBeDefined();
+    });
+
+    test('test sets retryAt to task instance timeout override when defined when claiming an ad hoc task', async () => {
+      const timeoutSeconds = 60;
+      const timeoutOverrideSeconds = 90;
+      const id = _.random(1, 20).toString();
+      const initialAttempts = _.random(0, 2);
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          id,
+          enabled: true,
+          attempts: initialAttempts,
+          timeoutOverride: `${timeoutOverrideSeconds}s`,
+          schedule: undefined,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `${timeoutSeconds}s`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      await runner.markTaskAsRunning();
+
+      expect(store.update).toHaveBeenCalledTimes(1);
+      const instance = store.update.mock.calls[0][0];
+
+      expect(instance.attempts).toEqual(initialAttempts + 1);
+      expect(instance.status).toBe('running');
+      expect(instance.startedAt!.getTime()).toEqual(Date.now());
+
+      const minRunAt = Date.now();
+      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
+      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
+        minRunAt + timeoutOverrideSeconds * 1000
+      );
+      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
+        maxRunAt + timeoutOverrideSeconds * 1000
       );
 
       expect(instance.enabled).not.toBeDefined();

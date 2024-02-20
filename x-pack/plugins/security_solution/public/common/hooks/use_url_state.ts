@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EXPANDABLE_FLYOUT_URL_KEY } from '@kbn/expandable-flyout';
 import { useSyncGlobalQueryString } from '../utils/global_query_string';
 import { useInitSearchBarFromUrlParams } from './search_bar/use_init_search_bar_url_params';
 import { useInitTimerangeFromUrlParam } from './search_bar/use_init_timerange_url_params';
@@ -15,6 +14,8 @@ import { useSyncTimelineUrlParam } from './timeline/use_sync_timeline_url_param'
 import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_by_id_on_url_change';
 import { useInitFlyoutFromUrlParam } from './flyout/use_init_flyout_url_param';
 import { useSyncFlyoutUrlParam } from './flyout/use_sync_flyout_url_param';
+
+export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
 
 export const useUrlState = () => {
   useSyncGlobalQueryString();

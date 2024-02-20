@@ -101,6 +101,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
+        'console.dev.enableMonaco (boolean)',
         'console.ui.enabled (boolean)',
         'console.ui.embeddedEnabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',

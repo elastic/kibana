@@ -13,7 +13,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import { AppNavLinkStatus, type AppMountParameters } from '@kbn/core-application-browser';
+import { type AppMountParameters } from '@kbn/core-application-browser';
 import type {
   InternalApplicationSetup,
   InternalApplicationStart,
@@ -49,7 +49,7 @@ export class CoreAppsService {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount(params: AppMountParameters) {
         // Do not use an async import here in order to ensure that network failures
         // cannot prevent the error UI from displaying. This UI is tiny so an async
@@ -66,7 +66,7 @@ export class CoreAppsService {
       title: 'Server Status',
       appRoute: '/status',
       chromeless: true,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount(params: AppMountParameters) {
         return renderStatusApp(params, { http, notifications });
       },

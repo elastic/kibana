@@ -169,6 +169,7 @@ export type LogsExplorerControllerEvent =
     }
   | {
       type: 'INITIALIZE_DATA_VIEW';
+      data?: DataViewSelection;
     }
   | {
       type: 'INITIALIZE_DATASET';
