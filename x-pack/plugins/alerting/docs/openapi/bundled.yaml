@@ -1695,6 +1695,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1732,6 +1734,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1768,6 +1772,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1802,6 +1808,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1836,6 +1844,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1870,6 +1880,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1905,6 +1917,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1940,6 +1954,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1976,6 +1992,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2011,6 +2029,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2044,6 +2064,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2081,6 +2103,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2151,6 +2175,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2947,6 +2973,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2981,6 +3009,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3018,6 +3048,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3088,6 +3120,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3125,6 +3159,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3161,6 +3197,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3345,6 +3383,16 @@ components:
             description: A universally unique identifier (UUID) for the action.
             examples:
               - 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+    alert_delay:
+      type: object
+      description: Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.
+      required:
+        - active
+      properties:
+        active:
+          type: number
+          description: The number of consecutive runs that must meet the rule conditions.
+          example: 3
     consumer:
       type: string
       description: |
@@ -4530,6 +4578,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         api_key_created_by_user:
           type: boolean
           description: Indicates whether the API key that is associated with the rule was created by the user.
@@ -4733,6 +4783,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         name:
           type: string
           description: The name of the rule.
@@ -5022,6 +5074,8 @@ components:
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
+        alert_delay:
+          active: 3
         consumer: alerts
         name: my rule
         params:
@@ -5246,6 +5300,8 @@ components:
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
+        alert_delay:
+          active: 3
         api_key_created_by_user: false
         api_key_owner: elastic
         consumer: alerts

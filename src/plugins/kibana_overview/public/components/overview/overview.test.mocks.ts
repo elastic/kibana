@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
 export const hasUserDataView = jest.fn();
@@ -44,6 +44,9 @@ jest.doMock('@kbn/kibana-react-plugin/public', () => ({
             guide: 'kibana_docs_url',
           },
         },
+      },
+      theme: {
+        theme$: of({ darkMode: false }),
       },
     },
   }),

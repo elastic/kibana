@@ -18,8 +18,8 @@ export const significantLogPatterns: SignificantItem[] = [
     normalizedScore: 0,
     pValue: 0.000001,
     score: -13.815510557964274,
-    total_bg_count: 2528,
-    total_doc_count: 6650,
+    total_bg_count: 1975,
+    total_doc_count: 4669,
     type: 'log_pattern',
   },
 ];

@@ -100,7 +100,7 @@ const InitializedContent = React.memo(
     datasetQualityController: DatasetQualityController;
   }) => {
     return (
-      <ObservabilityLogsExplorerPageTemplate pageProps={{ paddingSize: 'l' }}>
+      <ObservabilityLogsExplorerPageTemplate pageSectionProps={{ paddingSize: 'l' }}>
         <datasetQuality.DatasetQuality controller={datasetQualityController} />
       </ObservabilityLogsExplorerPageTemplate>
     );
