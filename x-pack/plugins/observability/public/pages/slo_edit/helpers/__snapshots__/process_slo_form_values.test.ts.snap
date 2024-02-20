@@ -105,6 +105,45 @@ Object {
 }
 `;
 
+exports[`Transform partial URL state into form state handles the 'filters' URL state 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "description": "",
+  "groupBy": "*",
+  "indicator": Object {
+    "params": Object {
+      "filter": "",
+      "good": Object {
+        "filters": Array [
+          Object {
+            "meta": Object {
+              "alias": "override-alias",
+              "disabled": true,
+              "key": "override",
+              "negate": true,
+            },
+          },
+        ],
+        "kqlQuery": "some.override.filter:'foo'",
+      },
+      "index": "override-index",
+      "timestampField": "",
+      "total": "",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "",
+  "objective": Object {
+    "target": 99,
+  },
+  "tags": Array [],
+  "timeWindow": Object {
+    "duration": "30d",
+    "type": "rolling",
+  },
+}
+`;
+
 exports[`Transform partial URL state into form state handles the 'objective' URL state 1`] = `
 Object {
   "budgetingMethod": "occurrences",

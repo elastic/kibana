@@ -14,3 +14,4 @@ gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_point
 
 .buildkite/scripts/common/activate_service_account.sh gs://elastic-kibana-coverage-live
 gsutil cp previous.txt gs://elastic-kibana-coverage-live/previous_pointer/
+.buildkite/scripts/common/activate_service_account.sh --unset-impersonation

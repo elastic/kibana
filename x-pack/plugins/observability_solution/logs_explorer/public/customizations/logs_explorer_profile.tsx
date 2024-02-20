@@ -43,8 +43,7 @@ export const createLogsExplorerProfileCustomizations =
       ...plugins,
       ...discoverServices,
     };
-    const { data, dataViews, discover, navigation, unifiedSearch } = pluginsWithOverrides;
-
+    const { data, dataViews, navigation, unifiedSearch } = pluginsWithOverrides;
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
     /**
@@ -65,9 +64,9 @@ export const createLogsExplorerProfileCustomizations =
         return (
           <KibanaContextProviderForPlugin>
             <LazyCustomDatasetSelector
+              controller={controller}
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
-              discover={discover}
               logsExplorerControllerStateService={service}
             />
           </KibanaContextProviderForPlugin>
@@ -87,6 +86,9 @@ export const createLogsExplorerProfileCustomizations =
       id: 'data_table',
       customCellRenderer: createCustomCellRenderer({ data }),
       customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
+      customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
+        module.createCustomControlColumnsConfiguration(service)
+      ),
     });
 
     /**

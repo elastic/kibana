@@ -8,12 +8,14 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { find, merge } from 'lodash';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamsDetailsResponseRt,
+  getDataStreamsEstimatedDataInBytesResponseRt,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
+import { DEFAULT_DATASET_TYPE, NONE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -23,6 +25,8 @@ import {
   GetDataStreamsStatsResponse,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
+  GetDataStreamsEstimatedDataInBytesParams,
+  GetDataStreamsEstimatedDataInBytesResponse,
 } from '../../../common/data_streams_stats';
 import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
@@ -54,7 +58,15 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       return merge({}, statsItem, { integration });
     });
 
-    return mergedDataStreamsStats.map(DataStreamStat.create);
+    const uncategorizedDatasets = dataStreamsStats.some((dataStream) => !dataStream.integration);
+
+    return {
+      dataStreamStats: mergedDataStreamsStats.map(DataStreamStat.create),
+      integrations: (uncategorizedDatasets
+        ? [...integrations, { name: NONE, title: 'None' }]
+        : integrations
+      ).map(Integration.create),
+    };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
@@ -99,5 +111,32 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return dataStreamDetails as DataStreamDetails;
+  }
+
+  public async getDataStreamsEstimatedDataInBytes(
+    params: GetDataStreamsEstimatedDataInBytesParams
+  ) {
+    const response = await this.http
+      .get<GetDataStreamsEstimatedDataInBytesResponse>(
+        `/internal/dataset_quality/data_streams/estimated_data`,
+        {
+          ...params,
+        }
+      )
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch data streams estimated data in bytes": ${error}`
+        );
+      });
+
+    const dataStreamsEstimatedDataInBytes = decodeOrThrow(
+      getDataStreamsEstimatedDataInBytesResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(
+          `Failed to decode data streams estimated data in bytes response: ${message}"`
+        )
+    )(response);
+
+    return dataStreamsEstimatedDataInBytes;
   }
 }
