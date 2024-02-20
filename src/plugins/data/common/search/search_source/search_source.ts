@@ -752,21 +752,7 @@ export class SearchSource {
       ...docvaluesIndex[fieldName],
       ...fld,
     };
-    if (!index) {
-      return field;
-    }
-    const { fields } = index;
-    const dateFields = fields.getByType('date');
-    const dateField = dateFields.find((indexPatternField) => indexPatternField.name === fieldName);
-    if (!dateField) {
-      return field;
-    }
-    const { esTypes } = dateField;
-    if (esTypes?.includes('date_nanos')) {
-      field.format = 'strict_date_optional_time_nanos';
-    } else if (esTypes?.includes('date')) {
-      field.format = 'strict_date_optional_time';
-    }
+
     return field;
   }
 
