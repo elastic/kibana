@@ -44,7 +44,6 @@ export const SnapshotContainer = ({ render }: Props) => {
       accountId,
       region,
       sendRequestImmediately: false,
-      includeTimeseries: view === 'table',
     },
     {
       abortable: true,
