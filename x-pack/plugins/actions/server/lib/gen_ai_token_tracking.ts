@@ -8,6 +8,7 @@
 import { PassThrough, Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { Logger } from '@kbn/logging';
+import { isArray } from 'lodash';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { getTokenCountFromOpenAI } from './get_token_count_from_openai_stream';
 import { getTokenCountFromInvokeStream, InvokeBody } from './get_token_count_from_invoke_stream';
@@ -57,7 +58,7 @@ export const getGenAiTokenTracking = async ({
   }
 
   // this is a streamed OpenAI response, which did not use the subAction invokeStream
-  if (actionTypeId === '.gen-ai') {
+  if (actionTypeId === '.gen-ai' && isArray(data)) {
     try {
       const { total, prompt, completion } = await getTokenCountFromOpenAI({
         responseBodyChunks: data as unknown[],
