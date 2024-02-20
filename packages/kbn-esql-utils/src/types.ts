@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { TextBasedLanguages } from './types';
-export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
-export {
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  removeDropCommandsFromESQLQuery,
-} from './utils/query_parsing_helpers';
+export enum TextBasedLanguages {
+  SQL = 'SQL',
+  ESQL = 'ESQL',
+}

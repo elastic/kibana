@@ -9,8 +9,9 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import { DataViewPickerProps, TextBasedLanguages } from '@kbn/unified-search-plugin/public';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { TextBasedLanguages } from '@kbn/esql-utils';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';

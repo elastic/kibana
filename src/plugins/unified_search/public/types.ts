@@ -103,8 +103,3 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   usageCollection?: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
-
-export enum TextBasedLanguages {
-  SQL = 'SQL',
-  ESQL = 'ESQL',
-}
