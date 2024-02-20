@@ -35,9 +35,8 @@ const ConnectedDegradedDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-  const row = state.context.rows[rowIndex];
-  if (state.matches('initialized') && row) {
-    return <DegradedDocs row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <DegradedDocs row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
@@ -51,9 +50,8 @@ const ConnectedStacktraceDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-  const row = state.context.rows[rowIndex];
-  if (state.matches('initialized') && row) {
-    return <Stacktrace row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <Stacktrace row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
