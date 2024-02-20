@@ -5,41 +5,37 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { SlosPluginSetup, SlosPluginStart, AppPluginStartDependencies } from './types';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+} from '@kbn/core/public';
+import { SlosPluginSetupDeps, SlosPluginStartDeps } from './types'; // TODO move later to type
 import { PLUGIN_NAME } from '../common';
+import type { SlosPluginSetup, SlosPluginStart } from './types';
 
 export class SlosPlugin implements Plugin<SlosPluginSetup, SlosPluginStart> {
-  public setup(core: CoreSetup): SlosPluginSetup {
+  public setup(core: CoreSetup, plugins: SlosPluginSetupDeps) /* : SlosPluginSetup*/ {
     // Register an application into the side navigation menu
     core.application.register({
       id: 'slos',
       title: PLUGIN_NAME,
+      order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts
+      euiIconType: 'logoObservability',
+      appRoute: '/app/slos',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      // Do I need deep links
       async mount(params: AppMountParameters) {
-        // Load application bundle
         const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, depsStart as SlosPluginStartDeps, params);
       },
     });
-
-    // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('slos.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
   }
 
-  public start(core: CoreStart): SlosPluginStart {
+  public start(core: CoreStart, plugins: SlosPluginStartDeps) /* : SlosPluginStart*/ {
     return {};
   }
 
