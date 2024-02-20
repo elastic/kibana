@@ -160,7 +160,6 @@ export const useChatSend = ({
       ...currentConversation,
       messages: currentConversation.messages.slice(0, -1),
     });
-
     const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
 
     const rawResponse = await sendMessages({

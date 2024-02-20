@@ -19,7 +19,7 @@ const mockConversations = {
 };
 const testProps = {
   conversations: mockConversations,
-  selectedConversationTitle: welcomeConvo.id,
+  selectedConversationTitle: welcomeConvo.title,
   onConversationDeleted,
   onConversationSelectionChange,
 };
@@ -30,9 +30,9 @@ describe('ConversationSelectorSettings', () => {
   });
   it('Selects an existing conversation', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
-    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.id);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.title);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    fireEvent.click(getByTestId(alertConvo.id));
+    fireEvent.click(getByTestId(alertConvo.title));
     expect(onConversationSelectionChange).toHaveBeenCalledWith(alertConvo);
   });
   it('Only custom option can be deleted', () => {
@@ -44,7 +44,7 @@ describe('ConversationSelectorSettings', () => {
   });
   it('Selects existing conversation from the search  input', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
-    fireEvent.change(getByTestId('comboBoxSearchInput'), { target: { value: alertConvo.id } });
+    fireEvent.change(getByTestId('comboBoxSearchInput'), { target: { value: alertConvo.title } });
     fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
       key: 'Enter',
       code: 'Enter',

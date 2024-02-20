@@ -329,7 +329,7 @@ const AssistantComponent: React.FC<Props> = ({
     onSetupComplete: () => {
       setConversations({
         ...conversations,
-        [currentConversation.id]: clearPresentationData(currentConversation),
+        [currentConversation.title]: clearPresentationData(currentConversation),
       });
     },
   });

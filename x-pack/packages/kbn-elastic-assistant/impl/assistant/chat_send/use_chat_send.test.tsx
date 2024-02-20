@@ -33,7 +33,7 @@ const setCurrentConversation = jest.fn();
 export const testProps: UseChatSendProps = {
   selectedPromptContexts: {},
   allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
-  currentConversation: emptyWelcomeConvo,
+  currentConversation: { ...emptyWelcomeConvo, id: 'an-id' },
   http: {
     basePath: {
       basePath: '/mfg',
@@ -113,7 +113,8 @@ describe('use chat send', () => {
   it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(
-      () => useChatSend({ ...testProps, currentConversation: welcomeConvo }),
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
         wrapper: TestProviders,
       }
@@ -130,14 +131,15 @@ describe('use chat send', () => {
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
     const { result } = renderHook(
-      () => useChatSend({ ...testProps, currentConversation: welcomeConvo }),
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
         wrapper: TestProviders,
       }
     );
 
     result.current.handleRegenerateResponse();
-    expect(removeLastMessage).toHaveBeenCalledWith('Welcome');
+    expect(removeLastMessage).toHaveBeenCalledWith('welcome-id');
 
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();

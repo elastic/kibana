@@ -381,7 +381,7 @@ describe('SystemPrompt', () => {
       };
       const localMockConversations: Record<string, Conversation> = {
         [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
-        [secondMockConversation.id]: secondMockConversation,
+        [secondMockConversation.title]: secondMockConversation,
       };
 
       const localMockUseAssistantContext = {
@@ -453,7 +453,7 @@ describe('SystemPrompt', () => {
             defaultSystemPromptId: undefined,
           }),
         }),
-        [secondMockConversation.id]: {
+        [secondMockConversation.title]: {
           ...secondMockConversation,
           apiConfig: {
             defaultSystemPromptId: mockSystemPrompt.id,
