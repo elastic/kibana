@@ -95,7 +95,10 @@ export const AdditionalFiltersAction = ({
       {additionalFilterCount > 0 && (
         <>
           &nbsp;
-          <EuiNotificationBadge color="subdued">{`${additionalFilterCount}`}</EuiNotificationBadge>
+          <EuiNotificationBadge
+            data-test-subj="additionalFiltersCountBadge"
+            color="subdued"
+          >{`${additionalFilterCount}`}</EuiNotificationBadge>
         </>
       )}
     </UtilityBarAction>
