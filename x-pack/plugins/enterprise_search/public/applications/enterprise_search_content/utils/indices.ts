@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   SyncStatus,
   ConnectorStatus,
-  CrawlerViewIndex,
   ConnectorViewIndex,
   ConnectorIndex,
   ElasticsearchIndex,
@@ -23,7 +22,7 @@ import {
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { CrawlerIndex, ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
-import { ApiViewIndex, ElasticsearchViewIndex } from '../types';
+import { ApiViewIndex, CrawlerViewIndex, ElasticsearchViewIndex } from '../types';
 
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | null | undefined

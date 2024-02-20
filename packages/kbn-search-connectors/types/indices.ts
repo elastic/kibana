@@ -13,7 +13,6 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Connector } from './connectors';
-import { Crawler } from './crawler';
 
 export enum IngestionStatus {
   CONFIGURED,
@@ -57,9 +56,4 @@ export interface ElasticsearchViewIndexExtension {
 
 export interface ConnectorIndex extends ElasticsearchIndex {
   connector: Connector;
-}
-
-export interface CrawlerIndex extends ElasticsearchIndex {
-  connector: Connector;
-  crawler: Crawler;
 }

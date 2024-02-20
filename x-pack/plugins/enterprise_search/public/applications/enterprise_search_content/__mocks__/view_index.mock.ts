@@ -7,7 +7,6 @@
 
 import {
   ConnectorStatus,
-  CrawlerViewIndex,
   DisplayType,
   FieldType,
   FilteringValidationState,
@@ -19,7 +18,7 @@ import {
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-import { ApiViewIndex } from '../types';
+import { ApiViewIndex, CrawlerViewIndex } from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
