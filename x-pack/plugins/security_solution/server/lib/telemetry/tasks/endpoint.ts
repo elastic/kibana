@@ -147,7 +147,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          */
         const agentsResponse = endpointData.fleetAgentsResponse;
 
-        if (agentsResponse === undefined) {
+        if (agentsResponse === undefined || agentsResponse === null) {
           log('no fleet agent information available');
           taskMetricsService.end(trace);
           return 0;

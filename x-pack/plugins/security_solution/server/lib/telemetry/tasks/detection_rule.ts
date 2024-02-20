@@ -16,7 +16,13 @@ import {
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
+import type {
+  ExceptionListItem,
+  ESClusterInfo,
+  ESLicense,
+  RuleSearchResult,
+  Nullable,
+} from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 

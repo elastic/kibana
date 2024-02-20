@@ -10,7 +10,13 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 import type { RawAxiosRequestHeaders } from 'axios';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
-import type { ESClusterInfo, ESLicense, TelemetryChannel, TelemetryCounter } from './types';
+import type {
+  ESClusterInfo,
+  ESLicense,
+  Nullable,
+  TelemetryChannel,
+  TelemetryCounter,
+} from './types';
 import { createUsageCounterLabel } from './helpers';
 
 export interface SenderMetadata {

@@ -22,6 +22,7 @@ import type {
   ExceptionListItem,
   ExtraInfo,
   ListTemplate,
+  Nullable,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -188,7 +189,7 @@ export const ruleExceptionListItemToTelemetryEvent = (
 export const templateExceptionList = (
   listData: ExceptionListItem[],
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined,
+  licenseInfo: Nullable<ESLicense>,
   listType: string
 ) => {
   return listData.map((item) => {
@@ -232,7 +233,7 @@ export const templateExceptionList = (
 /**
  * Convert counter label list to kebab case
  *
- * @param label_list the list of labels to create standardized UsageCounter from
+ * @param labelList the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
 export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
@@ -254,7 +255,7 @@ export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfi
 export const formatValueListMetaData = (
   valueListResponse: ValueListResponse,
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined
+  licenseInfo: Nullable<ESLicense>
 ) => ({
   '@timestamp': moment().toISOString(),
   cluster_uuid: clusterInfo.cluster_uuid,

@@ -490,7 +490,7 @@ export type Nullable<T> = T | null | undefined;
 
 export interface ExtraInfo {
   clusterInfo: ESClusterInfo;
-  licenseInfo: ESLicense | undefined;
+  licenseInfo: Nullable<ESLicense>;
 }
 
 export interface TimeFrame {

@@ -13,7 +13,7 @@ import {
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
 } from '../constants';
-import type { ESClusterInfo, ESLicense } from '../types';
+import type { ESClusterInfo, ESLicense, Nullable } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
