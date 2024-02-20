@@ -78,7 +78,7 @@ export function ChangeDataView({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
-  shouldShowTextBasedLanguageTransitionModal,
+  shouldShowTextBasedLanguageTransitionModal = true,
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
@@ -313,9 +313,7 @@ export function ChangeDataView({
 
             if (isTextBasedLangSelected) {
               const showTransitionModal =
-                !isTextLangTransitionModalDismissed &&
-                (!shouldShowTextBasedLanguageTransitionModal ||
-                  shouldShowTextBasedLanguageTransitionModal());
+                !isTextLangTransitionModalDismissed && shouldShowTextBasedLanguageTransitionModal;
 
               if (showTransitionModal) {
                 setIsTextLangTransitionModalVisible(true);

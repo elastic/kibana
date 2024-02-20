@@ -191,12 +191,10 @@ export const DiscoverTopNav = ({
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
       onChangeDataView: stateContainer.actions.onChangeDataView,
       textBasedLanguages: supportedTextBasedLanguages,
-      shouldShowTextBasedLanguageTransitionModal: () => {
-        return (
-          !stateContainer.savedSearchState.getId() ||
+      shouldShowTextBasedLanguageTransitionModal: Boolean(
+        !stateContainer.savedSearchState.getId() ||
           stateContainer.savedSearchState.getHasChanged$().getValue()
-        );
-      },
+      ),
       adHocDataViews,
       savedDataViews,
       onEditDataView,
