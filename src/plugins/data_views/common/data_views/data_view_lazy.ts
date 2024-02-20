@@ -519,7 +519,6 @@ export class DataViewLazy extends AbstractDataView {
     return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
-  // TODO should specify which fields are needed
   /**
    * Creates static representation of the data view.
    * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
@@ -576,14 +575,11 @@ export class DataViewLazy extends AbstractDataView {
     this.fieldCache.clear(fieldName);
   }
 
-  // todo this might be duplicating work in abstract / internal
   upsertScriptedField(field: FieldSpec) {
-    this.upsertScriptedFieldInternal(field);
+    return this.upsertScriptedFieldInternal(field);
   }
 
-  async isTimeBased() {
-    return !!(await this.getTimeField());
-  }
+  isTimeBased = async () => !!(await this.getTimeField());
 
   async isTimeNanosBased(): Promise<boolean> {
     const field = await this.getTimeField();
@@ -604,7 +600,6 @@ export class DataViewLazy extends AbstractDataView {
    */
 
   public setFieldCustomLabel(fieldName: string, customLabel: string | undefined | null) {
-    // todo this could be cleaned up
     const newCustomLabel: string | undefined = customLabel === null ? undefined : customLabel;
     this.setFieldCustomLabelInternal(fieldName, customLabel);
     const fieldObject = this.fieldCache.get(fieldName);
@@ -614,7 +609,6 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   public setFieldCount(fieldName: string, count: number | undefined | null) {
-    // todo this could be cleaned up
     const newCount: number | undefined = count === null ? undefined : count;
     this.setFieldCountInternal(fieldName, count);
     const fieldObject = this.fieldCache.get(fieldName);

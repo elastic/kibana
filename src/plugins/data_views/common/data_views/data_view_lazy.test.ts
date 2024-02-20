@@ -82,7 +82,7 @@ function create(id: string, spec?: DataViewSpec) {
 describe('DataViewLazy', () => {
   let dataViewLazy: DataViewLazy;
 
-  // create an indexPattern instance for each test
+  // create an dataViewLazy instance for each test
   beforeEach(() => {
     dataViewLazy = create('test-pattern');
     // strip out scripted fields as they're not returned by field caps
@@ -92,12 +92,9 @@ describe('DataViewLazy', () => {
   describe('api', () => {
     test('should have expected properties', () => {
       expect(dataViewLazy).toHaveProperty('getScriptedFields');
-      /* todo
-      expect(indexPattern).toHaveProperty('getNonScriptedFields');
-      expect(indexPattern).toHaveProperty('removeScriptedField');
-      expect(indexPattern).toHaveProperty('addRuntimeField');
-      expect(indexPattern).toHaveProperty('removeRuntimeField');
-      */
+      expect(dataViewLazy).toHaveProperty('removeScriptedField');
+      expect(dataViewLazy).toHaveProperty('addRuntimeField');
+      expect(dataViewLazy).toHaveProperty('removeRuntimeField');
     });
   });
 
