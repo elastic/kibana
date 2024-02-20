@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEqual, pick } from 'lodash';
@@ -198,7 +198,7 @@ export class ControlGroupContainer extends Container<
       notifications.toasts.remove(this.invalidSelectionsToast);
     }
 
-    this.invalidSelectionsToast = notifications.toasts.add({
+    this.invalidSelectionsToast = notifications.toasts.addWarning({
       title: ControlGroupStrings.invalidControlWarning.title,
       text: toMountPoint(
         <>

@@ -12,11 +12,10 @@ import { RANGE_SLIDER_CONTROL } from '../range_slider';
 export const ControlGroupStrings = {
   invalidControlWarning: {
     title: i18n.translate('controls.controlGroup.invalidControlWarning.title', {
-      defaultMessage: 'Selections are returning no results',
+      defaultMessage: 'Some control selections are returning no results.',
     }),
     text: i18n.translate('controls.controlGroup.invalidControlWarning.text', {
-      defaultMessage:
-        'Some control selections are returning no results. Remove them for complete results.',
+      defaultMessage: 'Remove them for complete results.',
     }),
     dismissButtonLabel: i18n.translate(
       'controls.controlGroup.invalidControlWarning.dismissButtonLabel',
