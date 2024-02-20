@@ -636,10 +636,7 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
-    const configurations = await this.casesClient.configure.get();
-    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
-      configurations.map((conf) => [conf.owner, conf.customFields])
-    );
+    const customFieldsConfigurationMap = await this.getCustomFieldsConfiguration();
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -890,10 +887,7 @@ export class CasesConnectorExecutor {
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
-    const configurations = await this.casesClient.configure.get();
-    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
-      configurations.map((conf) => [conf.owner, conf.customFields])
-    );
+    const customFieldsConfigurationMap = await this.getCustomFieldsConfiguration();
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(params, record, customFieldsConfigurationMap.get(params.owner))
@@ -1036,5 +1030,10 @@ export class CasesConnectorExecutor {
     { tags = [], labels = {} }: { tags?: string[]; labels?: Record<string, unknown> } = {}
   ) {
     return { tags: ['cases-connector', `rule:${params.rule.id}`, ...tags], labels };
+  }
+
+  private async getCustomFieldsConfiguration(): Promise<Map<string, CustomFieldsConfiguration>> {
+    const configurations = await this.casesClient.configure.get();
+    return new Map(configurations.map((conf) => [conf.owner, conf.customFields]));
   }
 }

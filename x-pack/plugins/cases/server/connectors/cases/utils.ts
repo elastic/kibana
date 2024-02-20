@@ -8,7 +8,7 @@
 import { isPlainObject, partition, toString } from 'lodash';
 import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from '../../common/constants';
+import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
 export const isRecordError = (so: OracleRecord | OracleRecordError): so is OracleRecordError =>
@@ -68,12 +68,12 @@ export const buildRequiredCustomFieldsForRequest = (
               customFieldConfig?.defaultValue === null
                 ? VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[customFieldConfig.type]
                 : customFieldConfig?.defaultValue;
-          } // else error?
+          }
 
           return {
             key: customFieldConfig.key,
             type: customFieldConfig.type,
-            value,
+            value: value as CaseRequestCustomField['value'],
           } as CaseRequestCustomField;
         })
     : [];

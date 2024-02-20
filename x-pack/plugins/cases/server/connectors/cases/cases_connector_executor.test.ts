@@ -796,7 +796,7 @@ describe('CasesConnectorExecutor', () => {
           });
         });
 
-        it('creates new cases with required custom fields if reopenClosedCases=false and there are closed cases', async () => {
+        it('creates new cases if reopenClosedCases=false and there are closed cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
             errors: [],
