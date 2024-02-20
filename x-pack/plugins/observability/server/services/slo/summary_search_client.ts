@@ -13,7 +13,6 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
-import { getElastichsearchQueryOrThrow } from './transform_generators';
 import { getFlattenedGroupings } from './utils';
 
 interface EsSummaryDocument {
