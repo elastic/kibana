@@ -12,6 +12,7 @@ export * from './job_completion_notifications';
 export { InternalApiClientProvider, useInternalApiClient } from './context';
 export { useCheckIlmPolicyStatus } from './hooks';
 export { ReportingAPIClient } from './reporting_api_client';
+export { checkLicense } from './license_check';
 
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

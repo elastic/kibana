@@ -13,7 +13,7 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { checkLicense } from '@kbn/reporting-common';
+import { checkLicense } from '@kbn/reporting-public';
 import type { ExportPanelShareOpts } from '.';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 

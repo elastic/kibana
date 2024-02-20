@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { checkLicense } from '@kbn/reporting-common';
+import { checkLicense } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
