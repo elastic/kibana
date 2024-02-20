@@ -59,7 +59,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         const licenseInfo =
           licenseInfoPromise.status === 'fulfilled'
             ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
+            : ({} as Nullable<ESLicense>);
 
         // Lists Telemetry: Detection Rules
 

@@ -15,8 +15,8 @@ import { createUsageCounterLabel } from './helpers';
 
 export interface SenderMetadata {
   telemetryUrl: string;
-  licenseInfo: ESLicense | undefined;
-  clusterInfo: ESClusterInfo | undefined;
+  licenseInfo: Nullable<ESLicense>;
+  clusterInfo: Nullable<ESClusterInfo>;
   telemetryRequestHeaders: () => RawAxiosRequestHeaders;
   isTelemetryOptedIn(): Promise<boolean>;
   isTelemetryServicesReachable(): Promise<boolean>;

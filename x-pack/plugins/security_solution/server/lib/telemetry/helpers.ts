@@ -451,7 +451,7 @@ export class TelemetryTimelineFetcher {
     const clusterInfo: ESClusterInfo =
       clusterInfoPromise.status === 'fulfilled' ? clusterInfoPromise.value : ({} as ESClusterInfo);
 
-    const licenseInfo: ESLicense | undefined =
+    const licenseInfo: Nullable<ESLicense> =
       licenseInfoPromise.status === 'fulfilled' ? licenseInfoPromise.value : ({} as ESLicense);
 
     return { clusterInfo, licenseInfo };
