@@ -88,7 +88,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           : c;
 
         if (newSelectedConversation && (isNew || newSelectedConversation.id === '')) {
-          console.log('setConversationSettings: 1');
           setConversationSettings({
             ...conversationSettings,
             [isNew ? c : newSelectedConversation.title]: newSelectedConversation,
@@ -101,7 +100,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             },
           });
         } else if (newSelectedConversation != null) {
-          console.log('setConversationSettings: 2');
           setConversationSettings((prev) => {
             return {
               ...prev,
@@ -129,7 +127,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         const conversationId = conversationSettings[conversationTitle].id;
         const updatedConverationSettings = { ...conversationSettings };
         delete updatedConverationSettings[conversationTitle];
-        console.log('setConversationSettings: 3');
         setConversationSettings(updatedConverationSettings);
 
         setConversationsSettingsBulkActions({
@@ -157,7 +154,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               defaultSystemPromptId: systemPromptId,
             },
           };
-          console.log('setConversationSettings: 4');
           setConversationSettings({
             ...conversationSettings,
             [updatedConversation.title]: updatedConversation,
@@ -228,7 +224,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               model: config?.defaultModel,
             },
           };
-          console.log('setConversationSettings: 5');
           setConversationSettings({
             ...conversationSettings,
             [selectedConversation.title]: updatedConversation,
@@ -290,7 +285,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               model,
             },
           };
-          console.log('setConversationSettings: 6', updatedConversation);
           setConversationSettings({
             ...conversationSettings,
             [updatedConversation.title]: updatedConversation,
