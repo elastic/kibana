@@ -21,6 +21,7 @@ import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getIntegrations } from './get_integrations';
+import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -70,7 +71,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
-      rangeRt,
+      t.partial(rangeRt.props),
       typeRt,
       t.partial({
         datasetQuery: t.string,
@@ -135,8 +136,36 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/estimated_data',
+  params: t.type({
+    query: t.intersection([typeRt, rangeRt]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    estimatedDataInBytes: number;
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const estimatedDataInBytes = await getEstimatedDataInBytes({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      estimatedDataInBytes,
+    };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...dataStreamDetailsRoute,
+  ...estimatedDataInBytesRoute,
 };

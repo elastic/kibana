@@ -114,6 +114,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableAssetCriticality': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -568,6 +572,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableTransactionProfiling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingShowErrorFrames': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:profilingPerVCPUWattX86': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
@@ -621,6 +633,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:profilingAWSCostDiscountRate': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingAzureCostDiscountRate': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },

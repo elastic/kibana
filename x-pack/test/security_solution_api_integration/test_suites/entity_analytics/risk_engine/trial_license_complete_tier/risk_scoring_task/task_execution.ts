@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  dataGeneratorFactory,
-} from '../../../../detections_response/utils';
+import { dataGeneratorFactory } from '../../../../detections_response/utils';
+import { deleteAllRules, deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -236,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await assetCriticalityRoutes.upsert({
               id_field: 'host.name',
               id_value: 'host-1',
-              criticality_level: 'very_important',
+              criticality_level: 'extreme_impact',
             });
           });
 
@@ -258,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
               (riskScore) => riskScore.host?.risk.criticality_modifier
             );
 
-            expect(assetCriticalityLevels).to.contain('very_important');
+            expect(assetCriticalityLevels).to.contain('extreme_impact');
             expect(assetCriticalityModifiers).to.contain(2);
 
             const scoreWithCriticality = riskScores.find((score) => score.host?.name === 'host-1');
@@ -266,7 +263,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id_field: 'host.name',
                 id_value: 'host-1',
-                criticality_level: 'very_important',
+                criticality_level: 'extreme_impact',
                 criticality_modifier: 2,
                 calculated_level: 'Moderate',
                 calculated_score: 79.81345973382406,

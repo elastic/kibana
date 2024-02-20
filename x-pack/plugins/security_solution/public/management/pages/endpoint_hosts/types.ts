@@ -79,6 +79,7 @@ export interface EndpointState {
   endpointPendingActions: AsyncResourceState<AgentIdsPendingActions>;
   // Metadata transform stats to checking transform state
   metadataTransformStats: AsyncResourceState<TransformStats[]>;
+  isInitialized: boolean;
 }
 
 export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending_actions']>;

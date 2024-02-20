@@ -89,7 +89,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
-            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type {givenType}',
+            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
           values: {
             command: out.command,
             type: out.type,
@@ -162,9 +162,10 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('monaco.esql.validation.unknowAggregateFunction', {
-          defaultMessage: '{command} expects an aggregate function, found [{value}]',
+          defaultMessage:
+            'Expected an aggregate function or group but got [{value}] of type [{type}]',
           values: {
-            command: out.command,
+            type: out.type,
             value: out.value,
           },
         }),
@@ -223,6 +224,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         }),
         type: 'error',
       };
+    case 'expectedConstant':
+      return {
+        message: i18n.translate('monaco.esql.validation.expectedConstantValue', {
+          defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
+          values: {
+            given: out.given,
+            fn: out.fn,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -251,4 +263,10 @@ export function createMessage(
     location,
     code: messageId,
   };
+}
+
+export function getUnknownTypeLabel() {
+  return i18n.translate('monaco.esql.validation.unknownColumnType', {
+    defaultMessage: 'Unknown type',
+  });
 }

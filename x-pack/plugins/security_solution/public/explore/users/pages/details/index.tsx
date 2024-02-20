@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiTitle,
   EuiWindowEvent,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -21,12 +20,14 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useAssetCriticalityData,
   useAssetCriticalityPrivileges,
 } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import {
+  AssetCriticalitySelector,
+  AssetCriticalityTitle,
+} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -70,7 +71,7 @@ import { getCriteriaFromUsersType } from '../../../../common/components/ml/crite
 import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const QUERY_ID = 'UsersDetailsQueryId';
@@ -209,14 +210,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             {canReadAssetCriticality && (
               <>
                 <EuiHorizontalRule margin="m" />
-                <EuiTitle size="xs">
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.securitySolution..users.assetCriticality.sectionTitle"
-                      defaultMessage="Asset Criticality"
-                    />
-                  </h3>
-                </EuiTitle>
+                <AssetCriticalityTitle />
                 <EuiSpacer size="s" />
                 <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
                 <EuiHorizontalRule margin="m" />
@@ -296,7 +290,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

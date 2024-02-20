@@ -1,0 +1,20 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  dataset: "fake_stack"
+
+schedule:
+  - template: "good"
+    start: "now-2h"
+    end: "now-1h"
+  - template: "bad"
+    start: "now-1h"
+    end: "now-15m"
+  - template: "good"
+    start: "now-15m"
+    end: false

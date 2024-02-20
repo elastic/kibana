@@ -23,8 +23,8 @@ import {
   UNCATEGORIZED_TAB_ID,
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
-import { DatasetsPopover } from './sub_components/datasets_popover';
-import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
+import { SelectorPopover } from './sub_components/selector_popover';
+import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { DatasetSelectorProps } from './types';
@@ -44,12 +44,12 @@ export function DatasetSelector({
   discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isDataViewAvailable,
   isEsqlEnabled,
   isLoadingDataViews,
   isLoadingIntegrations,
   isLoadingUncategorized,
   isSearchingIntegrations,
-  onDataViewSelection,
   onDataViewsReload,
   onDataViewsSearch,
   onDataViewsSort,
@@ -86,7 +86,6 @@ export function DatasetSelector({
     togglePopover,
   } = useDatasetSelector({
     initialContext: { selection: datasetSelection },
-    onDataViewSelection,
     onDataViewsSearch,
     onDataViewsSort,
     onIntegrationsLoadMore,
@@ -164,10 +163,18 @@ export function DatasetSelector({
 
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
-      name: dataView.name,
+      name: <DataViewMenuItem dataView={dataView} />,
       onClick: () => selectDataView(dataView),
+      disabled: !isDataViewAvailable(dataView),
     }));
-  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
+  }, [
+    dataViews,
+    dataViewsError,
+    isDataViewAvailable,
+    isLoadingDataViews,
+    onDataViewsReload,
+    selectDataView,
+  ]);
 
   const tabs = [
     {
@@ -208,8 +215,8 @@ export function DatasetSelector({
   ));
 
   return (
-    <DatasetsPopover
-      selection={datasetSelection.selection}
+    <SelectorPopover
+      selection={datasetSelection}
       isOpen={isOpen}
       closePopover={closePopover}
       onClick={togglePopover}
@@ -268,7 +275,7 @@ export function DatasetSelector({
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
-            title: <DataViewsPanelTitle />,
+            title: dataViewsLabel,
             width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
             items: dataViewsItems,
           },
@@ -282,7 +289,7 @@ export function DatasetSelector({
         <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogDataset} />
         {isEsqlEnabled && <ESQLButton {...discoverEsqlUrlProps} />}
       </SelectorFooter>
-    </DatasetsPopover>
+    </SelectorPopover>
   );
 }
 
