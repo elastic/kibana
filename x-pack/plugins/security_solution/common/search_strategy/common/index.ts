@@ -59,3 +59,7 @@ export interface GenericBuckets {
 }
 
 export type StringOrNumber = string | number;
+
+export interface Fields<T = unknown[]> {
+  [x: string]: T | Array<Fields<T>>;
+}

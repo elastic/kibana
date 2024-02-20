@@ -9,7 +9,6 @@ import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { Fields } from '../../../../../../../common/search_strategy';
 import {
   MATCHED_ATOMIC,
   MATCHED_FIELD,
@@ -19,6 +18,7 @@ import {
 } from '../../../../../../../common/cti/constants';
 import { MatchDetails } from './match_details';
 import { IndicatorDetails } from './indicator_details';
+import type { Fields } from '../../../../../../../common/search_strategy';
 
 export interface ThreatMatchRowProps {
   contextId: string;

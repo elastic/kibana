@@ -175,7 +175,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
-          indexNames={indexNames}
           setQuery={setQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
