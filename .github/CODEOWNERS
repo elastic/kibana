@@ -635,7 +635,7 @@ packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
-packages/kbn-reporting-share @elastic/appex-sharedux
+packages/kbn-reporting/public/share @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
