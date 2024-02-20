@@ -4,17 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
+// Command line parameters handling
+const args = process.argv.slice(2);
+const params = {};
+
+args.forEach((arg) => {
+  const [argName, argValue] = arg.split('=');
+  params[argName] = argValue;
+});
+
+// Initiating output, regex line matching and file extensions
+const testsLogOutput = [];
 const regex = /\b(?:describe\.skip|describe|it\.skip|it)\(['`]/;
 const allowedExtensions = ['.ts', '.tsx', '.test.ts', '.test.tsx'];
 
-const logs = [];
+// Directories to iterate over
+const FTR_SERVERLESS =
+  'x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture';
+const FTR_API_INTEGRATION = 'x-pack/test/api_integration/apis/cloud_security_posture';
+const FTR_CSP_API = 'x-pack/test/cloud_security_posture_api';
+const FTR_CSP_FUNCTIONAL = 'x-pack/test/cloud_security_posture_functional';
+const UNIT_TEST_CSP = 'x-pack/plugins/cloud_security_posture';
 
-const cleanLine = (line) => {
+const directoryPaths = [
+  FTR_SERVERLESS,
+  FTR_API_INTEGRATION,
+  FTR_CSP_API,
+  FTR_CSP_FUNCTIONAL,
+  UNIT_TEST_CSP,
+];
+
+// Utilities
+const toIdFormat = (text) => text.toLowerCase().replace(/\s+/g, '-');
+
+const getCleanLine = (line) => {
   if (line.includes("', ")) {
     return line.split("', ")[0] + "')";
   }
@@ -23,100 +50,35 @@ const cleanLine = (line) => {
   }
 };
 
-function processFile(filePath) {
-  const testSuits = [];
+const getTags = (filePath, testSuits) => {
+  const tags = [];
 
-  const stream = fs.createReadStream(filePath);
-  const rl = readline.createInterface({
-    input: stream,
-    crlfDelay: Infinity,
-  });
+  if (
+    filePath.startsWith(FTR_SERVERLESS) ||
+    filePath.startsWith(FTR_API_INTEGRATION) ||
+    filePath.startsWith(FTR_CSP_API) ||
+    filePath.startsWith(FTR_CSP_FUNCTIONAL)
+  ) {
+    tags.push('FTR');
+  }
 
-  rl.on('line', (line) => {
-    const match = line.match(regex);
-    if (match) {
-      const [fullMatch] = match;
-      const type = fullMatch.startsWith('describe') ? 'describe' : 'it';
-      const label = line.trim().replace(/^[^']*'([^']*)'.*$/, '$1');
-      const isSkipped = line.includes('.skip(');
-      const indent = (line.match(/^\s*/) || [''])[0].length;
+  if (filePath.startsWith(UNIT_TEST_CSP)) {
+    tags.push('UT');
+  }
 
-      testSuits.push({
-        id: toIdFormat(label),
-        rawLine: line,
-        line: cleanLine(line),
-        label,
-        indent,
-        type,
-        isSkipped,
-      });
-    }
-  });
+  if (testSuits.some((suit) => suit.isSkipped)) {
+    tags.push('HAS SKIP');
+  }
 
-  rl.on('close', () => {
-    if (testSuits.length) {
-      const logData = {
-        filePath,
-        fileName: path.basename(filePath),
-        lines: testSuits.map((testSuit) => {
-          if (testSuit) {
-            return cleanLine(testSuit.rawLine);
-          }
-        }),
-        testSuits,
-        tree: createTree(testSuits),
-      };
+  if (testSuits.some((suit) => suit.isTodo)) {
+    tags.push('HAS TODO');
+  }
 
-      logs.push(logData);
-    }
+  return tags;
+};
 
-    // Export logs to a JSON file
-    const outputFilePath = path.join(__dirname, 'output.json');
-    fs.writeFileSync(outputFilePath, JSON.stringify(logs, null, 2));
-    // console.log(`Logs exported to: ${outputFilePath}`);
-  });
-}
-
-function processDirectory(directoryPath) {
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      console.error(`Error reading directory: ${directoryPath}`);
-      return;
-    }
-
-    files.forEach((file) => {
-      const filePath = path.join(directoryPath, file);
-      fs.stat(filePath, (err, stats) => {
-        if (err) {
-          console.error(`Error reading file stats: ${filePath}`);
-          return;
-        }
-
-        if (stats.isDirectory()) {
-          processDirectory(filePath);
-        } else if (stats.isFile() && allowedExtensions.some((ext) => filePath.endsWith(ext))) {
-          processFile(filePath);
-        }
-      });
-    });
-  });
-}
-
-// Replace with the provided directory paths
-const directoryPaths = [
-  'x-pack/test/cloud_security_posture_functional',
-  'x-pack/plugins/cloud_security_posture',
-];
-
-directoryPaths.forEach((directoryPath) => {
-  processDirectory(directoryPath);
-});
-
-function toIdFormat(text) {
-  return text.toLowerCase().replace(/\s+/g, '-');
-}
-
-function createTree(testSuits) {
+// Creates a nested object to represent test hierarchy, useful to understand skip scope
+const createTree = (testSuits) => {
   const tree = [];
   let currentIndent = 0;
   let currentNode = { children: tree };
@@ -144,4 +106,88 @@ function createTree(testSuits) {
   });
 
   return tree;
-}
+};
+
+// Processes each line in a file, extracts relevant test data, and adds it to the output
+const processFile = (filePath) => {
+  const testSuits = [];
+  const stream = fs.createReadStream(filePath);
+  const rl = readline.createInterface({
+    input: stream,
+    crlfDelay: Infinity,
+  });
+
+  // Extracts relevant data from the matched line and adds it to the testSuits array
+  rl.on('line', (line) => {
+    const match = line.match(regex);
+    if (match) {
+      const [fullMatch] = match;
+      const type = fullMatch.startsWith('describe') ? 'describe' : 'it';
+      const label = line.trim().replace(/^[^`']*['`]([^'`]*)['`].*$/, '$1');
+      const isSkipped = line.includes('.skip(') || line.includes('.skip(`');
+      const isTodo = line.includes('todo') || line.includes('TODO');
+      const indent = (line.match(/^\s*/) || [''])[0].length;
+
+      testSuits.push({
+        id: toIdFormat(label),
+        rawLine: line,
+        line: getCleanLine(line),
+        label,
+        indent,
+        type,
+        isSkipped,
+        isTodo,
+      });
+    }
+  });
+
+  // After processing all lines in a file, adds an object containing the file details and its test suits to the output
+  rl.on('close', () => {
+    if (testSuits.length) {
+      const logData = {
+        filePath,
+        fileName: path.basename(filePath),
+        tags: getTags(filePath, testSuits),
+        lines: testSuits.map((testSuit) => (testSuit ? getCleanLine(testSuit.rawLine) : null)),
+        testSuits,
+        tree: createTree(testSuits),
+      };
+
+      testsLogOutput.push(logData);
+    }
+
+    // Writes the output to a JSON file
+    const outputDir = params['--outputDir'] || __dirname;
+    const testsLogOutputFilePath = path.join(outputDir, 'csp_test_log.json');
+    fs.writeFileSync(testsLogOutputFilePath, JSON.stringify(testsLogOutput, null, 2));
+  });
+};
+
+// Recursively iterates over the files of the provided directories
+const processDirectory = (directoryPath) => {
+  fs.readdir(directoryPath, (err, files) => {
+    if (err) {
+      console.error(`Error reading directory: ${directoryPath}`);
+      return;
+    }
+
+    files.forEach((file) => {
+      const filePath = path.join(directoryPath, file);
+      fs.stat(filePath, (err, stats) => {
+        if (err) {
+          console.error(`Error reading file stats: ${filePath}`);
+          return;
+        }
+
+        if (stats.isDirectory()) {
+          processDirectory(filePath);
+        } else if (stats.isFile() && allowedExtensions.some((ext) => filePath.endsWith(ext))) {
+          processFile(filePath);
+        }
+      });
+    });
+  });
+};
+
+// Initiates the processing for each directory
+directoryPaths.forEach(processDirectory);
