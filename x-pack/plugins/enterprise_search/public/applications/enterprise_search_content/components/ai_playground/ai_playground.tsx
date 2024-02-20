@@ -7,17 +7,20 @@
 
 import React, { useCallback, useEffect } from 'react';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useValues, useActions } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { Chat, EmptyIndex } from '@kbn/ai-playground';
+import { i18n } from '@kbn/i18n';
 
+import { KibanaLogic } from '../../../shared/kibana';
+import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { IndicesLogic } from '../search_indices/indices_logic';
-import { KibanaLogic } from '../../../shared/kibana';
-import { NEW_INDEX_PATH } from '../../routes';
+
+const queryClient = new QueryClient({});
 
 export const AIPlayground: React.FC = () => {
   const { fetchIndices } = useActions(IndicesLogic);
@@ -52,19 +55,21 @@ export const AIPlayground: React.FC = () => {
       customPageSections
       bottomBorder="extended"
     >
-      {hasNoIndices ? (
-        <EmptyIndex onCreateIndexClick={handleNavigateToIndex} />
-      ) : (
-        <EuiPageTemplate.Section
-          alignment="top"
-          restrictWidth={false}
-          grow
-          contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-          paddingSize="none"
-        >
-          <Chat />
-        </EuiPageTemplate.Section>
-      )}
+      <QueryClientProvider client={queryClient}>
+        {hasNoIndices ? (
+          <EmptyIndex onCreateIndexClick={handleNavigateToIndex} />
+        ) : (
+          <EuiPageTemplate.Section
+            alignment="top"
+            restrictWidth={false}
+            grow
+            contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+            paddingSize="none"
+          >
+            <Chat />
+          </EuiPageTemplate.Section>
+        )}
+      </QueryClientProvider>
     </EnterpriseSearchContentPageTemplate>
   );
 };

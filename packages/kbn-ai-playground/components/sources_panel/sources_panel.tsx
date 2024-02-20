@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { IndicesTable } from './indices_table';
 import { AddIndicesField } from './add_indices_field';
+import { FieldsPanel } from './fields_panel';
 
 interface SourcesFlyoutProps {}
 
@@ -40,11 +41,15 @@ export const SourcesPanel: React.FC<SourcesFlyoutProps> = () => {
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <IndicesTable onRemoveClick={removeIndex} />
+          <IndicesTable onRemoveClick={removeIndex} indices={indices} />
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AddIndicesField addIndices={addIndices} />
+          <AddIndicesField addIndices={addIndices} indices={indices} />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <FieldsPanel indices={indices} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiAccordion>

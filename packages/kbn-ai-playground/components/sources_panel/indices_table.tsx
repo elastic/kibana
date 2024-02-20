@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 interface IndicesTableProps {
   onRemoveClick: (index: string) => void;
+  indices: string[];
 }
 
-export const IndicesTable: React.FC<IndicesTableProps> = ({ onRemoveClick }) => {
+export const IndicesTable: React.FC<IndicesTableProps> = ({ onRemoveClick, indices }) => {
   return (
     <EuiBasicTable
       columns={[
@@ -41,10 +42,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ onRemoveClick }) => 
           ],
         },
       ]}
-      items={[
-        { id: '1', name: 'search-index' },
-        { id: '2', name: 'search-books' },
-      ]}
+      items={indices.map((name) => ({ id: name, name }))}
     />
   );
 };
