@@ -33,15 +33,7 @@ import {
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/es_fields/apm';
-import { string } from '../../../../common/utils/esql';
-import { getEsqlDateRangeFilter } from '../../../../common/utils/esql/get_esql_date_range_filter';
-import { getEsqlEnvironmentFilter } from '../../../../common/utils/esql/get_esql_environment_filter';
+import { getThroughputScreenContext } from './get_throughput_screen_context';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -166,34 +158,17 @@ export function ServiceOverviewThroughputChart({
     useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
-    const clauses = [
-      `${PROCESSOR_EVENT} == "transaction"`,
-      getEsqlDateRangeFilter(start, end),
-      serviceName ? `${SERVICE_NAME} == ${string`${serviceName}`}` : '',
-      transactionName
-        ? `${TRANSACTION_NAME} == ${string`${transactionName}`}`
-        : '',
-      transactionType
-        ? `${TRANSACTION_TYPE} == ${string`${transactionType}`}`
-        : '',
-      environment ? getEsqlEnvironmentFilter(environment) : '',
-    ].filter(Boolean);
-
-    return setScreenContext({
-      screenDescription: `There is a throughput chart displayed. The ES|QL equivalent for this is:
-      
-        \`\`\`esql
-        FROM traces-apm*
-          | WHERE ${clauses.join(' AND ')}
-          ${
-            preferred
-              ? `| EVAL date_bucket = DATE_TRUNC(${preferred?.bucketSizeInSeconds} seconds, @timestamp)`
-              : ''
-          }
-          | STATS count = COUNT(*)${preferred ? ` BY date_bucket` : ''}
-        \`\`\`
-      `,
-    });
+    return setScreenContext(
+      getThroughputScreenContext({
+        serviceName,
+        transactionName,
+        transactionType,
+        environment,
+        preferred,
+        start,
+        end,
+      })
+    );
   }, [
     serviceName,
     transactionName,

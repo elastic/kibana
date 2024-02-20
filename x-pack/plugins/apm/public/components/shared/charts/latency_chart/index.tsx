@@ -31,15 +31,7 @@ import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_pref
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
-import { string } from '../../../../../common/utils/esql';
-import { getEsqlDateRangeFilter } from '../../../../../common/utils/esql/get_esql_date_range_filter';
-import { getEsqlEnvironmentFilter } from '../../../../../common/utils/esql/get_esql_environment_filter';
+import { getLatencyChartScreenContext } from './get_latency_chart_screen_context';
 
 interface Props {
   height?: number;
@@ -113,36 +105,17 @@ export function LatencyChart({ height, kuery }: Props) {
     useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
-    const clauses = [
-      `${PROCESSOR_EVENT} == "transaction"`,
-      getEsqlDateRangeFilter(start, end),
-      serviceName ? `${SERVICE_NAME} == ${string`${serviceName}`}` : '',
-      transactionName
-        ? `${TRANSACTION_NAME} == ${string`${transactionName}`}`
-        : '',
-      transactionType
-        ? `${TRANSACTION_TYPE} == ${string`${transactionType}`}`
-        : '',
-      environment ? getEsqlEnvironmentFilter(environment) : '',
-    ].filter(Boolean);
-
-    return setScreenContext({
-      screenDescription: `There is a latency chart displayed. The ES|QL equivalent for this is:
-    
-      \`\`\`esql
-      FROM traces-apm*
-        | WHERE ${clauses.join(' AND ')}
-        ${
-          bucketSizeInSeconds !== undefined
-            ? `| EVAL date_bucket = DATE_TRUNC(${bucketSizeInSeconds} seconds, @timestamp)`
-            : ''
-        }
-        | STATS avg_duration = AVG(transaction.duration.us)${
-          bucketSizeInSeconds !== undefined ? ` BY date_bucket` : ''
-        }
-      \`\`\`
-    `,
-    });
+    return setScreenContext(
+      getLatencyChartScreenContext({
+        serviceName,
+        transactionName: transactionName ?? undefined,
+        transactionType,
+        environment,
+        bucketSizeInSeconds,
+        start,
+        end,
+      })
+    );
   }, [
     serviceName,
     transactionName,

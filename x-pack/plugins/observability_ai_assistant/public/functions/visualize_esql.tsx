@@ -39,6 +39,18 @@ import type {
 } from '../types';
 import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
 
+enum ChartType {
+  XY = 'XY',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heat map',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tag cloud',
+  Waffle = 'Waffle',
+}
+
 interface VisualizeQueryResponsev0 {
   content: DatatableColumn[];
 }
@@ -73,7 +85,7 @@ interface VisualizeESQLProps {
    */
   userOverrides?: unknown;
   /** User's preferation chart type as it comes from the model */
-  preferredChartType?: string;
+  preferredChartType?: ChartType;
 }
 
 function generateId() {
@@ -139,19 +151,14 @@ export function VisualizeESQL({
         },
       };
 
-      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataViewAsync.value);
+      const chartSuggestions = lensHelpersAsync.value.suggestions(
+        context,
+        dataViewAsync.value,
+        [],
+        preferredChartType
+      );
       if (chartSuggestions?.length) {
-        let [suggestion] = chartSuggestions;
-
-        if (chartSuggestions.length > 1 && preferredChartType) {
-          const suggestionFromModel = chartSuggestions.find(
-            (s) =>
-              s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
-          );
-          if (suggestionFromModel) {
-            suggestion = suggestionFromModel;
-          }
-        }
+        const [suggestion] = chartSuggestions;
 
         const attrs = getLensAttributesFromSuggestion({
           filters: [],
@@ -292,17 +299,6 @@ export function VisualizeESQL({
   );
 }
 
-enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-}
-
 export function registerVisualizeQueryRenderFunction({
   service,
   registerRenderFunction,
@@ -327,7 +323,7 @@ export function registerVisualizeQueryRenderFunction({
         userOverrides = typedResponse.data.userOverrides;
       }
 
-      let preferredChartType: string | undefined;
+      let preferredChartType: ChartType | undefined;
 
       switch (intention) {
         case VisualizeESQLUserIntention.executeAndReturnResults:
@@ -349,6 +345,10 @@ export function registerVisualizeQueryRenderFunction({
 
         case VisualizeESQLUserIntention.visualizeLine:
           preferredChartType = ChartType.Line;
+          break;
+
+        case VisualizeESQLUserIntention.visualizeArea:
+          preferredChartType = ChartType.Area;
           break;
 
         case VisualizeESQLUserIntention.visualizeTagcloud:
