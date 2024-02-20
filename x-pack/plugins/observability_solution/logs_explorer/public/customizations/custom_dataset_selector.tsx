@@ -7,7 +7,7 @@
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import React from 'react';
-import { DataSourceSelector } from '../components/dataset_selector';
+import { DataSourceSelector } from '../components/data_source_selector';
 import { LogsExplorerController } from '../controller';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { useDatasetSelection } from '../hooks/use_dataset_selection';

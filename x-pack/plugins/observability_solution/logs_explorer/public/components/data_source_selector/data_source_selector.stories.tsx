@@ -19,7 +19,7 @@ import {
   SelectionChange,
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
-import { DataSourceSelector } from './dataset_selector';
+import { DataSourceSelector } from './data_source_selector';
 import { DataSourceSelectorProps, DatasetsSelectorSearchParams } from './types';
 
 const meta: Meta<typeof DataSourceSelector> = {
