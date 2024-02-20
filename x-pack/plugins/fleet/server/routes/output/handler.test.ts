@@ -32,7 +32,7 @@ describe('output handler', () => {
       if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
         return { hosts: ['http://elasticsearch:9200'] } as any;
       } else {
-        return { id: 'output1' } as any;
+        return { type: 'elasticsearch', id: 'output1' } as any;
       }
     });
     jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
@@ -148,7 +148,7 @@ describe('output handler', () => {
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', hosts: ['http://localhost:8080'] },
+        body: { hosts: ['http://localhost:8080'] },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any
@@ -169,7 +169,7 @@ describe('output handler', () => {
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', hosts: ['http://elasticsearch:9200'] },
+        body: { hosts: ['http://elasticsearch:9200'] },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any
@@ -184,7 +184,7 @@ describe('output handler', () => {
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', name: 'Renamed output' },
+        body: { name: 'Renamed output' },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any
@@ -201,7 +201,7 @@ describe('output handler', () => {
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', hosts: ['http://localhost:8080'] },
+        body: { hosts: ['http://localhost:8080'] },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any
