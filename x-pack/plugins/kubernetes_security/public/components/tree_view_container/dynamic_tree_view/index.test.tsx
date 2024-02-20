@@ -56,7 +56,6 @@ describe('DynamicTreeView component', () => {
                 },
               },
             ]}
-            aria-label="Logical Tree View"
             onSelect={(selectionDepth, key, type) => {}}
             {...props}
           />
