@@ -21,7 +21,7 @@ export function useImportKnowledgeBaseEntries() {
     notifications: { toasts },
   } = useAppContext();
   const queryClient = useQueryClient();
-  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
 
   return useMutation<
     void,

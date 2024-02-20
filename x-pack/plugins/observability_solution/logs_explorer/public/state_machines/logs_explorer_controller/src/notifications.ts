@@ -20,12 +20,30 @@ export const createDatasetSelectionRestoreFailedNotifier = (toasts: IToasts) => 
     ),
   });
 
+export const createDataViewSelectionRestoreFailedNotifier = (toasts: IToasts) => () =>
+  toasts.addWarning({
+    title: i18n.translate(
+      'xpack.logsExplorer.datasetSelection.restoreDataViewSelectionFailedToastTitle',
+      { defaultMessage: "We couldn't restore your data view selection." }
+    ),
+    text: i18n.translate(
+      'xpack.logsExplorer.datasetSelection.restoreDataViewSelectionFailedToastMessage',
+      { defaultMessage: 'We switched to "All log datasets" as the default selection.' }
+    ),
+  });
+
 export const createCreateDataViewFailedNotifier = (toasts: IToasts) => () =>
   toasts.addWarning({
-    title: i18n.translate('xpack.logsExplorer.datasetSelection.createDataViewFailedToastTitle', {
-      defaultMessage: "We couldn't create a data view for your selection.",
-    }),
-    text: i18n.translate('xpack.logsExplorer.datasetSelection.createDataViewFailedToastMessage', {
-      defaultMessage: 'We switched to "All log datasets" as the default selection.',
-    }),
+    title: i18n.translate(
+      'xpack.logsExplorer.datasetSelection.createAdHocDataViewFailedToastTitle',
+      {
+        defaultMessage: "We couldn't create a data view for your selection.",
+      }
+    ),
+    text: i18n.translate(
+      'xpack.logsExplorer.datasetSelection.createAdHocDataViewFailedToastMessage',
+      {
+        defaultMessage: 'We switched to "All log datasets" as the default selection.',
+      }
+    ),
   });

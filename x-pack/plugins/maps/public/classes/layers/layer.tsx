@@ -245,7 +245,7 @@ export class AbstractLayer implements ILayer {
     const sourceDisplayName = source
       ? await source.getDisplayName()
       : await this.getSource().getDisplayName();
-    return sourceDisplayName || `Layer ${this._descriptor.id}`;
+    return sourceDisplayName || this._descriptor.id;
   }
 
   async getAttributions(): Promise<Attribution[]> {
@@ -577,7 +577,10 @@ export class AbstractLayer implements ILayer {
 
   getGeoFieldNames(): string[] {
     const source = this.getSource();
-    return hasESSourceMethod(source, 'getGeoFieldName') ? [source.getGeoFieldName()] : [];
+    const geoFieldName = hasESSourceMethod(source, 'getGeoFieldName')
+      ? source.getGeoFieldName()
+      : undefined;
+    return geoFieldName ? [geoFieldName] : [];
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {

@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import {
+  EuiHeaderLinks,
+  EuiHeaderLink,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import {
@@ -70,32 +76,38 @@ export function UXActionMenu({
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
       theme$={appMountParameters.theme$}
     >
-      <EuiHeaderLinks gutterSize="xs">
-        <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
-          <EuiHeaderLink
-            data-test-subj="uxAnalyzeBtn"
-            color="text"
-            href={uxExploratoryViewLink}
-            iconType="visBarVerticalStacked"
-          >
-            {ANALYZE_DATA}
-          </EuiHeaderLink>
-        </EuiToolTip>
-        <EuiHeaderLink
-          color="primary"
-          iconType="indexOpen"
-          iconSide="left"
-          href={application.getUrlForApp('/apm/tutorial')}
-        >
-          {i18n.translate('xpack.ux.addDataButtonLabel', {
-            defaultMessage: 'Add data',
-          })}
-        </EuiHeaderLink>
-        <UxInspectorHeaderLink isDev={isDev} />
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem>
+          <EuiHeaderLinks gutterSize="xs">
+            <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+              <EuiHeaderLink
+                data-test-subj="uxAnalyzeBtn"
+                color="text"
+                href={uxExploratoryViewLink}
+                iconType="visBarVerticalStacked"
+              >
+                {ANALYZE_DATA}
+              </EuiHeaderLink>
+            </EuiToolTip>
+            <EuiHeaderLink
+              color="primary"
+              iconType="indexOpen"
+              iconSide="left"
+              href={application.getUrlForApp('/apm/tutorial')}
+            >
+              {i18n.translate('xpack.ux.addDataButtonLabel', {
+                defaultMessage: 'Add data',
+              })}
+            </EuiHeaderLink>
+            <UxInspectorHeaderLink isDev={isDev} />
+          </EuiHeaderLinks>
+        </EuiFlexItem>
         {ObservabilityAIAssistantActionMenuItem ? (
-          <ObservabilityAIAssistantActionMenuItem />
+          <EuiFlexItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiFlexItem>
         ) : null}
-      </EuiHeaderLinks>
+      </EuiFlexGroup>
     </HeaderMenuPortal>
   );
 }

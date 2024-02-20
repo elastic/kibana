@@ -27,6 +27,9 @@ import {
   MlEmbeddableTypes,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
+import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlFieldFormatService } from '../application/services/field_format_service';
+import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -100,13 +103,45 @@ export interface AnomalyChartsEmbeddableCustomInput {
 
 export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
+export interface SingleMetricViewerEmbeddableCustomInput {
+  jobIds: JobId[];
+  title: string;
+  functionDescription?: string;
+  panelTitle: string;
+  selectedDetectorIndex: number;
+  selectedEntities: MlEntityField[];
+  // Embeddable inputs which are not included in the default interface
+  filters: Filter[];
+  query: Query;
+  refreshConfig: RefreshInterval;
+  timeRange: TimeRange;
+}
+
+export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
+  SingleMetricViewerEmbeddableCustomInput;
+
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
   mlResultsService: MlResultsService;
+  mlApiServices?: MlApiServices;
+}
+
+export interface SingleMetricViewerServices {
+  anomalyExplorerService: AnomalyExplorerChartsService;
+  anomalyDetectorService: AnomalyDetectorService;
+  mlApiServices: MlApiServices;
+  mlFieldFormatService: MlFieldFormatService;
+  mlResultsService: MlResultsService;
+  mlTimeSeriesSearchService?: MlTimeSeriesSeachService;
 }
 
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
+export type SingleMetricViewerEmbeddableServices = [
+  CoreStart,
+  MlDependencies,
+  SingleMetricViewerServices
+];
 export interface AnomalyChartsCustomOutput {
   entityFields?: MlEntityField[];
   severity?: number;

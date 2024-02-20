@@ -500,7 +500,7 @@ steps:
       preemptible: true
       buildDirectory: /dev/shm/builds
     key: storybooks
-    timeout_in_minutes: 60
+    timeout_in_minutes: 80
     retry:
       automatic:
         - exit_status: '-1'

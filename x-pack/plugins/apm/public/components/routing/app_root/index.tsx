@@ -21,6 +21,7 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
@@ -128,12 +129,23 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  const { setHeaderActionMenu, theme$ } =
-    useApmPluginContext().appMountParameters;
+  const {
+    appMountParameters: { setHeaderActionMenu, theme$ },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useApmPluginContext();
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <ApmHeaderActionMenu />
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem>
+          <ApmHeaderActionMenu />
+        </EuiFlexItem>
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <EuiFlexItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     </HeaderMenuPortal>
   );
 }

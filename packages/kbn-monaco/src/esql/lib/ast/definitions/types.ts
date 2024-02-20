@@ -23,13 +23,14 @@ export interface FunctionDefinition {
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
+      literalOnly?: boolean;
     }>;
     infiniteParams?: boolean;
     minParams?: number;
     returnType: string;
     examples?: string[];
   }>;
-  warning?: (fnDef: ESQLFunction) => ESQLMessage[];
+  validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
 export interface CommandBaseDefinition {
@@ -64,9 +65,11 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   ) => ESQLMessage[];
 }
 
-export interface CommandModeDefinition extends CommandBaseDefinition {
+export interface CommandModeDefinition {
   name: string;
   description: string;
+  values: Array<{ name: string; description: string }>;
+  prefix?: string;
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {
