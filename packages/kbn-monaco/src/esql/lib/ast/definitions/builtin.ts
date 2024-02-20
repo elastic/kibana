@@ -154,7 +154,7 @@ export const builtinFunctions: FunctionDefinition[] = [
               type: 'warning' as const,
               code: 'moduleByZero',
               text: i18n.translate('monaco.esql.divide.warning.zeroModule', {
-                defaultMessage: 'Module by zero can return null value: {left}/{right}',
+                defaultMessage: 'Module by zero can return null value: {left}%{right}',
                 values: {
                   left: left.text,
                   right: right.value,
@@ -207,13 +207,14 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
   ].map((op): FunctionDefinition => createComparisonDefinition(op)),
   ...[
+    // Skip the insensitive case equality until it gets restored back
     // new special comparison operator for strings only
-    {
-      name: '=~',
-      description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
-        defaultMessage: 'Case insensitive equality',
-      }),
-    },
+    // {
+    //   name: '=~',
+    //   description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
+    //     defaultMessage: 'Case insensitive equality',
+    //   }),
+    // },
     {
       name: 'like',
       description: i18n.translate('monaco.esql.definition.likeDoc', {

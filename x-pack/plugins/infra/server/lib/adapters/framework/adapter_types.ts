@@ -22,7 +22,10 @@ import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';
@@ -59,6 +62,7 @@ export interface InfraServerPluginStartDeps {
   dataViews: DataViewsPluginStart;
   logsShared: LogsSharedPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
   apmDataAccess: ApmDataAccessPluginStart;
 }
 

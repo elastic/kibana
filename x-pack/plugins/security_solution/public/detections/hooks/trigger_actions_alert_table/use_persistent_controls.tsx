@@ -36,7 +36,8 @@ export const getPersistentControlsHook = (tableId: TableId) => {
     } = useKibana();
 
     const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-    const { options } = useDeepEqualSelector((state) => groupIdSelector()(state, tableId)) ?? {
+    const groupId = useMemo(() => groupIdSelector(), []);
+    const { options } = useDeepEqualSelector((state) => groupId(state, tableId)) ?? {
       options: [],
     };
 
