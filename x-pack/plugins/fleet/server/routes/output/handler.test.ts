@@ -32,7 +32,7 @@ describe('output handler', () => {
       if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
         return { hosts: ['http://elasticsearch:9200'] } as any;
       } else {
-        return { type: 'elasticsearch', id: 'output1' } as any;
+        return { id: 'output1' } as any;
       }
     });
     jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
@@ -144,6 +144,14 @@ describe('output handler', () => {
 
   it('should return error on put elasticsearch output in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    // The original output should provide the output type
+    jest.spyOn(outputService, 'get').mockImplementation((_, id: string) => {
+      if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+        return { hosts: ['http://elasticsearch:9200'] } as any;
+      } else {
+        return { id: 'output1', type: 'elasticsearch' } as any;
+      }
+    });
 
     const res = await putOutputHandler(
       mockContext,
