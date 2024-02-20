@@ -154,10 +154,16 @@ export function ChatBody({
   }
 
   const containerClassName = css`
+    background: white;
+    min-width: 0;
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'
       ? 1200 - 250 + 'px' // page template max width - conversation list width.
       : '100%'};
+  `;
+
+  const headerContainerClassName = css`
+    padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
   `;
 
   const [stickToBottom, setStickToBottom] = useState(true);
@@ -400,9 +406,10 @@ export function ChatBody({
     return (
       <EuiFlexGroup
         direction="column"
-        gutterSize="none"
         className={containerClassName}
+        gutterSize="none"
         justifyContent="center"
+        responsive={false}
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
@@ -424,7 +431,12 @@ export function ChatBody({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={containerClassName}
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
@@ -445,7 +457,7 @@ export function ChatBody({
           </EuiCallOut>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingRight: showLinkToConversationsApp ? '24px' : '0' }}>
+      <EuiFlexItem grow={false} className={headerContainerClassName}>
         <ChatHeader
           connectors={connectors}
           conversationId={
