@@ -451,7 +451,7 @@ export class GetPreviewData {
     if (groupingsKeys.length) {
       groupingsKeys.forEach((key) => {
         filter.push({
-          term: { [key]: options.groupings[key] },
+          term: { [key]: options.groupings?.[key] },
         });
       });
     } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
