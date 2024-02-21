@@ -978,14 +978,13 @@ Then the preview should display the changes for the newly selected rule
 
 #### **Scenario: User can see changes when updated rule is a different rule type**
 
-**Automation**: 1 UI integration test
+**Automation**: 1 e2e test
 
 ```Gherkin
 Given a prebuilt rule is installed in Kibana
 And this rule has an update available that changes the rule type
 When user opens the upgrade preview
 Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
-And a tooltip is displayed with information about changing rule types
 ```
 
 #### **Scenario: Field groupings should be rendered together in the same accordion panel**
