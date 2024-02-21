@@ -47,7 +47,29 @@ export interface ValidationErrors {
   };
   wrongArgumentNumber: {
     message: string;
-    type: { fn: string; numArgs: number; passedArgs: number; exactly: number };
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+    };
+  };
+  wrongArgumentNumberTooMany: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      extraArgs: number;
+    };
+  };
+  wrongArgumentNumberTooFew: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      missingArgs: number;
+    };
   };
   unknownColumn: {
     message: string;
