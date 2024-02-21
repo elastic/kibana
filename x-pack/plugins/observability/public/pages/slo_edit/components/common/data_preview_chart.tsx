@@ -310,7 +310,7 @@ const periodOptions: EuiSelectOption[] = [
   },
   {
     value: '12h',
-    text: i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.last24Hours', {
+    text: i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.last12Hours', {
       defaultMessage: 'Last 12 hours',
     }),
   },
