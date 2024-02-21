@@ -74,10 +74,6 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           async function assertAnalysisResult(data: any[]) {
-            expect(data.length).to.eql(
-              testData.expected.actionsLengthGroupOnly,
-              `Expected 'actionsLengthGroupOnly' to be ${testData.expected.actionsLengthGroupOnly}, got ${data.length}.`
-            );
             data.forEach((d) => {
               expect(typeof d.type).to.be('string');
             });

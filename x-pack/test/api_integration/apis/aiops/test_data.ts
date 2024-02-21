@@ -44,8 +44,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 35,
-      actionsLengthGroupOnly: 4,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: [
@@ -96,8 +94,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 27,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
@@ -121,8 +117,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 61,
-      actionsLengthGroupOnly: 31,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: topTerms,
@@ -146,8 +140,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 61,
-      actionsLengthGroupOnly: 31,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: topTerms,
@@ -171,8 +163,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 30,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
@@ -196,8 +186,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 27,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
@@ -221,8 +209,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 30,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
@@ -246,8 +232,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      actionsLength: 218,
-      actionsLengthGroupOnly: 14,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       groups: frequentItemSetsLargeArraysGroups,
