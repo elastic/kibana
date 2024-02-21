@@ -14,11 +14,11 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock } from './mocks/dataview';
 import { DataViewPickerPropsExtended } from './data_view_picker';
-import { TextBasedLanguages } from '../types';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
