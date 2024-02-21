@@ -22,7 +22,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   // FLAKY: https://github.com/elastic/kibana/issues/169034
   describe.skip('with legacy risk score', () => {
     before(() => {
-      // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
 
