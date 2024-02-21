@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { ApmFields, appendHash, hashKeysOf } from '@kbn/apm-synthtrace-client';
-import { pick, random } from 'lodash';
+import { pick } from 'lodash';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
@@ -81,7 +81,7 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
             value_count: 0,
           },
           labels:
-            random(0, 100, false) % 2 === 0
+            event['service.name'] === 'synth-node-0'
               ? { custom_label: 'value' }
               : { custom_label: ['value1', 'value2'] },
         };

@@ -36,12 +36,14 @@ const mockBucket = {
 };
 
 describe('getSourceFields', () => {
-  it('should return a flattened record of fields and values for a given bucket', () => {
+  it('should return a flattened record of fields and values for a given bucket except for labels', () => {
     const result = getServiceGroupFields(mockBucket);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
-        "labels.team": "test",
+        "labels": Object {
+          "team": "test",
+        },
         "service.environment": "testing",
         "service.language.name": "typescript",
         "service.name": "testbeans",
@@ -106,12 +108,14 @@ describe('getSourceFieldsAgg', () => {
 });
 
 describe('flattenSourceDoc', () => {
-  it('should flatten a given nested object with dot delim paths as keys', () => {
+  it('should flatten a given nested object with dot delim paths as keys except for labels', () => {
     const result = flattenSourceDoc(mockSourceObj);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
-        "labels.team": "test",
+        "labels": Object {
+          "team": "test",
+        },
         "service.environment": "testing",
         "service.language.name": "typescript",
         "service.name": "testbeans",
