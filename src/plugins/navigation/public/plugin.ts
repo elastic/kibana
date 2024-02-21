@@ -97,29 +97,34 @@ export class NavigationPublicPlugin
       solutionNavigation: { featureOn: isSolutionNavigationFeatureOn },
     } = config;
 
-    core.settings.globalClient
-      .get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
-      .pipe(takeUntil(this.stop$), distinctUntilChanged())
-      .subscribe((enabled) => {});
+    if (isSolutionNavigationFeatureOn) {
+      core.settings.globalClient
+        .get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
+        .pipe(takeUntil(this.stop$), distinctUntilChanged())
+        .subscribe((enabled) => {});
 
-    combineLatest([
-      core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$(STATUS_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
-    ])
-      .pipe(takeUntil(this.stop$), debounceTime(10))
-      .subscribe(([enabled, status, defaultSolution]) => {
-        if (!isSolutionNavigationFeatureOn || !enabled) {
-          chrome.project.changeActiveSolutionNavigation(null);
-        } else {
-          const changeImmediately = status === 'visible';
-          chrome.project.changeActiveSolutionNavigation(
-            changeImmediately ? defaultSolution : null,
-            { onlyIfNotSet: true }
-          );
-        }
-        console.log({ enabled, status, defaultSolution });
-      });
+      combineLatest([
+        core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
+        core.settings.globalClient.get$(STATUS_SOLUTION_NAV_UI_SETTING_ID),
+        core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
+      ])
+        .pipe(takeUntil(this.stop$), debounceTime(10))
+        .subscribe(([enabled, status, defaultSolution]) => {
+          if (!isSolutionNavigationFeatureOn || !enabled) {
+            chrome.project.changeActiveSolutionNavigation(null);
+          } else {
+            // Here check if the user has opt in or not....
+            const changeImmediately = status === 'visible';
+            chrome.project.changeActiveSolutionNavigation(
+              changeImmediately ? defaultSolution : null,
+              { onlyIfNotSet: true }
+            );
+          }
+          console.log({ enabled, status, defaultSolution });
+        });
+    } else {
+      chrome.project.changeActiveSolutionNavigation(null);
+    }
 
     return {
       ui: {
