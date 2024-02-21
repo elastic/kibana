@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,6 +9,6 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server"
   ]
 }

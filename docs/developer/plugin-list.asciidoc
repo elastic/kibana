@@ -161,7 +161,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -458,11 +458,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm/readme.md[apm]
 |This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/apm_data_access[apmDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm_data_access[apmDataAccess]
 |WARNING: Missing README.
 
 
