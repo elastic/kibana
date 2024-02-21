@@ -6,6 +6,26 @@
  * Side Public License, v 1.
  */
 
+import {
+  CSV_JOB_TYPE,
+  CSV_JOB_TYPE_DEPRECATED,
+  CSV_JOB_TYPE_V2,
+  CSV_REPORT_TYPE,
+  CSV_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-csv-common';
+import {
+  PDF_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PDF_REPORT_TYPE,
+  PDF_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-pdf-common';
+import {
+  PNG_JOB_TYPE,
+  PNG_JOB_TYPE_V2,
+  PNG_REPORT_TYPE,
+  PNG_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-png-common';
+
 export const PLUGIN_ID = 'reporting';
 
 export const ALLOWED_JOB_CONTENT_TYPES = [
@@ -76,3 +96,34 @@ export enum JOB_STATUS {
 // automation that have no version value in the job params, we assume the
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
+
+export const reportTypes = [
+  CSV_REPORT_TYPE,
+  CSV_REPORT_TYPE_V2,
+  PDF_REPORT_TYPE,
+  PDF_REPORT_TYPE_V2,
+  PNG_REPORT_TYPE,
+  PNG_REPORT_TYPE_V2,
+];
+
+export const jobTypes = [
+  CSV_JOB_TYPE,
+  CSV_JOB_TYPE_V2,
+  PDF_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE,
+  PNG_JOB_TYPE_V2,
+];
+
+export const USES_HEADLESS_JOB_TYPES = [
+  PDF_JOB_TYPE,
+  PNG_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE_V2,
+];
+
+export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
+
+// Test Subjects
+export const REPORT_TABLE_ID = 'reportJobListing';
+export const REPORT_TABLE_ROW_ID = 'reportJobRow';
