@@ -39,6 +39,7 @@ const BOOLEAN_OPTIONS = [
 ];
 
 const SINGLE_SELECTION = { asPlainText: true };
+type Warning = string | React.ReactNode;
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
@@ -54,6 +55,8 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
+  onWarning?: (arg: boolean) => void;
+  warning?: Warning;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
