@@ -18,10 +18,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   v: 1,
   table: {
-    page: {
-      index: 0,
-      size: 10,
-    },
+    page: 0,
   },
   filters: {},
   flyout: {},
