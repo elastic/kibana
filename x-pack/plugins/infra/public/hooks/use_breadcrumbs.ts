@@ -9,16 +9,14 @@ import { ChromeBreadcrumb } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { observabilityTitle } from '../translations';
-import { useKibanaEnvironmentContext, useKibanaContextForPlugin } from './use_kibana';
+import { useKibanaContextForPlugin } from './use_kibana';
 
-type AppId = 'logs' | 'metrics';
+type AppId = 'logs';
 
 export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: ChromeBreadcrumb[]) => {
   const {
-    services: { chrome, serverless },
+    services: { chrome },
   } = useKibanaContextForPlugin();
-
-  const { isServerlessEnv } = useKibanaEnvironmentContext();
 
   const observabilityLinkProps = useLinkProps({ app: 'observability-overview' });
   const appLinkProps = useLinkProps({ app });
@@ -36,25 +34,12 @@ export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: Chrome
 
     chrome.docTitle.change(docTitle);
 
-    if (isServerlessEnv) {
-      serverless?.setBreadcrumbs(breadcrumbs, { absolute: true });
-    } else {
-      // statefull breadcrumb starts with `Observability`
-      chrome.setBreadcrumbs([
-        {
-          ...observabilityLinkProps,
-          text: observabilityTitle,
-        },
-        ...breadcrumbs,
-      ]);
-    }
-  }, [
-    appLinkProps,
-    appTitle,
-    chrome,
-    extraCrumbs,
-    isServerlessEnv,
-    observabilityLinkProps,
-    serverless,
-  ]);
+    chrome.setBreadcrumbs([
+      {
+        ...observabilityLinkProps,
+        text: observabilityTitle,
+      },
+      ...breadcrumbs,
+    ]);
+  }, [appLinkProps, appTitle, chrome, extraCrumbs, observabilityLinkProps]);
 };

@@ -10,8 +10,6 @@ import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { useParentBreadcrumbResolver } from './hooks/use_parent_breadcrumb_resolver';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
@@ -26,7 +24,6 @@ export const MetricDetailPage = () => {
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId, metricIndicesExist } = useSourceContext();
-  const parentBreadcrumbResolver = useParentBreadcrumbResolver();
 
   const {
     timeRange,
@@ -51,17 +48,6 @@ export const MetricDetailPage = () => {
     sourceId,
     timeRange: parsedTimeRange,
   });
-
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
-  useMetricsBreadcrumbs([
-    {
-      ...breadcrumbOptions.link,
-      text: breadcrumbOptions.text,
-    },
-    {
-      text: name,
-    },
-  ]);
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
