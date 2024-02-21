@@ -11,7 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Observability Logs Explorer', function () {
     loadTestFile(require.resolve('./app'));
     loadTestFile(require.resolve('./columns_selection'));
-    loadTestFile(require.resolve('./dataset_selection_state'));
+    loadTestFile(require.resolve('./data_source_selection_state'));
     loadTestFile(require.resolve('./data_source_selector'));
     loadTestFile(require.resolve('./filter_controls'));
     loadTestFile(require.resolve('./flyout'));

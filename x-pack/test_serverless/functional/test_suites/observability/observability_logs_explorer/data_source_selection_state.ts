@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('DatasetSelection initialization and update', () => {
+  describe('dataSourceSelection initialization and update', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
     });
@@ -41,19 +41,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('when no dataset selection is given', () => {
+    describe('when no dataSourceSelection is given', () => {
       it('should initialize the "All logs" selection', async () => {
         await PageObjects.observabilityLogsExplorer.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const datasetSelectionTitle =
+        const dataSourceSelectionTitle =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
 
-        expect(datasetSelectionTitle).to.be('All logs');
+        expect(dataSourceSelectionTitle).to.be('All logs');
       });
     });
 
-    describe('when a dataset selection is given', () => {
-      it('should decode and restore the selection from a valid encoded index', async () => {
+    describe('when a dataSourceSelection is given', () => {
+      it('should decode and restore the selection from a valid parameter', async () => {
         await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             dataSourceSelection: azureActivityDatasetSelection,
@@ -61,13 +61,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const datasetSelectionTitle =
+        const dataSourceSelectionTitle =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
 
-        expect(datasetSelectionTitle).to.be('[Azure Logs] activitylogs');
+        expect(dataSourceSelectionTitle).to.be('[Azure Logs] activitylogs');
       });
 
-      it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
+      it('should fallback to the "All logs" selection and notify the user of an invalid parameter', async () => {
         await PageObjects.observabilityLogsExplorer.navigateToWithUncheckedState({
           pageState: {
             v: 2,
@@ -78,11 +78,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const datasetSelectionTitle =
+        const dataSourceSelectionTitle =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
 
         await PageObjects.observabilityLogsExplorer.assertRestoreFailureToastExist();
-        expect(datasetSelectionTitle).to.be('All logs');
+        expect(dataSourceSelectionTitle).to.be('All logs');
       });
     });
 
