@@ -26,9 +26,9 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       // a one-line comment
       [/\/\/.*$/, 'comment'],
       // method
-      [/@regex_method/, 'keyword'],
+      [/@regex_method/, 'method'],
       // url
-      [/@regex_url/, 'identifier'],
+      [/@regex_url/, 'url'],
     ],
     rule_whitespace: [[/[ \t\r\n]+/, 'WHITESPACE']],
     rule_start_multi_comment: [[/\/\*/, 'comment', '@rule_multi_comment']],
