@@ -37,10 +37,13 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
     switch (connector.status) {
       case ConnectorStatus.CREATED:
         step = 'link';
+        break;
       case ConnectorStatus.NEEDS_CONFIGURATION:
         step = Object.keys(connector.configuration || {}).length > 0 ? 'configure' : 'link';
+        break;
       case ConnectorStatus.CONFIGURED:
         step = 'connect';
+        break;
       default:
         step = 'connected';
     }

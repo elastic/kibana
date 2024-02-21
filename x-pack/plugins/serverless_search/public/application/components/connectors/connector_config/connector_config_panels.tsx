@@ -49,15 +49,15 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
         <ConnectorIndexnamePanel connector={connector} />
       </EuiPanel>
       <EuiSpacer />
+      <ConnectionDetails
+        connectorId={connector.id}
+        serviceType={connector.service_type}
+        status={connector.status}
+      />
+      <EuiSpacer />
+      <EuiSpacer />
       <ApiKeyPanel connector={connector} />
       <EuiSpacer />
-      <EuiSpacer>
-        <ConnectionDetails
-          connectorId={connector.id}
-          serviceType={connector.service_type}
-          status={connector.status}
-        />
-      </EuiSpacer>
     </>
   );
 };
