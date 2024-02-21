@@ -1744,10 +1744,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.0.0":
-  version "93.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.0.0.tgz#43ba256d94f3d3acddee23427c9fa5285a43d7e4"
-  integrity sha512-Q5gY9roWZsB1At0rxG5d9M5P7+J4hfv8fzvuqNHoVjIxbeibHRCSq2TtOQcSUjhKE5Tu/BIZijzuYX8vITGaSQ==
+"@elastic/eui@93.1.1":
+  version "93.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.1.1.tgz#03c9667456664978c3477abef52afd6aceb48ebf"
+  integrity sha512-YnmNST8PmgAyeahDFTUTpToiBAc6gOyK/RSSqx6NTxCmUCwXnV7Oog9TUHlQ8tYGLjfFXrAja6Msy0X2VuxHOA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -27614,10 +27614,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.17.0:
-  version "4.17.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.17.0.tgz#f6c93a9df3e0543df7dc2329d81968af42845a7f"
-  integrity sha512-e2E+2XBlGepzwgFbyQfSwo9Cbj6G5fFfs9MzAS00nC99EewmcS2rwn2MwtgfP7I5p1e7DYv4HQJXtWedsu6DvA==
+selenium-webdriver@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.18.1.tgz#bcd19048b4aba5411edb7b5266d9390578fc7fed"
+  integrity sha512-uP4OJ5wR4+VjdTi5oi/k8oieV2fIhVdVuaOPrklKghgS59w7Zz3nGa5gcG73VcU9EBRv5IZEBRhPr7qFJAj5mQ==
   dependencies:
     jszip "^3.10.1"
     tmp "^0.2.1"
