@@ -320,7 +320,7 @@ export function ObservabilityLogsExplorerPageObject({
       );
     },
 
-    getAllLogssButton() {
+    getAllLogsButton() {
       return testSubjects.find('dataSourceSelectorShowAllLogs');
     },
 

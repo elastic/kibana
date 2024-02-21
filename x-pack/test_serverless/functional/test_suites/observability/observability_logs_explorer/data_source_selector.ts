@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should always display the "Show all logs" action', async () => {
-        const allLogsButton = await PageObjects.observabilityLogsExplorer.getAllLogssButton();
+        const allLogsButton = await PageObjects.observabilityLogsExplorer.getAllLogsButton();
 
         const allLogsTitle = await allLogsButton.getVisibleText();
 
