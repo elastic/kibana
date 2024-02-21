@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -29,7 +30,7 @@ import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
 import { cronExpressionToParts, cronPartsToExpression } from './services';
-import { Frequency, Field, FieldToValueMap } from './types';
+import { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
 
 const excludeBlockListedFrequencies = (
   units: EuiSelectOption[],
@@ -233,7 +234,7 @@ export class CronEditor extends Component<Props, State> {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               defaultMessage="Frequency"
             />
           }
@@ -248,7 +249,7 @@ export class CronEditor extends Component<Props, State> {
               this.onChangeFrequency(e.target.value as Frequency)
             }
             fullWidth
-            prepend={i18n.translate('xpack.enterpriseSearch.cronEditor.textEveryLabel', {
+            prepend={i18n.translate('searchConnectors.cronEditor.textEveryLabel', {
               defaultMessage: 'Every',
             })}
             data-test-subj="cronFrequencySelect"

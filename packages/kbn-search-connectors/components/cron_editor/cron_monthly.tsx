@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -36,7 +37,7 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronMonthly.fieldDateLabel"
+          id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
           defaultMessage="Date"
         />
       }
@@ -49,7 +50,7 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
         value={date}
         onChange={(e) => onChange({ date: e.target.value })}
         fullWidth
-        prepend={i18n.translate('xpack.enterpriseSearch.cronEditor.cronMonthly.textOnTheLabel', {
+        prepend={i18n.translate('searchConnectors.cronEditor.cronMonthly.textOnTheLabel', {
           defaultMessage: 'On the',
         })}
         data-test-subj="cronFrequencyMonthlyDateSelect"
@@ -59,7 +60,7 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronMonthly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
           defaultMessage="Time"
         />
       }
@@ -72,16 +73,13 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronMonthly.hourSelectLabel',
-              {
-                defaultMessage: 'Hour',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronMonthly.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
             prepend={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronMonthly.fieldHour.textAtLabel',
+              'searchConnectors.cronEditor.cronMonthly.fieldHour.textAtLabel',
               {
                 defaultMessage: 'At',
               }
@@ -96,7 +94,7 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
             options={minuteOptions}
             value={minute}
             aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronMonthly.minuteSelectLabel',
+              'searchConnectors.cronEditor.cronMonthly.minuteSelectLabel',
               {
                 defaultMessage: 'Minute',
               }
