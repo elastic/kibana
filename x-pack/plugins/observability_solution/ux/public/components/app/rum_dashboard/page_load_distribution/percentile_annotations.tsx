@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import * as React from 'react';
 import {
@@ -47,7 +48,10 @@ export function PercentileAnnotations({ percentiles }: Props) {
   }) {
     return (
       <span data-cy="percentileTooltipTitle">
-        {annotation.details}th Percentile
+        {annotation.details}
+        {i18n.translate('xpack.ux.percentileTooltip.span.thPercentileLabel', {
+          defaultMessage: 'th Percentile',
+        })}
       </span>
     );
   }
@@ -68,10 +72,21 @@ export function PercentileAnnotations({ percentiles }: Props) {
               <EuiToolTip
                 title={<PercentileTooltip annotation={annotation} />}
                 content={
-                  <span>Pages loaded: {Math.round(annotation.dataValue)}</span>
+                  <span>
+                    {i18n.translate(
+                      'xpack.ux.percentileAnnotations.span.pagesLoadedLabel',
+                      { defaultMessage: 'Pages loaded:' }
+                    )}
+                    {Math.round(annotation.dataValue)}
+                  </span>
                 }
               >
-                <>{annotation.details}th</>
+                <>
+                  {annotation.details}
+                  {i18n.translate('xpack.ux.percentileAnnotations.thLabel', {
+                    defaultMessage: 'th',
+                  })}
+                </>
               </EuiToolTip>
             </span>
           }

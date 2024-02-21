@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -80,7 +81,14 @@ export function VisitorBreakdownChart({
   );
 
   if (!LensEmbeddableComponent) {
-    return <EuiText>No lens component</EuiText>;
+    return (
+      <EuiText>
+        {i18n.translate(
+          'xpack.ux.visitorBreakdownChart.noLensComponentTextLabel',
+          { defaultMessage: 'No lens component' }
+        )}
+      </EuiText>
+    );
   }
 
   return (
