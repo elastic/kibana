@@ -9,7 +9,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useSourceIndicesField } from '../../hooks/useSourceIndicesField';
 import { useController } from 'react-hook-form';
 import { useIndicesFields } from '../../hooks/useIndicesFields';
 import { createQuery, getDefaultQueryFields } from '../../lib/create_query';
@@ -18,10 +18,7 @@ import { AddIndicesField } from './add_indices_field';
 import { IndicesList } from './indices_list';
 
 export const SourcesPanelSidebar: React.FC = () => {
-  const {
-    field: { value: selectedIndices, onChange },
-  } = useController({ name: ChatFormFields.indices, defaultValue: [] });
-
+  const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
   const { fields } = useIndicesFields(selectedIndices || []);
 
   const {
@@ -37,13 +34,6 @@ export const SourcesPanelSidebar: React.FC = () => {
       elasticsearchQueryOnChange(createQuery(defaultFields, fields));
     }
   }, [selectedIndices, fields, elasticsearchQueryOnChange]);
-
-  const addIndex = (newIndex: IndexName) => {
-    onChange([...selectedIndices, newIndex]);
-  };
-  const removeIndex = (index: IndexName) => {
-    onChange(selectedIndices.filter((indexName: string) => indexName !== index));
-  };
 
   return (
     <EuiFlexGroup direction="column">

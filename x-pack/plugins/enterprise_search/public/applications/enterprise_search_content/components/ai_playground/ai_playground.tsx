@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useValues } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
 import {
   Chat,
-  EmptyIndex,
   AIPlaygroundProvider,
   ViewQueryAction,
   ViewCodeAction,
@@ -26,19 +25,9 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { IndicesLogic } from '../search_indices/indices_logic';
 
 export const AIPlayground: React.FC = () => {
-  const { fetchIndices } = useActions(IndicesLogic);
-  const { hasNoIndices, isLoading } = useValues(IndicesLogic);
+  const { isLoading } = useValues(IndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
-
-  useEffect(() => {
-    fetchIndices({
-      from: 0,
-      onlyShowSearchOptimizedIndices: false,
-      returnHiddenIndices: false,
-      size: 20,
-    });
-  }, []);
 
   return (
     <AIPlaygroundProvider>
@@ -63,19 +52,15 @@ export const AIPlayground: React.FC = () => {
         customPageSections
         bottomBorder="extended"
       >
-        {hasNoIndices ? (
-          <EmptyIndex onCreateIndexClick={handleNavigateToIndex} />
-        ) : (
-          <EuiPageTemplate.Section
-            alignment="top"
-            restrictWidth={false}
-            grow
-            contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-            paddingSize="none"
-          >
-            <Chat />
-          </EuiPageTemplate.Section>
-        )}
+        <EuiPageTemplate.Section
+          alignment="top"
+          restrictWidth={false}
+          grow
+          contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+          paddingSize="none"
+        >
+          <Chat />
+        </EuiPageTemplate.Section>
       </EnterpriseSearchContentPageTemplate>
     </AIPlaygroundProvider>
   );
