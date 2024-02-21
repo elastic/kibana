@@ -17,11 +17,10 @@ import { Kpi } from './kpi';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { HostCountKpi } from './host_count_kpi';
 import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
+const LIMIT = 500;
 export const KPIGrid = () => {
   const model = findInventoryModel('host');
-  const { searchCriteria } = useUnifiedSearchContext();
   const { euiTheme } = useEuiTheme();
   const { dataView } = useMetricsDataViewContext();
   const { data: hostCountData } = useHostCountContext();
@@ -31,11 +30,11 @@ export const KPIGrid = () => {
   });
 
   const subtitle =
-    searchCriteria.limit < (hostCountData?.count.value ?? 0)
+    LIMIT < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {
-            limit: searchCriteria.limit,
+            limit: LIMIT,
           },
         })
       : undefined;

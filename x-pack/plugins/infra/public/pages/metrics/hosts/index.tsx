@@ -20,9 +20,9 @@ import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { MetricsDataViewProvider } from './hooks/use_metrics_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { HostContainer } from './components/hosts_container';
 import { BetaBadge } from '../../../components/beta_badge';
 import { NoRemoteCluster } from '../../../components/empty_states';
+import { Page } from './components/page';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
@@ -98,8 +98,8 @@ export const HostsPage = () => {
           }}
         >
           {source && (
-            <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-              <HostContainer />
+            <MetricsDataViewProvider indexPattern={source.configuration.metricAlias}>
+              <Page />
             </MetricsDataViewProvider>
           )}
         </MetricsPageTemplate>

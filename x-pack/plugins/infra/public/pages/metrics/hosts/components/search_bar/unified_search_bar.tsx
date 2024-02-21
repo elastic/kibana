@@ -5,43 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import type { Query, TimeRange, Filter } from '@kbn/es-query';
+import React from 'react';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { LimitOptions } from './limit_options';
-import { HostLimitOptions } from '../../types';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
 
 export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch, application },
   } = useKibanaContextForPlugin();
   const { dataView } = useMetricsDataViewContext();
-  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
+  const { fetchHosts } = useHostsViewContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
-  const onLimitChange = (limit: number) => {
-    onSubmit({ limit });
-  };
-
-  const onPanelFiltersChange = useCallback(
-    (panelFilters: Filter[]) => {
-      onSubmit({ panelFilters });
-    },
-    [onSubmit]
-  );
+  const onLimitChange = (limit: number) => {};
 
   const handleRefresh = (payload: { query?: Query; dateRange: TimeRange }, isUpdate?: boolean) => {
     // This makes sure `onQueryChange` is only called when the submit button is clicked
     if (isUpdate === false) {
-      onSubmit(payload);
+      fetchHosts();
     }
   };
 
@@ -73,19 +63,10 @@ export const UnifiedSearchBar = () => {
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="s">
             <EuiFlexItem>
-              <ControlsContent
-                timeRange={searchCriteria.dateRange}
-                dataView={dataView}
-                query={searchCriteria.query}
-                filters={searchCriteria.filters}
-                onFiltersChange={onPanelFiltersChange}
-              />
+              <ControlsContent dataView={dataView} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <LimitOptions
-                limit={searchCriteria.limit as HostLimitOptions}
-                onChange={onLimitChange}
-              />
+              <LimitOptions limit={500} onChange={onLimitChange} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

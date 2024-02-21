@@ -9,21 +9,19 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import type { AlertsEsQuery } from '../../../../../../common/alerts/types';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 import AlertsStatusFilter from './alerts_status_filter';
 import { ALERTS_PER_PAGE, ALERTS_TABLE_ID, infraAlertFeatureIds } from '../config';
-import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
-
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
-
-  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria, actions } = useHostsViewContext();
 
   const { triggersActionsUi } = services;
 
@@ -41,8 +39,10 @@ export const AlertsTabContent = () => {
         <EuiFlexItem>
           <MemoAlertSummaryWidget
             alertsQuery={alertsEsQueryByStatus}
-            dateRange={searchCriteria.dateRange}
-            onRangeSelection={onSubmit}
+            timeRange={searchCriteria.timeRange}
+            onRangeSelection={(timeRange) => {
+              actions.updateTimeRange(timeRange);
+            }}
           />
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
@@ -65,15 +65,15 @@ export const AlertsTabContent = () => {
 
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
-  dateRange: HostsState['dateRange'];
-  onRangeSelection: HostsStateUpdater;
+  timeRange: TimeRange;
+  onRangeSelection: (timeRange: TimeRange) => void;
 }
 
 const MemoAlertSummaryWidget = React.memo(
-  ({ alertsQuery, dateRange, onRangeSelection }: MemoAlertSummaryWidgetProps) => {
+  ({ alertsQuery, timeRange, onRangeSelection }: MemoAlertSummaryWidgetProps) => {
     const { services } = useKibanaContextForPlugin();
 
-    const summaryTimeRange = useSummaryTimeRange(dateRange);
+    const summaryTimeRange = useSummaryTimeRange(timeRange);
 
     const { charts, triggersActionsUi } = services;
     const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
@@ -86,7 +86,7 @@ const MemoAlertSummaryWidget = React.memo(
         const from = new Date(start).toISOString();
         const to = new Date(end).toISOString();
 
-        onRangeSelection({ dateRange: { from, to } });
+        onRangeSelection({ from, to });
       }
     };
 

@@ -61,7 +61,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
         filters,
         searchSessionId,
       }: {
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         filters: Filter[];
         query: Query;
         searchSessionId?: string;
@@ -92,7 +92,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       query = { language: 'kuery', query: '' },
       searchSessionId,
     }: {
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       filters?: Filter[];
       query?: Query;
       searchSessionId?: string;

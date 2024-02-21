@@ -15,29 +15,19 @@ import {
   type ControlGroupInput,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Subscription } from 'rxjs';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useControlPanels } from '../../hooks/use_control_panels_url_state';
 import { ControlTitle } from './controls_title';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
 
 interface Props {
   dataView: DataView | undefined;
-  timeRange: TimeRange;
-  filters: Filter[];
-  query: Query;
-  onFiltersChange: (filters: Filter[]) => void;
 }
 
-export const ControlsContent: React.FC<Props> = ({
-  dataView,
-  filters,
-  query,
-  timeRange,
-  onFiltersChange,
-}) => {
-  const [controlPanels, setControlPanels] = useControlPanels(dataView);
+export const ControlsContent = ({ dataView }: Props) => {
+  const { searchCriteria, controlPanels, actions } = useHostsViewContext();
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(async () => {
@@ -48,13 +38,19 @@ export const ControlsContent: React.FC<Props> = ({
       controlStyle: 'oneLine',
       defaultControlWidth: 'small',
       panels: controlPanels,
-      filters,
-      query,
-      timeRange,
+      filters: searchCriteria.filters,
+      query: searchCriteria.query as Query,
+      timeRange: searchCriteria.timeRange,
     };
 
     return { initialInput };
-  }, [controlPanels, dataView?.id, filters, query, timeRange]);
+  }, [
+    controlPanels,
+    dataView?.id,
+    searchCriteria.filters,
+    searchCriteria.query,
+    searchCriteria.timeRange,
+  ]);
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {
@@ -72,15 +68,15 @@ export const ControlsContent: React.FC<Props> = ({
 
       subscriptions.current.add(
         controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-          onFiltersChange(newFilters);
+          actions.updateControlPanelFilters(newFilters);
         })
       );
 
       subscriptions.current.add(
-        controlGroup.getInput$().subscribe(({ panels }) => setControlPanels(panels))
+        controlGroup.getInput$().subscribe(({ panels }) => actions.updateControlPanels(panels))
       );
     },
-    [onFiltersChange, setControlPanels]
+    [actions]
   );
 
   useEffect(() => {
@@ -95,9 +91,9 @@ export const ControlsContent: React.FC<Props> = ({
       <ControlGroupRenderer
         getCreationOptions={getInitialInput}
         ref={loadCompleteHandler}
-        timeRange={timeRange}
-        query={query}
-        filters={filters}
+        timeRange={searchCriteria.timeRange}
+        query={searchCriteria.query as Query}
+        filters={searchCriteria.filters}
       />
     </ControlGroupContainer>
   );

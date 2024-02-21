@@ -17,12 +17,12 @@ import { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
-import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { SourceProvider } from '../containers/metrics_source';
 import { PluginConfigProvider } from '../containers/plugin_config_context';
 import type { KibanaEnvContext } from '../hooks/use_kibana';
+import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 
 export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 
@@ -102,21 +102,17 @@ const MetricsApp: React.FC<{
         <SourceProvider sourceId="default">
           <PluginConfigProvider value={pluginConfig}>
             <Router history={history}>
-              <Routes>
-                <Route path="/link-to" component={LinkToMetricsPage} />
-                {uiCapabilities?.infrastructure?.show && (
-                  <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
-                )}
-                {uiCapabilities?.infrastructure?.show && (
-                  <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
-                )}
-                {uiCapabilities?.infrastructure?.show && (
-                  <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-                )}
-                {uiCapabilities?.infrastructure?.show && (
-                  <Route path="/" component={InfrastructurePage} />
-                )}
-              </Routes>
+              <KbnUrlStateStorageFromRouterProvider
+                history={history}
+                toastsService={core.notifications.toasts}
+              >
+                <Routes>
+                  <Route path="/link-to" component={LinkToMetricsPage} />
+                  {uiCapabilities?.infrastructure?.show && (
+                    <Route path="/" component={InfrastructurePage} />
+                  )}
+                </Routes>
+              </KbnUrlStateStorageFromRouterProvider>
             </Router>
           </PluginConfigProvider>
         </SourceProvider>

@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { pick } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useMemo } from 'react';
-import { useUrlState } from '../../../../utils/use_url_state';
-
-const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
+import { actions } from 'xstate';
+import { ControlPanels, HostsViewQueryContext, HostsViewQueryEvent } from './types';
 
 export const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',
@@ -22,7 +16,7 @@ export const availableControlsPanels = {
   SERVICE_NAME: 'service.name',
 };
 
-const controlPanelConfigs: ControlPanels = {
+export const defaultControlPanels: ControlPanels = {
   [availableControlsPanels.HOST_OS_NAME]: {
     order: 0,
     width: 'medium',
@@ -60,34 +54,53 @@ const controlPanelConfigs: ControlPanels = {
 
 const availableControlPanelFields = Object.values(availableControlsPanels);
 
-export const useControlPanels = (
-  dataView: DataView | undefined
-): [ControlPanels, (state: ControlPanels) => void] => {
-  const defaultState = useMemo(() => getVisibleControlPanelsConfig(dataView), [dataView]);
+export const updateControlsContextFromControlPanelsUpdate = actions.assign(
+  (context: HostsViewQueryContext, event: HostsViewQueryEvent) => {
+    if ('controlPanels' in event && event.type === 'UPDATE_CONTROL_PANELS') {
+      return {
+        controlPanels: mergeDefaultPanelsWithUrlConfig(context.dataView, event.controlPanels ?? {}),
+      };
+    } else {
+      return {};
+    }
+  }
+);
 
-  const [controlPanels, setControlPanels] = useUrlState<ControlPanels>({
-    defaultState,
-    decodeUrlState,
-    encodeUrlState,
-    urlStateKey: HOST_FILTERS_URL_STATE_KEY,
-  });
+export const updateControlPanelsContextFromUrl = actions.assign(
+  (context: HostsViewQueryContext, event: HostsViewQueryEvent) => {
+    if (event.type === 'INITIALIZED_FROM_URL') {
+      return {
+        ...('controlPanels' in event && event.controlPanels
+          ? {
+              controlPanels: mergeDefaultPanelsWithUrlConfig(
+                context.dataView,
+                event.controlPanels ?? {}
+              ),
+            }
+          : {}),
+      };
+    } else {
+      return {};
+    }
+  }
+);
 
-  /**
-   * Configure the control panels as
-   * 1. Available fields from the data view
-   * 2. Existing filters from the URL parameter (not colliding with allowed fields from data view)
-   * 3. Enhanced with dataView.id
-   */
-  const controlsPanelsWithId = dataView
-    ? mergeDefaultPanelsWithUrlConfig(dataView, controlPanels)
-    : ({} as ControlPanels);
+export const updatePanelFiltersContextFromControlPanelsUpdate = actions.assign(
+  (context: HostsViewQueryContext, event: HostsViewQueryEvent) => {
+    if (event.type === 'PANEL_FILTERS_CHANGED') {
+      return {
+        ...('panelFilters' in event && event.panelFilters
+          ? {
+              panelFilters: event.panelFilters,
+            }
+          : {}),
+      };
+    } else {
+      return {};
+    }
+  }
+);
 
-  return [controlsPanelsWithId, setControlPanels];
-};
-
-/**
- * Utils
- */
 const getVisibleControlPanels = (dataView: DataView | undefined) => {
   return availableControlPanelFields.filter(
     (panelKey) => dataView?.fields.getByName(panelKey) !== undefined
@@ -96,7 +109,7 @@ const getVisibleControlPanels = (dataView: DataView | undefined) => {
 
 const getVisibleControlPanelsConfig = (dataView: DataView | undefined) => {
   return getVisibleControlPanels(dataView).reduce((panelsMap, panelKey) => {
-    const config = controlPanelConfigs[panelKey];
+    const config = defaultControlPanels[panelKey];
 
     return { ...panelsMap, [panelKey]: config };
   }, {} as ControlPanels);
@@ -114,7 +127,7 @@ const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: 
   }, {});
 };
 
-const cleanControlPanels = (controlPanels: ControlPanels) => {
+export const cleanControlPanels = (controlPanels: ControlPanels) => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
     const { explicitInput } = controlPanelConfig;
     const { dataViewId, ...rest } = explicitInput;
@@ -125,7 +138,10 @@ const cleanControlPanels = (controlPanels: ControlPanels) => {
   }, {});
 };
 
-const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlPanels = {}) => {
+export const mergeDefaultPanelsWithUrlConfig = (
+  dataView: DataView,
+  urlPanels: ControlPanels = {}
+) => {
   // Get default panel configs from existing fields in data view
   const visiblePanels = getVisibleControlPanelsConfig(dataView);
 
@@ -138,39 +154,4 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
     { ...visiblePanels, ...controlPanelsToOverride },
     dataView.id
   );
-};
-
-const PanelRT = rt.type({
-  order: rt.number,
-  width: rt.union([rt.literal('medium'), rt.literal('small'), rt.literal('large')]),
-  grow: rt.boolean,
-  type: rt.string,
-  explicitInput: rt.intersection([
-    rt.type({ id: rt.string }),
-    rt.partial({
-      dataViewId: rt.string,
-      fieldName: rt.string,
-      title: rt.union([rt.string, rt.undefined]),
-      selectedOptions: rt.array(rt.string),
-    }),
-  ]),
-});
-
-const ControlPanelRT = rt.record(rt.string, PanelRT);
-
-type ControlPanels = rt.TypeOf<typeof ControlPanelRT>;
-
-const encodeUrlState = (value: ControlPanels) => {
-  if (value) {
-    // Remove the dataView.id on update to make the control panels portable between data views
-    const cleanPanels = cleanControlPanels(value);
-
-    return ControlPanelRT.encode(cleanPanels);
-  }
-};
-
-const decodeUrlState = (value: unknown) => {
-  if (value) {
-    return pipe(ControlPanelRT.decode(value), fold(constant({}), identity));
-  }
 };

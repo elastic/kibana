@@ -28,7 +28,7 @@ export const LensChart = React.memo(
   ({
     id,
     borderRadius,
-    dateRange,
+    timeRange,
     filters,
     hidePanelTitles,
     lastReloadRequestTime,
@@ -48,7 +48,7 @@ export const LensChart = React.memo(
     const isLoading = loading || !attributes;
 
     const extraActions: Action[] = getExtraActions({
-      timeRange: dateRange,
+      timeRange,
       query,
       filters,
       searchSessionId,
@@ -58,7 +58,7 @@ export const LensChart = React.memo(
       <LensWrapper
         id={id}
         attributes={attributes}
-        dateRange={dateRange}
+        timeRange={timeRange}
         disableTriggers={disableTriggers}
         extraActions={extraActions}
         filters={filters}
