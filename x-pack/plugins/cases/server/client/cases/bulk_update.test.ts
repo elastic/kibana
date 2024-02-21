@@ -1213,7 +1213,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1419,7 +1419,7 @@ describe('update', () => {
       ]);
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {

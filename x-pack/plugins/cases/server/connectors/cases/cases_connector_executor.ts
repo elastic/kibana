@@ -12,6 +12,7 @@ import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
@@ -27,7 +28,12 @@ import {
 } from './constants';
 import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
 import type { CasesOracleService } from './cases_oracle_service';
-import { convertValueToString, partitionByNonFoundErrors, partitionRecordsByError } from './utils';
+import {
+  convertValueToString,
+  partitionByNonFoundErrors,
+  partitionRecordsByError,
+  buildRequiredCustomFieldsForRequest,
+} from './utils';
 import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
@@ -630,11 +636,15 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
+    const customFieldsConfigurationMap = await this.getCustomFieldsConfiguration();
+
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
 
-        bulkCreateReq.push(this.getCreateCaseRequest(params, data));
+        bulkCreateReq.push(
+          this.getCreateCaseRequest(params, data, customFieldsConfigurationMap.get(params.owner))
+        );
       }
     }
 
@@ -674,7 +684,8 @@ export class CasesConnectorExecutor {
 
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
-    groupingData: GroupedAlertsWithCaseId
+    groupingData: GroupedAlertsWithCaseId,
+    customFieldsConfigurations?: CustomFieldsConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord } = groupingData;
 
@@ -689,6 +700,18 @@ export class CasesConnectorExecutor {
         ? `${params.rule.name} (Auto-created)`
         : `${params.rule.name} (${oracleRecord.counter}) (Auto-created)`;
 
+    const requiredCustomFields = buildRequiredCustomFieldsForRequest(customFieldsConfigurations);
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][getCreateCaseRequest] Built ${requiredCustomFields.length} required custom fields for case with id ${caseId}`,
+      this.getLogMetadata(params, {
+        labels: {
+          caseId,
+          totalCreatedCustomFields: requiredCustomFields.length,
+        },
+        tags: ['case-connector:getCreateCaseRequest'],
+      })
+    );
+
     return {
       id: caseId,
       description,
@@ -700,6 +723,7 @@ export class CasesConnectorExecutor {
        */
       settings: { syncAlerts: false },
       owner: params.owner,
+      customFields: requiredCustomFields,
     };
   }
 
@@ -874,8 +898,11 @@ export class CasesConnectorExecutor {
     );
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
+
+    const customFieldsConfigurationMap = await this.getCustomFieldsConfiguration();
+
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
-      this.getCreateCaseRequest(params, record)
+      this.getCreateCaseRequest(params, record, customFieldsConfigurationMap.get(params.owner))
     );
 
     const idsToCreate = bulkCreateReq.map(({ id }) => id);
@@ -1015,5 +1042,14 @@ export class CasesConnectorExecutor {
     { tags = [], labels = {} }: { tags?: string[]; labels?: Record<string, unknown> } = {}
   ) {
     return { tags: ['cases-connector', `rule:${params.rule.id}`, ...tags], labels };
+  }
+
+  private async getCustomFieldsConfiguration(): Promise<Map<string, CustomFieldsConfiguration>> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][getCustomFieldsConfiguration] Getting case configurations`,
+      { tags: ['case-connector:getCustomFieldsConfiguration'] }
+    );
+    const configurations = await this.casesClient.configure.get();
+    return new Map(configurations.map((conf) => [conf.owner, conf.customFields]));
   }
 }

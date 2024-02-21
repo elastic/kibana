@@ -45,6 +45,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/serverless",
     "@kbn/actions-types",
+    "@kbn/core-http-server",
     "@kbn/core-test-helpers-kbn-server"
   ],
   "exclude": [
