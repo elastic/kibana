@@ -21,7 +21,7 @@ import type {
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
-import { createUsageCounterLabel, tlog } from './helpers';
+import { copyLicenseFields, createUsageCounterLabel, tlog } from './helpers';
 import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
@@ -317,7 +317,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
+        ...(licenseInfo ? { license: copyLicenseFields(licenseInfo) } : {}),
         cluster_uuid: clusterInfo?.cluster_uuid,
         cluster_name: clusterInfo?.cluster_name,
       }));

@@ -367,6 +367,16 @@ export const ranges = (
   return { rangeFrom, rangeTo };
 };
 
+export const copyLicenseFields = (lic: ESLicense) => {
+  return {
+    uid: lic.uid,
+    status: lic.status,
+    type: lic.type,
+    ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
+    ...(lic.issuer ? { issuer: lic.issuer } : {}),
+  };
+};
+
 export class TelemetryTimelineFetcher {
   private receiver: ITelemetryReceiver;
   private extraInfo: Promise<ExtraInfo>;

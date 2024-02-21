@@ -175,14 +175,6 @@ export interface ITelemetryReceiver {
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
 
-  copyLicenseFields(lic: ESLicense): {
-    issuer?: string | undefined;
-    issued_to?: string | undefined;
-    uid: string;
-    status: string;
-    type: string;
-  };
-
   fetchTimelineAlerts(
     index: string,
     rangeFrom: string,
@@ -1095,16 +1087,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       tlog(this.logger, `failed retrieving license: ${err}`);
       return undefined;
     }
-  }
-
-  public copyLicenseFields(lic: ESLicense) {
-    return {
-      uid: lic.uid,
-      status: lic.status,
-      type: lic.type,
-      ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
-      ...(lic.issuer ? { issuer: lic.issuer } : {}),
-    };
   }
 
   // calculates the number of documents that can be returned per page
