@@ -9,8 +9,11 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { readListIndex, ApiParams } from '@kbn/securitysolution-list-api';
+import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 import { READ_INDEX_QUERY_KEY } from '../constants';
+
+const readListIndexWithOptionalSignal = withOptionalSignal(readListIndex);
 
 export const useReadListIndex = ({
   http,
@@ -24,11 +27,11 @@ export const useReadListIndex = ({
   const query = useQuery(
     READ_INDEX_QUERY_KEY,
     async ({ signal }) => {
-      if (!isEnabled || !signal) {
+      if (!isEnabled) {
         return null;
       }
 
-      return readListIndex({ http, signal });
+      return readListIndexWithOptionalSignal({ http, signal });
     },
     {
       onError,
