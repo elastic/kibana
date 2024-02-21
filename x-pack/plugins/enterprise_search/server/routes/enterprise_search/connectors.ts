@@ -648,9 +648,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
       validate: {
-        body: schema.object({
-          is_native: schema.boolean(),
-        }),
         params: schema.object({
           connectorId: schema.string(),
           indexName: schema.string(),
@@ -660,7 +657,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId, indexName } = request.params;
-      const { is_native: isNative } = request.body;
 
       try {
         await client.asCurrentUser.transport.request({
@@ -671,12 +667,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           path: `/_connector/${connectorId}/_index_name`,
         });
 
-        if (isNative) {
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+        if (connector?.is_native) {
           // generateApiKey will search for the connector based on index_name, so we need to refresh the index before that.
-          await client.asCurrentUser.transport.request({
-            method: 'POST',
-            path: `/${CONNECTORS_INDEX}/_refresh`,
-          });
+          await client.asCurrentUser.indices.refresh({ index: indexName });
           await generateApiKey(client, indexName, true);
         }
 

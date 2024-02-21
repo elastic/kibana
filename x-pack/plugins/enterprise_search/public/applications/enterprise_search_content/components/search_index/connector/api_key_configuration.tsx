@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -135,29 +136,19 @@ export const ApiKeyConfig: React.FC<{
             }
           )}
         />
-      ) : hasApiKey ? (
-        <EuiCallOut
-          iconType="check"
-          color="success"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.exists',
-            {
-              defaultMessage: `An API has been generated for this connector.`,
-            }
-          )}
-        />
-      ) : (
+      ) : !hasApiKey ? (
         <EuiCallOut
           iconType="warning"
           color="danger"
           title={i18n.translate(
             'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.missing',
             {
-              defaultMessage:
-                'This connector is missing an API key. Click "Generate API key" to regenerate it.',
+              defaultMessage: 'This connector is missing an API key.',
             }
           )}
         />
+      ) : (
+        <></>
       )}
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

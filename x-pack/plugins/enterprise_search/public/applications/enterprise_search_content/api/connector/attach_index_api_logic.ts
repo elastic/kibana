@@ -11,21 +11,15 @@ import { HttpLogic } from '../../../shared/http';
 export interface AttachIndexApiLogicArgs {
   connectorId: string;
   indexName: string;
-  isNative: boolean;
 }
 
 export const attachIndex = async ({
   connectorId,
   indexName,
-  isNative,
 }: AttachIndexApiLogicArgs): Promise<void> => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/index_name/${indexName}`;
 
-  await HttpLogic.values.http.put(route, {
-    body: JSON.stringify({
-      is_native: isNative,
-    }),
-  });
+  await HttpLogic.values.http.put(route);
 };
 
 export const AttachIndexApiLogic = createApiLogic(['add_connector_api_logic'], attachIndex);

@@ -54,7 +54,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       attachIndex({
         connectorId: connector.id,
         indexName: selectedIndex.label,
-        isNative: connector.is_native,
       });
     }
   };

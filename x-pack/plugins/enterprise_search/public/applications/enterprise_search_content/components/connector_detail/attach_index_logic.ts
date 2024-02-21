@@ -74,7 +74,6 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
         actions.attachIndex({
           connectorId: values.connector?.id,
           indexName,
-          isNative: values.connector?.is_native,
         });
       }
     },
