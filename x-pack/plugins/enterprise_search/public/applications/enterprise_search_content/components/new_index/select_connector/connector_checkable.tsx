@@ -144,7 +144,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                           button={
                             <EuiButtonIcon
                               aria-label={i18n.translate(
-                                'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                                'xpack.enterpriseSearch.content.newIndex.selectConnector.openNativePopoverLabel',
                                 {
                                   defaultMessage: 'Open native connector popover',
                                 }

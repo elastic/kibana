@@ -371,7 +371,7 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.description"
-                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free day trial."
+                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial."
                   />
                 </p>
                 <EuiButton
