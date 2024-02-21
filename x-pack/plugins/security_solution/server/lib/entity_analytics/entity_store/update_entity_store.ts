@@ -386,11 +386,17 @@ async function getNextRiskScores({
   if (!fromTimestamp) {
     return [];
   }
-  const riskScores = await riskScoreDataClient.getRiskScoresFromTimestamp({
-    from: fromTimestamp,
-    size: MAX_CRITICALITY_SIZE,
-    namespace: 'default',
-  });
+
+  let riskScores: EcsRiskScore[] = [];
+  try {
+    riskScores = await riskScoreDataClient.getRiskScoresFromTimestamp({
+      from: fromTimestamp,
+      size: MAX_CRITICALITY_SIZE,
+      namespace: 'default',
+    });
+  } catch (e) {
+    riskScores = [];
+  }
 
   if (!lastProcessed || !riskScores.length) {
     return riskScores;
