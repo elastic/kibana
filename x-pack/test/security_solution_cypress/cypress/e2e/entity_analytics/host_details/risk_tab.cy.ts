@@ -17,7 +17,7 @@ import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytic
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-describe.only('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
