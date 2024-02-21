@@ -8,7 +8,11 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, NODE_DETAILS_PATH, DATE_PICKER_FORMAT } from './constants';
 
@@ -286,6 +290,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 const tableRows = await observability.alerts.common.getTableCellsInRows();
                 expect(tableRows.length).to.be(ACTIVE_ALERTS);
               });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus:active');
             });
 
             it('can be filtered to only show "recovered" alerts using the filter button', async () => {
@@ -294,6 +300,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 const tableRows = await observability.alerts.common.getTableCellsInRows();
                 expect(tableRows.length).to.be(RECOVERED_ALERTS);
               });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus:recovered');
+            });
+
+            it('can be filtered to only show "untracked" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_UNTRACKED);
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(0);
+              });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus:untracked');
             });
           });
         });
