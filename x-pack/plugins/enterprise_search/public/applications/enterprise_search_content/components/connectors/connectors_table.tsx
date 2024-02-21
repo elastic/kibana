@@ -37,6 +37,7 @@ import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
 
 interface ConnectorsTableProps {
+  isCrawler: boolean;
   isLoading?: boolean;
   items: ConnectorViewItem[];
   meta?: Meta;
@@ -53,25 +54,12 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     },
   },
   onChange,
+  isCrawler,
   isLoading,
   onDelete,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
-    {
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
-        {
-          defaultMessage: 'Connector name',
-        }
-      ),
-      render: (connector: Connector) => (
-        <EuiLinkTo to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}>
-          {connector.name}
-        </EuiLinkTo>
-      ),
-      width: '25%',
-    },
     {
       field: 'index_name',
       name: i18n.translate(
@@ -88,7 +76,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         ) : (
           '--'
         ),
-      width: '25%',
+      width: isCrawler ? '70%' : '25%',
     },
     {
       field: 'docsCount',
@@ -99,18 +87,6 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         }
       ),
       truncateText: true,
-    },
-    {
-      field: 'service_type',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
-        {
-          defaultMessage: 'Connector type',
-        }
-      ),
-      render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
-      truncateText: true,
-      width: '25%',
     },
     {
       field: 'status',
@@ -125,6 +101,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
       },
       truncateText: true,
+      width: '15%',
     },
     {
       actions: [
@@ -181,6 +158,36 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
     },
   ];
+
+  if (!isCrawler) {
+    columns.splice(0, 0, {
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
+        {
+          defaultMessage: 'Connector name',
+        }
+      ),
+      render: (connector: Connector) => (
+        <EuiLinkTo to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}>
+          {connector.name}
+        </EuiLinkTo>
+      ),
+      width: '25%',
+    });
+    columns.splice(3, 0, {
+      field: 'service_type',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
+        {
+          defaultMessage: 'Connector type',
+        }
+      ),
+      render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
+      truncateText: true,
+      width: '15%',
+    });
+  }
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
