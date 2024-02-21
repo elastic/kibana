@@ -480,7 +480,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`deletes the imported model ${model.id}`, async () => {
-            await ml.trainedModelsTable.refreshModelsTable();
             await ml.trainedModelsTable.deleteModel(model.id);
           });
         }
