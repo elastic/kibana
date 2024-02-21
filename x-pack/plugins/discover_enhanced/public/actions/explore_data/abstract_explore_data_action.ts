@@ -77,11 +77,12 @@ export abstract class AbstractExploreDataAction {
     return shared.hasExactlyOneDataView(embeddable);
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+  public async execute(api: EmbeddableApiContext): Promise<void> {
+    const { embeddable } = api;
     if (!this.isCompatible({ embeddable })) return;
 
     const { core } = this.params.start();
-    const { app, path } = await this.getLocation({ embeddable });
+    const { app, path } = await this.getLocation(api);
 
     await core.application.navigateToApp(app, {
       path,
