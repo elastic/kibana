@@ -7,9 +7,8 @@
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type {
-  DatasetSelection,
-  SelectionChange,
-  DataViewSelection,
+  DataSourceSelectionChangeHandler,
+  DataSourceSelection,
 } from '../../../common/data_source_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
@@ -40,7 +39,7 @@ export interface DataSourceSelectorProps {
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError: Error | null;
   /* The current selection instance */
-  datasetSelection: DatasetSelection | DataViewSelection;
+  dataSourceSelection: DataSourceSelection;
   /* The available data views list */
   dataViews: DataViewDescriptor[] | null;
   /* Any error occurred to show when the user preview the data views */
@@ -82,7 +81,7 @@ export interface DataSourceSelectorProps {
   /* Triggered when the uncategorized tab is selected */
   onUncategorizedTabClick: LoadDatasets;
   /* Triggered when the selection is updated */
-  onSelectionChange: SelectionChange;
+  onSelectionChange: DataSourceSelectionChangeHandler;
 }
 
 export type PanelId = typeof INTEGRATIONS_PANEL_ID | IntegrationId;

@@ -7,9 +7,8 @@
 import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { SearchDataViews } from '../../../hooks/use_data_views';
 import {
-  DatasetSelection,
-  DataViewSelection,
-  SelectionChange,
+  DataSourceSelection,
+  DataSourceSelectionChangeHandler,
 } from '../../../../common/data_source_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
@@ -22,7 +21,7 @@ import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DataSourceSelectorSearchParams, PanelId, TabId } from '../types';
 
 export interface DefaultDataSourceSelectorContext {
-  selection: DatasetSelection | DataViewSelection;
+  selection: DataSourceSelection;
   tabId: TabId;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId | TabId, DataSourceSelectorSearchParams>;
@@ -142,7 +141,7 @@ export interface DataSourceSelectorStateMachineDependencies {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onSelectionChange: SelectionChange;
+  onSelectionChange: DataSourceSelectionChangeHandler;
   onUncategorizedReload: ReloadDatasets;
   onUncategorizedSearch: SearchDatasets;
   onUncategorizedSort: SearchDatasets;

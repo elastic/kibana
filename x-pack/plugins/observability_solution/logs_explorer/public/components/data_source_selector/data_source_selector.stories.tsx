@@ -14,9 +14,8 @@ import { IndexPattern } from '@kbn/io-ts-utils';
 import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import {
   AllDatasetSelection,
-  DatasetSelection,
-  DataViewSelection,
-  SelectionChange,
+  DataSourceSelectionChangeHandler,
+  DataSourceSelection,
 } from '../../../common/data_source_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DataSourceSelector } from './data_source_selector';
@@ -44,8 +43,8 @@ const meta: Meta<typeof DataSourceSelector> = {
 export default meta;
 
 const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
-  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection | DataViewSelection>(
-    () => AllDatasetSelection.create()
+  const [dataSourceSelection, setDataSourceSelection] = useState<DataSourceSelection>(() =>
+    AllDatasetSelection.create()
   );
 
   const [search, setSearch] = useState<DataSourceSelectorSearchParams>({
@@ -60,8 +59,8 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
     }
   };
 
-  const onSelectionChange: SelectionChange = (newSelection) => {
-    setDatasetSelection(newSelection);
+  const onSelectionChange: DataSourceSelectionChangeHandler = (newSelection) => {
+    setDataSourceSelection(newSelection);
   };
 
   const filteredIntegrations = integrations.filter((integration) =>
@@ -98,7 +97,7 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
       {...args}
       datasets={Boolean(datasetsError || isLoadingUncategorized) ? [] : sortedDatasets}
       dataViews={Boolean(dataViewsError || isLoadingDataViews) ? [] : sortedDataViews}
-      datasetSelection={datasetSelection}
+      dataSourceSelection={dataSourceSelection}
       integrations={Boolean(integrationsError || isLoadingIntegrations) ? [] : sortedIntegrations}
       onDataViewsSearch={setSearch}
       onDataViewsSort={setSearch}

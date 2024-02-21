@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { useInterpret, useSelector } from '@xstate/react';
+import { isAllDatasetSelection } from '../../../../common/data_source_selection';
 import {
   ChangePanelHandler,
   DatasetSelectionHandler,
@@ -136,7 +137,7 @@ export const useDataSourceSelector = ({
     tabId,
     // Flags
     isOpen,
-    isAllMode: selection.selectionType === 'all',
+    isAllMode: isAllDatasetSelection(selection),
     // Actions
     changePanel,
     closePopover,

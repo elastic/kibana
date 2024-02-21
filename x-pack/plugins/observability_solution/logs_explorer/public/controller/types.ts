@@ -62,13 +62,13 @@ export interface ControlOptions {
 export type LogsExplorerPublicState = QueryState &
   DisplayOptions & {
     controls: ControlOptions;
-    datasetSelection: DataSourceSelectionPlain;
+    dataSourceSelection: DataSourceSelectionPlain;
   };
 
 export type LogsExplorerPublicStateUpdate = QueryState &
   PartialDisplayOptions & {
     controls?: ControlOptions;
-    datasetSelection?: DataSourceSelectionPlain;
+    dataSourceSelection?: DataSourceSelectionPlain;
   };
 
 // a placeholder for now

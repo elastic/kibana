@@ -17,6 +17,7 @@ import {
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import {
   DatasetSelection,
+  DataSourceSelection,
   DataViewSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
@@ -27,7 +28,7 @@ const panelStyle = { width: DATA_SOURCE_SELECTOR_WIDTH };
 interface SelectorPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
-  selection: DatasetSelection | DataViewSelection;
+  selection: DataSourceSelection;
 }
 
 export const SelectorPopover = ({

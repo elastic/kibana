@@ -9,10 +9,6 @@ import * as rt from 'io-ts';
 import { datasetRT } from '../datasets';
 import { dataViewDescriptorRT } from '../data_views/types';
 
-export const allDatasetSelectionPlainRT = rt.type({
-  selectionType: rt.literal('all'),
-});
-
 const integrationNameRT = rt.partial({
   name: rt.string,
 });
@@ -45,14 +41,18 @@ const unresolvedDatasetSelectionPayloadRT = rt.intersection([
   }),
 ]);
 
-export const singleDatasetSelectionPlainRT = rt.type({
-  selectionType: rt.literal('single'),
-  selection: singleDatasetSelectionPayloadRT,
+export const allDatasetSelectionPlainRT = rt.type({
+  selectionType: rt.literal('all'),
 });
 
 export const dataViewSelectionPlainRT = rt.type({
   selectionType: rt.literal('dataView'),
   selection: dataViewSelectionPayloadRT,
+});
+
+export const singleDatasetSelectionPlainRT = rt.type({
+  selectionType: rt.literal('single'),
+  selection: singleDatasetSelectionPayloadRT,
 });
 
 export const unresolvedDatasetSelectionPlainRT = rt.type({
@@ -72,6 +72,7 @@ export type DataViewSelectionPayload = rt.TypeOf<typeof dataViewSelectionPayload
 export type UnresolvedDatasetSelectionPayload = rt.TypeOf<
   typeof unresolvedDatasetSelectionPayloadRT
 >;
+
 export type DataSourceSelectionPlain = rt.TypeOf<typeof dataSourceSelectionPlainRT>;
 
 export type DataViewSpecWithId = DataViewSpec & {

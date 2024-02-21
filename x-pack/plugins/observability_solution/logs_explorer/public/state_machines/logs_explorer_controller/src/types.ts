@@ -16,13 +16,13 @@ import { DoneInvokeEvent } from 'xstate';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
-  DatasetSelection,
+  DataSourceSelection,
   DataViewSelection,
   SingleDatasetSelection,
 } from '../../../../common/data_source_selection';
 
 export interface WithDatasetSelection {
-  datasetSelection: DatasetSelection | DataViewSelection;
+  dataSourceSelection: DataSourceSelection;
 }
 
 export interface WithControlPanelGroupAPI {
@@ -98,7 +98,7 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.idle';
+      value: 'initialized.dataSourceSelection.idle';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -107,7 +107,7 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.changingDataView';
+      value: 'initialized.dataSourceSelection.changingDataView';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -116,7 +116,7 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.creatingAdHocDataView';
+      value: 'initialized.dataSourceSelection.creatingAdHocDataView';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -175,8 +175,8 @@ export type LogsExplorerControllerEvent =
       data?: SingleDatasetSelection;
     }
   | {
-      type: 'UPDATE_DATASET_SELECTION';
-      data: DatasetSelection | DataViewSelection;
+      type: 'UPDATE_DATA_SOURCE_SELECTION';
+      data: DataSourceSelection;
     }
   | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
@@ -202,7 +202,7 @@ export type LogsExplorerControllerEvent =
       type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
       refreshInterval: RefreshInterval;
     }
-  | DoneInvokeEvent<DatasetSelection | DataViewSelection>
+  | DoneInvokeEvent<DataSourceSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
   | DoneInvokeEvent<Error>;

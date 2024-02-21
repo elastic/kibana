@@ -7,22 +7,22 @@
 
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { SelectionChange } from '../../common/data_source_selection';
+import { DataSourceSelectionChangeHandler } from '../../common/data_source_selection';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
-export const useDatasetSelection = (
+export const useDataSourceSelection = (
   logsExplorerControllerStateService: LogsExplorerControllerStateService
 ) => {
-  const datasetSelection = useSelector(logsExplorerControllerStateService, (state) => {
-    return state.context.datasetSelection;
+  const dataSourceSelection = useSelector(logsExplorerControllerStateService, (state) => {
+    return state.context.dataSourceSelection;
   });
 
-  const handleDatasetSelectionChange: SelectionChange = useCallback(
+  const handleDataSourceSelectionChange: DataSourceSelectionChangeHandler = useCallback(
     (data) => {
-      logsExplorerControllerStateService.send({ type: 'UPDATE_DATASET_SELECTION', data });
+      logsExplorerControllerStateService.send({ type: 'UPDATE_DATA_SOURCE_SELECTION', data });
     },
     [logsExplorerControllerStateService]
   );
 
-  return { datasetSelection, handleDatasetSelectionChange };
+  return { dataSourceSelection, handleDataSourceSelectionChange };
 };

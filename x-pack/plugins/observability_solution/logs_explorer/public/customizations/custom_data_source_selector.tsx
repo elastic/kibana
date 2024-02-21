@@ -10,7 +10,7 @@ import React from 'react';
 import { DataSourceSelector } from '../components/data_source_selector';
 import { LogsExplorerController } from '../controller';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
-import { useDatasetSelection } from '../hooks/use_dataset_selection';
+import { useDataSourceSelection } from '../hooks/use_data_source_selection';
 import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views';
 import { useEsql } from '../hooks/use_esql';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
@@ -22,7 +22,7 @@ interface CustomDataSourceSelectorProps {
 }
 
 export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerStateService }) => {
-  const { datasetSelection, handleDatasetSelectionChange } = useDatasetSelection(
+  const { dataSourceSelection, handleDataSourceSelectionChange } = useDataSourceSelection(
     logsExplorerControllerStateService
   );
 
@@ -60,12 +60,12 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
     sortDataViews,
   } = useDataViewsContext();
 
-  const { isEsqlEnabled, discoverEsqlUrlProps } = useEsql({ datasetSelection });
+  const { isEsqlEnabled, discoverEsqlUrlProps } = useEsql({ dataSourceSelection });
 
   return (
     <DataSourceSelector
       datasets={datasets}
-      datasetSelection={datasetSelection}
+      dataSourceSelection={dataSourceSelection}
       datasetsError={datasetsError}
       dataViews={dataViews}
       dataViewsError={dataViewsError}
@@ -88,7 +88,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
       onIntegrationsSort={sortIntegrations}
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
-      onSelectionChange={handleDatasetSelectionChange}
+      onSelectionChange={handleDataSourceSelectionChange}
       onUncategorizedReload={reloadDatasets}
       onUncategorizedSearch={searchDatasets}
       onUncategorizedSort={sortDatasets}

@@ -116,7 +116,7 @@ export const redirectToDiscover =
   (context, event) => {
     if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
       if (events?.onUknownDataViewSelection) {
-        return events.onUknownDataViewSelection({ ...context, datasetSelection: event.data });
+        return events.onUknownDataViewSelection({ ...context, dataSourceSelection: event.data });
       }
     }
   };

@@ -9,7 +9,7 @@ import { actions, assign, createMachine, raise } from 'xstate';
 import {
   AllDatasetSelection,
   DataViewSelection,
-  isDatasetSelection,
+  isAllDatasetSelection,
   isDataViewSelection,
   SingleDatasetSelection,
 } from '../../../../common/data_source_selection';
@@ -273,8 +273,7 @@ export const createPureDataSourceSelectorStateMachine = (
       },
       guards: {
         isDataViewSelection: (context) => isDataViewSelection(context.selection),
-        isAllDatasetSelection: (context) =>
-          isDatasetSelection(context.selection) && context.selection.selectionType === 'all',
+        isAllDatasetSelection: (context) => isAllDatasetSelection(context.selection),
       },
     }
   );

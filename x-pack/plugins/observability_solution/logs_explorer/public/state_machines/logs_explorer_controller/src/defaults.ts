@@ -15,7 +15,7 @@ import { AllDatasetSelection } from '../../../../common/data_source_selection';
 import { DefaultLogsExplorerControllerState } from './types';
 
 export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
-  datasetSelection: AllDatasetSelection.create(),
+  dataSourceSelection: AllDatasetSelection.create(),
   grid: {
     columns: DEFAULT_COLUMNS,
     rows: {

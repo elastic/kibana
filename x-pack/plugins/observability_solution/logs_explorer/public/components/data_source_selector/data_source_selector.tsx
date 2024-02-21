@@ -37,7 +37,7 @@ import {
 
 export function DataSourceSelector({
   datasets,
-  datasetSelection,
+  dataSourceSelection,
   datasetsError,
   dataViews,
   dataViewsError,
@@ -85,7 +85,7 @@ export function DataSourceSelector({
     switchToDataViewsTab,
     togglePopover,
   } = useDataSourceSelector({
-    initialContext: { selection: datasetSelection },
+    initialContext: { selection: dataSourceSelection },
     onDataViewsSearch,
     onDataViewsSort,
     onIntegrationsLoadMore,
@@ -216,7 +216,7 @@ export function DataSourceSelector({
 
   return (
     <SelectorPopover
-      selection={datasetSelection}
+      selection={dataSourceSelection}
       isOpen={isOpen}
       closePopover={closePopover}
       onClick={togglePopover}
