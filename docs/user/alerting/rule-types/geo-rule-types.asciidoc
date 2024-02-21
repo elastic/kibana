@@ -78,12 +78,14 @@ You can also specify <<rule-action-variables,variables common to all rules>>.
 
 `context.containingBoundaryId`::
 The identifier for the boundary containing the entity.
+This value is not set for recovered alerts.
 
 `context.containingBoundaryName`::
 The name of the boundary containing the entity.
+This value is not set for recovered alerts.
 
 `context.detectionDateTime`::
-The alert interval end time this change was recorded.
+The end of the check interval when the alert occurred.
 
 `context.entityDateTime`::
 The date the entity was recorded in the boundary.
