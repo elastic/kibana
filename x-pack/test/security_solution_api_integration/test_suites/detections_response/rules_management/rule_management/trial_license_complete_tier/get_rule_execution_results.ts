@@ -49,7 +49,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Get Rule Execution Results', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177223
+  describe.skip('@ess @serverless Get Rule Execution Results', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');

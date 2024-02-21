@@ -14,6 +14,7 @@ export {
 export type { AvailableControlPanels, ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
+  DataViewSelection,
   datasetSelectionPlainRT,
   hydrateDatasetSelection,
   isDatasetSelection,
