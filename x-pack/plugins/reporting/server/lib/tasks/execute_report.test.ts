@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ExportType, ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -97,7 +99,13 @@ describe('Execute Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportError = jest.fn(() => Promise.resolve({} as any));
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test',
+        jobtype: 'noop',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     // @ts-expect-error private method
     task._claimJob = jest.fn(() =>
