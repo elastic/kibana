@@ -16,7 +16,7 @@ var worker = require('node:worker_threads');
 var execOpts = getopts(process.execArgv);
 var envOpts = getopts(process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s+/) : []);
 var dir = execOpts['diagnostic-dir'] || envOpts['diagnostic-dir'] || process.cwd();
-var signal = execOpts['cpuprofile-signal'] || envOpts['cpuprofile-signal'];
+var signal = 'SIGUSR2'; // execOpts['cpuprofile-signal'] || envOpts['cpuprofile-signal'];
 var counter = 0;
 var session;
 
