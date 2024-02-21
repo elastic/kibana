@@ -669,8 +669,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
 
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
         if (connector?.is_native) {
-          // generateApiKey will search for the connector based on index_name, so we need to refresh the index before that.
-          await client.asCurrentUser.indices.refresh({ index: indexName });
+          // generateApiKey will search for the connector doc based on index_name, so we need to refresh the index before that.
+          await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
           await generateApiKey(client, indexName, true);
         }
 
