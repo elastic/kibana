@@ -16,7 +16,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Frequency"
-        id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+        id="searchConnectors.cronEditor.fieldFrequencyLabel"
         values={Object {}}
       />
     }
@@ -43,7 +43,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
           >
             <FormattedMessage
               defaultMessage="Frequency"
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               values={Object {}}
             >
               Frequency
@@ -565,7 +565,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Time"
-          id="xpack.enterpriseSearch.cronEditor.cronDaily.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronDaily.fieldTimeLabel"
           values={Object {}}
         />
       }
@@ -593,7 +593,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Time"
-                id="xpack.enterpriseSearch.cronEditor.cronDaily.fieldTimeLabel"
+                id="searchConnectors.cronEditor.cronDaily.fieldTimeLabel"
                 values={Object {}}
               >
                 Time
@@ -1998,7 +1998,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Frequency"
-        id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+        id="searchConnectors.cronEditor.fieldFrequencyLabel"
         values={Object {}}
       />
     }
@@ -2025,7 +2025,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
           >
             <FormattedMessage
               defaultMessage="Frequency"
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               values={Object {}}
             >
               Frequency
@@ -2446,7 +2446,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Minute"
-          id="xpack.enterpriseSearch.cronEditor.cronHourly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
           values={Object {}}
         />
       }
@@ -2474,7 +2474,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Minute"
-                id="xpack.enterpriseSearch.cronEditor.cronHourly.fieldTimeLabel"
+                id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
                 values={Object {}}
               >
                 Minute
@@ -3197,7 +3197,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Frequency"
-        id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+        id="searchConnectors.cronEditor.fieldFrequencyLabel"
         values={Object {}}
       />
     }
@@ -3224,7 +3224,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
           >
             <FormattedMessage
               defaultMessage="Frequency"
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               values={Object {}}
             >
               Frequency
@@ -3421,7 +3421,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Minute"
-          id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronMinutely.fieldTimeLabel"
           values={Object {}}
         />
       }
@@ -3449,7 +3449,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Minute"
-                id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+                id="searchConnectors.cronEditor.cronMinutely.fieldTimeLabel"
                 values={Object {}}
               >
                 Minute
@@ -3625,7 +3625,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Frequency"
-        id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+        id="searchConnectors.cronEditor.fieldFrequencyLabel"
         values={Object {}}
       />
     }
@@ -3652,7 +3652,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
           >
             <FormattedMessage
               defaultMessage="Frequency"
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               values={Object {}}
             >
               Frequency
@@ -4303,7 +4303,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Date"
-          id="xpack.enterpriseSearch.cronEditor.cronMonthly.fieldDateLabel"
+          id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
           values={Object {}}
         />
       }
@@ -4331,7 +4331,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Date"
-                id="xpack.enterpriseSearch.cronEditor.cronMonthly.fieldDateLabel"
+                id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
                 values={Object {}}
               >
                 Date
@@ -4754,7 +4754,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Time"
-          id="xpack.enterpriseSearch.cronEditor.cronMonthly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
           values={Object {}}
         />
       }
@@ -4782,7 +4782,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Time"
-                id="xpack.enterpriseSearch.cronEditor.cronMonthly.fieldTimeLabel"
+                id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
                 values={Object {}}
               >
                 Time
@@ -6211,7 +6211,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Frequency"
-        id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+        id="searchConnectors.cronEditor.fieldFrequencyLabel"
         values={Object {}}
       />
     }
@@ -6238,7 +6238,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
           >
             <FormattedMessage
               defaultMessage="Frequency"
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               values={Object {}}
             >
               Frequency
@@ -6793,7 +6793,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Day"
-          id="xpack.enterpriseSearch.cronEditor.cronWeekly.fieldDateLabel"
+          id="searchConnectors.cronEditor.cronWeekly.fieldDateLabel"
           values={Object {}}
         />
       }
@@ -6821,7 +6821,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Day"
-                id="xpack.enterpriseSearch.cronEditor.cronWeekly.fieldDateLabel"
+                id="searchConnectors.cronEditor.cronWeekly.fieldDateLabel"
                 values={Object {}}
               >
                 Day
@@ -7004,7 +7004,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Time"
-          id="xpack.enterpriseSearch.cronEditor.cronWeekly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronWeekly.fieldTimeLabel"
           values={Object {}}
         />
       }
@@ -7032,7 +7032,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Time"
-                id="xpack.enterpriseSearch.cronEditor.cronWeekly.fieldTimeLabel"
+                id="searchConnectors.cronEditor.cronWeekly.fieldTimeLabel"
                 values={Object {}}
               >
                 Time
@@ -8449,7 +8449,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Frequency"
-        id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+        id="searchConnectors.cronEditor.fieldFrequencyLabel"
         values={Object {}}
       />
     }
@@ -8476,7 +8476,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           >
             <FormattedMessage
               defaultMessage="Frequency"
-              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              id="searchConnectors.cronEditor.fieldFrequencyLabel"
               values={Object {}}
             >
               Frequency
@@ -9180,7 +9180,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Month"
-          id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldMonthLabel"
+          id="searchConnectors.cronEditor.cronYearly.fieldMonthLabel"
           values={Object {}}
         />
       }
@@ -9208,7 +9208,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Month"
-                id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldMonthLabel"
+                id="searchConnectors.cronEditor.cronYearly.fieldMonthLabel"
                 values={Object {}}
               >
                 Month
@@ -9441,7 +9441,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Date"
-          id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldDateLabel"
+          id="searchConnectors.cronEditor.cronYearly.fieldDateLabel"
           values={Object {}}
         />
       }
@@ -9469,7 +9469,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Date"
-                id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldDateLabel"
+                id="searchConnectors.cronEditor.cronYearly.fieldDateLabel"
                 values={Object {}}
               >
                 Date
@@ -9892,7 +9892,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Time"
-          id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronYearly.fieldTimeLabel"
           values={Object {}}
         />
       }
@@ -9920,7 +9920,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Time"
-                id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldTimeLabel"
+                id="searchConnectors.cronEditor.cronYearly.fieldTimeLabel"
                 values={Object {}}
               >
                 Time

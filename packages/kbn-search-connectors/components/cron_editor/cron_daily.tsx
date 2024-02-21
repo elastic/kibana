@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -32,7 +33,7 @@ export const CronDaily: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronDaily.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronDaily.fieldTimeLabel"
           defaultMessage="Time"
         />
       }
@@ -45,20 +46,14 @@ export const CronDaily: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronDaily.hourSelectLabel',
-              {
-                defaultMessage: 'Hour',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronDaily.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
-            prepend={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronDaily.fieldHour.textAtLabel',
-              {
-                defaultMessage: 'At',
-              }
-            )}
+            prepend={i18n.translate('searchConnectors.cronEditor.cronDaily.fieldHour.textAtLabel', {
+              defaultMessage: 'At',
+            })}
             data-test-subj="cronFrequencyDailyHourSelect"
           />
         </EuiFlexItem>
@@ -68,12 +63,9 @@ export const CronDaily: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={minuteOptions}
             value={minute}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronDaily.minuteSelectLabel',
-              {
-                defaultMessage: 'Minute',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronDaily.minuteSelectLabel', {
+              defaultMessage: 'Minute',
+            })}
             onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"
