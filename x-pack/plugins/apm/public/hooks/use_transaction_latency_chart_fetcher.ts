@@ -125,6 +125,9 @@ export function useTransactionLatencyChartsFetcher({
   );
 
   return {
+    bucketSizeInSeconds: preferred?.bucketSizeInSeconds,
+    start,
+    end,
     latencyChartsData: memoizedData,
     latencyChartsStatus: status,
     latencyChartsError: error,
