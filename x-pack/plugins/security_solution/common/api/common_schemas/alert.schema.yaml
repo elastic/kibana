@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Shared Alert Schema Primitives
+  title: Shared Alert Primitives Schema
   version: 'not applicable'
 paths: {}
 components:

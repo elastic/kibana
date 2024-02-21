@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Shared Primitives
+  title: Shared Primitives Schema
   version: 'not applicable'
 paths: {}
 components:
