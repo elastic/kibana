@@ -161,7 +161,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -848,7 +848,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/uptime/README.md[uptime]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
 
