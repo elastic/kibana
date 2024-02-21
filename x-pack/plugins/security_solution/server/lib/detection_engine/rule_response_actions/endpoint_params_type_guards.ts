@@ -18,11 +18,6 @@ export const isExecuteAction = (
   return params.command === 'execute';
 };
 
-export const isGetFileAction = (
-  params: RuleResponseEndpointAction['params']
-): params is DefaultParams => {
-  return params.command === 'get-file';
-};
 export const isIsolateAction = (
   params: RuleResponseEndpointAction['params']
 ): params is DefaultParams => {

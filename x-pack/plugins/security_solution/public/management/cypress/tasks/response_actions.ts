@@ -35,16 +35,11 @@ export const validateAvailableCommands = () => {
   const automatedExecuteActionEnabled = config.env.ftrConfig.kbnServerArgs[0].match(
     automatedExecuteActionsPattern
   );
-  const automatedGetFileActionsPattern = /automatedGetFileActionEnabled/;
-  const automatedGetFileActionEnabled = config.env.ftrConfig.kbnServerArgs[0].match(
-    automatedGetFileActionsPattern
-  );
 
   const enabledActions = [
     ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
     ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
     ...(automatedExecuteActionEnabled ? ['execute'] : []),
-    ...(automatedGetFileActionEnabled ? ['get-file'] : []),
   ];
 
   cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);

@@ -104,27 +104,6 @@ const useGetCommandText = (
           />
         ),
       };
-    case 'get-file':
-      return {
-        title: (
-          <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.getFile"
-            defaultMessage="Get File"
-          />
-        ),
-        description: (
-          <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.getFileDescription"
-            defaultMessage="Retrieve a file from a host. Files are downloaded in a password-protected .zip archive to prevent the file from running. "
-          />
-        ),
-        tooltip: (
-          <FormattedMessage
-            id="xpack.securitySolution.responseActions.endpoint.getFileTooltip"
-            defaultMessage="Insufficient privileges to get file. Contact your Kibana administrator if you think you should have this permission."
-          />
-        ),
-      };
     case 'execute':
       return {
         title: (

@@ -10,12 +10,7 @@ import { each } from 'lodash';
 
 import type { ExperimentalFeatures } from '../../../../common';
 
-import {
-  isExecuteAction,
-  isGetFileAction,
-  isIsolateAction,
-  isProcessesAction,
-} from './endpoint_params_type_guards';
+import { isExecuteAction, isIsolateAction, isProcessesAction } from './endpoint_params_type_guards';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 
@@ -25,7 +20,6 @@ import {
   getIsolateAlerts,
   getErrorProcessAlerts,
   getExecuteAlerts,
-  getGetFileAlerts,
 } from './utils';
 
 export const endpointResponseAction = (
@@ -65,22 +59,6 @@ export const endpointResponseAction = (
   if (automatedExecuteActionEnabled) {
     if (isExecuteAction(responseAction.params)) {
       const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
-
-      return each(actionAlerts, (actionPayload) => {
-        return endpointAppContextService.getActionCreateService().createActionFromAlert(
-          {
-            ...actionPayload,
-            ...commonData,
-          },
-          actionPayload.endpoint_ids
-        );
-      });
-    }
-  }
-
-  if (automatedGetFileActionEnabled) {
-    if (isGetFileAction(responseAction.params)) {
-      const actionAlerts = getGetFileAlerts(alerts);
 
       return each(actionAlerts, (actionPayload) => {
         return endpointAppContextService.getActionCreateService().createActionFromAlert(

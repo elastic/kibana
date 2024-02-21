@@ -151,29 +151,3 @@ export const getExecuteAlerts = (
       },
     };
   }, {} as Record<string, AlertsAction>);
-
-// TODO TC: double check how we want to call actions: prossibly 1 action per agent and per path === many actions
-export const getGetFileAlerts = (alerts: AlertWithAgent[]) =>
-  alerts.reduce((acc, alert) => {
-    const { id: agentId, name: agentName } = alert.agent || {};
-
-    const hostName = alert.host?.name;
-    const filePath = get(alert, 'file.path');
-    return {
-      ...acc,
-      [filePath]: {
-        hosts: {
-          ...(acc?.[filePath]?.hosts || {}),
-          [agentId]: {
-            name: agentName || hostName || '',
-            id: agentId,
-          },
-        },
-        parameters: {
-          path: filePath,
-        },
-        endpoint_ids: [agentId],
-        alert_ids: [...(acc?.[filePath]?.alert_ids || []), alert._id],
-      },
-    };
-  }, {} as Record<string, AlertsAction>);

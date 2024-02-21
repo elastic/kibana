@@ -38,7 +38,6 @@ export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiComma
   // 'kill-process',
   // 'suspend-process'
   // 'execute',
-  // 'get-file',
 ];
 
 export type EnabledAutomatedResponseActionsCommands =
