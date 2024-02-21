@@ -54,9 +54,6 @@ export async function setupTestServers(logFilePath: string, settings = {}) {
   const root = createRootWithCorePlugins(
     deepmerge(
       {
-        server: {
-          port: 9991,
-        },
         logging: {
           appenders: {
             file: {

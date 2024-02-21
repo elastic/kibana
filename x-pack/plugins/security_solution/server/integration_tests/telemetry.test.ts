@@ -46,7 +46,7 @@ jest.mock('axios');
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
-const telemetrySenderStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
+const securitySolutionStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
 const mockedAxiosGet = jest.spyOn(axios, 'get');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
 
@@ -69,10 +69,10 @@ describe('telemetry tasks', () => {
     expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
     taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
 
-    expect(telemetrySenderStartSpy).toHaveBeenCalledTimes(1);
+    expect(securitySolutionStartSpy).toHaveBeenCalledTimes(1);
 
-    tasks = getTelemetryTasks(telemetrySenderStartSpy);
-    asyncTelemetryEventSender = getAsyncTelemetryEventSender(telemetrySenderStartSpy);
+    tasks = getTelemetryTasks(securitySolutionStartSpy);
+    asyncTelemetryEventSender = getAsyncTelemetryEventSender(securitySolutionStartSpy);
 
     // update queue config to not wait for a long bufferTimeSpanMillis
     asyncTelemetryEventSender.updateQueueConfig(TelemetryChannel.TASK_METRICS, {

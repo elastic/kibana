@@ -1080,7 +1080,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient().info();
   }
 
-  public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
+  public async fetchLicenseInfo(): Promise<Nullable<ESLicense>> {
     try {
       const ret = (await this.esClient().transport.request({
         method: 'GET',
