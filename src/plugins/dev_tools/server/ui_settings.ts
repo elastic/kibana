@@ -20,7 +20,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
     category: [DEV_TOOLS_FEATURE_ID],
     description: i18n.translate('devTools.uiSettings.persistentConsole.description', {
       defaultMessage:
-        'Docks the Console in the Kibana UI. This setting does not affect the standard Console in Dev Tools.',
+        'Enables a persistent console in the Kibana UI. This setting does not affect the standard Console in Dev Tools.',
     }),
     name: i18n.translate('devTools.uiSettings.persistentConsole.name', {
       defaultMessage: 'Persistent Console',
