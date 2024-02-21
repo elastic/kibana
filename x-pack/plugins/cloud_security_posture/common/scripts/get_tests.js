@@ -23,10 +23,11 @@ args.forEach((arg) => {
   params[argName] = argValue;
 });
 
-// Initiating output, regex line matching and file extensions
+// Initiating output, regex line matching, file extensions and output directory
 const testsLogOutput = [];
 const regex = /\b(?:describe\.skip|describe|it\.skip|it)\(['`]/;
 const allowedExtensions = ['.ts', '.tsx', '.test.ts', '.test.tsx'];
+const outputDir = params['--outputDir'] || __dirname;
 
 // Directories to iterate over
 const FTR_SERVERLESS =
@@ -74,6 +75,10 @@ const getTags = (filePath, testSuits) => {
     filePath.startsWith(FTR_CSP_FUNCTIONAL)
   ) {
     tags.push('FTR');
+  }
+
+  if (filePath.startsWith(FTR_API_INTEGRATION) || filePath.startsWith(FTR_CSP_API)) {
+    tags.push('API INTEGRATION');
   }
 
   if (filePath.startsWith(UNIT_TEST_CSP)) {
@@ -173,7 +178,6 @@ const processFile = (filePath) => {
     }
 
     // Writes the output to a JSON file
-    const outputDir = params['--outputDir'] || __dirname;
     const testsLogOutputFilePath = path.join(outputDir, 'csp_test_log.json');
     fs.writeFileSync(testsLogOutputFilePath, JSON.stringify(testsLogOutput, null, 2));
   });
@@ -207,3 +211,13 @@ const processDirectory = (directoryPath) => {
 
 // Initiates the processing for each directory
 directoryPaths.forEach(processDirectory);
+
+console.log(`
+  🌟 Success! CSP Test Log Generated ✨
+
+  📄 Log file: file://${path.resolve(path.join(outputDir, 'csp_test_log.json'))}
+
+  📊 Copy its content to the dedicated app's "data.json" for visualization.
+
+  🚀 Dedicated app: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c
+`);
