@@ -9,15 +9,35 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const servers = functionalConfig.get('servers');
 
   return {
     ...functionalConfig.getAll(),
 
+    servers: {
+      ...servers,
+      kibana: {
+        ...servers.kibana,
+        auth: 'kibana_system:changeme',
+        username: 'kibana_system',
+        password: 'changeme',
+      },
+    },
+
     testFiles: [require.resolve('./tests')],
+
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: [
+        'path.repo=/tmp/',
+        'xpack.security.authc.api_key.enabled=true',
+        'network.host=0.0.0.0',
+      ],
+    },
 
     kbnTestServer: {
       dockerImage:
-        'docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-223731094b431c713bbb8569f7204eb74c211884',
+        'docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-e101c22703375e070e5baf576e21465b29071ba2',
     },
   };
 }

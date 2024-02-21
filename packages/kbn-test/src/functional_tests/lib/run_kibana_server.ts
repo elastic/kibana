@@ -89,8 +89,8 @@ export async function runKibanaServer(options: {
               {
                 'kibana-fips': {
                   enabled: true,
-                  port: 5601,
-                  portInContainer: 5601,
+                  port: 5620,
+                  portInContainer: 5620,
                   image: dockerImage,
                   waitForLogLine: 'Kibana has not been configured.',
                   waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
