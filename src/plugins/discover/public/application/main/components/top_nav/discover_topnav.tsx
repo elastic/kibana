@@ -12,7 +12,11 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
-import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import {
+  useSavedSearch,
+  useSavedSearchHasChanged,
+  useSavedSearchInitial,
+} from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
@@ -173,6 +177,8 @@ export const DiscoverTopNav = ({
     };
   }, [services.serverless, setMenuMountPoint, topNavBadges, topNavMenu]);
 
+  const savedSearchId = useSavedSearch().id;
+  const savedSearchHasChanged = useSavedSearchHasChanged();
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);
     const supportedTextBasedLanguages: DataViewPickerProps['textBasedLanguages'] = isESQLModeEnabled
@@ -191,10 +197,7 @@ export const DiscoverTopNav = ({
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
       onChangeDataView: stateContainer.actions.onChangeDataView,
       textBasedLanguages: supportedTextBasedLanguages,
-      shouldShowTextBasedLanguageTransitionModal: Boolean(
-        !stateContainer.savedSearchState.getId() ||
-          stateContainer.savedSearchState.getHasChanged$().getValue()
-      ),
+      shouldShowTextBasedLanguageTransitionModal: !savedSearchId || savedSearchHasChanged,
       adHocDataViews,
       savedDataViews,
       onEditDataView,
@@ -206,6 +209,8 @@ export const DiscoverTopNav = ({
     dataView,
     onEditDataView,
     savedDataViews,
+    savedSearchHasChanged,
+    savedSearchId,
     stateContainer,
     uiSettings,
   ]);
