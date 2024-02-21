@@ -8,7 +8,7 @@
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useLocation } from 'react-router-dom';
-import { LinkProps } from '@kbn/observability-shared-plugin/public/hooks/use_link_props';
+import type { LinkProps } from '@kbn/observability-shared-plugin/public/hooks/use_link_props';
 import { hostsTitle, inventoryTitle } from '../translations';
 
 interface LocationStateProps {

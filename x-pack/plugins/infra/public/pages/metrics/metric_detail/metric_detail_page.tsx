@@ -72,6 +72,8 @@ export const MetricDetailPage = () => {
   useMetricsBreadcrumbs(breadcrumbs);
   useEffect(() => {
     if (serverless) {
+      // For deeper context breadcrumbs serveless provides its own breadcrumb service.
+      // docs.elastic.dev/kibana-dev-docs/serverless-project-navigation#breadcrumbs
       serverless.setBreadcrumbs(breadcrumbs);
     }
   }, [serverless, breadcrumbs]);
