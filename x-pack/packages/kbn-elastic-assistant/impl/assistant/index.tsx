@@ -186,6 +186,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     conversation: blockBotConversation,
+    isFlyoutMode,
   });
 
   const currentTitle: string =

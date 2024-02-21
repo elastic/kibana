@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
@@ -31,18 +31,16 @@ const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
 `;
 
-const SkipEuiText = styled(EuiText)`
-  margin-top: 20px;
-`;
-
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   onSetupComplete?: () => void;
+  isFlyoutMode?: boolean;
 }
 
 export const useConnectorSetup = ({
   conversation = WELCOME_CONVERSATION,
   onSetupComplete,
+  isFlyoutMode,
 }: ConnectorSetupProps): {
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
@@ -226,7 +224,17 @@ export const useConnectorSetup = ({
           </ConnectorButtonWrapper>
         )}
         {!showAddConnectorButton && (
-          <SkipEuiText color="subdued" size={'xs'}>
+          <EuiText
+            color="subdued"
+            size={'xs'}
+            css={
+              !isFlyoutMode
+                ? css`
+                    margin-top: 20px;
+                  `
+                : null
+            }
+          >
             <EuiTextAlign textAlign="center">
               <EuiBadge
                 color="hollow"
@@ -237,7 +245,7 @@ export const useConnectorSetup = ({
                 {i18n.CONNECTOR_SETUP_SKIP}
               </EuiBadge>
             </EuiTextAlign>
-          </SkipEuiText>
+          </EuiText>
         )}
         {isConnectorModalVisible && (
           <AddConnectorModal

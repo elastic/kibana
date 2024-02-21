@@ -90,23 +90,6 @@ interface UseConversation {
   updateConversationTitle: ({ currentTitle, updatedTitle }: UpdateConversationTitleProps) => void;
 }
 
-function extractNumberFromItem(item: string) {
-  const match = item.match(/\d+/);
-  return match ? parseInt(match[0], 10) : 0;
-}
-
-const getNewConversationId = (conversationIds: string[] = []) => {
-  const draftConversationsList = conversationIds.filter((id) =>
-    /^New conversation( \d+)?$/.test(id)
-  );
-
-  if (!draftConversationsList.length) return NEW_CONVERSATION_PREFIX;
-
-  const lastId = draftConversationsList.map(extractNumberFromItem).sort((a, b) => b - a)[0] ?? 0;
-
-  return `${NEW_CONVERSATION_PREFIX} ${lastId + 1}`;
-};
-
 export const useConversation = (): UseConversation => {
   const {
     allSystemPrompts,
@@ -292,12 +275,12 @@ export const useConversation = (): UseConversation => {
           ...(apiConfig ?? DEFAULT_CONVERSATION_STATE.apiConfig),
           defaultSystemPromptId,
         },
-        id: conversationId ?? getNewConversationId(conversationIds),
+        id: conversationId ?? NEW_CONVERSATION_PREFIX,
         messages: messages != null ? messages : [],
       };
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[newConversation.id];
-        if (prevConversation != null) {
+        if (prevConversation != null && newConversation.id !== NEW_CONVERSATION_PREFIX) {
           throw new Error('Conversation already exists!');
         } else {
           return {

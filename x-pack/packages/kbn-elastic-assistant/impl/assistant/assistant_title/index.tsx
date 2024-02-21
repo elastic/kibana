@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import type { Conversation } from '../../..';
+import { useAssistantContext } from '../../..';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
@@ -45,7 +46,9 @@ export const AssistantTitle: React.FC<{
   setSelectedConversationId,
   isFlyoutMode,
 }) => {
-  const [newTitle, setNewTitle] = useState(() => title);
+  const { conversationIds } = useAssistantContext();
+  const [newTitle, setNewTitle] = useState(title);
+  const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
 
   const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
@@ -85,14 +88,31 @@ export const AssistantTitle: React.FC<{
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen: boolean) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const existingConversationIds = useMemo(
+    () => conversationIds.filter((cid) => cid !== selectedConversation?.id),
+    [conversationIds, selectedConversation?.id]
+  );
+
   const handleUpdateTitle = useCallback(
     (updatedTitle: string) => {
+      if (existingConversationIds.includes(updatedTitle)) {
+        setNewTitleError(true);
+        return false;
+      }
+
+      setNewTitleError(false);
+
       if (selectedConversation) {
         updateConversationTitle({ currentTitle: selectedConversation?.id, updatedTitle });
         setSelectedConversationId(updatedTitle);
       }
     },
-    [selectedConversation, setSelectedConversationId, updateConversationTitle]
+    [
+      existingConversationIds,
+      selectedConversation,
+      setSelectedConversationId,
+      updateConversationTitle,
+    ]
   );
 
   useEffect(() => {
@@ -112,9 +132,12 @@ export const AssistantTitle: React.FC<{
           `}
         >
           <EuiInlineEditTitle
-            heading="h3"
+            heading="h2"
             inputAriaLabel="Edit text inline"
             value={newTitle}
+            size="xs"
+            isInvalid={!!newTitleError}
+            isReadOnly={selectedConversation?.isDefault}
             onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
             onCancel={() => setNewTitle(title)}
             onSave={handleUpdateTitle}
@@ -145,9 +168,9 @@ export const AssistantTitle: React.FC<{
             gutterSize="none"
             justifyContent={isFlyoutMode ? 'spaceBetween' : 'center'}
           >
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiTitle size={'s'}>
                     <h3>{title}</h3>
                   </EuiTitle>

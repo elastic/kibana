@@ -13,6 +13,7 @@ interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
   isFlyoutMode: boolean;
+  promptValue?: string;
   onChatCleared: () => void;
   onSendMessage: () => void;
 }
@@ -28,6 +29,7 @@ export const ChatActions: React.FC<Props> = ({
   onChatCleared,
   onSendMessage,
   isFlyoutMode,
+  promptValue,
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -52,8 +54,9 @@ export const ChatActions: React.FC<Props> = ({
             aria-label={SUBMIT_MESSAGE}
             data-test-subj="submit-chat"
             color="primary"
-            display="base"
-            iconType="returnKey"
+            display={isFlyoutMode && promptValue?.length ? 'fill' : 'base'}
+            size={isFlyoutMode ? 'm' : 's'}
+            iconType={isFlyoutMode ? 'kqlFunction' : 'returnKey'}
             isDisabled={isDisabled}
             isLoading={isLoading}
             onClick={onSendMessage}

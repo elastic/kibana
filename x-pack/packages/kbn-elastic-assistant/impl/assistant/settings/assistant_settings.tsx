@@ -66,6 +66,7 @@ interface Props {
   onSave?: () => void;
   selectedConversation: Conversation;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -80,6 +81,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     onSave,
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
+    isFlyoutMode,
   }) => {
     const { toasts, modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
       useAssistantContext();
@@ -293,6 +295,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     isDisabled={selectedConversation == null}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
+                    isFlyoutMode={isFlyoutMode}
                   />
                 )}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (

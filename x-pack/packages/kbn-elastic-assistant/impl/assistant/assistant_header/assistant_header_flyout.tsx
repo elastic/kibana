@@ -143,6 +143,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
       {
         id: 1,
         title: i18n.CONNECTOR_TITLE,
+        width: 500,
         content: (
           <EuiPanel hasShadow={false}>
             <ConnectorSelectorInline

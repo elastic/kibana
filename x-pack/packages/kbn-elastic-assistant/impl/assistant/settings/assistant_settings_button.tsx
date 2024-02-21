@@ -85,6 +85,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             setSelectedConversationId={setSelectedConversationId}
             onClose={handleCloseModal}
             onSave={handleSave}
+            isFlyoutMode={isFlyoutMode}
           />
         )}
       </>

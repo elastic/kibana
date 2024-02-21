@@ -51,6 +51,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         css={css`
           padding-right: 42px !important;
           min-height: ${!isFlyoutMode ? '125px' : '56px'};
+          max-height: ${!isFlyoutMode ? 'auto' : '350px'};
         `}
         className="eui-scrollBar"
         inputRef={ref}
@@ -58,12 +59,13 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         data-test-subj={'prompt-textarea'}
         fullWidth
         autoFocus
+        resize="vertical"
         disabled={isDisabled}
         placeholder={i18n.PROMPT_PLACEHOLDER}
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}
-        rows={isFlyoutMode ? 2 : 6}
+        rows={isFlyoutMode ? 1 : 6}
       />
     );
   }
