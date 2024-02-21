@@ -1485,50 +1485,76 @@ In both cases, the validation checks if the `immutable` param of the rule is `fa
 
 #### Changes needed to endpoints
 
-##### Update Rule - `PUT /rules`
+Depending on the endpoint, we will have to modify it to address multiple changes. These are:
 
-- Addition of rule schema migration logic (described above)
-- Calculation of `is_customized` field
-- No other changes needed as endpoint already allows modifying prebuilt rules
+**1. Introduction of migration logic**: as explained in the first section of this document, endpoints should have the additional reponsibility of migrating our rule schema.
+**2. Calculation of the `is_customized` field**: this field which is part of the `rule_source` field for external rules needs to be recalculated whenever a rule's field is possibly modified. See implementation details in the [Updating the `is_customized` field](#updating-the-is_customized-field) section.
+**3. Removing checks that block modifying prebuilt rules:** some of our endpoints prevent users from modifying prebuilt rules. This check needs to be removed from all endpoints to allow the customization of prebuilt rules.
+**4. Blocking the update of non-customizable fields:** while the goal of this epic is to allow users to modify their prebuilt rule fields, there are certain rule fields that we will still want to prevent the user from modifying via endpoints, since we will not provide support for resolving conflicts for them via the UI or API if they arise during an update. See the **Customizable** column in [this ticket](https://github.com/elastic/kibana/issues/147239) for a detailed list of fields that should be blocked from modification via the endpoints.
 
-##### Patch Rule - `PATCH /rules`
+The table below shows which of these changes need to be applied to our endpoints: (✅ change needed - ❌ no change needed)
 
-- Addition of rule schema migration logic (described above)
-- Calculation of `is_customized` field
-- No other changes needed as endpoint already allows modifying prebuilt rules
-
-##### Bulk Patch Rules - `PATCH /rules/_bulk_update`
-
-- Addition of rule schema migration logic (described above)
-- Calculation of `is_customized` field for each modified rule
-- No other changes needed as endpoint already allows modifying prebuilt rules
-
-##### Bulk Update Rules - `PUT /rules/_bulk_update`
-
-- Addition of rule schema migration logic (described above)
-- Calculation of `is_customized` field for each modified rule
-- No other changes needed as endpoint already allows modifying prebuilt rules
-
-##### Bulk Actions - `POST /rules/_bulk_action`
-
-- Addition of rule schema migration logic (described above)
-- Calculation of `is_customized` field for each modified rule
-- Removal of the check that prevents modifying prebuilt rules. Customization should be possible for both prebuilt and custom rules, and for all bulk editing actions that are currently supported for custom rules.
-  - This means we need to remove check for whether the rules in the payload have an `immutable` value of `false` OR if the `BulkActionEditTypeEnum` is either `set_rule_actions` or `add_rule_actions`. Bulk editing should be possible for all rules (independently of their values for the `rule_source` and now legacy `immutable` fields), and for all types of Bulk Action Edit Types:
-  ```ts
-  export const BulkActionEditType = z.enum([
-    'add_tags',
-    'delete_tags',
-    'set_tags',
-    'add_index_patterns',
-    'delete_index_patterns',
-    'set_index_patterns',
-    'set_timeline',
-    'add_rule_actions',
-    'set_rule_actions',
-    'set_schedule',
-  ]);
-  ```
+  <table>
+    <thead>
+      <tr>
+        <th>Endpoints</th>
+        <th>Migration logic</th>
+        <th>is_customized calculation</th>
+        <th>Removing prebuilt checks</th>
+        <th>Blocking non-customizable fields updates</th>
+      </tr>
+    </thead>
+    <tbody align="center">
+      <tr>
+        <td><b>Update Rule</b> - PUT /rules</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td><b>Patch Rule</b> - PATCH /rules</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td><b>Bulk Patch Rules</b> - PATCH /rules/_bulk_update</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td><b>Bulk Update Rules</b> - PUT /rules/_bulk_update</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td><b>Bulk Actions</b> - POST /rules/_bulk_action</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+      </tr>
+      <tr>
+        <td><b>Perform Rule Upgrade</b> - POST /prebuilt_rules/upgrade/_perform</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+        <td>❌</td>
+      </tr>
+      <tr>
+        <td><b>Import Rules</b> POST /rules/_import</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>❌</td>
+        <td>✅</td>
+      </tr>
+  </table>
 
 #### Updating the `is_customized` field
 
@@ -1907,11 +1933,44 @@ This means that **no changes will be needed in this page.**
 
 The algorithm for calculating rule version diffs' core structure is [fully implemented](https://github.com/elastic/kibana/pull/148392) and operational. However, the current method for calculating field differences is basic: it currently simply compares field values across versions and flags a conflict if the base version, the current version and the target versions differ from one another. In this conflict scenario, the `mergedVersion` of the field proposed by the algorithmalways equals the `targetVersion`.
 
-We propose developing more adaptable diff algorithms tailored to specific rule fields or rule field types. These more specific algorithms aim to minimize conflicts and automate merging of changes, doing the best effort to keep the intended customizationa applied by the user, as well as the updates proposed by Elastic. Hopefully, the user will be able to simply review the proposal and accept it.
+We propose developing more adaptable diff algorithms tailored to specific rule fields or rule field types. These more specific algorithms aim to minimize conflicts and automate merging of changes, doing the best effort to keep the intended customizations applied by the user, as well as the updates proposed by Elastic. Hopefully, the user will be able to simply review the proposal and accept it.
 
 #### Concrete field diff algorithm by type
 
+Depending on the specific field or type of field we might want to apply a specific merging algorithm when conflicts arise. Let's propose different types.
+
 ##### String fields
+
+Examples: `name`, `description`, `setup`, `note` (Investigation guide)
+
+  <table>
+    <thead>
+      <tr>
+        <th style="border-right:3px solid black">Use case</th>
+        <th>Base version</th>
+        <th>Current version</th>
+        <th style="border-right:3px solid black">Target version</th>
+        <th>Merged version (output)</th>
+      </tr>
+    </thead>
+    <tbody align="center">
+      <tr>
+        <td style="border-right:3px solid black">Keep customizations on conflicts, but add updates in parts with no conflicts</td>
+        <td><code>This is a prebuilt rule name</code></td>
+        <td><code>This is a customized prebuilt rule name</code></td>
+        <td style="border-right:3px solid black"><code>This is an updated prebuilt rule name. Much better.</code></td>
+        <td><code>This is a customized prebuilt rule name. Much better.</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+
+
+
+
+
+
+
 
 
 
@@ -1921,9 +1980,6 @@ We propose developing more adaptable diff algorithms tailored to specific rule f
 
 TODO
 
-## Changes in UI
-
-TODO
 
 ## Scenarios for bulk accepting updates
 
