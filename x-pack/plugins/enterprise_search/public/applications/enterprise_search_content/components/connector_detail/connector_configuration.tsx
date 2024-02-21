@@ -89,12 +89,6 @@ export const ConnectorConfiguration: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            {!connector.index_name && (
-              <>
-                <AttachIndexBox connector={connector} />
-                <EuiSpacer />
-              </>
-            )}
             <EuiSteps
               steps={[
                 {
@@ -324,6 +318,12 @@ export const ConnectorConfiguration: React.FC = () => {
               ]}
             />
           </EuiPanel>
+          {!connector.index_name && (
+            <>
+              <EuiSpacer />
+              <AttachIndexBox connector={connector} />
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">
