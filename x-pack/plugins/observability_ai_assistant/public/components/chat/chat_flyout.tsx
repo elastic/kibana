@@ -16,6 +16,7 @@ import {
   EuiFlyout,
   EuiPopover,
   EuiToolTip,
+  useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { ObservabilityAIAssistantMultipaneFlyoutProvider } from '../../context/observability_ai_assistant_multipane_flyout_provider';
@@ -50,6 +51,7 @@ export function ChatFlyout({
   onClose: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const breakpoint = useCurrentEuiBreakpoint();
 
   const currentUser = useCurrentUser();
 
@@ -65,6 +67,10 @@ export function ChatFlyout({
 
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
   const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
+
+  const flyoutClassName = css`
+    max-inline-size: 100% !important;
+  `;
 
   const sidebarClass = css`
     max-width: ${conversationsExpanded
@@ -91,10 +97,15 @@ export function ChatFlyout({
 
   const containerClassName = css`
     height: 100%;
+    flex-wrap: nowrap;
   `;
 
   const chatBodyContainerClassName = css`
     min-width: 0;
+  `;
+
+  const hideClassName = css`
+    display: none;
   `;
 
   const newChatButtonClassName = css`
@@ -142,13 +153,18 @@ export function ChatFlyout({
       }}
     >
       <EuiFlyout
+        className={flyoutClassName}
         closeButtonProps={{
-          css: { marginRight: `${euiTheme.size.s}`, marginTop: `${euiTheme.size.s}` },
+          css: {
+            marginRight: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
+            marginTop: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
+          },
         }}
         size={getFlyoutWidth({
+          breakpoint,
           expanded: conversationsExpanded,
-          isSecondSlotVisible,
           flyoutWidthMode,
+          isSecondSlotVisible,
         })}
         paddingSize="m"
         onClose={() => {
@@ -160,7 +176,7 @@ export function ChatFlyout({
         }}
       >
         <EuiFlexGroup gutterSize="none" className={containerClassName}>
-          <EuiFlexItem className={sidebarClass}>
+          <EuiFlexItem className={breakpoint === 'xs' ? hideClassName : sidebarClass}>
             <EuiPopover
               anchorPosition="downLeft"
               className={expandButtonContainerClassName}
@@ -269,16 +285,21 @@ export function ChatFlyout({
 }
 
 const getFlyoutWidth = ({
+  breakpoint,
   expanded,
   isSecondSlotVisible,
   flyoutWidthMode,
 }: {
+  breakpoint?: string;
   expanded: boolean;
   isSecondSlotVisible: boolean;
   flyoutWidthMode?: FlyoutWidthMode;
 }) => {
   if (flyoutWidthMode === 'full') {
     return '100%';
+  }
+  if (breakpoint === 'xs') {
+    return '90vw';
   }
   if (!expanded && !isSecondSlotVisible) {
     return '40vw';

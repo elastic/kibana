@@ -71,7 +71,7 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
-import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
+import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -170,7 +170,7 @@ export const createMockEndpointAppContextServiceStartContract =
       savedObjectsStart
     );
     const experimentalFeatures = config.experimentalFeatures;
-    const appFeaturesService = createAppFeaturesServiceMock(
+    const productFeaturesService = createProductFeaturesServiceMock(
       undefined,
       experimentalFeatures,
       undefined,
@@ -224,7 +224,7 @@ export const createMockEndpointAppContextServiceStartContract =
       actionCreateService: undefined,
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
       esClient: elasticsearchClientMock.createElasticsearchClient(),
-      appFeaturesService,
+      productFeaturesService,
       savedObjectsClient: savedObjectsClientMock.create(),
     };
   };

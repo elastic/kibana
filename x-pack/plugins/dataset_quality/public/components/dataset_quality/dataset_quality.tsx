@@ -56,17 +56,21 @@ export const createDatasetQuality = ({
 };
 
 const Header = dynamic(() => import('./header'));
-const Table = dynamic(() => import('./table'));
+const Table = dynamic(() => import('./table/table'));
+const Filters = dynamic(() => import('./filters/filters'));
 const SummaryPanel = dynamic(() => import('./summary_panel/summary_panel'));
 
 function DatasetQuality() {
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
         <Header />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SummaryPanel />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Filters />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Table />

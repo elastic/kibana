@@ -124,7 +124,12 @@ export function ChatConsolidatedItems({
               // use index, not id to prevent unmounting of component when message is persisted
               key={index}
               {...item}
-              onActionClick={onActionClick}
+              onActionClick={(payload) => {
+                onActionClick({
+                  message: item.message,
+                  payload,
+                });
+              }}
               onEditSubmit={(message) => onEditSubmit(item.message, message)}
               onFeedbackClick={(feedback) => {
                 onFeedback(item.message, feedback);
