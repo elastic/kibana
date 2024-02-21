@@ -25,6 +25,7 @@ import {
   useIsWithinMinBreakpoint,
   useEuiTheme,
   useEuiThemeCSSVariables,
+  EuiPageSidebar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -102,6 +103,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   canBeCollapsed = true,
   ...rest
 }) => {
+  const euiThemeContext = useEuiTheme();
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
@@ -177,7 +179,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const navWidth = useMemo(() => {
     if (isLargerBreakpoint) {
       return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
@@ -234,11 +236,11 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               className="kbnSolutionNav__flyout"
               hideCloseButton={!canBeCollapsed}
             >
-              <div className={sideNavClasses}>
+              <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
                 {titleText}
                 <EuiSpacer size="l" />
                 {sideNavContent}
-              </div>
+              </EuiPageSidebar>
             </EuiFlyout>
           )}
           {canBeCollapsed && (
