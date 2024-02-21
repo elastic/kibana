@@ -29,6 +29,7 @@ import { ChatBody } from './chat_body';
 import { ConversationList } from './conversation_list';
 import type { Message } from '../../../common/types';
 import { ChatInlineEditingContent } from './chat_inline_edit';
+import { NewChatButton } from '../buttons/new_chat_button';
 
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
 const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
@@ -110,7 +111,7 @@ export function ChatFlyout({
 
   const newChatButtonClassName = css`
     position: absolute;
-    bottom: 31px;
+    bottom: 30px;
     margin-left: ${conversationsExpanded
       ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
       : 5}px;
@@ -228,13 +229,13 @@ export function ChatFlyout({
                     )}
                     display="block"
                   >
-                    <EuiButtonIcon
+                    <NewChatButton
                       aria-label={i18n.translate(
                         'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
                         { defaultMessage: 'New chat' }
                       )}
+                      collapsed
                       data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
-                      iconType="plusInCircle"
                       onClick={handleClickNewChat}
                     />
                   </EuiToolTip>
