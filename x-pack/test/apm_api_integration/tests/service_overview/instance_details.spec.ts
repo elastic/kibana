@@ -47,7 +47,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Instance details when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177494
+  registry.when.skip('Instance details when data is loaded', { config: 'basic', archives: [] }, () => {
     const range = timerange(new Date(start).getTime(), new Date(end).getTime());
 
     const serviceInstance = apm
