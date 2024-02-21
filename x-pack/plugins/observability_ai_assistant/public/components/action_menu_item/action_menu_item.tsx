@@ -6,8 +6,15 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiLoadingSpinner,
+  useCurrentEuiBreakpoint,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import moment from 'moment';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -16,8 +23,14 @@ import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 
+const buttonLabelClassName = css`
+  display: none;
+`;
+
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
+  const breakpoint = useCurrentEuiBreakpoint();
+
   const { plugins } = useKibana().services;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -71,7 +84,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
           setIsOpen(() => true);
         }}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             {!isOpen || chatService.value ? (
               <AssistantAvatar size="xs" />
@@ -79,7 +92,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
               <EuiLoadingSpinner size="m" />
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className={breakpoint === 'xs' ? buttonLabelClassName : ''}>
             {i18n.translate('xpack.observabilityAiAssistant.actionMenuItemLabel', {
               defaultMessage: 'AI Assistant',
             })}

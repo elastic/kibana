@@ -36,8 +36,8 @@ export const ORCHESTRATOR_NAMESPACE_FIELD = 'orchestrator.namespace';
 export const CONTAINER_NAME_FIELD = 'container.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 
-// Malformed Docs
-export const MALFORMED_DOCS_FIELD = 'ignored_field_values';
+// Degraded Docs
+export const DEGRADED_DOCS_FIELD = 'ignored_field_values';
 
 // Error Stacktrace
 export const ERROR_STACK_TRACE = 'error.stack_trace';
