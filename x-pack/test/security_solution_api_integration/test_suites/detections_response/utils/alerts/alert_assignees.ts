@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertIds } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { AlertIds } from '@kbn/security-solution-plugin/common/api/common_schemas';
 import { SetAlertAssigneesRequestBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setAlertAssignees = ({
