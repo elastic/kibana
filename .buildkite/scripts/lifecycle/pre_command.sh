@@ -36,21 +36,6 @@ if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo ""
 fi
 
-# Check if we have gcloud, if yes, check which account, if not, check the config paths
-echo '--- GCloud Info'
-if [[ -x "$(command -v gcloud)" ]]; then
-  echo "gcloud account: $(gcloud config get-value core/account)"
-else
-  echo "gcloud not found, checking config paths"
-  ls -la $HOME/.config/gcloud || echo "$HOME/.config/gcloud not found"
-  ls -la $HOME/.config/gcloud/legacy_credentials || echo "$HOME/.config/gcloud/legacy_credentials not found"
-  if [[ -f "$HOME/.config/gcloud/configurations/config_default" ]]; then
-    cat $HOME/.config/gcloud/configurations/config_default
-  else
-    echo "$HOME/.config/gcloud/configurations/config_default not found"
-  fi
-fi
-
 echo '--- Job Environment Setup'
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -165,11 +150,6 @@ export GCS_SA_CDN_EMAIL
 
 GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
 export GCS_SA_CDN_BUCKET
-
-GOOGLE_APPLICATION_CREDENTIALS="$(mktemp -d)/kibana-gcloud-service-account.json"
-export GOOGLE_APPLICATION_CREDENTIALS
-vault_get kibana-gcloud-service-account key | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
-
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
