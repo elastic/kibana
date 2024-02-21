@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import React, { Fragment } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
@@ -36,7 +36,7 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronWeekly.fieldDateLabel"
+          id="searchConnectors.cronEditor.cronWeekly.fieldDateLabel"
           defaultMessage="Day"
         />
       }
@@ -49,7 +49,7 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
         value={day}
         onChange={(e) => onChange({ day: e.target.value })}
         fullWidth
-        prepend={i18n.translate('xpack.enterpriseSearch.cronEditor.cronWeekly.textOnLabel', {
+        prepend={i18n.translate('searchConnectors.cronEditor.cronWeekly.textOnLabel', {
           defaultMessage: 'On',
         })}
         data-test-subj="cronFrequencyWeeklyDaySelect"
@@ -59,7 +59,7 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronWeekly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronWeekly.fieldTimeLabel"
           defaultMessage="Time"
         />
       }
@@ -72,16 +72,13 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronWeekly.hourSelectLabel',
-              {
-                defaultMessage: 'Hour',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronWeekly.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
             prepend={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronWeekly.fieldHour.textAtLabel',
+              'searchConnectors.cronEditor.cronWeekly.fieldHour.textAtLabel',
               {
                 defaultMessage: 'At',
               }
@@ -96,12 +93,9 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
             options={minuteOptions}
             value={minute}
             onChange={(e) => onChange({ minute: e.target.value })}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronWeekly.minuteSelectLabel',
-              {
-                defaultMessage: 'Minute',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronWeekly.minuteSelectLabel', {
+              defaultMessage: 'Minute',
+            })}
             fullWidth
             prepend=":"
             data-test-subj="cronFrequencyWeeklyMinuteSelect"

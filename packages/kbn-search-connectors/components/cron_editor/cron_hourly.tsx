@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -18,7 +19,7 @@ interface Props {
   onChange: ({ minute }: { minute?: string }) => void;
 }
 
-export const CronMinutely: React.FunctionComponent<Props> = ({
+export const CronHourly: React.FunctionComponent<Props> = ({
   disabled,
   minute,
   minuteOptions,
@@ -28,7 +29,7 @@ export const CronMinutely: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
           defaultMessage="Minute"
         />
       }
@@ -41,19 +42,10 @@ export const CronMinutely: React.FunctionComponent<Props> = ({
         value={minute}
         onChange={(e) => onChange({ minute: e.target.value })}
         fullWidth
-        prepend={i18n.translate(
-          'xpack.enterpriseSearch.cronEditor.cronMinutely.fieldMinute.textAtLabel',
-          {
-            defaultMessage: 'Every',
-          }
-        )}
-        append={i18n.translate(
-          'xpack.enterpriseSearch.cronEditor.cronMinutely.fieldMinute.textAppendLabel',
-          {
-            defaultMessage: 'minutes',
-          }
-        )}
-        data-test-subj="cronFrequencyMinutelyMinuteSelect"
+        prepend={i18n.translate('searchConnectors.cronEditor.cronHourly.fieldMinute.textAtLabel', {
+          defaultMessage: 'At',
+        })}
+        data-test-subj="cronFrequencyHourlyMinuteSelect"
       />
     </EuiFormRow>
   </Fragment>
