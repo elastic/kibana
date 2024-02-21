@@ -449,8 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/175443
-      describe.skip('with imported models', function () {
+      describe('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
         });
@@ -481,6 +480,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`deletes the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.refreshModelsTable();
             await ml.trainedModelsTable.deleteModel(model.id);
           });
         }
