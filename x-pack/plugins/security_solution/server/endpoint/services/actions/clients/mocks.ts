@@ -17,6 +17,7 @@ import { merge } from 'lodash';
 import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
+import type { ResponseActionsClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import {
@@ -48,6 +49,19 @@ export interface ResponseActionsClientOptionsMock extends ResponseActionsClientO
   esClient: ElasticsearchClientMock;
   casesClient?: CasesClientMock;
 }
+
+const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> => {
+  return {
+    suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
+    upload: jest.fn().mockReturnValue(Promise.resolve()),
+    getFile: jest.fn().mockReturnValue(Promise.resolve()),
+    execute: jest.fn().mockReturnValue(Promise.resolve()),
+    killProcess: jest.fn().mockReturnValue(Promise.resolve()),
+    isolate: jest.fn().mockReturnValue(Promise.resolve()),
+    release: jest.fn().mockReturnValue(Promise.resolve()),
+    runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
+  };
+};
 
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -237,6 +251,7 @@ const createConnectorActionExecuteResponseMock = <TData>(
 };
 
 export const responseActionsClientMock = Object.freeze({
+  create: createResponseActionClientMock,
   createConstructorOptions: createConstructorOptionsMock,
 
   createIsolateOptions: createNoParamsResponseActionOptionsMock,

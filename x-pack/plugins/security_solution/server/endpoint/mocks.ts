@@ -126,6 +126,7 @@ export const createMockEndpointAppContextService = (
     getExceptionListsClient: jest.fn(),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
+    getInternalResponseActionsClient: jest.fn(),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
