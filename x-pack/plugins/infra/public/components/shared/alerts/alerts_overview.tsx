@@ -83,7 +83,6 @@ export const AlertsOverview = React.memo(
     };
 
     const handleAlertStatusChange = (id: AlertStatus) => {
-      console.log('change', id);
       setAlertStatus(id);
       setUrlState({ alertStatus: id });
     };
