@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('flyoutTitle');
         });
         await PageObjects.settings.setFieldType('Long');
-        await new Promise((r) => setTimeout(r, 1000 * 60 * 10 * 10000));
+        await new Promise((r) => setTimeout(r, 1000 * 60 * 10));
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
 
         await PageObjects.settings.toggleRow('formatRow');
