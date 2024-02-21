@@ -211,7 +211,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         differenceBy(selectedAgents, agentsOnCurrentPage, 'id').length === 0;
       if (!areSelectedAgentsStillVisible) {
         // force selecting all agents on current page if staying in query mode
-        return setSelectedAgents(agentsOnCurrentPage);
+        return setSelectedAgents(agentsOnCurrentPage.filter((agent) => isAgentSelectable(agent)));
       } else {
         setSelectionMode('manual');
       }
