@@ -1009,5 +1009,53 @@ export const registerEnterpriseSearchIntegrations = (
       shipper: 'enterprise_search',
       isBeta: false,
     });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'notion',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.notionTitle', {
+        defaultMessage: 'Notion',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.notionDescription',
+        {
+          defaultMessage: 'Search over your content on Notion.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=notion',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/notion.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: true,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'redis',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.redisTitle', {
+        defaultMessage: 'Redis',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.redisDescription',
+        {
+          defaultMessage: 'Search over your content on Redis.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=redis',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/redis.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
   }
 };
