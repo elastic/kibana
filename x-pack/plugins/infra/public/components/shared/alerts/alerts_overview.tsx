@@ -29,7 +29,6 @@ export const AlertsOverview = React.memo(
   ({ assetName, dateRange, onLoaded, onRangeSelection }: AlertsOverviewProps) => {
     const { services } = useKibanaContextForPlugin();
     const [alertStatus, setAlertStatus] = useState<AlertStatus>(ALERT_STATUS_ALL);
-    console.log('asset');
     const alertsEsQueryByStatus = useMemo(
       () =>
         createAlertsEsQuery({

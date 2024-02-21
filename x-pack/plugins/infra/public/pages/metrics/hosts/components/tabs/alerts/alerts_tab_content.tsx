@@ -27,8 +27,6 @@ export const AlertsTabContent = () => {
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
-  console.log('alertStatus', alertStatus);
-  console.log('alertsEsQueryByStatus', alertsEsQueryByStatus);
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
   const { triggersActionsUi } = services;
@@ -86,7 +84,6 @@ const MemoAlertSummaryWidget = React.memo(
 
     const onBrushEnd: BrushEndListener = (brushEvent) => {
       const { x } = brushEvent as XYBrushEvent;
-      console.log('x', x);
       if (x) {
         const [start, end] = x;
 
