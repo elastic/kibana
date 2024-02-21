@@ -33,6 +33,11 @@ export interface DiscoverGridEmbeddableProps
   savedSearchId?: string;
 }
 
+export type DiscoverGridEmbeddableSearchProps = Omit<
+  DiscoverGridEmbeddableProps,
+  'sampleSizeState' | 'loadingState' | 'query'
+>;
+
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
@@ -102,6 +107,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         renderCustomToolbar={renderCustomToolbar}
         showColumnTokens
         configHeaderRowHeight={3}
+        showFullScreenButton={false}
+        className="unifiedDataTable"
       />
     </SavedSearchEmbeddableBase>
   );
