@@ -79,15 +79,11 @@ const CorrelationIdField: React.FunctionComponent<
         </EuiLink>
       }
       labelAppend={
-        selectedActionGroupId !== ACTION_GROUP_RECOVERED ? (
-          <EuiText size="xs" color="subdued">
-            {i18n.OPTIONAL_LABEL}
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            {i18n.REQUIRED_LABEL}
-          </EuiText>
-        )
+        <EuiText size="xs" color="subdued">
+          {selectedActionGroupId !== ACTION_GROUP_RECOVERED
+            ? i18n.OPTIONAL_LABEL
+            : i18n.REQUIRED_LABEL}
+        </EuiText>
       }
     >
       <TextFieldWithMessageVariables
