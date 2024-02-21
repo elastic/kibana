@@ -12,24 +12,24 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../hooks/use_control_panels';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
-const DATASET_FILTERS_CUSTOMIZATION_ID = 'datasetFiltersCustomization';
+const DATA_SOURCE_FILTERS_CUSTOMIZATION_ID = 'dataSourceFiltersCustomization';
 
-interface CustomDatasetFiltersProps {
+interface CustomDataSourceFiltersProps {
   logsExplorerControllerStateService: LogsExplorerControllerStateService;
   data: DataPublicPluginStart;
 }
 
-const CustomDatasetFilters = ({
+const CustomDataSourceFilters = ({
   logsExplorerControllerStateService,
   data,
-}: CustomDatasetFiltersProps) => {
+}: CustomDataSourceFiltersProps) => {
   const { getInitialInput, setControlGroupAPI, query, filters, timeRange } = useControlPanels(
     logsExplorerControllerStateService,
     data
   );
 
   return (
-    <ControlGroupContainer data-test-subj={DATASET_FILTERS_CUSTOMIZATION_ID}>
+    <ControlGroupContainer data-test-subj={DATA_SOURCE_FILTERS_CUSTOMIZATION_ID}>
       <ControlGroupRenderer
         ref={setControlGroupAPI}
         getCreationOptions={getInitialInput}
@@ -81,4 +81,4 @@ const ControlGroupContainer = euiStyled.div`
 `;
 
 // eslint-disable-next-line import/no-default-export
-export default CustomDatasetFilters;
+export default CustomDataSourceFilters;

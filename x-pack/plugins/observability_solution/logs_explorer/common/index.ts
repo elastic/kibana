@@ -14,10 +14,11 @@ export {
 export type { AvailableControlPanels, ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
-  DataViewSelection,
   dataSourceSelectionPlainRT,
+  DataViewSelection,
   hydrateDataSourceSelection,
   isDatasetSelection,
+  isDataSourceSelection,
   isDataViewSelection,
   isUnresolvedDatasetSelection,
   UnresolvedDatasetSelection,

@@ -21,7 +21,7 @@ import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
 
-const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
+const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
 const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
@@ -73,7 +73,7 @@ export const createLogsExplorerProfileCustomizations =
         );
       },
       PrependFilterBar: () => (
-        <LazyCustomDatasetFilters logsExplorerControllerStateService={service} data={data} />
+        <LazyCustomDataSourceFilters logsExplorerControllerStateService={service} data={data} />
       ),
       CustomSearchBar: createCustomSearchBar({
         data,
