@@ -23,7 +23,6 @@ import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_UUID,
-  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -53,8 +52,6 @@ import {
 import {
   ALERTS_TABLE_CONF_ERROR_MESSAGE,
   ALERTS_TABLE_CONF_ERROR_TITLE,
-  ALERTS_TABLE_FILTERS_ERROR_DESCRIPTION,
-  ALERTS_TABLE_RESET_FILTERS_LABEL,
   ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
   ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
   ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
@@ -67,7 +64,6 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
-import { UnsupportedAlertsFiltersSetError } from './errors';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
 const DefaultPagination = {
@@ -97,10 +93,6 @@ export type AlertsTableStateProps = {
    */
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
-  /**
-   * A cleanup callback to help the user recover from an inconsistent filters combination
-   */
-  resetFilters?: () => void;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -149,23 +141,6 @@ const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
 
 const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
-  if (error instanceof UnsupportedAlertsFiltersSetError) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{error.message}</h2>}
-        body={<p>{ALERTS_TABLE_FILTERS_ERROR_DESCRIPTION}</p>}
-        actions={
-          error.recover ? (
-            <EuiButton onClick={error.recover} color="danger" fill>
-              {ALERTS_TABLE_RESET_FILTERS_LABEL}
-            </EuiButton>
-          ) : undefined
-        }
-      />
-    );
-  }
   return (
     <EuiEmptyPrompt
       iconType="error"
@@ -221,7 +196,6 @@ const AlertsTableStateWithQueryProvider = ({
   shouldHighlightRow,
   dynamicRowHeight,
   lastReloadRequestTime,
-  resetFilters,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
   const hasAlertsTableConfiguration =
@@ -522,10 +496,6 @@ const AlertsTableStateWithQueryProvider = ({
         body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
       />
     );
-  }
-
-  if (featureIds.length > 1 && featureIds.includes(AlertConsumers.SIEM)) {
-    throw new UnsupportedAlertsFiltersSetError(resetFilters);
   }
 
   return (

@@ -43,20 +43,6 @@ export const ALERTS_TABLE_FILTERS_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const ALERTS_TABLE_FILTERS_ERROR_DESCRIPTION = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.filters.errorBody',
-  {
-    defaultMessage: 'Security alerts can only be browsed in isolation',
-  }
-);
-
-export const ALERTS_TABLE_RESET_FILTERS_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.resetFilters',
-  {
-    defaultMessage: 'Reset filters',
-  }
-);
-
 export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.unknownErrorTitle',
   {

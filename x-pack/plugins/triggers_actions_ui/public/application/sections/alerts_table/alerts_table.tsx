@@ -24,12 +24,16 @@ import {
   EuiDataGridRefProps,
   EuiFlexGroup,
   EuiDataGridProps,
-  EuiCallOut,
+  EuiCodeBlock,
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
@@ -77,11 +81,6 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
 const Row = styled.div`
   display: flex;
   min-width: fit-content;
-`;
-
-const CellErrorCallOut = styled(EuiCallOut)`
-  padding: 0;
-  background: none;
 `;
 
 type CustomGridBodyProps = Pick<
@@ -429,17 +428,25 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         return null;
       } catch (e) {
         return (
-          <CellErrorCallOut
-            title={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertTable.cellErrorTitle"
-                defaultMessage="Error while rendering cell"
-              />
-            }
-            size="s"
-            color="danger"
-            iconType="error"
-          />
+          <>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              css={css`
+                height: 1lh;
+              `}
+            >
+              <EuiIcon type="error" color="danger" />
+              <EuiText color="danger" size="xs">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertTable.cellErrorTitle"
+                  defaultMessage="Error while rendering cell"
+                />
+              </EuiText>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiCodeBlock isCopyable>{e.stack}</EuiCodeBlock>
+          </>
         );
       }
     },
