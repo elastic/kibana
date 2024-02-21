@@ -65,6 +65,7 @@ describe('FormFields ', () => {
         {
           label: 'hello',
           type: CustomFieldTypes.TOGGLE,
+          defaultValue: false,
         },
         true
       );

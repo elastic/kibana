@@ -173,6 +173,24 @@ describe('<ComponentTemplateList />', () => {
     });
   });
 
+  describe('if filter is set, component templates are filtered', () => {
+    test('search value is set if url param is set', async () => {
+      const filter = 'usedBy=(test_index_template_1)';
+      await act(async () => {
+        testBed = await setup(httpSetup, { filter });
+      });
+
+      testBed.component.update();
+
+      const { table } = testBed;
+      const search = testBed.actions.getSearchValue();
+      expect(search).toBe(filter);
+
+      const { rows } = table.getMetaData('componentTemplatesTable');
+      expect(rows.length).toBe(1);
+    });
+  });
+
   describe('No component templates', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);

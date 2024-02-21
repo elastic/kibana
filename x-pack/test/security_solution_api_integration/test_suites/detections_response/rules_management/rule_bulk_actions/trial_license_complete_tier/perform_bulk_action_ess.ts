@@ -21,20 +21,22 @@ import {
 import {
   binaryToString,
   createLegacyRuleAction,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getLegacyActionSO,
   getSimpleRule,
   getWebHookAction,
-  waitForRuleSuccess,
-  getRuleSOById,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   checkInvestigationFieldSoValue,
+  getRuleSOById,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleSuccess,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -801,7 +803,7 @@ export default ({ getService }: FtrProviderContext): void => {
         /*
           It's duplicate of a rule with properly formatted "investigation fields".
           So we just check that "investigation fields" are in intended format.
-          No migration needs to happen. 
+          No migration needs to happen.
         */
         const isInvestigationFieldForRuleWithIntendedTypeInSo =
           await checkInvestigationFieldSoValue(
@@ -839,7 +841,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         /*
           Since this rule was created with intended "investigation fields" format,
-          it shouldn't change - no need to migrate. 
+          it shouldn't change - no need to migrate.
         */
         const isInvestigationFieldForOriginalRuleWithIntendedTypeInSo =
           await checkInvestigationFieldSoValue(

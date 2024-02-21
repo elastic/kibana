@@ -8,6 +8,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { PROCESSOR_EVENT } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import { ESSearchClient } from '../metrics/types';
 import {
   ServicesAPIRequest,
@@ -79,12 +80,35 @@ export const getServices = async (
         filter: [
           {
             term: {
-              'metricset.name': 'transaction',
+              [PROCESSOR_EVENT]: 'metric',
             },
           },
           {
-            term: {
-              'metricset.interval': '1m', // make this dynamic if we start returning time series data
+            bool: {
+              should: [
+                {
+                  term: {
+                    'metricset.name': 'app',
+                  },
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'metricset.name': 'transaction',
+                        },
+                      },
+                      {
+                        term: {
+                          'metricset.interval': '1m', // make this dynamic if we start returning time series data
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
           ...commonFiltersList,
@@ -136,8 +160,8 @@ export const getServices = async (
   const services = Array.from(serviceMap)
     .slice(0, size)
     .map(([serviceName, { agentName }]) => ({
-      'service.name': serviceName,
-      'agent.name': agentName,
+      serviceName,
+      agentName,
     }));
   return { services };
 };

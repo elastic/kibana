@@ -199,6 +199,20 @@
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.dropNullColumns",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dropNullColumns",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

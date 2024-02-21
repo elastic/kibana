@@ -19,7 +19,6 @@ export function processOpenAiStream() {
     const id = v4();
 
     return source.pipe(
-      map((line) => line.substring(6)),
       filter((line) => !!line && line !== '[DONE]'),
       map(
         (line) =>

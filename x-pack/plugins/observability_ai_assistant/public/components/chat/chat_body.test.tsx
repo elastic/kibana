@@ -38,7 +38,7 @@ describe('<ChatBody>', () => {
         message: {
           role: 'assistant',
           function_call: {
-            name: 'recall',
+            name: 'context',
             arguments: '{"queries":[],"categories":[]}',
             trigger: 'assistant',
           },
@@ -48,7 +48,7 @@ describe('<ChatBody>', () => {
       {
         message: {
           role: 'user',
-          name: 'recall',
+          name: 'context',
           content: '[]',
         },
       },
@@ -86,7 +86,7 @@ describe('<ChatBody>', () => {
         message: {
           role: 'assistant',
           function_call: {
-            name: 'recall',
+            name: 'context',
             arguments: '{"queries":[],"categories":[]}',
             trigger: 'assistant',
           },
@@ -96,7 +96,7 @@ describe('<ChatBody>', () => {
       {
         message: {
           role: 'user',
-          name: 'recall',
+          name: 'context',
           content: '[]',
         },
       },

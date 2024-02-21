@@ -5,27 +5,28 @@
  * 2.0.
  */
 
+import { getDateRange } from '@kbn/timerange';
+import { DEFAULT_TIME_RANGE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats';
 
 interface FilterInactiveDatasetsOptions {
   datasets: DataStreamStat[];
-  timeRange: {
+  timeRange?: {
     from: string;
     to: string;
   };
 }
 
-export const filterInactiveDatasets = (options: FilterInactiveDatasetsOptions) => {
-  const {
-    datasets,
-    timeRange: { from, to },
-  } = options;
-
-  const startDate = new Date(from).getTime();
-  const endDate = new Date(to).getTime();
+export const filterInactiveDatasets = ({
+  datasets,
+  timeRange = DEFAULT_TIME_RANGE,
+}: FilterInactiveDatasetsOptions) => {
+  const { startDate, endDate } = getDateRange(timeRange);
 
   return datasets.filter((dataset) =>
-    dataset.lastActivity ? isActive(dataset.lastActivity, startDate, endDate) : false
+    dataset.lastActivity
+      ? isActive(dataset.lastActivity, startDate as number, endDate as number)
+      : false
   );
 };
 
@@ -38,13 +39,8 @@ interface IsActiveDatasetOptions {
 }
 
 export const isActiveDataset = (options: IsActiveDatasetOptions) => {
-  const {
-    lastActivity,
-    timeRange: { from, to },
-  } = options;
-
-  const startDate = new Date(from).getTime();
-  const endDate = new Date(to).getTime();
+  const { lastActivity, timeRange } = options;
+  const { startDate, endDate } = getDateRange(timeRange);
 
   return isActive(lastActivity, startDate, endDate);
 };

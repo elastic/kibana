@@ -914,6 +914,12 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
+    if (this.isTextBasedLanguage()) {
+      this.updateInput({
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
+      });
+    }
+
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
         await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
@@ -1585,8 +1591,19 @@ export class Embeddable
     return this.savedVis?.state.query;
   }
 
-  public getSavedVis(): Readonly<Document | undefined> {
-    return this.savedVis;
+  public getSavedVis(): Readonly<LensSavedObjectAttributes | undefined> {
+    if (!this.savedVis) {
+      return;
+    }
+
+    // Why are 'type' and 'savedObjectId' keys being removed?
+    // Prior to removing them,
+    // this method returned 'Readonly<Document | undefined>' while consumers typed the results as 'LensSavedObjectAttributes'.
+    // Removing 'type' and 'savedObjectId' keys to align method results with consumer typing.
+    const savedVis = { ...this.savedVis };
+    delete savedVis.type;
+    delete savedVis.savedObjectId;
+    return savedVis;
   }
 
   destroy() {

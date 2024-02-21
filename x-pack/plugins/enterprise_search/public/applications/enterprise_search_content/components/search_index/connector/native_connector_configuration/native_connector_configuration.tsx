@@ -30,9 +30,11 @@ import { HttpLogic } from '../../../../../shared/http';
 import { CONNECTOR_ICONS } from '../../../../../shared/icons/connector_icons';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
+import { GenerateConnectorApiKeyApiLogic } from '../../../../api/connector/generate_connector_api_key_api_logic';
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
+import { ApiKeyConfig } from '../api_key_configuration';
 import { ConnectorNameAndDescription } from '../connector_name_and_description/connector_name_and_description';
 import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../constants';
 
@@ -45,6 +47,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const { index } = useValues(IndexViewLogic);
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
+  const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
 
   if (!isConnectorIndex(index)) {
     return <></>;
@@ -73,6 +76,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
     index.connector.scheduling.incremental.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
+
+  const hasApiKey = !!(index.connector.api_key_id ?? apiKeyData);
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
@@ -136,6 +141,24 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.researchConfigurationTitle',
                     {
                       defaultMessage: 'Research configuration requirements',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
+                  children: (
+                    <ApiKeyConfig
+                      indexName={index.connector.name}
+                      hasApiKey={hasApiKey}
+                      isNative
+                      secretId={index.connector.api_key_secret_id}
+                    />
+                  ),
+                  status: hasApiKey ? 'complete' : 'incomplete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.regenerateApiKeyTitle',
+                    {
+                      defaultMessage: 'Regenerate API key',
                     }
                   ),
                   titleSize: 'xs',

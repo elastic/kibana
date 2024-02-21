@@ -6,9 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -16,7 +15,7 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { betaBadgeProps } from './beta_badge_props';
+import { betaBadgeProps, technicalPreviewBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -77,12 +76,13 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(
       ([id, details]) =>
         actionTypeRegistry.has(id) &&
-        details.enabledInConfig === true &&
-        !actionTypeRegistry.get(id).hideInUi
+        !actionTypeRegistry.get(id).hideInUi &&
+        details.enabledInConfig
     )
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
@@ -91,6 +91,7 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
+        isBeta: actionTypeModel.isBeta,
         isExperimental: actionTypeModel.isExperimental,
       };
     });
@@ -101,7 +102,13 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
-          betaBadgeProps={item.isExperimental ? betaBadgeProps : undefined}
+          betaBadgeProps={
+            item.isBeta
+              ? betaBadgeProps
+              : item.isExperimental
+              ? technicalPreviewBadgeProps
+              : undefined
+          }
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
@@ -117,7 +124,7 @@ export const ActionTypeMenu = ({
       return (
         <EuiFlexItem key={index}>
           {checkEnabledResult.isEnabled && card}
-          {checkEnabledResult.isEnabled === false && (
+          {!checkEnabledResult.isEnabled && (
             <EuiToolTip position="top" content={checkEnabledResult.message}>
               {card}
             </EuiToolTip>

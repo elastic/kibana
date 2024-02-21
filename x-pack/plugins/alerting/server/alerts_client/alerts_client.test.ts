@@ -308,6 +308,7 @@ describe('Alerts Client', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
+          alertDelay: 0,
         };
       });
 
@@ -514,6 +515,25 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
+        });
+
+        test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: { ...alertsClientParams.rule, alertDelay: 3 },
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 1 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(clusterClient.bulk).not.toHaveBeenCalled();
         });
 
         test('should update ongoing alerts in existing index', async () => {

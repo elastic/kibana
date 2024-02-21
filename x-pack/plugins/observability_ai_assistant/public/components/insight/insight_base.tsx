@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -30,6 +31,7 @@ export interface InsightBaseProps {
   actions?: Array<{ id: string; label: string; icon?: string; handler: () => void }>;
   onToggle: (isOpen: boolean) => void;
   children: React.ReactNode;
+  isOpen: boolean;
   loading?: boolean;
   dataTestSubj?: string;
 }
@@ -44,6 +46,7 @@ export function InsightBase({
   actions,
   onToggle,
   loading,
+  isOpen,
   dataTestSubj = 'obsAiAssistantInsightButton',
 }: InsightBaseProps) {
   const { euiTheme } = useEuiTheme();
@@ -66,10 +69,19 @@ export function InsightBase({
               <AssistantAvatar size="xs" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText css={{ marginTop: 2, marginBottom: 1 }}>
-                <h5>{title}</h5>
-              </EuiText>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiText css={{ marginTop: 2, marginBottom: 1 }}>
+                  <h5>{title}</h5>
+                </EuiText>
 
+                <EuiIconTip
+                  content={i18n.translate('xpack.observabilityAiAssistant.insight.iconTooltip', {
+                    defaultMessage:
+                      'Every contextual insight can be changed with a custom prompt defined by the user. You can always reset it to the default.',
+                  })}
+                  position="right"
+                />
+              </EuiFlexGroup>
               <EuiText size="s" css={{ color: euiTheme.colors.subduedText }}>
                 <span>{description}</span>
               </EuiText>
@@ -78,6 +90,7 @@ export function InsightBase({
         }
         isLoading={loading}
         isDisabled={loading}
+        forceState={isOpen ? 'open' : 'closed'}
         extraAction={
           actions?.length || controls ? (
             <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>

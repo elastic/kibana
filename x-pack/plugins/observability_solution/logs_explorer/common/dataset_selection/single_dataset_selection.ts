@@ -50,7 +50,7 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
     const integration = name && version ? { name, title, version } : undefined;
     const datasetInstance = Dataset.create(dataset, integration);
 
-    return new SingleDatasetSelection(datasetInstance);
+    return SingleDatasetSelection.create(datasetInstance);
   }
 
   public static create(dataset: Dataset) {

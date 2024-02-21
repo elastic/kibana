@@ -34,7 +34,6 @@ const defaultConfig: ConfigSchema = {
     alertDetails: {
       metrics: { enabled: false },
       uptime: { enabled: false },
-      observability: { enabled: false },
     },
   },
 };

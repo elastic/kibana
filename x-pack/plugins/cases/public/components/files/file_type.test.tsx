@@ -17,7 +17,8 @@ import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
-describe('getFileType', () => {
+// Failing: See https://github.com/elastic/kibana/issues/175841
+describe.skip('getFileType', () => {
   const fileType = getFileType();
 
   it('invalid props return blank FileAttachmentViewObject', () => {

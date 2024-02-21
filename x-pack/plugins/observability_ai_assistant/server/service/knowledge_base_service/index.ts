@@ -436,6 +436,7 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
+    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
@@ -482,10 +483,9 @@ export class KnowledgeBaseService {
       }
     }
 
-    if (returnedEntries.length <= sortedEntries.length) {
-      this.dependencies.logger.debug(
-        `Dropped ${sortedEntries.length - returnedEntries.length} entries because of token limit`
-      );
+    const droppedEntries = sortedEntries.length - returnedEntries.length;
+    if (droppedEntries > 0) {
+      this.dependencies.logger.info(`Dropped ${droppedEntries} entries because of token limit`);
     }
 
     return {

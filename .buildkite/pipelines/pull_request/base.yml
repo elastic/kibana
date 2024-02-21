@@ -96,7 +96,7 @@ steps:
     agents:
       queue: n2-4-spot
     key: build_api_docs
-    timeout_in_minutes: 60
+    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'

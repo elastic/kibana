@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
+import { VIDEO_SOURCE } from '../../../../empty_prompt/constants';
 import { useStepContext } from '../../context/step_context';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
 import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../../types';
@@ -69,9 +70,7 @@ const VideoComponent: React.FC = () => {
             sandbox="allow-scripts allow-same-origin"
             scrolling="no"
             allow={isVideoPlaying ? 'autoplay;' : undefined}
-            src={`//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html${
-              isVideoPlaying ? '?autoplay=1' : ''
-            }`}
+            src={`${VIDEO_SOURCE}${isVideoPlaying ? '?autoplay=1' : ''}`}
             title={WATCH_VIDEO_BUTTON_TITLE}
           />
         )}

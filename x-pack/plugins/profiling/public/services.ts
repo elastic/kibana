@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { HttpFetchQuery } from '@kbn/core/public';
 import {
   createFlameGraph,
@@ -51,6 +52,7 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
+    showErrorFrames: boolean;
   }) => Promise<ElasticFlameGraph>;
   fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
@@ -101,7 +103,7 @@ export function getServices(): Services {
       return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
-    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery }) => {
+    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, showErrorFrames }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
@@ -109,7 +111,7 @@ export function getServices(): Services {
       };
 
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
-      return createFlameGraph(baseFlamegraph);
+      return createFlameGraph(baseFlamegraph, showErrorFrames);
     },
     fetchHasSetup: async ({ http }) => {
       const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;

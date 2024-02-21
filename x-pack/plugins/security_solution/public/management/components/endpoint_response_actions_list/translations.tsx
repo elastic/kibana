@@ -77,6 +77,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Hostname',
       }
     ),
+    agentType: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.agentType',
+      {
+        defaultMessage: 'Agent type',
+      }
+    ),
   },
 });
 

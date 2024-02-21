@@ -12,13 +12,8 @@ import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/serv
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import Ajv, { type ValidateFunction } from 'ajv';
 import { once } from 'lodash';
-import {
-  ContextRegistry,
-  KnowledgeBaseEntryRole,
-  RegisterContextDefinition,
-} from '../../common/types';
+import { KnowledgeBaseEntryRole, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
@@ -27,16 +22,10 @@ import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type {
   ChatRegistrationFunction,
-  FunctionHandlerRegistry,
   ObservabilityAIAssistantResourceNames,
-  RegisterFunction,
   RespondFunctionResources,
 } from './types';
 import { splitKbText } from './util/split_kb_text';
-
-const ajv = new Ajv({
-  strict: false,
-});
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -297,37 +286,37 @@ export class ObservabilityAIAssistantService {
   }
 
   async getFunctionClient({
+    screenContexts,
     signal,
     resources,
     client,
   }: {
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
   }): Promise<ChatFunctionClient> {
-    const contextRegistry: ContextRegistry = new Map();
-    const functionHandlerRegistry: FunctionHandlerRegistry = new Map();
+    const fnClient = new ChatFunctionClient(screenContexts);
 
-    const validators = new Map<string, ValidateFunction>();
-
-    const registerContext: RegisterContextDefinition = (context) => {
-      contextRegistry.set(context.name, context);
+    const params = {
+      signal,
+      registerContext: fnClient.registerContext.bind(fnClient),
+      registerFunction: fnClient.registerFunction.bind(fnClient),
+      hasFunction: fnClient.hasFunction.bind(fnClient),
+      resources,
+      client,
     };
 
-    const registerFunction: RegisterFunction = (definition, respond) => {
-      validators.set(definition.name, ajv.compile(definition.parameters));
-      functionHandlerRegistry.set(definition.name, { definition, respond });
-    };
     await Promise.all(
       this.registrations.map((fn) =>
-        fn({ signal, registerContext, registerFunction, resources, client }).catch((error) => {
+        fn(params).catch((error) => {
           this.logger.error(`Error registering functions`);
           this.logger.error(error);
         })
       )
     );
 
-    return new ChatFunctionClient(contextRegistry, functionHandlerRegistry, validators);
+    return fnClient;
   }
 
   addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {

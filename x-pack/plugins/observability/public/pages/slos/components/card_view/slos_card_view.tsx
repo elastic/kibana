@@ -29,14 +29,14 @@ export interface Props {
 const useColumns = () => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isMedium = useIsWithinBreakpoints(['m']);
-  const isLarge = useIsWithinBreakpoints(['l', 'xl']);
+  const isXLarge = useIsWithinBreakpoints(['xl']);
 
   switch (true) {
     case isMobile:
       return 1;
     case isMedium:
       return 3;
-    case isLarge:
+    case isXLarge:
       return 4;
     default:
       return 3;

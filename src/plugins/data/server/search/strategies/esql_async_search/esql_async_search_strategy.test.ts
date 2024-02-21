@@ -123,7 +123,7 @@ describe('ES|QL async search strategy', () => {
       it('sets transport options on POST requests', async () => {
         const transportOptions = { maxRetries: 1 };
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-        const params = {};
+        const params = { query: 'from logs' };
         const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
         await firstValueFrom(
@@ -139,6 +139,7 @@ describe('ES|QL async search strategy', () => {
               keep_alive: '60000ms',
               wait_for_completion_timeout: '100ms',
               keep_on_completion: false,
+              query: 'from logs',
             },
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })

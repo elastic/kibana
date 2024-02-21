@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import { deleteConnectorById } from '@kbn/search-connectors';
+import { deleteConnectorById, deleteConnectorSecret } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
   fetchConnectors,
@@ -204,6 +204,12 @@ export function registerIndexRoutes({
 
         if (connector) {
           await deleteConnectorById(client.asCurrentUser, connector.id);
+          if (connector.api_key_id) {
+            await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
+          }
+          if (connector.api_key_secret_id) {
+            await deleteConnectorSecret(client.asCurrentUser, connector.api_key_secret_id);
+          }
         }
 
         await deleteIndexPipelines(client, indexName);
@@ -272,6 +278,10 @@ export function registerIndexRoutes({
     {
       path: '/internal/enterprise_search/indices/{indexName}/api_key',
       validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+          secret_id: schema.maybe(schema.nullable(schema.string())),
+        }),
         params: schema.object({
           indexName: schema.string(),
         }),
@@ -279,9 +289,11 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
+      const { is_native: isNative, secret_id: secretId } = request.body;
+
       const { client } = (await context.core).elasticsearch;
 
-      const apiKey = await generateApiKey(client, indexName);
+      const apiKey = await generateApiKey(client, indexName, isNative, secretId || null);
 
       return response.ok({
         body: apiKey,

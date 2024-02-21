@@ -106,7 +106,11 @@ export const DurationChartComponent = ({
           <Settings
             xDomain={{ min, max }}
             showLegend
-            showLegendExtra
+            // Please double check if the data passed to the chart contains all the buckets, even the empty ones.
+            // the showLegendExtra will display the last element of the data array as the default legend value
+            // and if empty buckets are filtered out you can probably see a value that doesn't correspond
+            // to the value in the last time bucket visualized.
+            // showLegendExtra
             legendPosition={Position.Right}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}

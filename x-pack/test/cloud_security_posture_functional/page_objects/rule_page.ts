@@ -181,6 +181,10 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       const disabledRulesButton = await testSubjects.find('rules-counters-disabled-rules-button');
       await disabledRulesButton.click();
     },
+
+    doesElementExist: async (selector: string) => {
+      return await testSubjects.exists(selector);
+    },
   };
 
   const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {

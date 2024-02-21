@@ -35,14 +35,11 @@ import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import {
-  ChatActionClickHandler,
-  ChatActionClickType,
-  type ChatFlyoutSecondSlotHandler,
-} from './types';
+import { ChatActionClickHandler, ChatActionClickType } from './types';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
+import { FlyoutWidthMode } from './chat_flyout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -93,27 +90,29 @@ const animClassName = css`
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
-  initialTitle,
-  initialMessages,
-  initialConversationId,
   connectors,
-  knowledgeBase,
   currentUser,
+  flyoutWidthMode,
+  initialConversationId,
+  initialMessages,
+  initialTitle,
+  knowledgeBase,
   showLinkToConversationsApp,
   startedFrom,
-  chatFlyoutSecondSlotHandler,
   onConversationUpdate,
+  onToggleFlyoutWidthMode,
 }: {
+  connectors: UseGenAIConnectorsResult;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  flyoutWidthMode?: FlyoutWidthMode;
   initialTitle?: string;
   initialMessages?: Message[];
   initialConversationId?: string;
-  connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   showLinkToConversationsApp: boolean;
   startedFrom?: StartedFrom;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
+  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -155,10 +154,16 @@ export function ChatBody({
   }
 
   const containerClassName = css`
+    background: white;
+    min-width: 0;
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'
       ? 1200 - 250 + 'px' // page template max width - conversation list width.
       : '100%'};
+  `;
+
+  const headerContainerClassName = css`
+    padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
   `;
 
   const [stickToBottom, setStickToBottom] = useState(true);
@@ -357,7 +362,6 @@ export function ChatBody({
                   onStopGenerating={() => {
                     stop();
                   }}
-                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                   onActionClick={handleActionClick}
                 />
               )}
@@ -402,9 +406,10 @@ export function ChatBody({
     return (
       <EuiFlexGroup
         direction="column"
-        gutterSize="none"
         className={containerClassName}
+        gutterSize="none"
         justifyContent="center"
+        responsive={false}
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
@@ -426,7 +431,12 @@ export function ChatBody({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={containerClassName}
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
@@ -447,7 +457,7 @@ export function ChatBody({
           </EuiCallOut>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingRight: showLinkToConversationsApp ? '24px' : '0' }}>
+      <EuiFlexItem grow={false} className={headerContainerClassName}>
         <ChatHeader
           connectors={connectors}
           conversationId={
@@ -455,6 +465,7 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
+          flyoutWidthMode={flyoutWidthMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           showLinkToConversationsApp={showLinkToConversationsApp}
@@ -463,6 +474,7 @@ export function ChatBody({
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
+          onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

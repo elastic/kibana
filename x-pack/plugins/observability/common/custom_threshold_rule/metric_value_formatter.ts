@@ -16,9 +16,9 @@ export const metricValueFormatter = (value: number | null, metric: string = '') 
     }
   );
 
-  const formatter = metric.endsWith('.pct')
-    ? createFormatter('percent')
-    : createFormatter('highPrecision');
+  let formatter = createFormatter('highPrecision');
+  if (metric.endsWith('.pct')) formatter = createFormatter('percent');
+  if (metric.endsWith('.bytes')) formatter = createFormatter('bytes');
 
   return value == null ? noDataValue : formatter(value);
 };

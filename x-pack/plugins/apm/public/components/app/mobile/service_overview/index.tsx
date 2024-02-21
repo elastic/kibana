@@ -193,7 +193,6 @@ export function MobileServiceOverview() {
                     kuery={kueryWithMobileFilters}
                     environment={environment}
                     fixedHeight={true}
-                    isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
                     showPerPageOptions={false}

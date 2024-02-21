@@ -9,6 +9,7 @@ import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import { createFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { FlameGraph } from '../../components/flamegraph';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 import {
@@ -16,6 +17,7 @@ import {
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
 import { EmbeddableFlamegraphEmbeddableInput } from './embeddable_flamegraph_factory';
+import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export class EmbeddableFlamegraph extends Embeddable<
   EmbeddableFlamegraphEmbeddableInput,
@@ -34,18 +36,9 @@ export class EmbeddableFlamegraph extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { data, isLoading } = this.input;
-    const flamegraph = !isLoading && data ? createFlameGraph(data) : undefined;
-
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
-        <AsyncEmbeddableComponent isLoading={isLoading}>
-          <>
-            {flamegraph && (
-              <FlameGraph primaryFlamegraph={flamegraph} id="embddable_profiling" isEmbedded />
-            )}
-          </>
-        </AsyncEmbeddableComponent>
+        <Flamegraph {...this.input} />
       </ProfilingEmbeddableProvider>,
       domNode
     );
@@ -62,4 +55,19 @@ export class EmbeddableFlamegraph extends Embeddable<
       this.render(this._domNode);
     }
   }
+}
+
+function Flamegraph({ isLoading, data }: EmbeddableFlamegraphEmbeddableInput) {
+  const { core } = useProfilingDependencies().start;
+  const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const flamegraph = !isLoading && data ? createFlameGraph(data, showErrorFrames) : undefined;
+  return (
+    <AsyncEmbeddableComponent isLoading={isLoading}>
+      <>
+        {flamegraph && (
+          <FlameGraph primaryFlamegraph={flamegraph} id="embddable_profiling" isEmbedded />
+        )}
+      </>
+    </AsyncEmbeddableComponent>
+  );
 }

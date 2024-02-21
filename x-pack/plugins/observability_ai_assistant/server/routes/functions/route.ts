@@ -39,6 +39,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       signal: controller.signal,
       resources,
       client,
+      screenContexts: [],
     });
 
     return {

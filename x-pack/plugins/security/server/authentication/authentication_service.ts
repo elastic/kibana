@@ -40,12 +40,14 @@ import type { Session } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
-  http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  http: Pick<
+    HttpServiceSetup,
+    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+  >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
-  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -92,7 +94,6 @@ export class AuthenticationService {
     config,
     http,
     license,
-    buildNumber,
     elasticsearch,
     customBranding,
   }: AuthenticationServiceSetupParams) {
@@ -204,8 +205,8 @@ export class AuthenticationService {
         });
         return toolkit.render({
           body: renderUnauthenticatedPage({
-            buildNumber,
             basePath: http.basePath,
+            staticAssets: http.staticAssets,
             originalURL,
             customBranding: customBrandingValue,
           }),

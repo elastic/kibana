@@ -27,7 +27,7 @@ export const lensFunctionDefinition = {
   // function is deprecated
   visibility: FunctionVisibility.Internal,
   description:
-    "Use this function to create custom visualizations, using Lens, that can be saved to dashboards. This function does not return data to the assistant, it only shows it to the user. When using this function, make sure to use the recall function to get more information about how to use it, with how you want to use it. Make sure the query also contains information about the user's request. The visualisation is displayed to the user above your reply, DO NOT try to generate or display an image yourself.",
+    "Use this function to create custom visualizations, using Lens, that can be saved to dashboards. This function does not return data to the assistant, it only shows it to the user. When using this function, make sure to use the context function to get more information about how to use it, with how you want to use it. Make sure the query also contains information about the user's request. The visualisation is displayed to the user above your reply, DO NOT try to generate or display an image yourself.",
   descriptionForUser:
     'Use this function to create custom visualizations, using Lens, that can be saved to dashboards.',
   parameters: {

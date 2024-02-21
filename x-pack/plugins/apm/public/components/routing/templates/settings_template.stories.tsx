@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { Meta, Story } from '@storybook/react';
+import { noop } from 'lodash';
 import React, { ComponentProps } from 'react';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -21,6 +22,11 @@ const coreMock = {
       PageTemplate: () => {
         return <>hello world</>;
       },
+    },
+  },
+  observabilityAIAssistant: {
+    service: {
+      setScreenContext: () => noop,
     },
   },
 } as unknown as Partial<CoreStart>;

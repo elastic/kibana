@@ -24,11 +24,12 @@ describe('CSV Export Search Cursor', () => {
   beforeEach(async () => {
     settings = {
       scroll: {
-        duration: '10m',
+        duration: jest.fn(() => '10m'),
         size: 500,
       },
       includeFrozen: false,
       maxConcurrentShardRequests: 5,
+      taskInstanceFields: { startedAt: null, retryAt: null },
     };
 
     es = elasticsearchServiceMock.createScopedClusterClient();
@@ -37,7 +38,13 @@ describe('CSV Export Search Cursor', () => {
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursorPit('test-index-pattern-string', settings, { data, es }, logger);
+    cursor = new SearchCursorPit(
+      'test-index-pattern-string',
+      settings,
+      { data, es },
+      new AbortController(),
+      logger
+    );
 
     const openPointInTimeSpy = jest
       // @ts-expect-error create spy on private method

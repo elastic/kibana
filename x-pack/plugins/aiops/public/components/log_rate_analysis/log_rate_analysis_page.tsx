@@ -172,7 +172,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
             onWindowParametersChange={onWindowParametersHandler}
-            setGlobalState={setGlobalState}
             stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>

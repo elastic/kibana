@@ -473,11 +473,7 @@ export const fillMissingCustomFields = ({
   // only populate with the default value required custom fields missing from the request
   for (const confCustomField of customFieldsConfiguration) {
     if (!customFieldsKeys.has(confCustomField.key)) {
-      if (
-        confCustomField.required &&
-        confCustomField?.defaultValue !== null &&
-        confCustomField?.defaultValue !== undefined
-      ) {
+      if (confCustomField?.defaultValue !== null && confCustomField?.defaultValue !== undefined) {
         missingCustomFields.push({
           key: confCustomField.key,
           type: confCustomField.type,
