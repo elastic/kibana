@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'responseCodeBlock',
         `"logstash-2015.09.22"`
       );
-      expect(await toasts.getToastCount()).to.be(0);
+      expect(await toasts.getCount()).to.be(0);
     });
   });
 }

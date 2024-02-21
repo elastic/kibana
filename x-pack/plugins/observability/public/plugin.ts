@@ -14,7 +14,6 @@ import {
   App,
   AppDeepLink,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -45,7 +44,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -103,7 +102,7 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
-      observability: {
+      observability?: {
         enabled: boolean;
       };
     };
@@ -159,6 +158,7 @@ export interface ObservabilityPublicPluginsStart {
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
   presentationUtil?: PresentationUtilPluginStart;
+  theme: CoreStart['theme'];
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -196,7 +196,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'rules',
@@ -204,7 +204,7 @@ export class Plugin
             defaultMessage: 'Rules',
           }),
           path: RULES_PATH,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
       ],
     },
@@ -213,7 +213,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.slosLinkTitle', {
         defaultMessage: 'SLOs',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       order: 8002,
       path: SLOS_PATH,
     },
@@ -222,15 +222,13 @@ export class Plugin
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesCreate]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesConfigure]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
+          visibleIn: [],
         },
       },
     }),
@@ -315,7 +313,9 @@ export class Plugin
         'user',
         'experience',
       ],
-      searchable: !Boolean(pluginsSetup.serverless),
+      visibleIn: Boolean(pluginsSetup.serverless)
+        ? ['home', 'kibanaOverview']
+        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
     };
 
     coreSetup.application.register(app);
@@ -390,47 +390,69 @@ export class Plugin
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(appUpdater$).pipe(
-        map((value) => {
-          const deepLinks = value(app)?.deepLinks ?? [];
+        mergeMap((value) =>
+          from(coreSetup.getStartServices()).pipe(
+            map(([coreStart, pluginsStart]) => {
+              const deepLinks = value(app)?.deepLinks ?? [];
 
-          const overviewLink = !Boolean(pluginsSetup.serverless)
-            ? [
-                {
-                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
-                    defaultMessage: 'Overview',
-                  }),
+              const overviewLink = !Boolean(pluginsSetup.serverless)
+                ? [
+                    {
+                      label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                        defaultMessage: 'Overview',
+                      }),
+                      app: observabilityAppId,
+                      path: OVERVIEW_PATH,
+                    },
+                  ]
+                : [];
+
+              const isAiAssistantEnabled =
+                pluginsStart.observabilityAIAssistant.service.isEnabled();
+
+              const aiAssistantLink =
+                isAiAssistantEnabled &&
+                !Boolean(pluginsSetup.serverless) &&
+                Boolean(pluginsSetup.observabilityAIAssistant)
+                  ? [
+                      {
+                        label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+                          defaultMessage: 'AI Assistant',
+                        }),
+                        app: 'observabilityAIAssistant',
+                        path: '/conversations/new',
+                      },
+                    ]
+                  : [];
+
+              // Reformat the visible links to be NavigationEntry objects instead of
+              // AppDeepLink objects.
+              //
+              // In our case the deep links and sections being registered are the
+              // same, and the logic to hide them based on flags or capabilities is
+              // the same, so we just want to make a new list with the properties
+              // needed by `registerSections`, which are different than the
+              // properties used by the deepLinks.
+              //
+              // See https://github.com/elastic/kibana/issues/103325.
+              const otherLinks: NavigationEntry[] = deepLinks
+                .filter((link) => (link.visibleIn ?? []).length > 0)
+                .map((link) => ({
                   app: observabilityAppId,
-                  path: OVERVIEW_PATH,
+                  label: link.title,
+                  path: link.path ?? '',
+                }));
+
+              return [
+                {
+                  label: '',
+                  sortKey: 100,
+                  entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
                 },
-              ]
-            : [];
-
-          // Reformat the visible links to be NavigationEntry objects instead of
-          // AppDeepLink objects.
-          //
-          // In our case the deep links and sections being registered are the
-          // same, and the logic to hide them based on flags or capabilities is
-          // the same, so we just want to make a new list with the properties
-          // needed by `registerSections`, which are different than the
-          // properties used by the deepLinks.
-          //
-          // See https://github.com/elastic/kibana/issues/103325.
-          const otherLinks: NavigationEntry[] = deepLinks
-            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .map((link) => ({
-              app: observabilityAppId,
-              label: link.title,
-              path: link.path ?? '',
-            }));
-
-          return [
-            {
-              label: '',
-              sortKey: 100,
-              entries: [...overviewLink, ...otherLinks],
-            },
-          ];
-        })
+              ];
+            })
+          )
+        )
       )
     );
 

@@ -130,7 +130,7 @@ function testQuickFixesFn(
   });
 }
 
-type TestArgs = [string, string[], { equalityCheck?: 'include' | 'equal' }];
+type TestArgs = [string, string[], { equalityCheck?: 'include' | 'equal' }?];
 
 // Make only and skip work with our custom wrapper
 const testQuickFixes = Object.assign(testQuickFixesFn, {
@@ -184,9 +184,14 @@ describe('quick fixes logic', () => {
     ]);
 
     describe('metafields spellchecks', () => {
-      testQuickFixes(`FROM index [metadata _i_ndex]`, ['_index']);
-      testQuickFixes(`FROM index [metadata _id, _i_ndex]`, ['_index']);
-      testQuickFixes(`FROM index [METADATA _id, _i_ndex]`, ['_index']);
+      for (const isWrapped of [true, false]) {
+        function setWrapping(text: string) {
+          return isWrapped ? `[${text}]` : text;
+        }
+        testQuickFixes(`FROM index ${setWrapping('metadata _i_ndex')}`, ['_index']);
+        testQuickFixes(`FROM index ${setWrapping('metadata _id, _i_ndex')}`, ['_index']);
+        testQuickFixes(`FROM index ${setWrapping('METADATA _id, _i_ndex')}`, ['_index']);
+      }
     });
   });
 
@@ -214,6 +219,15 @@ describe('quick fixes logic', () => {
     testQuickFixes(`FROM index | ENRICH poli`, ['policy']);
     testQuickFixes(`FROM index | ENRICH mypolicy`, ['policy']);
     testQuickFixes(`FROM index | ENRICH policy[`, ['policy', 'policy[]']);
+
+    describe('modes', () => {
+      testQuickFixes(`FROM index | ENRICH _ann:policy`, ['_any']);
+      const modes = ['_any', '_coordinator', '_remote'];
+      for (const mode of modes) {
+        testQuickFixes(`FROM index | ENRICH ${mode.replace('_', '@')}:policy`, [mode]);
+      }
+      testQuickFixes(`FROM index | ENRICH unknown:policy`, modes);
+    });
   });
 
   describe('fixing function spellchecks', () => {
@@ -280,5 +294,40 @@ describe('quick fixes logic', () => {
   describe('fixing unquoted field names', () => {
     testQuickFixes('FROM index | DROP any#Char$Field', ['`any#Char$Field`']);
     testQuickFixes('FROM index | DROP numberField, any#Char$Field', ['`any#Char$Field`']);
+  });
+
+  describe('callbacks', () => {
+    it('should not crash if callback functions are not passed', async () => {
+      const callbackMocks = getCallbackMocks();
+      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const { model, range } = createModelAndRange(statement);
+      const { errors } = await validateAst(statement, getAstAndErrors, callbackMocks);
+      const monacoErrors = wrapAsMonacoMessage('error', statement, errors);
+      const context = createMonacoContext(monacoErrors);
+      try {
+        await getActions(model, range, context, getAstAndErrors, {
+          getFieldsFor: undefined,
+          getSources: undefined,
+          getPolicies: undefined,
+          getMetaFields: undefined,
+        });
+      } catch {
+        fail('Should not throw');
+      }
+    });
+
+    it('should not crash no callbacks are passed', async () => {
+      const callbackMocks = getCallbackMocks();
+      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const { model, range } = createModelAndRange(statement);
+      const { errors } = await validateAst(statement, getAstAndErrors, callbackMocks);
+      const monacoErrors = wrapAsMonacoMessage('error', statement, errors);
+      const context = createMonacoContext(monacoErrors);
+      try {
+        await getActions(model, range, context, getAstAndErrors, undefined);
+      } catch {
+        fail('Should not throw');
+      }
+    });
   });
 });

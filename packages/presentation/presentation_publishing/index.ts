@@ -90,6 +90,10 @@ export {
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export {
+  apiHasSupportedTriggers,
+  type HasSupportedTriggers,
+} from './interfaces/has_supported_triggers';
+export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
   useViewMode,

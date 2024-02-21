@@ -20,9 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Serverless tests', function () {
-    this.beforeAll(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
     describe('disables scripted fields', function () {
       let dataViewId = '';
 

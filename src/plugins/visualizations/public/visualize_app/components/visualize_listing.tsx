@@ -64,6 +64,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
   return {
     id: savedObject.id as string,
     updatedAt: savedObject.updatedAt as string,
+    managed: savedObject.managed as boolean,
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
     icon: savedObject.icon as string,
@@ -90,7 +91,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'itemIsEditable'
+  | 'rowItemActions'
 >;
 
 const useTableListViewProps = (
@@ -260,7 +261,8 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
+    rowItemActions: ({ attributes: { readOnly } }) =>
+      !visualizeCapabilities.save || readOnly ? { edit: { enabled: false } } : undefined,
   };
 
   return props;

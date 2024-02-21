@@ -11,6 +11,8 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
 import {
   PackagePolicyRestrictionRelatedError,
   FleetUnauthorizedError,
@@ -1003,6 +1005,95 @@ describe('agent policy', () => {
         { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
         { inactivityTimeout: 2000, policyIds: ['policy3'] },
       ]);
+    });
+  });
+
+  describe('turnOffAgentTamperProtections', () => {
+    const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
+      id,
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      attributes: {
+        is_protected: isProtected,
+      },
+      references: [],
+      score: 1,
+      ...(error ? { error } : {}),
+    });
+
+    const createMockSoClientThatReturns = (policies: Array<ReturnType<typeof createPolicySO>>) => {
+      const mockSoClient = savedObjectsClientMock.create();
+
+      const resolvedValue = {
+        saved_objects: policies,
+        page: 1,
+        per_page: 10,
+        total: policies.length,
+      };
+      mockSoClient.find.mockResolvedValue(resolvedValue);
+      return mockSoClient;
+    };
+
+    it('should return if all policies are compliant', async () => {
+      const mockSoClient = createMockSoClientThatReturns([]);
+
+      expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
+        failedPolicies: [],
+        updatedPolicies: null,
+      });
+      expect(mockSoClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should bulk update policies that are not compliant', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', true),
+        createPolicySO('policy2', true),
+        createPolicySO('policy3', false),
+      ]);
+
+      mockSoClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [createPolicySO('policy1', false), createPolicySO('policy2', false)],
+      });
+
+      const expectedResponse = expect.arrayContaining([
+        expect.objectContaining({
+          id: 'policy1',
+          attributes: expect.objectContaining({ is_protected: false }),
+        }),
+        expect.objectContaining({
+          id: 'policy2',
+          attributes: expect.objectContaining({ is_protected: false }),
+        }),
+      ]);
+
+      expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
+        failedPolicies: [],
+        updatedPolicies: expectedResponse,
+      });
+
+      expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith(expectedResponse);
+    });
+
+    it('should return failed policies if bulk update fails', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', true),
+        createPolicySO('policy2', true),
+        createPolicySO('policy3', false),
+      ]);
+      mockSoClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          createPolicySO('policy1', false, { error: 'Oops!', message: 'Ooops!', statusCode: 500 }),
+          createPolicySO('policy2', false),
+        ],
+      });
+      expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
+        failedPolicies: [
+          expect.objectContaining({
+            id: 'policy1',
+            error: expect.objectContaining({ message: 'Ooops!' }),
+          }),
+        ],
+        updatedPolicies: [expect.objectContaining({ id: 'policy2' })],
+      });
     });
   });
 

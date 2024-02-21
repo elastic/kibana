@@ -72,11 +72,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_1',
           inference_config: {
             text_classification: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -160,11 +166,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_embedding: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
         {
@@ -172,11 +184,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_expansion: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -210,11 +228,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_embedding: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
         {
@@ -222,11 +246,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_expansion: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -265,17 +295,26 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: E5_MODEL_ID,
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_1',
           inference_config: {
             ner: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -337,6 +376,9 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
       ],
     };
@@ -385,17 +427,26 @@ describe('fetchMlModels', () => {
           inference_config: {
             ner: {}, // "Named Entity Recognition"
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_2',
           inference_config: {
             text_embedding: {}, // "Dense Vector Text Embedding"
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_3',
           inference_config: {
             text_classification: {}, // "Text Classification"
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],

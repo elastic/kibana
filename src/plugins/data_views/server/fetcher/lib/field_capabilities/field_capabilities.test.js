@@ -38,6 +38,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     fieldCapsOptions: undefined,
     indexFilter: undefined,
     fields: undefined,
+    includeEmptyFields: undefined,
     ...args,
   });
 

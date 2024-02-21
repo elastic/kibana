@@ -41,9 +41,6 @@ export async function executeCreateAction({
   api: PresentationContainer;
 }) {
   const isCompatibleAction = isCreateActionCompatible(core);
-  const defaultDataView = await deps.dataViews.getDefaultDataView({
-    displayErrors: false,
-  });
 
   const getFallbackDataView = async () => {
     const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
@@ -52,7 +49,7 @@ export async function executeCreateAction({
     return dataView;
   };
 
-  const dataView = defaultDataView ?? (await getFallbackDataView());
+  const dataView = await getFallbackDataView();
 
   if (!isCompatibleAction || !dataView) {
     throw new IncompatibleActionError();

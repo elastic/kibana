@@ -1545,6 +1545,20 @@
           },
           {
             "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
             "id": "def-public.SavedObjectWithMetadata.attributes",
             "type": "Uncategorized",
             "tags": [],
@@ -2226,6 +2240,20 @@
           },
           {
             "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
             "id": "def-server.SavedObjectWithMetadata.attributes",
             "type": "Uncategorized",
             "tags": [],
@@ -2721,6 +2749,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

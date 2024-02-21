@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { reactEmbeddableRegistryHasKey } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableInput,
+  isReferenceOrValueEmbeddable,
+  reactEmbeddableRegistryHasKey,
+} from '@kbn/embeddable-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-
-import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
+import { prefixReferencesFromPanel } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -30,7 +34,8 @@ import { DashboardSaveModal } from './overlays/save_modal';
 
 const serializeAllPanelState = async (
   dashboard: DashboardContainer
-): Promise<DashboardContainerInput['panels']> => {
+): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
+  const references: Reference[] = [];
   const reactEmbeddableSavePromises: Array<
     Promise<{ serializedState: SerializedPanelState; uuid: string }>
   > = [];
@@ -51,8 +56,9 @@ const serializeAllPanelState = async (
   const saveResults = await Promise.all(reactEmbeddableSavePromises);
   for (const { serializedState, uuid } of saveResults) {
     panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
+    references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
   }
-  return panels;
+  return { panels, references };
 };
 
 export function runSaveAs(this: DashboardContainer) {
@@ -112,7 +118,7 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      const nextPanels = await serializeAllPanelState(this);
+      const { panels: nextPanels, references } = await serializeAllPanelState(this);
       const dashboardStateToSave: DashboardContainerInput = {
         ...currentState,
         panels: nextPanels,
@@ -127,6 +133,7 @@ export function runSaveAs(this: DashboardContainer) {
       const beforeAddTime = window.performance.now();
 
       const saveResult = await saveDashboardState({
+        panelReferences: references,
         currentState: stateToSave,
         saveOptions,
         lastSavedId,
@@ -145,12 +152,13 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(dashboardStateToSave);
-          this.lastSavedState.next();
           if (this.controlGroup && persistableControlGroupInput) {
             this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
           }
         });
       }
+      this.savedObjectReferences = saveResult.references ?? [];
+      this.lastSavedState.next();
       resolve(saveResult);
       return saveResult;
     };
@@ -186,7 +194,7 @@ export async function runQuickSave(this: DashboardContainer) {
 
   if (managed) return;
 
-  const nextPanels = await serializeAllPanelState(this);
+  const { panels: nextPanels, references } = await serializeAllPanelState(this);
   const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
   let stateToSave: SavedDashboardInput = dashboardStateToSave;
   let persistableControlGroupInput: PersistableControlGroupInput | undefined;
@@ -196,11 +204,13 @@ export async function runQuickSave(this: DashboardContainer) {
   }
 
   const saveResult = await saveDashboardState({
-    lastSavedId,
+    panelReferences: references,
     currentState: stateToSave,
     saveOptions: {},
+    lastSavedId,
   });
 
+  this.savedObjectReferences = saveResult.references ?? [];
   this.dispatch.setLastSavedInput(dashboardStateToSave);
   this.lastSavedState.next();
   if (this.controlGroup && persistableControlGroupInput) {
@@ -279,6 +289,7 @@ export async function runClone(this: DashboardContainer) {
           title: newTitle,
         },
       });
+      this.savedObjectReferences = saveResult.references ?? [];
       resolve(saveResult);
       return saveResult.id
         ? {

@@ -18,7 +18,7 @@ import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
-import { useSentinelOneAgentData } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
 import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
@@ -96,7 +96,10 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render sentinelone agent status cell if field is agent.status and origialField is observer.serial_number', () => {
-    (useSentinelOneAgentData as jest.Mock).mockReturnValue({ isFetched: true });
+    (useGetSentinelOneAgentStatus as jest.Mock).mockReturnValue({
+      isFetched: true,
+      isLoading: false,
+    });
     const { getByTestId } = render(
       <TestProviders>
         <HighlightedFieldsCell

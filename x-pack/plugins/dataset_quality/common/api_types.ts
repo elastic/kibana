@@ -79,3 +79,13 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
 );
 
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
+
+export const dataStreamsEstimatedDataInBytesRT = rt.type({
+  estimatedDataInBytes: rt.number,
+});
+
+export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;
+
+export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
+  dataStreamsEstimatedDataInBytesRT
+);

@@ -4,109 +4,114 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-
-import React, { ReactNode, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
-  EuiFlyout,
+  EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCodeBlock,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutFooter,
-  EuiSpacer,
-  EuiFlyoutBody,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiLoadingSpinner,
-  EuiAccordion,
-  EuiButtonIcon,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
+  IngestPipelinesListParams,
   INGEST_PIPELINES_APP_LOCATOR,
   INGEST_PIPELINES_PAGES,
-  IngestPipelinesListParams,
 } from '@kbn/ingest-pipelines-plugin/public';
-import { SloInspectPortalProps } from './inspect_slo_portal';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { GetSLOResponse } from '@kbn/slo-schema';
+import React, { ReactNode, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { ObservabilityPublicPluginsStart } from '../../../..';
-import { useInspectSlo } from '../../../../hooks/slo/use_inspect_slo';
-import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { enableInspectEsQueries } from '../../../../../common';
+import { useFetchSloInspect } from '../../../../hooks/slo/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
+import { CreateSLOForm } from '../../types';
 
-export function SLOInspectWrapper(props: SloInspectPortalProps) {
+interface Props {
+  slo?: GetSLOResponse;
+  disabled: boolean;
+}
+
+export function SLOInspectWrapper({ slo, disabled }: Props) {
   const {
     services: { uiSettings },
   } = useKibana();
 
   const { isDev } = usePluginContext();
-
   const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
 
-  return isDev || isInspectorEnabled ? <SLOInspect {...props} /> : null;
+  return isDev || isInspectorEnabled ? <SLOInspect slo={slo} disabled={disabled} /> : null;
 }
 
-function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
+function SLOInspect({ slo, disabled }: Props) {
   const { share, http } = useKibana<ObservabilityPublicPluginsStart>().services;
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { mutateAsync: inspectSlo, data, isLoading } = useInspectSlo();
+  const { trigger, getValues } = useFormContext<CreateSLOForm>();
 
-  const { data: sloData } = useFetcher(async () => {
-    if (!isFlyoutVisible) {
-      return;
-    }
-    const isValid = await trigger();
-    if (!isValid) {
-      return;
-    }
-    const sloForm = transformCreateSLOFormToCreateSLOInput(getValues());
-    inspectSlo({ slo: { ...sloForm, id: slo?.id, revision: slo?.revision } });
-    return sloForm;
-  }, [isFlyoutVisible, trigger, getValues, inspectSlo, slo]);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isFormValid, setFormValid] = useState(false);
+
+  const sloFormValues = transformCreateSLOFormToCreateSLOInput(getValues());
+  const { data: inspectSloData, isLoading } = useFetchSloInspect(
+    { ...sloFormValues, id: slo?.id, revision: slo?.revision },
+    isFlyoutVisible && isFormValid
+  );
 
   const { data: pipeLineUrl } = useFetcher(async () => {
     const ingestPipeLocator = share.url.locators.get<IngestPipelinesListParams>(
       INGEST_PIPELINES_APP_LOCATOR
     );
-    const ingestPipeLineId = data?.pipeline?.id;
+    const ingestPipeLineId = inspectSloData?.pipeline?.id;
     return ingestPipeLocator?.getUrl({
       pipelineId: ingestPipeLineId,
       page: INGEST_PIPELINES_PAGES.LIST,
     });
-  }, [data?.pipeline?.id, share.url.locators]);
+  }, [inspectSloData?.pipeline?.id, share.url.locators]);
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
-    setIsInspecting(false);
+    setFormValid(false);
   };
 
-  const [isInspecting, setIsInspecting] = useState(false);
-  const onButtonClick = () => {
-    trigger().then((isValid) => {
-      if (isValid) {
-        setIsInspecting(() => !isInspecting);
-        setIsFlyoutVisible(() => !isFlyoutVisible);
-      }
-    });
+  const handleInspectButtonClick = async () => {
+    const valid = await trigger();
+    if (!valid) {
+      setFormValid(false);
+      return;
+    }
+
+    setFormValid(true);
+    setIsFlyoutVisible(true);
   };
 
   let flyout;
-
   if (isFlyoutVisible) {
     flyout = (
       <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="flyoutTitle">{CONFIG_LABEL}</h2>
+            <h2 id="flyoutTitle">
+              {i18n.translate('xpack.observability.monitorInspect.configLabel', {
+                defaultMessage: 'SLO Configurations',
+              })}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {isLoading && <LoadingState />}
           <EuiSpacer size="m" />
-          {data && (
+          {inspectSloData && (
             <>
               <CodeBlockAccordion
                 id="slo"
@@ -114,7 +119,7 @@ function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
                   'xpack.observability.sLOInspect.codeBlockAccordion.sloConfigurationLabel',
                   { defaultMessage: 'SLO configuration' }
                 )}
-                json={data.slo}
+                json={inspectSloData.slo}
               />
               <EuiSpacer size="s" />
               <CodeBlockAccordion
@@ -123,7 +128,7 @@ function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
                   'xpack.observability.sLOInspect.codeBlockAccordion.rollupTransformLabel',
                   { defaultMessage: 'Rollup transform' }
                 )}
-                json={data.rollUpTransform}
+                json={inspectSloData.rollUpTransform}
                 extraAction={
                   <EuiButtonIcon
                     iconType="link"
@@ -140,7 +145,7 @@ function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
                   'xpack.observability.sLOInspect.codeBlockAccordion.summaryTransformLabel',
                   { defaultMessage: 'Summary transform' }
                 )}
-                json={data.summaryTransform}
+                json={inspectSloData.summaryTransform}
                 extraAction={
                   <EuiButtonIcon
                     iconType="link"
@@ -164,7 +169,7 @@ function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
                     href={pipeLineUrl}
                   />
                 }
-                json={data.pipeline}
+                json={inspectSloData.pipeline}
               />
               <EuiSpacer size="s" />
 
@@ -174,7 +179,7 @@ function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
                   'xpack.observability.sLOInspect.codeBlockAccordion.temporaryDocumentLabel',
                   { defaultMessage: 'Temporary document' }
                 )}
-                json={data.temporaryDoc}
+                json={inspectSloData.temporaryDoc}
               />
             </>
           )}
@@ -193,20 +198,33 @@ function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
       </EuiFlyout>
     );
   }
+
   return (
     <>
       <EuiToolTip
-        content={sloData ? VIEW_FORMATTED_CONFIG_LABEL : VALID_CONFIG_LABEL}
+        content={
+          isFormValid
+            ? i18n.translate('xpack.observability.slo.viewFormattedResourcesConfigsButtonLabel', {
+                defaultMessage: 'View formatted resources configs for SLO',
+              })
+            : i18n.translate('xpack.observability.slo.formattedConfigLabel.valid', {
+                defaultMessage: 'Only valid form configurations can be inspected.',
+              })
+        }
         repositionOnScroll
       >
-        <EuiButton
+        <EuiButtonEmpty
+          color="primary"
           data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
-          onClick={onButtonClick}
+          onClick={handleInspectButtonClick}
+          disabled={disabled}
           iconType="inspect"
           iconSide="left"
         >
-          {SLO_INSPECT_LABEL}
-        </EuiButton>
+          {i18n.translate('xpack.observability.sLOInspect.sLOInspectButtonLabel', {
+            defaultMessage: 'SLO Inspect',
+          })}
+        </EuiButtonEmpty>
       </EuiToolTip>
 
       {flyout}
@@ -251,20 +269,3 @@ export function LoadingState() {
     </EuiFlexGroup>
   );
 }
-
-const SLO_INSPECT_LABEL = i18n.translate('xpack.observability.sLOInspect.sLOInspectButtonLabel', {
-  defaultMessage: 'SLO Inspect',
-});
-
-const VIEW_FORMATTED_CONFIG_LABEL = i18n.translate(
-  'xpack.observability.slo.viewFormattedResourcesConfigsButtonLabel',
-  { defaultMessage: 'View formatted resources configs for SLO' }
-);
-
-const VALID_CONFIG_LABEL = i18n.translate('xpack.observability.slo.formattedConfigLabel.valid', {
-  defaultMessage: 'Only valid form configurations can be inspected.',
-});
-
-const CONFIG_LABEL = i18n.translate('xpack.observability.monitorInspect.configLabel', {
-  defaultMessage: 'SLO Configurations',
-});

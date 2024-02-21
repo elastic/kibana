@@ -15,7 +15,7 @@ import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
 } from '../../../common/slo/constants';
 import { Status } from '../../domain/models';
-import { getElastichsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -66,7 +66,7 @@ export class FindSLOGroups {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            getElastichsearchQueryOrThrow(kqlQuery),
+            getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
         },

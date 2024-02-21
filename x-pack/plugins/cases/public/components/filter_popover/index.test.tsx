@@ -14,7 +14,15 @@ import { createAppMockRenderer } from '../../common/mock';
 
 import { FilterPopover } from '.';
 
-describe('FilterPopover ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/176679
+// FLAKY: https://github.com/elastic/kibana/issues/176680
+// FLAKY: https://github.com/elastic/kibana/issues/176681
+// FLAKY: https://github.com/elastic/kibana/issues/176682
+// FLAKY: https://github.com/elastic/kibana/issues/176683
+// FLAKY: https://github.com/elastic/kibana/issues/176684
+// FLAKY: https://github.com/elastic/kibana/issues/176685
+// FLAKY: https://github.com/elastic/kibana/issues/176686
+describe.skip('FilterPopover ', () => {
   let appMockRender: AppMockRenderer;
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];

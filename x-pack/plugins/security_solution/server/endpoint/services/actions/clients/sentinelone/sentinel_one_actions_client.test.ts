@@ -11,8 +11,8 @@ import { SentinelOneActionsClient } from './sentinel_one_actions_client';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import type { SentinelOneActionsClientOptionsMock } from './mock';
-import { sentinelOneMock } from './mock';
+import type { SentinelOneActionsClientOptionsMock } from './mocks';
+import { sentinelOneMock } from './mocks';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,

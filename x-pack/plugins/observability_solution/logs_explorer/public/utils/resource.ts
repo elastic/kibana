@@ -7,13 +7,7 @@
 
 import { LogDocument, ResourceFields } from '../../common/document';
 import * as constants from '../../common/constants';
-
-type Field = keyof LogDocument['flattened'];
-
-const getFieldFromDoc = <T extends Field>(doc: LogDocument, field: T) => {
-  const fieldValueArray = doc.flattened[field];
-  return fieldValueArray && fieldValueArray.length ? fieldValueArray[0] : undefined;
-};
+import { getFieldFromDoc } from './get_field_from_flattened_doc';
 
 export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields => {
   const serviceName = getFieldFromDoc(doc, constants.SERVICE_NAME_FIELD);

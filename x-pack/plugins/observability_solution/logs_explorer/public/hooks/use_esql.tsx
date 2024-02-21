@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DatasetSelection } from '../../common/dataset_selection';
+import {
+  DatasetSelection,
+  DataViewSelection,
+  isDatasetSelection,
+} from '../../common/dataset_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export interface DiscoverEsqlUrlProps {
@@ -19,7 +23,7 @@ export interface UseEsqlResult {
 }
 
 interface EsqlContextDeps {
-  datasetSelection: DatasetSelection;
+  datasetSelection: DatasetSelection | DataViewSelection;
 }
 
 export const useEsql = ({ datasetSelection }: EsqlContextDeps): UseEsqlResult => {
@@ -31,7 +35,11 @@ export const useEsql = ({ datasetSelection }: EsqlContextDeps): UseEsqlResult =>
 
   const discoverLinkParams = {
     query: {
-      esql: `from ${datasetSelection.selection.dataset.name} | limit 10`,
+      esql: `from ${
+        isDatasetSelection(datasetSelection)
+          ? datasetSelection.selection.dataset.name
+          : datasetSelection.selection.dataView.title
+      } | limit 10`,
     },
   };
 

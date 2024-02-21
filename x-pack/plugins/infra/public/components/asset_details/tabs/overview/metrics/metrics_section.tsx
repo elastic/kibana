@@ -58,7 +58,11 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
           filterFieldName={model.fields.name}
         />
       </Section>
-      <Section dependsOn={dashboards?.kubernetes?.dependsOn} title={KubernetesMetricsSectionTitle}>
+      <Section
+        dependsOn={dashboards?.kubernetes?.dependsOn}
+        title={KubernetesMetricsSectionTitle}
+        collapsible
+      >
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}

@@ -13,6 +13,7 @@ import {
   ProfilingESField,
   TopNType,
 } from '@kbn/profiling-utils';
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
@@ -33,6 +34,7 @@ export async function topNElasticSearchQuery({
   searchField,
   highCardinality,
   kuery,
+  showErrorFrames,
 }: {
   client: ProfilingESClient;
   logger: Logger;
@@ -41,6 +43,7 @@ export async function topNElasticSearchQuery({
   searchField: string;
   highCardinality: boolean;
   kuery: string;
+  showErrorFrames: boolean;
 }): Promise<TopNResponse> {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -136,6 +139,7 @@ export async function topNElasticSearchQuery({
         filter: stackTraceFilter,
         sampleSize: targetSampleSize,
         durationSeconds: totalSeconds,
+        showErrorFrames,
       });
     }
   );
@@ -178,7 +182,9 @@ export function queryTopNCommon({
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery } = request.query;
-      const client = await getClient(context);
+      const [client, core] = await Promise.all([getClient(context), context.core]);
+
+      const showErrorFrames = await core.uiSettings.client.get<boolean>(profilingShowErrorFrames);
 
       try {
         return response.ok({
@@ -190,6 +196,7 @@ export function queryTopNCommon({
             searchField,
             highCardinality,
             kuery,
+            showErrorFrames,
           }),
         });
       } catch (error) {

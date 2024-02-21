@@ -15,9 +15,20 @@ export interface ApiKey {
   name: string;
 }
 
-export const generateApiKey = async ({ indexName }: { indexName: string }) => {
+export const generateApiKey = async ({
+  indexName,
+  isNative,
+}: {
+  indexName: string;
+  isNative: boolean;
+}) => {
   const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
-  return await HttpLogic.values.http.post<ApiKey>(route);
+  const params = {
+    is_native: isNative,
+  };
+  return await HttpLogic.values.http.post<ApiKey>(route, {
+    body: JSON.stringify(params),
+  });
 };
 
 export const GenerateConnectorApiKeyApiLogic = createApiLogic(
