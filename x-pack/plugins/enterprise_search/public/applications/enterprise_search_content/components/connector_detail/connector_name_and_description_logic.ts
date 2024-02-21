@@ -53,7 +53,6 @@ export const ConnectorNameAndDescriptionLogic = kea<
         actions.makeRequest({
           connectorId: values.connector.id,
           description,
-          indexName: values.connector.index_name || '',
           name,
         });
       }
