@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { getProductAppFeatures } from '../common/pli/pli_features';
+import { getProductProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
@@ -26,7 +26,7 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { getProductAppFeaturesConfigurator } from './app_features';
+import { getProductProductFeaturesConfigurator } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
@@ -55,7 +55,7 @@ export class SecuritySolutionServerlessPlugin
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
-    const enabledAppFeatures = getProductAppFeatures(this.config.productTypes);
+    const enabledProductFeatures = getProductProductFeatures(this.config.productTypes);
 
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
@@ -64,14 +64,17 @@ export class SecuritySolutionServerlessPlugin
     if (shouldRegister) {
       const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
       this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
-      const appFeaturesConfigurator = getProductAppFeaturesConfigurator(
-        enabledAppFeatures,
+      const productFeaturesConfigurator = getProductProductFeaturesConfigurator(
+        enabledProductFeatures,
         this.config
       );
-      pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
+      pluginsSetup.securitySolution.setProductFeaturesConfigurator(productFeaturesConfigurator);
     }
 
-    enableRuleActions({ actions: pluginsSetup.actions, appFeatureKeys: enabledAppFeatures });
+    enableRuleActions({
+      actions: pluginsSetup.actions,
+      productFeatureKeys: enabledProductFeatures,
+    });
 
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
