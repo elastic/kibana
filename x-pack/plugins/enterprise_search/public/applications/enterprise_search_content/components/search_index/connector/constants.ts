@@ -120,6 +120,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.network_drive,
     platinumOnly: true,
   },
+  notion: {
+    docsUrl: docLinks.connectorsNotion,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.notion,
+    platinumOnly: true,
+  },
   onedrive: {
     docsUrl: docLinks.connectorsOneDrive,
     externalAuthDocsUrl: '',
@@ -146,6 +153,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://www.postgresql.org/docs/15/auth-methods.html',
     externalDocsUrl: 'https://www.postgresql.org/docs/',
     icon: CONNECTOR_ICONS.postgresql,
+  },
+  redis: {
+    docsUrl: docLinks.connectorsRedis,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.redis,
+    platinumOnly: true,
   },
   s3: {
     docsUrl: docLinks.connectorsS3,

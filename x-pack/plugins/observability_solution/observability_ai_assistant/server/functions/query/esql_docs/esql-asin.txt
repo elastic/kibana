@@ -1,0 +1,14 @@
+ASIN
+
+Syntax
+Parameters
+n
+Numeric expression. If null, the function returns null.
+DescriptionReturns the
+arcsine
+of the input numeric expression as an angle, expressed in radians.Supported types
+Example
+```esql
+ROW a=.9
+| EVAL asin=ASIN(a)
+```
