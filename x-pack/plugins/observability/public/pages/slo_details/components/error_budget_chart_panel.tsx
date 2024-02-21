@@ -89,12 +89,12 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           objectType={i18n.translate(
-            'xpack.observability.slo.item.actions.attachToDashboard.objectTypeLabel',
+            'xpack.observability.slo.errorBudgetBurnDown.actions.attachToDashboard.objectTypeLabel',
             { defaultMessage: 'SLO Error Budget burn down' }
           )}
           documentInfo={{
             title: i18n.translate(
-              'xpack.observability.slo.item.actions.attachToDashboard.attachmentTitle',
+              'xpack.observability.slo.errorBudgetBurnDown.actions.attachToDashboard.attachmentTitle',
               { defaultMessage: 'SLO Error Budget burn down' }
             ),
           }}

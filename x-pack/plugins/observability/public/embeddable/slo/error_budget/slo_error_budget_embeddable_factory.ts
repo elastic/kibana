@@ -59,7 +59,7 @@ export class SloErrorBudgetEmbeddableFactoryDefinition implements EmbeddableFact
   }
 
   public getDescription() {
-    return i18n.translate('xpack.observability.sloAlertsEmbeddable.description', {
+    return i18n.translate('xpack.observability.sloErrorBudgetEmbeddable.description', {
       defaultMessage: 'Get an error budget burn down chart of your SLOs',
     });
   }

@@ -112,6 +112,7 @@ export function SloErrorBudget({
             </EuiTitle>
           ) : (
             <EuiLink
+              css={{ fontSize: '16px' }}
               data-test-subj="o11ySloErrorBudgetLink"
               onClick={() => {
                 setSelectedSlo(slo);
