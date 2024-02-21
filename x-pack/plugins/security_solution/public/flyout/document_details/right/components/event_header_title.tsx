@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { startCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { DocumentSeverity } from './severity';
@@ -34,8 +33,6 @@ export const EventHeaderTitle: FC = memo(() => {
     if (eventKind === 'event' && eventCategory) {
       const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
       eventTitle = getField(getFieldsData(fieldName));
-    } else if (eventKind && eventKind !== null) {
-      eventTitle = startCase(eventKind);
     }
     return (
       eventTitle ??

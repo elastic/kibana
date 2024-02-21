@@ -64,12 +64,12 @@ export const getEcsAllowedValueDescription = (fieldName: string, value: string):
 
 // mapping of event category to the field displayed as title
 export const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
-  authentication: '',
+  authentication: 'user.name',
   configuration: '',
   database: '',
   driver: '',
   email: '',
-  file: '',
+  file: 'file.name',
   host: 'host.name',
   iam: '',
   intrusion_detection: '',

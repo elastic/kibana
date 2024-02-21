@@ -46,7 +46,7 @@ describe('<EventHeaderTitle />', () => {
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render event kind as title if event.kind is not event', () => {
+  it('should render event details as title if event.kind is not event', () => {
     const mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':
@@ -60,7 +60,7 @@ describe('<EventHeaderTitle />', () => {
       getFieldsData: mockGetFieldsData,
     });
 
-    expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Alert');
+    expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Event details');
   });
 
   it('should render event category as title if event.kind is event', () => {
