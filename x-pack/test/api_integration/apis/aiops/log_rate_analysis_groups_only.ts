@@ -110,7 +110,10 @@ export default ({ getService }: FtrProviderContext) => {
             expect(groupHistograms.length).to.be(groups.length);
             // each histogram should have a length of 20 items.
             groupHistograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
+              expect(h.histogram.length).to.eql(
+                testData.expected.histogramLength,
+                `Expected group histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
+              );
             });
           }
 

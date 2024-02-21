@@ -51,17 +51,36 @@ export function groupDuplicates(
   return groups;
 }
 
+/**
+ * Creates ES bool should clauses for each provided significant item.
+ * In previous versions of this helper we grouped values for the same field
+ * in a `terms` agg, but this might clash with the `minimum_should_match: 2` clause
+ * used in the query for the `frequent_item_sets`, because even multiple matches within
+ * the `terms` agg would count as just 1 match in the outer `should` part.
+ *
+ * @param significantItems
+ * @returns an array of term filters
+ */
 export function getShouldClauses(significantItems: SignificantItem[]) {
-  return Array.from(
-    group(significantItems, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
-  );
+  return significantItems.map((d) => ({ term: { [d.fieldName]: d.fieldValue } }));
 }
 
+/**
+ * Creates a filter for each field to be used in the `frequent_items_sets` agg.
+ * Considers a limit per field to work around scaling limitations of the agg.
+ *
+ * @param significantItems
+ * @returns field filter for the `frequent_item_sets` agg
+ */
 export function getFrequentItemSetsAggFields(significantItems: SignificantItem[]) {
   return Array.from(
     group(significantItems, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ field, include: values.map((d) => String(d.fieldValue)) })
+    ([field, values]) => ({
+      field,
+      include: values
+        .map((d) => String(d.fieldValue))
+        .slice(0, LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_FIELD_VALUE_LIMIT),
+    })
   );
 }
 

@@ -14,11 +14,14 @@ import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } fro
 import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
 import { topTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms';
 import { topTermsGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms_groups';
-
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+import {
+  frequentItemSetsLargeArraysGroups,
+  frequentItemSetsLargeArraysSignificantItems,
+} from '../../../functional/apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
 
 import type { TestData } from './types';
 
@@ -239,6 +242,33 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
       groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
+    },
+  },
+  {
+    testName: 'large_arrays',
+    dataGenerator: 'large_arrays',
+    requestBody: {
+      start: 1561995338700,
+      end: 1562427338700,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'large_arrays',
+      baselineMax: 1562184000000,
+      baselineMin: 1562061600000,
+      deviationMax: 1562277600000,
+      deviationMin: 1562227200000,
+      grouping: true,
+    } as AiopsLogRateAnalysisSchema<T>,
+    expected: {
+      chunksLength: 219,
+      chunksLengthGroupOnly: 15,
+      actionsLength: 218,
+      actionsLengthGroupOnly: 14,
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      groups: frequentItemSetsLargeArraysGroups,
+      significantItems: frequentItemSetsLargeArraysSignificantItems,
+      histogramLength: 1,
     },
   },
 ];

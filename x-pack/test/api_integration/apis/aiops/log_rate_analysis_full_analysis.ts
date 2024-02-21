@@ -61,7 +61,10 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
             const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
-            expect(addSignificantItemsActions.length).to.greaterThan(0);
+            expect(addSignificantItemsActions.length).to.greaterThan(
+              0,
+              'Expected significant items actions to be greater than 0.'
+            );
 
             const significantItems = orderBy(
               addSignificantItemsActions.flatMap((d) => d.payload),
@@ -80,7 +83,10 @@ export default ({ getService }: FtrProviderContext) => {
             expect(histogramActions.length).to.be(significantItems.length);
             // each histogram should have a length of 20 items.
             histograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
+              expect(h.histogram.length).to.eql(
+                testData.expected.histogramLength,
+                `Expected histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
+              );
             });
 
             const groupActions = getGroupActions(data, apiVersion);
@@ -102,7 +108,10 @@ export default ({ getService }: FtrProviderContext) => {
             expect(groupHistograms.length).to.be(groups.length);
             // each histogram should have a length of 20 items.
             groupHistograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
+              expect(h.histogram.length).to.eql(
+                testData.expected.histogramLength,
+                `Expected group histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
+              );
             });
           }
 
