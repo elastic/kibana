@@ -327,7 +327,7 @@ src/plugins/data_view_management @elastic/kibana-data-discovery
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
-x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/dataset_quality @elastic/obs-ux-logs-team
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
