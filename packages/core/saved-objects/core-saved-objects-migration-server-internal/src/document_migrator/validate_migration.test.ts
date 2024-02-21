@@ -294,6 +294,71 @@ describe('validateTypeMigrations', () => {
     });
   });
 
+  describe('modelVersions with schemas', () => {
+    const baseSchema = schema.object({ name: schema.string() }, { unknowns: 'ignore' });
+
+    it('throws if used without specifying switchToModelVersionAt', () => {
+      const type = createType({
+        name: 'foo',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: baseSchema,
+              create: baseSchema,
+            },
+          },
+        },
+        mappings: {
+          properties: {
+            name: { type: 'text' },
+          },
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Type foo: Using modelVersions requires to specify switchToModelVersionAt"`
+      );
+    });
+
+    it('does not throw passing a model version schema map', () => {
+      const someModelVersionWithSchema = {
+        changes: [],
+        schemas: {
+          forwardCompatibility: baseSchema.extends({}, { unknowns: 'ignore' }),
+          create: baseSchema,
+        },
+      };
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '3.1.0',
+        modelVersions: {
+          '1': someModelVersionWithSchema,
+        },
+        mappings: {
+          properties: {
+            name: { type: 'text' },
+          },
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
+    });
+
+    it('does not throw passing an empty model version schema map', () => {
+      const someModelVersionWithSchema = { changes: [], schemas: {} };
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '3.1.0',
+        modelVersions: {
+          '1': someModelVersionWithSchema,
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
+    });
+  });
+
   describe('modelVersions mapping additions', () => {
     it('throws when registering mapping additions not present in the global mappings', () => {
       const type = createType({
@@ -323,7 +388,7 @@ describe('validateTypeMigrations', () => {
       );
     });
 
-    it('does not throw when registering mapping additions are present in the global mappings', () => {
+    it('does not throw when registering mapping additions are present in the global mappings with a schema', () => {
       const type = createType({
         name: 'foo',
         switchToModelVersionAt: '8.8.0',
@@ -337,6 +402,7 @@ describe('validateTypeMigrations', () => {
                 },
               },
             ],
+            schemas: {},
           },
           '2': {
             changes: [
@@ -388,6 +454,30 @@ describe('validateTypeMigrations', () => {
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
         `"Type foo: mappings added on model versions differs from the global mappings definition: field2.type"`
       );
+    });
+
+    it('does not throw if a schema is specified for a modelVersion with no changes', () => {
+      const baseSchema = schema.object({ name: schema.string() });
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.10.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: baseSchema.extends({}, { unknowns: 'ignore' }),
+              create: baseSchema,
+            },
+          },
+        },
+        mappings: {
+          properties: {
+            name: { type: 'text' },
+          },
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
     });
   });
 
