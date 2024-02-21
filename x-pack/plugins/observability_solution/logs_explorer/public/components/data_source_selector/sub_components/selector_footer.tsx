@@ -20,14 +20,14 @@ import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
 import { createAllLogsItem } from '../utils';
 import { showAllLogsLabel, tryEsql } from '../constants';
 
-type DatasetsAllActionProps = EuiListGroupProps;
+type SelectorFooterProps = EuiListGroupProps;
 
 interface ShowAllLogsProps {
   isSelected: boolean;
   onClick(): void;
 }
 
-export const SelectorFooter = (props: DatasetsAllActionProps) => {
+export const SelectorFooter = (props: SelectorFooterProps) => {
   return (
     <EuiPanel paddingSize="s" hasShadow={false} data-test-subj="dataSourceSelectorSearchFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" {...props} />
