@@ -340,6 +340,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const header = useMemo(
     () => (
       <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
+        <InPortal node={timelineEventsCountPortalNode}>
+          {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        </InPortal>
         <EuiFlexGroup gutterSize="s" direction="column">
           {!unifiedComponentsInTimelineEnabled &&
             timelineFullScreen &&
@@ -382,6 +385,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       setTimelineFullScreen,
       timelineFullScreen,
       unifiedComponentsInTimelineEnabled,
+      timelineEventsCountPortalNode,
+      showEventsCountBadge,
+      totalCount,
     ]
   );
 
@@ -413,9 +419,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
-      </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
         inputId={InputsModelId.timeline}
