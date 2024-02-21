@@ -18,7 +18,12 @@ const configSchema = schema.object({
       { defaultValue: 'ask' }
     ),
     defaultSolution: schema.oneOf(
-      [schema.literal('es'), schema.literal('oblt'), schema.literal('security')],
+      [
+        schema.literal('ask'),
+        schema.literal('es'),
+        schema.literal('oblt'),
+        schema.literal('security'),
+      ],
       { defaultValue: 'es' }
     ),
   }),

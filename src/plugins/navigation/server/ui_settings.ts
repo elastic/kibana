@@ -30,6 +30,9 @@ const statusOptionLabels = {
 };
 
 const solutionsOptionLabels = {
+  ask: i18n.translate('navigation.advancedSettings.searchSolution', {
+    defaultMessage: 'Ask user to choose a solution',
+  }),
   es: i18n.translate('navigation.advancedSettings.searchSolution', {
     defaultMessage: 'Search',
   }),
@@ -67,7 +70,7 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
       description: i18n.translate('navigation.uiSettings.statusSolutionNav.description', {
         defaultMessage: `Define how user will discover the new navigation.
       <ul>
-        <li><strong>{visible}:</strong> The new navigation is visible immediately to all user. If a user has opt out in their profile, this value has no effect.</li>
+        <li><strong>{visible}:</strong> The new navigation is visible immediately to all user. For users who have opt out, changing the status to "visible" has no effect for them.</li>
         <li><strong>{hidden}:</strong> The new navigation is hidden by default. Users can opt in from inside their user profile. No banners are shown.</li>
         <li><strong>{ask}:</strong> Display a banner to the user asking them if they want to experience the new navigation.</li>
       </ul>`,
@@ -91,7 +94,7 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
       category: [categoryLabel],
       description: i18n.translate('navigation.uiSettings.defaultSolutionNav.description', {
         defaultMessage:
-          'The default solution to display to users once they opt in to the new navigation.',
+          'The default solution to display to the users once they opt in to the new navigation.',
       }),
       name: i18n.translate('navigation.uiSettings.defaultSolutionNav.name', {
         defaultMessage: 'Default solution',
@@ -99,7 +102,7 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
       type: 'select',
       schema: schema.string(),
       value: config.solutionNavigation.defaultSolution,
-      options: ['es', 'oblt', 'security'],
+      options: ['ask', 'es', 'oblt', 'security'],
       optionLabels: solutionsOptionLabels,
       order: 2,
     },

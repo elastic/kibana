@@ -43,7 +43,7 @@ export interface NavigationPublicStartDependencies {
 
 export type SolutionNavigationStatus = 'visible' | 'hidden' | 'ask';
 
-export type SolutionType = 'es' | 'oblt' | 'security';
+export type SolutionType = 'ask' | 'es' | 'oblt' | 'security';
 
 export interface ConfigSchema {
   solutionNavigation: {
