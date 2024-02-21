@@ -11,7 +11,7 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { observabilityTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-type AppId = 'logs';
+type AppId = 'logs' | 'metrics';
 
 export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: ChromeBreadcrumb[]) => {
   const {
@@ -24,6 +24,10 @@ export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: Chrome
   useEffect(() => {
     const breadcrumbs = [
       {
+        ...observabilityLinkProps,
+        text: observabilityTitle,
+      },
+      {
         ...appLinkProps,
         text: appTitle,
       },
@@ -33,13 +37,6 @@ export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: Chrome
     const docTitle = [...breadcrumbs].reverse().map((breadcrumb) => breadcrumb.text as string);
 
     chrome.docTitle.change(docTitle);
-
-    chrome.setBreadcrumbs([
-      {
-        ...observabilityLinkProps,
-        text: observabilityTitle,
-      },
-      ...breadcrumbs,
-    ]);
+    chrome.setBreadcrumbs(breadcrumbs);
   }, [appLinkProps, appTitle, chrome, extraCrumbs, observabilityLinkProps]);
 };
