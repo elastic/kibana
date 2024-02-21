@@ -7,7 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../../../..',
   roots: ['<rootDir>/x-pack/plugins/uptime'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/uptime',
   coverageReporters: ['text', 'html'],
