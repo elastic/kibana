@@ -301,6 +301,11 @@ const tagShieldsColors = {
 const generateMDFile = (testLogs) => {
   const groupedTests = groupTestsByDirectory(testLogs);
   let mdContent = '# Cloud Security Posture - Requirements Test Coverage\n\n';
+  mdContent +=
+    'This document provides a summary of the requirements test coverage for Cloud Security Posture.\n\n';
+  mdContent +=
+    'You can also check out the dedicated app view, which enables easier search and filter functionalities. This app needs to be updated manually, so it might not always be up to date.\n';
+  mdContent += '[Requirement test coverage app](https://vxgs2c.csb.app/)\n\n';
 
   Object.entries(groupedTests)
     .sort()

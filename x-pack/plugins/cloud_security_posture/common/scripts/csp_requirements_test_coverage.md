@@ -1,5 +1,10 @@
 # Cloud Security Posture - Requirements Test Coverage
 
+This document provides a summary of the requirements test coverage for Cloud Security Posture.
+
+You can also check out the dedicated app view, which enables easier search and filter functionalities. This app needs to be updated manually, so it might not always be up to date.
+[Requirement test coverage app](https://vxgs2c.csb.app/)
+
 ## Directory: x-pack/plugins/cloud_security_posture
 
 **Total Tests:** 425 | **Skipped:** 5 (1.18%) | **Todo:** 0 (0.00%)
@@ -18,22 +23,6 @@
 | [should initialize when new package is created](x-pack/plugins/cloud_security_posture/server/plugin.test.ts) | it |  |  |
 | [should not initialize when other package is created](x-pack/plugins/cloud_security_posture/server/plugin.test.ts) | it |  |  |
 | [packagePolicyPostCreate should return the same received policy](x-pack/plugins/cloud_security_posture/server/plugin.test.ts) | it |  |  |
-| [Detection rules utils](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | describe |  |  |
-| [should convert tags to KQL format with AND operator](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should convert tags to KQL format with AND Operator (empty array)](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [should convert tags to KQL format with OR Operator](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should convert tags to KQL format with OR Operator  (empty array)](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should generate search tags for a CSP benchmark rule](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should handle undefined benchmark object gracefully](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should handle undefined rule number gracefully](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should generate search tags for a CSP benchmark rule given an array of Benchmarks](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should handle undefined benchmark object gracefully given an array of empty benchmark](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should generate tags for a CSPM benchmark rule](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [Should generate tags for a KSPM benchmark rule](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
-| [isSubscriptionAllowed](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | describe |  |  |
-| [should allow any cloud subscription](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | it |  |  |
-| [should allow enterprise and trial licenses for on-prem](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | it |  |  |
-| [should not allow enterprise and trial licenses for on-prem](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | it |  |  |
 | [CspRouter](x-pack/plugins/cloud_security_posture/public/application/csp_router.test.tsx) | describe |  |  |
 | [happy path](x-pack/plugins/cloud_security_posture/public/application/csp_router.test.tsx) | describe |  |  |
 | [should render Findings](x-pack/plugins/cloud_security_posture/public/application/csp_router.test.tsx) | it |  |  |
@@ -65,6 +54,22 @@
 | [when aws credential type is undefined, return unchanged policy](x-pack/plugins/cloud_security_posture/common/utils/helpers.test.ts) | it |  |  |
 | [cleans unused gcp credential methods, when using credentials-file method ](x-pack/plugins/cloud_security_posture/common/utils/helpers.test.ts) | it |  |  |
 | [when gcp credential type is undefined, return unchanged policy](x-pack/plugins/cloud_security_posture/common/utils/helpers.test.ts) | it |  |  |
+| [Detection rules utils](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | describe |  |  |
+| [should convert tags to KQL format with AND operator](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should convert tags to KQL format with AND Operator (empty array)](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [should convert tags to KQL format with OR Operator](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should convert tags to KQL format with OR Operator  (empty array)](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should generate search tags for a CSP benchmark rule](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should handle undefined benchmark object gracefully](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should handle undefined rule number gracefully](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should generate search tags for a CSP benchmark rule given an array of Benchmarks](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should handle undefined benchmark object gracefully given an array of empty benchmark](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should generate tags for a CSPM benchmark rule](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [Should generate tags for a KSPM benchmark rule](x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts) | it |  |  |
+| [isSubscriptionAllowed](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | describe |  |  |
+| [should allow any cloud subscription](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | it |  |  |
+| [should allow enterprise and trial licenses for on-prem](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | it |  |  |
+| [should not allow enterprise and trial licenses for on-prem](x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts) | it |  |  |
 | [AccountsEvaluatedWidget](x-pack/plugins/cloud_security_posture/public/components/accounts_evaluated_widget.test.tsx) | describe |  |  |
 | [renders the component with benchmark data correctly](x-pack/plugins/cloud_security_posture/public/components/accounts_evaluated_widget.test.tsx) | it |  |  |
 | [calls navToFindingsByCloudProvider when a benchmark with provider is clicked](x-pack/plugins/cloud_security_posture/public/components/accounts_evaluated_widget.test.tsx) | it |  |  |
@@ -92,13 +97,6 @@
 | [should render create rule link when no rules exist](x-pack/plugins/cloud_security_posture/public/components/detection_rule_counter.test.tsx) | it |  |  |
 | [should render alert and rule count when rules exist](x-pack/plugins/cloud_security_posture/public/components/detection_rule_counter.test.tsx) | it |  |  |
 | [should show loading spinner when creating a rule](x-pack/plugins/cloud_security_posture/public/components/detection_rule_counter.test.tsx) | it |  |  |
-| [createBenchmarkScoreIndex](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | describe |  |  |
-| [should delete old index template from prev verions first](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
-| [should create index template with the correct index pattern, index name and default ingest pipeline](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
-| [should create index template the correct index patter, index name and default ingest pipeline but without lifecycle in serverless](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
-| [should create index if does not exist](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
-| [should updat index mapping if index exists](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
-| [is Csp package installed tests](x-pack/plugins/cloud_security_posture/server/fleet_integration/fleet_integration.test.ts) | describe |  |  |
 | [createTransformIfNotExist](x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts) | describe |  |  |
 | [expect not to create if already exists](x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts) | it |  |  |
 | [expect to create if does not already exist](x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts) | it |  |  |
@@ -108,6 +106,13 @@
 | [expect not to start if transform not found](x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts) | it |  |  |
 | [expect to start if state is stopped](x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts) | it |  |  |
 | [expect to attempt restart if state is failed](x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts) | it |  |  |
+| [createBenchmarkScoreIndex](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | describe |  |  |
+| [should delete old index template from prev verions first](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
+| [should create index template with the correct index pattern, index name and default ingest pipeline](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
+| [should create index template the correct index patter, index name and default ingest pipeline but without lifecycle in serverless](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
+| [should create index if does not exist](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
+| [should updat index mapping if index exists](x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts) | it |  |  |
+| [is Csp package installed tests](x-pack/plugins/cloud_security_posture/server/fleet_integration/fleet_integration.test.ts) | describe |  |  |
 | [Benchmark Field Key Functions](x-pack/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts) | describe |  |  |
 | [toBenchmarkDocFieldKey should keep the same benchmark id and version key for benchmark document](x-pack/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts) | it |  |  |
 | [toBenchmarkDocFieldKey should convert benchmark version with . delimiter correctly](x-pack/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts) | it |  |  |
@@ -119,14 +124,27 @@
 | [should work on empty object when running the up migration](x-pack/plugins/cloud_security_posture/server/tasks/task_state.test.ts) | it |  |  |
 | [shouldn](x-pack/plugins/cloud_security_posture/server/tasks/task_state.test.ts) | it |  |  |
 | [should drop unknown properties when running the up migration](x-pack/plugins/cloud_security_posture/server/tasks/task_state.test.ts) | it |  |  |
+| [getSecuritySolutionLink](x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts) | describe |  |  |
+| [gets the correct link properties](x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts) | it |  |  |
 | [useBenchmarkDynamicValues](x-pack/plugins/cloud_security_posture/public/common/hooks/use_benchmark_dynamic_values.test.ts) | describe |  |  |
 | [should return the correct dynamic benchmark values for each provided benchmark ID](x-pack/plugins/cloud_security_posture/public/common/hooks/use_benchmark_dynamic_values.test.ts) | it |  |  |
 | [should return the correct resource plurals based on the provided resource count](x-pack/plugins/cloud_security_posture/public/common/hooks/use_benchmark_dynamic_values.test.ts) | it |  |  |
+| [useNavigateFindings](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | describe |  |  |
+| [creates a URL to findings page with correct path, filter and dataViewId](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
+| [creates a URL to findings page with correct path and negated filter](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
+| [creates a URL to findings resource page with correct path and filter](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
+| [creates a URL to vulnerabilities page with correct path, filter and dataViewId](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
 | [useUrlQuery](x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts) | describe |  |  |
 | [uses default query when no query is provided](x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts) | it |  |  |
 | [merges default query, partial first query and partial second query](x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts) | it |  |  |
-| [getSecuritySolutionLink](x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts) | describe |  |  |
-| [gets the correct link properties](x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts) | it |  |  |
+| [getAbbreviatedNumber](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | describe |  |  |
+| [should return the same value if it is less than 1000](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | it |  |  |
+| [should use numeral to format the value if it is greater than or equal to 1000](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | it |  |  |
+| [should return 0 if the value is NaN](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | it |  |  |
+| [getLimitProperties](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | describe |  |  |
+| [less items than limit](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | it |  |  |
+| [more items than limit](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | it |  |  |
+| [per page calculations are correct](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | it |  |  |
 | [<Benchmarks />](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks.test.tsx) | describe |  |  |
 | [renders the page header](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks.test.tsx) | it |  |  |
 | [renders the "add integration" button](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks.test.tsx) | it |  |  |
@@ -138,15 +156,6 @@
 | [renders applicable to](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx) | it |  |  |
 | [renders evaluated](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx) | it |  |  |
 | [renders compliance](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx) | it |  |  |
-| [useNavigateFindings](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | describe |  |  |
-| [creates a URL to findings page with correct path, filter and dataViewId](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
-| [creates a URL to findings page with correct path and negated filter](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
-| [creates a URL to findings resource page with correct path and filter](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
-| [creates a URL to vulnerabilities page with correct path, filter and dataViewId](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
-| [getLimitProperties](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | describe |  |  |
-| [less items than limit](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | it |  |  |
-| [more items than limit](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | it |  |  |
-| [per page calculations are correct](x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts) | it |  |  |
 | [getCvsScoreColor](x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts) | describe |  |  |
 | [returns correct color for low severity score](x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts) | it |  |  |
 | [returns correct color for medium severity score](x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts) | it |  |  |
@@ -159,10 +168,6 @@
 | [should return the correct color for HIGH severity](x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts) | it |  |  |
 | [should return the correct color for CRITICAL severity](x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts) | it |  |  |
 | [should return #aaa for an unknown severity](x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts) | it |  |  |
-| [getAbbreviatedNumber](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | describe |  |  |
-| [should return the same value if it is less than 1000](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | it |  |  |
-| [should use numeral to format the value if it is greater than or equal to 1000](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | it |  |  |
-| [should return 0 if the value is NaN](x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts) | it |  |  |
 | [<ComplianceDashboard />](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | describe |  |  |
 | [shows package not installed page instead of tabs](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
 | [no findings state: not-deployed - shows NotDeployed instead of dashboard](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx) | it |  |  |
@@ -199,6 +204,12 @@
 | [<Rules />](x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx) | describe |  |  |
 | [calls Benchmark API](x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx) | it |  |  |
 | [Display success state when result request is resolved](x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx) | it |  |  |
+| [<Vulnerabilities />](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | describe |  |  |
+| [No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
+| [No vulnerabilities  state: indexing - shows Indexing instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
+| [No vulnerabilities  state: index-timeout - shows IndexTimeout instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
+| [No vulnerabilities  state: unprivileged - shows Unprivileged instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
+| [renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
 | [<VulnerabilityDashboard />](x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx) | describe |  |  |
 | [renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed](x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx) | it |  |  |
 | [No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx) | it |  |  |
@@ -206,12 +217,6 @@
 | [No vulnerabilities  state: index-timeout - shows IndexTimeout instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx) | it |  |  |
 | [No vulnerabilities  state: unprivileged - shows Unprivileged instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx) | it |  |  |
 | [Vulnerabilities  state: indexed - renders dashboard container on indexed state ](x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx) | it |  |  |
-| [<Vulnerabilities />](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | describe |  |  |
-| [No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
-| [No vulnerabilities  state: indexing - shows Indexing instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
-| [No vulnerabilities  state: index-timeout - shows IndexTimeout instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
-| [No vulnerabilities  state: unprivileged - shows Unprivileged instead of vulnerabilities ](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
-| [renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx) | it |  |  |
 | [CloudSecurityDataTable](x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.test.tsx) | describe |  |  |
 | [renders loading state](x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.test.tsx) | it |  |  |
 | [renders empty state when no rows are present](x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.test.tsx) | it |  |  |
@@ -368,6 +373,9 @@
 | [Verify status when there are installed policies, healthy agents and no vul_mgmt findings and been more than 10 minutes](x-pack/plugins/cloud_security_posture/server/routes/status/status.test.ts) | it |  |  |
 | [Verify status when there are installed policies, healthy agents and no vul_mgmt findings and been more than 1 hour](x-pack/plugins/cloud_security_posture/server/routes/status/status.test.ts) | it |  |  |
 | [Verify status when there are installed policies, healthy agents past vul_mgmt findings but no recent findings](x-pack/plugins/cloud_security_posture/server/routes/status/status.test.ts) | it |  |  |
+| [getTopRisks](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts) | describe |  |  |
+| [returns sorted by posture score](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts) | it |  |  |
+| [return sorted array with the correct number of elements](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts) | it |  |  |
 | [<BenchmarksSection />](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx) | describe |  |  |
 | [Sorting](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx) | describe |  |  |
 | [sorts by ascending order of compliance scores](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx) | it |  |  |
@@ -386,9 +394,6 @@
 | [displays resource name and id](x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/findings_flyout.test.tsx) | it |  |  |
 | [should allow pagination with next](x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/findings_flyout.test.tsx) | it |  |  |
 | [should allow pagination with previous](x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/findings_flyout.test.tsx) | it |  |  |
-| [getTopRisks](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts) | describe |  |  |
-| [returns sorted by posture score](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts) | it |  |  |
-| [return sorted array with the correct number of elements](x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts) | it |  |  |
 | [Get Filters](x-pack/plugins/cloud_security_posture/public/pages/configurations/utils/get_filters.test.ts) | describe |  |  |
 | [negate an existing filter](x-pack/plugins/cloud_security_posture/public/pages/configurations/utils/get_filters.test.ts) | it |  |  |
 | [<VulnerabilityFindingFlyout/>](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx) | describe |  |  |
@@ -528,6 +533,17 @@
 | [Get Benchmark API](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
 | [Verify cspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
 | [Verify kspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
+| [Verify update csp rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [mute benchmark rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [unmute rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [verify new rules are added and existing rules are set.](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [mute detection rule successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Expect to mute two benchmark rules and one detection rule](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Expect to save rules states when requesting to update empty object](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [set wrong action input](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Tests get rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | describe |  |  |
+| [get rules states successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [get empty object when rules states not exists](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
 | [GET /internal/cloud_security_posture/stats](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
 | [CSPM Compliance Dashboard Stats API](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
 | [should return CSPM cluster V1 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
@@ -542,17 +558,6 @@
 | [Vulnerability Dashboard API](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | describe |  |  |
 | [responds with a 200 status code and matching data mock](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
 | [returns a 400 error when necessary indices are nonexistent](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [Tests get rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | describe |  |  |
-| [get rules states successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [get empty object when rules states not exists](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [Verify update csp rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [mute benchmark rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [unmute rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [verify new rules are added and existing rules are set.](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [mute detection rule successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Expect to mute two benchmark rules and one detection rule](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Expect to save rules states when requesting to update empty object](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [set wrong action input](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [Verify cloud_security_posture telemetry payloads](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | describe |  |  |
 | [includes only KSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
 | [includes only CSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
@@ -565,30 +570,13 @@
 
 **Total Tests:** 137 | **Skipped:** 10 (7.30%) | **Todo:** 2 (1.46%)
 
-![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-SKIP-yellow) ![](https://img.shields.io/badge/HAS-TODO-green)
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-TODO-green) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
 
 <details>
 <summary>Test Details</summary>
 
 | Test Label | Type | Skipped | Todo |
 |------------|------|---------|------|
-| [Findings Page - DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [SearchBar](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [add filter](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [remove filter](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [set search query](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Table Sort](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [sorts by a column, should be case sensitive/insensitive depending on the column](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [DistributionBar](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [filters by ${type} findings](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [DataTable features](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [Edit data view field option is Enabled](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Findings - Fields selector](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [Add fields to the Findings DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Remove fields from the Findings DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Reset fields to default](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Findings Page - support muting rules](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [verify only enabled rules appears](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
 | [Test adding Cloud Security Posture Integrations](x-pack/test/cloud_security_posture_functional/pages/cis_integration.ts) | describe |  |  |
 | [CNVM AWS](x-pack/test/cloud_security_posture_functional/pages/cis_integration.ts) | describe |  |  |
 | [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/test/cloud_security_posture_functional/pages/cis_integration.ts) | it |  |  |
@@ -621,6 +609,32 @@
 | [displays accurate summary compliance score](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
 | [TODO - Cloud Dashboard](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  | ![](https://img.shields.io/badge/todo-green) |
 | [todo - displays accurate summary compliance score](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  | ![](https://img.shields.io/badge/todo-green) |
+| [Findings Page - DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [SearchBar](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [add filter](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [remove filter](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [set search query](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Table Sort](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [sorts by a column, should be case sensitive/insensitive depending on the column](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [DistributionBar](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [filters by ${type} findings](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [DataTable features](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [Edit data view field option is Enabled](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Findings - Fields selector](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [Add fields to the Findings DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Remove fields from the Findings DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Reset fields to default](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Findings Page - support muting rules](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [verify only enabled rules appears](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Findings Page - Alerts](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
+| [Create detection rule](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
+| [Creates a detection rule from the Take Action button and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
+| [Creates a detection rule from the Alerts section and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
+| [Rule details](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
+| [The rule page contains the expected matching data](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
+| [Navigation](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
+| [Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
+| [Clicking on count of Alerts should navigate to the alerts page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
 | [Findings Page - Grouping](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
 | [Default Grouping](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
 | [groups findings by resource and sort by compliance score desc](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
@@ -635,19 +649,15 @@
 | [shows findings table when expanding](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
 | [Default Grouping - support muting rules](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
 | [groups findings by resource after muting rule](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [Findings Page - Alerts](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
-| [Create detection rule](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
-| [Creates a detection rule from the Take Action button and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
-| [Creates a detection rule from the Alerts section and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
-| [Rule details](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
-| [The rule page contains the expected matching data](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
-| [Navigation](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
-| [Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
-| [Clicking on count of Alerts should navigate to the alerts page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it |  |  |
 | [Old Data](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
 | [Findings page with old data](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
 | [returns no Findings KSPM](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
 | [returns no Findings CSPM](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
+| [Findings Page onboarding](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Cloud Security Posture](x-pack/test/cloud_security_posture_functional/pages/index.ts) | describe |  |  |
 | [Cloud Posture Rules Page](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe |  |  |
 | [Rules Page - Rules Counters](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe |  |  |
 | [Shows posture score when there are findings](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it |  |  |
@@ -676,11 +686,6 @@
 | [Alerts section of Rules Flyout shows Disabled text when Rules are disabled](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it |  |  |
 | [Users are able to Enable/Disable Rule from Take Action on Rule Flyout](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it |  |  |
 | [Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it |  |  |
-| [Findings Page onboarding](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Cloud Security Posture](x-pack/test/cloud_security_posture_functional/pages/index.ts) | describe |  |  |
 | [Vulnerabilities Page - DataTable](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
 | [SearchBar](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
 | [add filter](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
@@ -692,12 +697,6 @@
 | [Add fields to the Vulnerabilities DataTable](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
 | [Remove fields from the Vulnerabilities DataTable](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
 | [Reset fields to default](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [Vulnerability Dashboard Page](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
-| [Vulnerability Dashboard](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
-| [Page Header renders on startup](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
-| [Stats render accurate output](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
-| [should navigate to vulnerability findings page with high severity filter](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
-| [should navigate to vulnerability findings page with critical severity filter and no high severity filter](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
 | [Vulnerabilities Page - Grouping](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
 | [Default Grouping](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
 | [groups vulnerabilities by cloud account and sort by number of vulnerabilities desc](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
@@ -709,6 +708,12 @@
 | [set search query](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
 | [Group table](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
 | [shows vulnerabilities table when expanding](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [Vulnerability Dashboard Page](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
+| [Vulnerability Dashboard](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
+| [Page Header renders on startup](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [Stats render accurate output](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [should navigate to vulnerability findings page with high severity filter](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [should navigate to vulnerability findings page with critical severity filter and no high severity filter](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
 </details>
 
 ## Directory: x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture
