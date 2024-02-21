@@ -17,7 +17,7 @@ const BULK_ADD_ATTACHMENT_TO_NEW_CASE = 'bulkAddAttachmentsToNewCase' as const;
 const ADD_ATTACHMENT_TO_EXISTING_CASE = 'addAttachmentToExistingCase' as const;
 const BULK_ADD_ATTACHMENT_TO_EXISTING_CASE = 'bulkAddAttachmentsToExistingCase' as const;
 
-export type StartCreateCaseWithAttachmentsTransaction = (param: {
+export type StartCreateCaseWithAttachmentsTransaction = (param?: {
   appId?: string;
   attachments?: CaseAttachmentsWithoutOwner;
 }) => Transaction | undefined;
@@ -28,7 +28,7 @@ export const useCreateCaseWithAttachmentsTransaction = () => {
 
   const startCreateCaseWithAttachmentsTransaction =
     useCallback<StartCreateCaseWithAttachmentsTransaction>(
-      ({ appId, attachments }) => {
+      ({ appId, attachments } = {}) => {
         if (!appId) {
           return;
         }

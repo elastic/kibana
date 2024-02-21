@@ -22,9 +22,11 @@ const isBehaviorSubjectObservable = <T,>(
  */
 const useStatefulObservable = <T,>(observable: Observable<T>) => {
   let initialValue: T | undefined;
+
   if (isBehaviorSubjectObservable(observable)) {
     initialValue = observable.value;
   }
+
   return useObservable(observable, initialValue);
 };
 

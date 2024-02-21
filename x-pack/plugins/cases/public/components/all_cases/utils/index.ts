@@ -35,5 +35,5 @@ export const stringToIntegerWithDefault = (
 };
 
 export const getLocalStorageKey = (localStorageKey: string, appId?: string) => {
-  return appId != null ? `${appId}.${localStorageKey}` : `.${localStorageKey}`;
+  return `${appId ?? ''}.${localStorageKey}`;
 };
