@@ -7,49 +7,31 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import {
-  EmbeddableApiContext,
-  HasParentApi,
-  PublishesLocalUnifiedSearch,
-  PublishesSavedObjectId,
-} from '@kbn/presentation-publishing';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { PublishesLocalUnifiedSearch, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { DiscoverAppLocatorParams } from '../../common';
-
-export interface HasSavedSearch {
-  getSavedSearch: () => SavedSearch;
-}
-
-export const apiHasSavedSearch = (
-  api: EmbeddableApiContext['embeddable']
-): api is HasSavedSearch => {
-  const embeddable = api as HasSavedSearch;
-  return Boolean(embeddable.getSavedSearch);
-};
+import { HasSavedSearch } from './types';
 
 export const getDiscoverLocatorParams = (
-  api: HasSavedSearch &
-    Partial<PublishesSavedObjectId> &
-    Partial<HasParentApi<Partial<PublishesLocalUnifiedSearch>>>
+  api: HasSavedSearch & Partial<PublishesSavedObjectId> & Partial<PublishesLocalUnifiedSearch>
 ) => {
   const savedSearch = api.getSavedSearch();
 
-  const dataView = savedSearch.searchSource.getField('index');
+  const dataView = savedSearch?.searchSource.getField('index');
   const savedObjectId = api.savedObjectId?.getValue();
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),
-        timeRange: savedSearch.timeRange,
-        refreshInterval: savedSearch.refreshInterval,
-        filters: savedSearch.searchSource.getField('filter') as Filter[],
-        query: savedSearch.searchSource.getField('query'),
-        columns: savedSearch.columns,
-        sort: savedSearch.sort,
-        viewMode: savedSearch.viewMode,
-        hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-        breakdownField: savedSearch.breakdownField,
+        timeRange: savedSearch?.timeRange,
+        refreshInterval: savedSearch?.refreshInterval,
+        filters: savedSearch?.searchSource.getField('filter') as Filter[],
+        query: savedSearch?.searchSource.getField('query'),
+        columns: savedSearch?.columns,
+        sort: savedSearch?.sort,
+        viewMode: savedSearch?.viewMode,
+        hideAggregatedPreview: savedSearch?.hideAggregatedPreview,
+        breakdownField: savedSearch?.breakdownField,
       };
 
   return locatorParams;

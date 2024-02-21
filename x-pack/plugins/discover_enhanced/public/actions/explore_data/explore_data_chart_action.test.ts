@@ -79,7 +79,6 @@ const setup = (
     ]),
     parentApi: {
       viewMode: new BehaviorSubject(ViewMode.VIEW),
-      localFilters: new BehaviorSubject([]),
     },
   } as unknown as VisualizeEmbeddableContract;
 

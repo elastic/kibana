@@ -20,6 +20,7 @@
     "@kbn/config-schema",
     "@kbn/presentation-publishing",
     "@kbn/data-views-plugin",
+    "@kbn/unified-search-plugin",
   ],
   "exclude": [
     "target/**/*",

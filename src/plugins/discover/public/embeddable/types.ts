@@ -13,6 +13,7 @@ import type {
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput;
 
@@ -21,11 +22,25 @@ export interface SearchOutput extends EmbeddableOutput {
   editable: boolean;
 }
 
-export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
-  getSavedSearch(): SavedSearch | undefined;
-  hasTimeRange(): boolean;
-}
+export type ISearchEmbeddable = IEmbeddable<SearchInput, SearchOutput> &
+  HasSavedSearch &
+  HasTimeRange;
 
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
   type: string;
+}
+
+export interface HasSavedSearch {
+  getSavedSearch: () => SavedSearch | undefined;
+}
+
+export const apiHasSavedSearch = (
+  api: EmbeddableApiContext['embeddable']
+): api is HasSavedSearch => {
+  const embeddable = api as HasSavedSearch;
+  return Boolean(embeddable.getSavedSearch);
+};
+
+export interface HasTimeRange {
+  hasTimeRange(): boolean;
 }

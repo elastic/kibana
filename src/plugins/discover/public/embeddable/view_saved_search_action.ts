@@ -22,11 +22,8 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { DiscoverAppLocator } from '../../common';
-import {
-  apiHasSavedSearch,
-  getDiscoverLocatorParams,
-  HasSavedSearch,
-} from './get_discover_locator_params';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { apiHasSavedSearch, HasSavedSearch } from './types';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
@@ -58,7 +55,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
       return;
     }
 
-    const locatorParams = getDiscoverLocatorParams(embeddable as HasSavedSearch);
+    const locatorParams = getDiscoverLocatorParams(embeddable);
     await this.locator.navigate(locatorParams);
   }
 

@@ -32,11 +32,7 @@ export class ExploreDataContextMenuAction
   public readonly order = 200;
 
   public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
-    return (
-      (await super.isCompatible({ embeddable })) &&
-      apiHasParentApi(embeddable) &&
-      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
-    );
+    return await super.isCompatible({ embeddable });
   }
 
   public async getLocation({ embeddable }: EmbeddableApiContext): Promise<KibanaLocation> {
@@ -49,20 +45,14 @@ export class ExploreDataContextMenuAction
 
     const params: DiscoverAppLocatorParams = {};
     params.dataViewId = shared.getDataViews(embeddable)[0] || undefined;
-    if (
-      apiHasParentApi(embeddable) &&
-      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
-    ) {
-      if (embeddable.parentApi.localTimeRange)
-        params.timeRange = embeddable.parentApi.localTimeRange.getValue();
-      if (embeddable.parentApi.localQuery)
-        params.query = embeddable.parentApi.localQuery.getValue();
-      if (embeddable.parentApi.localFilters) {
-        const filters = embeddable.parentApi.localFilters.getValue() ?? [];
+    if (apiHasParentApi(embeddable) && apiPublishesPartialLocalUnifiedSearch(embeddable)) {
+      if (embeddable.localTimeRange) params.timeRange = embeddable.localTimeRange.getValue();
+      if (embeddable.localQuery) params.query = embeddable.localQuery.getValue();
+      if (embeddable.localFilters) {
+        const filters = embeddable.localFilters.getValue() ?? [];
         params.filters = [...filters, ...(params.filters || [])];
       }
     }
-
     const location = await locator.getLocation(params);
     return location;
   }
