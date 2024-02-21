@@ -18,7 +18,7 @@ import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '../../../common/constants';
-import { add } from '../../notifier/job_completion_notifications';
+import { addPendingJobId } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
 /*
@@ -180,7 +180,7 @@ export class ReportingAPIClient implements IReportingAPI {
         body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-    add(resp.job.id);
+    await addPendingJobId(resp.job.id);
     return new Job(resp.job);
   }
 

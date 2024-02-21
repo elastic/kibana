@@ -8,29 +8,53 @@
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
 
-const set = (jobs: string[]) => {
-  sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
-};
+// Reading and writing to the local storage must be atomic,
+// i.e. performed in a single operation. This storage queue
+// allows operations to process one at a time.
+let operationQueue = Promise.resolve();
+async function addToQueue(func: (error: Error | null) => void) {
+  operationQueue = operationQueue.then(() => func(null)).catch(func);
+  await operationQueue;
+}
 
-const getAll = (): string[] => {
-  const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
-  return sessionValue ? JSON.parse(sessionValue) : [];
-};
+export async function getPendingJobIds(): Promise<JobId[]> {
+  let jobs: JobId[] = [];
+  await addToQueue(async () => {
+    // get the current jobs
+    const jobsData = localStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+    jobs = jobsData ? JSON.parse(jobsData) : [];
+  });
+  return jobs;
+}
 
-export const add = (jobId: JobId) => {
-  const jobs = getAll();
-  jobs.push(jobId);
-  set(jobs);
-};
+export async function addPendingJobId(jobId: JobId) {
+  addToQueue(async (error: Error | null) => {
+    return new Promise((resolve, reject) => {
+      if (error) {
+        window.console.error(error);
+        reject(error);
+      }
+      // get the current jobs synchronously
+      const jobsData = localStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+      const jobs: JobId[] = jobsData ? JSON.parse(jobsData) : [];
+      // add the new job
+      jobs.push(jobId);
+      // write back to local storage
+      localStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
+      resolve();
+    });
+  });
+}
 
-export const remove = (jobId: JobId) => {
-  const jobs = getAll();
-  const index = jobs.indexOf(jobId);
-
-  if (!index) {
-    throw new Error('Unable to find job to remove it');
-  }
-
-  jobs.splice(index, 1);
-  set(jobs);
-};
+export async function setPendingJobIds(jobIds: JobId[]) {
+  addToQueue(async (error: Error | null) => {
+    return new Promise((resolve, reject) => {
+      if (error) {
+        reject(error);
+      }
+      // write update jobs back to local storage
+      localStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
+      resolve();
+    });
+  });
+}
