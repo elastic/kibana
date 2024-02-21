@@ -64,8 +64,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.clickUseFullDataButton();
       await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
       await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
-      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
-      const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
+
+      const tableService = aiops.changePointDetectionPage.getTable(0);
+      await tableService.waitForTableToLoad();
+      const result = await tableService.parseTable();
       // the aggregation may return different results (+-1)
       expect(result.length).to.be.above(4);
       // assert asc sorting by p_value is applied
@@ -73,20 +75,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('allows change point selection for detailed view', async () => {
-      await aiops.changePointDetectionPage.getTable(0).selectAllRows();
+      const tableService = aiops.changePointDetectionPage.getTable(0);
+
+      await tableService.selectAllRows();
       await aiops.changePointDetectionPage.viewSelected();
       await aiops.changePointDetectionPage.assertDetailedView(5);
       await aiops.changePointDetectionPage.closeFlyout();
       // deselect
-      await aiops.changePointDetectionPage.getTable(0).selectAllRows();
+      await tableService.selectAllRows();
     });
 
     it('supports a quick filter actions', async () => {
-      await aiops.changePointDetectionPage
-        .getTable(0)
-        .invokeAction(0, 'aiopsChangePointFilterForValue');
-      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
-      const resultFor = await aiops.changePointDetectionPage.getTable(0).parseTable();
+      const tableService = aiops.changePointDetectionPage.getTable(0);
+      await tableService.invokeAction(0, 'aiopsChangePointFilterForValue', async () => {
+        await aiops.changePointDetectionPage.assertFiltersApplied();
+        await tableService.waitForTableToStartLoading();
+      });
+      const resultFor = await tableService.parseTable();
       expect(resultFor.length).to.eql(1);
     });
 
