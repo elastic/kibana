@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   httpServiceMock,
   notificationServiceMock,
   themeServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/public/mocks';
-import { ReportingAPIClient } from '@kbn/reporting-public';
-import { ReportingPanelContent, ReportingPanelProps as Props } from '.';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { ReportingPanelProps as Props, ReportingPanelContent } from '.';
+import { ReportingAPIClient } from '../../..';
 import { ErrorUnsavedWorkPanel } from './components';
+import * as constants from './constants';
 
 jest.mock('./constants', () => ({
   getMaxUrlLength: jest.fn(() => 9999999),
 }));
-import * as constants from './constants';
 
 const theme = themeServiceMock.createSetupContract();
 

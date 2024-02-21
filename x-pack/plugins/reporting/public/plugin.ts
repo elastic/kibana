@@ -36,7 +36,7 @@ import {
   getSharedComponents,
   reportingScreenshotShareProvider,
   reportingCsvShareProvider,
-} from '@kbn/reporting-share';
+} from '@kbn/reporting-public/share';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';

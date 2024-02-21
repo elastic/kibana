@@ -27,5 +27,8 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-csv-common",
     "@kbn/licensing-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
   ]
 }
