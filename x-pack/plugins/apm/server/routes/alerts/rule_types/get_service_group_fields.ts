@@ -12,7 +12,7 @@ import {
 } from '../../../../common/service_groups';
 
 export interface SourceDoc {
-  [key: string]: string | SourceDoc;
+  [key: string]: string | string[] | SourceDoc;
 }
 
 export function getServiceGroupFieldsAgg(
@@ -56,7 +56,10 @@ export function flattenSourceDoc(
     return { [path.join('.')]: val };
   }
   return Object.keys(val).reduce((acc, key) => {
-    const fieldMap = flattenSourceDoc(val[key], [...path, key]);
+    const fieldMap = flattenSourceDoc(val[key] as SourceDoc | string, [
+      ...path,
+      key,
+    ]);
     return Object.assign(acc, fieldMap);
   }, {});
 }

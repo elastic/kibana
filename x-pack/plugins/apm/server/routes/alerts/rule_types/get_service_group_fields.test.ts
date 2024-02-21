@@ -27,10 +27,25 @@ const mockSourceObj = {
   },
 };
 
+const mockSourceObj2 = {
+  ...mockSourceObj,
+  labels: {
+    team: ['test1', 'test2'],
+  },
+};
+
 const mockBucket = {
   source_fields: {
     hits: {
       hits: [{ _source: mockSourceObj }],
+    },
+  },
+};
+
+const mockBucket2 = {
+  source_fields: {
+    hits: {
+      hits: [{ _source: mockSourceObj2 }],
     },
   },
 };
@@ -43,6 +58,24 @@ describe('getSourceFields', () => {
         "agent.name": "nodejs",
         "labels": Object {
           "team": "test",
+        },
+        "service.environment": "testing",
+        "service.language.name": "typescript",
+        "service.name": "testbeans",
+      }
+    `);
+  });
+
+  it('should not flatten labels', () => {
+    const result = getServiceGroupFields(mockBucket2);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "agent.name": "nodejs",
+        "labels": Object {
+          "team": Array [
+            "test1",
+            "test2",
+          ],
         },
         "service.environment": "testing",
         "service.language.name": "typescript",
@@ -115,6 +148,24 @@ describe('flattenSourceDoc', () => {
         "agent.name": "nodejs",
         "labels": Object {
           "team": "test",
+        },
+        "service.environment": "testing",
+        "service.language.name": "typescript",
+        "service.name": "testbeans",
+      }
+    `);
+  });
+
+  it('should not flatten labels', () => {
+    const result = flattenSourceDoc(mockSourceObj2);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "agent.name": "nodejs",
+        "labels": Object {
+          "team": Array [
+            "test1",
+            "test2",
+          ],
         },
         "service.environment": "testing",
         "service.language.name": "typescript",
