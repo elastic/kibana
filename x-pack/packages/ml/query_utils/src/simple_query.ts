@@ -9,8 +9,16 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { SimpleQuery } from './types';
 
+/**
+ * Default instance of `SimpleQuery` with a wildcard query string.
+ */
 export const defaultSimpleQuery: SimpleQuery = { query_string: { query: '*' } };
 
+/**
+ * Type guard verifying if an argument is a `SimpleQuery`.
+ * @param {unknown} arg - Argument to check.
+ * @returns {boolean} True if `arg` is a `SimpleQuery`, false otherwise.
+ */
 export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
   return isPopulatedObject(arg, ['query_string']);
 }

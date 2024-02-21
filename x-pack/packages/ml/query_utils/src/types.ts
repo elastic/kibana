@@ -20,19 +20,47 @@ export const SEARCH_QUERY_LANGUAGE = {
  */
 export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
 
+/**
+ * Placeholder for the structure for a saved search query.
+ */
 export type SavedSearchQuery = object;
 
+/**
+ * Represents a simple query structure for searching documents.
+ */
 export interface SimpleQuery {
+  /**
+   * Defines the query string parameters for the search.
+   */
   query_string: {
+    /**
+     * The query text to search for within documents.
+     */
     query: string;
+
+    /**
+     * The default logical operator.
+     */
     default_operator?: estypes.QueryDslOperator;
   };
 }
 
+/**
+ * Represents simple queries that are based on a boolean filter.
+ */
 export interface FilterBasedSimpleQuery {
+  /**
+   * The container for the boolean filter logic.
+   */
   bool: {
+    /**
+     * An array of `SimpleQuery` objects.
+     */
     filter: [SimpleQuery];
   };
 }
 
+/**
+ * Represents a union of search queries that can be used to fetch documents.
+ */
 export type SearchQueryVariant = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
