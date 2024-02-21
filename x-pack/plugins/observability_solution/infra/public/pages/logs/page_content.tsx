@@ -38,7 +38,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
-  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts
+  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts
   const streamTab = {
     app: 'logs',
     title: streamTabTitle,
