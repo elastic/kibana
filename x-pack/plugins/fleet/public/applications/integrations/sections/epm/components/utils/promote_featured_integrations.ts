@@ -26,7 +26,7 @@ export function _promoteFeaturedIntegrations(
     featuredIntegrationNames.includes(card.name)
   );
 
-  // Find all featured integrations with matching names
+  // now return the integrations in the order they are defined in
   const orderedFeaturedIntegrations = featuredIntegrations.filter(({ name }) =>
     featuredIntegrationNames.includes(name)
   );
