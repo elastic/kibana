@@ -54,9 +54,8 @@ export const useLensSuggestions = ({
             query: query && isOfAggregateQueryType(query) ? query : undefined,
           }
         : undefined;
-    const allSuggestions = context
-      ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
-      : [];
+    const allSuggestions =
+      context && dataView ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [] : [];
 
     const [firstSuggestion] = allSuggestions;
 
