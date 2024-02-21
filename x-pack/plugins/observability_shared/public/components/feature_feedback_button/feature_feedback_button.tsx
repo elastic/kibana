@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 const SANITIZED_PATH_PARAM = 'entry.1876422621';
+const ML_JOB_TYPE = 'entry.170406579';
 
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
@@ -23,18 +24,27 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed (you manage)';
 };
 
+const getMLJobType = (mlJobType: 'host' | 'pod'): string | undefined => {
+  if (mlJobType === 'pod') {
+    return 'Pod+Anomalies';
+  }
+  return 'Host+Anomalies';
+};
+
 const getSurveyFeedbackURL = ({
   formUrl,
   formConfig,
   kibanaVersion,
   deploymentType,
   sanitizedPath,
+  mlJobType,
 }: {
   formUrl: string;
   formConfig?: FormConfig;
   kibanaVersion?: string;
   deploymentType?: string;
   sanitizedPath?: string;
+  mlJobType?: string;
 }) => {
   const url = new URL(formUrl);
   if (kibanaVersion) {
@@ -55,6 +65,9 @@ const getSurveyFeedbackURL = ({
       sanitizedPath
     );
   }
+  if (mlJobType) {
+    url.searchParams.append(formConfig?.mlJobTypeParam || ML_JOB_TYPE, mlJobType);
+  }
 
   return url.href;
 };
@@ -63,6 +76,7 @@ interface FormConfig {
   kibanaVersionQueryParam?: string;
   kibanaDeploymentTypeQueryParam?: string;
   sanitizedPathQueryParam?: string;
+  mlJobTypeParam?: string;
 }
 
 interface FeatureFeedbackButtonProps {
@@ -75,6 +89,7 @@ interface FeatureFeedbackButtonProps {
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
   sanitizedPath?: string;
+  nodeType?: 'pod' | 'host';
   formConfig?: FormConfig;
 }
 
@@ -88,6 +103,7 @@ export const FeatureFeedbackButton = ({
   isCloudEnv,
   isServerlessEnv,
   sanitizedPath,
+  nodeType,
   surveyButtonText = (
     <FormattedMessage
       id="xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink"
@@ -99,6 +115,7 @@ export const FeatureFeedbackButton = ({
     isCloudEnv !== undefined || isServerlessEnv !== undefined
       ? getDeploymentType(isCloudEnv, isServerlessEnv)
       : undefined;
+  const mlJobType = nodeType ? getMLJobType(nodeType) : undefined;
 
   return (
     <EuiButton
@@ -108,6 +125,7 @@ export const FeatureFeedbackButton = ({
         kibanaVersion,
         deploymentType,
         sanitizedPath,
+        mlJobType,
       })}
       target="_blank"
       color={defaultButton ? undefined : 'warning'}
