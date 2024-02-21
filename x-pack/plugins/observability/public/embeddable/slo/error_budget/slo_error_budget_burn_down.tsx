@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink, EuiTitle } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -101,20 +101,39 @@ export function SloErrorBudget({
       </LoadingContainer>
     );
   }
-
+  const hasGroupBy = slo.instanceId !== ALL_VALUE;
   return (
     <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="o11ySloErrorBudgetLink"
-            onClick={() => {
-              setSelectedSlo(slo);
-            }}
-          >
-            {slo.name} ({slo.groupBy}: {slo.instanceId})
-          </EuiLink>
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem>
+          {hasGroupBy ? (
+            <EuiTitle size="xs">
+              <h4>{slo.name}</h4>
+            </EuiTitle>
+          ) : (
+            <EuiLink
+              data-test-subj="o11ySloErrorBudgetLink"
+              onClick={() => {
+                setSelectedSlo(slo);
+              }}
+            >
+              <h4>{slo.name}</h4>
+            </EuiLink>
+          )}
         </EuiFlexItem>
+
+        {hasGroupBy && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="o11ySloErrorBudgetLink"
+              onClick={() => {
+                setSelectedSlo(slo);
+              }}
+            >
+              {slo.groupBy}: {slo.instanceId}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" gutterSize="l">
