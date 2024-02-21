@@ -62,7 +62,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177390
+  registry.when.skip('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
         synthtraceEsClient,
