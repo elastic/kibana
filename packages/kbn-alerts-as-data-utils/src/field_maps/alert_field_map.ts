@@ -14,7 +14,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_CONSECUTIVE_MATCH_COUNT,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -81,7 +81,7 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
-  [ALERT_CONSECUTIVE_MATCH_COUNT]: {
+  [ALERT_CONSECUTIVE_MATCHES]: {
     type: 'long',
     array: false,
     required: false,

@@ -22,7 +22,7 @@ import {
   ALERT_END,
   ALERT_TIME_RANGE,
   ALERT_START,
-  ALERT_CONSECUTIVE_MATCH_COUNT,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
@@ -94,7 +94,7 @@ export const buildRecoveredAlert = <
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest match count, should be 0
-    [ALERT_CONSECUTIVE_MATCH_COUNT]: legacyAlert.getActiveCount(),
+    [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     // Set status to 'recovered'
     [ALERT_STATUS]: 'recovered',
     // Set latest duration as recovered alerts should have updated duration

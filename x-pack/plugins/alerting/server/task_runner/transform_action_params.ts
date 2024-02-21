@@ -37,7 +37,7 @@ export interface TransformActionParamsOptions {
   ruleUrl?: string;
   flapping: boolean;
   aadAlert?: AADAlert;
-  consecutiveMatchCount?: number;
+  consecutiveMatches?: number;
 }
 
 interface SummarizedAlertsWithAll {
@@ -80,7 +80,7 @@ export function transformActionParams({
   ruleUrl,
   flapping,
   aadAlert,
-  consecutiveMatchCount,
+  consecutiveMatches,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -113,7 +113,7 @@ export function transformActionParams({
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       flapping,
-      consecutiveMatchCount,
+      consecutiveMatches,
     },
     ...(aadAlert ? { ...aadAlert } : {}),
   };
@@ -164,7 +164,7 @@ export function transformSummaryActionParams({
       actionGroup: 'default',
       actionGroupName: 'Default',
       flapping: false,
-      consecutiveMatchCount: 0,
+      consecutiveMatches: 0,
     },
     kibanaBaseUrl,
     date: new Date().toISOString(),

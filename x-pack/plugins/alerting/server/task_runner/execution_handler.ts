@@ -319,7 +319,7 @@ export class ExecutionHandler<
             actionParams: action.params,
             flapping: executableAlert.getFlapping(),
             ruleUrl: ruleUrl?.absoluteUrl,
-            consecutiveMatchCount: executableAlert.getActiveCount(),
+            consecutiveMatches: executableAlert.getActiveCount(),
           };
 
           if (executableAlert.isAlertAsData()) {
