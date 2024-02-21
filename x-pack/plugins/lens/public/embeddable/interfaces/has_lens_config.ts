@@ -6,10 +6,10 @@
  */
 
 import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
-import { Document } from '../../persistence';
+import { LensSavedObjectAttributes } from '../embeddable';
 
 export type HasLensConfig = HasType<'lens'> & {
-  getSavedVis: () => Readonly<Document | undefined>;
+  getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
 };
 
 export const apiHasLensConfig = (api: unknown): api is HasLensConfig => {
