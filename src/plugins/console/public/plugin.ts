@@ -34,6 +34,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     this.autocompleteInfo.setup(http);
@@ -83,6 +84,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             element,
             theme$,
             autocompleteInfo: this.autocompleteInfo,
+            isMonacoEnabled,
           });
         },
       });

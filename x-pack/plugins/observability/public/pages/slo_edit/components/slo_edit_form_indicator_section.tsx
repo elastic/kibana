@@ -59,11 +59,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
     >
       {!isEditMode && (
         <>
-          <EuiFormRow
-            label={i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
-              defaultMessage: 'Choose the SLI type',
-            })}
-          >
+          <EuiFormRow label={indicatorLabel}>
             <Controller
               name="indicator.type"
               control={control}
@@ -74,6 +70,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
                   required
                   data-test-subj="sloFormIndicatorTypeSelect"
                   options={SLI_OPTIONS}
+                  aria-label={indicatorLabel}
                 />
               )}
             />
@@ -85,3 +82,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
     </EuiPanel>
   );
 }
+
+const indicatorLabel = i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
+  defaultMessage: 'Choose the SLI type',
+});

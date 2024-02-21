@@ -693,13 +693,7 @@
             "text": "ElasticsearchClient"
           },
           ", id: string) => Promise<",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorsAPIUpdateResponse",
-            "text": "ConnectorsAPIUpdateResponse"
-          },
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/delete_connector_secret.ts",
@@ -2047,7 +2041,7 @@
             "text": "Connector"
           },
           ", \"name\" | \"description\">>) => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_name_and_description.ts",
@@ -2142,13 +2136,7 @@
             "text": "SchedulingConfiguraton"
           },
           ") => Promise<",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorsAPIUpdateResponse",
-            "text": "ConnectorsAPIUpdateResponse"
-          },
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_scheduling.ts",
@@ -2233,13 +2221,7 @@
             "text": "ElasticsearchClient"
           },
           ", value: string, secretId: string) => Promise<",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorsAPIUpdateResponse",
-            "text": "ConnectorsAPIUpdateResponse"
-          },
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_secret.ts",
@@ -3757,34 +3739,6 @@
                 "text": "ConnectorSyncJob"
               },
               "[]"
-            ],
-            "path": "packages/kbn-search-connectors/types/connectors_api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-connectors",
-        "id": "def-common.ConnectorsAPIUpdateResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "ConnectorsAPIUpdateResponse",
-        "description": [],
-        "path": "packages/kbn-search-connectors/types/connectors_api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-connectors",
-            "id": "def-common.ConnectorsAPIUpdateResponse.result",
-            "type": "Enum",
-            "tags": [],
-            "label": "result",
-            "description": [],
-            "signature": [
-              "Result"
             ],
             "path": "packages/kbn-search-connectors/types/connectors_api.ts",
             "deprecated": false,

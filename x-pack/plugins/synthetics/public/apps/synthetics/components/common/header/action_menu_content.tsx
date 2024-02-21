@@ -13,7 +13,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { LastRefreshed } from '../components/last_refreshed';
 import { AutoRefreshButton } from '../components/auto_refresh_button';
-import { useSyntheticsSettingsContext, useSyntheticsStartPlugins } from '../../../contexts';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
@@ -32,8 +32,6 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.synthetics.analyzeDataButtonLabel.
 export function ActionMenuContent(): React.ReactElement {
   const { basePath } = useSyntheticsSettingsContext();
 
-  const { observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem } = {} } =
-    useSyntheticsStartPlugins();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
@@ -106,9 +104,6 @@ export function ActionMenuContent(): React.ReactElement {
         </EuiHeaderLink>
       </EuiToolTip>
       <InspectorHeaderLink />
-      {ObservabilityAIAssistantActionMenuItem && ObservabilityAIAssistantActionMenuItem ? (
-        <ObservabilityAIAssistantActionMenuItem />
-      ) : null}
     </EuiHeaderLinks>
   );
 }
