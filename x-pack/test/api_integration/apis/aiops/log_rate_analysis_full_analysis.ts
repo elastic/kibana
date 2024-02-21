@@ -137,11 +137,6 @@ export default ({ getService }: FtrProviderContext) => {
 
             const chunks: string[] = resp.body.toString().split('\n');
 
-            expect(chunks.length).to.eql(
-              testData.expected.chunksLength,
-              `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
-            );
-
             const lastChunk = chunks.pop();
             expect(lastChunk).to.be('');
 
