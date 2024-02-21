@@ -78,7 +78,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     await this.set(key, null);
   }
 
-  async removeMany(keys: string[], options: { validateKeys?: boolean } = {}) {
+  async removeMany(keys: string[], options?: { validateKeys?: boolean }) {
     const changes: Record<string, null> = {};
     keys.forEach((key) => {
       changes[key] = null;
