@@ -17,7 +17,7 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiLink,
-  EuiButton
+  EuiButton,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../../types';
@@ -31,14 +31,15 @@ export const ViewQueryAction: React.FC<ViewQueryActionProps> = () => {
   const [showFlyout, setShowFlyout] = useState(false);
   const selectedIndices: string[] = getValues('indices');
   const { fields } = useIndicesFields(selectedIndices || []);
+  const defaultFields = useMemo(() => getDefaultQueryFields(fields), [fields]);
+  const [queryFields, setQueryFields] = useState(defaultFields);
 
   const {
     field: { onChange },
-  } = useController({ name: ChatFormFields.elasticsearchQuery, defaultValue: {} });
-
-  const defaultFields = useMemo(() => getDefaultQueryFields(fields), [fields]);
-
-  const [queryFields, setQueryFields] = useState(defaultFields);
+  } = useController({
+    name: ChatFormFields.elasticsearchQuery,
+    defaultValue: {},
+  });
 
   useEffect(() => {
     if (selectedIndices?.length > 0) {
