@@ -51,8 +51,8 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.DURATION]: {
-    [FieldType.DURATION]: {
+  [FieldType.DURATION_MS]: {
+    [FieldType.DURATION_MS]: {
       type: 'long',
       _meta: {
         description: 'The number of milliseconds of time taken for the event from start to finish.',
@@ -143,7 +143,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
-      ...fields[FieldType.DURATION],
+      ...fields[FieldType.DURATION_MS],
     },
   },
   {
@@ -152,7 +152,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
-      ...fields[FieldType.DURATION],
+      ...fields[FieldType.DURATION_MS],
       ...fields[FieldType.BYTE_SIZE],
       ...fields[FieldType.CSV_ROWS],
       // ...fields[FieldType.CSV_COLUMNS], // TODO add to report output metrics
@@ -164,7 +164,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
-      ...fields[FieldType.DURATION],
+      ...fields[FieldType.DURATION_MS],
       ...fields[FieldType.BYTE_SIZE],
       ...fields[FieldType.NUM_PAGES],
       ...fields[FieldType.SCREENSHOT_LAYOUT],
@@ -177,7 +177,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
-      ...fields[FieldType.DURATION],
+      ...fields[FieldType.DURATION_MS],
       ...fields[FieldType.ERROR_CODE],
       ...fields[FieldType.ERROR_MESSAGE],
     },
@@ -188,7 +188,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
-      ...fields[FieldType.DURATION],
+      ...fields[FieldType.DURATION_MS],
     },
   },
   {
@@ -197,7 +197,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.REPORT_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
-      ...fields[FieldType.DURATION],
+      ...fields[FieldType.DURATION_MS],
     },
   },
 ];

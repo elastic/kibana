@@ -79,7 +79,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION_MS]: timeSinceCreation,
     });
   }
 
@@ -94,7 +94,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION_MS]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.NUM_PAGES]: numPages,
       [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
@@ -108,7 +108,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION_MS]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.CSV_ROWS]: csvRows,
     });
@@ -126,7 +126,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION_MS]: timeSinceCreation,
       [FieldType.ERROR_MESSAGE]: errorMessage,
       [FieldType.ERROR_CODE]: errorCode,
     });
@@ -142,7 +142,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION_MS]: timeSinceCreation,
     });
   }
 
@@ -157,7 +157,7 @@ export class EventTracker {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
-      [FieldType.DURATION]: timeSinceCreation,
+      [FieldType.DURATION_MS]: timeSinceCreation,
     });
   }
 }

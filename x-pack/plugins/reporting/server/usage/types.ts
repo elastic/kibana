@@ -268,7 +268,7 @@ export enum FieldType {
   OBJECT_TYPE = 'object_type',
   IS_DEPRECATED = 'is_deprecated',
   IS_PUBLIC_API = 'is_public_api',
-  DURATION = 'duration_ms',
+  DURATION_MS = 'duration_ms',
   ERROR_CODE = 'error_code',
   ERROR_MESSAGE = 'error_message',
   BYTE_SIZE = 'byte_size',
