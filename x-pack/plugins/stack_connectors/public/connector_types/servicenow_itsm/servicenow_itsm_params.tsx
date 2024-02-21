@@ -45,16 +45,31 @@ const defaultFields: Fields = {
 };
 
 const CorrelationIdField: React.FunctionComponent<
-  Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables'> & {
+  Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables' | 'errors'> & {
     correlationId: string | null;
+    selectedActionGroupId?: string;
     editSubActionProperty: (key: string, value: any) => void;
   }
-> = ({ index, messageVariables, correlationId, editSubActionProperty }) => {
+> = ({
+  index,
+  messageVariables,
+  correlationId,
+  editSubActionProperty,
+  selectedActionGroupId,
+  errors,
+}) => {
   const { docLinks } = useKibana().services;
   return (
     <EuiFormRow
       fullWidth
       label={i18n.CORRELATION_ID}
+      error={errors['subActionParams.incident.correlation_id']}
+      isInvalid={
+        errors['subActionParams.incident.correlation_id'] !== undefined &&
+        errors['subActionParams.incident.correlation_id'].length > 0 &&
+        !correlationId &&
+        selectedActionGroupId === ACTION_GROUP_RECOVERED
+      }
       helpText={
         <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
           <FormattedMessage
@@ -64,9 +79,15 @@ const CorrelationIdField: React.FunctionComponent<
         </EuiLink>
       }
       labelAppend={
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
+        selectedActionGroupId !== ACTION_GROUP_RECOVERED ? (
+          <EuiText size="xs" color="subdued">
+            {i18n.OPTIONAL_LABEL}
+          </EuiText>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            {i18n.REQUIRED_LABEL}
+          </EuiText>
+        )
       }
     >
       <TextFieldWithMessageVariables
@@ -75,6 +96,7 @@ const CorrelationIdField: React.FunctionComponent<
         messageVariables={messageVariables}
         paramsProperty={'correlation_id'}
         inputTargetValue={correlationId ?? undefined}
+        errors={errors['subActionParams.incident.correlation_id'] as string[]}
       />
     </EuiFormRow>
   );
@@ -297,6 +319,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
                     messageVariables={messageVariables}
                     correlationId={incident.correlation_id}
                     editSubActionProperty={editSubActionProperty}
+                    selectedActionGroupId={selectedActionGroupId}
+                    errors={errors}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -374,6 +398,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
           messageVariables={messageVariables}
           correlationId={incident.correlation_id}
           editSubActionProperty={editSubActionProperty}
+          selectedActionGroupId={selectedActionGroupId}
+          errors={errors}
         />
       )}
     </>
