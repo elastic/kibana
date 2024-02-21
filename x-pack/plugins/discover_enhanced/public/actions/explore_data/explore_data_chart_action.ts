@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import { apiIsOfType, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import {
+  apiHasParentApi,
+  apiIsOfType,
+  apiPublishesPartialLocalUnifiedSearch,
+  HasParentApi,
+  PublishesLocalUnifiedSearch,
+} from '@kbn/presentation-publishing';
+import { KibanaLocation } from '@kbn/share-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
+import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
+
+export interface ExploreDataChartActionContext extends ApplyGlobalFilterActionContext {
+  embeddable: Partial<
+    PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>
+  >;
+}
 
 /**
  * This is "Explore underlying data" action which appears in popup context
@@ -18,7 +34,7 @@ export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
 export class ExploreDataChartAction
   extends AbstractExploreDataAction
-  implements Action<EmbeddableApiContext>
+  implements Action<ExploreDataChartActionContext>
 {
   public readonly id = ACTION_EXPLORE_DATA_CHART;
 
@@ -26,10 +42,54 @@ export class ExploreDataChartAction
 
   public readonly order = 200;
 
-  public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
+  public async isCompatible(api: ExploreDataChartActionContext): Promise<boolean> {
+    const { embeddable } = api;
     if (apiIsOfType(embeddable, 'map')) {
       return false; // TODO: https://github.com/elastic/kibana/issues/73043
     }
-    return super.isCompatible({ embeddable });
+    return super.isCompatible(api);
   }
+
+  protected readonly getLocation = async (
+    api: ExploreDataChartActionContext
+  ): Promise<KibanaLocation> => {
+    const { plugins } = this.params.start();
+    const { locator } = plugins.discover;
+
+    if (!locator) {
+      throw new Error('Discover URL locator not available.');
+    }
+
+    const { extractTimeRange } = await import('@kbn/es-query');
+    const { restOfFilters: filters, timeRange } = extractTimeRange(
+      api.filters ?? [],
+      api.timeFieldName
+    );
+
+    const params: DiscoverAppLocatorParams = {
+      filters,
+      timeRange,
+    };
+
+    const { embeddable } = api;
+    params.dataViewId = shared.getDataViews(embeddable)[0] || undefined;
+    if (
+      apiHasParentApi(embeddable) &&
+      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
+    ) {
+      if (embeddable.parentApi.localTimeRange && !params.timeRange)
+        params.timeRange = embeddable.parentApi.localTimeRange.getValue();
+      if (embeddable.parentApi.localQuery)
+        params.query = embeddable.parentApi.localQuery.getValue();
+      if (embeddable.parentApi.localFilters) {
+        params.filters = [
+          ...(embeddable.parentApi.localFilters.getValue() ?? []),
+          ...(params.filters || []),
+        ];
+      }
+    }
+
+    const location = await locator.getLocation(params);
+    return location;
+  };
 }
