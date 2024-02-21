@@ -15,7 +15,7 @@ export const LOG_RATE_ANALYSIS_SETTINGS = {
    */
   FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT: 0.001,
   /**
-   * The maximum values per field  support value to be used for the frequent item sets aggration.
+   * The maximum values per field to be used for the frequent item sets aggration.
    */
   FREQUENT_ITEMS_SETS_FIELD_VALUE_LIMIT: 50,
   /**
