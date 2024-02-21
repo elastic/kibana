@@ -17,7 +17,7 @@ export const ControlGroupStrings = {
           return i18n.translate(
             'controls.controlGroup.invalidControlWarning.tourStepTitle.rangeSlider',
             {
-              defaultMessage: 'Invalid range selection',
+              defaultMessage: 'Invalid range selections are no longer ignored',
             }
           );
         }
@@ -25,7 +25,7 @@ export const ControlGroupStrings = {
           return i18n.translate(
             'controls.controlGroup.invalidControlWarning.tourStepTitle.default',
             {
-              defaultMessage: 'Invalid selections',
+              defaultMessage: 'Invalid selections are no longer ignored',
             }
           );
         }

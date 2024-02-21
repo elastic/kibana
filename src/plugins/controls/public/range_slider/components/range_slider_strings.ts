@@ -17,7 +17,7 @@ export const RangeSliderStrings = {
     getInvalidSelectionWarningContent: () =>
       i18n.translate('controls.rangeSlider.control.invalidSelectionWarningMessage', {
         defaultMessage:
-          'Selected range returns no results. Select a different range or adjust the time range and filters.',
+          'Selected range returns no results. Select a different range for complete results.',
       }),
   },
   editor: {
