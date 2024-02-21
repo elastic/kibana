@@ -1,0 +1,10 @@
+SINH
+
+
+Sine hyperbolic function.
+```esql
+ROW a=1.8
+| EVAL sinh=SINH(a)
+```
+
+Supported types:

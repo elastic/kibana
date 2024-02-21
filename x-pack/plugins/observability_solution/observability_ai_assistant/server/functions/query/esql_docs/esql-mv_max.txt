@@ -1,0 +1,17 @@
+MV_MAX
+
+
+Converts a multivalued field into a single valued field containing the maximum value. For example:
+```esql
+ROW a=[3, 5, 1]
+| EVAL max_a = MV_MAX(a)
+```
+
+It can be used by any field type, including keyword fields. In that case picks the
+last string, comparing their utf-8 representation byte by byte:
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL max_a = MV_MAX(a)
+```
+
+Supported types:

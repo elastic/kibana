@@ -1,0 +1,9 @@
+TO_VERSION
+
+
+Converts an input string to a version value. For example:
+```esql
+ROW v = TO_VERSION("1.2.3")
+```
+
+The input can be a single- or multi-valued field or an expression.Alias: TO_VERSupported types:
