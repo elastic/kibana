@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
 import * as React from 'react';
 import { useCallback } from 'react';
@@ -53,10 +52,7 @@ export function SelectedWildcards({ indexPattern }: Props) {
       field={TRANSACTION_URL}
       value={searchTerm}
       negate={false}
-      label={i18n.translate(
-        'xpack.ux.selectedWildcards.filterValueLabel.urlWildcardLabel',
-        { defaultMessage: 'URL wildcard' }
-      )}
+      label={'URL wildcard'}
     />
   ) : null;
 }
