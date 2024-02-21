@@ -1,0 +1,18 @@
+ABS
+
+Syntax
+Parameters
+n
+Numeric expression. If null, the function returns null.
+DescriptionReturns the absolute value.Supported types
+Examples
+```esql
+ROW number = -1.0
+| EVAL abs_number = ABS(number)
+```
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL abs_height = ABS(0.0 - height)
+```
