@@ -1,47 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import React, { useState } from 'react';
-
-import { useActions, useValues } from 'kea';
-
-import { EuiFlexItem, EuiFlexGroup, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { ConnectorScheduling, SyncJobType } from '@kbn/search-connectors';
-
-import { Status } from '../../../../../../../common/types/api';
-import { CronEditor } from '../../../../../shared/cron_editor';
-import { Frequency } from '../../../../../shared/cron_editor/types';
-import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';
-import { ConnectorSchedulingLogic } from '../connector_scheduling_logic';
+import { ConnectorScheduling } from '../../types/connectors';
+import { Frequency } from '../../types/cron_editor';
+import { CronEditor } from '../cron_editor';
 
 interface ConnectorCronEditorProps {
+  dataTelemetryIdPrefix: string;
   disabled?: boolean;
   frequencyBlockList?: string[];
+  hasSyncTypeChanges: boolean;
   onReset?(): void;
   onSave?(interval: ConnectorScheduling['interval']): void;
   scheduling: ConnectorScheduling;
-  type: SyncJobType;
+  setHasSyncTypeChanges: (state: boolean) => void;
+  status: boolean;
 }
-
 export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
+  dataTelemetryIdPrefix,
   disabled = false,
   frequencyBlockList = ['MINUTE'],
-  scheduling,
-  onSave,
+  hasSyncTypeChanges,
   onReset,
-  type,
+  onSave,
+  scheduling,
+  setHasSyncTypeChanges,
+  status,
 }) => {
-  const { status } = useValues(UpdateConnectorSchedulingApiLogic);
-  const { hasFullSyncChanges, hasAccessSyncChanges, hasIncrementalSyncChanges } =
-    useValues(ConnectorSchedulingLogic);
-  const { clearHasChanges, setHasChanges } = useActions(ConnectorSchedulingLogic);
   const [newInterval, setNewInterval] = useState(scheduling.interval);
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
   const [simpleCron, setSimpleCron] = useState<{
@@ -51,18 +43,11 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
     expression: scheduling.interval ?? '',
     frequency: scheduling.interval ? cronToFrequency(scheduling.interval) : 'HOUR',
   });
-  const hasChanges =
-    type === SyncJobType.FULL
-      ? hasFullSyncChanges
-      : type === SyncJobType.INCREMENTAL
-      ? hasIncrementalSyncChanges
-      : hasAccessSyncChanges;
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <CronEditor
-          data-telemetry-id="entSearchContent-connector-scheduling-editSchedule"
+          data-telemetry-id={`${dataTelemetryIdPrefix}-connector-scheduling-editSchedule`}
           disabled={!scheduling.enabled || disabled}
           fieldToPreferredValueMap={fieldToPreferredValueMap}
           cronExpression={simpleCron.expression}
@@ -78,7 +63,7 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
             });
             setFieldToPreferredValueMap(newFieldToPreferredValueMap);
             setNewInterval(expression);
-            setHasChanges(type);
+            setHasSyncTypeChanges(true);
           }}
           frequencyBlockList={frequencyBlockList}
         />
@@ -87,36 +72,34 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-telemetry-id="entSearchContent-connector-scheduling-resetSchedule"
-              disabled={!hasChanges || status === Status.LOADING || disabled}
+              data-telemetry-id={`${dataTelemetryIdPrefix}-connector-scheduling-resetSchedule`}
+              disabled={!hasSyncTypeChanges || status || disabled}
               onClick={() => {
                 setNewInterval(scheduling.interval);
                 setSimpleCron({
                   expression: scheduling.interval ?? '',
                   frequency: scheduling.interval ? cronToFrequency(scheduling.interval) : 'HOUR',
                 });
-                clearHasChanges(type);
+                setHasSyncTypeChanges(false);
                 if (onReset) {
                   onReset();
                 }
               }}
             >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.resetButton.label',
-                { defaultMessage: 'Reset' }
-              )}
+              {i18n.translate('searchConnectors.connectorScheduling.resetButton.label', {
+                defaultMessage: 'Reset',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-telemetry-id="entSearchContent-connector-scheduling-saveSchedule"
-              disabled={!hasChanges || status === Status.LOADING || disabled}
+              data-telemetry-id={`${dataTelemetryIdPrefix}-connector-scheduling-saveSchedule`}
+              disabled={!hasSyncTypeChanges || status || disabled}
               onClick={() => onSave && onSave(newInterval)}
             >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.saveButton.label',
-                { defaultMessage: 'Save' }
-              )}
+              {i18n.translate('searchConnectors.connectorScheduling.saveButton.label', {
+                defaultMessage: 'Save',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -124,13 +107,11 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
     </EuiFlexGroup>
   );
 };
-
 export interface Schedule {
   days: string;
   hours: string;
   minutes: string;
 }
-
 function cronToFrequency(cron: string): Frequency {
   const fields = cron.split(' ');
   if (fields.length < 4) {
