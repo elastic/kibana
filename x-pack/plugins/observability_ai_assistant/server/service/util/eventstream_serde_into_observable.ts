@@ -11,6 +11,9 @@ import { identity } from 'lodash';
 import { Observable } from 'rxjs';
 import { Readable } from 'stream';
 import { Message } from '@smithy/types';
+import { Logger } from '@kbn/logging';
+import { inspect } from 'util';
+import { createInternalServerError } from '../../../common/conversation_complete';
 
 interface ModelStreamErrorException {
   name: 'ModelStreamErrorException';
@@ -31,7 +34,7 @@ export type BedrockStreamMember = BedrockChunkMember | ModelStreamErrorException
 // AWS uses SerDe to send over serialized data, so we use their
 // @smithy library to parse the stream data
 
-export function eventstreamSerdeIntoObservable(readable: Readable) {
+export function eventstreamSerdeIntoObservable(readable: Readable, logger: Logger) {
   return new Observable<BedrockStreamMember>((subscriber) => {
     const marshaller = new EventStreamMarshaller({
       utf8Encoder: toUtf8,
@@ -51,6 +54,25 @@ export function eventstreamSerdeIntoObservable(readable: Readable) {
         subscriber.complete();
       },
       (error) => {
+        if (!(error instanceof Error)) {
+          try {
+            const exceptionType = error.headers[':exception-type'].value;
+            const body = toUtf8(error.body);
+            let message = 'Encountered error in Bedrock stream of type ' + exceptionType;
+            try {
+              message += '\n' + JSON.parse(body).message;
+            } catch (parseError) {
+              logger.error(`Could not parse message from stream error`);
+              logger.error(inspect(body));
+            }
+            error = createInternalServerError(message);
+          } catch (decodeError) {
+            logger.error('Encountered unparsable error in Bedrock stream');
+            logger.error(inspect(decodeError));
+            logger.error(inspect(error));
+            error = createInternalServerError();
+          }
+        }
         subscriber.error(error);
       }
     );
