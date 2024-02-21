@@ -831,7 +831,14 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over your content on Confluence Data Center.',
         }
       ),
-      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'confluence_data_center'],
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
+        'confluence_data_center',
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=confluence',
       icons: [
@@ -880,9 +887,12 @@ export const registerEnterpriseSearchIntegrations = (
     });
     customIntegrations.registerCustomIntegration({
       id: 'jira_data_center',
-      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.jiraDataCenterCloudTitle', {
-        defaultMessage: 'Jira Data Center',
-      }),
+      title: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.jiraDataCenterCloudTitle',
+        {
+          defaultMessage: 'Jira Data Center',
+        }
+      ),
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.jiraDataCenterDescription',
         {
