@@ -4,36 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { TimeRange } from '@kbn/es-query';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { AlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
-import { infraAlertFeatureIds } from './constants';
+import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
+import { ALERT_STATUS_ALL, infraAlertFeatureIds } from './constants';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import { useAlertsQuery } from '../../../pages/metrics/hosts/hooks/use_alerts_query';
 import AlertsStatusFilter from './alerts_status_filter';
 
 interface AlertsOverviewProps {
-  alertsQuery: AlertsEsQuery;
+  assetName: string;
   dateRange: TimeRange;
   onLoaded: (alertsCount?: AlertsCount) => void;
   onRangeSelection?: HostsStateUpdater;
 }
 
 export const AlertsOverview = React.memo(
-  ({ alertsQuery, dateRange, onLoaded, onRangeSelection }: AlertsOverviewProps) => {
+  ({ assetName, dateRange, onLoaded, onRangeSelection }: AlertsOverviewProps) => {
     const { services } = useKibanaContextForPlugin();
-    const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
+    const [alertStatus, setAlertStatus] = useState<AlertStatus>(ALERT_STATUS_ALL);
+    console.log('asset');
+    const alertsEsQueryByStatus = useMemo(
+      () =>
+        createAlertsEsQuery({
+          dateRange,
+          hostNodeNames: [assetName],
+          status: alertStatus,
+        }),
+      [assetName, dateRange, alertStatus]
+    );
+
+    const alertsEsQuery = useMemo(
+      () =>
+        createAlertsEsQuery({
+          dateRange,
+          hostNodeNames: [assetName],
+          status: ALERT_STATUS_ALL,
+        }),
+      [assetName, dateRange]
+    );
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
-
-    console.log('alertsQuery', alertsQuery);
-    console.log('alertsEsQueryByStatus', alertsEsQueryByStatus);
 
     const {
       charts,
@@ -72,7 +89,7 @@ export const AlertsOverview = React.memo(
           <AlertSummaryWidget
             chartProps={chartProps}
             featureIds={infraAlertFeatureIds}
-            filter={alertsQuery}
+            filter={alertsEsQuery}
             timeRange={summaryTimeRange}
             onLoaded={onLoaded}
             fullSize
@@ -86,7 +103,7 @@ export const AlertsOverview = React.memo(
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={[...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY]}
               showAlertStatusWithFlapping
-              query={[alertsQuery]}
+              query={alertsEsQueryByStatus}
               pageSize={5}
             />
           </EuiFlexItem>

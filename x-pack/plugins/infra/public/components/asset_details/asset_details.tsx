@@ -12,7 +12,6 @@ import { Page } from './template/page';
 import { ContextProviders } from './context_providers';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
 import { DataViewsProvider } from './hooks/use_data_views';
-import { AlertsQueryProvider } from '../../pages/metrics/hosts/hooks/use_alerts_query';
 
 const ContentTemplate = ({
   tabs,
@@ -20,9 +19,7 @@ const ContentTemplate = ({
   renderMode,
 }: ContentTemplateProps & { renderMode: RenderMode }) => {
   return renderMode.mode === 'flyout' ? (
-    <AlertsQueryProvider>
-      <Flyout tabs={tabs} links={links} closeFlyout={renderMode.closeFlyout!} />
-    </AlertsQueryProvider>
+    <Flyout tabs={tabs} links={links} closeFlyout={renderMode.closeFlyout!} />
   ) : (
     <Page tabs={tabs} links={links} />
   );

@@ -23,7 +23,7 @@ export const useAlertsQueryImpl = () => {
   const getAlertsEsQuery = useCallback(
     (status?: AlertStatus) =>
       createAlertsEsQuery({ dateRange: searchCriteria.dateRange, hostNodeNames, status }),
-    [hostNodeNames, searchCriteria.dateRange]
+    [hostNodeNames, searchCriteria?.dateRange]
   );
 
   // Regenerate the query when status change even if is not used.

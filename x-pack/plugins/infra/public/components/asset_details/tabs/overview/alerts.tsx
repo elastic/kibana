@@ -1,5 +1,4 @@
-import React, { useMemo, useState } from 'react';
-
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -14,8 +13,6 @@ import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details
 import { CollapsibleSection } from './section/collapsible_section';
 import { AlertsClosedContent } from './alerts_closed_content';
 import { type AlertsCount } from '../../../../hooks/use_alerts_count';
-import { createAlertsEsQuery } from '../../../../utils/filters/create_alerts_es_query';
-import { ALERT_STATUS_ALL } from '../../../shared/alerts/constants';
 import { AlertsOverview } from '../../../shared/alerts/alerts_overview';
 
 export const AlertsSummaryContent = ({
@@ -33,16 +30,6 @@ export const AlertsSummaryContent = ({
   const [collapsibleStatus, setCollapsibleStatus] =
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
-
-  const alertsEsQueryByStatus = useMemo(
-    () =>
-      createAlertsEsQuery({
-        dateRange,
-        hostNodeNames: [assetName],
-        status: ALERT_STATUS_ALL,
-      }),
-    [assetName, dateRange]
-  );
 
   const onLoaded = (alertsCount?: AlertsCount) => {
     const { activeAlertCount = 0 } = alertsCount ?? {};
@@ -78,11 +65,7 @@ export const AlertsSummaryContent = ({
           </EuiFlexGroup>
         }
       >
-        <AlertsOverview
-          onLoaded={onLoaded}
-          alertsQuery={alertsEsQueryByStatus}
-          dateRange={dateRange}
-        />
+        <AlertsOverview onLoaded={onLoaded} dateRange={dateRange} assetName={assetName} />
       </CollapsibleSection>
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout
