@@ -15,6 +15,7 @@ import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import { manifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
+import { savedScriptsType } from './endpoint/lib/saved_objects/saved_scripts';
 
 const types = [
   noteType,
@@ -26,6 +27,7 @@ const types = [
   signalsMigrationType,
   riskEngineConfigurationType,
   protectionUpdatesNoteType,
+  savedScriptsType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

@@ -120,3 +120,9 @@ export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
 
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
+
+/** Saved Scripts route */
+export const ENDPOINT_SAVED_SCRIPTS_ROUTE = `${BASE_ENDPOINT_ROUTE}/saved_scripts`;
+export const CREATE_ENDPOINT_SAVED_SCRIPTS_ROUTE = `${ENDPOINT_SAVED_SCRIPTS_ROUTE}`;
+export const LIST_ENDPOINT_SAVED_SCRIPTS_ROUTE = `${ENDPOINT_SAVED_SCRIPTS_ROUTE}`;
+export const GET_ENDPOINT_SAVED_SCRIPTS_ROUTE = `${ENDPOINT_SAVED_SCRIPTS_ROUTE}/{id}`;

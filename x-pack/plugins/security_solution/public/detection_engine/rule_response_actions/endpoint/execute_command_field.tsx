@@ -6,15 +6,16 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import parse from 'bash-parser';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-
 import useDebounce from 'react-use/lib/useDebounce';
+import { SavedScriptsFlyout } from '../../../management/components/saved_scripts/saved_scripts_flyout';
+import { SavedScriptsDropdown } from '../../../management/components/saved_scripts/list/saved_scripts_dropdown';
 
 interface ActionTypeFieldProps {
   path: string;
@@ -69,6 +70,7 @@ const ExecuteCommandFieldComponent = ({
     [editorValue]
   );
 
+  const [isScriptsFlyoutOpen, setIsScriptsFlyoutOpen] = useState(false);
   // write an async useEffect to fetch the shellcheck binary
   useEffect(() => {
     const errors = checkShellSyntax(editorValue);
@@ -95,15 +97,29 @@ const ExecuteCommandFieldComponent = ({
   useEffect(() => setEditorValue('defaultValue'), []);
   return (
     <>
-      <UseField
+      {/* <UseField
         path={path}
         readDefaultValueOnForm={readDefaultValueOnForm}
         config={CONFIG}
         isDisabled={disabled}
         component={TextAreaField}
         required={true}
-      />
+      /> */}
 
+      {/* <SavedScriptsFlyout defaultValue={{}} onClose={() => console.log('closed')} /> */}
+
+      <SavedScriptsDropdown
+        onChange={(value) => {
+          console.log({ value });
+          return setEditorValue(value.command);
+        }}
+      />
+      <EuiSpacer size="m" />
+      <EuiButton onClick={() => setIsScriptsFlyoutOpen(true)}>Add new Script</EuiButton>
+      {isScriptsFlyoutOpen && (
+        <SavedScriptsFlyout defaultValue={{}} onClose={() => setIsScriptsFlyoutOpen(false)} />
+      )}
+      <EuiSpacer size="m" />
       <CodeEditor
         languageId={'shell'}
         value={editorValue}
@@ -113,6 +129,7 @@ const ExecuteCommandFieldComponent = ({
         width="100%"
         editorDidMount={editorDidMount}
       />
+      <EuiSpacer size="m" />
       {syntaxError && (
         <EuiCallOut title="Sorry, there was an error" color="danger" iconType="error">
           <p>{syntaxError}</p>
