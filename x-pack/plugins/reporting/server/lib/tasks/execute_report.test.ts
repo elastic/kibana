@@ -17,7 +17,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
 import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
-import type { SavedReport } from '../store';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -107,10 +106,10 @@ describe('Execute Report Task', () => {
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
     const task = new ExecuteReportTask(mockReporting, configType, logger);
-    // @ts-expect-error private method
-    task._claimJob = jest.fn(() =>
-      Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
-    );
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
+      .spyOn(task, '_claimJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'noop', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
