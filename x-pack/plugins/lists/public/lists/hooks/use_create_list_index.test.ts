@@ -83,6 +83,6 @@ describe('useCreateListIndex', () => {
     });
     await waitForNextUpdate();
 
-    expect(invalidateQueriesSpy).toHaveBeenCalled();
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith(['detectionEngine', 'listIndex']);
   });
 });
