@@ -63,7 +63,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       <EuiTitle
         size="xxs"
         className="optionsList-control-ignored-selection-title"
-        data-test-subj="optionList__ignoredSelectionLabel"
+        data-test-subj="optionList__invalidSelectionLabel"
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
