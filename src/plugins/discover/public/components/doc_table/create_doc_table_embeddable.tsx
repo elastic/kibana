@@ -34,7 +34,6 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         isLoading={renderProps.isLoading}
         isPlainRecord={renderProps.isPlainRecord}
         interceptedWarnings={renderProps.interceptedWarnings}
-        dataTestSubj="embeddedSavedSearchDocTable"
       />
     </I18nProvider>
   );
