@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
+import { getTokenCountFromOpenAI } from './get_token_count_from_openai_stream';
 import { loggerMock } from '@kbn/logging-mocks';
 
 interface StreamMock {
@@ -35,7 +35,7 @@ function createStreamMock(): StreamMock {
 
 const logger = loggerMock.create();
 describe('getTokenCountFromOpenAIStream', () => {
-  let tokens: Awaited<ReturnType<typeof getTokenCountFromOpenAIStream>>;
+  let tokens: Awaited<ReturnType<typeof getTokenCountFromOpenAI>>;
   let stream: StreamMock;
   const body = {
     messages: [
@@ -77,10 +77,10 @@ describe('getTokenCountFromOpenAIStream', () => {
 
     describe('without function tokens', () => {
       beforeEach(async () => {
-        tokens = await getTokenCountFromOpenAIStream({
+        tokens = await getTokenCountFromOpenAI({
           responseStream: stream.transform,
           logger,
-          body: JSON.stringify(body),
+          requestBody: JSON.stringify(body),
         });
       });
 
@@ -93,10 +93,10 @@ describe('getTokenCountFromOpenAIStream', () => {
 
     describe('with function tokens', () => {
       beforeEach(async () => {
-        tokens = await getTokenCountFromOpenAIStream({
+        tokens = await getTokenCountFromOpenAI({
           responseStream: stream.transform,
           logger,
-          body: JSON.stringify({
+          requestBody: JSON.stringify({
             ...body,
             functions: [
               {
@@ -125,10 +125,10 @@ describe('getTokenCountFromOpenAIStream', () => {
 
   describe('when a stream fails', () => {
     it('resolves the promise with the correct prompt tokens', async () => {
-      const tokenPromise = getTokenCountFromOpenAIStream({
+      const tokenPromise = getTokenCountFromOpenAI({
         responseStream: stream.transform,
         logger,
-        body: JSON.stringify(body),
+        requestBody: JSON.stringify(body),
       });
 
       stream.fail();

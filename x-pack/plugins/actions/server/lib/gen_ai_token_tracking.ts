@@ -7,17 +7,36 @@
 
 import { PassThrough, Readable } from 'stream';
 import { Logger } from '@kbn/logging';
+import { finished } from 'stream/promises';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { ActionTypeExecutorRawResult } from '../../common';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
+import { getTokenCountFromOpenAI } from './get_token_count_from_openai_stream';
 import { getTokenCountFromInvokeStream, InvokeBody } from './get_token_count_from_invoke_stream';
 
-interface OwnProps {
-  actionTypeId: string;
-  logger: Logger;
-  result: ActionTypeExecutorRawResult<unknown>;
-  validatedParams: Record<string, unknown>;
-}
+type ValidatedParams =
+  | {
+      subAction: 'invokeAI';
+      subActionParams: {
+        messages: Array<{ content: string }>;
+      };
+    }
+  | {
+      subAction: 'run' | 'test';
+      subActionParams: {
+        body: string;
+      };
+    }
+  | {
+      subAction: 'invokeStream';
+      subActionParams: InvokeBody;
+    }
+  | {
+      subAction: 'invokeOpenAiStream';
+      subActionParams: { body: string };
+    };
+
+type ActionTypeId = '.gen-ai' | '.bedrock';
+
 /*
  * Calculates the total, prompt, and completion token counts from different types of responses.
  * It handles both streamed and non-streamed responses from OpenAI and Bedrock.
@@ -27,23 +46,29 @@ interface OwnProps {
  * @param result the result from the action executor
  * @param validatedParams the validated params from the action executor
  */
-export const getGenAiTokenTracking = async ({
+
+export async function getGenAiTokenTracking({
   actionTypeId,
   logger,
   result,
   validatedParams,
-}: OwnProps): Promise<{
+}: {
+  actionTypeId: ActionTypeId;
+  logger: Logger;
+  result: ActionTypeExecutorRawResult<unknown>;
+  validatedParams: ValidatedParams;
+}): Promise<{
   total_tokens: number;
   prompt_tokens: number;
   completion_tokens: number;
-} | null> => {
+} | null> {
   // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
   if (validatedParams.subAction === 'invokeStream' && result.data instanceof Readable) {
     try {
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
         actionTypeId,
-        body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
+        body: validatedParams.subActionParams,
         logger,
       });
       return {
@@ -58,12 +83,18 @@ export const getGenAiTokenTracking = async ({
   }
 
   // this is a streamed OpenAI response, which did not use the subAction invokeStream
-  if (actionTypeId === '.gen-ai' && result.data instanceof Readable) {
+  if (validatedParams.subAction === 'invokeOpenAiStream' && result.data instanceof Readable) {
+    const responseBodyChunks = await getResponseBodyChunksFromStream(
+      result.data.pipe(new PassThrough()),
+      logger
+    );
+
+    const { subActionParams } = validatedParams;
+
     try {
-      const { total, prompt, completion } = await getTokenCountFromOpenAIStream({
-        responseStream: result.data.pipe(new PassThrough()),
-        body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
-        logger,
+      const { total, prompt, completion } = await getTokenCountFromOpenAI({
+        responseBodyChunks,
+        requestBody: subActionParams.body,
       });
       return {
         total_tokens: total,
@@ -128,8 +159,7 @@ export const getGenAiTokenTracking = async ({
           }
         ).message,
         body: JSON.stringify({
-          prompt: (validatedParams as { subActionParams: { messages: Array<{ content: string }> } })
-            .subActionParams.messages[0].content,
+          prompt: validatedParams.subActionParams.messages[0].content,
         }),
       });
 
@@ -144,7 +174,23 @@ export const getGenAiTokenTracking = async ({
     }
   }
   return null;
-};
+}
 
 export const shouldTrackGenAiToken = (actionTypeId: string) =>
   actionTypeId === '.gen-ai' || actionTypeId === '.bedrock';
+
+export async function getResponseBodyChunksFromStream(responseStream: Readable, logger: Logger) {
+  const responseBodyChunks = [] as string[];
+
+  responseStream.on('data', (chunk) => {
+    responseBodyChunks.push(chunk.toString());
+  });
+
+  try {
+    await finished(responseStream);
+  } catch (e) {
+    logger.error('An error occurred while calculating streaming response tokens');
+  }
+
+  return responseBodyChunks;
+}

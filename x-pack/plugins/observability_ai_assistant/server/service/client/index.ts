@@ -7,6 +7,8 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { getResponseBodyChunksFromStream } from '@kbn/actions-plugin/server/lib/gen_ai_token_tracking';
+import { getTokenCountFromOpenAI } from '@kbn/actions-plugin/server/lib/get_token_count_from_openai_stream';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -22,7 +24,7 @@ import {
   shareReplay,
   toArray,
 } from 'rxjs';
-import { Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -501,6 +503,23 @@ export class ObservabilityAIAssistantClient {
         actionId: connectorId,
         params: subAction,
       });
+
+      const responseBodyChunks = await getResponseBodyChunksFromStream(
+        // executeResult.data as Readable,
+        (executeResult.data as Readable).pipe(new PassThrough()),
+        this.dependencies.logger
+      );
+
+      try {
+        const tokenCount = await getTokenCountFromOpenAI({
+          requestBody: subAction.subActionParams.body,
+          responseBodyChunks,
+        });
+
+        console.log({ tokenCount });
+      } catch (e) {
+        console.log('could not get tokens');
+      }
 
       this.dependencies.logger.debug(
         `Received action client response: ${executeResult.status} (took: ${Math.round(

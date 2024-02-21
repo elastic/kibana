@@ -55,7 +55,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
       };
 
       return {
-        subAction: 'stream',
+        subAction: 'invokeOpenAiStream',
         subActionParams: {
           body: JSON.stringify(request),
           stream: true,

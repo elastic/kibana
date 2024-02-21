@@ -339,10 +339,12 @@ export class ActionExecutor {
         // start genai extension
         if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
           getGenAiTokenTracking({
-            actionTypeId,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            actionTypeId: actionTypeId as unknown as any,
             logger,
             result,
-            validatedParams,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            validatedParams: validatedParams as unknown as any,
           })
             .then((tokenTracking) => {
               if (tokenTracking != null) {
