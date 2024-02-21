@@ -837,7 +837,6 @@ export const registerEnterpriseSearchIntegrations = (
         'custom',
         'connector',
         'connector_client',
-        'confluence_data_center',
       ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=confluence',
@@ -905,7 +904,6 @@ export const registerEnterpriseSearchIntegrations = (
         'custom',
         'connector',
         'connector_client',
-        'jira_data_center',
         ...nativeSearchTag,
       ],
       uiInternalPath:
