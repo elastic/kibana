@@ -446,7 +446,7 @@ export class GetPreviewData {
     }));
   }
 
-  private getGroupingsFilter(options: options, filter: estypes.QueryDslQueryContainer[]) {
+  private getGroupingsFilter(options: Options, filter: estypes.QueryDslQueryContainer[]) {
     const groupingsKeys = Object.keys(options.groupings || []);
     if (groupingsKeys.length) {
       groupingsKeys.forEach((key) => {
