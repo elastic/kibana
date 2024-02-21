@@ -9,10 +9,10 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
-import { betaBadgeProps, technicalPreviewBadgeProps } from '../beta_badge_props';
+import { betaBadgeProps } from '../beta_badge_props';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 
 const updateConnectorResponse = {
@@ -321,7 +321,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(queryByText(technicalPreviewBadgeProps.label)).not.toBeInTheDocument();
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
     });
 
     it('shows `tech preview` badge when isExperimental is true', async () => {
@@ -335,7 +335,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(getByText(technicalPreviewBadgeProps.label)).toBeInTheDocument();
+      expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
     });
 
     it('does not show `beta` badge when `isBeta` is `false`', async () => {
