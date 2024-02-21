@@ -7,11 +7,10 @@
 
 import React, { useCallback, useEffect } from 'react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useValues, useActions } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { Chat, EmptyIndex } from '@kbn/ai-playground';
+import { Chat, EmptyIndex, AIPlaygroundProvider, ViewQueryAction } from '@kbn/ai-playground';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
@@ -19,8 +18,6 @@ import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { IndicesLogic } from '../search_indices/indices_logic';
-
-const queryClient = new QueryClient({});
 
 export const AIPlayground: React.FC = () => {
   const { fetchIndices } = useActions(IndicesLogic);
@@ -38,24 +35,25 @@ export const AIPlayground: React.FC = () => {
   }, []);
 
   return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.content.aiPlayground.breadcrumb', {
-          defaultMessage: 'AI Playground',
-        }),
-      ]}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.aiPlayground.headerTitle', {
-          defaultMessage: 'AI Playground',
-        }),
-        rightSideItems: [],
-      }}
-      pageViewTelemetry="AI Playground"
-      isLoading={isLoading}
-      customPageSections
-      bottomBorder="extended"
-    >
-      <QueryClientProvider client={queryClient}>
+    <AIPlaygroundProvider>
+      <EnterpriseSearchContentPageTemplate
+        pageChrome={[
+          i18n.translate('xpack.enterpriseSearch.content.aiPlayground.breadcrumb', {
+            defaultMessage: 'AI Playground',
+          }),
+        ]}
+        pageHeader={{
+          pageTitle: i18n.translate('xpack.enterpriseSearch.content.aiPlayground.headerTitle', {
+            defaultMessage: 'AI Playground',
+          }),
+          rightSideItems: [<ViewQueryAction key="viewQueryAction" />],
+        }}
+        pageViewTelemetry="AI Playground"
+        restrictWidth={false}
+        isLoading={isLoading}
+        customPageSections
+        bottomBorder="extended"
+      >
         {hasNoIndices ? (
           <EmptyIndex onCreateIndexClick={handleNavigateToIndex} />
         ) : (
@@ -69,7 +67,7 @@ export const AIPlayground: React.FC = () => {
             <Chat />
           </EuiPageTemplate.Section>
         )}
-      </QueryClientProvider>
-    </EnterpriseSearchContentPageTemplate>
+      </EnterpriseSearchContentPageTemplate>
+    </AIPlaygroundProvider>
   );
 };

@@ -9,3 +9,4 @@
 
 export * from './chat';
 export * from './empty_index';
+export * from './view_query/view_query_action';

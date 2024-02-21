@@ -73,7 +73,7 @@ export const parseFieldsCapabilities = (
       // if the field is present in all indices, the indices property is not present
       const indicesPresentIn: string[] =
         'unmapped' in field
-          ? indices.filter((index) => field.unmapped.indices!.includes(index))
+          ? indices.filter((index) => !field.unmapped.indices!.includes(index))
           : (indices as unknown as string[]);
 
       for (const index of indicesPresentIn) {
@@ -93,6 +93,7 @@ export const parseFieldsCapabilities = (
           };
           acc[index].dense_vector_query_fields.push(denseVectorField);
         } else if ('text' in field && field.text.searchable) {
+          acc[index].bm25_query_fields.push(fieldKey);
           acc[index].source_fields.push(fieldKey);
         }
       }

@@ -6,6 +6,46 @@
  * Side Public License, v 1.
  */
 
+export const ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS = [
+  {
+    _index: 'workplace_index',
+    _id: '248629d8-64d7-4e91-a4eb-dbd8282d9f24',
+    _score: 1,
+    _ignored: ['metadata.summary.keyword', 'text.keyword'],
+    _source: {
+      metadata: {
+        summary: 'This policy',
+        rolePermissions: ['demo', 'manager'],
+        name: 'Work From Home Policy',
+      },
+      vector: {
+        tokens: {},
+        model_id: '.elser_model_2',
+      },
+      text: 'Effective: March 2020',
+    },
+  },
+  {
+    _index: 'workplace_index2',
+    _id: 'b047762c-24eb-4846-aeb5-808346d54c54',
+    _score: 1,
+    _ignored: ['content.keyword', 'metadata.summary.keyword'],
+    _source: {
+      metadata: {
+        summary:
+          'This policy outlines the guidelines for full-time remote work, including eligibility, equipment and resources, workspace requirements, communication expectations, performance expectations, time tracking and overtime, confidentiality and data security, health and well-being, and policy reviews and updates. Employees are encouraged to direct any questions or concerns',
+        rolePermissions: ['demo', 'manager'],
+        name: 'Work From Home Policy',
+      },
+      content: 'Effective',
+      content_vector: {
+        tokens: {},
+        model_id: '.elser_model_2',
+      },
+    },
+  },
+];
+
 export const ELSER_PASSAGE_CHUNKED_TWO_INDICES = {
   indices: ['workplace_index', 'workplace_index2'],
   fields: {

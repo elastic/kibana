@@ -13,6 +13,7 @@ import {
   IndicesStatsIndexMetadataState,
   Uuid,
   HealthStatus,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export enum MessageRole {
@@ -45,6 +46,7 @@ export enum ChatFormFields {
   prompt = 'prompt',
   openAIKey = 'api_key',
   indices = 'indices',
+  elasticsearchQuery = 'elasticsearch_query',
 }
 
 export interface ChatForm {
@@ -52,7 +54,8 @@ export interface ChatForm {
   [ChatFormFields.prompt]: string;
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.openAIKey]: string;
-  [ChatFormFields.indices]: IndexName[];
+  [ChatFormFields.indices]: string[];
+  [ChatFormFields.elasticsearchQuery]: QueryDslQueryContainer;
 }
 
 export interface AIPlaygroundPluginStartDeps {

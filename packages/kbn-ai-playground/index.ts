@@ -7,3 +7,4 @@
  */
 
 export * from './components';
+export * from './providers/ai_playground_provider';
