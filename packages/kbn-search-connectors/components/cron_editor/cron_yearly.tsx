@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -50,7 +51,7 @@ export const CronYearly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldMonthLabel"
+          id="searchConnectors.cronEditor.cronYearly.fieldMonthLabel"
           defaultMessage="Month"
         />
       }
@@ -63,12 +64,9 @@ export const CronYearly: React.FunctionComponent<Props> = ({
         value={month}
         onChange={(e) => onChange({ month: e.target.value })}
         fullWidth
-        prepend={i18n.translate(
-          'xpack.enterpriseSearch.cronEditor.cronYearly.fieldMonth.textInLabel',
-          {
-            defaultMessage: 'In',
-          }
-        )}
+        prepend={i18n.translate('searchConnectors.cronEditor.cronYearly.fieldMonth.textInLabel', {
+          defaultMessage: 'In',
+        })}
         data-test-subj="cronFrequencyYearlyMonthSelect"
       />
     </EuiFormRow>
@@ -76,7 +74,7 @@ export const CronYearly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldDateLabel"
+          id="searchConnectors.cronEditor.cronYearly.fieldDateLabel"
           defaultMessage="Date"
         />
       }
@@ -89,12 +87,9 @@ export const CronYearly: React.FunctionComponent<Props> = ({
         value={date}
         onChange={(e) => onChange({ date: e.target.value })}
         fullWidth
-        prepend={i18n.translate(
-          'xpack.enterpriseSearch.cronEditor.cronYearly.fieldDate.textOnTheLabel',
-          {
-            defaultMessage: 'On the',
-          }
-        )}
+        prepend={i18n.translate('searchConnectors.cronEditor.cronYearly.fieldDate.textOnTheLabel', {
+          defaultMessage: 'On the',
+        })}
         data-test-subj="cronFrequencyYearlyDateSelect"
       />
     </EuiFormRow>
@@ -102,7 +97,7 @@ export const CronYearly: React.FunctionComponent<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.enterpriseSearch.cronEditor.cronYearly.fieldTimeLabel"
+          id="searchConnectors.cronEditor.cronYearly.fieldTimeLabel"
           defaultMessage="Time"
         />
       }
@@ -115,16 +110,13 @@ export const CronYearly: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronYearly.hourSelectLabel',
-              {
-                defaultMessage: 'Hour',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronYearly.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
             prepend={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronYearly.fieldHour.textAtLabel',
+              'searchConnectors.cronEditor.cronYearly.fieldHour.textAtLabel',
               {
                 defaultMessage: 'At',
               }
@@ -138,12 +130,9 @@ export const CronYearly: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={minuteOptions}
             value={minute}
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.cronEditor.cronYearly.minuteSelectLabel',
-              {
-                defaultMessage: 'Minute',
-              }
-            )}
+            aria-label={i18n.translate('searchConnectors.cronEditor.cronYearly.minuteSelectLabel', {
+              defaultMessage: 'Minute',
+            })}
             onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"
