@@ -26,7 +26,12 @@ import {
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
-import { getNonEmptyStringCodec, InlineScriptString, TimeoutString } from '../common';
+import {
+  getNonEmptyStringCodec,
+  InlineScriptString,
+  NameSpaceString,
+  TimeoutString,
+} from '../common';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -58,7 +63,7 @@ export type MonitorLocations = t.TypeOf<typeof MonitorLocationsCodec>;
 export const CommonFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.NAME]: NonEmptyString,
-    [ConfigKey.NAMESPACE]: t.string,
+    [ConfigKey.NAMESPACE]: NameSpaceString,
     [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: ScheduleCodec,

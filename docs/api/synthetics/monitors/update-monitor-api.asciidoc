@@ -85,7 +85,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 `timeout`:: (Optional, number, default: 16): The monitor timeout in seconds, monitor will fail if it doesn't complete within this time.
 
-`namespace`:: (Optional, string, default: "default"): The namespace.
+`namespace`:: (Optional, string, default: "default"): The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`
 
 `params`:: (Optional, string): Monitor parameters.
 

@@ -8,7 +8,35 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/Either';
 import { i18n } from '@kbn/i18n';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../constants/monitor_management';
+
+export const NameSpaceString = new t.Type<string, string, unknown>(
+  'NameSpaceString',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (typeof input === 'string') {
+      const { error, valid } = isValidNamespace(input, true);
+      if (!valid) {
+        return t.failure(
+          input,
+          context,
+          i18n.translate('xpack.synthetics.namespaceValidation.error', {
+            defaultMessage: 'Invalid namespace: {error}',
+            values: { error },
+          })
+        );
+      }
+
+      return t.success(input);
+    } else {
+      return t.failure(input, context);
+    }
+  },
+  t.identity
+);
+
+export type NameSpaceStringC = typeof NameSpaceString;
 
 export const TimeoutString = new t.Type<string, string, unknown>(
   'TimeoutString',
