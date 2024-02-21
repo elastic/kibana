@@ -21,20 +21,17 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
+import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { flyoutDegradedDocsText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useDatasetQualityContext } from '../../dataset_quality/context';
 import { DegradedDocsChart } from './degraded_docs_chart';
 
-const DEFAULT_TIME_RANGE: TimeRangeConfig = {
-  from: 'now-24h',
-  to: 'now',
-  refresh: { interval: 60000, isPaused: false },
-};
+const DEFAULT_REFRESH = { interval: 60000, isPaused: false };
 
 export function DegradedDocs({
   dataStream,
-  timeRange = DEFAULT_TIME_RANGE,
+  timeRange = { ...DEFAULT_TIME_RANGE, ...DEFAULT_REFRESH },
 }: {
   dataStream?: string;
   timeRange?: TimeRangeConfig;
@@ -54,7 +51,7 @@ export function DegradedDocs({
         timeRange: {
           from: durationRange.start,
           to: durationRange.end,
-          refresh: timeRange.refresh ?? DEFAULT_TIME_RANGE.refresh,
+          refresh: timeRange.refresh ?? DEFAULT_REFRESH,
         },
       });
     },
