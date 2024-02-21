@@ -97,7 +97,7 @@ export const systemMetricsFilter = {
           },
           {
             term: {
-              'metricset.module': 'system',
+              'metricset.module': 'system', // Needed for hosts where metricbeat version < 8
             },
           },
         ],
