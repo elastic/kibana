@@ -61,7 +61,6 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
             invariant(ruleVersions != null, 'ruleVersions not found');
             return calculateRuleDiff(ruleVersions);
           });
-          debugger;
 
           const body: ReviewRuleUpgradeResponseBody = {
             stats: calculateRuleStats(ruleDiffCalculationResults),

@@ -70,25 +70,40 @@ export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
 export const IsRuleImmutable = z.boolean();
 
 /**
- * Determines whether the prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverge from the base value).
+ * Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
  */
-export type IsPrebuiltRuleCustomized = z.infer<typeof IsPrebuiltRuleCustomized>;
-export const IsPrebuiltRuleCustomized = z.boolean();
+export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
+export const IsExternalRuleCustomized = z.boolean();
 
 /**
- * The date and time that the prebuilt rule was last updated by Elastic.
+ * The date and time that the external/prebuilt rule was last updated in its source repository.
  */
-export type ElasticUpdateDate = z.infer<typeof ElasticUpdateDate>;
-export const ElasticUpdateDate = z.string().datetime();
+export type ExternalSourceUpdatedAt = z.infer<typeof ExternalSourceUpdatedAt>;
+export const ExternalSourceUpdatedAt = z.string().datetime();
 
 /**
- * Property whose existence  determines whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. Contains information relating to prebuilt rules.
+ * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
  */
-export type Prebuilt = z.infer<typeof Prebuilt>;
-export const Prebuilt = z.object({
-  isCustomized: IsPrebuiltRuleCustomized,
-  elasticUpdateDate: ElasticUpdateDate.optional(),
+export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
+export const InternalRuleSource = z.object({
+  type: z.literal('internal'),
 });
+
+/**
+ * Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
+ */
+export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
+export const ExternalRuleSource = z.object({
+  type: z.literal('external'),
+  is_customized: IsExternalRuleCustomized,
+  source_updated_at: ExternalSourceUpdatedAt.optional(),
+});
+
+/**
+ * Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
+ */
+export type RuleSource = z.infer<typeof RuleSource>;
+export const RuleSource = z.union([ExternalRuleSource, InternalRuleSource]);
 
 /**
  * Determines whether the rule is enabled.
