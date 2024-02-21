@@ -6,26 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { RecognitionException } from 'antlr4';
+import type { RecognitionException, ATN } from 'antlr4';
 import { default as esql_parser } from '../../antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 
-function getExpectedSymbols(expectedTokens: RecognitionException['expectedTokens']) {
-  const tokenIds = expectedTokens?.toIntegerList().toArray() || [];
-  const list = [];
-  for (const tokenId of tokenIds) {
-    if (esql_parser.symbolicNames[tokenId]) {
-      const symbol = esql_parser.symbolicNames[tokenId];
-      list.push(symbol === 'EOF' ? `<${symbol}>` : symbol);
-    }
-  }
-  return list;
+function getExpectedSymbols(expectedTokens: ReturnType<ATN['getExpectedTokens']>) {
+  return expectedTokens.intervals
+    .reduce(
+      (list, interval) =>
+        list.concat(esql_parser.symbolicNames.slice(interval.start, interval.stop)),
+      [] as Array<string | null>
+    )
+    .filter(Boolean);
 }
 
 export function createError(exception: RecognitionException) {
   const token = exception.offendingToken;
+
   if (token) {
-    const expectedSymbols = getExpectedSymbols(exception.expectedTokens);
+    const expectedSymbols = getExpectedSymbols(
+      // @ts-expect-error method exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/error/RecognitionException.js#L52
+      exception.getExpectedTokens()
+    );
+
     if (
       ['ASTERISK', 'UNQUOTED_IDENTIFIER', 'QUOTED_IDENTIFIER'].every(
         (s, i) => expectedSymbols[i] === s
@@ -38,12 +41,14 @@ export function createError(exception: RecognitionException) {
       };
     }
   }
+
   return {
     type: 'error' as const,
     text: token
-      ? `SyntaxError: expected {${getExpectedSymbols(exception.expectedTokens).join(
-          ', '
-        )}} but found "${token.text}"`
+      ? `SyntaxError: expected {${getExpectedSymbols(
+          // @ts-expect-error method exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/error/RecognitionException.js#L52
+          exception.getExpectedTokens()
+        ).join(', ')}} but found "${token.text}"`
       : exception.message,
     location: getPosition(token),
   };

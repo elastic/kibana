@@ -9,7 +9,7 @@
 import type { Token } from 'antlr4';
 
 export function getPosition(
-  token: Pick<Token, 'start' | 'stop'> | undefined,
+  token: Pick<Token, 'start' | 'stop'> | null,
   lastToken?: Pick<Token, 'stop'> | undefined
 ) {
   if (!token || token.start < 0) {
