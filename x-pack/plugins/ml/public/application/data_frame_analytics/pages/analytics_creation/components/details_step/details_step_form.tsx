@@ -7,7 +7,15 @@
 
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTextArea,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
@@ -21,6 +29,7 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
 import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
+import { useHasRequiredIndicesPermissions } from '../../hooks';
 import { AdditionalSection } from './additional_section';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
@@ -49,6 +58,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   });
 
   const createIndexLink = docLinks.links.apis.createIndex;
+  const startDFAJobLink = docLinks.links.ml.dFAStartJob;
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
@@ -156,8 +166,24 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destIndexSameAsId, jobId]);
 
+  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions(destinationIndex);
+
   return (
     <Fragment>
+      {hasRequiredIndicesPermissions === false ? (
+        <>
+          <EuiCallOut title="You will not be able to start the job." iconType="warning">
+            <p>
+              You can create the job but you may not be able to start it. Check out the{' '}
+              <EuiLink href={startDFAJobLink} target="_blank">
+                documentation
+              </EuiLink>{' '}
+              for more information on requirements.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      ) : null}
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
