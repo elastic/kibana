@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { Embeddable, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Embeddable, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type {
   SavedSearch,
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
+
+import type { Adapters } from '@kbn/embeddable-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+
+import type { DiscoverServices } from '../build_services';
+import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
+import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput;
 
@@ -44,3 +50,14 @@ export const apiHasSavedSearch = (
 export interface HasTimeRange {
   hasTimeRange(): boolean;
 }
+
+export type EmbeddableComponentSearchProps = DiscoverGridEmbeddableSearchProps &
+  DocTableEmbeddableSearchProps;
+
+export type SearchProps = EmbeddableComponentSearchProps & {
+  sampleSizeState: number | undefined;
+  description?: string;
+  sharedItemTitle?: string;
+  inspectorAdapters?: Adapters;
+  services: DiscoverServices;
+};

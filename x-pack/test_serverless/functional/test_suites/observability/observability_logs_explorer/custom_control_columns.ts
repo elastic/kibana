@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render the malformed icon in the last control column if malformed doc exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(1, 4);
-          const malformedButton = await cellElement.findByTestSubject('docTableMalformedDocExist');
+          const malformedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
           expect(malformedButton).to.not.be.empty();
         });
       });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
           const malformedDisableButton = await cellElement.findByTestSubject(
-            'docTableMalformedDocDoesNotExist'
+            'docTableDegradedDocDoesNotExist'
           );
           expect(malformedDisableButton).to.not.be.empty();
         });

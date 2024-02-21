@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  Plugin,
-  CoreSetup,
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreStart,
-} from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -54,7 +48,7 @@ export class TriggersActionsUiExamplePlugin
     core.application.register({
       id: 'triggersActionsUiExample',
       title: 'Triggers Actions UI Example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       // category set as cases expects the label to exist
       category: {
         id: 'fakeId',
