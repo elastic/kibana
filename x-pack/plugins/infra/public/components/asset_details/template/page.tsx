@@ -9,7 +9,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { MetricsPageTemplate } from '../../../pages/metrics/page_template';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
@@ -25,15 +26,44 @@ import { getIntegrationsAvailable } from '../utils';
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
-  const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
+  const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
   const { actionMenuHeight } = useKibanaHeader();
   const trackOnlyOnce = React.useRef(false);
 
   const { activeTabId } = useTabSwitcherContext();
   const {
-    services: { telemetry },
+    services: {
+      telemetry,
+      serverless,
+      observabilityShared: {
+        navigation: { PageTemplate },
+      },
+    },
   } = useKibanaContextForPlugin();
+
+  const parentBreadcrumbResolver = useParentBreadcrumbResolver();
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(asset.type);
+  const breadcrumbs = useMemo(
+    () => [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: asset.name,
+      },
+    ],
+    [breadcrumbOptions, asset.name]
+  );
+
+  useMetricsBreadcrumbs(breadcrumbs);
+  useEffect(() => {
+    if (serverless) {
+      // For deeper context breadcrumbs serveless provides its own breadcrumb service. https://docs.elastic.dev/kibana-dev-docs/serverless-project-navigation#breadcrumbs
+      serverless.setBreadcrumbs(breadcrumbs);
+    }
+  }, [serverless, breadcrumbs]);
 
   useEffect(() => {
     if (trackOnlyOnce.current) {
@@ -65,13 +95,12 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   );
 
   return (
-    <MetricsPageTemplate
-      hasData
+    <PageTemplate
       pageHeader={{
         pageTitle: asset.name,
         tabs: tabEntries,
         rightSideItems,
-        breadcrumbs,
+        breadcrumbs: headerBreadcrumbs,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={asset.type}
@@ -94,6 +123,6 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       ) : (
         <Content />
       )}
-    </MetricsPageTemplate>
+    </PageTemplate>
   );
 };
