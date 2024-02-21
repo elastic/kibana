@@ -11,5 +11,4 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 export const ALERTS_PER_PAGE = 10;
 export const ALERTS_TABLE_ID = 'xpack.infra.hosts.alerts.table';
 
-export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
 export const infraAlertFeatureIds: ValidFeatureId[] = [AlertConsumers.INFRASTRUCTURE];

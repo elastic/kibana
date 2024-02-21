@@ -8,10 +8,10 @@
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../common/constants';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, NONE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
-import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
+import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
@@ -38,6 +38,8 @@ export const useDatasetQualityTable = () => {
     inactive: showInactiveDatasets,
     fullNames: showFullDatasetNames,
     timeRange,
+    integrations,
+    query,
   } = useSelector(service, (state) => state.context.filters);
 
   const flyout = useSelector(service, (state) => state.context.flyout);
@@ -115,10 +117,26 @@ export const useDatasetQualityTable = () => {
     ]
   );
 
-  const filteredItems = useMemo(
-    () => (showInactiveDatasets ? datasets : filterInactiveDatasets({ datasets, timeRange })),
-    [showInactiveDatasets, datasets, timeRange]
-  );
+  const filteredItems = useMemo(() => {
+    const visibleDatasets = showInactiveDatasets
+      ? datasets
+      : filterInactiveDatasets({ datasets, timeRange });
+
+    const filteredByIntegrations =
+      integrations.length > 0
+        ? visibleDatasets.filter((dataset) => {
+            if (!dataset.integration && integrations.includes(NONE)) {
+              return true;
+            }
+
+            return dataset.integration && integrations.includes(dataset.integration.name);
+          })
+        : visibleDatasets;
+
+    return query
+      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
+      : filteredByIntegrations;
+  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
 
   const pagination = {
     pageIndex: page,
@@ -155,7 +173,7 @@ export const useDatasetQualityTable = () => {
   }, [sort.field, sort.direction, filteredItems, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = rowsPerPage * page + 1;
+    const startNumberItemsOnPage = rowsPerPage * page + (renderedItems.length ? 1 : 0);
     const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
     return rowsPerPage === 0 ? (

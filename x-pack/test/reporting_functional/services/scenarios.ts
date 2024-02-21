@@ -80,12 +80,13 @@ export function createScenarios(
   const tryDashboardDownloadCsvFail = async (savedSearchTitle: string) => {
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    await dashboardPanelActions.clickContextMenuMoreItem();
     const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
-    await testSubjects.existOrFail(actionItemTestSubj);
-    /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
-      actionItemTestSubj
-    );
+
+    if (!(await testSubjects.exists(actionItemTestSubj))) {
+      await testSubjects.click('embeddablePanelMore-mainMenu');
+    }
+
+    await testSubjects.click(actionItemTestSubj);
     await testSubjects.existOrFail('downloadCsvFail');
   };
   const tryDashboardDownloadCsvNotAvailable = async (savedSearchTitle: string) => {

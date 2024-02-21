@@ -870,6 +870,29 @@
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.visibleIn",
+            "type": "Array",
+            "tags": [],
+            "label": "visibleIn",
+            "description": [
+              "\nLocations where the link is visible in the UI"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLinkLocations",
+                "text": "AppDeepLinkLocations"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

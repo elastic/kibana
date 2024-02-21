@@ -154,6 +154,7 @@ export function ChatBody({
   }
 
   const containerClassName = css`
+    min-width: 0;
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'
       ? 1200 - 250 + 'px' // page template max width - conversation list width.
