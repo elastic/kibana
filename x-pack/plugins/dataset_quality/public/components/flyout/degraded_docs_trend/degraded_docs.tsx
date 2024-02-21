@@ -31,7 +31,7 @@ const DEFAULT_REFRESH = { interval: 60000, isPaused: false };
 
 export function DegradedDocs({
   dataStream,
-  timeRange = { ...DEFAULT_TIME_RANGE, ...DEFAULT_REFRESH },
+  timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_REFRESH },
 }: {
   dataStream?: string;
   timeRange?: TimeRangeConfig;
