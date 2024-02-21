@@ -155,7 +155,7 @@ export const createPureDatasetsSelectorStateMachine = (
               always: [
                 { cond: 'isDataViewSelection', target: 'dataView' },
                 { cond: 'isAllDatasetSelection', target: 'all' },
-                { cond: 'isSingleDatasetSelection', target: 'single' },
+                { target: 'single' },
               ],
             },
             single: {

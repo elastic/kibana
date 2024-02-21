@@ -19,6 +19,7 @@ import {
   ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
+import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
 import { logsExplorerAppTitle } from '../common/translations';
 import type {
@@ -89,20 +90,26 @@ export class ObservabilityLogsExplorerPlugin
     }
 
     // Register Locators
-    const singleDatasetLocator = share.url.locators.create(
-      new SingleDatasetLocatorDefinition({
-        useHash,
-      })
-    );
     const allDatasetsLocator = share.url.locators.create(
       new AllDatasetsLocatorDefinition({
         useHash,
       })
     );
+    const dataViewLocator = share.url.locators.create(
+      new DataViewLocatorDefinition({
+        useHash,
+      })
+    );
+    const singleDatasetLocator = share.url.locators.create(
+      new SingleDatasetLocatorDefinition({
+        useHash,
+      })
+    );
 
     this.locators = {
-      singleDatasetLocator,
       allDatasetsLocator,
+      dataViewLocator,
+      singleDatasetLocator,
     };
 
     return {

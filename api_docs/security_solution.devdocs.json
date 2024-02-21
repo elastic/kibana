@@ -3085,16 +3085,16 @@
       "children": [
         {
           "parentPluginId": "securitySolution",
-          "id": "def-server.SecuritySolutionPluginSetup.setAppFeaturesConfigurator",
+          "id": "def-server.SecuritySolutionPluginSetup.setProductFeaturesConfigurator",
           "type": "Function",
           "tags": [],
-          "label": "setAppFeaturesConfigurator",
+          "label": "setProductFeaturesConfigurator",
           "description": [
             "\nSets the configurations for app features that are available to the Security Solution"
           ],
           "signature": [
             "(configurator: ",
-            "AppFeaturesConfigurator",
+            "ProductFeaturesConfigurator",
             ") => void"
           ],
           "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
@@ -3104,15 +3104,15 @@
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-server.SecuritySolutionPluginSetup.setAppFeaturesConfigurator.$1",
+              "id": "def-server.SecuritySolutionPluginSetup.setProductFeaturesConfigurator.$1",
               "type": "Object",
               "tags": [],
               "label": "configurator",
               "description": [],
               "signature": [
-                "AppFeaturesConfigurator"
+                "ProductFeaturesConfigurator"
               ],
-              "path": "x-pack/plugins/security_solution/server/lib/app_features_service/app_features_service.ts",
+              "path": "x-pack/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
               "deprecated": false,
               "trackAdoption": false
             }
