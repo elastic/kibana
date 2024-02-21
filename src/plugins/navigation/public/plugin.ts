@@ -6,11 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, ReplaySubject, takeUntil } from 'rxjs';
-import { debounce } from 'lodash';
+import {
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  of,
+  ReplaySubject,
+  takeUntil,
+} from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import {
+  CloudURLs,
+  SolutionNavigationDefinition,
+  SolutionNavigationDefinitions,
+} from '@kbn/core-chrome-browser';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
   STATUS_SOLUTION_NAV_UI_SETTING_ID,
@@ -22,9 +33,11 @@ import {
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
   ConfigSchema,
+  SolutionNavigation,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import { getSideNavComponent } from './side_navigation';
 
 export class NavigationPublicPlugin
   implements
@@ -51,9 +64,12 @@ export class NavigationPublicPlugin
 
   public start(
     core: CoreStart,
-    { unifiedSearch }: NavigationPublicStartDependencies
+    { unifiedSearch, cloud }: NavigationPublicStartDependencies
   ): NavigationPublicStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
+    const chrome = core.chrome as InternalChromeStart;
+
+    this.addDefaultSolutionNavigation({ core, chrome, cloud });
 
     /*
      *
@@ -76,19 +92,33 @@ export class NavigationPublicPlugin
     };
 
     const config = this.initializerContext.config.get();
-    console.log(config);
+    const {
+      solutionNavigation: { featureOn: isSolutionNavigationFeatureOn },
+    } = config;
+
+    core.settings.globalClient
+      .get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
+      .pipe(takeUntil(this.stop$), distinctUntilChanged())
+      .subscribe((enabled) => {});
 
     combineLatest([
       core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
       core.settings.globalClient.get$(STATUS_SOLUTION_NAV_UI_SETTING_ID),
       core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
     ])
-      .pipe(takeUntil(this.stop$))
-      .subscribe(
-        debounce(([enabled, status, defaultSolution]) => {
-          console.log({ enabled, status, defaultSolution });
-        }, 10)
-      );
+      .pipe(takeUntil(this.stop$), debounceTime(10))
+      .subscribe(([enabled, status, defaultSolution]) => {
+        if (!isSolutionNavigationFeatureOn || !enabled) {
+          chrome.project.changeActiveSolutionNavigation(null);
+        } else {
+          const changeImmediately = status === 'visible';
+          chrome.project.changeActiveSolutionNavigation(
+            changeImmediately ? defaultSolution : null,
+            { onlyIfNotSet: true }
+          );
+        }
+        console.log({ enabled, status, defaultSolution });
+      });
 
     return {
       ui: {
@@ -96,10 +126,74 @@ export class NavigationPublicPlugin
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
+      addSolutionNavigation: this.addSolutionNavigation.bind(this),
     };
   }
 
   public stop() {
     this.stop$.next();
+  }
+
+  private addSolutionNavigation(solutionNavigation: SolutionNavigation) {
+    // TODO: Implement. This handler will allow any plugin (e.g. security) to register a solution navigation.
+  }
+
+  private addDefaultSolutionNavigation({
+    core,
+    chrome,
+    cloud = {},
+  }: {
+    core: CoreStart;
+    chrome: InternalChromeStart;
+    cloud?: CloudURLs;
+  }) {
+    const { project } = chrome;
+    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
+    const navigationTreeUi$ = project.getNavigationTreeUi$();
+
+    const sideNavComponentGetter: SolutionNavigationDefinition['sideNavComponentGetter'] = () => {
+      // Temp. In future work this will be loaded from a package
+      const navigationTree$ = of({
+        body: [],
+      });
+
+      project.initNavigation(navigationTree$, { cloudUrls: cloud });
+
+      return getSideNavComponent({
+        navProps: {
+          navigationTree$: navigationTreeUi$,
+        },
+        deps: {
+          core,
+          activeNodes$: activeNavigationNodes$,
+        },
+      });
+    };
+
+    const solutionNavs: SolutionNavigationDefinitions = {
+      es: {
+        id: 'es',
+        title: 'Search',
+        icon: 'logoElasticsearch',
+        homePage: 'discover', // Temp. Wil be updated when all links are registered
+        sideNavComponentGetter,
+      },
+      oblt: {
+        id: 'oblt',
+        title: 'Observability',
+        icon: 'logoObservability',
+        homePage: 'discover', // Temp. Wil be updated when all links are registered
+        sideNavComponentGetter,
+      },
+      security: {
+        id: 'security',
+        title: 'Security',
+        icon: 'logoSecurity',
+        homePage: 'discover', // Temp. Wil be updated when all links are registered
+        sideNavComponentGetter,
+      },
+    };
+
+    chrome.project.updateSolutionNavigations(solutionNavs, true);
   }
 }

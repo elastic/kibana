@@ -26,7 +26,6 @@ import type {
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
 
-import type { ChromeStyle } from './types';
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
