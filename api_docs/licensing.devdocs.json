@@ -824,7 +824,7 @@
             },
             {
               "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/plugin.ts"
+              "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts"
             },
             {
               "plugin": "profiling",
