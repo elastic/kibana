@@ -18,7 +18,10 @@ import {
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../../../common/functions/visualize_esql';
 import { FunctionVisibility, MessageRole } from '../../../common/types';
-import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import {
+  concatenateChatCompletionChunks,
+  type ConcatenatedMessage,
+} from '../../../common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '../../service/util/create_function_response_message';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
@@ -74,7 +77,7 @@ export function registerQueryFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.AssistantOnly,
-      description: 'Display the results of an ES|QL query.',
+      description: 'Display the results of an ES|QL query',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -104,7 +107,7 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
@@ -262,33 +265,7 @@ export function registerQueryFunction({
         'answer_esql_question',
         {
           messages: [
-            ...withEsqlSystemMessage(
-              `Format every ES|QL query as Markdown:
-              \`\`\`esql
-              <query>
-              \`\`\`
-
-              Prefer to use commands and functions for which you have requested documentation.
-
-              ${userIntentionMessage}
-
-              DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-              as mentioned in the system message and documentation.
-              
-              Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
-              functions in stats commands, NOT in SORT or EVAL.
-              Rationale: Only aggregation functions are supported in STATS commands, and aggregation
-              functions are only supported in STATS commands. 
-              Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
-              Do not use aggregation functions anywhere else, such as SORT or EVAL.
-              Example:
-              \`\`\`esql
-              EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
-              | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-              \`\`\`
-              
-              `
-            ),
+            ...withEsqlSystemMessage(),
             {
               '@timestamp': new Date().toISOString(),
               message: {
@@ -311,6 +288,66 @@ export function registerQueryFunction({
                 }),
               },
             },
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                content: `Answer the user's question that was previously asked using the attached documentation.
+
+                Format any ES|QL query as follows:
+                \`\`\`esql
+                <query>
+                \`\`\`
+  
+                Prefer to use commands and functions for which you have requested documentation.
+  
+                ${
+                  args.intention !== VisualizeESQLUserIntention.generateQueryOnly
+                    ? `DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
+                    If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
+                    
+                    Human: plot both yesterday's and today's data.
+                    
+                    Assistant: Here's how you can plot yesterday's data:
+                    \`\`\`esql
+                    <query>
+                    \`\`\`
+  
+                    Let's see that first. We'll look at today's data next.
+  
+                    Human: <response from yesterday's data>
+  
+                    Assistant: Let's look at today's data:
+  
+                    \`\`\`esql
+                    <query>
+                    \`\`\`
+                    `
+                    : ''
+                }
+  
+                ${userIntentionMessage}
+  
+                DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
+                as mentioned in the system message and documentation. When converting queries from one language
+                to ES|QL, make sure that the functions are available and documented in ES|QL.
+                E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
+                
+                Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
+                functions in stats commands, NOT in SORT or EVAL.
+                Rationale: Only aggregation functions are supported in STATS commands, and aggregation
+                functions are only supported in STATS commands. 
+                Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
+                Do not use aggregation functions anywhere else, such as SORT or EVAL.
+                Example:
+                \`\`\`esql
+                EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
+                | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
+                \`\`\`
+                
+                `,
+              },
+            },
           ],
           connectorId,
           signal,
@@ -323,20 +360,36 @@ export function registerQueryFunction({
             /```esql([\s\S]*?)```/
           )?.[1];
 
+          let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
+
+          if (
+            !args.intention ||
+            !esqlQuery ||
+            args.intention === VisualizeESQLUserIntention.generateQueryOnly
+          ) {
+            functionCall = undefined;
+          } else if (args.intention === VisualizeESQLUserIntention.executeAndReturnResults) {
+            functionCall = {
+              name: 'execute_query',
+              arguments: JSON.stringify({ query: esqlQuery }),
+              trigger: MessageRole.Assistant as const,
+            };
+          } else {
+            functionCall = {
+              name: 'visualize_query',
+              arguments: JSON.stringify({ query: esqlQuery, intention: args.intention }),
+              trigger: MessageRole.Assistant as const,
+            };
+          }
+
           return {
             ...msg,
             message: {
               ...msg.message,
               content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
-              ...(esqlQuery &&
-              args.intention &&
-              args.intention !== VisualizeESQLUserIntention.generateQueryOnly
+              ...(functionCall
                 ? {
-                    function_call: {
-                      name: 'visualize_query',
-                      arguments: JSON.stringify({ query: esqlQuery, intention: args.intention }),
-                      trigger: MessageRole.Assistant as const,
-                    },
+                    function_call: functionCall,
                   }
                 : {}),
             },
