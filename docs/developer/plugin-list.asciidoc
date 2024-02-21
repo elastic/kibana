@@ -161,7 +161,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -613,7 +613,7 @@ Index Management by running this series of requests in Console:
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
 
