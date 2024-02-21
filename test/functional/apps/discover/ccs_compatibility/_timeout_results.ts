@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.exists('searchResponseWarningsCallout');
 
       // Timed out error notification is shown
-      const { title } = await toasts.getErrorToast(1, true);
+      const { title } = await toasts.getErrorByIndex(1, true);
       expect(title).to.be('Timed out');
 
       // View cluster details shows timed out
