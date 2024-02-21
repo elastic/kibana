@@ -38,7 +38,7 @@ export const ControlGroupStrings = {
             'controls.controlGroup.invalidControlWarning.tourStepContent.rangeSlider',
             {
               defaultMessage:
-                'The selected range is returning no results. To see the full results, change your selected range.',
+                'The selected range is returning no results. For full results, change the selected range.',
             }
           );
         }
@@ -47,7 +47,7 @@ export const ControlGroupStrings = {
             'controls.controlGroup.invalidControlWarning.tourStepContent.default',
             {
               defaultMessage:
-                'Some selections are returning no results. To see the full results, change your selections.',
+                'Some selections are returning no results. For full results, change the selections.',
             }
           );
         }
