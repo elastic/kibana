@@ -24,10 +24,6 @@ import { useObservabilityAIAssistantParams } from '../../hooks/use_observability
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';
 
-const containerClassName = css`
-  max-width: 100%;
-`;
-
 const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 export function ConversationView() {
@@ -120,6 +116,10 @@ export function ConversationView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const containerClassName = css`
+    max-width: 100%;
+  `;
+
   const conversationListContainerName = css`
     min-width: 250px;
     width: 250px;
@@ -150,67 +150,65 @@ export function ConversationView() {
   `;
 
   return (
-    <>
-      <EuiFlexGroup direction="row" className={containerClassName} gutterSize="none">
-        <EuiFlexItem grow={false} className={conversationListContainerName}>
-          <ConversationList
-            selected={conversationId ?? ''}
-            onClickNewChat={() => {
-              if (conversationId) {
-                observabilityAIAssistantRouter.push('/conversations/new', {
-                  path: {},
-                  query: {},
-                });
-              } else {
-                // clear the chat
-                chatBodyKeyRef.current = v4();
-                forceUpdate();
-              }
-            }}
-            onClickChat={(id) => {
-              navigateToConversation(id, false);
-            }}
-            onClickDeleteConversation={(id) => {
-              if (conversationId === id) {
-                navigateToConversation(undefined, false);
-              }
-            }}
+    <EuiFlexGroup direction="row" className={containerClassName} gutterSize="none">
+      <EuiFlexItem grow={false} className={conversationListContainerName}>
+        <ConversationList
+          selected={conversationId ?? ''}
+          onClickNewChat={() => {
+            if (conversationId) {
+              observabilityAIAssistantRouter.push('/conversations/new', {
+                path: {},
+                query: {},
+              });
+            } else {
+              // clear the chat
+              chatBodyKeyRef.current = v4();
+              forceUpdate();
+            }
+          }}
+          onClickChat={(id) => {
+            navigateToConversation(id, false);
+          }}
+          onClickDeleteConversation={(id) => {
+            if (conversationId === id) {
+              navigateToConversation(undefined, false);
+            }
+          }}
+        />
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+
+      {!chatService.value ? (
+        <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="xl" />
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+
+      {chatService.value && (
+        <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+          <ChatBody
+            key={chatBodyKeyRef.current}
+            currentUser={currentUser}
+            connectors={connectors}
+            initialConversationId={conversationId}
+            knowledgeBase={knowledgeBase}
+            showLinkToConversationsApp={false}
+            startedFrom="conversationView"
+            onConversationUpdate={handleConversationUpdate}
           />
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
 
-        {!chatService.value ? (
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xl" />
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
-
-        {chatService.value && (
-          <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
-            <ChatBody
-              key={chatBodyKeyRef.current}
-              currentUser={currentUser}
-              connectors={connectors}
-              initialConversationId={conversationId}
-              knowledgeBase={knowledgeBase}
-              showLinkToConversationsApp={false}
-              startedFrom="conversationView"
-              onConversationUpdate={handleConversationUpdate}
+          <div className={sidebarContainerClass}>
+            <ChatInlineEditingContent
+              setContainer={setSecondSlotContainer}
+              visible={isSecondSlotVisible}
+              style={{ width: '100%' }}
             />
-
-            <div className={sidebarContainerClass}>
-              <ChatInlineEditingContent
-                setContainer={setSecondSlotContainer}
-                visible={isSecondSlotVisible}
-                style={{ width: '100%' }}
-              />
-            </div>
-          </ObservabilityAIAssistantChatServiceProvider>
-        )}
-      </EuiFlexGroup>
-    </>
+          </div>
+        </ObservabilityAIAssistantChatServiceProvider>
+      )}
+    </EuiFlexGroup>
   );
 }

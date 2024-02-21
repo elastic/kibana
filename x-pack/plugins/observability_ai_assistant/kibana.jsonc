@@ -10,6 +10,7 @@
     "requiredPlugins": [
       "alerting",
       "actions",
+      "data",
       "dataViews",
       "features",
       "lens",
@@ -24,10 +25,8 @@
       "dataViews",
       "ml"
     ],
-    "requiredBundles": [ "kibanaReact", "kibanaUtils"],
-    "optionalPlugins": [
-      "cloud"
-    ],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }
 }

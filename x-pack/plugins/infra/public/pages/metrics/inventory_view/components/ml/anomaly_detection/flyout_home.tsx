@@ -108,14 +108,18 @@ export const FlyoutHome = (props: Props) => {
 
         <EuiTabs>
           <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
-            Jobs
+            {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
+              defaultMessage: 'Jobs',
+            })}
           </EuiTab>
           <EuiTab
             isSelected={tab === 'anomalies'}
             onClick={() => setTab('anomalies')}
             data-test-subj="anomalyFlyoutAnomaliesTab"
           >
-            Anomalies
+            {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
+              defaultMessage: 'Anomalies',
+            })}
           </EuiTab>
         </EuiTabs>
 
@@ -157,7 +161,11 @@ export const FlyoutHome = (props: Props) => {
                 </>
               )}
               <EuiText>
-                <h4>Create ML Jobs</h4>
+                <h4>
+                  {i18n.translate('xpack.infra.ml.anomalyFlyout.createMLJobsLabel', {
+                    defaultMessage: 'Create ML Jobs',
+                  })}
+                </h4>
                 <p>
                   <FormattedMessage
                     defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."

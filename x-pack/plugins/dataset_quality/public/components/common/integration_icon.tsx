@@ -8,6 +8,7 @@
 import { EuiIcon } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import React from 'react';
+import { NONE } from '../../../common/constants';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import loggingIcon from '../../icons/logging.svg';
 
@@ -16,7 +17,7 @@ interface IntegrationIconProps {
 }
 
 export const IntegrationIcon = ({ integration }: IntegrationIconProps) => {
-  return integration ? (
+  return integration && integration.name !== NONE ? (
     <PackageIcon
       packageName={integration.name}
       version={integration.version!}

@@ -1620,6 +1620,8 @@
       "@kbn/timelines-plugin/*": ["x-pack/plugins/timelines/*"],
       "@kbn/timelion-grammar": ["packages/kbn-timelion-grammar"],
       "@kbn/timelion-grammar/*": ["packages/kbn-timelion-grammar/*"],
+      "@kbn/timerange": ["packages/kbn-timerange"],
+      "@kbn/timerange/*": ["packages/kbn-timerange/*"],
       "@kbn/tinymath": ["packages/kbn-tinymath"],
       "@kbn/tinymath/*": ["packages/kbn-tinymath/*"],
       "@kbn/tooling-log": ["packages/kbn-tooling-log"],

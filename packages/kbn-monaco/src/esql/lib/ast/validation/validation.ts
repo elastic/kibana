@@ -38,6 +38,7 @@ import {
   hasCCSSource,
   isSettingItem,
   isAssignment,
+  isVariable,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -52,7 +53,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId } from './errors';
+import { getMessageFromId, getUnknownTypeLabel } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -176,16 +177,41 @@ function validateFunctionColumnArg(
     if (actualArg.name) {
       const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
       if (!columnCheck) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownColumn',
-            values: {
-              name: actualArg.name,
-            },
-            locations: actualArg.location,
-          })
-        );
+        if (argDef.literalOnly) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'expectedConstant',
+              values: {
+                fn: astFunction.name,
+                given: getUnknownTypeLabel(),
+              },
+              locations: actualArg.location,
+            })
+          );
+        } else {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownColumn',
+              values: {
+                name: actualArg.name,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
       } else {
+        if (argDef.literalOnly) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'expectedConstant',
+              values: {
+                fn: astFunction.name,
+                given: actualArg.name,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
         if (actualArg.name === '*') {
           // if function does not support wildcards return a specific error
           if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
@@ -201,11 +227,9 @@ function validateFunctionColumnArg(
           }
           // do not validate any further for now, only count() accepts wildcard as args...
         } else {
-          // guaranteed by the check above
-          const columnHit = getColumnHit(nameHit!, references);
-          // check the type of the column hit
-          const typeHit = columnHit!.type;
           if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+            // guaranteed by the check above
+            const columnHit = getColumnHit(nameHit!, references);
             messages.push(
               getMessageFromId({
                 messageId: 'wrongArgumentType',
@@ -213,7 +237,7 @@ function validateFunctionColumnArg(
                   name: astFunction.name,
                   argType: argDef.type,
                   value: actualArg.name,
-                  givenType: typeHit,
+                  givenType: columnHit!.type,
                 },
                 locations: actualArg.location,
               })
@@ -231,16 +255,16 @@ function extractCompatibleSignaturesForFunction(
   astFunction: ESQLFunction
 ) {
   return fnDef.signatures.filter((def) => {
-    if (def.infiniteParams && astFunction.args.length > 0) {
-      return true;
+    if (def.infiniteParams) {
+      return astFunction.args.length > 0;
     }
-    if (def.minParams && astFunction.args.length >= def.minParams) {
-      return true;
+    if (def.minParams) {
+      return astFunction.args.length >= def.minParams;
     }
-    if (astFunction.args.length === def.params.length) {
-      return true;
-    }
-    return astFunction.args.length === def.params.filter(({ optional }) => !optional).length;
+    return (
+      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
+      astFunction.args.length <= def.params.length
+    );
   });
 }
 
@@ -298,19 +322,53 @@ function validateFunction(
   }
   const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
-    const numArgs = fnDefinition.signatures[0].params.filter(({ optional }) => !optional).length;
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentNumber',
-        values: {
-          fn: astFunction.name,
-          numArgs,
-          passedArgs: astFunction.args.length,
-          exactly: fnDefinition.signatures[0].params.length - numArgs,
-        },
-        locations: astFunction.location,
-      })
-    );
+    const refSignature = fnDefinition.signatures[0];
+    const numArgs =
+      refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
+    if (
+      !refSignature.minParams &&
+      refSignature.params.filter(({ optional }) => !optional).length === refSignature.params.length
+    ) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumber',
+          values: {
+            fn: astFunction.name,
+            numArgs:
+              refSignature.minParams ??
+              refSignature.params.filter(({ optional }) => !optional).length,
+            passedArgs: astFunction.args.length,
+          },
+          locations: astFunction.location,
+        })
+      );
+    } else if (Math.max(astFunction.args.length - refSignature.params.length, 0) > 0) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumberTooMany',
+          values: {
+            fn: astFunction.name,
+            numArgs: refSignature.params.length,
+            passedArgs: astFunction.args.length,
+            extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+          },
+          locations: astFunction.location,
+        })
+      );
+    } else {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumberTooFew',
+          values: {
+            fn: astFunction.name,
+            numArgs,
+            passedArgs: astFunction.args.length,
+            missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+          },
+          locations: astFunction.location,
+        })
+      );
+    }
   }
   // now perform the same check on all functions args
   for (const arg of astFunction.args) {
@@ -584,10 +642,10 @@ function validateColumnForCommand(
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
         ({ type, innerType }) => type === 'column' && innerType
       );
+      // this should be guaranteed by the columnCheck above
+      const columnRef = getColumnHit(nameHit, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        // this should be guaranteed by the columnCheck above
-        const columnRef = getColumnHit(nameHit, references)!;
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
           return innerType !== 'any' && innerType !== columnRef.type;
         });
@@ -611,6 +669,7 @@ function validateColumnForCommand(
       }
       if (
         hasWildcard(nameHit) &&
+        !isVariable(columnRef) &&
         !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
       ) {
         messages.push(
@@ -681,8 +740,8 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             getMessageFromId({
               messageId: 'unknownAggregateFunction',
               values: {
-                command: command.name.toUpperCase(),
                 value: (arg as ESQLSingleAstItem).name,
+                type: 'FieldAttribute',
               },
               locations: (arg as ESQLSingleAstItem).location,
             })

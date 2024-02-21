@@ -8,15 +8,16 @@
 import { EuiSelectableOption } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { useIsMutating } from '@tanstack/react-query';
-import { QuickFilters } from './common/quick_filters';
+import { Query } from '@kbn/es-query';
+import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { useKibana } from '../../../utils/kibana_react';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/slo/constants';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
-import { ObservabilityPublicPluginsStart } from '../../..';
-import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
+import { observabilityAppId, ObservabilityPublicPluginsStart } from '../../..';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { QuickFilters } from './common/quick_filters';
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
 export type SortDirection = 'asc' | 'desc';
@@ -30,57 +31,62 @@ export type Item<T> = EuiSelectableOption & {
 export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar() {
-  const { state, onStateChange: onChange } = useUrlSearchState();
-  const { kqlQuery, filters } = state;
-
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
-  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
-  const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-
-  const loading = isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo;
-
-  const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  });
-
-  const onStateChange = (newState: Partial<SearchState>) => {
-    onChange({ page: 0, ...newState });
-  };
-
   const {
+    data: { query },
     unifiedSearch: {
       ui: { SearchBar },
     },
   } = useKibana<ObservabilityPublicPluginsStart>().services;
 
+  const { state, onStateChange } = useUrlSearchState();
+  const loading = useSloCrudLoading();
+
+  const { dataView } = useCreateDataView({
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  });
+
+  useEffect(() => {
+    const sub = query.state$.subscribe(() => {
+      const queryState = query.getState();
+      onStateChange({
+        kqlQuery: String((queryState.query as Query).query),
+        filters: queryState.filters,
+      });
+    });
+
+    return () => sub.unsubscribe();
+  }, [onStateChange, query]);
+
   return (
-    <Container ref={containerRef}>
+    <Container>
       <SearchBar
-        appName="observability"
-        placeholder={i18n.translate('xpack.observability.slo.list.search', {
-          defaultMessage: 'Search your SLOs...',
-        })}
+        appName={observabilityAppId}
+        placeholder={PLACEHOLDER}
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={loading}
         renderQueryInputAppend={() => (
           <QuickFilters initialState={state} loading={loading} onStateChange={onStateChange} />
         )}
-        filters={filters}
+        filters={state.filters}
         onFiltersUpdated={(newFilters) => {
           onStateChange({ filters: newFilters });
         }}
         onQuerySubmit={({ query: value }) => {
           onStateChange({ kqlQuery: String(value?.query), lastRefresh: Date.now() });
         }}
-        query={{ query: String(kqlQuery), language: 'kuery' }}
+        query={{ query: String(state.kqlQuery), language: 'kuery' }}
         showSubmitButton={true}
         showDatePicker={false}
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
         saveQueryMenuVisibility="globally_managed"
+        onClearSavedQuery={() => {}}
+        onSavedQueryUpdated={(savedQuery) => {
+          onStateChange({
+            filters: savedQuery.attributes.filters,
+            kqlQuery: String(savedQuery.attributes.query.query),
+          });
+        }}
       />
     </Container>
   );
@@ -91,3 +97,7 @@ const Container = styled.div`
     padding: 0;
   }
 `;
+
+const PLACEHOLDER = i18n.translate('xpack.observability.slo.list.search', {
+  defaultMessage: 'Search your SLOs ...',
+});
