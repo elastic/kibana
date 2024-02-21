@@ -22,7 +22,7 @@ import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class MetricCustomTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public async getTransformParams(slo: SLO): Promise<TransformPutTransformRequest> {
     if (!metricCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }

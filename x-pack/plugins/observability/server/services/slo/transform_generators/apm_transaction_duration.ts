@@ -25,7 +25,7 @@ import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public async getTransformParams(slo: SLO): Promise<TransformPutTransformRequest> {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }

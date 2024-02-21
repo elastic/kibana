@@ -11,15 +11,16 @@ import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import styled from 'styled-components';
 import { kqlQuerySchema } from '@kbn/slo-schema';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { observabilityAppId } from '../../../../../common';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
 import { OptionalText } from './optional_text';
 
 export interface Props {
   dataTestSubj: string;
-  indexPatternString: string | undefined;
+  dataView?: DataView;
+  dataViewId?: string;
   label: string;
   name: FieldPath<CreateSLOForm>;
   placeholder: string;
@@ -29,12 +30,12 @@ export interface Props {
 
 export function QueryBuilder({
   dataTestSubj,
-  indexPatternString,
   label,
   name,
   placeholder,
   required,
   tooltip,
+  dataView,
 }: Props) {
   const {
     unifiedSearch: {
@@ -43,10 +44,6 @@ export function QueryBuilder({
   } = useKibana().services;
 
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-
-  const { dataView } = useCreateDataView({
-    indexPatternString,
-  });
 
   return (
     <EuiFormRow

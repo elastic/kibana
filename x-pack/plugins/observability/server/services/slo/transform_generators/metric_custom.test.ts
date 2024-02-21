@@ -25,7 +25,7 @@ describe('Metric Custom Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid equation/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid equation/);
     });
     it('throws when the good filter is invalid', () => {
       const anSLO = createSLO({
@@ -36,9 +36,9 @@ describe('Metric Custom Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
     });
-    it('throws when the total equation is invalid', () => {
+    it('throws when the total equation is invalid', async () => {
       const anSLO = createSLO({
         indicator: createMetricCustomIndicator({
           total: {
@@ -47,7 +47,7 @@ describe('Metric Custom Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid equation/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid equation/);
     });
     it('throws when the total filter is invalid', () => {
       const anSLO = createSLO({
@@ -58,19 +58,19 @@ describe('Metric Custom Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+      expect(() => generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
     });
     it('throws when the query_filter is invalid', () => {
       const anSLO = createSLO({
         indicator: createMetricCustomIndicator({ filter: '{ kql.query: invalid' }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+      expect(() => generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ id: 'irrelevant', indicator: createMetricCustomIndicator() });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -80,7 +80,7 @@ describe('Metric Custom Transform Generator', () => {
       id: 'irrelevant',
       indicator: createMetricCustomIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -89,7 +89,7 @@ describe('Metric Custom Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createMetricCustomIndicator({ filter: 'labels.groupId: group-4' }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -98,7 +98,7 @@ describe('Metric Custom Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createMetricCustomIndicator({ index: 'my-own-index*' }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -109,7 +109,7 @@ describe('Metric Custom Transform Generator', () => {
         timestampField: 'my-date-field',
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -125,7 +125,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -139,7 +139,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -155,7 +155,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -169,7 +169,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -183,7 +183,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
@@ -197,7 +197,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
@@ -211,7 +211,7 @@ describe('Metric Custom Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });

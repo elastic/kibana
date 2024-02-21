@@ -15,14 +15,16 @@ import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
-import { IndexSelection } from '../custom_common/index_selection';
+import { DATA_VIEW_FIELD, IndexSelection } from '../custom_common/index_selection';
 
 export function CustomKqlIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,
+    dataViewId,
   });
   const timestampFields = dataView?.fields?.filter((field) => field.type === 'date') ?? [];
 
@@ -52,7 +54,7 @@ export function CustomKqlIndicatorTypeForm() {
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormQueryFilterInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
             defaultMessage: 'Query filter',
           })}
@@ -79,7 +81,7 @@ export function CustomKqlIndicatorTypeForm() {
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormGoodQueryInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
             defaultMessage: 'Good query',
           })}
@@ -109,7 +111,7 @@ export function CustomKqlIndicatorTypeForm() {
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormTotalQueryInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
             defaultMessage: 'Total query',
           })}

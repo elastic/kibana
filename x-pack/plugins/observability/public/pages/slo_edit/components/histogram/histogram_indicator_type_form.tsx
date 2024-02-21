@@ -74,7 +74,7 @@ export function HistogramIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="histogramIndicatorFormQueryFilterInput"
-            indexPatternString={watch('indicator.params.index')}
+            dataView={dataView}
             label={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.queryFilter', {
               defaultMessage: 'Query filter',
             })}

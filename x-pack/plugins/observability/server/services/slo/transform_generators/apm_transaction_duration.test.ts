@@ -16,24 +16,24 @@ import { ApmTransactionDurationTransformGenerator } from './apm_transaction_dura
 const generator = new ApmTransactionDurationTransformGenerator();
 
 describe('APM Transaction Duration Transform Generator', () => {
-  it('returns the expected transform params with every specified indicator params', () => {
+  it('returns the expected transform params with every specified indicator params', async () => {
     const slo = createSLO({ id: 'irrelevant', indicator: createAPMTransactionDurationIndicator() });
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });
 
-  it('returns the expected transform params for timeslices slo', () => {
+  it('returns the expected transform params for timeslices slo', async () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'irrelevant',
       indicator: createAPMTransactionDurationIndicator(),
     });
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });
 
-  it("does not include the query filter when params are '*'", () => {
+  it("does not include the query filter when params are '*'", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         environment: ALL_VALUE,
@@ -42,36 +42,36 @@ describe('APM Transaction Duration Transform Generator', () => {
         transactionType: ALL_VALUE,
       }),
     });
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
   });
 
-  it('uses the provided index params as source index', () => {
+  it('uses the provided index params as source index', async () => {
     const index = 'my-custom-apm-index*';
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         index,
       }),
     });
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.index).toEqual(index);
   });
 
-  it('adds the custom kql filter to the query', () => {
+  it('adds the custom kql filter to the query', async () => {
     const filter = `"my.field" : "value" and ("foo" >= 12 or "bar" <= 100)`;
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         filter,
       }),
     });
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
   });
 
-  it("groups by the 'service.name'", () => {
+  it("groups by the 'service.name'", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         service: 'my-service',
@@ -81,13 +81,13 @@ describe('APM Transaction Duration Transform Generator', () => {
       }),
     });
 
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
   });
 
-  it("groups by the 'service.environment'", () => {
+  it("groups by the 'service.environment'", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         service: ALL_VALUE,
@@ -97,13 +97,13 @@ describe('APM Transaction Duration Transform Generator', () => {
       }),
     });
 
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
   });
 
-  it("groups by the 'transaction.name'", () => {
+  it("groups by the 'transaction.name'", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         service: ALL_VALUE,
@@ -113,13 +113,13 @@ describe('APM Transaction Duration Transform Generator', () => {
       }),
     });
 
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
   });
 
-  it("groups by the 'transaction.type'", () => {
+  it("groups by the 'transaction.type'", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator({
         service: ALL_VALUE,
@@ -129,7 +129,7 @@ describe('APM Transaction Duration Transform Generator', () => {
       }),
     });
 
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();

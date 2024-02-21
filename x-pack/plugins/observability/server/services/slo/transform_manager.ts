@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewsService } from '@kbn/data-views-plugin/server';
 import { SLO, IndicatorTypes } from '../../domain/models';
 import { SecurityException } from '../../errors';
 import { retryTransientEsErrors } from '../../utils/retry';
@@ -17,7 +18,7 @@ type TransformId = string;
 
 export interface TransformManager {
   install(slo: SLO): Promise<TransformId>;
-  inspect(slo: SLO): TransformPutTransformRequest;
+  inspect(slo: SLO): Promise<TransformPutTransformRequest>;
   preview(transformId: TransformId): Promise<void>;
   start(transformId: TransformId): Promise<void>;
   stop(transformId: TransformId): Promise<void>;
@@ -28,7 +29,8 @@ export class DefaultTransformManager implements TransformManager {
   constructor(
     private generators: Record<IndicatorTypes, TransformGenerator>,
     private esClient: ElasticsearchClient,
-    private logger: Logger
+    private logger: Logger,
+    private dataViewService: DataViewsService
   ) {}
 
   async install(slo: SLO): Promise<TransformId> {
@@ -38,7 +40,7 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    const transformParams = generator.getTransformParams(slo);
+    const transformParams = await generator.getTransformParams(slo, this.dataViewService);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,
@@ -55,14 +57,14 @@ export class DefaultTransformManager implements TransformManager {
     return transformParams.transform_id;
   }
 
-  inspect(slo: SLO): TransformPutTransformRequest {
+  async inspect(slo: SLO): Promise<TransformPutTransformRequest> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
       this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    return generator.getTransformParams(slo);
+    return await generator.getTransformParams(slo, this.dataViewService);
   }
 
   async preview(transformId: string): Promise<void> {

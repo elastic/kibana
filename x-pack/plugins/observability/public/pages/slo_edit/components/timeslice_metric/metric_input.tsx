@@ -16,6 +16,7 @@ import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
@@ -73,7 +74,9 @@ export function MetricInput({
   );
   const [aggregationOptions, setAggregationOptions] = useState(AGGREGATION_OPTIONS);
   const [fieldOptions, setFieldOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
-
+  const { dataView } = useCreateDataView({
+    indexPatternString: watch('indicator.params.index'),
+  });
   useEffect(() => {
     setMetricFields(
       indexFields.filter((field) =>
@@ -266,7 +269,7 @@ export function MetricInput({
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="timesliceMetricIndicatorFormMetricQueryInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={`${filterLabel} ${metric.name}`}
           name={`indicator.params.metric.metrics.${index}.filter`}
           placeholder={i18n.translate(

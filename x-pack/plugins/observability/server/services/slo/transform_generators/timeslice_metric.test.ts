@@ -34,7 +34,7 @@ describe('Timeslice Metric Transform Generator', () => {
           '(A / 200) + A'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(
         'The sli.metric.timeslice indicator MUST have a timeslice budgeting method.'
       );
     });
@@ -45,7 +45,7 @@ describe('Timeslice Metric Transform Generator', () => {
           '(a / 200) + A'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid equation/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid equation/);
     });
     it('throws when the metric filter is invalid', () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
@@ -54,7 +54,7 @@ describe('Timeslice Metric Transform Generator', () => {
           '(A / 200) + A'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: test:/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: test:/);
     });
     it('throws when the query_filter is invalid', () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
@@ -64,7 +64,7 @@ describe('Timeslice Metric Transform Generator', () => {
           'test:'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
@@ -73,7 +73,7 @@ describe('Timeslice Metric Transform Generator', () => {
       id: 'irrelevant',
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -83,7 +83,7 @@ describe('Timeslice Metric Transform Generator', () => {
       id: 'irrelevant',
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -92,7 +92,7 @@ describe('Timeslice Metric Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -104,7 +104,7 @@ describe('Timeslice Metric Transform Generator', () => {
         params: { ...everythingIndicator.params, index: 'my-own-index*' },
       },
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -116,7 +116,7 @@ describe('Timeslice Metric Transform Generator', () => {
         params: { ...everythingIndicator.params, timestampField: 'my-date-field' },
       },
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -127,7 +127,7 @@ describe('Timeslice Metric Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!._metric).toEqual({
       bucket_script: {

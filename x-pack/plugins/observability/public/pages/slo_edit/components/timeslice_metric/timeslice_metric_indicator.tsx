@@ -82,7 +82,7 @@ export function TimesliceMetricIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="timesliceMetricIndicatorFormQueryFilterInput"
-            indexPatternString={watch('indicator.params.index')}
+            dataView={dataView}
             label={i18n.translate(
               'xpack.observability.slo.sloEdit.sliType.timesliceMetric.queryFilter',
               {

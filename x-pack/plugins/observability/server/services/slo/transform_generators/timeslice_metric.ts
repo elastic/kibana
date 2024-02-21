@@ -27,7 +27,7 @@ import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public async getTransformParams(slo: SLO): Promise<TransformPutTransformRequest> {
     if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }

@@ -8,7 +8,7 @@
 import { EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -16,17 +16,20 @@ import { ObservabilityPublicPluginsStart } from '../../../..';
 import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { CreateSLOForm } from '../../types';
 
+export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
+const INDEX_FIELD = 'indicator.params.index';
+const TIMESTAMP_FIELD = 'indicator.params.timestampField';
+
 export function IndexSelection() {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService } = useKibana().services;
-
   const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
 
   const { dataViewEditor } = useKibana<ObservabilityPublicPluginsStart>().services;
-
   const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
 
-  const currentIndexPattern = watch('indicator.params.index');
+  const currentIndexPattern = watch(INDEX_FIELD);
+  const currentDataViewId = watch(DATA_VIEW_FIELD);
 
   useEffect(() => {
     if (!isDataViewsLoading) {
@@ -60,51 +63,63 @@ export function IndexSelection() {
     );
   };
 
-  const getDataViewIdByIndexPattern = (indexPattern: string) => {
-    return (
-      dataViews.find((dataView) => dataView.title === indexPattern) ||
-      adHocDataViews.find((dataView) => dataView.getIndexPattern() === indexPattern)
-    );
-  };
+  const getDataViewIdByIndexPattern = useCallback(
+    (indexPattern: string) => {
+      return (
+        dataViews.find((dataView) => dataView.title === indexPattern) ||
+        adHocDataViews.find((dataView) => dataView.getIndexPattern() === indexPattern)
+      );
+    },
+    [adHocDataViews, dataViews]
+  );
+
+  useEffect(() => {
+    if (!currentDataViewId && currentIndexPattern) {
+      setValue(DATA_VIEW_FIELD, getDataViewIdByIndexPattern(currentIndexPattern)?.id);
+    }
+  }, [currentDataViewId, currentIndexPattern, getDataViewIdByIndexPattern, setValue]);
 
   return (
-    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState('indicator.params.index').invalid}>
+    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid}>
       <Controller
         defaultValue=""
-        name="indicator.params.index"
+        name={DATA_VIEW_FIELD}
         control={control}
-        rules={{ required: true }}
+        rules={{ required: !Boolean(currentIndexPattern) }}
         render={({ field, fieldState }) => (
           <DataViewPicker
             adHocDataViews={adHocDataViews}
             trigger={{
-              label: field.value || SELECT_DATA_VIEW,
+              label: currentIndexPattern || SELECT_DATA_VIEW,
               fullWidth: true,
               color: fieldState.invalid ? 'danger' : 'text',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
             }}
             onChangeDataView={(newId: string) => {
-              field.onChange(getDataViewPatternById(newId));
+              setValue(INDEX_FIELD, getDataViewPatternById(newId)!);
+              field.onChange(newId);
               dataViewsService.get(newId).then((dataView) => {
                 if (dataView.timeFieldName) {
-                  setValue('indicator.params.timestampField', dataView.timeFieldName);
+                  setValue(TIMESTAMP_FIELD, dataView.timeFieldName);
                 }
               });
             }}
-            currentDataViewId={getDataViewIdByIndexPattern(field.value)?.id}
+            currentDataViewId={field.value ?? getDataViewIdByIndexPattern(currentIndexPattern)?.id}
             onDataViewCreated={() => {
               dataViewEditor.openEditor({
                 allowAdHocDataView: true,
                 onSave: (dataView: DataView) => {
                   if (!dataView.isPersisted()) {
                     setAdHocDataViews([...adHocDataViews, dataView]);
-                    field.onChange(dataView.getIndexPattern());
+                    field.onChange(dataView.id);
+                    setValue(INDEX_FIELD, dataView.getIndexPattern());
                   } else {
-                    field.onChange(getDataViewPatternById(dataView.id));
+                    field.onChange(dataView.id);
+                    setValue(INDEX_FIELD, getDataViewPatternById(dataView.id)!);
                   }
                   if (dataView.timeFieldName) {
-                    setValue('indicator.params.timestampField', dataView.timeFieldName);
+                    setValue(TIMESTAMP_FIELD, dataView.timeFieldName);
                   }
                 },
               });

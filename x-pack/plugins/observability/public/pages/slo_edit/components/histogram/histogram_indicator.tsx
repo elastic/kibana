@@ -19,6 +19,7 @@ import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
@@ -109,6 +110,10 @@ export function HistogramIndicator({
 
   const indexPattern = watch('indicator.params.index');
   const aggregation = watch(`indicator.params.${type}.aggregation`);
+
+  const { dataView } = useCreateDataView({
+    indexPatternString: indexPattern,
+  });
 
   return (
     <Fragment>
@@ -287,7 +292,7 @@ export function HistogramIndicator({
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj={`histogramIndicatorForm${type}QueryInput`}
-            indexPatternString={indexPattern}
+            dataView={dataView}
             label={i18n.translate(
               'xpack.observability.slo.sloEdit.sliType.histogram.kqlFilterLabel',
               {

@@ -22,6 +22,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -39,6 +40,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -55,6 +57,7 @@ const kqlCustomIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -132,6 +135,7 @@ const timesliceMetricIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -173,6 +177,7 @@ const metricCustomIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -218,6 +223,7 @@ const histogramIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });

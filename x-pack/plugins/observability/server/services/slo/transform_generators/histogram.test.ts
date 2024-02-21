@@ -28,7 +28,7 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
     });
 
     it('throws when the total filter is invalid', () => {
@@ -41,20 +41,20 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
     });
 
     it('throws when the query_filter is invalid', () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({ filter: '{ kql.query: invalid' }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ id: 'irrelevant', indicator: createHistogramIndicator() });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -64,7 +64,7 @@ describe('Histogram Transform Generator', () => {
       id: 'irrelevant',
       indicator: createHistogramIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -73,7 +73,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator({ filter: 'labels.groupId: group-4' }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -82,7 +82,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator({ index: 'my-own-index*' }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -93,7 +93,7 @@ describe('Histogram Transform Generator', () => {
         timestampField: 'my-date-field',
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -104,7 +104,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -121,7 +121,7 @@ describe('Histogram Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -130,7 +130,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
@@ -145,7 +145,7 @@ describe('Histogram Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });

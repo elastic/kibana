@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataViewsService } from '@kbn/data-views-plugin/server';
 import { SLO } from '../../domain/models';
 import { SecurityException } from '../../errors';
 import { retryTransientEsErrors } from '../../utils/retry';
@@ -20,11 +21,12 @@ export class DefaultSummaryTransformManager implements TransformManager {
   constructor(
     private generator: SummaryTransformGenerator,
     private esClient: ElasticsearchClient,
-    private logger: Logger
+    private logger: Logger,
+    private dataViewService: DataViewsService
   ) {}
 
   async install(slo: SLO): Promise<TransformId> {
-    const transformParams = this.generator.generate(slo);
+    const transformParams = await this.generator.generate(slo, this.dataViewService);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,
@@ -41,8 +43,8 @@ export class DefaultSummaryTransformManager implements TransformManager {
     return transformParams.transform_id;
   }
 
-  inspect(slo: SLO): TransformPutTransformRequest {
-    return this.generator.generate(slo);
+  async inspect(slo: SLO): Promise<TransformPutTransformRequest> {
+    return this.generator.generate(slo, this.dataViewService);
   }
 
   async preview(transformId: string): Promise<void> {

@@ -7,15 +7,16 @@
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { InvalidTransformError } from '../../../errors';
 
-export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
+export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?: DataView) {
   try {
     if (kqlQuerySchema.is(kuery)) {
       return toElasticsearchQuery(fromKueryExpression(kuery));
     } else {
       return buildEsQuery(
-        undefined,
+        dataView,
         {
           query: kuery?.kqlQuery,
           language: 'kuery',

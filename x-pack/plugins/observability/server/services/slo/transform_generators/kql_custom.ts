@@ -8,6 +8,7 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
@@ -19,7 +20,10 @@ import {
 import { KQLCustomIndicator, SLO } from '../../../domain/models';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public async getTransformParams(
+    slo: SLO,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -27,7 +31,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
+      await this.buildSource(slo, slo.indicator, dataViewService),
       this.buildDestination(),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
@@ -39,10 +43,19 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
+  private async buildSource(
+    slo: SLO,
+    indicator: KQLCustomIndicator,
+    dataViewService: DataViewsService
+  ) {
+    let dataView: DataView | undefined;
+
+    if (indicator.params.dataViewId) {
+      dataView = await dataViewService.get(indicator.params.dataViewId);
+    }
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
       query: {
         bool: {
           filter: [

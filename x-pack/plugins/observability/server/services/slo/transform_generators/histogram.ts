@@ -24,7 +24,7 @@ import { SLO } from '../../../domain/models';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
 
 export class HistogramTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public async getTransformParams(slo: SLO): Promise<TransformPutTransformRequest> {
     if (!histogramIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }

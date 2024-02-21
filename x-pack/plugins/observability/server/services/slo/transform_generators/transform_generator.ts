@@ -10,13 +10,17 @@ import {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
-  public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
+  public abstract getTransformParams(
+    slo: SLO,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest>;
 
-  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
+  public buildCommonRuntimeMappings(slo: SLO, dataView?: DataView): MappingRuntimeFields {
     const mustIncludeAllInstanceId = slo.groupBy === ALL_VALUE || slo.groupBy === '';
 
     return {
@@ -40,6 +44,7 @@ export abstract class TransformGenerator {
           },
         },
       }),
+      ...(dataView?.getRuntimeMappings() ?? {}),
     };
   }
 

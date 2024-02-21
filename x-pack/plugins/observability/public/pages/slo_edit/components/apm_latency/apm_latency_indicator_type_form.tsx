@@ -18,7 +18,7 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, watch, getFieldState, setValue } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, setValue } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export function ApmLatencyIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="apmLatencyFilterInput"
-            indexPatternString={watch('indicator.params.index')}
+            dataView={dataView}
             label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
               defaultMessage: 'Query filter',
             })}

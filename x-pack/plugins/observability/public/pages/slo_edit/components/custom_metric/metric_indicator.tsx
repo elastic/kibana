@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import {
   aggValueToLabel,
   CUSTOM_METRIC_AGGREGATION_OPTIONS,
@@ -106,6 +107,10 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
   });
   const equation = watch(`indicator.params.${type}.equation`);
   const indexPattern = watch('indicator.params.index');
+
+  const { dataView } = useCreateDataView({
+    indexPatternString: indexPattern,
+  });
 
   const disableAdd = fields?.length === MAX_VARIABLES || !indexPattern;
   const disableDelete = fields?.length === 1 || !indexPattern;
@@ -279,7 +284,7 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
             <EuiFlexItem>
               <QueryBuilder
                 dataTestSubj="customKqlIndicatorFormGoodQueryInput"
-                indexPatternString={watch('indicator.params.index')}
+                dataView={dataView}
                 label={`${filterLabel} ${metric.name}`}
                 name={`indicator.params.${type}.metrics.${index}.filter`}
                 placeholder={i18n.translate(

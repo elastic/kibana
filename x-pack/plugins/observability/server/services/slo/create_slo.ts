@@ -84,20 +84,20 @@ export class CreateSLO {
     return this.toResponse(slo);
   }
 
-  public inspect(params: CreateSLOParams): {
+  public async inspect(params: CreateSLOParams): Promise<{
     slo: CreateSLOParams;
     pipeline: Record<string, any>;
     rollUpTransform: TransformPutTransformRequest;
     summaryTransform: TransformPutTransformRequest;
     temporaryDoc: Record<string, any>;
-  } {
+  }> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    const rollUpTransform = this.transformManager.inspect(slo);
+    const rollUpTransform = await this.transformManager.inspect(slo);
     const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId);
 
-    const summaryTransform = this.summaryTransformManager.inspect(slo);
+    const summaryTransform = await this.summaryTransformManager.inspect(slo);
 
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId);
 
