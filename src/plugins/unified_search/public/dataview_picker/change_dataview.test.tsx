@@ -154,7 +154,7 @@ describe('DataView component', () => {
         {
           ...props,
           onDataViewCreated: jest.fn(),
-          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.ESQL],
+          textBasedLanguages: [TextBasedLanguages.ESQL],
           textBasedLanguage: TextBasedLanguages.ESQL,
         },
         false
@@ -165,16 +165,12 @@ describe('DataView component', () => {
     expect(props.onTextLangQuerySubmit).toHaveBeenCalled();
   });
 
-  const runAdHocDataViewTest = (esqlMode: boolean) => {
+  it('should properly handle ad hoc data views', async () => {
     const component = mount(
       wrapDataViewComponentInContext(
         {
           ...props,
           onDataViewCreated: jest.fn(),
-          ...(esqlMode && {
-            textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.ESQL],
-            textBasedLanguage: TextBasedLanguages.ESQL,
-          }),
           savedDataViews: [
             {
               id: 'dataview-1',
@@ -196,20 +192,13 @@ describe('DataView component', () => {
         id: 'the-data-view-id',
         title: 'the-data-view-title',
         name: 'the-data-view',
+        type: 'default',
         isAdhoc: true,
       },
     ]);
-  };
-
-  it('should propagate the adHoc dataviews for text based mode', () => {
-    runAdHocDataViewTest(true);
   });
 
-  it('should propagate the adHoc dataviews for dataview mode', () => {
-    runAdHocDataViewTest(false);
-  });
-
-  const runEsqlAdHocDataViewTest = (esqlMode: boolean) => {
+  it('should properly handle ES|QL ad hoc data views', async () => {
     const component = mount(
       wrapDataViewComponentInContext(
         {
@@ -221,11 +210,7 @@ describe('DataView component', () => {
               title: 'dataview-1',
             },
           ],
-          adHocDataViews: [dataViewMock, dataViewMockEsql],
-          ...(esqlMode && {
-            textBasedLanguages: [TextBasedLanguages.ESQL],
-            textBasedLanguage: TextBasedLanguages.ESQL,
-          }),
+          adHocDataViews: [dataViewMockEsql],
         },
         false
       )
@@ -237,19 +222,12 @@ describe('DataView component', () => {
         title: 'dataview-1',
       },
       {
-        id: 'the-data-view-id',
-        title: 'the-data-view-title',
-        name: 'the-data-view',
+        id: 'the-data-view-esql-id',
+        title: 'the-data-view-esql-title',
+        name: 'the-data-view-esql',
+        type: 'esql',
         isAdhoc: true,
       },
     ]);
-  };
-
-  it('should not show ES|QL ad hoc data views in the list for text based mode', async () => {
-    runEsqlAdHocDataViewTest(true);
-  });
-
-  it('should not show ES|QL ad hoc data views in the list for data view mode', async () => {
-    runEsqlAdHocDataViewTest(false);
   });
 });

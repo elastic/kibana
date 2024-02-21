@@ -31,7 +31,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerPropsExtended } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -56,11 +55,12 @@ export const TextBasedLanguagesTransitionModal = (
   </React.Suspense>
 );
 
-const mapAdHocDataView = (adHocDataView: DataView) => {
+const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => {
   return {
     title: adHocDataView.title,
     name: adHocDataView.name,
     id: adHocDataView.id!,
+    type: adHocDataView.type,
     isAdhoc: true,
   };
 };
@@ -112,11 +112,8 @@ export function ChangeDataView({
       const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      // Don't show ES|QL ad hoc data views in the data view picker
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        adHocDataViews
-          ?.filter((adHocDataView) => adHocDataView.type !== ESQL_TYPE)
-          .map(mapAdHocDataView) ?? [];
+        adHocDataViews?.map(mapAdHocDataView) ?? [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
