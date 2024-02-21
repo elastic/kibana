@@ -85,7 +85,7 @@ export const createFilter = ({
   dataViewId: string | null;
 }): Filter => {
   if (value.length === 0) {
-    return createExistsFilter({ key, negate, dataViewId });
+    return createExistsFilter({ key, negate, dataViewId: dataViewId ?? undefined });
   }
 
   if (value.length > 1) {
