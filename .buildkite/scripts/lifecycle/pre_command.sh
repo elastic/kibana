@@ -151,8 +151,8 @@ export GCS_SA_CDN_EMAIL
 GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
 export GCS_SA_CDN_BUCKET
 
-GCS_SA_CDN_QA_CDN="$(vault_get gcs-sa-cdn-qa cdn)"
-export GCS_SA_CDN_QA_CDN
+GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
+export GCS_SA_CDN_URL
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
