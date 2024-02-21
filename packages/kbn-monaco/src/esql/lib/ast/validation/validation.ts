@@ -255,16 +255,16 @@ function extractCompatibleSignaturesForFunction(
   astFunction: ESQLFunction
 ) {
   return fnDef.signatures.filter((def) => {
-    if (def.infiniteParams && astFunction.args.length > 0) {
-      return true;
+    if (def.infiniteParams) {
+      return astFunction.args.length > 0;
     }
-    if (def.minParams && astFunction.args.length >= def.minParams) {
-      return true;
+    if (def.minParams) {
+      return astFunction.args.length >= def.minParams;
     }
-    if (astFunction.args.length === def.params.length) {
-      return true;
-    }
-    return astFunction.args.length === def.params.filter(({ optional }) => !optional).length;
+    return (
+      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
+      astFunction.args.length <= def.params.length
+    );
   });
 }
 
@@ -322,19 +322,53 @@ function validateFunction(
   }
   const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
-    const numArgs = fnDefinition.signatures[0].params.filter(({ optional }) => !optional).length;
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentNumber',
-        values: {
-          fn: astFunction.name,
-          numArgs,
-          passedArgs: astFunction.args.length,
-          exactly: fnDefinition.signatures[0].params.length - numArgs,
-        },
-        locations: astFunction.location,
-      })
-    );
+    const refSignature = fnDefinition.signatures[0];
+    const numArgs =
+      refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
+    if (
+      !refSignature.minParams &&
+      refSignature.params.filter(({ optional }) => !optional).length === refSignature.params.length
+    ) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumber',
+          values: {
+            fn: astFunction.name,
+            numArgs:
+              refSignature.minParams ??
+              refSignature.params.filter(({ optional }) => !optional).length,
+            passedArgs: astFunction.args.length,
+          },
+          locations: astFunction.location,
+        })
+      );
+    } else if (Math.max(astFunction.args.length - refSignature.params.length, 0) > 0) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumberTooMany',
+          values: {
+            fn: astFunction.name,
+            numArgs: refSignature.params.length,
+            passedArgs: astFunction.args.length,
+            extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+          },
+          locations: astFunction.location,
+        })
+      );
+    } else {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentNumberTooFew',
+          values: {
+            fn: astFunction.name,
+            numArgs,
+            passedArgs: astFunction.args.length,
+            missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+          },
+          locations: astFunction.location,
+        })
+      );
+    }
   }
   // now perform the same check on all functions args
   for (const arg of astFunction.args) {
