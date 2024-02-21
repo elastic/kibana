@@ -17,14 +17,7 @@ import { isValidDateMath } from '@kbn/zod-helpers';
  *   version: not applicable
  */
 
-/**
- * A string that is not empty and does not contain only whitespace
- */
-export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .regex(/^(?! *$).+$/);
+import { NonEmptyString } from '../../../common_schemas/primitives.gen';
 
 /**
  * A universally unique identifier
