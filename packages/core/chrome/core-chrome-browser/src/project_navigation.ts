@@ -26,6 +26,7 @@ import type {
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
 
+import type { ChromeStyle } from './types';
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
@@ -372,4 +373,16 @@ export interface NavigationTreeDefinition<
 export interface NavigationTreeDefinitionUI {
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+}
+
+export interface SolutionNavigationDefinition {
+  id: string;
+  title: string;
+  icon?: IconType;
+  sideNavComponentGetter?: () => SideNavComponent;
+  homePage?: AppDeepLinkId;
+}
+
+export interface SolutionNavigationDefinitions {
+  [id: string]: SolutionNavigationDefinition;
 }
