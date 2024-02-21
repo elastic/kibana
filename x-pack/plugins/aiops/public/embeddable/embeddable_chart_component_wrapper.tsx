@@ -85,8 +85,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
   return (
     <ReloadContextProvider reload$={resultObservable$}>
       <DataSourceContextProvider dataViewId={input.dataViewId}>
-        <ChangePointDetectionControlsContextProvider>
-          <FilterQueryContextProvider timeRange={input.timeRange}>
+        <FilterQueryContextProvider timeRange={input.timeRange}>
+          <ChangePointDetectionControlsContextProvider>
             <ChartGridEmbeddableWrapper
               viewType={input.viewType}
               timeRange={input.timeRange}
@@ -102,8 +102,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               onChange={input.onChange}
               emptyState={input.emptyState}
             />
-          </FilterQueryContextProvider>
-        </ChangePointDetectionControlsContextProvider>
+          </ChangePointDetectionControlsContextProvider>
+        </FilterQueryContextProvider>
       </DataSourceContextProvider>
     </ReloadContextProvider>
   );
@@ -139,7 +139,7 @@ export const ChartGridEmbeddableWrapper: FC<
   onChange,
   emptyState,
 }) => {
-  const { filters, query, timeRange } = useFilerQueryUpdates();
+  const { filters, query, timeRange, searchBounds } = useFilerQueryUpdates();
 
   const fieldConfig = useMemo(() => {
     return { fn, metricField, splitField };
@@ -168,8 +168,9 @@ export const ChartGridEmbeddableWrapper: FC<
     mergedQuery.bool!.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: timeRange.from,
-          to: timeRange.to,
+          from: searchBounds.min?.valueOf(),
+          to: searchBounds.max?.valueOf(),
+          format: 'epoch_millis',
         },
       },
     });
@@ -183,16 +184,7 @@ export const ChartGridEmbeddableWrapper: FC<
     }
 
     return mergedQuery;
-  }, [
-    dataView,
-    fieldConfig.splitField,
-    filters,
-    partitions,
-    query,
-    timeRange.from,
-    timeRange.to,
-    uiSettings,
-  ]);
+  }, [dataView, fieldConfig.splitField, filters, partitions, query, searchBounds, uiSettings]);
 
   const requestParams = useMemo<ChangePointDetectionRequestParams>(() => {
     return { interval } as ChangePointDetectionRequestParams;
