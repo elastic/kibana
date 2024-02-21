@@ -73,7 +73,7 @@ export const buildRequiredCustomFieldsForRequest = (
           return {
             key: customFieldConfig.key,
             type: customFieldConfig.type,
-            value: value as CaseRequestCustomField['value'],
+            value,
           } as CaseRequestCustomField;
         })
     : [];

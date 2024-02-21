@@ -700,6 +700,18 @@ export class CasesConnectorExecutor {
         ? `${params.rule.name} (Auto-created)`
         : `${params.rule.name} (${oracleRecord.counter}) (Auto-created)`;
 
+    const requiredCustomFields = buildRequiredCustomFieldsForRequest(customFieldsConfigurations);
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][getCreateCaseRequest] Built ${requiredCustomFields.length} required custom fields for case with id ${caseId}`,
+      this.getLogMetadata(params, {
+        labels: {
+          caseId,
+          totalCreatedCustomFields: requiredCustomFields.length,
+        },
+        tags: ['case-connector:getCreateCaseRequest'],
+      })
+    );
+
     return {
       id: caseId,
       description,
@@ -711,7 +723,7 @@ export class CasesConnectorExecutor {
        */
       settings: { syncAlerts: false },
       owner: params.owner,
-      customFields: buildRequiredCustomFieldsForRequest(customFieldsConfigurations),
+      customFields: requiredCustomFields,
     };
   }
 
@@ -1033,6 +1045,10 @@ export class CasesConnectorExecutor {
   }
 
   private async getCustomFieldsConfiguration(): Promise<Map<string, CustomFieldsConfiguration>> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][getCustomFieldsConfiguration] Getting case configurations`,
+      { tags: ['case-connector:getCustomFieldsConfiguration'] }
+    );
     const configurations = await this.casesClient.configure.get();
     return new Map(configurations.map((conf) => [conf.owner, conf.customFields]));
   }
