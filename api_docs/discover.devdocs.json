@@ -958,7 +958,15 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined; }, isUpdate?: boolean | undefined) => void; onChangeDataView: (id: string) => Promise<void>; setDataView: (dataView: ",
+              " | undefined; }, isUpdate?: boolean | undefined) => void; onChangeDataView: (id: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<void>; setDataView: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",

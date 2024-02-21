@@ -6,27 +6,31 @@
  */
 
 import { IToasts } from '@kbn/core/public';
+import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { mergeDegradedStatsIntoDataStreams } from '../../../utils/merge_degraded_docs_into_datastreams';
-import { DataStreamDetails } from '../../../../common/data_streams_stats';
+import {
+  DataStreamDetails,
+  DataStreamStatServiceResponse,
+  GetDataStreamsStatsQuery,
+} from '../../../../common/data_streams_stats';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
+import { mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import { DEFAULT_CONTEXT } from './defaults';
-import {
-  DatasetQualityControllerContext,
-  DatasetQualityControllerEvent,
-  DatasetQualityControllerTypeState,
-  FlyoutDataset,
-} from './types';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   fetchDatasetDetailsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
   noDatasetSelected,
 } from './notifications';
+import {
+  DatasetQualityControllerContext,
+  DatasetQualityControllerEvent,
+  DatasetQualityControllerTypeState,
+  FlyoutDataset,
+} from './types';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
@@ -76,6 +80,22 @@ export const createPureDatasetQualityControllerStateMachine = (
               },
             },
           },
+          on: {
+            UPDATE_TIME_RANGE: {
+              target: 'datasets.fetching',
+              actions: ['storeTimeRange'],
+            },
+            REFRESH_DATA: {
+              target: 'datasets.fetching',
+            },
+            UPDATE_INTEGRATIONS: {
+              target: 'datasets.loaded',
+              actions: ['storeIntegrations'],
+            },
+            UPDATE_QUERY: {
+              actions: ['storeQuery'],
+            },
+          },
         },
         degradedDocs: {
           initial: 'fetching',
@@ -94,6 +114,15 @@ export const createPureDatasetQualityControllerStateMachine = (
               },
             },
             loaded: {},
+          },
+          on: {
+            UPDATE_TIME_RANGE: {
+              target: 'degradedDocs.fetching',
+              actions: ['storeTimeRange'],
+            },
+            REFRESH_DATA: {
+              target: 'degradedDocs.fetching',
+            },
           },
         },
         flyout: {
@@ -173,6 +202,36 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
           };
         }),
+        storeTimeRange: assign((context, event) => {
+          return 'timeRange' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  timeRange: event.timeRange,
+                },
+              }
+            : {};
+        }),
+        storeIntegrations: assign((context, event) => {
+          return 'integrations' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  integrations: event.integrations,
+                },
+              }
+            : {};
+        }),
+        storeQuery: assign((context, event) => {
+          return 'query' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  query: event.query,
+                },
+              }
+            : {};
+        }),
         storeFlyoutOptions: assign((context, event) => {
           return 'dataset' in event
             ? {
@@ -187,7 +246,8 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDataStreamStats: assign((_context, event) => {
           return 'data' in event
             ? {
-                dataStreamStats: event.data as DataStreamStat[],
+                dataStreamStats: (event.data as DataStreamStatServiceResponse).dataStreamStats,
+                integrations: (event.data as DataStreamStatServiceResponse).integrations,
               }
             : {};
         }),
@@ -245,12 +305,21 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetDetailsFailedNotifier(toasts, event.data),
     },
     services: {
-      loadDataStreamStats: (_context) => dataStreamStatsClient.getDataStreamsStats(),
-      loadDegradedDocs: (context) =>
-        dataStreamStatsClient.getDataStreamsDegradedStats({
-          start: context.filters.timeRange.from,
-          end: context.filters.timeRange.to,
+      loadDataStreamStats: (context) =>
+        dataStreamStatsClient.getDataStreamsStats({
+          type: context.type as GetDataStreamsStatsQuery['type'],
+          datasetQuery: context.filters.query,
         }),
+      loadDegradedDocs: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+
+        return dataStreamStatsClient.getDataStreamsDegradedStats({
+          type: context.type as GetDataStreamsStatsQuery['type'],
+          datasetQuery: context.filters.query,
+          start,
+          end,
+        });
+      },
       loadDataStreamDetails: (context) => {
         if (!context.flyout.dataset) {
           fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
