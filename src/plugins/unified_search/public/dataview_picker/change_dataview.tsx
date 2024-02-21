@@ -239,7 +239,7 @@ export function ChangeDataView({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {Boolean(isTextBasedLangSelected) ? (
+                  {isTextBasedLangSelected && shouldShowTextBasedLanguageTransitionModal ? (
                     <EuiToolTip
                       position="top"
                       content={i18n.translate(
