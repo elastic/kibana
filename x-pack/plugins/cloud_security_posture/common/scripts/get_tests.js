@@ -124,6 +124,22 @@ const createTree = (testSuits) => {
     }
   });
 
+  // Mark higher-level indents as skipped when a lower-level indent is skipped
+  const markSkipped = (node, isParentSkipped) => {
+    if (isParentSkipped) {
+      node.isSkipped = true;
+    }
+    if (node.children) {
+      node.children.forEach((child) => {
+        markSkipped(child, isParentSkipped || node.isSkipped);
+      });
+    }
+  };
+
+  tree.forEach((node) => {
+    markSkipped(node, false);
+  });
+
   return tree;
 };
 
@@ -212,7 +228,13 @@ const processDirectory = (directoryPath) => {
 // Initiates the processing for each directory
 directoryPaths.forEach(processDirectory);
 
-console.log(`
+process.on('exit', () => {
+  if (testsLogOutput.length) {
+    const mdFilePath = path.join(outputDir, 'requirements_test_coverage.md');
+    generateMDFile(testsLogOutput, mdFilePath);
+    console.log(`Markdown file generated successfully: ${mdFilePath}`);
+
+    console.log(`
   🌟 Success! CSP Test Log Generated ✨
 
   📄 Log file: file://${path.resolve(path.join(outputDir, 'csp_test_log.json'))}
@@ -220,4 +242,110 @@ console.log(`
   📊 Copy its content to the dedicated app's "data.json" for visualization.
 
   🚀 Dedicated app: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c
+
+  🅫 MD file: file://${path.resolve(path.join(outputDir, 'requirements_test_coverage.md'))}
 `);
+  }
+});
+
+/**
+ * Creating the Requirement Test Coverage ReadMe file
+ * */
+
+// Utility function to count nested tests isSkipped and isTodo states
+const countNestedTests = (tree) => {
+  return tree.reduce(
+    (counts, node) => {
+      counts.totalTests += 1;
+      counts.skippedTests += node.isSkipped ? 1 : 0;
+      counts.todoTests += node.isTodo ? 1 : 0;
+
+      if (node.children) {
+        const childCounts = countNestedTests(node.children);
+        counts.totalTests += childCounts.totalTests;
+        counts.skippedTests += childCounts.skippedTests;
+        counts.todoTests += childCounts.todoTests;
+      }
+
+      return counts;
+    },
+    { totalTests: 0, skippedTests: 0, todoTests: 0 }
+  );
+};
+
+// Group test files by directory
+const groupTestsByDirectory = (testLogs) => {
+  const groupedTests = {};
+
+  testLogs.forEach((testLog) => {
+    const directory = testLog.directory;
+    if (!groupedTests[directory]) {
+      groupedTests[directory] = [];
+    }
+    groupedTests[directory].push(testLog);
+  });
+
+  return groupedTests;
+};
+
+const tagColors = {
+  FTR: 'blue',
+  UT: 'brightgreen',
+  'HAS SKIP': 'yellow',
+  'HAS TODO': 'green',
+  'API INTEGRATION': 'purple',
+};
+
+// Creates the MD content and write into file
+const generateMDFile = (testLogs) => {
+  const groupedTests = groupTestsByDirectory(testLogs);
+  let mdContent = '# Cloud Security Posture - Requirements Test Coverage\n\n';
+
+  Object.entries(groupedTests)
+    .sort()
+    .forEach(([directory, logs]) => {
+      logs.sort((a, b) => testLogs.indexOf(a) - testLogs.indexOf(b));
+
+      const { totalTests, skippedTests, todoTests } = countNestedTests(
+        logs.flatMap((log) => log.tree)
+      );
+
+      const skippedPercentage = ((skippedTests / totalTests) * 100).toFixed(2);
+      const todoPercentage = ((todoTests / totalTests) * 100).toFixed(2);
+
+      const tagsBadges = logs
+        .flatMap((log) => log.tags || [])
+        .map(
+          (tag) => `![](https://img.shields.io/badge/${tag.replace(/\s+/g, '-')}-${tagColors[tag]})`
+        );
+      const uniqueTags = [...new Set(tagsBadges)];
+      const tagsSection = uniqueTags.length > 0 ? `${uniqueTags.join(' ')}\n\n` : '';
+
+      mdContent += `## Directory: ${directory}\n\n`;
+      mdContent += `**Total Tests:** ${totalTests} | **Skipped:** ${skippedTests} (${skippedPercentage}%) | **Todo:** ${todoTests} (${todoPercentage}%)\n\n`;
+      mdContent += tagsSection;
+      mdContent += '<details>\n<summary>Test Details</summary>\n\n';
+      mdContent += '| Test Label | Type | Skipped | Todo |\n';
+      mdContent += '|------------|------|---------|------|\n';
+
+      const generateTableFromTree = (tree, filePath) => {
+        tree.forEach((node) => {
+          mdContent += `| [${node.label}](${filePath}) | ${node.type} | ${
+            node.isSkipped ? '![](https://img.shields.io/badge/skipped-yellow)' : ''
+          } | ${node.isTodo ? '![](https://img.shields.io/badge/todo-green)' : ''} |\n`;
+
+          if (node.children) {
+            generateTableFromTree(node.children, filePath);
+          }
+        });
+      };
+
+      logs.forEach((log) => {
+        generateTableFromTree(log.tree, log.filePath);
+      });
+
+      mdContent += '</details>\n\n';
+    });
+
+  fs.writeFileSync(path.join(outputDir, 'requirements_test_coverage.md'), mdContent);
+};
