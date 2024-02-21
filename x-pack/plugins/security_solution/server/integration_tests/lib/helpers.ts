@@ -6,6 +6,7 @@
  */
 import Fs from 'fs';
 import Util from 'util';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import deepmerge from 'deepmerge';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 const asyncUnlink = Util.promisify(Fs.unlink);
@@ -103,4 +104,17 @@ export async function setupTestServers(logFilePath: string, settings = {}) {
 
 export async function removeFile(path: string) {
   await asyncUnlink(path).catch(() => void 0);
+}
+
+export async function bulkInsert(
+  index: string,
+  data: unknown[],
+  esClient: ElasticsearchClient
+): Promise<void> {
+  const bulk = data.flatMap((d) => [{ index: { _index: index } }, d]);
+  await esClient.bulk({ body: bulk, refresh: 'wait_for' }).catch(() => {});
+}
+
+export function updateTimestamps(data: object[]): object[] {
+  return data.map((d) => ({ ...d, '@timestamp': new Date().toISOString() }));
 }

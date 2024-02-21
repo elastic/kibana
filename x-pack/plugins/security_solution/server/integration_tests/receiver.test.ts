@@ -7,7 +7,7 @@
 import Path from 'path';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { setupTestServers, removeFile } from './lib/helpers';
+import { bulkInsert, setupTestServers, removeFile } from './lib/helpers';
 import { getTelemetryReceiver } from './lib/telemetry_helpers';
 
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
@@ -80,7 +80,7 @@ describe('ITelemetryReceiver', () => {
 
     it('should paginate queries', async () => {
       const docs = mockedDocs(numOfDocs);
-      await bulkInsert(docs);
+      await bulkInsert(TEST_INDEX, docs, esClient);
 
       const results = telemetryReceiver.paginate(TEST_INDEX, testQuery());
 
@@ -100,8 +100,8 @@ describe('ITelemetryReceiver', () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const batchTwo = mockedDocs(numOfDocs, 'batchTwo');
 
-      await bulkInsert(batchOne);
-      await bulkInsert(batchTwo);
+      await bulkInsert(TEST_INDEX, batchOne, esClient);
+      await bulkInsert(TEST_INDEX, batchTwo, esClient);
 
       const results = telemetryReceiver.paginate(TEST_INDEX, testQuery(from, to));
 
@@ -113,7 +113,7 @@ describe('ITelemetryReceiver', () => {
     });
 
     it('should manage empty response', async () => {
-      await bulkInsert(mockedDocs(numOfDocs));
+      await bulkInsert(TEST_INDEX, mockedDocs(numOfDocs), esClient);
 
       const results = telemetryReceiver.paginate(TEST_INDEX, testQuery('now-2d', 'now-1d'));
 
@@ -153,11 +153,6 @@ describe('ITelemetryReceiver', () => {
         },
       ],
     };
-  }
-
-  async function bulkInsert(data: unknown[]): Promise<void> {
-    const bulk = data.flatMap((d) => [{ index: { _index: TEST_INDEX } }, d]);
-    await esClient.bulk({ body: bulk, refresh: 'wait_for' }).catch((_) => {});
   }
 
   async function getPages(it: AsyncGenerator<unknown[], void, unknown>): Promise<unknown[][]> {

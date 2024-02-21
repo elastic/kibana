@@ -114,7 +114,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         };
 
         if (endpointMetricsResponse.aggregations === undefined) {
-          log(`no endpoint metrics to report`);
+          log(`no endpoint metrics response to report`);
           taskMetricsService.end(trace);
           return 0;
         }
@@ -347,6 +347,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               },
             };
           });
+
+          log(`sending ${telemetryPayloads.length} endpoint telemetry records`);
 
           /**
            * STAGE 6 - Send the documents
