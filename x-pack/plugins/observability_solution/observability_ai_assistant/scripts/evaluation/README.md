@@ -14,7 +14,7 @@ This tool is developed for our team working on the Elastic Observability platfor
 
 Run the tool using:
 
-`$ node x-pack/plugins/observability_ai_assistant/scripts/evaluation/index.js`
+`$ node x-pack/plugins/observability_solution/observability_ai_assistant/scripts/evaluation/index.js`
 
 This will evaluate all existing scenarios, and write the evaluation results to the terminal.
 
