@@ -38,7 +38,7 @@ import {
   mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -46,7 +46,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -55,17 +55,15 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
-import type { UnifiedDataTableProps, UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { columnActions, getTextBasedColumnTypes } from '@kbn/unified-data-table';
 import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
-import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import type { ISearchEmbeddable, SearchInput, SearchOutput, SearchProps } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { getMaxAllowedSampleSize, getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { handleSourceColumnState } from '../utils/state_helpers';
-import type { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { fetchTextBased } from '../application/main/utils/fetch_text_based';
@@ -73,26 +71,6 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
-
-export type SearchProps = Partial<UnifiedDataTableProps> &
-  Partial<DocTableProps> & {
-    savedSearchId?: string;
-    filters?: Filter[];
-    settings?: UnifiedDataTableSettings;
-    description?: string;
-    sharedItemTitle?: string;
-    inspectorAdapters?: Adapters;
-    services: DiscoverServices;
-    filter?: (field: DataViewField, value: string[], operator: string) => void;
-    hits?: DataTableRecord[];
-    totalHitCount?: number;
-    interceptedWarnings?: SearchResponseWarning[];
-    onMoveColumn?: (column: string, index: number) => void;
-    onUpdateRowHeight?: (rowHeight?: number) => void;
-    onUpdateHeaderRowHeight?: (headerRowHeight?: number) => void;
-    onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
-    onUpdateSampleSize?: (sampleSize?: number) => void;
-  };
 
 export interface SearchEmbeddableConfig {
   editable: boolean;
@@ -435,7 +413,7 @@ export class SavedSearchEmbeddable
     }
 
     const props: SearchProps = {
-      columns: savedSearch.columns,
+      columns: savedSearch.columns || [],
       savedSearchId: savedSearch.id,
       filters: savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
@@ -595,7 +573,7 @@ export class SavedSearchEmbeddable
       this.services.core.uiSettings
     );
 
-    searchProps.columns = columnState.columns;
+    searchProps.columns = columnState.columns || [];
     searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
     searchProps.sharedItemTitle = this.panelTitleInternal;
     searchProps.searchTitle = this.panelTitleInternal;
