@@ -23,10 +23,12 @@ Get help with the data forge tool: `node x-pack/scripts/data_forge.js --help`
 #### Create a Custom threshold rule
 
 - First create a data view as shown below:
-![Data forge data view](./images/data_forge_data_view.png)
+
+  <img src="./images/data_forge_data_view.png" width="800"/>
 
 - Then you can adjust the rule to alert based on CPU usage:
-![Data forge custom threshold](./images/data_forge_custom_threshold_rule_cpu.png)
+
+  <img src="./images/data_forge_custom_threshold_rule_cpu.png" width="500"/>
 
 #### With synthtrace
 
@@ -41,7 +43,9 @@ node scripts/synthtrace simple_trace.ts --local --live
 #### Create a Custom threshold rule
 
 - First create a data view as shown below:
-  ![Synthtrace data view](./images/synthtrace_data_view.png)
+
+  <img src="./images/synthtrace_data_view.png" width="800"/>
 
 - Then you can adjust the rule to alert based on CPU usage:
-  ![Synthtrace custom threshold](./images/synthtrace_custom_threshold_rule.png)
+
+  <img src="./images/synthtrace_custom_threshold_rule.png" width="500"/>
