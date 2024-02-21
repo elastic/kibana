@@ -260,25 +260,6 @@ export function ObservabilityLogsExplorerPageObject({
       );
     },
 
-    async navigateToDatasetQuality({
-      pageState,
-    }: {
-      pageState?: logExplorerUrlSchemaV1.UrlSchema;
-    } = {}) {
-      const queryStringParams = '';
-
-      return await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/dataset-quality',
-        queryStringParams,
-        {
-          // the check sometimes is too slow for the page so it misses the point
-          // in time before the app rewrites the URL
-          ensureCurrentUrl: false,
-        }
-      );
-    },
-
     getDatasetSelector() {
       return testSubjects.find('datasetSelectorPopover');
     },

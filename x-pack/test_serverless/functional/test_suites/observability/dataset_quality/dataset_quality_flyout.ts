@@ -6,28 +6,32 @@
  */
 
 import expect from '@kbn/expect';
-import { DatasetQualityFtrProviderContext } from './config';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
 
-export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
+    'svlCommonNavigation',
+    'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('svlLogsSynthtraceClient');
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality flyout', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.login();
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();
     });
 
     after(async () => {
       await synthtrace.clean();
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('opens the flyout for the right dataset', async () => {

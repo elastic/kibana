@@ -5,16 +5,30 @@
  * 2.0.
  */
 
+import querystring from 'querystring';
+import rison from '@kbn/rison';
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import {
+  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
+  datasetQualityUrlSchemaV1,
+} from '@kbn/observability-logs-explorer-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export interface IntegrationPackage {
-  name: string;
-  version: string;
-}
+const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
+  v: 1,
+  table: {
+    page: {
+      index: 0,
+      size: 10,
+    },
+  },
+  filters: {},
+  flyout: {},
+};
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -26,20 +40,60 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
   const testSubjectSelectors = {
     datasetQualityTable: 'datasetQualityTable',
+    datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
     datasetQualityFlyout: 'datasetQualityFlyout',
     datasetQualityFlyoutBody: 'datasetQualityFlyoutBody',
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
     datasetQualityFlyoutOpenInLogsExplorerButton: 'datasetQualityFlyoutOpenInLogsExplorerButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
+
+    superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
+    euiFlyoutCloseButton: 'euiFlyoutCloseButton',
   };
 
   return {
     selectors,
     testSubjectSelectors,
 
+    async navigateTo({
+      pageState,
+    }: {
+      pageState?: datasetQualityUrlSchemaV1.UrlSchema;
+    } = {}) {
+      const queryStringParams = querystring.stringify({
+        [OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY]: rison.encode(
+          datasetQualityUrlSchemaV1.urlSchemaRT.encode({
+            ...defaultPageState,
+            ...pageState,
+          })
+        ),
+      });
+
+      return PageObjects.common.navigateToUrlWithBrowserHistory(
+        'observabilityLogsExplorer',
+        '/dataset-quality',
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
+      );
+    },
+
     getDatasetsTable(): Promise<WebElementWrapper> {
       return testSubjects.find(testSubjectSelectors.datasetQualityTable);
+    },
+
+    async refreshTable() {
+      const filtersContainer = await testSubjects.find(
+        testSubjectSelectors.datasetQualityFiltersContainer
+      );
+      const refreshButton = await filtersContainer.findByTestSubject(
+        testSubjectSelectors.superDatePickerApplyTimeButton
+      );
+      return refreshButton.click();
     },
 
     async getDatasetTableRows(): Promise<WebElementWrapper[]> {
@@ -84,12 +138,16 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       });
     },
 
+    async closeFlyout() {
+      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
+    },
+
     async getFlyoutElementsByText(selector: string, text: string) {
       const flyoutContainer: WebElementWrapper = await testSubjects.find(
         testSubjectSelectors.datasetQualityFlyout
       );
 
-      return await getAllByText(flyoutContainer, selector, text);
+      return getAllByText(flyoutContainer, selector, text);
     },
 
     getFlyoutLogsExplorerButton() {

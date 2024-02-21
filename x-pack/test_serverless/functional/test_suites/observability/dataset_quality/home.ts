@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { DatasetQualityFtrProviderContext } from './config';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
-    'common',
-    'navigationalSearch',
-    'observabilityLogsExplorer',
     'datasetQuality',
+    'observabilityLogsExplorer',
+    'svlCommonNavigation',
+    'svlCommonPage',
   ]);
 
   const testSubjects = getService('testSubjects');
 
   describe('Dataset quality home', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.login();
+    });
+
+    after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
+    });
+
     it('dataset quality table exists', async () => {
       await PageObjects.datasetQuality.navigateTo();
       await testSubjects.existOrFail(
