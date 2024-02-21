@@ -829,16 +829,15 @@ export const RuleForm = ({
 
       <EuiFlexItem>
         <EuiAccordion
-          id="alertSettingsAccordion"
-          data-test-subj="alertSettingsAccordion"
+          id="advancedOptionsAccordion"
+          data-test-subj="advancedOptionsAccordion"
           buttonContent={
-            <EuiTitle size="xxs">
-              <h5>
-                {i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertSettingsLabel', {
-                  defaultMessage: 'Alert settings',
-                })}
-              </h5>
-            </EuiTitle>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleForm.advancedOptionsLabel"
+                defaultMessage="Advanced options"
+              />
+            </EuiText>
           }
         >
           <EuiSpacer size="s" />
