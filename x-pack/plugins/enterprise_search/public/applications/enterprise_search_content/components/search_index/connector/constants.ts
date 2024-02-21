@@ -133,6 +133,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
       'https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/index.html',
     externalDocsUrl: 'https://docs.oracle.com/database/oracle/oracle-database/',
     icon: CONNECTOR_ICONS.oracle,
+    platinumOnly: true,
   },
   outlook: {
     docsUrl: docLinks.connectorsOutlook,
@@ -146,6 +147,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://www.postgresql.org/docs/15/auth-methods.html',
     externalDocsUrl: 'https://www.postgresql.org/docs/',
     icon: CONNECTOR_ICONS.postgresql,
+    platinumOnly: true,
   },
   s3: {
     docsUrl: docLinks.connectorsS3,
@@ -180,7 +182,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint,
-    platinumOnly: false,
+    platinumOnly: true,
   },
   slack: {
     docsUrl: docLinks.connectorsSlack,
