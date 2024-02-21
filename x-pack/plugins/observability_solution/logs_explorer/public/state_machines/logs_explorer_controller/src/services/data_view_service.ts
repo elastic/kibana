@@ -43,7 +43,7 @@ export const changeDataView =
     // when updating the control panels.
     const nextDataView = await dataViews.get(context.datasetSelection.toDataviewSpec().id, false);
     if (nextDataView.id) {
-      await discoverStateContainer.actions.onChangeDataView(nextDataView.id);
+      await discoverStateContainer.actions.onChangeDataView(nextDataView);
     }
     discoverStateContainer.actions.setDataView(nextDataView);
   };

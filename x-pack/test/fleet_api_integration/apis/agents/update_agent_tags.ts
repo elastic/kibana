@@ -156,14 +156,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if the passed kuery is not correct', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is not correct ', async () => {
         await supertest
           .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:existingTag`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });
 
-      it('should return 400 if the passed kuery is invalid', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/agents?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
