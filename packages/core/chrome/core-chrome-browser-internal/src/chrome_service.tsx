@@ -361,8 +361,11 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyle$.getValue();
+
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
@@ -374,7 +377,7 @@ export class ChromeService {
         }
 
         // render header
-        if (chromeStyle$.getValue() === 'project') {
+        if (chromeStyle === 'project') {
           const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
           const projectBreadcrumbs$ = projectNavigation
             .getProjectBreadcrumbs$()

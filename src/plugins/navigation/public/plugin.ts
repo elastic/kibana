@@ -16,8 +16,9 @@ import {
 } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import {
+import type {
   CloudURLs,
+  NavigationTreeDefinition,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
@@ -151,13 +152,11 @@ export class NavigationPublicPlugin
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
-    const sideNavComponentGetter: SolutionNavigationDefinition['sideNavComponentGetter'] = () => {
-      // Temp. In future work this will be loaded from a package
-      const navigationTree$ = of({
-        body: [],
-      });
-
-      project.initNavigation(navigationTree$, { cloudUrls: cloud });
+    const getSideNavComponentGetter: (
+      navTree: NavigationTreeDefinition,
+      id: string
+    ) => SolutionNavigationDefinition['sideNavComponentGetter'] = (navTree, id) => () => {
+      project.initNavigation(of(navTree), { cloudUrls: cloud });
 
       return getSideNavComponent({
         navProps: {
@@ -176,21 +175,71 @@ export class NavigationPublicPlugin
         title: 'Search',
         icon: 'logoElasticsearch',
         homePage: 'discover', // Temp. Wil be updated when all links are registered
-        sideNavComponentGetter,
+        sideNavComponentGetter: getSideNavComponentGetter(
+          {
+            body: [
+              // Temp. In future work this will be loaded from a package
+              {
+                type: 'navGroup',
+                id: 'search_project_nav',
+                title: 'Search',
+                icon: 'logoElasticsearch',
+                defaultIsCollapsed: false,
+                isCollapsible: false,
+                breadcrumbStatus: 'hidden',
+                children: [],
+              },
+            ],
+          },
+          'search'
+        ),
       },
       oblt: {
         id: 'oblt',
         title: 'Observability',
         icon: 'logoObservability',
         homePage: 'discover', // Temp. Wil be updated when all links are registered
-        sideNavComponentGetter,
+        sideNavComponentGetter: getSideNavComponentGetter(
+          {
+            body: [
+              // Temp. In future work this will be loaded from a package
+              {
+                type: 'navGroup',
+                id: 'observability_project_nav',
+                title: 'Observability',
+                icon: 'logoObservability',
+                defaultIsCollapsed: false,
+                isCollapsible: false,
+                breadcrumbStatus: 'hidden',
+                children: [],
+              },
+            ],
+          },
+          'oblt'
+        ),
       },
       security: {
         id: 'security',
         title: 'Security',
         icon: 'logoSecurity',
         homePage: 'discover', // Temp. Wil be updated when all links are registered
-        sideNavComponentGetter,
+        sideNavComponentGetter: getSideNavComponentGetter(
+          {
+            body: [
+              // Temp. In future work this will be loaded from a package
+              {
+                type: 'navGroup',
+                id: 'security_project_nav',
+                title: 'Security',
+                icon: 'logoSecurity',
+                breadcrumbStatus: 'hidden',
+                defaultIsCollapsed: false,
+                children: [],
+              },
+            ],
+          },
+          'security'
+        ),
       },
     };
 

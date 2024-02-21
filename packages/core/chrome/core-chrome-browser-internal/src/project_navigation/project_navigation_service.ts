@@ -139,9 +139,7 @@ export class ProjectNavigationService {
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));
       },
-      setSideNavComponent: (component: SideNavComponent | null) => {
-        this.customProjectSideNavComponent$.next({ current: component });
-      },
+      setSideNavComponent: this.setSideNavComponent.bind(this),
       getProjectSideNavComponent$: () => {
         return this.customProjectSideNavComponent$.asObservable();
       },
@@ -298,6 +296,10 @@ export class ProjectNavigationService {
       .subscribe(this.onSolutionNavDefinitionsChange.bind(this));
   }
 
+  private setSideNavComponent(component: SideNavComponent | null) {
+    this.customProjectSideNavComponent$.next({ current: component });
+  }
+
   private changeActiveSolutionNavigation(id: string | null, { onlyIfNotSet = false } = {}) {
     if (onlyIfNotSet && this.activeSolutionNavDefinitionId$.getValue() !== null) {
       return;
@@ -323,20 +325,23 @@ export class ProjectNavigationService {
     SolutionNavigationDefinitions,
     string | null
   ]) {
+    this.updateChromeStyle(id === null ? 'classic' : 'project');
+
     if (id === null) {
       localStorage.removeItem(SOLUTION_NAV_KEY);
+      this.navigationTree$.next(undefined);
     } else {
+      if (Object.keys(definitions).length === 0) return;
       const definition = definitions[id];
       if (!definition) {
         throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
       }
       localStorage.setItem(SOLUTION_NAV_KEY, id);
-      const { sideNavComponentGetter, title, homePage } = definition;
-      console.log('ACTIVE NAV:', title, homePage);
+      const { sideNavComponentGetter } = definition;
+      if (sideNavComponentGetter) {
+        this.setSideNavComponent(sideNavComponentGetter());
+      }
     }
-
-    console.log({ definitions, id });
-    this.updateChromeStyle(id === null ? 'classic' : 'project');
   }
 
   public stop() {
