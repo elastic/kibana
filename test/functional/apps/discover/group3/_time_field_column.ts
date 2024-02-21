@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     // Add `true` to the array to test locally with non default `doc_table:hideTimeColumn` setting too. I would not recommend committing with `true` as it doubles the whole test suit time.
-    [false, true].forEach((hideTimeFieldColumnSetting) => {
+    [false].forEach((hideTimeFieldColumnSetting) => {
       const savedSearchSuffix = hideTimeFieldColumnSetting ? 'HideTimeColumn' : 'ShowTimeColumn';
 
       describe(`should${hideTimeFieldColumnSetting ? ' not' : ''} add a time field column`, () => {
@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // These tests are skipped as they take a lot of time to run. Temporary unskip them to validate current functionality if necessary.
-        describe('legacy table', () => {
+        describe.skip('legacy table', () => {
           beforeEach(async () => {
             await kibanaServer.uiSettings.update({
               ...defaultSettings,
