@@ -7,7 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, FeatureName, IngestPipelineParams } from '@kbn/search-connectors';
+import {
+  Connector,
+  FeatureName,
+  IngestPipelineParams,
+  IngestionMethod,
+  IngestionStatus,
+} from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -17,15 +23,17 @@ import {
 } from '../../api/connector/fetch_connector_by_id_logic';
 
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
+import { ElasticsearchViewIndex } from '../../types';
 import { IndexNameActions, IndexNameLogic } from '../search_index/index_name_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
   fetchConnectorApiError: FetchConnectorByIdApiLogicActions['apiError'];
+  fetchConnectorApiReset: FetchConnectorByIdApiLogicActions['apiReset'];
   fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
+  fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
   setIndexName: IndexNameActions['setIndexName'];
 }
@@ -71,12 +79,14 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'makeRequest as fetchConnector',
         'apiSuccess as fetchConnectorApiSuccess',
         'apiError as fetchConnectorApiError',
+        'apiReset as fetchConnectorApiReset',
       ],
       FetchIndexApiLogic,
       [
         'makeRequest as fetchIndex',
         'apiSuccess as fetchIndexApiSuccess',
         'apiError as fetchIndexApiError',
+        'apiReset as fetchIndexApiReset',
       ],
     ],
     values: [
@@ -86,6 +96,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['data as index', 'status as fetchIndexApiStatus'],
     ],
   },
+  events: ({ actions }) => ({
+    beforeMount: () => {
+      actions.fetchConnectorApiReset();
+      actions.fetchIndexApiReset();
+    },
+    beforeUnmount: () => {
+      actions.fetchConnectorApiReset();
+      actions.fetchIndexApiReset();
+    },
+  }),
   listeners: ({ actions, values }) => ({
     fetchConnectorApiSuccess: () => {
       if (values.indexName) {
@@ -95,15 +115,6 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   path: ['enterprise_search', 'content', 'connector_view_logic'],
-  reducers: {
-    syncTriggeredLocally: [
-      false,
-      {
-        fetchIndexApiSuccess: () => false,
-        startSyncApiSuccess: () => true,
-      },
-    ],
-  },
   selectors: ({ selectors }) => ({
     connector: [
       () => [selectors.connectorData],

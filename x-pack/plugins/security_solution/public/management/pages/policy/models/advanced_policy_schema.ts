@@ -1589,4 +1589,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
 ];

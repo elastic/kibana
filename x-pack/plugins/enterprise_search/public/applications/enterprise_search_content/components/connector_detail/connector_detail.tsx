@@ -19,13 +19,14 @@ import { baseBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
-import { ConnectorSchedulingComponent } from '../search_index/connector/connector_scheduling';
+import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
 
 import { ConnectorConfiguration } from './connector_configuration';
+import { ConnectorNameAndDescription } from './connector_name_and_description';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 
@@ -160,7 +161,7 @@ export const ConnectorDetail: React.FC = () => {
         ]
       : []),
     {
-      content: <ConnectorSchedulingComponent />,
+      content: <ConnectorScheduling />,
       disabled: !index,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
@@ -225,7 +226,7 @@ export const ConnectorDetail: React.FC = () => {
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
-        pageTitle: connector?.name ?? '...',
+        pageTitle: connector ? <ConnectorNameAndDescription connector={connector} /> : '...',
         rightSideItems: getHeaderActions(index, hasAppSearchAccess),
         tabs,
       }}
