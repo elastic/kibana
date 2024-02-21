@@ -116,8 +116,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onOptionsChange,
     tracker: track,
   });
-
-  const groupInRedux = useDeepEqualSelector((state) => groupIdSelector()(state, props.tableId));
+  const groupId = useMemo(() => groupIdSelector(), []);
+  const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
   useEffect(() => {
     // only ever set to `none` - siem only handles group selector when `none` is selected
     if (isNoneGroup(selectedGroups)) {

@@ -8,8 +8,8 @@
 
 import { CharStreams } from 'antlr4ts';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
-// import { mathCommandDefinition } from '../../autocomplete/autocomplete_definitions';
-// import { getDurationItemsWithQuantifier } from '../../autocomplete/helpers';
+import { join } from 'path';
+import { writeFile } from 'fs/promises';
 import { AstListener } from '../ast_factory';
 import { validateAst } from './validation';
 import { ESQLAst } from '../types';
@@ -254,6 +254,31 @@ function generateWrongMappingForArgs(
 }
 
 describe('validation logic', () => {
+  const testCases: Array<{ query: string; error: boolean }> = [];
+
+  afterAll(async () => {
+    const targetFolder = join(__dirname, 'esql_validation_meta_tests.json');
+    try {
+      await writeFile(
+        targetFolder,
+        JSON.stringify(
+          {
+            indexes,
+            fields: fields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+            enrichFields: enrichFields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+            policies,
+            unsupported_field,
+            testCases,
+          },
+          null,
+          2
+        )
+      );
+    } catch (e) {
+      throw new Error(`Error writing test cases to ${targetFolder}: ${e.message}`);
+    }
+  });
+
   const getAstAndErrors = async (
     text: string | undefined
   ): Promise<{
@@ -279,6 +304,8 @@ describe('validation logic', () => {
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) {
     const testFn = only ? it.only : skip ? it.skip : it;
+    testCases.push({ query: statement, error: Boolean(expectedErrors.length) });
+
     testFn(
       `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
       async () => {
@@ -952,27 +979,28 @@ describe('validation logic', () => {
       ]);
     }
 
-    testErrorsAndWarnings(`from a_index | where numberField =~ 0`, [
+    // Skip these tests until the insensitive case equality gets restored back
+    testErrorsAndWarnings.skip(`from a_index | where numberField =~ 0`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where NOT numberField =~ 0`, [
+    testErrorsAndWarnings.skip(`from a_index | where NOT numberField =~ 0`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where (numberField =~ 0)`, [
+    testErrorsAndWarnings.skip(`from a_index | where (numberField =~ 0)`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where (NOT (numberField =~ 0))`, [
+    testErrorsAndWarnings.skip(`from a_index | where (NOT (numberField =~ 0))`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | where 1 =~ 0`, [
+    testErrorsAndWarnings.skip(`from a_index | where 1 =~ 0`, [
       'Argument of [=~] must be [string], found value [1] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
     ]);
-    testErrorsAndWarnings(`from a_index | eval stringField =~ 0`, [
+    testErrorsAndWarnings.skip(`from a_index | eval stringField =~ 0`, [
       `Argument of [=~] must be [string], found value [0] type [number]`,
     ]);
 

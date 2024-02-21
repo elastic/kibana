@@ -235,7 +235,6 @@ function getMathOperation(ctx: ArithmeticBinaryContext) {
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
     ctx.EQ()?.text ||
-    ctx.CIEQ()?.text ||
     ctx.NEQ()?.text ||
     ctx.LT()?.text ||
     ctx.LTE()?.text ||

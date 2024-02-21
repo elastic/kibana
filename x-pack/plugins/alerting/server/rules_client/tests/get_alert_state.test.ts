@@ -236,7 +236,7 @@ describe('getAlertState()', () => {
 
     expect(rulesClientParams.logger.warn).toHaveBeenCalledTimes(1);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      'An error occurred when getting the task state for (task-123)'
+      'An error occurred when getting the task state for (task-123): Bad Request'
     );
   });
 
