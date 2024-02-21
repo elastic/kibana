@@ -6,13 +6,8 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    UUID:
-      type: string
-      format: uuid
-      description: A universally unique identifier
-
     RuleObjectId:
-      $ref: '#/components/schemas/UUID'
+      $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/UUID'
 
     RuleSignatureId:
       type: string

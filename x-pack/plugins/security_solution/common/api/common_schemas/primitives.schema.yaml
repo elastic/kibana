@@ -11,3 +11,8 @@ components:
       pattern: ^(?! *$).+$
       minLength: 1
       description: A string that is not empty and does not contain only whitespace
+
+    UUID:
+      type: string
+      format: uuid
+      description: A universally unique identifier

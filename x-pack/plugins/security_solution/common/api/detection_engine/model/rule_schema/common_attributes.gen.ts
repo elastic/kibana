@@ -17,13 +17,7 @@ import { isValidDateMath } from '@kbn/zod-helpers';
  *   version: not applicable
  */
 
-import { NonEmptyString } from '../../../common_schemas/primitives.gen';
-
-/**
- * A universally unique identifier
- */
-export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
+import { UUID, NonEmptyString } from '../../../common_schemas/primitives.gen';
 
 export type RuleObjectId = z.infer<typeof RuleObjectId>;
 export const RuleObjectId = UUID;

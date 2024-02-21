@@ -24,3 +24,9 @@ export const NonEmptyString = z
   .string()
   .min(1)
   .regex(/^(?! *$).+$/);
+
+/**
+ * A universally unique identifier
+ */
+export type UUID = z.infer<typeof UUID>;
+export const UUID = z.string().uuid();
