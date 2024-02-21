@@ -25,9 +25,9 @@ const createExistsFilter = ({
 }: {
   key: string;
   negate: boolean;
-  dataViewId: string | null;
+  dataViewId?: string;
 }): ExistsFilter => ({
-  meta: { key, negate, type: FILTERS.EXISTS, value: 'exists', index: dataViewId ?? undefined },
+  meta: { key, negate, type: FILTERS.EXISTS, value: 'exists', index: dataViewId },
   query: { exists: { field: key } },
 });
 
