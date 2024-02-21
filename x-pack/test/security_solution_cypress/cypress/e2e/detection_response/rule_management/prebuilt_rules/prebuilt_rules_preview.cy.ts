@@ -74,7 +74,7 @@ const TEST_ENV_TAGS = ['@ess', '@serverless'];
 const PREVIEW_TABS = {
   OVERVIEW: 'Overview',
   JSON_VIEW: 'JSON view',
-  UPDATES: 'Updates',
+  UPDATES: 'Updates', // Currently open by default on upgrade
 };
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
@@ -853,7 +853,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.JSON_VIEW);
           selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           const { index } = UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'] as {
@@ -881,7 +880,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           closeRulePreview();
 
           openRuleUpdatePreview(UPDATED_SAVED_QUERY_DATA_VIEW_RULE['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.JSON_VIEW);
           selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           const { data_view_id: dataViewId } = UPDATED_SAVED_QUERY_DATA_VIEW_RULE[
@@ -1076,7 +1074,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         clickRuleUpdatesTab();
 
         openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-        assertSelectedPreviewTab(PREVIEW_TABS.JSON_VIEW);
+        selectPreviewTab(PREVIEW_TABS.JSON_VIEW);
 
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
@@ -1158,7 +1156,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES);
+          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
 
           cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
           cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
@@ -1206,7 +1204,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(OUTDATED_RULE_WITH_QUERY_TYPE['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES);
+          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
 
           cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
           cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
