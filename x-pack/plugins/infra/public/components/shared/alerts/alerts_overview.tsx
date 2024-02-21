@@ -17,6 +17,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import AlertsStatusFilter from './alerts_status_filter';
+import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
 interface AlertsOverviewProps {
   assetName: string;
@@ -28,7 +29,11 @@ interface AlertsOverviewProps {
 export const AlertsOverview = React.memo(
   ({ assetName, dateRange, onLoaded, onRangeSelection }: AlertsOverviewProps) => {
     const { services } = useKibanaContextForPlugin();
-    const [alertStatus, setAlertStatus] = useState<AlertStatus>(ALERT_STATUS_ALL);
+    const [urlState, setUrlState] = useAssetDetailsUrlState();
+    const [alertStatus, setAlertStatus] = useState<AlertStatus>(
+      urlState?.alertStatus ?? ALERT_STATUS_ALL
+    );
+
     const alertsEsQueryByStatus = useMemo(
       () =>
         createAlertsEsQuery({
@@ -77,11 +82,17 @@ export const AlertsOverview = React.memo(
       onBrushEnd,
     };
 
+    const handleAlertStatusChange = (id: AlertStatus) => {
+      console.log('change', id);
+      setAlertStatus(id);
+      setUrlState({ alertStatus: id });
+    };
+
     return (
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
+            <AlertsStatusFilter onChange={handleAlertStatusChange} status={alertStatus} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem>
