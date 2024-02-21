@@ -7,7 +7,7 @@
  */
 
 import type { Token } from 'antlr4';
-import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
+import { default as PainlessLexer } from '../../antlr/painless_lexer';
 
 /*
  * This extends the PainlessLexer class in order to handle backslashes appropriately

@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ErrorListener, Recognizer, RecognitionException } from 'antlr4';
-import type { EditorError } from '../../../types';
+import type { Recognizer, RecognitionException } from 'antlr4';
+import { ANTLRErrorListener } from '../../../common/error_listener';
 import { createError } from '../ast/ast_errors';
 
-export class ESQLErrorListener implements ErrorListener<any> {
-  private errors: EditorError[] = [];
-
+export class ESQLErrorListener extends ANTLRErrorListener {
   syntaxError(
     recognizer: Recognizer<any>,
     offendingSymbol: any,
@@ -45,9 +43,5 @@ export class ESQLErrorListener implements ErrorListener<any> {
       message: textMessage,
       severity: 8, // monaco.MarkerSeverity.Error,
     });
-  }
-
-  getErrors(): EditorError[] {
-    return this.errors;
   }
 }

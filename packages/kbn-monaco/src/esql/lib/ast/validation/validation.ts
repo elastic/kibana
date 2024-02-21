@@ -836,6 +836,8 @@ export async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
+  // console.log('ast received:: %o \n', ast);
+
   const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
@@ -882,6 +884,7 @@ export async function validateAst(
     });
     messages.push(...commandMessages);
   }
+
   return {
     errors: [...errors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),

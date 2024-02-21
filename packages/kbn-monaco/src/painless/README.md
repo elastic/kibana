@@ -111,7 +111,7 @@ To add additional contexts, edit the `supportedContexts` constant in `kbn-monaco
 
 [ANTLR](https://www.antlr.org/) generates lexical and syntax errors out of the box, which we can use to set error markers in monaco. 
 
-Elasticsearch has defined [lexer and parser grammar](https://github.com/elastic/elasticsearch/tree/master/modules/lang-painless/src/main/antlr) for the Painless language. For now, these rules have been largely copied from ES to Kibana and reside in the `antlr` directory with the `.g4` file extension. We then use [antlr4ts](https://github.com/tunnelvisionlabs/antlr4ts) to generate a lexer and a parser in Typescript.
+Elasticsearch has defined [lexer and parser grammar](https://github.com/elastic/elasticsearch/tree/master/modules/lang-painless/src/main/antlr) for the Painless language. For now, these rules have been largely copied from ES to Kibana and reside in the `antlr` directory with the `.g4` file extension. We then generate a Typescript target for the lexer and a parser.
 
 To regenerate the lexer and parser, run the following script:
 

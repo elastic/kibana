@@ -8,7 +8,7 @@
 
 import { CharStreams, type Token } from 'antlr4';
 import { monaco } from '../../../monaco_imports';
-import { ANTLREErrorListener } from '../../../common/error_listener';
+import { ESQLErrorListener } from './esql_error_listener';
 
 import { ESQLToken } from './esql_token';
 import { ESQLLineTokens } from './esql_line_tokens';
@@ -27,7 +27,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
 
   tokenize(line: string, prevState: ESQLState): monaco.languages.ILineTokens {
     const errorStartingPoints: number[] = [];
-    const errorListener = new ANTLREErrorListener();
+    const errorListener = new ESQLErrorListener();
     // This has the drawback of not styling any ESQL wrong query as
     // | from ...
     const cleanedLine =

@@ -69,7 +69,7 @@ import {
   createFakeMultiplyLiteral,
   createList,
   createNumericLiteral,
-  sanifyIdentifierString,
+  sanitizeIdentifierString,
   computeLocationExtends,
   createColumnStar,
   wrapIdentifierAsArray,
@@ -556,7 +556,7 @@ function visitDissectOptions(ctx: CommandOptionsContext | undefined) {
   const options: ESQLCommandOption[] = [];
   for (const optionCtx of ctx.commandOption_list()) {
     const option = createOption(
-      sanifyIdentifierString(optionCtx.identifier()).toLowerCase(),
+      sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
       optionCtx
     );
     options.push(option);

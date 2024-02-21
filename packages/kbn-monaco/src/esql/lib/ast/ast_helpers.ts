@@ -10,7 +10,7 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import { Token, ErrorNode, type ParserRuleContext, type TerminalNode } from 'antlr4';
+import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
 import type {
   ArithmeticUnaryContext,
   DecimalValueContext,
@@ -229,7 +229,7 @@ function safeBackticksRemoval(text: string | undefined) {
   return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
-export function sanifyIdentifierString(ctx: ParserRuleContext) {
+export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   return (
     getUnquotedText(ctx)?.getText() ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
@@ -273,7 +273,7 @@ export function createSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
-  const text = sanifyIdentifierString(ctx);
+  const text = sanitizeIdentifierString(ctx);
   return {
     type: 'source',
     name: text,
@@ -296,7 +296,7 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
-  const text = sanifyIdentifierString(ctx);
+  const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
@@ -315,6 +315,12 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     args: [],
-    incomplete: Boolean(ctx.exception || ctx.children?.some((c) => c instanceof ErrorNode)),
+    incomplete: Boolean(
+      ctx.exception ||
+        ctx.children?.some((c) => {
+          // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
+          return Boolean(c.isErrorNode);
+        })
+    ),
   };
 }

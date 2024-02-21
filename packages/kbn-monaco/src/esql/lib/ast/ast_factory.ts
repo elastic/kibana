@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
+import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   type ShowInfoContext,
   type ShowFunctionsContext,
@@ -260,18 +260,18 @@ export class AstListener implements ESQLParserListener {
   }
 
   enterEveryRule(ctx: ParserRuleContext): void {
-    // not implemented yet
+    // method not implemented, added to satisfy interface expectation
   }
 
   visitErrorNode(node: ErrorNode): void {
-    // not implemented yet
+    // method not implemented, added to satisfy interface expectation
   }
 
   visitTerminal(node: TerminalNode): void {
-    // not implemented yet
+    // method not implemented, added to satisfy interface expectation
   }
 
   exitEveryRule(ctx: ParserRuleContext): void {
-    // not implemented yet
+    // method not implemented, added to satisfy interface expectation
   }
 }
