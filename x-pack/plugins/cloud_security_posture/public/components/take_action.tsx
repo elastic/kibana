@@ -112,7 +112,7 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
         {isBenchmarkRuleMuted ? (
           <FormattedMessage
             id="xpack.csp.flyout.ruleEnabledToastRulesCount"
-            defaultMessage={`Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} `}
+            defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} "
             values={{
               ruleCount: data.numberOfRules,
             }}
@@ -121,7 +121,7 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
           <>
             <FormattedMessage
               id="xpack.csp.flyout.ruleDisabledToastRulesCount"
-              defaultMessage={`Successfully disabled {ruleCount, plural, one {# rule} other {# rules}} `}
+              defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}} "
               values={{
                 ruleCount: data.numberOfRules,
               }}
