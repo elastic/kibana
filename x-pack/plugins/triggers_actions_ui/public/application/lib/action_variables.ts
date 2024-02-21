@@ -76,6 +76,7 @@ export enum AlertProvidedActionVariables {
   alertActionSubgroup = 'alert.actionSubgroup',
   alertFlapping = 'alert.flapping',
   kibanaBaseUrl = 'kibanaBaseUrl',
+  alertConsecutiveMatchCount = 'alert.consecutiveMatchCount',
 }
 
 export enum LegacyAlertProvidedActionVariables {
@@ -222,6 +223,16 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       defaultMessage:
         'A flag on the alert that indicates whether the alert status is changing repeatedly.',
     }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertConsecutiveMatchCount,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertConsecutiveMatchCountLabel',
+      {
+        defaultMessage: 'The number of consecutive runs that meet the rule conditions.',
+      }
+    ),
   });
 
   result.push(AlertProvidedActionVariableDescriptions[AlertProvidedActionVariables.kibanaBaseUrl]);
