@@ -146,6 +146,8 @@ export class ManifestTask {
       return;
     }
 
+    console.time('🧀 getManifestManager ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️');
+
     const manifestManager = this.endpointAppContext.service.getManifestManager();
 
     if (manifestManager === undefined) {
@@ -153,12 +155,16 @@ export class ManifestTask {
       return;
     }
 
+    console.timeEnd('🧀 getManifestManager ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️');
+
     try {
       let oldManifest: Manifest | null = null;
 
       try {
         // Last manifest we computed, which was saved to ES
+        console.time('🧀 getLastComputedManifest');
         oldManifest = await manifestManager.getLastComputedManifest();
+        console.timeEnd('🧀 getLastComputedManifest');
       } catch (e) {
         this.logger.error(e);
 
@@ -181,9 +187,13 @@ export class ManifestTask {
       }
 
       // New computed manifest based on current manifest
+      console.time('🧀 buildNewManifest');
       const newManifest = await manifestManager.buildNewManifest(oldManifest);
+      console.timeEnd('🧀 buildNewManifest');
 
+      console.time('🧀 diff');
       const diff = newManifest.diff(oldManifest);
+      console.timeEnd('🧀 diff');
 
       this.logger.debug(
         `New -vs- old manifest diff counts: ${Object.entries(diff).map(
@@ -191,24 +201,32 @@ export class ManifestTask {
         )}`
       );
 
+      console.time('🧀 pushArtifacts');
       const persistErrors = await manifestManager.pushArtifacts(
         diff.additions as InternalArtifactCompleteSchema[],
         newManifest
       );
+      console.timeEnd('🧀 pushArtifacts');
 
       if (persistErrors.length) {
         reportErrors(this.logger, persistErrors);
         throw new Error('Unable to persist new artifacts.');
       }
 
+      console.time('🧀 bumpSemanticVersion & commit OUTER');
       if (!isEmptyManifestDiff(diff)) {
+        console.time('🧀 bumpSemanticVersion & commit INNER');
         // Commit latest manifest state
         newManifest.bumpSemanticVersion();
         await manifestManager.commit(newManifest);
+        console.timeEnd('🧀 bumpSemanticVersion & commit INNER');
       }
+      console.timeEnd('🧀 bumpSemanticVersion & commit OUTER');
 
       // Dispatch updates to Fleet integration policies with new manifest info
+      console.time('🧀 tryDispatch');
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+      console.timeEnd('🧀 tryDispatch');
 
       if (dispatchErrors.length) {
         reportErrors(this.logger, dispatchErrors);
@@ -216,15 +234,19 @@ export class ManifestTask {
       }
 
       // Try to clean up superceded artifacts
+      console.time('🧀 deleteArtifacts');
       const deleteErrors = await manifestManager.deleteArtifacts(
         diff.removals.map((artifact) => getArtifactId(artifact))
       );
+      console.timeEnd('🧀 deleteArtifacts');
 
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }
 
+      console.time('🧀 cleanup ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️');
       await manifestManager.cleanup(newManifest);
+      console.timeEnd('🧀 cleanup ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️');
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
     }

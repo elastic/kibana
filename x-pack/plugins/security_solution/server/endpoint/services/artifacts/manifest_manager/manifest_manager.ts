@@ -707,9 +707,9 @@ export class ManifestManager {
       this.logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
     }
 
-    if (unChangedPolicies.length) {
-      this.logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
-    }
+    // if (unChangedPolicies.length) {
+    //   this.logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
+    // }
 
     return errors;
   }
