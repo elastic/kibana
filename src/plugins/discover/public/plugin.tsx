@@ -296,6 +296,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
+      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
         setScopedHistory(params.history);

@@ -33,7 +33,7 @@ import {
   createScopedLogger,
   AdditionalContext,
   getContextForRecoveredAlerts,
-  getViewInMetricsAppUrl,
+  getMetricsViewInAppUrlWithSpaceId,
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
@@ -171,7 +171,6 @@ export const createMetricThresholdExecutor =
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
-        logger.error(e.message);
         const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS_ID; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
@@ -182,7 +181,11 @@ export const createMetricThresholdExecutor =
           reason,
           timestamp,
           value: null,
-          viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+          viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
+            basePath: libs.basePath,
+            spaceId,
+            timestamp,
+          }),
         };
 
         await alertReporter(UNGROUPED_FACTORY_KEY, reason, actionGroupId, alertContext);
@@ -356,7 +359,12 @@ export const createMetricThresholdExecutor =
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+          viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
+            basePath: libs.basePath,
+            spaceId,
+            timestamp,
+            hostName: additionalContext?.host?.name,
+          }),
           ...additionalContext,
         };
 
@@ -407,7 +415,12 @@ export const createMetricThresholdExecutor =
         }),
         timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-        viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+        viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
+          basePath: libs.basePath,
+          spaceId,
+          timestamp: indexedStartedAt,
+          hostName: additionalContext?.host?.name,
+        }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,

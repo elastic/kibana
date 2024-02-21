@@ -86,7 +86,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'google_drive.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['google', 'drive', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.googleDrive.name', {
@@ -146,9 +146,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'salesforce.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
-    isTechPreview: false,
     keywords: ['salesforce', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
       defaultMessage: 'Salesforce',
@@ -179,10 +178,9 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'gmail.svg',
-    isBeta: false,
-    isNative: false,
-    isTechPreview: true,
-    keywords: ['google', 'gmail', 'connector', 'mail'],
+    isBeta: true,
+    isNative: true,
+    keywords: ['gmail', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
     }),
@@ -200,7 +198,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'onedrive.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['network', 'drive', 'file', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.oneDrive.name', {
@@ -253,9 +251,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'outlook.svg',
-    isBeta: false,
-    isNative: false,
-    isTechPreview: true,
+    isBeta: true,
+    isNative: true,
     keywords: ['outlook', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.outlook.name', {
       defaultMessage: 'Outlook',

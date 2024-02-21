@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -32,6 +33,11 @@ const minWidthClassName = css`
 const chatHeaderClassName = css`
   padding-top: 12px;
   padding-bottom: 12px;
+`;
+
+const chatHeaderMobileClassName = css`
+  padding-top: 8px;
+  padding-bottom: 8px;
 `;
 
 export function ChatHeader({
@@ -58,6 +64,7 @@ export function ChatHeader({
   onToggleFlyoutWidthMode?: (newFlyoutWidthMode: FlyoutWidthMode) => void;
 }) {
   const theme = useEuiTheme();
+  const breakpoint = useCurrentEuiBreakpoint();
 
   const router = useObservabilityAIAssistantRouter();
 
@@ -87,20 +94,24 @@ export function ChatHeader({
   return (
     <EuiPanel
       borderRadius="none"
+      className={breakpoint === 'xs' ? chatHeaderMobileClassName : chatHeaderClassName}
       hasBorder={false}
       hasShadow={false}
-      paddingSize="m"
-      className={chatHeaderClassName}
+      paddingSize={breakpoint === 'xs' ? 's' : 'm'}
     >
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="s" />}
+          {loading ? (
+            <EuiLoadingSpinner size={breakpoint === 'xs' ? 'm' : 'l'} />
+          ) : (
+            <AssistantAvatar size={breakpoint === 'xs' ? 'xs' : 's'} />
+          )}
         </EuiFlexItem>
 
         <EuiFlexItem grow className={minWidthClassName}>
           <EuiInlineEditTitle
             heading="h2"
-            size="s"
+            size={breakpoint === 'xs' ? 'xs' : 's'}
             value={newTitle}
             className={css`
               color: ${!!title ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
@@ -130,7 +141,7 @@ export function ChatHeader({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" responsive={false}>
             {flyoutWidthMode && onToggleFlyoutWidthMode ? (
               <>
                 <EuiFlexItem grow={false}>

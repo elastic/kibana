@@ -383,7 +383,6 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiTourStepIndicator.isActive": "active",
           "euiTourStepIndicator.isComplete": "complete",
           "euiTourStepIndicator.isIncomplete": "incomplete",
-          "euiTreeView.ariaLabel": [Function],
           "euiTreeView.listNavigationInstructions": "You can quickly navigate this list using arrow keys.",
         },
       }
