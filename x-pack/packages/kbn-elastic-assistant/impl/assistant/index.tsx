@@ -171,13 +171,16 @@ const AssistantComponent: React.FC<Props> = ({
       const updatedConversation = await getConversation(
         cId ?? conversations[selectedConversationTitle].id
       );
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
       return updatedConversation;
     },
     [conversations, getConversation, selectedConversationTitle]
   );
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && Object.keys(conversations).length > 0) {
       const conversation =
         conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
       if (conversation) {
@@ -311,16 +314,12 @@ const AssistantComponent: React.FC<Props> = ({
       } else {
         setSelectedConversationTitle(cTitle);
         const refetchedConversation = await refetchCurrentConversation(cId);
-        if (refetchedConversation) {
-          setCurrentConversation(refetchedConversation);
-          setConversations({ ...(conversations ?? {}), [cTitle]: refetchedConversation });
-        }
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
       }
     },
-    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
