@@ -1,0 +1,34 @@
+DATE_TRUNC
+
+Syntax
+DATE_TRUNC(interval, date)
+Parameters
+interval
+Interval, expressed using the timespan literal
+syntax. If null, the function returns null.
+date
+Date expression. If null, the function returns null.
+DescriptionRounds down a date to the closest interval.Examples
+```esql
+FROM employees
+| KEEP first_name, last_name, hire_date
+| EVAL year_hired = DATE_TRUNC(1 year, hire_date)
+```
+
+Combine DATE_TRUNC with STATS ... BY to create date histograms. For
+example, the number of hires per year:
+```esql
+FROM employees
+| EVAL year = DATE_TRUNC(1 year, hire_date)
+| STATS hires = COUNT(emp_no) BY year
+| SORT year
+```
+
+Or an hourly error rate:
+```esql
+FROM sample_data
+| EVAL error = CASE(message LIKE "*error*", 1, 0)
+| EVAL hour = DATE_TRUNC(1 hour, @timestamp)
+| STATS error_rate = AVG(error) by hour
+| SORT hour
+```

@@ -1,0 +1,9 @@
+REPLACE
+
+The function substitutes in the string (1st argument) any match of the regular expression (2nd argument) with the replacement string (3rd argument).If any of the arguments are NULL, the result is NULL.
+This example replaces an occurrence of the word "World" with the word "Universe":
+```esql
+ROW str = "Hello World"
+| EVAL str = REPLACE(str, "World", "Universe")
+| KEEP str
+```

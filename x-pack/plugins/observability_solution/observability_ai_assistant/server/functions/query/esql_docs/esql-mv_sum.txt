@@ -1,0 +1,10 @@
+MV_SUM
+
+Converts a multivalued field into a single valued field containing the sum
+of all of the values. For example:
+```esql
+ROW a=[3, 5, 6]
+| EVAL sum_a = MV_SUM(a)
+```
+
+The input type can be any number and the output type is the same as the input type.
