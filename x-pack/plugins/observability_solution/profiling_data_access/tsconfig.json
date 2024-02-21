@@ -1,16 +1,10 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "server/**/*",
-    "jest.config.js"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["common/**/*", "server/**/*", "jest.config.js"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -21,6 +15,6 @@
     "@kbn/fleet-plugin",
     "@kbn/cloud-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/observability-plugin",
+    "@kbn/observability-plugin"
   ]
 }

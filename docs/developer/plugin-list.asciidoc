@@ -161,7 +161,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -712,11 +712,11 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
