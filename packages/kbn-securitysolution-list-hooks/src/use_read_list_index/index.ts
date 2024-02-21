@@ -41,7 +41,7 @@ export const useReadListIndex = ({
 
   return {
     result: query.data,
-    loading: query.isLoading,
+    loading: query.isFetching,
     error: query.error,
   };
 };
