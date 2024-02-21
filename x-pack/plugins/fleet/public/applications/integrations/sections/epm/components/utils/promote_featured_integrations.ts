@@ -26,10 +26,10 @@ export function _promoteFeaturedIntegrations(
     featuredIntegrationNames.includes(card.name)
   );
 
-  // now return the integrations in the order they are defined in
-  const orderedFeaturedIntegrations = featuredIntegrationNames
-    .map((integrationName) => featuredIntegrations.find(({ name }) => name === integrationName))
-    .filter((v) => v) as PackageListGridProps['list'];
+  // Find all featured integrations with matching names
+  const orderedFeaturedIntegrations = featuredIntegrations.filter(({ name }) =>
+    featuredIntegrationNames.includes(name)
+  );
 
   return [...orderedFeaturedIntegrations, ...otherIntegrations];
 }
