@@ -23,10 +23,10 @@ describe('NavButtons', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
-  it('shows the configure case button', () => {
+  it('shows the configure case button', async () => {
     appMockRenderer.render(<NavButtons actionsErrors={[]} />);
 
-    expect(screen.getByTestId('configure-case-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('configure-case-button')).toBeInTheDocument();
   });
 
   it('does not render the case create button with no create permissions', () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
@@ -55,15 +55,15 @@ describe('ResilientParamsFields renders', () => {
     jest.clearAllMocks();
   });
 
-  it('all params fields are rendered', () => {
+  it('all params fields are rendered', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByText('Malware')).toBeInTheDocument();
-    expect(screen.getByTestId('severitySelect')).toHaveValue('6');
+    expect(await screen.findByText('Malware')).toBeInTheDocument();
+    expect(await screen.findByTestId('severitySelect')).toHaveValue('6');
   });
 
   it('disabled the fields when loading incident types', async () => {
@@ -75,10 +75,12 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox')).toBeDisabled();
+    expect(
+      await within(await screen.findByTestId('incidentTypeComboBox')).findByRole('combobox')
+    ).toBeDisabled();
   });
 
-  it('disabled the fields when loading severity', () => {
+  it('disabled the fields when loading severity', async () => {
     useGetSeverityMock.mockReturnValue({
       ...useGetSeverityResponse,
       isLoading: true,
@@ -90,7 +92,7 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('severitySelect')).toBeDisabled();
+    expect(await screen.findByTestId('severitySelect')).toBeDisabled();
   });
 
   it('sets issue type correctly', async () => {
@@ -100,13 +102,13 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
+    const checkbox = within(await screen.findByTestId('incidentTypeComboBox')).getByTestId(
       'comboBoxSearchInput'
     );
 
     userEvent.type(checkbox, 'Denial of Service{enter}');
 
-    expect(screen.getByText('Denial of Service')).toBeInTheDocument();
+    expect(await screen.findByText('Denial of Service')).toBeInTheDocument();
   });
 
   it('sets severity correctly', async () => {
@@ -116,8 +118,8 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), 'Low');
-    expect(screen.getByText('Low')).toBeInTheDocument();
+    userEvent.selectOptions(await screen.findByTestId('severitySelect'), 'Low');
+    expect(await screen.findByText('Low')).toBeInTheDocument();
   });
 
   it('should submit a resilient connector', async () => {
@@ -127,20 +129,18 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'Low' }));
-    });
+    expect(await screen.findByTestId('incidentTypeComboBox')).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Low' }));
 
-    const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
+    const checkbox = within(await screen.findByTestId('incidentTypeComboBox')).getByTestId(
       'comboBoxSearchInput'
     );
 
     userEvent.type(checkbox, 'Denial of Service{enter}');
 
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+    userEvent.selectOptions(await screen.findByTestId('severitySelect'), ['4']);
 
-    expect(screen.getByText('Denial of Service')).toBeInTheDocument();
-    expect(screen.getByText('Low')).toBeInTheDocument();
+    expect(await screen.findByText('Denial of Service')).toBeInTheDocument();
+    expect(await screen.findByText('Low')).toBeInTheDocument();
   });
 });

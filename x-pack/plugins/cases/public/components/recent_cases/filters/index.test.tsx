@@ -8,7 +8,7 @@
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { waitFor, fireEvent } from '@testing-library/react';
+import { waitFor, fireEvent, screen } from '@testing-library/react';
 import { RecentCasesFilters, caseFilterOptions } from '.';
 import type { FilterMode } from '../types';
 
@@ -27,32 +27,30 @@ describe('Severity form field', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders', () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} />);
-    expect(result.getByTestId('recent-cases-filter')).toBeTruthy();
+  it('renders', async () => {
+    appMockRender.render(<RecentCasesFilters {...props} />);
+    expect(await screen.findByTestId('recent-cases-filter')).toBeTruthy();
   });
 
-  it('renders loading state correctly', () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} isLoading={true} />);
-    expect(result.getByLabelText('Loading')).toBeTruthy();
-    expect(result.getByRole('progressbar')).toBeTruthy();
+  it('renders loading state correctly', async () => {
+    appMockRender.render(<RecentCasesFilters {...props} isLoading={true} />);
+    expect(await screen.findByLabelText('Loading')).toBeTruthy();
+    expect(await screen.findByRole('progressbar')).toBeTruthy();
   });
 
-  it('renders disabled  state correctly', () => {
-    const result = appMockRender.render(
-      <RecentCasesFilters {...props} hasCurrentUserInfo={false} />
-    );
-    expect(result.getByTestId('recent-cases-filter')).toHaveAttribute('disabled');
+  it('renders disabled  state correctly', async () => {
+    appMockRender.render(<RecentCasesFilters {...props} hasCurrentUserInfo={false} />);
+    expect(await screen.findByTestId('recent-cases-filter')).toHaveAttribute('disabled');
   });
 
   it('selects the correct value when changed to reported by me', async () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} />);
+    appMockRender.render(<RecentCasesFilters {...props} />);
 
-    const recentCasesFilter = result.getByTestId('recent-cases-filter');
+    const recentCasesFilter = await screen.findByTestId('recent-cases-filter');
 
     expect(recentCasesFilter).toBeInTheDocument();
 
-    expect(result.getByText(caseFilterOptions[1].label)).toBeInTheDocument();
+    expect(await screen.findByText(caseFilterOptions[1].label)).toBeInTheDocument();
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
 
@@ -62,13 +60,13 @@ describe('Severity form field', () => {
   });
 
   it('selects the correct value when changed assigned to me', async () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} />);
+    appMockRender.render(<RecentCasesFilters {...props} />);
 
-    const recentCasesFilter = result.getByTestId('recent-cases-filter');
+    const recentCasesFilter = await screen.findByTestId('recent-cases-filter');
 
     expect(recentCasesFilter).toBeInTheDocument();
 
-    expect(result.getByText(caseFilterOptions[2].label)).toBeInTheDocument();
+    expect(await screen.findByText(caseFilterOptions[2].label)).toBeInTheDocument();
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -42,7 +42,7 @@ describe('AssigneesColumn', () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
     // u2014 is the unicode for a long dash
-    expect(screen.getByText('\u2014')).toBeInTheDocument();
+    expect(await screen.findByText('\u2014')).toBeInTheDocument();
   });
 
   it('only renders 2 avatars when the limit is 2', async () => {
@@ -52,8 +52,12 @@ describe('AssigneesColumn', () => {
 
     appMockRender.render(<AssigneesColumn {...props} />);
 
-    expect(screen.getByTestId('case-table-column-assignee-damaged_raccoon')).toBeInTheDocument();
-    expect(screen.getByTestId('case-table-column-assignee-physical_dinosaur')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('case-table-column-assignee-damaged_raccoon')
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('case-table-column-assignee-physical_dinosaur')
+    ).toBeInTheDocument();
   });
 
   it('renders all 3 avatars when the limit is 5', async () => {
@@ -64,9 +68,13 @@ describe('AssigneesColumn', () => {
 
     appMockRender.render(<AssigneesColumn {...props} />);
 
-    expect(screen.getByTestId('case-table-column-assignee-damaged_raccoon')).toBeInTheDocument();
-    expect(screen.getByTestId('case-table-column-assignee-physical_dinosaur')).toBeInTheDocument();
-    expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('case-table-column-assignee-damaged_raccoon')
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('case-table-column-assignee-physical_dinosaur')
+    ).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
   });
 
   it('shows the show more avatars button when the limit is 2', async () => {
@@ -77,8 +85,8 @@ describe('AssigneesColumn', () => {
 
     appMockRender.render(<AssigneesColumn {...props} />);
 
-    expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
-    expect(screen.getByText('+1 more')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-column-expand-button')).toBeInTheDocument();
+    expect(await screen.findByText('+1 more')).toBeInTheDocument();
   });
 
   it('does not show the show more button when the limit is 5', async () => {
@@ -113,15 +121,13 @@ describe('AssigneesColumn', () => {
 
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
-    expect(screen.getByText('+1 more')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-column-expand-button')).toBeInTheDocument();
+    expect(await screen.findByText('+1 more')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    userEvent.click(await screen.findByTestId('case-table-column-expand-button'));
 
-    await waitFor(() => {
-      expect(screen.getByText('show less')).toBeInTheDocument();
-      expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('show less')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
   });
 
   it('shows more avatars and then hides them when the expand row button is clicked multiple times', async () => {
@@ -134,21 +140,17 @@ describe('AssigneesColumn', () => {
 
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
-    expect(screen.getByText('+1 more')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-column-expand-button')).toBeInTheDocument();
+    expect(await screen.findByText('+1 more')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    userEvent.click(await screen.findByTestId('case-table-column-expand-button'));
 
-    await waitFor(() => {
-      expect(screen.getByText('show less')).toBeInTheDocument();
-      expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('show less')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    userEvent.click(await screen.findByTestId('case-table-column-expand-button'));
 
-    await waitFor(() => {
-      expect(screen.getByText('+1 more')).toBeInTheDocument();
-      expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
-    });
+    expect(await screen.findByText('+1 more')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
   });
 });

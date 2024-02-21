@@ -81,32 +81,28 @@ describe('ConnectorsForm ', () => {
   it('renders correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    expect(screen.getByTestId('caseConnectors')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-connector-fields-form-flex-item')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-connectors-cancel')).toBeInTheDocument();
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-connector-fields-form-flex-item')).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-connectors-submit')).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-connectors-cancel')).toBeInTheDocument();
   });
 
   it('sets the selected connector correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
   });
 
   it('sets the fields for the selected connector correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    const severitySelect = screen.getByTestId('severitySelect');
-    const urgencySelect = screen.getByTestId('urgencySelect');
-    const impactSelect = screen.getByTestId('impactSelect');
-    const categorySelect = screen.getByTestId('categorySelect');
-    const subcategorySelect = screen.getByTestId('subcategorySelect');
+    const severitySelect = await screen.findByTestId('severitySelect');
+    const urgencySelect = await screen.findByTestId('urgencySelect');
+    const impactSelect = await screen.findByTestId('impactSelect');
+    const categorySelect = await screen.findByTestId('categorySelect');
+    const subcategorySelect = await screen.findByTestId('subcategorySelect');
 
     expect(severitySelect).toHaveValue('3');
     expect(urgencySelect).toHaveValue('3');
@@ -118,21 +114,19 @@ describe('ConnectorsForm ', () => {
   it('changes to a new corrector correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
 
-    const incidentTypeComboBox = screen.getByTestId('incidentTypeComboBox');
-    const severitySelect = screen.getByTestId('severitySelect');
+    const incidentTypeComboBox = await screen.findByTestId('incidentTypeComboBox');
+    const severitySelect = await screen.findByTestId('severitySelect');
 
     expect(incidentTypeComboBox).not.toHaveValue();
     expect(severitySelect).toHaveValue('5');
@@ -141,15 +135,13 @@ describe('ConnectorsForm ', () => {
   it('submits correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    const severitySelect = screen.getByTestId('severitySelect');
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), ['2']);
+    const severitySelect = await screen.findByTestId('severitySelect');
+    userEvent.selectOptions(await screen.findByTestId('severitySelect'), ['2']);
 
     expect(severitySelect).toHaveValue('2');
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    userEvent.click(await screen.findByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -171,23 +163,21 @@ describe('ConnectorsForm ', () => {
   it('changes to a new corrector correctly and its fields correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
 
-    const severitySelect = screen.getByTestId('severitySelect');
+    const severitySelect = await screen.findByTestId('severitySelect');
     userEvent.selectOptions(severitySelect, ['4']);
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    userEvent.click(await screen.findByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -203,11 +193,9 @@ describe('ConnectorsForm ', () => {
   it('disables the save button if the fields have not been changed', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+    expect(await screen.findByTestId('edit-connectors-submit')).toBeDisabled();
   });
 
   it('disables the save button if the fields have not been changed and the fields contain null values', async () => {
@@ -232,44 +220,36 @@ describe('ConnectorsForm ', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
-    });
+    expect(await screen.findByTestId('edit-connectors-submit')).toBeDisabled();
   });
 
   it('calls onCancel when clicking the cancel button', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('edit-connectors-cancel'));
+    userEvent.click(await screen.findByTestId('edit-connectors-cancel'));
     expect(onCancel).toBeCalled();
   });
 
   it('disables the submit button correctly if the initial connector is the none', async () => {
     appMockRender.render(<ConnectorsForm {...props} caseData={basicCase} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('No connector selected')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('No connector selected')).toBeInTheDocument();
 
-    expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+    expect(await screen.findByTestId('edit-connectors-submit')).toBeDisabled();
   });
 
   it('can select the none connector', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getAllByTestId('dropdown-connector-no-connector')[0]);
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    userEvent.click(await screen.findByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -284,26 +264,24 @@ describe('ConnectorsForm ', () => {
   it('changes to a new corrector does not disables the submit button with no changes in the fields', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
+    expect(await screen.findByTestId('edit-connectors-submit')).not.toBeDisabled();
   });
 
   it('does not disables the submit button if the connector is deleted', async () => {
     appMockRender.render(<ConnectorsForm {...props} supportedActionConnectors={[]} />);
 
-    expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
+    expect(await screen.findByTestId('edit-connectors-submit')).not.toBeDisabled();
   });
 
   it('changes optional (undefined) values to null', async () => {
@@ -317,20 +295,18 @@ describe('ConnectorsForm ', () => {
 
     appMockRender.render(<ConnectorsForm {...props} caseConnectors={caseConnectorsOptional} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    userEvent.click(await screen.findByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
@@ -367,19 +343,15 @@ describe('ConnectorsForm ', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+    userEvent.click(await screen.findByTestId('dropdown-connector-servicenow-2'));
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector 2')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector 2')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    userEvent.click(await screen.findByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({

@@ -43,19 +43,19 @@ describe('Cases metrics', () => {
     expect(await screen.findByTestId('cases-metrics-stats')).toBeInTheDocument();
 
     expect(
-      within(await screen.findByTestId('openStatsHeader')).getByText('20')
+      await within(await screen.findByTestId('openStatsHeader')).findByText('20')
     ).toBeInTheDocument();
 
     expect(
-      within(await screen.findByTestId('inProgressStatsHeader')).getByText('40')
+      await within(await screen.findByTestId('inProgressStatsHeader')).findByText('40')
     ).toBeInTheDocument();
 
     expect(
-      within(await screen.findByTestId('closedStatsHeader')).getByText('130')
+      await within(await screen.findByTestId('closedStatsHeader')).findByText('130')
     ).toBeInTheDocument();
 
     expect(
-      within(await screen.findByTestId('mttrStatsHeader')).getByText('2ms')
+      await within(await screen.findByTestId('mttrStatsHeader')).findByText('2ms')
     ).toBeInTheDocument();
   });
 });

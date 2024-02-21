@@ -46,7 +46,7 @@ describe('createAssigneesUserActionBuilder', () => {
       jest.clearAllMocks();
     });
 
-    it('renders assigned users', () => {
+    it('renders assigned users', async () => {
       const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           // damaged_raccoon uid
@@ -65,16 +65,16 @@ describe('createAssigneesUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('assigned')).toBeInTheDocument();
-      expect(screen.getByText('themselves')).toBeInTheDocument();
-      expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+      expect(await screen.findByText('assigned')).toBeInTheDocument();
+      expect(await screen.findByText('themselves')).toBeInTheDocument();
+      expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
 
-      expect(screen.getByTestId('ua-assignee-physical_dinosaur')).toContainElement(
-        screen.getByText('and')
+      expect(await screen.findByTestId('ua-assignee-physical_dinosaur')).toContainElement(
+        await screen.findByText('and')
       );
     });
 
-    it('renders assigned users with a comma', () => {
+    it('renders assigned users with a comma', async () => {
       const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           // damaged_raccoon uid
@@ -101,19 +101,21 @@ describe('createAssigneesUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('assigned')).toBeInTheDocument();
-      expect(screen.getByText('themselves,')).toBeInTheDocument();
-      expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+      expect(await screen.findByText('assigned')).toBeInTheDocument();
+      expect(await screen.findByText('themselves,')).toBeInTheDocument();
+      expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
 
-      expect(screen.getByTestId('ua-assignee-physical_dinosaur')).toContainElement(
-        screen.getByText(',')
+      expect(await screen.findByTestId('ua-assignee-physical_dinosaur')).toContainElement(
+        await screen.findByText(',')
       );
 
-      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
-      expect(screen.getByTestId('ua-assignee-wet_dingo')).toContainElement(screen.getByText('and'));
+      expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();
+      expect(await screen.findByTestId('ua-assignee-wet_dingo')).toContainElement(
+        await screen.findByText('and')
+      );
     });
 
-    it('renders unassigned users', () => {
+    it('renders unassigned users', async () => {
       const userAction = getUserAction('assignees', UserActionActions.delete, {
         createdBy: {
           // damaged_raccoon uid
@@ -132,16 +134,16 @@ describe('createAssigneesUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('unassigned')).toBeInTheDocument();
-      expect(screen.getByText('themselves')).toBeInTheDocument();
-      expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+      expect(await screen.findByText('unassigned')).toBeInTheDocument();
+      expect(await screen.findByText('themselves')).toBeInTheDocument();
+      expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
 
-      expect(screen.getByTestId('ua-assignee-physical_dinosaur')).toContainElement(
-        screen.getByText('and')
+      expect(await screen.findByTestId('ua-assignee-physical_dinosaur')).toContainElement(
+        await screen.findByText('and')
       );
     });
 
-    it('renders a single assigned user', () => {
+    it('renders a single assigned user', async () => {
       const userAction = getUserAction('assignees', UserActionActions.add, {
         payload: {
           assignees: [
@@ -162,12 +164,12 @@ describe('createAssigneesUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+      expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
       expect(screen.queryByText('themselves,')).not.toBeInTheDocument();
       expect(screen.queryByText('and')).not.toBeInTheDocument();
     });
 
-    it('renders a single assigned user that is themselves using matching profile uids', () => {
+    it('renders a single assigned user that is themselves using matching profile uids', async () => {
       const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           ...elasticUser,
@@ -192,12 +194,12 @@ describe('createAssigneesUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('themselves')).toBeInTheDocument();
+      expect(await screen.findByText('themselves')).toBeInTheDocument();
       expect(screen.queryByText('Physical Dinosaur')).not.toBeInTheDocument();
       expect(screen.queryByText('and')).not.toBeInTheDocument();
     });
 
-    it('renders a single assigned user that is themselves using matching usernames', () => {
+    it('renders a single assigned user that is themselves using matching usernames', async () => {
       const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           ...elasticUser,
@@ -222,7 +224,7 @@ describe('createAssigneesUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('themselves')).toBeInTheDocument();
+      expect(await screen.findByText('themselves')).toBeInTheDocument();
       expect(screen.queryByText('Physical Dinosaur')).not.toBeInTheDocument();
       expect(screen.queryByText('and')).not.toBeInTheDocument();
     });

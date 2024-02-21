@@ -6,7 +6,7 @@
  */
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { UserToolTip } from './user_tooltip';
 
@@ -34,12 +34,12 @@ describe.skip('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(screen.getByText('case user'));
+    fireEvent.mouseOver(await screen.findByText('case user'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
-    expect(screen.getByText('Some Super User')).toBeInTheDocument();
-    expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
-    expect(screen.getByText('SU')).toBeInTheDocument();
+    await screen.findByTestId('user-profile-tooltip');
+    expect(await screen.findByText('Some Super User')).toBeInTheDocument();
+    expect(await screen.findByText('some.user@google.com')).toBeInTheDocument();
+    expect(await screen.findByText('SU')).toBeInTheDocument();
   });
 
   it('only shows the display name if full name is missing', async () => {
@@ -63,12 +63,12 @@ describe.skip('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(screen.getByText('case user'));
+    fireEvent.mouseOver(await screen.findByText('case user'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
+    await screen.findByTestId('user-profile-tooltip');
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
-    expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
-    expect(screen.getByText('SU')).toBeInTheDocument();
+    expect(await screen.findByText('some.user@google.com')).toBeInTheDocument();
+    expect(await screen.findByText('SU')).toBeInTheDocument();
   });
 
   it('only shows the full name if display name is missing', async () => {
@@ -93,12 +93,12 @@ describe.skip('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(screen.getByText('case user'));
+    fireEvent.mouseOver(await screen.findByText('case user'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
-    expect(screen.getByText('Some Super User')).toBeInTheDocument();
-    expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
-    expect(screen.getByText('SU')).toBeInTheDocument();
+    await screen.findByTestId('user-profile-tooltip');
+    expect(await screen.findByText('Some Super User')).toBeInTheDocument();
+    expect(await screen.findByText('some.user@google.com')).toBeInTheDocument();
+    expect(await screen.findByText('SU')).toBeInTheDocument();
   });
 
   it('only shows the email once when display name and full name are not defined', async () => {
@@ -122,12 +122,12 @@ describe.skip('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(screen.getByText('case user'));
+    fireEvent.mouseOver(await screen.findByText('case user'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
+    await screen.findByTestId('user-profile-tooltip');
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
-    expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
-    expect(screen.getByText('SU')).toBeInTheDocument();
+    expect(await screen.findByText('some.user@google.com')).toBeInTheDocument();
+    expect(await screen.findByText('SU')).toBeInTheDocument();
   });
 
   it('only shows the username once when all other fields are undefined', async () => {
@@ -150,13 +150,13 @@ describe.skip('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(screen.getByText('case user'));
+    fireEvent.mouseOver(await screen.findByText('case user'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
+    await screen.findByTestId('user-profile-tooltip');
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
     expect(screen.queryByText('some.user@google.com')).not.toBeInTheDocument();
-    expect(screen.getByText('user')).toBeInTheDocument();
-    expect(screen.getByText('SU')).toBeInTheDocument();
+    expect(await screen.findByText('user')).toBeInTheDocument();
+    expect(await screen.findByText('SU')).toBeInTheDocument();
   });
 
   it('shows an unknown users display name and avatar', async () => {
@@ -166,10 +166,10 @@ describe.skip('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(screen.getByText('case user'));
+    fireEvent.mouseOver(await screen.findByText('case user'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
-    expect(screen.getByText('Unable to find user profile')).toBeInTheDocument();
-    expect(screen.getByText('?')).toBeInTheDocument();
+    await screen.findByTestId('user-profile-tooltip');
+    expect(await screen.findByText('Unable to find user profile')).toBeInTheDocument();
+    expect(await screen.findByText('?')).toBeInTheDocument();
   });
 });

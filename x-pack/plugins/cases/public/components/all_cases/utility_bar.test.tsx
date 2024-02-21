@@ -46,12 +46,10 @@ describe('Severity form field', () => {
 
   it('renders', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
-
     expect(await screen.findByText('Showing 5 of 5 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
     expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
     expect(await screen.findByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
-
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
   });
@@ -67,7 +65,6 @@ describe('Severity form field', () => {
     };
 
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-
     expect(await screen.findByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
   });
@@ -84,7 +81,6 @@ describe('Severity form field', () => {
     };
 
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-
     expect(await screen.findByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
   });
@@ -246,7 +242,6 @@ describe('Severity form field', () => {
         expect(
           await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
         ).toBeInTheDocument();
-
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       }
     );
@@ -268,7 +263,6 @@ describe('Severity form field', () => {
         expect(
           await screen.findByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
         ).toBeInTheDocument();
-
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       }
     );

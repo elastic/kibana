@@ -43,10 +43,10 @@ describe('AssignUsers', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('does not show any assignees when there are none assigned', () => {
+  it('does not show any assignees when there are none assigned', async () => {
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
-    expect(screen.getByText('No users are assigned')).toBeInTheDocument();
+    expect(await screen.findByText('No users are assigned')).toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the user does not have update permissions', () => {
@@ -64,27 +64,27 @@ describe('AssignUsers', () => {
     expect(screen.queryByTestId('Assign a user')).not.toBeInTheDocument();
   });
 
-  it('does not show the suggest users edit button when the component is still loading', () => {
+  it('does not show the suggest users edit button when the component is still loading', async () => {
     appMockRender.render(<AssignUsers {...{ ...defaultProps, isLoading: true }} />);
 
     expect(screen.queryByTestId('case-view-assignees-edit')).not.toBeInTheDocument();
-    expect(screen.getByTestId('case-view-assignees-button-loading')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-assignees-button-loading')).toBeInTheDocument();
   });
 
-  it('does not show the assign yourself link when the current profile is undefined', () => {
+  it('does not show the assign yourself link when the current profile is undefined', async () => {
     appMockRender.render(<AssignUsers {...{ ...defaultProps, currentUserProfile: undefined }} />);
 
     expect(screen.queryByText('assign yourself')).not.toBeInTheDocument();
-    expect(screen.getByText('Assign a user')).toBeInTheDocument();
+    expect(await screen.findByText('Assign a user')).toBeInTheDocument();
   });
 
-  it('shows the suggest users edit button when the user has update permissions', () => {
+  it('shows the suggest users edit button when the user has update permissions', async () => {
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
-    expect(screen.getByTestId('case-view-assignees-edit')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-assignees-edit')).toBeInTheDocument();
   });
 
-  it('shows the two initially assigned users', () => {
+  it('shows the two initially assigned users', async () => {
     const props = {
       ...defaultProps,
       caseAssignees: userProfiles.slice(0, 2),
@@ -92,14 +92,14 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
     expect(screen.queryByText('No users are assigned')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 
-  it('shows the rerendered assignees', () => {
+  it('shows the rerendered assignees', async () => {
     const { rerender } = appMockRender.render(<AssignUsers {...defaultProps} />);
 
     const props = {
@@ -109,8 +109,8 @@ describe('AssignUsers', () => {
     };
     rerender(<AssignUsers {...props} />);
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
     expect(screen.queryByText('No users are assigned')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
@@ -123,13 +123,13 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
   it('shows the popover when the assign a user link is clicked', async () => {
@@ -139,13 +139,13 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByText('Assign a user'));
+    fireEvent.click(await screen.findByText('Assign a user'));
     await waitForEuiPopoverOpen();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
   it('assigns the current user when the assign yourself link is clicked', async () => {
@@ -157,7 +157,7 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByText('assign yourself'));
+    fireEvent.click(await screen.findByText('assign yourself'));
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
@@ -188,10 +188,12 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.mouseEnter(
-      screen.getByTestId(`user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`)
+      await screen.findByTestId(
+        `user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`
+      )
     );
     fireEvent.click(
-      screen.getByTestId(
+      await screen.findByTestId(
         `user-profile-assigned-user-${userProfiles[0].user.username}-remove-button`
       )
     );
@@ -210,16 +212,16 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
 
-    fireEvent.click(screen.getByText('Damaged Raccoon'));
+    fireEvent.click(await screen.findByText('Damaged Raccoon'));
 
     // close the popover
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
@@ -250,11 +252,11 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
 
     // close the popover
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(0));
@@ -270,8 +272,12 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.mouseEnter(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-group`));
-    fireEvent.click(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-button`));
+    fireEvent.mouseEnter(
+      await screen.findByTestId(`user-profile-assigned-user-unknownId1-remove-group`)
+    );
+    fireEvent.click(
+      await screen.findByTestId(`user-profile-assigned-user-unknownId1-remove-button`)
+    );
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
@@ -292,12 +298,12 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
     expect(
-      screen.getByTestId('user-profile-assigned-user-unknownId1-remove-group')
+      await screen.findByTestId('user-profile-assigned-user-unknownId1-remove-group')
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId('user-profile-assigned-user-unknownId2-remove-group')
+      await screen.findByTestId('user-profile-assigned-user-unknownId2-remove-group')
     ).toBeInTheDocument();
   });
 
@@ -311,16 +317,16 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
 
-    fireEvent.click(screen.getByText('Damaged Raccoon'));
+    fireEvent.click(await screen.findByText('Damaged Raccoon'));
 
     // close the popover
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
@@ -357,17 +363,17 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
 
-    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
 
-    fireEvent.click(screen.getByText('Damaged Raccoon'));
+    fireEvent.click(await screen.findByText('Damaged Raccoon'));
 
     // close the popover
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));

@@ -21,7 +21,7 @@ describe('HoverableUsernameResolver', () => {
 
     render(<HoverableUsernameResolver user={user} />);
 
-    expect(screen.getByText('Some Super User')).toBeInTheDocument();
+    expect(await screen.findByText('Some Super User')).toBeInTheDocument();
   });
 
   it('renders the username when the profile uid is not found', async () => {
@@ -34,7 +34,7 @@ describe('HoverableUsernameResolver', () => {
 
     render(<HoverableUsernameResolver user={user} />);
 
-    expect(screen.getByText('some_user')).toBeInTheDocument();
+    expect(await screen.findByText('some_user')).toBeInTheDocument();
   });
 
   it('renders the full name using the profile', async () => {
@@ -47,7 +47,7 @@ describe('HoverableUsernameResolver', () => {
 
     render(<HoverableUsernameResolver user={user} userProfiles={userProfilesMap} />);
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
   it('renders the full name bolded by default', async () => {
@@ -60,7 +60,7 @@ describe('HoverableUsernameResolver', () => {
 
     render(<HoverableUsernameResolver user={user} userProfiles={userProfilesMap} />);
 
-    expect(screen.getByTestId('user-profile-username-bolded')).toBeInTheDocument();
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByTestId('user-profile-username-bolded')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
 });

@@ -26,12 +26,12 @@ describe('SolutionFilter ', () => {
     jest.clearAllMocks();
   });
 
-  it('renders button correctly', () => {
-    const { getByTestId } = appMockRender.render(
+  it('renders button correctly', async () => {
+    appMockRender.render(
       <SolutionFilter onChange={onChange} selectedOptionKeys={[]} availableSolutions={solutions} />
     );
 
-    expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
+    expect(await screen.findByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
   });
 
   describe('when the owner is a single solution', () => {
@@ -50,20 +50,22 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      expect(screen.getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
+      expect(await screen.findByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('options-filter-popover-button-owner'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      expect(screen.getByTestId(`options-filter-popover-item-${solutions[0]}`)).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`options-filter-popover-item-${solutions[0]}`)
+      ).toBeInTheDocument();
       expect(
         screen.queryByTestId(`options-filter-popover-item-${solutions[1]}`)
       ).not.toBeInTheDocument();
     });
 
     it('should call onChange with selected solution id when no option selected yet', async () => {
-      const { getByTestId } = appMockRender.render(
+      appMockRender.render(
         <SolutionFilter
           onChange={onChange}
           selectedOptionKeys={[]}
@@ -71,11 +73,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      userEvent.click(await screen.findByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
@@ -84,7 +86,7 @@ describe('SolutionFilter ', () => {
     });
 
     it('should call onChange with [owner] when the last solution option selected is deselected', async () => {
-      const { getByTestId } = appMockRender.render(
+      appMockRender.render(
         <SolutionFilter
           onChange={onChange}
           selectedOptionKeys={[solutions[0]]}
@@ -92,11 +94,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      userEvent.click(await screen.findByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
@@ -112,7 +114,7 @@ describe('SolutionFilter ', () => {
     });
 
     it('renders options correctly', async () => {
-      const { getByTestId } = appMockRender.render(
+      appMockRender.render(
         <SolutionFilter
           onChange={onChange}
           selectedOptionKeys={[]}
@@ -120,18 +122,22 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
+      expect(await screen.findByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      expect(getByTestId(`options-filter-popover-item-${solutions[0]}`)).toBeInTheDocument();
-      expect(getByTestId(`options-filter-popover-item-${solutions[1]}`)).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`options-filter-popover-item-${solutions[0]}`)
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`options-filter-popover-item-${solutions[1]}`)
+      ).toBeInTheDocument();
     });
 
     it('should call onChange with selected solution id when no option selected yet', async () => {
-      const { getByTestId } = appMockRender.render(
+      appMockRender.render(
         <SolutionFilter
           onChange={onChange}
           selectedOptionKeys={[]}
@@ -139,11 +145,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      userEvent.click(await screen.findByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
@@ -152,7 +158,7 @@ describe('SolutionFilter ', () => {
     });
 
     it('should call onChange with [all solutions] when the last solution option selected is deselected', async () => {
-      const { getByTestId } = appMockRender.render(
+      appMockRender.render(
         <SolutionFilter
           onChange={onChange}
           selectedOptionKeys={[solutions[0]]}
@@ -160,11 +166,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      userEvent.click(await screen.findByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
