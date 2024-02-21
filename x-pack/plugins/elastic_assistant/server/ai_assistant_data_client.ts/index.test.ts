@@ -6,13 +6,16 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AIAssistantConversationsDataClient, AIAssistantConversationsDataClientParams } from '.';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import {
   getConversationMock,
   getQueryConversationParams,
   getUpdateConversationSchemaMock,
 } from '../__mocks__/conversations_schema.mock';
+import {
+  AIAssistantConversationsDataClient,
+  AIAssistantConversationsDataClientParams,
+} from '../conversations_data_client';
 
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
