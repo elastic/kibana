@@ -1021,13 +1021,7 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over your content on Notion.',
         }
       ),
-      categories: [
-        'enterprise_search',
-        'elastic_stack',
-        'custom',
-        'connector',
-        'connector_client',
-      ],
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=notion',
       icons: [
@@ -1051,13 +1045,7 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over your content on Redis.',
         }
       ),
-      categories: [
-        'enterprise_search',
-        'elastic_stack',
-        'custom',
-        'connector',
-        'connector_client',
-      ],
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=redis',
       icons: [
