@@ -103,7 +103,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177383
+  registry.when.skip('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
     describe('error sample id', () => {
       before(async () => {
         await generateData({ serviceName, start, end, synthtraceEsClient });
