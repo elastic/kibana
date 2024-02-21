@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { LicenseCheck } from '@kbn/reporting-plugin/public/shared_imports';
+import { LicenseCheck } from '@kbn/licensing-plugin/public';
 import { checkLicense } from './license_check';
 
 describe('License check', () => {

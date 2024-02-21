@@ -30,6 +30,5 @@
     "@kbn/screenshotting-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
-    "@kbn/reporting-plugin",
   ]
 }
