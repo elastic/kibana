@@ -65,8 +65,7 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
         // the report job was completed successfully
         // and a file is available
         const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
-        const timeSinceCreation =
-          new Date(Date.now()).valueOf() - new Date(doc.created_at).valueOf();
+        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
         eventTracker?.downloadReport({ timeSinceCreation });
 
         return res.file({ body, headers, filename });
@@ -119,8 +118,7 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
 
         // event tracking of the deleted report
         const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
-        const timeSinceCreation =
-          new Date(Date.now()).valueOf() - new Date(doc.created_at).valueOf();
+        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
         eventTracker?.deleteReport({ timeSinceCreation });
 
         return res.ok({

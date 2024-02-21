@@ -236,8 +236,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     // event tracking of claimed job
     const eventTracker = this.getEventTracker(report);
-    const timeSinceCreation =
-      new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf();
+    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
     eventTracker?.claimJob({ timeSinceCreation });
 
     const resp = await store.setReportClaimed(claimedReport, doc);
@@ -271,8 +270,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     // event tracking of failed job
     const eventTracker = this.getEventTracker(report);
-    const timeSinceCreation =
-      new Date(Date.now()).valueOf() - new Date(report.created_at).valueOf();
+    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
     eventTracker?.failJob({
       timeSinceCreation,
       errorCode: docOutput?.error_code ?? 'unknown',
