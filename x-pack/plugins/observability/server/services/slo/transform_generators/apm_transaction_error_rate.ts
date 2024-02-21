@@ -121,7 +121,11 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     let dataView: DataView | undefined;
 
     if (indicator.params.dataViewId) {
-      dataView = await dataViewService.get(indicator.params.dataViewId);
+      try {
+        dataView = await dataViewService.get(indicator.params.dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
     }
     if (indicator.params.filter) {
       queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));

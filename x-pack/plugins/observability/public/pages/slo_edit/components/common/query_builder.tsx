@@ -20,7 +20,6 @@ import { OptionalText } from './optional_text';
 export interface Props {
   dataTestSubj: string;
   dataView?: DataView;
-  dataViewId?: string;
   label: string;
   name: FieldPath<CreateSLOForm>;
   placeholder: string;
