@@ -21,7 +21,6 @@ import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { CreateSloLinkForValidState } from './create_slo_link';
 import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
@@ -40,6 +39,7 @@ export const LogsExplorerTopNavMenu = () => {
 const ServerlessTopNav = () => {
   const { services } = useKibanaContextForPlugin();
   const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
+
   return (
     <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
@@ -64,7 +64,6 @@ const ServerlessTopNav = () => {
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <CreateSloLinkForValidState observability={services.observability} />
             <ConnectedDiscoverLink />
             <VerticalRule />
             <FeedbackLink />
@@ -90,13 +89,13 @@ const StatefulTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
-      observability,
       observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
-      i18n: i18nStart,
+      i18n,
       theme,
     },
   } = useKibanaContextForPlugin();
+
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
@@ -130,7 +129,7 @@ const StatefulTopNav = () => {
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
-          { theme, i18n: i18nStart }
+          { theme, i18n }
         ),
       });
     }
@@ -140,14 +139,13 @@ const StatefulTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18nStart, previousAppendExtension, theme]);
+  }, [chrome, i18n, previousAppendExtension, theme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <CreateSloLinkForValidState observability={observability} />
             <ConnectedDiscoverLink />
             <VerticalRule />
             <AlertsPopover />
