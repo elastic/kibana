@@ -6217,7 +6217,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
   version "0.0.0"
   uid ""
 
