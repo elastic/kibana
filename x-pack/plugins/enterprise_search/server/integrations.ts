@@ -1027,7 +1027,6 @@ export const registerEnterpriseSearchIntegrations = (
         'custom',
         'connector',
         'connector_client',
-        'notion',
       ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=notion',
@@ -1058,7 +1057,6 @@ export const registerEnterpriseSearchIntegrations = (
         'custom',
         'connector',
         'connector_client',
-        'redis',
       ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=redis',
