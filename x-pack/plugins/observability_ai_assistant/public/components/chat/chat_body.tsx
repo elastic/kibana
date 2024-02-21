@@ -35,7 +35,7 @@ import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import { ChatActionClickHandler, ChatActionClickType } from './types';
+import { ChatActionClickPayload, ChatActionClickType } from './types';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
@@ -154,10 +154,16 @@ export function ChatBody({
   }
 
   const containerClassName = css`
+    background: white;
+    min-width: 0;
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'
       ? 1200 - 250 + 'px' // page template max width - conversation list width.
       : '100%'};
+  `;
+
+  const headerContainerClassName = css`
+    padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
   `;
 
   const [stickToBottom, setStickToBottom] = useState(true);
@@ -222,7 +228,13 @@ export function ChatBody({
     navigator.clipboard?.writeText(content || '');
   };
 
-  const handleActionClick: ChatActionClickHandler = (payload) => {
+  const handleActionClick = ({
+    message,
+    payload,
+  }: {
+    message: Message;
+    payload: ChatActionClickPayload;
+  }) => {
     setStickToBottom(true);
     switch (payload.type) {
       case ChatActionClickType.executeEsqlQuery:
@@ -243,25 +255,23 @@ export function ChatBody({
           })
         );
         break;
+
       case ChatActionClickType.updateVisualization:
-        const visualizeQueryMessagesIndex = messages.findIndex(
-          ({ message }) => message.name === 'visualize_query'
-        );
+        const visualizeQueryResponse = message;
+
+        const visualizeQueryResponseData = JSON.parse(visualizeQueryResponse.message.data ?? '{}');
+
         next(
-          messages.slice(0, visualizeQueryMessagesIndex).concat({
+          messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
             '@timestamp': new Date().toISOString(),
             message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'visualize_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                  userOverrides: payload.userOverrides,
-                  intention: VisualizeESQLUserIntention.visualizeAuto,
-                }),
-                trigger: MessageRole.User,
-              },
+              name: 'visualize_query',
+              content: visualizeQueryResponse.message.content,
+              data: JSON.stringify({
+                ...visualizeQueryResponseData,
+                userOverrides: payload.userOverrides,
+              }),
+              role: MessageRole.User,
             },
           })
         );
@@ -400,9 +410,10 @@ export function ChatBody({
     return (
       <EuiFlexGroup
         direction="column"
-        gutterSize="none"
         className={containerClassName}
+        gutterSize="none"
         justifyContent="center"
+        responsive={false}
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
@@ -424,7 +435,12 @@ export function ChatBody({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={containerClassName}
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
@@ -445,7 +461,7 @@ export function ChatBody({
           </EuiCallOut>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingRight: showLinkToConversationsApp ? '24px' : '0' }}>
+      <EuiFlexItem grow={false} className={headerContainerClassName}>
         <ChatHeader
           connectors={connectors}
           conversationId={
