@@ -9,7 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -19,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const queryBar = getService('queryBar');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176837
-  describe.skip('lens fields list tests', () => {
+  describe('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
       describe(`${datasourceType} datasource`, () => {
         before(async () => {
@@ -263,16 +269,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show new fields Available fields', async () => {
         await es.transport.request({
-          path: '/field-update-test/_doc',
+          path: '/field-update-test/_doc?refresh=true',
           method: 'POST',
           body: {
             '@timestamp': new Date().toISOString(),
-            oldField: 10,
+            oldField: 20,
             newField: 20,
           },
         });
+
         await PageObjects.lens.waitForField('oldField');
-        await queryBar.setQuery('oldField: 10');
+        await queryBar.setQuery('oldField: 20');
         await queryBar.submitQuery();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.waitForField('newField');

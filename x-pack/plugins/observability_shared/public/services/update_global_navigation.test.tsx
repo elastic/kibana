@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { App, AppDeepLink, ApplicationStart, AppNavLinkStatus, AppUpdater } from '@kbn/core/public';
+import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { casesFeatureId, sloFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
@@ -29,7 +29,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
       });
     });
   });
@@ -49,7 +49,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        navLinkStatus: AppNavLinkStatus.visible,
+        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
       });
     });
 
@@ -65,7 +65,7 @@ describe('updateGlobalNavigation', () => {
           title: 'Cases',
           order: 8003,
           path: '/cases',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [], // no visibility set
         };
 
         const deepLinks = [caseRoute];
@@ -81,10 +81,10 @@ describe('updateGlobalNavigation', () => {
           deepLinks: [
             {
               ...caseRoute,
-              navLinkStatus: AppNavLinkStatus.visible,
+              visibleIn: ['sideNav', 'globalSearch'], // visibility set
             },
           ],
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
@@ -101,7 +101,7 @@ describe('updateGlobalNavigation', () => {
           title: 'Cases',
           order: 8003,
           path: '/cases',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
 
         const deepLinks = [caseRoute];
@@ -114,13 +114,8 @@ describe('updateGlobalNavigation', () => {
         updateGlobalNavigation({ capabilities, deepLinks, updater$ });
 
         expect(callback).toHaveBeenCalledWith({
-          deepLinks: [
-            {
-              ...caseRoute,
-              navLinkStatus: AppNavLinkStatus.hidden,
-            },
-          ],
-          navLinkStatus: AppNavLinkStatus.visible,
+          deepLinks: [], // Deeplink has been filtered out
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
@@ -138,7 +133,7 @@ describe('updateGlobalNavigation', () => {
             title: 'Alerts',
             order: 8001,
             path: '/alerts',
-            navLinkStatus: AppNavLinkStatus.hidden,
+            visibleIn: [],
           },
         ];
         const callback = jest.fn();
@@ -155,10 +150,10 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              navLinkStatus: AppNavLinkStatus.visible,
+              visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
@@ -173,7 +168,7 @@ describe('updateGlobalNavigation', () => {
         title: 'SLOs',
         order: 8002,
         path: '/slos',
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
       };
 
       const deepLinks = [sloRoute];
@@ -186,13 +181,8 @@ describe('updateGlobalNavigation', () => {
       updateGlobalNavigation({ capabilities, deepLinks, updater$ });
 
       expect(callback).toHaveBeenCalledWith({
-        deepLinks: [
-          {
-            ...sloRoute,
-            navLinkStatus: AppNavLinkStatus.hidden,
-          },
-        ],
-        navLinkStatus: AppNavLinkStatus.visible,
+        deepLinks: [], // Deeplink has been filtered out
+        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
       });
     });
 
@@ -209,7 +199,7 @@ describe('updateGlobalNavigation', () => {
           title: 'SLOs',
           order: 8002,
           path: '/slos',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
 
         const deepLinks = [sloRoute];
@@ -225,10 +215,10 @@ describe('updateGlobalNavigation', () => {
           deepLinks: [
             {
               ...sloRoute,
-              navLinkStatus: AppNavLinkStatus.visible,
+              visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
