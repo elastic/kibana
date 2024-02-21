@@ -133,6 +133,7 @@ describe('resultToOption', () => {
               "color": "#000000",
               "description": "Known",
               "id": "known",
+              "managed": false,
               "name": "Known",
             },
           ]
