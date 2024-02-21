@@ -448,6 +448,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [serverErrors, serverWarning, code]
   );
 
+  const signatureProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getSignatureProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
+  );
+
   const suggestionProvider = useMemo(
     () => (language === 'esql' ? ESQLLang.getSuggestionProvider?.(esqlCallbacks) : undefined),
     [language, esqlCallbacks]
@@ -800,6 +805,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       options={codeEditorOptions}
                       width="100%"
                       suggestionProvider={suggestionProvider}
+                      signatureProvider={signatureProvider}
                       hoverProvider={{
                         provideHover: (model, position, token) => {
                           if (isCompactFocused || !hoverProvider?.provideHover) {
