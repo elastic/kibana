@@ -34,10 +34,12 @@ import { CONNECTOR_ICONS } from '../../../shared/icons/connector_icons';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { hasConfiguredConfiguration } from '../../utils/has_configured_configuration';
 
 import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
+import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../search_index/connector/constants';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
@@ -51,6 +53,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const { connector } = useValues(ConnectorViewLogic);
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
+  const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
 
   if (!connector) {
     return <></>;
@@ -79,6 +82,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
     connector.scheduling.incremental.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
+
+  const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
@@ -163,6 +168,23 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.configurationTitle',
                     {
                       defaultMessage: 'Configuration',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
+                  children: (
+                    <ApiKeyConfig
+                      indexName={connector.index_name || ''}
+                      hasApiKey={hasApiKey}
+                      isNative
+                    />
+                  ),
+                  status: hasApiKey ? 'complete' : 'incomplete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
+                    {
+                      defaultMessage: 'Manage API key',
                     }
                   ),
                   titleSize: 'xs',
