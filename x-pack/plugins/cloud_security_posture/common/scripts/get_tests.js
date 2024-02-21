@@ -14,20 +14,21 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
+// ==============================
+//           Setup
+// ==============================
+
 // Command line parameters handling
 const args = process.argv.slice(2);
 const params = {};
-
 args.forEach((arg) => {
-  const [argName, argValue] = arg.split('=');
-  params[argName] = argValue;
+  if (arg === '--generateLogsFile') {
+    params['--generateLogsFile'] = true;
+  } else {
+    const [argName, argValue] = arg.split('=');
+    params[argName] = argValue;
+  }
 });
-
-// Initiating output, regex line matching, file extensions and output directory
-const testsLogOutput = [];
-const regex = /\b(?:describe\.skip|describe|it\.skip|it)\(['`]/;
-const allowedExtensions = ['.ts', '.tsx', '.test.ts', '.test.tsx'];
-const outputDir = params['--outputDir'] || __dirname;
 
 // Directories to iterate over
 const FTR_SERVERLESS =
@@ -45,9 +46,23 @@ const directoryPaths = [
   UNIT_TEST_CSP,
 ];
 
-// Utilities
+// Output directories and file paths
+const outputDir = params['--outputDir'] || __dirname;
+const MD_FILE_PATH = path.join(__dirname, 'csp_requirements_test_coverage.md');
+const CSP_TEST_LOGS_FILE_PATH = path.join(outputDir, 'csp_test_log.json');
+
+// Test output data
+const testsLogOutput = [];
+const regex = /\b(?:describe\.skip|describe|it\.skip|it)\(['`]/;
+const allowedExtensions = ['.ts', '.tsx', '.test.ts', '.test.tsx'];
+
+// ==============================
+//         Utilities
+// ==============================
+
 const toIdFormat = (text) => text.toLowerCase().replace(/\s+/g, '-');
 
+// Trims the line from prefixes and suffixes that can intervene with indentation logic
 const getCleanLine = (line) => {
   const cleanLine = line;
 
@@ -96,7 +111,11 @@ const getTags = (filePath, testSuits) => {
   return tags;
 };
 
-// Creates a nested object to represent test hierarchy, useful to understand skip scope
+// ==============================
+//       Generate Logs
+// ==============================
+
+// Creates a nested object to represent test hierarchy and skip scope
 const createTree = (testSuits) => {
   const tree = [];
   let currentIndent = 0;
@@ -124,7 +143,7 @@ const createTree = (testSuits) => {
     }
   });
 
-  // Mark higher-level indents as skipped when a lower-level indent is skipped
+  // Mark nested nodes as skipped when a parent node is skipped
   const markSkipped = (node, isParentSkipped) => {
     if (isParentSkipped) {
       node.isSkipped = true;
@@ -192,10 +211,10 @@ const processFile = (filePath) => {
 
       testsLogOutput.push(logData);
     }
-
-    // Writes the output to a JSON file
-    const testsLogOutputFilePath = path.join(outputDir, 'csp_test_log.json');
-    fs.writeFileSync(testsLogOutputFilePath, JSON.stringify(testsLogOutput, null, 2));
+    // if (params['--generateLogsFile']) {
+    //   // Writes the output to a JSON file
+    //   fs.writeFileSync(CSP_TEST_LOGS_FILE_PATH, JSON.stringify(testsLogOutput, null, 2));
+    // }
   });
 };
 
@@ -226,31 +245,13 @@ const processDirectory = (directoryPath) => {
 };
 
 // Initiates the processing for each directory
-directoryPaths.forEach(processDirectory);
+const init = () => {
+  directoryPaths.forEach(processDirectory);
+};
 
-process.on('exit', () => {
-  if (testsLogOutput.length) {
-    const mdFilePath = path.join(outputDir, 'requirements_test_coverage.md');
-    generateMDFile(testsLogOutput, mdFilePath);
-    console.log(`Markdown file generated successfully: ${mdFilePath}`);
-
-    console.log(`
-  🌟 Success! CSP Test Log Generated ✨
-
-  📄 Log file: file://${path.resolve(path.join(outputDir, 'csp_test_log.json'))}
-
-  📊 Copy its content to the dedicated app's "data.json" for visualization.
-
-  🚀 Dedicated app: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c
-
-  🅫 MD file: file://${path.resolve(path.join(outputDir, 'requirements_test_coverage.md'))}
-`);
-  }
-});
-
-/**
- * Creating the Requirement Test Coverage ReadMe file
- * */
+// ==============================
+//      Generate Markdown
+// ==============================
 
 // Utility function to count nested tests isSkipped and isTodo states
 const countNestedTests = (tree) => {
@@ -273,7 +274,7 @@ const countNestedTests = (tree) => {
   );
 };
 
-// Group test files by directory
+// Groups test files by directory
 const groupTestsByDirectory = (testLogs) => {
   const groupedTests = {};
 
@@ -288,7 +289,7 @@ const groupTestsByDirectory = (testLogs) => {
   return groupedTests;
 };
 
-const tagColors = {
+const tagShieldsColors = {
   FTR: 'blue',
   UT: 'brightgreen',
   'HAS SKIP': 'yellow',
@@ -296,7 +297,7 @@ const tagColors = {
   'API INTEGRATION': 'purple',
 };
 
-// Creates the MD content and write into file
+// Generates the Requirement Test Coverage Markdown file using the data in testsLogOutput
 const generateMDFile = (testLogs) => {
   const groupedTests = groupTestsByDirectory(testLogs);
   let mdContent = '# Cloud Security Posture - Requirements Test Coverage\n\n';
@@ -316,7 +317,8 @@ const generateMDFile = (testLogs) => {
       const tagsBadges = logs
         .flatMap((log) => log.tags || [])
         .map(
-          (tag) => `![](https://img.shields.io/badge/${tag.replace(/\s+/g, '-')}-${tagColors[tag]})`
+          (tag) =>
+            `![](https://img.shields.io/badge/${tag.replace(/\s+/g, '-')}-${tagShieldsColors[tag]})`
         );
       const uniqueTags = [...new Set(tagsBadges)];
       const tagsSection = uniqueTags.length > 0 ? `${uniqueTags.join(' ')}\n\n` : '';
@@ -347,5 +349,38 @@ const generateMDFile = (testLogs) => {
       mdContent += '</details>\n\n';
     });
 
-  fs.writeFileSync(path.join(outputDir, 'requirements_test_coverage.md'), mdContent);
+  fs.writeFileSync(MD_FILE_PATH, mdContent);
 };
+
+// ==============================
+//         Main Process
+// ==============================
+
+// Initiates the processing for each directory
+init();
+
+// Handling process exit
+process.on('exit', () => {
+  if (testsLogOutput.length) {
+    generateMDFile(testsLogOutput);
+
+    console.log('🌟 Cloud Security Posture tests were processed successfully! ✨');
+    console.log(
+      `ℳ  MD file: file://${path.resolve(outputDir, 'csp_requirements_test_coverage.md')}`
+    );
+    if (params['--generateLogsFile']) {
+      fs.writeFileSync(CSP_TEST_LOGS_FILE_PATH, JSON.stringify(testsLogOutput, null, 2));
+      console.log(`📄 Logs file: file://${path.resolve(CSP_TEST_LOGS_FILE_PATH)}`);
+      console.log(
+        '📊 Copy Logs file content to the dedicated app\'s "data.json" for visualization.'
+      );
+      console.log(`🚀 Dedicated app: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c`);
+    } else {
+      console.log(
+        `📄 Did not generate a logs file, in order to generate the file use: --generateLogsFile`
+      );
+    }
+  } else {
+    console.error(`Logs generation has failed`);
+  }
+});
