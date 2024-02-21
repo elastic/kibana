@@ -22,8 +22,13 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "controls",
       "presentationUtil",
       "licensing"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
     ]
   }
 }

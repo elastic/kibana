@@ -15,6 +15,7 @@ export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been m
 export const RULES_PATH = '/alerts/rules' as const;
 export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
+// TODO delete SLO stuff from here
 export const SLOS_PATH = '/slos' as const;
 export const SLOS_WELCOME_PATH = '/slos/welcome' as const;
 export const SLO_DETAIL_PATH = '/slos/:sloId' as const;
@@ -30,6 +31,7 @@ export const paths = {
       `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURI(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
     ruleDetails: (ruleId: string) => `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(ruleId)}`,
+    // TODO: delete things from here
     slos: `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}`,
     slosWelcome: `${OBSERVABILITY_BASE_PATH}${SLOS_WELCOME_PATH}`,
     slosOutdatedDefinitions: `${OBSERVABILITY_BASE_PATH}${SLOS_OUTDATED_DEFINITIONS_PATH}`,

@@ -209,6 +209,7 @@ export class Plugin
         },
       ],
     },
+    // TODO remove SLOs from here
     {
       id: 'slos',
       title: i18n.translate('xpack.observability.slosLinkTitle', {
@@ -408,6 +409,16 @@ export class Plugin
                   ]
                 : [];
 
+              const slosLink = [
+                {
+                  label: i18n.translate('xpack.observability.slosNewLinkTitle', {
+                    defaultMessage: 'SLOs new',
+                  }),
+                  app: 'slos',
+                  path: '/',
+                },
+              ];
+
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant.service.isEnabled();
 
@@ -448,7 +459,7 @@ export class Plugin
                 {
                   label: '',
                   sortKey: 100,
-                  entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
+                  entries: [...overviewLink, ...slosLink, ...otherLinks, ...aiAssistantLink],
                 },
               ];
             })

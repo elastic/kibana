@@ -62,7 +62,7 @@ export function updateGlobalNavigation({
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
     navLinkStatus:
-      someVisible || !!capabilities[sloFeatureId]?.read
+      someVisible || !!capabilities[sloFeatureId]?.read // TODO remove this, since now we have the new plugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
   }));

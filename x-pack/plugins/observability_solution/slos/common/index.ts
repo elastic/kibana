@@ -5,5 +5,14 @@
  * 2.0.
  */
 
+// TODO rename to slo
 export const PLUGIN_ID = 'slos';
 export const PLUGIN_NAME = 'SLOs NEW';
+export const sloFeatureId = 'slo';
+
+export const sloListLocatorID = 'SLO_LIST_LOCATOR';
+export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
+export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
+
+import { paths } from './locators/paths';
+export const sloPaths = paths;
