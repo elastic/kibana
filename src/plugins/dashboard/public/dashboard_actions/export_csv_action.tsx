@@ -17,7 +17,11 @@ import {
   HasInspectorAdapters,
   type Adapters,
 } from '@kbn/inspector-plugin/public';
-import { EmbeddableApiContext, getPanelTitle, PublishesPanelTitle } from '@kbn/presentation-publishing';
+import {
+  EmbeddableApiContext,
+  getPanelTitle,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
 

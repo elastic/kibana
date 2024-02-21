@@ -59,9 +59,7 @@ const duplicateReactEmbeddableInput = async (
   const child = dashboard.reactEmbeddableChildren.value[idToDuplicate];
   if (!child) throw new PanelNotFoundError();
 
-  const lastTitle = apiPublishesPanelTitle(child)
-    ? getPanelTitle(child) ?? ''
-    : '';
+  const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
   const id = uuidv4();
   const serializedState = await child.serializeState();

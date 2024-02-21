@@ -29,7 +29,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { apiPublishesLocalUnifiedSearch, getInheritedViewMode, getPanelTitle } from '@kbn/presentation-publishing';
+import {
+  apiPublishesLocalUnifiedSearch,
+  getInheritedViewMode,
+  getPanelTitle,
+} from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
 import { CustomizePanelActionApi } from './customize_panel_action';

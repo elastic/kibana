@@ -52,7 +52,7 @@ export const usePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) => 
   const title = useStateFromPublishingSubject(api?.panelTitle);
   const defaultTitle = useStateFromPublishingSubject(api?.defaultPanelTitle);
   return title || defaultTitle;
-}
+};
 
 /**
  * A hook that gets this API's hide panel title setting as a reactive variable which will cause re-renders on change.

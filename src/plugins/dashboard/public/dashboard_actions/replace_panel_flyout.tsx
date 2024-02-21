@@ -83,9 +83,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
           <EuiTitle size="m">
             <h2>
               <span>
-                {dashboardReplacePanelActionStrings.getFlyoutHeader(
-                  getPanelTitle(this.props.api)
-                )}
+                {dashboardReplacePanelActionStrings.getFlyoutHeader(getPanelTitle(this.props.api))}
               </span>
             </h2>
           </EuiTitle>

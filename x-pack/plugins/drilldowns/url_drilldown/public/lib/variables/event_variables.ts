@@ -103,9 +103,9 @@ const getEventScopeFromRowClickTriggerContext = (
   for (const columnId of columns) {
     const column = data.table.columns.find(({ id }) => id === columnId);
     if (!column) {
-      // This should never happe, but in case it does we log data necessary for debugging.
-      // eslint-disable-next-line no-console
+      // This should never happen, but in case it does we log data necessary for debugging.
       const title = getPanelTitle(api);
+      // eslint-disable-next-line no-console
       console.error(data, title ? `Embeddable [${title}]` : null);
       throw new Error('Could not find a datatable column.');
     }
