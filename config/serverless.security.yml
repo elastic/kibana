@@ -69,19 +69,3 @@ xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
-
-# connect to local epr #:
-elasticsearch.ssl.certificateAuthorities: '/Users/idocohen/.elastic-package/profiles/default/certs/kibana/ca-cert.pem'
-
-xpack.fleet.registryUrl: 'https://localhost:8080'
-xpack.fleet.agents.enabled: true
-xpack.encryptedSavedObjects.encryptionKey: '12345678901234567890123456789012'
-monitoring.ui.container.elasticsearch.enabled: true
-
-server.ssl.enabled: true
-server.ssl.certificate: '/Users/idocohen/.elastic-package/profiles/default/certs/kibana/cert.pem'
-server.ssl.key: '/Users/idocohen/.elastic-package/profiles/default/certs/kibana/key.pem'
-server.ssl.certificateAuthorities:
-  ['/Users/idocohen/.elastic-package/profiles/default/certs/kibana/ca-cert.pem']
-xpack.actions.rejectUnauthorized: false
-#### end # connect to local epr # end
