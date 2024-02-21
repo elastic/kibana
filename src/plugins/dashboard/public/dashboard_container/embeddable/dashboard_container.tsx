@@ -718,6 +718,7 @@ export class DashboardContainer
 
   public setFocusedPanelId = (id: string | undefined) => {
     this.dispatch.setFocusedPanelId(id);
+    this.setScrollToPanelId(id);
   };
 
   // ------------------------------------------------------------------------------------------------------

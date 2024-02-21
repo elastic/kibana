@@ -37,7 +37,7 @@
         "label": "ProfilingDataAccessPluginStart",
         "description": [],
         "signature": [
-          "{ services: { fetchFlamechartData: ({ core, esClient, rangeFromMs, rangeToMs, kuery }: ",
+          "{ services: { fetchFlamechartData: ({ core, esClient, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFlamechartParams",
           ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; TotalCPU: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; }>; getStatus: ({ esClient, soClient, spaceId }: ",
           "HasSetupParams",
@@ -55,7 +55,7 @@
           "CloudSetupStateType",
           " | ",
           "SetupStateType",
-          ">; fetchFunction: ({ core, esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
+          ">; fetchFunction: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {

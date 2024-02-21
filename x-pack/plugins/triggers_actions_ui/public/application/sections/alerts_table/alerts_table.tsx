@@ -85,7 +85,7 @@ const CellErrorCallOut = styled(EuiCallOut)`
 `;
 
 type CustomGridBodyProps = Pick<
-  Parameters<Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>>['0'],
+  Parameters<NonNullable<EuiDataGridProps['renderCustomGridBody']>>['0'],
   'Cell' | 'visibleColumns'
 > & {
   alertsData: FetchAlertData['oldAlertsData'];
@@ -308,7 +308,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             }
 
             return (
-              <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
                 {renderCustomActionsRow({
                   alert: alerts[visibleRowIndex],
                   ecsAlert: ecsAlertsData[visibleRowIndex],
@@ -536,9 +536,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return mergedGridStyle;
   }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
-  const renderCustomGridBody = useCallback<
-    Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>
-  >(
+  const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
     ({ visibleColumns: _visibleColumns, Cell }) => (
       <CustomGridBody
         visibleColumns={_visibleColumns}

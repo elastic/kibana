@@ -30,7 +30,6 @@ export interface ConnectorViewActions {
   setIndexName: IndexNameActions['setIndexName'];
 }
 
-// TODO UPDATE
 export interface ConnectorViewValues {
   connector: Connector | undefined;
   connectorData: typeof FetchConnectorByIdApiLogic.values.data;
@@ -112,26 +111,20 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         return connectorData?.connector;
       },
     ],
+    connectorError: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.error,
+    ],
+    connectorId: [() => [selectors.connector], (connector) => connector?.id],
+    error: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
+    ],
     indexName: [
       () => [selectors.connector],
       (connector: Connector | undefined) => {
         return connector?.index_name || undefined;
       },
-    ],
-    isLoading: [
-      () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus],
-      (fetchConnectorApiStatus: Status, fetchIndexApiStatus: Status) =>
-        [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
-        [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus),
-    ],
-    connectorId: [() => [selectors.connector], (connector) => connector?.id],
-    connectorError: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error,
-    ],
-    error: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
@@ -167,6 +160,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       () => [selectors.connector],
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
+    isLoading: [
+      () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus, selectors.index],
+      (
+        fetchConnectorApiStatus: Status,
+        fetchIndexApiStatus: Status,
+        index: ConnectorViewValues['index']
+      ) =>
+        [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
+        (index && [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus)),
     ],
     pipelineData: [
       () => [selectors.connector],

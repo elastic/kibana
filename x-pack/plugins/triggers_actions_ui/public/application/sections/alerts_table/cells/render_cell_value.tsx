@@ -9,17 +9,21 @@ import { isEmpty } from 'lodash';
 import React, { type ReactNode } from 'react';
 import {
   ALERT_DURATION,
+  AlertConsumers,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_START,
   TIMESTAMP,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import {
   FIELD_FORMAT_IDS,
   FieldFormatParams,
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
+import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { GetRenderCellValue } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -141,6 +145,18 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
             })(value) || '--'}
           </>
         );
+      case ALERT_RULE_CONSUMER:
+        const producer = rowData?.find(({ field }) => field === ALERT_RULE_PRODUCER)?.value?.[0];
+        const consumer: AlertConsumers = observabilityFeatureIds.includes(value)
+          ? 'observability'
+          : producer && (value === 'alerts' || value === 'stackAlerts')
+          ? producer
+          : value;
+        const consumerData = alertProducersData[consumer];
+        if (!consumerData) {
+          return <>{value}</>;
+        }
+        return <EuiBadge iconType={consumerData.icon}>{consumerData.displayName}</EuiBadge>;
       default:
         return <>{value}</>;
     }

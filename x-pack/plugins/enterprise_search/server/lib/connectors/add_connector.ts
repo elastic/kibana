@@ -32,6 +32,7 @@ export const addConnector = async (
     indexName: string | null;
     isNative: boolean;
     language: string | null;
+    name: string | null;
     serviceType?: string | null;
   }
 ): Promise<Connector> => {
@@ -84,7 +85,7 @@ export const addConnector = async (
 
   const connector = await createConnector(client.asCurrentUser, {
     ...input,
-    name: input.indexName || '',
+    name: input.name || '',
     ...nativeFields,
     pipeline: await getDefaultPipeline(client),
   });

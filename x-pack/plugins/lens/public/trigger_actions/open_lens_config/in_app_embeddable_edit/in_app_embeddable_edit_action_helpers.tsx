@@ -118,6 +118,7 @@ export async function executeEditEmbeddableAction({
       onCancelCb={onCancel}
       canEditTextBasedQuery={activeDatasourceId === 'textBased'}
       updateSuggestion={onUpdateSuggestion}
+      hideTimeFilterInfo={true}
     />
   );
 

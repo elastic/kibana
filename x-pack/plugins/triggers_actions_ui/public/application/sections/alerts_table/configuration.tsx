@@ -12,19 +12,22 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { FEATURE_LABEL } from '../translations';
 import { getDefaultAlertFlyout } from './alerts_flyout/default_alerts_flyout';
 import { AlertActionsCell } from './row_actions/alert_actions_cell';
 import { AlertsTableConfigurationRegistry, RenderCustomActionsRowArgs } from '../../../types';
 import { getAlertFormatters, getRenderCellValue } from './cells/render_cell_value';
-import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../../common';
+import { ALERT_TABLE_GENERIC_CONFIG_ID, ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
 
 const columns = [
   {
@@ -34,6 +37,12 @@ const columns = [
     }),
     id: ALERT_STATUS,
     initialWidth: 120,
+  },
+  {
+    displayAsText: FEATURE_LABEL,
+    id: ALERT_RULE_CONSUMER,
+    schema: 'string',
+    initialWidth: 180,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -128,25 +137,40 @@ const columns = [
   },
 ];
 
-export const getAlertsTableConfiguration = (
+const sort: SortCombinations[] = [
+  {
+    [TIMESTAMP]: {
+      order: 'desc',
+    },
+  },
+];
+
+const useActionsColumn = () => ({
+  renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
+    return <AlertActionsCell {...props} />;
+  },
+});
+
+export const createGenericAlertsTableConfigurations = (
   fieldFormats: FieldFormatsRegistry
-): AlertsTableConfigurationRegistry => {
-  return {
-    id: ALERT_TABLE_GENERIC_CONFIG_ID,
-    columns,
-    getRenderCellValue: getRenderCellValue(fieldFormats),
-    useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
-    sort: [
-      {
-        [TIMESTAMP]: {
-          order: 'desc',
-        },
-      },
-    ],
-    useActionsColumn: () => ({
-      renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
-        return <AlertActionsCell {...props} />;
-      },
-    }),
-  };
+): AlertsTableConfigurationRegistry[] => {
+  const [firstColumn, _, ...genericColumns] = columns;
+  return [
+    {
+      id: ALERT_TABLE_GENERIC_CONFIG_ID,
+      columns: [firstColumn, ...genericColumns],
+      getRenderCellValue: getRenderCellValue(fieldFormats),
+      useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
+      sort,
+      useActionsColumn,
+    },
+    {
+      id: ALERT_TABLE_GLOBAL_CONFIG_ID,
+      columns,
+      getRenderCellValue: getRenderCellValue(fieldFormats),
+      useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
+      sort,
+      useActionsColumn,
+    },
+  ];
 };

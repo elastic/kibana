@@ -19,13 +19,13 @@ import { baseBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
-import { ConnectorConfiguration } from '../search_index/connector/connector_configuration';
 import { ConnectorSchedulingComponent } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
 
+import { ConnectorConfiguration } from './connector_configuration';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 
