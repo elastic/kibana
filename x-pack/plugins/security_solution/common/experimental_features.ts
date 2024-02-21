@@ -209,7 +209,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
    * Added: on Feb 12, 2023 in https://github.com/elastic/kibana/pull/174564
    */
-  perFieldPrebuiltRulesDiffingEnabled: false,
+  perFieldPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
