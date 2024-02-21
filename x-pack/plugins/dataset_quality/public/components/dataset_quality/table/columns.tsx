@@ -27,12 +27,12 @@ import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
-} from '../../../common/constants';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
-import { IntegrationIcon } from '../common';
-import { useLinkToLogsExplorer } from '../../hooks';
-import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
+} from '../../../../common/constants';
+import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import { QualityIndicator, QualityPercentageIndicator } from '../../quality_indicator';
+import { IntegrationIcon } from '../../common';
+import { useLinkToLogsExplorer } from '../../../hooks';
+import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -189,11 +189,13 @@ export const getDatasetQualityTableColumns = ({
       render: (_, dataStreamStat: DataStreamStat) => (
         <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
       ),
+      width: '160px',
     },
     {
       name: sizeColumnName,
       field: 'size',
       sortable: true,
+      width: '100px',
     },
     {
       name: (
@@ -219,6 +221,7 @@ export const getDatasetQualityTableColumns = ({
           </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),
+      width: '140px',
     },
     {
       name: lastActivityColumnName,
@@ -239,6 +242,7 @@ export const getDatasetQualityTableColumns = ({
           .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
           .convert(timestamp);
       },
+      width: '300px',
       sortable: true,
     },
     {

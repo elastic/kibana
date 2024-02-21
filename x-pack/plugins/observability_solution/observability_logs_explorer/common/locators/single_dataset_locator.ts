@@ -12,8 +12,8 @@ import {
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import { DatasetLocatorDependencies } from '../types';
-import { constructLocatorPath } from '../utils';
+import { ObsLogsExplorerLocatorDependencies } from './types';
+import { constructLocatorPath } from './utils';
 
 export type SingleDatasetLocator = LocatorPublic<SingleDatasetLocatorParams>;
 
@@ -22,7 +22,7 @@ export class SingleDatasetLocatorDefinition
 {
   public readonly id = SINGLE_DATASET_LOCATOR_ID;
 
-  constructor(protected readonly deps: DatasetLocatorDependencies) {}
+  constructor(protected readonly deps: ObsLogsExplorerLocatorDependencies) {}
 
   public readonly getLocation = (params: SingleDatasetLocatorParams) => {
     const { useHash } = this.deps;
