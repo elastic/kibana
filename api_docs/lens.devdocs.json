@@ -944,7 +944,13 @@
             "description": [],
             "signature": [
               "() => Readonly<",
-              "Document",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensSavedObjectAttributes",
+                "text": "LensSavedObjectAttributes"
+              },
               " | undefined>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -10798,7 +10804,13 @@
             "text": "HasType"
           },
           "<\"lens\"> & { getSavedVis: () => Readonly<",
-          "Document",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensSavedObjectAttributes",
+            "text": "LensSavedObjectAttributes"
+          },
           " | undefined>; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
