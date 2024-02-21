@@ -48,7 +48,7 @@ export const useCloudSecurityGrouping = ({
   groupingLevel?: number;
   groupingLocalStorageKey: string;
   maxGroupingLevels?: number;
-  groupsUnit: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
+  groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
