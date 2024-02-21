@@ -410,10 +410,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
         const ecs = pageRowIndex < data.length ? data[pageRowIndex].ecs : null;
 
         useEffect(() => {
-          const defaultStyles = { overflow: 'hidden' };
-          setCellProps({ style: { ...defaultStyles } });
           if (ecs && rowData) {
-            addBuildingBlockStyle(ecs, theme, setCellProps, defaultStyles);
+            addBuildingBlockStyle(ecs, theme, setCellProps);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });

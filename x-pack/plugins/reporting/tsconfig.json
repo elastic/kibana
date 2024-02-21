@@ -51,6 +51,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
     "@kbn/discover-utils",
+    "@kbn/analytics-client",
   ],
   "exclude": [
     "target/**/*",

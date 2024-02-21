@@ -27,7 +27,7 @@ import type {
   ReportingStartDeps,
 } from './types';
 import { ReportingRequestHandlerContext } from './types';
-import { registerReportingUsageCollector } from './usage';
+import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 
 /*
  * @internal
@@ -74,6 +74,7 @@ export class ReportingPlugin
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+    registerReportingEventTypes(core);
 
     // Routes
     registerRoutes(reportingCore, this.logger);
@@ -108,6 +109,7 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,
