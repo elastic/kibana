@@ -17,20 +17,15 @@ import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytic
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
-  // FLAKY: https://github.com/elastic/kibana/issues/169033
-  // FLAKY: https://github.com/elastic/kibana/issues/169034
-  describe.skip('with legacy risk score', () => {
-    before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-    });
-
+describe.only('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+  describe('with legacy risk score', () => {
     beforeEach(() => {
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       login();
       deleteRiskEngineConfiguration();
     });
 
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', 'risk_hosts');
     });
 
@@ -58,17 +53,14 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('with new risk score', () => {
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
-    });
-
-    beforeEach(() => {
       mockRiskEngineEnabled();
       login();
     });
 
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
       deleteRiskEngineConfiguration();
