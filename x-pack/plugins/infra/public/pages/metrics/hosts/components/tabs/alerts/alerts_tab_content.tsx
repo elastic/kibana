@@ -20,7 +20,7 @@ import {
   ALERTS_TABLE_ID,
   infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
-import AlertsStatusFilter from './alerts_status_filter';
+import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
@@ -28,6 +28,7 @@ export const AlertsTabContent = () => {
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
   console.log('alertStatus', alertStatus);
+  console.log('alertsEsQueryByStatus', alertsEsQueryByStatus);
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
   const { triggersActionsUi } = services;
@@ -40,7 +41,7 @@ export const AlertsTabContent = () => {
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
-            {/* <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} /> */}
+            <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem>

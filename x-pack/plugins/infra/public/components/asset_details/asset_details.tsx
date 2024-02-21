@@ -20,7 +20,9 @@ const ContentTemplate = ({
   renderMode,
 }: ContentTemplateProps & { renderMode: RenderMode }) => {
   return renderMode.mode === 'flyout' ? (
-    <Flyout tabs={tabs} links={links} closeFlyout={renderMode.closeFlyout!} />
+    <AlertsQueryProvider>
+      <Flyout tabs={tabs} links={links} closeFlyout={renderMode.closeFlyout!} />
+    </AlertsQueryProvider>
   ) : (
     <Page tabs={tabs} links={links} />
   );

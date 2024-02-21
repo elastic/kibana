@@ -16,7 +16,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import { useAlertsQuery } from '../../../pages/metrics/hosts/hooks/use_alerts_query';
-import AlertsStatusFilter from '../../../pages/metrics/hosts/components/tabs/alerts/alerts_status_filter';
+import AlertsStatusFilter from './alerts_status_filter';
 
 interface AlertsOverviewProps {
   alertsQuery: AlertsEsQuery;
@@ -31,6 +31,9 @@ export const AlertsOverview = React.memo(
     const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
+
+    console.log('alertsQuery', alertsQuery);
+    console.log('alertsEsQueryByStatus', alertsEsQueryByStatus);
 
     const {
       charts,
@@ -83,7 +86,7 @@ export const AlertsOverview = React.memo(
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={[...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY]}
               showAlertStatusWithFlapping
-              query={alertsQuery}
+              query={[alertsQuery]}
               pageSize={5}
             />
           </EuiFlexItem>
