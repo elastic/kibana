@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should decode and restore the selection from a valid encoded index', async () => {
         await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
-            datasetSelection: azureActivityDatasetSelection,
+            dataSourceSelection: azureActivityDatasetSelection,
           },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -70,8 +70,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
         await PageObjects.observabilityLogsExplorer.navigateToWithUncheckedState({
           pageState: {
-            v: 1,
-            datasetSelection: {
+            v: 2,
+            dataSourceSelection: {
               selectionType: 'invalid',
             },
           },
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
-            datasetSelection: azureActivityDatasetSelection,
+            dataSourceSelection: azureActivityDatasetSelection,
           },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();

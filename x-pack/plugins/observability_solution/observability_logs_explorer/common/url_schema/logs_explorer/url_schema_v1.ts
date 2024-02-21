@@ -96,7 +96,7 @@ export const filterRT = rt.intersection([
 
 export const filtersRT = rt.array(filterRT);
 
-const queryRT = rt.union([
+export const queryRT = rt.union([
   rt.strict({
     language: rt.string,
     query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
@@ -109,7 +109,7 @@ const queryRT = rt.union([
   }),
 ]);
 
-const timeRangeRT = rt.intersection([
+export const timeRangeRT = rt.intersection([
   rt.strict({
     from: rt.string,
     to: rt.string,
@@ -124,7 +124,7 @@ const timeRangeRT = rt.intersection([
   ),
 ]);
 
-const refreshIntervalRT = rt.strict({
+export const refreshIntervalRT = rt.strict({
   pause: rt.boolean,
   value: rt.number,
 });

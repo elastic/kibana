@@ -79,7 +79,9 @@ export const AlertsPopover = () => {
       pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
       const { logsExplorerState } = pageState.context;
-      const index = hydrateDataSourceSelection(logsExplorerState.datasetSelection).toDataviewSpec();
+      const index = hydrateDataSourceSelection(
+        logsExplorerState.dataSourceSelection
+      ).toDataviewSpec();
 
       return triggersActionsUi.getAddRuleFlyout<ThresholdRuleTypeParams>({
         consumer: 'logs',
