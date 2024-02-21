@@ -23,9 +23,11 @@ import { IndexNameActions, IndexNameLogic } from '../search_index/index_name_log
 export interface ConnectorViewActions {
   fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
   fetchConnectorApiError: FetchConnectorByIdApiLogicActions['apiError'];
+  fetchConnectorApiReset: FetchConnectorByIdApiLogicActions['apiReset'];
   fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
+  fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
   setIndexName: IndexNameActions['setIndexName'];
 }
@@ -71,12 +73,14 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'makeRequest as fetchConnector',
         'apiSuccess as fetchConnectorApiSuccess',
         'apiError as fetchConnectorApiError',
+        'apiReset as fetchConnectorApiReset',
       ],
       FetchIndexApiLogic,
       [
         'makeRequest as fetchIndex',
         'apiSuccess as fetchIndexApiSuccess',
         'apiError as fetchIndexApiError',
+        'apiReset as fetchIndexApiReset',
       ],
     ],
     values: [
@@ -86,6 +90,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['data as index', 'status as fetchIndexApiStatus'],
     ],
   },
+  events: ({ actions }) => ({
+    beforeMount: () => {
+      actions.fetchConnectorApiReset();
+      actions.fetchIndexApiReset();
+    },
+    beforeUnmount: () => {
+      actions.fetchConnectorApiReset();
+      actions.fetchIndexApiReset();
+    },
+  }),
   listeners: ({ actions, values }) => ({
     fetchConnectorApiSuccess: () => {
       if (values.indexName) {
