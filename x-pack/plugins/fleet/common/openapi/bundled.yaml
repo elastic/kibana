@@ -5368,7 +5368,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5376,6 +5380,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5707,7 +5715,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5715,6 +5727,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
