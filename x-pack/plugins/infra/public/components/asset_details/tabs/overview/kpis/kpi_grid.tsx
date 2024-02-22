@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { i18n } from '@kbn/i18n';
 import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 import { Kpi } from './kpi';
 
@@ -24,20 +25,29 @@ export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
   const model = findInventoryModel('host');
   const { euiTheme } = useEuiTheme();
 
-  const { value: dashboards } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpuCharts, diskCharts, memoryCharts } = await model.metrics.getCharts();
+    return [
+      cpuCharts.metric.cpuUsage,
+      cpuCharts.metric.normalizedLoad1m,
+      memoryCharts.metric.memoryUsage,
+      diskCharts.metric.diskUsage,
+    ].map((chart) => ({
+      ...chart,
+      seriesColor: euiTheme.colors.lightestShade,
+      subtitle: i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+        defaultMessage: 'Average',
+      }),
+      ...(dataView?.id
+        ? {
+            dataset: {
+              index: dataView.id,
+            },
+          }
+        : {}),
+    }));
+  }, [dataView?.id, euiTheme.colors.lightestShade]);
 
-  const charts = useMemo(
-    () =>
-      dashboards?.kpi.get({
-        metricsDataViewId: dataView?.id,
-        options: {
-          seriesColor: euiTheme.colors.lightestShade,
-        },
-      }).charts ?? [],
-    [dataView, euiTheme.colors.lightestShade, dashboards?.kpi]
-  );
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
       {charts.map((chartProps, index) => (

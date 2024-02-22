@@ -4,44 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-import { LensConfigWithId } from '../../../types';
+import { LensConfigWithId } from '../../../../types';
 import { formulas } from '../formulas';
 
-export const networkCharts = {
+export const nodeCharts = {
   xy: {
-    rxTx: {
-      id: 'rxTx',
+    nodeCpuCapacity: {
+      id: 'nodeCpuCapacity',
       chartType: 'xy',
-      title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
-        defaultMessage: 'Network',
-      }),
+      title: 'Node CPU Capacity',
       layers: [
         {
           seriesType: 'area',
           type: 'series',
           xAxis: '@timestamp',
-          yAxis: [
-            {
-              ...formulas.rx,
-              label: i18n.translate(
-                'xpack.metricsData.assetDetails.metricsCharts.network.label.rx',
-                {
-                  defaultMessage: 'Inbound (RX)',
-                }
-              ),
-            },
-            {
-              ...formulas.tx,
-              label: i18n.translate(
-                'xpack.metricsData.assetDetails.metricsCharts.network.label.tx',
-                {
-                  defaultMessage: 'Outbound (TX)',
-                }
-              ),
-            },
-          ],
+          yAxis: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed],
         },
       ],
       fittingFunction: 'Linear',
@@ -54,16 +31,16 @@ export const networkCharts = {
         showYAxisTitle: false,
       },
     } as LensConfigWithId,
-    rx: {
-      id: 'rx',
+    nodeMemoryCapacity: {
+      id: 'nodeMemoryCapacity',
       chartType: 'xy',
-      title: formulas.rx.label ?? '',
+      title: 'Node Memory Capacity',
       layers: [
         {
           seriesType: 'area',
           type: 'series',
           xAxis: '@timestamp',
-          yAxis: [formulas.rx],
+          yAxis: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed],
         },
       ],
       fittingFunction: 'Linear',
@@ -76,16 +53,38 @@ export const networkCharts = {
         showYAxisTitle: false,
       },
     } as LensConfigWithId,
-    tx: {
-      id: 'tx',
+    nodeDiskCapacity: {
+      id: 'nodeDiskCapacity',
       chartType: 'xy',
-      title: formulas.tx.label ?? '',
+      title: 'Node Disk Capacity',
       layers: [
         {
           seriesType: 'area',
           type: 'series',
           xAxis: '@timestamp',
-          yAxis: [formulas.tx],
+          yAxis: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed],
+        },
+      ],
+      fittingFunction: 'Linear',
+      legend: {
+        show: true,
+        position: 'bottom',
+      },
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
+    } as LensConfigWithId,
+    nodePodCapacity: {
+      id: 'nodePodCapacity',
+      chartType: 'xy',
+      title: 'Node Pod Capacity',
+      layers: [
+        {
+          seriesType: 'area',
+          type: 'series',
+          xAxis: '@timestamp',
+          yAxis: [formulas.nodePodCapacity, formulas.nodePodUsed],
         },
       ],
       fittingFunction: 'Linear',
@@ -99,4 +98,4 @@ export const networkCharts = {
       },
     } as LensConfigWithId,
   },
-};
+} as const;

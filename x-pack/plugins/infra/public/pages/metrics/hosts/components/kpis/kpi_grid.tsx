@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -16,8 +16,8 @@ import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Kpi } from './kpi';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { HostCountKpi } from './host_count_kpi';
-import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 
 export const KPIGrid = () => {
   const model = findInventoryModel('host');
@@ -25,10 +25,6 @@ export const KPIGrid = () => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useMetricsDataViewContext();
   const { data: hostCountData } = useHostCountContext();
-
-  const { value: dashboards } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
 
   const subtitle =
     searchCriteria.limit < (hostCountData?.count.value ?? 0)
@@ -38,19 +34,30 @@ export const KPIGrid = () => {
             limit: searchCriteria.limit,
           },
         })
-      : undefined;
+      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+          defaultMessage: 'Average',
+        });
 
-  const charts = useMemo(
-    () =>
-      dashboards?.kpi.get({
-        metricsDataViewId: dataView?.id,
-        options: {
-          seriesColor: euiTheme.colors.lightestShade,
-          ...(subtitle ? { subtitle } : {}),
-        },
-      }).charts ?? [],
-    [dashboards?.kpi, dataView, euiTheme.colors.lightestShade, subtitle]
-  );
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpuCharts, diskCharts, memoryCharts } = await model.metrics.getCharts();
+    return [
+      cpuCharts.metric.cpuUsage,
+      cpuCharts.metric.normalizedLoad1m,
+      memoryCharts.metric.memoryUsage,
+      diskCharts.metric.diskUsage,
+    ].map((chart) => ({
+      ...chart,
+      seriesColor: euiTheme.colors.lightestShade,
+      subtitle,
+      ...(dataView?.id
+        ? {
+            dataset: {
+              index: dataView.id,
+            },
+          }
+        : {}),
+    }));
+  }, [dataView?.id, euiTheme.colors.lightestShade]);
 
   return (
     <>

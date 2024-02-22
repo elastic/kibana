@@ -6,53 +6,142 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensConfigWithId } from '../../../types';
+import { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
-import type { ChartArgs } from './types';
 
-export const cpuUsageBreakdown = {
-  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
-    id: 'cpuUsageBreakdown',
-    chartType: 'xy',
-    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
-      defaultMessage: 'CPU Usage',
-    }),
-    layers: [
-      {
-        seriesType: 'area',
-        type: 'series',
-        xAxis: '@timestamp',
-        yAxis: [
-          formulas.cpuUsageIowait,
-          formulas.cpuUsageIrq,
-          formulas.cpuUsageNice,
-          formulas.cpuUsageSoftirq,
-          formulas.cpuUsageSteal,
-          formulas.cpuUsageUser,
-          formulas.cpuUsageSystem,
-        ],
+export const cpuCharts = {
+  xy: {
+    cpuUsageBreakdown: {
+      id: 'cpuUsageBreakdown',
+      chartType: 'xy',
+      title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
+        defaultMessage: 'CPU Usage',
+      }),
+      layers: [
+        {
+          seriesType: 'area',
+          type: 'series',
+          xAxis: '@timestamp',
+          yAxis: [
+            formulas.cpuUsageIowait,
+            formulas.cpuUsageIrq,
+            formulas.cpuUsageNice,
+            formulas.cpuUsageSoftirq,
+            formulas.cpuUsageSteal,
+            formulas.cpuUsageUser,
+            formulas.cpuUsageSystem,
+          ],
+        },
+      ],
+      fittingFunction: 'Linear',
+      legend: {
+        position: 'bottom',
+        show: true,
       },
-    ],
-    fittingFunction: 'Linear',
-    legend: {
-      position: 'bottom',
-      show: true,
-    },
-    yBounds: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
-    },
-    axisTitleVisibility: {
-      showXAxisTitle: false,
-      showYAxisTitle: false,
-    },
-    ...(dataViewId
-      ? {
-          dataset: {
-            index: dataViewId,
-          },
-        }
-      : {}),
-  }),
-};
+      yBounds: {
+        mode: 'custom',
+        lowerBound: 0,
+        upperBound: 1,
+      },
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
+    } as LensConfigWithId,
+    loadBreakdown: {
+      id: 'loadBreakdown',
+      chartType: 'xy',
+      title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
+        defaultMessage: 'Load',
+      }),
+      layers: [
+        {
+          seriesType: 'area',
+          type: 'series',
+          xAxis: '@timestamp',
+          yAxis: [formulas.load1m, formulas.load5m, formulas.load15m],
+        },
+      ],
+      fittingFunction: 'Linear',
+      legend: {
+        position: 'bottom',
+        show: true,
+      },
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
+    } as LensConfigWithId,
+    cpuUsage: {
+      id: 'cpuUsage',
+      chartType: 'xy',
+      title: formulas.cpuUsage.label,
+      layers: [
+        {
+          seriesType: 'line',
+          type: 'series',
+          xAxis: '@timestamp',
+          yAxis: [formulas.cpuUsage],
+        },
+      ],
+      fittingFunction: 'Linear',
+      legend: {
+        show: false,
+      },
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
+      yBounds: {
+        mode: 'custom',
+        lowerBound: 0,
+        upperBound: 1,
+      },
+    } as LensConfigWithId,
+    normalizedLoad1m: {
+      id: 'normalizedLoad1m',
+      chartType: 'xy',
+      title: formulas.normalizedLoad1m.label,
+      layers: [
+        {
+          seriesType: 'line',
+          type: 'series',
+          xAxis: '@timestamp',
+          yAxis: [formulas.normalizedLoad1m],
+        },
+        {
+          type: 'reference',
+          yAxis: [
+            {
+              value: '1',
+            },
+          ],
+        },
+      ],
+      fittingFunction: 'Linear',
+      legend: {
+        show: false,
+      },
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
+    } as LensConfigWithId,
+  },
+  metric: {
+    cpuUsage: {
+      id: 'cpuUsage',
+      chartType: 'metric',
+      title: formulas.cpuUsage.label,
+      trendLine: true,
+      ...formulas.cpuUsage,
+    } as LensConfigWithId,
+    normalizedLoad1m: {
+      id: 'normalizedLoad1m',
+      chartType: 'metric',
+      title: formulas.normalizedLoad1m.label,
+      trendLine: true,
+      ...formulas.normalizedLoad1m,
+    } as LensConfigWithId,
+  },
+} as const;
