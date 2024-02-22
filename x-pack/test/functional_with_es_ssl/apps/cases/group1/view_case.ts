@@ -1230,13 +1230,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         {
           key: 'valid_key_1',
           label: 'Summary',
-          type: CustomFieldTypes.TEXT,
+          type: CustomFieldTypes.TEXT as const,
+          defaultValue: 'foobar',
           required: true,
         },
         {
           key: 'valid_key_2',
           label: 'Sync',
-          type: CustomFieldTypes.TOGGLE,
+          type: CustomFieldTypes.TOGGLE as const,
+          defaultValue: false,
           required: true,
         },
       ];
@@ -1294,19 +1296,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('update toast exist', async () => {
-          return await testSubjects.exists('toastCloseButton');
-        });
-
-        await testSubjects.click('toastCloseButton');
-
-        await header.waitUntilLoadingHasFinished();
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
-
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         expect(await toggle.getAttribute('aria-checked')).equal('false');
 

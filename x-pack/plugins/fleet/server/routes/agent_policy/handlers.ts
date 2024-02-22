@@ -172,6 +172,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
+  const force = request.body.force;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
@@ -188,6 +189,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         spaceId,
         user,
         authorizationHeader,
+        force,
       }),
     };
 
@@ -195,6 +197,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
@@ -229,6 +237,12 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

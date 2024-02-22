@@ -139,7 +139,7 @@ describe('DiscoverTopNavServerless', () => {
         },
       });
       const props = getProps();
-      props.stateContainer.customizationContext.showLogExplorerTabs = true;
+      props.stateContainer.customizationContext.showLogsExplorerTabs = true;
       render(
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverTopNavServerless {...props} />
@@ -148,8 +148,8 @@ describe('DiscoverTopNavServerless', () => {
       const topNav = screen.queryByTestId('discoverTopNavServerless');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
-        const logExplorerTabs = screen.queryByTestId('logsExplorerTabs');
-        expect(logExplorerTabs).not.toBeNull();
+        const logsExplorerTabs = screen.queryByTestId('logsExplorerTabs');
+        expect(logsExplorerTabs).not.toBeNull();
       });
     });
 
@@ -169,8 +169,8 @@ describe('DiscoverTopNavServerless', () => {
       const topNav = screen.queryByTestId('discoverTopNavServerless');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
-        const logExplorerTabs = screen.queryByTestId('logsExplorerTabs');
-        expect(logExplorerTabs).toBeNull();
+        const logsExplorerTabs = screen.queryByTestId('logsExplorerTabs');
+        expect(logsExplorerTabs).toBeNull();
       });
     });
   });

@@ -6,7 +6,6 @@
  */
 
 import { omit } from 'lodash';
-import moment from 'moment';
 import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
@@ -25,7 +24,7 @@ import {
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
-import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -45,7 +44,6 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
       dataForgeConfig = {
@@ -178,11 +176,10 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -208,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
 
         expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.group');
-
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([1, 2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -231,7 +228,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
@@ -239,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
 
         expect(resp.hits.hits[0]._source?.reason).eql(
@@ -247,11 +243,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(resp.hits.hits[0]._source?.value).eql('3');
 
-        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },

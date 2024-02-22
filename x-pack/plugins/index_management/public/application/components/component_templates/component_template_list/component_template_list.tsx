@@ -36,6 +36,7 @@ import { useRedirectPath } from '../../../hooks/redirect_path';
 interface Props {
   componentTemplateName?: string;
   history: RouteComponentProps['history'];
+  filter?: string;
 }
 
 const { useGlobalFlyout } = GlobalFlyout;
@@ -43,6 +44,7 @@ const { useGlobalFlyout } = GlobalFlyout;
 export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
+  filter,
 }) => {
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -183,6 +185,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
         <ComponentTable
           componentTemplates={data}
+          defaultFilter={filter ?? ''}
           onReloadClick={resendRequest}
           onDeleteClick={setComponentTemplatesToDelete}
           onEditClick={goToEditComponentTemplate}

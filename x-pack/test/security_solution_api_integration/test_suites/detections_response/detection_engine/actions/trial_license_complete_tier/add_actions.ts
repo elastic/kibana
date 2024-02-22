@@ -12,11 +12,9 @@ import {
   deleteAllRules,
   waitForRuleSuccess,
   deleteAllAlerts,
-  getCustomQueryRuleParams,
-  createWebHookRuleAction,
-  fetchRule,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { createWebHookRuleAction, fetchRule, getCustomQueryRuleParams } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -16,8 +16,11 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
 import type { EmbeddableSloProps } from './types';
@@ -29,8 +32,14 @@ interface SloConfigurationProps {
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
+  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
+
   const onConfirmClick = () =>
-    onCreate({ sloId: selectedSlo?.sloId, sloInstanceId: selectedSlo?.sloInstanceId });
+    onCreate({
+      showAllGroupByInstances,
+      sloId: selectedSlo?.sloId,
+      sloInstanceId: selectedSlo?.sloInstanceId,
+    });
   const [hasError, setHasError] = useState(false);
 
   return (
@@ -57,6 +66,21 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {selectedSlo?.sloInstanceId !== ALL_VALUE && (
+          <>
+            <EuiSpacer />
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.observability.sloConfiguration.euiSwitch.showAllGroupByLabel',
+                { defaultMessage: 'Show all related group-by instances' }
+              )}
+              checked={showAllGroupByInstances}
+              onChange={(e) => {
+                setShowAllGroupByInstances(e.target.checked);
+              }}
+            />
+          </>
+        )}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">

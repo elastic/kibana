@@ -13,13 +13,17 @@ import {
 } from '../../common';
 import {
   DEFAULT_CONTEXT,
-  LogExplorerControllerContext,
-} from '../state_machines/log_explorer_controller';
-import { LogExplorerPublicState, LogExplorerPublicStateUpdate, OptionsListControl } from './types';
+  LogsExplorerControllerContext,
+} from '../state_machines/logs_explorer_controller';
+import {
+  LogsExplorerPublicState,
+  LogsExplorerPublicStateUpdate,
+  OptionsListControl,
+} from './types';
 
 export const getPublicStateFromContext = (
-  context: LogExplorerControllerContext
-): LogExplorerPublicState => {
+  context: LogsExplorerControllerContext
+): LogsExplorerPublicState => {
   return {
     chart: context.chart,
     datasetSelection: context.datasetSelection.toPlainSelection(),
@@ -33,8 +37,8 @@ export const getPublicStateFromContext = (
 };
 
 export const getContextFromPublicState = (
-  publicState: LogExplorerPublicStateUpdate
-): LogExplorerControllerContext => ({
+  publicState: LogsExplorerPublicStateUpdate
+): LogsExplorerControllerContext => ({
   ...DEFAULT_CONTEXT,
   chart: {
     ...DEFAULT_CONTEXT.chart,
@@ -61,7 +65,7 @@ export const getContextFromPublicState = (
 
 const getPublicControlsStateFromControlPanels = (
   controlPanels: ControlPanels | undefined
-): LogExplorerPublicState['controls'] =>
+): LogsExplorerPublicState['controls'] =>
   controlPanels != null
     ? {
         ...(availableControlsPanels.NAMESPACE in controlPanels
@@ -87,7 +91,7 @@ const getOptionsListPublicControlStateFromControlPanel = (
 });
 
 const getControlPanelsFromPublicControlsState = (
-  publicControlsState: LogExplorerPublicStateUpdate['controls']
+  publicControlsState: LogsExplorerPublicStateUpdate['controls']
 ): ControlPanels => {
   if (publicControlsState == null) {
     return {};

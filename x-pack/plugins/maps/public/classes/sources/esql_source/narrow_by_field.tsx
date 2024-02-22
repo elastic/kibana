@@ -8,7 +8,7 @@
 import React, { ChangeEvent, useMemo } from 'react';
 import { EuiFormRow, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 export function NarrowByMapBounds(props: Omit<NarrowByFieldProps, 'switchLabel' | 'fieldTypes'>) {

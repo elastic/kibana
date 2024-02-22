@@ -28,7 +28,7 @@ import {
 import { isFields, processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
 import { getESAssetMetadata } from '../meta';
-import { updateEsAssetReferences } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
@@ -43,6 +43,7 @@ import type {
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
+import { isUserSettingsTemplate } from '../template/utils';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
@@ -456,7 +457,6 @@ const installTransformsAssets = async (
         })
       : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
         undefined;
-
     // delete all previous transform
     await Promise.all([
       deleteTransforms(
@@ -542,6 +542,8 @@ const installTransformsAssets = async (
                   ],
                   _meta: destinationIndexTemplate._meta,
                   composed_of: Object.keys(componentTemplates),
+                  ignore_missing_component_templates:
+                    Object.keys(componentTemplates).filter(isUserSettingsTemplate),
                 },
               },
             });
@@ -769,7 +771,9 @@ async function handleTransformInstall({
         throw err;
       }
     }
-  } else {
+  }
+
+  if (startTransform === false || transform?.content?.settings?.unattended === true) {
     // if transform was not set to start automatically in yml config,
     // we need to check using _stats if the transform had insufficient permissions
     try {
@@ -781,7 +785,11 @@ async function handleTransformInstall({
           ),
         { logger, additionalResponseStatuses: [400] }
       );
-      if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
+      if (
+        transformStats &&
+        Array.isArray(transformStats.transforms) &&
+        transformStats.transforms.length === 1
+      ) {
         const transformHealth = transformStats.transforms[0].health;
         if (
           transformHealth &&

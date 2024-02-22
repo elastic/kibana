@@ -1085,7 +1085,7 @@
         "signature": [
           "{ item: ",
           "EventAnnotationGroupSavedObject",
-          "; }"
+          "; meta?: undefined; }"
         ],
         "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
         "deprecated": false,

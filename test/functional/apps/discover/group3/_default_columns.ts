@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
     beforeEach(async function () {

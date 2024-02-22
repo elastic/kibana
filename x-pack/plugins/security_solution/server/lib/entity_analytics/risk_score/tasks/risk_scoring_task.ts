@@ -35,7 +35,6 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
-import type { ExperimentalFeatures } from '../../../../../common';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -58,14 +57,12 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 type GetRiskScoreService = (namespace: string) => Promise<RiskScoreService>;
 
 export const registerRiskScoringTask = ({
-  experimentalFeatures,
   getStartServices,
   kibanaVersion,
   logger,
   taskManager,
   telemetry,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
   getStartServices: StartServicesAccessor<StartPlugins>;
   kibanaVersion: string;
   logger: Logger;
@@ -87,9 +84,10 @@ export const registerRiskScoringTask = ({
         logger,
         namespace,
       });
+
       const assetCriticalityService = assetCriticalityServiceFactory({
         assetCriticalityDataClient,
-        experimentalFeatures,
+        uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       });
 
       const riskEngineDataClient = new RiskEngineDataClient({

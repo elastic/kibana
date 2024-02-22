@@ -9,5 +9,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/interpreter",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
   ]
 }

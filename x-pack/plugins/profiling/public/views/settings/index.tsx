@@ -24,12 +24,13 @@ import {
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -47,18 +48,23 @@ const co2Settings = [
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
 ];
-const costSettings = [profilingAWSCostDiscountRate, profilingCostPervCPUPerHour];
+const costSettings = [
+  profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
+  profilingCostPervCPUPerHour,
+];
+const miscSettings = [profilingShowErrorFrames];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
   const {
     start: {
-      core: { docLinks, notifications },
+      core: { docLinks, notifications, settings },
     },
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings('profiling', [...co2Settings, ...costSettings]);
+    useEditableSettings('profiling', [...co2Settings, ...costSettings, ...miscSettings]);
 
   async function handleSave() {
     try {
@@ -81,11 +87,7 @@ export function Settings() {
     }
   }
 
-  // We don't validate the user input on these settings
-  const settingsValidationResponse: ValueValidation = {
-    successfulValidation: true,
-    valid: true,
-  };
+  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   return (
     <ProfilingAppPageTemplate hideSearchBar>
@@ -109,30 +111,57 @@ export function Settings() {
                   'The Universal Profiling host agent can detect if your machine is running on AWS, Azure, or Google Cloud Platform.',
               }),
               subtitle: (
-                <FormattedMessage
-                  id="xpack.profiling.settings.co2.subtitle"
-                  defaultMessage="For machines running on AWS, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
-                  values={{
-                    regionalCarbonIntensityLink: (
-                      <EuiLink
-                        data-test-subj="profilingSettingsLink"
-                        href="https://ela.st/grid-datasheet"
-                        target="_blank"
-                      >
-                        {i18n.translate('xpack.profiling.settings.co2.subtitle.link', {
-                          defaultMessage: 'regional carbon intensity',
-                        })}
-                      </EuiLink>
-                    ),
-                    pue: (
-                      <strong>
-                        {i18n.translate('xpack.profiling.settings.co2.subtitle.pue', {
-                          defaultMessage: 'PUE',
-                        })}
-                      </strong>
-                    ),
-                  }}
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.profiling.settings.co2.aws.subtitle"
+                    defaultMessage="For machines running on AWS, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
+                    values={{
+                      regionalCarbonIntensityLink: (
+                        <EuiLink
+                          data-test-subj="profilingSettingsLink"
+                          href="https://ela.st/grid-datasheet"
+                          target="_blank"
+                        >
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.link', {
+                            defaultMessage: 'regional carbon intensity',
+                          })}
+                        </EuiLink>
+                      ),
+                      pue: (
+                        <strong>
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.pue', {
+                            defaultMessage: 'PUE',
+                          })}
+                        </strong>
+                      ),
+                    }}
+                  />
+                  <EuiSpacer size="xs" />
+                  <FormattedMessage
+                    id="xpack.profiling.settings.co2.azure.subtitle"
+                    defaultMessage="For machines running on Azure, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's Azure region and the current Azure data center {pue}."
+                    values={{
+                      regionalCarbonIntensityLink: (
+                        <EuiLink
+                          data-test-subj="profilingSettingsLink"
+                          href="https://ela.st/grid-datasheet"
+                          target="_blank"
+                        >
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.link', {
+                            defaultMessage: 'regional carbon intensity',
+                          })}
+                        </EuiLink>
+                      ),
+                      pue: (
+                        <strong>
+                          {i18n.translate('xpack.profiling.settings.co2.subtitle.pue', {
+                            defaultMessage: 'PUE',
+                          })}
+                        </strong>
+                      ),
+                    }}
+                  />
+                </>
               ),
               text: i18n.translate('xpack.profiling.settings.co2.text', {
                 defaultMessage:
@@ -149,16 +178,27 @@ export function Settings() {
               title: (
                 <FormattedMessage
                   id="xpack.profiling.settings.cost.title"
-                  defaultMessage="Universal Profiling sets the cost for AWS configurations using the {awsPriceList} for your EC2 instance type."
+                  defaultMessage="Universal Profiling uses the cost for AWS EC2 instances and Azure VMs using the {awsPriceList} and {azurePriceList} respectively."
                   values={{
                     awsPriceList: (
                       <EuiLink
-                        data-test-subj="profilingSettingsLink"
-                        href="https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/Welcome.html#Welcome_AWS_Price_List_Service"
+                        data-test-subj="profilingSettingsLinkAws"
+                        href="https://ela.st/aws-price-list"
                         target="_blank"
                       >
-                        {i18n.translate('xpack.profiling.settings.cost.subtitle.link', {
+                        {i18n.translate('xpack.profiling.settings.cost.subtitle.link.aws', {
                           defaultMessage: 'AWS price list',
+                        })}
+                      </EuiLink>
+                    ),
+                    azurePriceList: (
+                      <EuiLink
+                        data-test-subj="profilingSettingsLinkAzure"
+                        href="https://ela.st/azure-price-list"
+                        target="_blank"
+                      >
+                        {i18n.translate('xpack.profiling.settings.cost.subtitle.link.azure', {
+                          defaultMessage: 'Azure price list',
                         })}
                       </EuiLink>
                     ),
@@ -167,6 +207,20 @@ export function Settings() {
               ),
             },
             settings: costSettings,
+          },
+          {
+            label: i18n.translate('xpack.profiling.settings.miscSection', {
+              defaultMessage: 'Miscellaneous settings',
+            }),
+            description: {
+              title: (
+                <FormattedMessage
+                  id="xpack.profiling.settings.misc.title"
+                  defaultMessage="Universal Profiling miscellaneous settings."
+                />
+              ),
+            },
+            settings: miscSettings,
           },
         ].map((item) => (
           <>
@@ -215,7 +269,8 @@ export function Settings() {
                       {...{
                         links: docLinks.links.management,
                         showDanger: (message: string) => notifications.toasts.addDanger(message),
-                        validateChange: async () => settingsValidationResponse,
+                        validateChange: (key: string, value: any) =>
+                          settings.client.validateValue(key, value),
                       }}
                     >
                       <FieldRow
@@ -242,6 +297,7 @@ export function Settings() {
               defaultMessage: 'Save changes',
             })}
             unsavedChangesCount={Object.keys(unsavedChanges).length}
+            areChangesInvalid={hasInvalidChanges}
           />
         )}
       </>

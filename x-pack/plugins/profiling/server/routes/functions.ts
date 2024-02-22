@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -40,15 +41,32 @@ export function registerTopNFunctionsSearchRoute({
         const core = await context.core;
 
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
+        const startSecs = timeFrom / 1000;
+        const endSecs = timeTo / 1000;
+
         const esClient = await getClient(context);
         const topNFunctions = await profilingDataAccess.services.fetchFunction({
           core,
           esClient,
-          rangeFromMs: timeFrom,
-          rangeToMs: timeTo,
-          kuery,
           startIndex,
           endIndex,
+          totalSeconds: endSecs - startSecs,
+          query: {
+            bool: {
+              filter: [
+                ...kqlQuery(kuery),
+                {
+                  range: {
+                    ['@timestamp']: {
+                      gte: String(startSecs),
+                      lt: String(endSecs),
+                      format: 'epoch_second',
+                    },
+                  },
+                },
+              ],
+            },
+          },
         });
 
         return response.ok({

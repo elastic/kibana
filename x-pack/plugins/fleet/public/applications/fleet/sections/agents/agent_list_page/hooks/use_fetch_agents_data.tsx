@@ -7,6 +7,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
 
@@ -33,14 +34,16 @@ export function useFetchAgentsData() {
 
   const { notifications } = useStartServices();
   // useBreadcrumbs('agent_list');
-  const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
+  const history = useHistory();
+  const { urlParams, toUrlParams } = useUrlParams();
+  const defaultKuery: string = (urlParams.kuery as string) || '';
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
 
   // Table and search states
   const [draftKuery, setDraftKuery] = useState<string>(defaultKuery);
-  const [search, setSearch] = useState<string>(defaultKuery);
+  const [search, setSearchState] = useState<string>(defaultKuery);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -64,6 +67,22 @@ export function useFetchAgentsData() {
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
+
+  const setSearch = useCallback(
+    (newVal: string) => {
+      setSearchState(newVal);
+      if (newVal.trim() === '' && !urlParams.kuery) {
+        return;
+      }
+
+      if (urlParams.kuery !== newVal) {
+        history.replace({
+          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
+        });
+      }
+    },
+    [urlParams, history, toUrlParams]
+  );
 
   // filters kuery
   const kuery = useMemo(() => {

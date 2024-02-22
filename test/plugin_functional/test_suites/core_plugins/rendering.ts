@@ -101,6 +101,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
+        'console.dev.enableMonaco (boolean)',
         'console.ui.enabled (boolean)',
         'console.ui.embeddedEnabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
@@ -257,7 +258,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
-        'xpack.fleet.internal.disableProxies (boolean)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
@@ -311,6 +311,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
@@ -374,6 +375,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
 
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)

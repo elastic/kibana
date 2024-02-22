@@ -11,7 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
-  AppNavLinkStatus,
+  PackageInfo,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -54,6 +54,7 @@ import {
   ObservabilityAIAssistantPluginStart,
   ObservabilityAIAssistantPluginSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -70,6 +71,7 @@ export interface ClientPluginsSetup {
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface ClientPluginsStart {
@@ -112,7 +114,11 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  private readonly _packageInfo: Readonly<PackageInfo>;
+
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this._packageInfo = initContext.env.packageInfo;
+  }
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     locators.forEach((locator) => {
@@ -154,7 +160,7 @@ export class UptimePlugin
             defaultMessage: 'Overview',
           }),
           path: '/',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
           id: 'management',
@@ -162,7 +168,7 @@ export class UptimePlugin
             defaultMessage: 'Management',
           }),
           path: '/monitors',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
       mount: async (params: AppMountParameters) => {
@@ -193,6 +199,10 @@ export class UptimePlugin
   }
 
   public stop(): void {}
+
+  private get _isServerless(): boolean {
+    return this._packageInfo.buildFlavor === 'serverless';
+  }
 }
 
 function registerSyntheticsRoutesWithNavigation(

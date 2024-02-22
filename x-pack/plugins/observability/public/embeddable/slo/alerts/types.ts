@@ -18,6 +18,7 @@ export interface EmbeddableSloProps {
   slos: SloItem[];
   timeRange?: TimeRange;
   lastReloadRequestTime?: number | undefined;
+  showAllGroupByInstances?: boolean;
 }
 
 export type SloAlertsEmbeddableInput = EmbeddableInput & EmbeddableSloProps;

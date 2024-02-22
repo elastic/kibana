@@ -7,11 +7,11 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { removeDropCommandsFromESQLQuery } from '@kbn/esql-utils';
 import {
   AggregateQuery,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  cleanupESQLQueryForLensSuggestions,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -79,7 +79,7 @@ export const useLensSuggestions = ({
 
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
-      const safeQuery = cleanupESQLQueryForLensSuggestions(query[language]);
+      const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
       const esqlQuery = `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),

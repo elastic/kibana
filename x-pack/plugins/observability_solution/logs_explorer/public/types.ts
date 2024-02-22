@@ -12,24 +12,24 @@ import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { LogExplorerLocators } from '../common/locators';
-import type { LogExplorerProps } from './components/log_explorer';
-import type { CreateLogExplorerController } from './controller';
+import type { LogsExplorerLocators } from '../common/locators';
+import type { LogsExplorerProps } from './components/logs_explorer';
+import type { CreateLogsExplorerController } from './controller';
 
-export interface LogExplorerPluginSetup {
-  locators: LogExplorerLocators;
+export interface LogsExplorerPluginSetup {
+  locators: LogsExplorerLocators;
 }
-export interface LogExplorerPluginStart {
-  LogExplorer: ComponentType<LogExplorerProps>;
-  createLogExplorerController: CreateLogExplorerController;
+export interface LogsExplorerPluginStart {
+  LogsExplorer: ComponentType<LogsExplorerProps>;
+  createLogsExplorerController: CreateLogsExplorerController;
 }
 
-export interface LogExplorerSetupDeps {
+export interface LogsExplorerSetupDeps {
   share: SharePluginSetup;
   discover: DiscoverSetup;
 }
 
-export interface LogExplorerStartDeps {
+export interface LogsExplorerStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;

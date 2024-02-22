@@ -16,12 +16,6 @@ import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
 import { ValidationBurnRateRuleResult } from './validation';
 import { createNewWindow, Windows } from './windows';
-import {
-  ALERT_ACTION,
-  HIGH_PRIORITY_ACTION,
-  LOW_PRIORITY_ACTION,
-  MEDIUM_PRIORITY_ACTION,
-} from '../../../common/constants';
 import { BURN_RATE_DEFAULTS } from './constants';
 import { AlertTimeTable } from './alert_time_table';
 
@@ -38,54 +32,25 @@ export function BurnRateRuleEditor(props: Props) {
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
+  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
 
   useEffect(() => {
     setSelectedSlo(initialSlo);
+    setWindowDefs((previous) => {
+      if (previous.length > 0) {
+        return previous;
+      }
+      return createDefaultWindows(initialSlo);
+    });
   }, [initialSlo]);
 
   const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
+    setWindowDefs(() => {
+      return createDefaultWindows(slo);
+    });
     setRuleParams('sloId', slo?.id);
   };
-
-  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(
-    ruleParams?.windows || [
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 14.4,
-        longWindow: { value: 1, unit: 'h' },
-        shortWindow: { value: 5, unit: 'm' },
-        actionGroup: ALERT_ACTION.id,
-      }),
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 6,
-        longWindow: { value: 6, unit: 'h' },
-        shortWindow: { value: 30, unit: 'm' },
-        actionGroup: HIGH_PRIORITY_ACTION.id,
-      }),
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 3,
-        longWindow: { value: 24, unit: 'h' },
-        shortWindow: { value: 120, unit: 'm' },
-        actionGroup: MEDIUM_PRIORITY_ACTION.id,
-      }),
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 1,
-        longWindow: { value: 72, unit: 'h' },
-        shortWindow: { value: 360, unit: 'm' },
-        actionGroup: LOW_PRIORITY_ACTION.id,
-      }),
-    ]
-  );
-
-  // When the SLO changes, recalculate the max burn rates
-  useEffect(() => {
-    setWindowDefs(() => {
-      const burnRateDefaults = selectedSlo
-        ? BURN_RATE_DEFAULTS[selectedSlo?.timeWindow.duration]
-        : BURN_RATE_DEFAULTS['30d'];
-      return burnRateDefaults.map((partialWindow) => createNewWindow(selectedSlo, partialWindow));
-    });
-  }, [selectedSlo]);
 
   useEffect(() => {
     setRuleParams('windows', windowDefs);
@@ -130,4 +95,9 @@ export function BurnRateRuleEditor(props: Props) {
       )}
     </>
   );
+}
+
+function createDefaultWindows(slo: SLOResponse | undefined) {
+  const burnRateDefaults = slo ? BURN_RATE_DEFAULTS[slo.timeWindow.duration] : [];
+  return burnRateDefaults.map((partialWindow) => createNewWindow(slo, partialWindow));
 }

@@ -28,6 +28,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -150,6 +151,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async loadSavedSearch(searchName: string) {
     await this.openLoadSavedSearchPanel();
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -199,7 +201,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickHistogramBar() {
-    await this.elasticChart.waitForRenderComplete();
+    await this.elasticChart.waitForRenderComplete(undefined, 5000);
     const el = await this.elasticChart.getCanvas();
 
     await this.browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
@@ -641,11 +643,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveCurrentSavedQuery() {
-    await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.testSubjects.existOrFail('savedQueryFormSaveButton');
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('savedQueryFormSaveButton')) {
+        await this.testSubjects.click('savedQueryFormSaveButton');
+      }
+      await this.testSubjects.missingOrFail('queryBarMenuPanel');
+    });
   }
 
   public async deleteSavedQuery() {
-    await this.testSubjects.click('delete-saved-query-TEST-button');
+    await this.testSubjects.click('delete-saved-query-button');
   }
 
   public async confirmDeletionOfSavedQuery() {

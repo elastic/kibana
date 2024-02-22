@@ -18,8 +18,9 @@ import {
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
 import { CustomThresholdAlertFields } from '../../types';
-import { ExpressionChart } from '../expression_chart';
-import AlertDetailsAppSection, { CustomThresholdAlert } from './alert_details_app_section';
+import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { CustomThresholdAlert } from '../types';
+import AlertDetailsAppSection from './alert_details_app_section';
 import { Groups } from './groups';
 import { Tags } from './tags';
 
@@ -28,6 +29,17 @@ const mockedChartStartContract = chartPluginMock.createStartContract();
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertActiveTimeRangeAnnotation: () => {},
+  useAlertsHistory: () => ({
+    data: {
+      histogramTriggeredAlerts: [
+        { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 2 },
+      ],
+      avgTimeToRecoverUS: 0,
+      totalTriggeredAlerts: 2,
+    },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
@@ -37,8 +49,8 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('../expression_chart', () => ({
-  ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
+  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
 jest.mock('../../../../utils/kibana_react', () => ({
@@ -86,7 +98,7 @@ describe('AlertDetailsAppSection', () => {
   it('should render rule and alert data', async () => {
     const result = renderComponent();
 
-    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(3);
+    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(6);
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
@@ -141,11 +153,37 @@ describe('AlertDetailsAppSection', () => {
   });
 
   it('should render annotations', async () => {
-    const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
-    (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
-    const alertDetailsAppSectionComponent = renderComponent();
+    const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
+    (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
+    const alertDetailsAppSectionComponent = renderComponent(
+      {},
+      { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
+    );
 
-    expect(alertDetailsAppSectionComponent.getAllByTestId('ExpressionChart').length).toBe(3);
-    expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
+    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(6);
+    expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('should render title on condition charts', async () => {
+    const result = renderComponent();
+
+    expect(result.getByTestId('chartTitle-0').textContent).toBe(
+      'Equation result for count (all documents)'
+    );
+    expect(result.getByTestId('chartTitle-1').textContent).toBe(
+      'Equation result for max (system.cpu.user.pct)'
+    );
+    expect(result.getByTestId('chartTitle-2').textContent).toBe(
+      'Equation result for min (system.memory.used.pct)'
+    );
+    expect(result.getByTestId('chartTitle-3').textContent).toBe(
+      'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct...'
+    );
+    expect(result.getByTestId('chartTitle-4').textContent).toBe(
+      'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct)'
+    );
+    expect(result.getByTestId('chartTitle-5').textContent).toBe(
+      'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct)'
+    );
   });
 });

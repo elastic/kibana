@@ -18,13 +18,21 @@ export interface UseGetPreviewData {
   isError: boolean;
 }
 
-export function useGetPreviewData(
-  isValid: boolean,
-  indicator: Indicator,
-  range: { start: number; end: number },
-  objective?: Objective,
-  filter?: string
-): UseGetPreviewData {
+export function useGetPreviewData({
+  isValid,
+  range,
+  indicator,
+  objective,
+  groupBy,
+  instanceId,
+}: {
+  isValid: boolean;
+  groupBy?: string;
+  instanceId?: string;
+  objective?: Objective;
+  indicator: Indicator;
+  range: { start: number; end: number };
+}): UseGetPreviewData {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
@@ -34,9 +42,11 @@ export function useGetPreviewData(
         '/internal/observability/slos/_preview',
         {
           body: JSON.stringify({
-            indicator: { ...indicator, params: { ...indicator.params, filter } },
+            indicator,
             range,
-            ...((objective && { objective }) || {}),
+            groupBy,
+            instanceId,
+            ...(objective ? { objective } : null),
           }),
           signal,
         }

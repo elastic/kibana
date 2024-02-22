@@ -7,6 +7,6 @@
 
 const PREFIX = 'securitySolutionAssignees';
 
-/* Apply Panel */
+export const ASSIGNEES_SELECTABLE_TEST_ID = `${PREFIX}Selectable`;
 export const ASSIGNEES_APPLY_PANEL_TEST_ID = `${PREFIX}ApplyPanel`;
 export const ASSIGNEES_APPLY_BUTTON_TEST_ID = `${PREFIX}ApplyButton`;

@@ -12,6 +12,7 @@ export interface EmbeddableSloProps {
   sloInstanceId: string | undefined;
   reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
+  showAllGroupByInstances?: boolean;
 }
 
 export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;

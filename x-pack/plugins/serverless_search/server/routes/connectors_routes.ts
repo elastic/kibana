@@ -12,7 +12,7 @@ import {
   deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
-  fetchSyncJobsByConnectorId,
+  fetchSyncJobs,
   startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
@@ -51,12 +51,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchConnectorById(client.asCurrentUser, request.params.connectorId);
+      const connector = await fetchConnectorById(client.asCurrentUser, request.params.connectorId);
 
-      return result
+      return connector
         ? response.ok({
             body: {
-              connector: result.value,
+              connector,
             },
             headers: { 'content-type': 'application/json' },
           })
@@ -323,7 +323,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchSyncJobsByConnectorId(
+      const result = await fetchSyncJobs(
         client.asCurrentUser,
         request.params.connectorId,
         request.query.from || 0,

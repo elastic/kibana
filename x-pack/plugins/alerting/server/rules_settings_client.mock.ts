@@ -23,14 +23,10 @@ const createRulesSettingsClientMock = () => {
   const flappingMocked: RulesSettingsFlappingClientMock = {
     get: jest.fn().mockReturnValue(DEFAULT_FLAPPING_SETTINGS),
     update: jest.fn(),
-    getSettings: jest.fn(),
-    createSettings: jest.fn(),
   };
   const queryDelayMocked: RulesSettingsQueryDelayClientMock = {
     get: jest.fn().mockReturnValue(DEFAULT_QUERY_DELAY_SETTINGS),
     update: jest.fn(),
-    getSettings: jest.fn(),
-    createSettings: jest.fn(),
   };
   const mocked: RulesSettingsClientMock = {
     flapping: jest.fn().mockReturnValue(flappingMocked),

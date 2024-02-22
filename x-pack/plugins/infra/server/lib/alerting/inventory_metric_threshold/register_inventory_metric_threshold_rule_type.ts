@@ -91,24 +91,32 @@ export async function registerInventoryThresholdRuleType(
     return;
   }
 
+  const paramsSchema = schema.object(
+    {
+      criteria: schema.arrayOf(condition),
+      nodeType: schema.string() as Type<InventoryItemType>,
+      filterQuery: schema.maybe(
+        schema.string({ validate: validateIsStringElasticsearchJSONFilter })
+      ),
+      sourceId: schema.string(),
+      alertOnNoData: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'allow' }
+  );
+
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
       defaultMessage: 'Inventory',
     }),
     validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(condition),
-          nodeType: schema.string() as Type<InventoryItemType>,
-          filterQuery: schema.maybe(
-            schema.string({ validate: validateIsStringElasticsearchJSONFilter })
-          ),
-          sourceId: schema.string(),
-          alertOnNoData: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'allow' }
-      ),
+      params: paramsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: paramsSchema,
+      },
     },
     defaultActionGroupId: FIRED_ACTIONS_ID,
     doesSetRecoveryContext: true,

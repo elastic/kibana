@@ -7,3 +7,4 @@
 
 export * from './indicator';
 export * from './percentage_indicator';
+export * from './helpers';

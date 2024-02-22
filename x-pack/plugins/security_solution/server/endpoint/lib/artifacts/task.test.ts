@@ -19,7 +19,7 @@ import { getMockArtifacts } from './mocks';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-describe('task', () => {
+describe('Endpoint artifact packager task', () => {
   const MOCK_TASK_INSTANCE = {
     id: `${ManifestTaskConstants.TYPE}:1.0.0`,
     runAt: new Date(),
@@ -170,7 +170,7 @@ describe('task', () => {
 
       await runTask(manifestManager);
 
-      expect(logger.info).toHaveBeenCalledWith('recovering from invalid internal manifest');
+      expect(logger.warn).toHaveBeenCalledWith('recovering from invalid internal manifest');
       expect(logger.error).toHaveBeenNthCalledWith(1, expect.any(InvalidInternalManifestError));
     });
 

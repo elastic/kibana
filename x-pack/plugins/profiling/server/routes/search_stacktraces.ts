@@ -13,11 +13,13 @@ export async function searchStackTraces({
   filter,
   sampleSize,
   durationSeconds,
+  showErrorFrames,
 }: {
   client: ProfilingESClient;
   filter: ProjectTimeQuery;
   sampleSize: number;
   durationSeconds: number;
+  showErrorFrames: boolean;
 }) {
   const response = await client.profilingStacktraces({
     query: filter,
@@ -25,5 +27,5 @@ export async function searchStackTraces({
     durationSeconds,
   });
 
-  return decodeStackTraceResponse(response);
+  return decodeStackTraceResponse(response, showErrorFrames);
 }

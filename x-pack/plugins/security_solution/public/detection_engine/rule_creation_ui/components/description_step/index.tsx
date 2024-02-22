@@ -56,7 +56,12 @@ import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
-import { isThresholdRule, isQueryRule } from '../../../../../common/detection_engine/utils';
+import {
+  isThresholdRule,
+  isSuppressionRuleConfiguredWithMissingFields,
+  isSuppressionRuleConfiguredWithGroupBy,
+  isSuppressionRuleConfiguredWithDuration,
+} from '../../../../../common/detection_engine/utils';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -206,7 +211,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveGroupByFields = isQueryRule(ruleType);
+
+    const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
     if (!ruleCanHaveGroupByFields) {
       return [];
     }
@@ -216,7 +222,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByDuration') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveDuration = isQueryRule(ruleType) || isThresholdRule(ruleType);
+
+    const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
     if (!ruleCanHaveDuration) {
       return [];
     }
@@ -239,7 +246,9 @@ export const getDescriptionItem = (
     }
   } else if (field === 'suppressionMissingFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveSuppressionMissingFields = isQueryRule(ruleType);
+    const ruleCanHaveSuppressionMissingFields =
+      isSuppressionRuleConfiguredWithMissingFields(ruleType);
+
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }

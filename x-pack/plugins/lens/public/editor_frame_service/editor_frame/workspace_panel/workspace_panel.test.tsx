@@ -62,7 +62,7 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
 
 const mockVisualization = createMockVisualization();
 const mockVisualization2 = createMockVisualization();
-const mockDatasource = createMockDatasource('testDatasource');
+const mockDatasource = createMockDatasource();
 
 let expressionRendererMock = createExpressionRendererMock();
 const trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;

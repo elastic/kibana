@@ -9,9 +9,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 import expect from 'expect';
 
 import type SuperTest from 'supertest';
+import { createRuleWithExceptionEntries } from '../../../../utils';
 import {
   createRule,
-  createRuleWithExceptionEntries,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
@@ -19,7 +19,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import {
   createListsIndex,
   deleteAllExceptions,

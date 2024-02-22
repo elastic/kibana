@@ -7,6 +7,7 @@ FldList [
     "conflictDescriptions": undefined,
     "count": 5,
     "customLabel": "A Runtime Field",
+    "defaultFormatter": undefined,
     "esTypes": Array [
       "keyword",
     ],

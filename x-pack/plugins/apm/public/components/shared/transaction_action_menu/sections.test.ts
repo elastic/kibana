@@ -15,7 +15,7 @@ import {
 } from '../../routing/apm_route_config';
 import {
   logsLocatorsMock,
-  observabilityLogExplorerLocatorsMock,
+  observabilityLogsExplorerLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 const apmRouter = {
@@ -24,7 +24,7 @@ const apmRouter = {
     `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
 
-const { allDatasetsLocator } = observabilityLogExplorerLocatorsMock;
+const { allDatasetsLocator } = observabilityLogsExplorerLocatorsMock;
 const { nodeLogsLocator, traceLogsLocator } = logsLocatorsMock;
 
 const expectLogsLocatorsToBeCalled = () => {

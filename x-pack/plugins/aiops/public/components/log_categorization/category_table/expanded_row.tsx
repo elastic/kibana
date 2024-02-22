@@ -15,9 +15,10 @@ import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../fo
 
 interface ExpandedRowProps {
   category: Category;
+  displayExamples?: boolean;
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ category }) => {
+export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = true }) => {
   const { euiTheme } = useEuiTheme();
   const cssExpandedRow = css({
     marginRight: euiTheme.size.xxl,
@@ -44,13 +45,15 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ category }) => {
         <FormattedRegex category={category} />
       </Section>
 
-      <Section
-        title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.examples', {
-          defaultMessage: 'Examples',
-        })}
-      >
-        <FormattedPatternExamples category={category} />
-      </Section>
+      {displayExamples ? (
+        <Section
+          title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.examples', {
+            defaultMessage: 'Examples',
+          })}
+        >
+          <FormattedPatternExamples category={category} />
+        </Section>
+      ) : null}
     </div>
   );
 };

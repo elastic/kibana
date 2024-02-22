@@ -25,7 +25,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
@@ -93,6 +93,7 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 /**
@@ -193,13 +194,10 @@ export interface PluginStart {
   setOnboardingPageSettings: OnboardingPageService;
 }
 
-export interface AppObservableLibs {
-  kibana: CoreStart;
-}
-
 export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
+
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;

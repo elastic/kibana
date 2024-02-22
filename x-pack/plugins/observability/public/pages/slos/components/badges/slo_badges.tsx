@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { SloTagsList } from '../common/slo_tags_list';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
@@ -41,11 +42,12 @@ export function SloBadges({
       ) : (
         <>
           <SloStatusBadge slo={slo} />
+          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
           <SloGroupByBadge slo={slo} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
-          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
           <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
+          <SloTagsList tags={slo.tags} numberOfTagsToDisplay={1} color="default" ignoreEmpty />
         </>
       )}
     </EuiFlexGroup>

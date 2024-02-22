@@ -2280,7 +2280,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -4223,6 +4223,17 @@
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisSavedObject.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5674,7 +5685,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attr>; }>"
+              "<Attr>; meta?: undefined; }>"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -5746,7 +5757,7 @@
                 "section": "def-common.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
-              "<Attr>; }>"
+              "<Attr>; meta?: undefined; }>"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -6821,15 +6832,39 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; parentApi: (",
+          "<boolean | undefined>; parentApi: (Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
           },
-          " & Partial<Pick<",
+          " & { addNewPanel: <ApiType extends unknown = unknown>(panel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>; registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -6909,7 +6944,15 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          ">; disableTriggers: boolean; getExplicitInput: () => ",
+          ">; disableTriggers: boolean; savedObjectId: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6917,7 +6960,47 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; destroy: () => void; getQuery: () => ",
+          "; getDescription: () => string; localFilters: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; localQuery: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; destroy: () => void; getQuery: () => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6941,47 +7024,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; onEdit: () => void; localQuery: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined>; localFilters: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined>; onPhaseChange: ",
+          "[]; onEdit: () => void; onPhaseChange: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -8738,7 +8781,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -13101,6 +13144,20 @@
             "description": [],
             "signature": [
               "{ error: string; message: string; statusCode: number; metadata?: Record<string, unknown> | undefined; } | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,

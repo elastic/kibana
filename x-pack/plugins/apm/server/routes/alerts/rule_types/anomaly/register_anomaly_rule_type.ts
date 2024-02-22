@@ -82,6 +82,12 @@ export function registerAnomalyRuleType({
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: anomalyParamsSchema },
+      schemas: {
+        params: {
+          type: 'config-schema',
+          schema: anomalyParamsSchema,
+        },
+      },
       actionVariables: {
         context: [
           apmActionVariables.alertDetailsUrl,

@@ -15,6 +15,7 @@ import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
+import { ToolingLog } from '@kbn/tooling-log';
 import { retry } from '../../retry';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
@@ -35,12 +36,14 @@ export const installPrebuiltRulesFleetPackage = async ({
   version,
   overrideExistingPackage,
   retryService,
+  log,
 }: {
   es: Client;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   version?: string;
   overrideExistingPackage: boolean;
   retryService: RetryService;
+  log: ToolingLog;
 }): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
@@ -59,8 +62,10 @@ export const installPrebuiltRulesFleetPackage = async ({
         return testResponse.body;
       },
       retryService,
+      utilityName: installPrebuiltRulesFleetPackage.name,
       retries: MAX_RETRIES,
       timeout: ATTEMPT_TIMEOUT,
+      log,
     });
 
     await refreshSavedObjectIndices(es);
@@ -91,8 +96,10 @@ export const installPrebuiltRulesFleetPackage = async ({
         return body;
       },
       retryService,
+      utilityName: installPrebuiltRulesFleetPackage.name,
       retries: MAX_RETRIES,
       timeout: ATTEMPT_TIMEOUT,
+      log,
     });
 
     await refreshSavedObjectIndices(es);

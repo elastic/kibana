@@ -673,7 +673,13 @@
         "description": [],
         "signature": [
           "{ staticAssets: ",
-          "InternalStaticAssets",
+          {
+            "pluginId": "@kbn/core-http-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerInternalPluginApi",
+            "section": "def-common.InternalStaticAssets",
+            "text": "InternalStaticAssets"
+          },
           "; isListening: jest.MockInstance<boolean, [], unknown>; basePath: ",
           {
             "pluginId": "@kbn/core-http-server",

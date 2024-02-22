@@ -32,10 +32,10 @@ import {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
-  ExternalCallback,
   FleetStartContract,
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
+  ExternalCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
@@ -62,9 +62,6 @@ const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> =>
       fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
     },
     fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    esIndexPatternService: {
-      getESIndexPattern: jest.fn().mockResolvedValue(undefined),
-    },
     // @ts-expect-error 2322
     agentService: createMockAgentService(),
     // @ts-expect-error 2322

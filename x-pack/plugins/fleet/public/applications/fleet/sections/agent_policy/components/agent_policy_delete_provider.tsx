@@ -12,15 +12,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useHistory } from 'react-router-dom';
 
-import { AGENTS_PREFIX } from '../../../constants';
+import { SO_SEARCH_LIMIT } from '../../../../../constants';
+
 import {
   useStartServices,
   useConfig,
-  sendRequest,
   useLink,
   useDeleteAgentPolicyMutation,
+  sendGetAgents,
 } from '../../../hooks';
-import { API_VERSIONS } from '../../../../../../common/constants';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
@@ -111,15 +111,13 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       return;
     }
     setIsLoadingAgentsCount(true);
-    const { data } = await sendRequest<{ total: number }>({
-      path: `/api/fleet/agents`,
-      method: 'get',
-      query: {
-        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyToCheck}`,
-      },
-      version: API_VERSIONS.public.v1,
+    // filtering out the unenrolled agents assigned to this policy
+    const agents = await sendGetAgents({
+      showInactive: true,
+      kuery: `policy_id:"${agentPolicyToCheck}" and not status: unenrolled`,
+      perPage: SO_SEARCH_LIMIT,
     });
-    setAgentsCount(data?.total || 0);
+    setAgentsCount(agents.data?.total ?? 0);
     setIsLoadingAgentsCount(false);
   };
 
@@ -168,6 +166,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
         ) : agentsCount ? (
           <EuiCallOut
             color="danger"
+            iconType="warning"
             title={i18n.translate(
               'xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsTitle',
               {

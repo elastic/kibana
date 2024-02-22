@@ -20,8 +20,8 @@ import Expressions from './custom_threshold_rule_expression';
 import { AlertParams, CustomThresholdPrefillOptions } from './types';
 
 jest.mock('../../utils/kibana_react');
-jest.mock('./components/preview_chart/preview_chart', () => ({
-  PreviewChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+jest.mock('./components/rule_condition_chart/rule_condition_chart', () => ({
+  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
 const useKibanaMock = useKibana as jest.Mock;

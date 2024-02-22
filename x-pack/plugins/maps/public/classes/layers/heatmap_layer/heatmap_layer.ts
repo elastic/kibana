@@ -11,6 +11,7 @@ import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
+import { hasESSourceMethod } from '../../sources/es_source';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   syncBoundsData,
@@ -236,11 +237,15 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   getIndexPatternIds() {
-    return this.getSource().getIndexPatternIds();
+    const source = this.getSource();
+    return hasESSourceMethod(source, 'getIndexPatternId') ? [source.getIndexPatternId()] : [];
   }
 
   getQueryableIndexPatternIds() {
-    return this.getSource().getQueryableIndexPatternIds();
+    const source = this.getSource();
+    return source.getApplyGlobalQuery() && hasESSourceMethod(source, 'getIndexPatternId')
+      ? [source.getIndexPatternId()]
+      : [];
   }
 
   async getLicensedFeatures() {

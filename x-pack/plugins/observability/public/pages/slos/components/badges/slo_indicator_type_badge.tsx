@@ -15,6 +15,7 @@ import {
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
@@ -30,6 +31,8 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
     http: { basePath },
   } = useKibana().services;
 
+  const { onStateChange } = useUrlSearchState();
+
   const handleNavigateToApm = () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(slo);
     if (url) {
@@ -40,7 +43,21 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
+        <EuiBadge
+          color={color ?? euiLightVars.euiColorDisabled}
+          onClick={() => {
+            onStateChange({
+              kqlQuery: `slo.indicator.type: ${slo.indicator.type}`,
+            });
+          }}
+          onClickAriaLabel={i18n.translate(
+            'xpack.observability.slo.indicatorTypeBadge.clickToFilter',
+            {
+              defaultMessage: 'Click to filter by {indicatorType} SLOs',
+              values: { indicatorType: toIndicatorTypeLabel(slo.indicator.type) },
+            }
+          )}
+        >
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>

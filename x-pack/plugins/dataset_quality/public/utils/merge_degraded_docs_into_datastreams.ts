@@ -21,6 +21,6 @@ export function mergeDegradedStatsIntoDataStreams(
 
   return dataStreamStats?.map((dataStream) => ({
     ...dataStream,
-    degradedDocs: degradedMap[dataStream.name],
+    degradedDocs: degradedMap[dataStream.rawName],
   }));
 }

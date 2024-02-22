@@ -84,9 +84,36 @@ export function jobsProvider(
     });
   }
 
-  async function deleteJobs(jobIds: string[], deleteUserAnnotations = false) {
+  async function deleteJobs(
+    jobIds: string[],
+    deleteUserAnnotations = false,
+    deleteAlertingRules = false
+  ) {
     const results: Results = {};
     const datafeedIds = await getDatafeedIdsByJobId();
+
+    if (deleteAlertingRules && rulesClient) {
+      // Check what jobs have associated alerting rules
+      const anomalyDetectionAlertingRules = await rulesClient.find<MlAnomalyDetectionAlertParams>({
+        options: {
+          filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}`,
+          perPage: 10000,
+        },
+      });
+
+      const jobIdsSet = new Set(jobIds);
+      const ruleIds: string[] = anomalyDetectionAlertingRules.data
+        .filter((rule) => {
+          return jobIdsSet.has(rule.params.jobSelection.jobIds[0]);
+        })
+        .map((rule) => rule.id);
+
+      if (ruleIds.length > 0) {
+        await rulesClient.bulkDeleteRules({
+          ids: ruleIds,
+        });
+      }
+    }
 
     for (const jobId of jobIds) {
       try {

@@ -14,6 +14,7 @@ import {
   fetchHistoricalSummaryParamsSchema,
   findSloDefinitionsParamsSchema,
   findSLOParamsSchema,
+  findSLOGroupsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
@@ -34,6 +35,7 @@ import {
   GetSLO,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
+  FindSLOGroups,
 } from '../../services/slo';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
@@ -359,7 +361,6 @@ const findSLORoute = createObservabilityServerRoute({
 
     const spaceId =
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -368,6 +369,25 @@ const findSLORoute = createObservabilityServerRoute({
 
     const response = await findSLO.execute(params?.query ?? {});
 
+    return response;
+  },
+});
+
+const findSLOGroupsRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/api/observability/slos/_groups',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  params: findSLOGroupsParamsSchema,
+  handler: async ({ context, request, params, logger, dependencies }) => {
+    await assertPlatinumLicense(context);
+    const spaceId =
+      (await dependencies.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+    const coreContext = context.core;
+    const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
+    const findSLOGroups = new FindSLOGroups(esClient, logger, spaceId);
+    const response = await findSLOGroups.execute(params?.query ?? {});
     return response;
   },
 });
@@ -533,4 +553,5 @@ export const sloRouteRepository = {
   ...getPreviewData,
   ...getSLOInstancesRoute,
   ...resetSLORoute,
+  ...findSLOGroupsRoute,
 };

@@ -34,7 +34,7 @@ export interface DashboardPluginInternalFunctions {
    * A temporary backdoor to allow some actions access to the Dashboard panels. This should eventually be replaced with a generic version
    * on the PresentationContainer interface.
    */
-  getDashboardPanelFromId: (id: string) => DashboardPanelState;
+  getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
 
   /**
    * A temporary backdoor to allow the filters notification popover to get the data views directly from the dashboard container

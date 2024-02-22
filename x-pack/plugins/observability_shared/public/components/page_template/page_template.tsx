@@ -110,7 +110,6 @@ export function ObservabilityPageTemplate({
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const { services } = useKibana();
 
@@ -198,45 +197,39 @@ export function ObservabilityPageTemplate({
       >
         {({ isTourVisible }) => {
           return (
-            <div ref={containerRef}>
-              <KibanaPageTemplate
-                restrictWidth={false}
-                {...pageTemplateProps}
-                solutionNav={
-                  showSolutionNav
-                    ? {
-                        icon: 'logoObservability',
-                        items: sideNavItems,
-                        name: sideNavTitle,
-                        // Only false if tour is active
-                        canBeCollapsed: isTourVisible === false,
-                      }
-                    : undefined
-                }
-              >
-                <KibanaErrorBoundaryProvider analytics={services.analytics}>
-                  <KibanaErrorBoundary>
-                    <KibanaPageTemplate.Section
-                      component="div"
-                      alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                      {...pageSectionProps}
-                    >
-                      {topSearchBar && (
-                        <SearchBarPortal containerRef={containerRef}>
-                          {topSearchBar}
-                        </SearchBarPortal>
-                      )}
-                      {children}
-                    </KibanaPageTemplate.Section>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>
-                {bottomBar && (
-                  <KibanaPageTemplate.BottomBar {...bottomBarProps}>
-                    {bottomBar}
-                  </KibanaPageTemplate.BottomBar>
-                )}
-              </KibanaPageTemplate>
-            </div>
+            <KibanaPageTemplate
+              restrictWidth={false}
+              {...pageTemplateProps}
+              solutionNav={
+                showSolutionNav
+                  ? {
+                      icon: 'logoObservability',
+                      items: sideNavItems,
+                      name: sideNavTitle,
+                      // Only false if tour is active
+                      canBeCollapsed: isTourVisible === false,
+                    }
+                  : undefined
+              }
+            >
+              <KibanaErrorBoundaryProvider analytics={services.analytics}>
+                <KibanaErrorBoundary>
+                  <KibanaPageTemplate.Section
+                    component="div"
+                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                    {...pageSectionProps}
+                  >
+                    {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
+                    {children}
+                  </KibanaPageTemplate.Section>
+                </KibanaErrorBoundary>
+              </KibanaErrorBoundaryProvider>
+              {bottomBar && (
+                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+                  {bottomBar}
+                </KibanaPageTemplate.BottomBar>
+              )}
+            </KibanaPageTemplate>
           );
         }}
       </ObservabilityTour>

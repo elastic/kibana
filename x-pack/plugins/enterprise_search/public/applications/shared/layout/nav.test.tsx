@@ -9,6 +9,10 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
+jest.mock('../../enterprise_search_content/components/search_index/indices/indices_nav', () => ({
+  useIndicesNav: () => [],
+}));
+
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { EuiSideNavItemType } from '@elastic/eui';
@@ -38,7 +42,7 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/content/search_indices',
         id: 'search_indices',
-        items: undefined,
+        items: [],
         name: 'Indices',
       },
       {

@@ -17,10 +17,21 @@ interface SloListFilter {
   lastRefresh?: number;
 }
 
+interface SloGroupListFilter {
+  page: number;
+  perPage: number;
+  groupBy: string;
+  kqlQuery: string;
+  filters: string;
+  lastRefresh?: number;
+}
+
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
   list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
+  group: (filters: SloGroupListFilter) => [...sloKeys.groups(), filters] as const,
+  groups: () => [...sloKeys.all, 'group'] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,

@@ -115,10 +115,11 @@ export function validateName(value: string) {
 
 export function useFleetServerHostsForm(
   fleetServerHost: FleetServerHost | undefined,
-  onSuccess: () => void
+  onSuccess: () => void,
+  defaultFleetServerHost?: FleetServerHost
 ) {
   const [isLoading, setIsLoading] = useState(false);
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   const { confirm } = useConfirmModal();
   const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
 
@@ -128,11 +129,18 @@ export function useFleetServerHostsForm(
     isPreconfigured || fleetServerHost?.is_default
   );
 
+  const isServerless = cloud?.isServerlessEnabled;
+  // Set the host URLs to default for new Fleet server host in serverless.
+  const hostUrlsDefaultValue =
+    isServerless && !fleetServerHost?.host_urls
+      ? defaultFleetServerHost?.host_urls || []
+      : fleetServerHost?.host_urls || [];
+  const hostUrlsDisabled = isPreconfigured || isServerless;
   const hostUrlsInput = useComboInput(
     'hostUrls',
-    fleetServerHost?.host_urls || [],
+    hostUrlsDefaultValue,
     validateFleetServerHosts,
-    isPreconfigured
+    hostUrlsDisabled
   );
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isPreconfigured);
 

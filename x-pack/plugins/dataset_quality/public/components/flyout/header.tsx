@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { flyoutOpenInLogExplorerText } from '../../../common/translations';
-import { useLinkToLogExplorer } from '../../hooks';
+import { flyoutOpenInLogsExplorerText } from '../../../common/translations';
+import { useLinkToLogsExplorer } from '../../hooks';
 import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { IntegrationIcon } from '../common';
 
@@ -25,7 +25,7 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
   const { integration, title } = dataStreamStat;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
-  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
 
   return (
     <EuiFlyoutHeader hasBorder>
@@ -55,8 +55,8 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
             justifyContent="flexEnd"
             alignItems="center"
           >
-            <EuiButton size="s" {...logExplorerLinkProps} iconType="logoObservability">
-              {flyoutOpenInLogExplorerText}
+            <EuiButton size="s" {...logsExplorerLinkProps} iconType="logoObservability">
+              {flyoutOpenInLogsExplorerText}
             </EuiButton>
           </EuiFlexGroup>
         </EuiFlexItem>

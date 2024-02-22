@@ -45,7 +45,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
-    elasticStackGetStarted: `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
+    elasticStackGetStarted: isServerless
+      ? `${SERVERLESS_DOCS}`
+      : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -171,10 +173,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       connectorsMySQL: `${ENTERPRISE_SEARCH_DOCS}connectors-mysql.html`,
       connectorsNative: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-native`,
       connectorsNetworkDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-network-drive.html`,
+      connectorsNotion: `${ENTERPRISE_SEARCH_DOCS}connectors-notion.html`,
       connectorsOneDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-onedrive.html`,
       connectorsOracle: `${ENTERPRISE_SEARCH_DOCS}connectors-oracle.html`,
       connectorsOutlook: `${ENTERPRISE_SEARCH_DOCS}connectors-outlook.html`,
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
+      connectorsRedis: `${ENTERPRISE_SEARCH_DOCS}connectors-redis.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
       connectorsSalesforce: `${ENTERPRISE_SEARCH_DOCS}connectors-salesforce.html`,
       connectorsServiceNow: `${ENTERPRISE_SEARCH_DOCS}connectors-servicenow.html`,
