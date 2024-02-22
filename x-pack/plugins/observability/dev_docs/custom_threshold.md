@@ -30,7 +30,7 @@ Get help with the data forge tool: `node x-pack/scripts/data_forge.js --help`
 
   <img src="./images/data_forge_custom_threshold_rule_cpu.png" width="500"/>
 
-#### With synthtrace
+### With synthtrace
 
 > [!TIP]
 > The following commands uses [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace) to generate some data for testing Custom threshold rule.
