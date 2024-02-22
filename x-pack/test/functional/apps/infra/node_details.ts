@@ -306,10 +306,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             it('can be filtered to only show "untracked" alerts using the filter button', async () => {
               await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_UNTRACKED);
-              await retry.try(async () => {
-                const tableRows = await observability.alerts.common.getTableCellsInRows();
-                expect(tableRows.length).to.be(0);
-              });
+              await observability.alerts.common.getNoDataStateOrFail();
               const pageUrl = await browser.getCurrentUrl();
               expect(pageUrl).to.contain('alertStatus%3Auntracked');
             });
