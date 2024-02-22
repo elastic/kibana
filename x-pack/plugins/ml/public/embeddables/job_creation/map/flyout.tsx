@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { MapApi } from '@kbn/maps-plugin/public';
 import { Layer } from './map_vis_layer_selection_flyout/layer';
 import {
@@ -63,7 +64,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
           <FormattedMessage
             id="xpack.ml.embeddables.geoJobFlyout.secondTitle"
             defaultMessage="Create an anomaly detection lat_long job from map visualization {title}."
-            values={{ title: embeddable.panelTitle?.value ?? '' }}
+            values={{ title: getPanelTitle(embeddable) ?? '' }}
           />
         </EuiText>
       </EuiFlyoutHeader>

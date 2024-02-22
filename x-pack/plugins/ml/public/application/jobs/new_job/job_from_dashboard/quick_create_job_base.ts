@@ -12,6 +12,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
@@ -248,7 +249,7 @@ export class QuickJobCreatorBase {
     const url = `${location.app}${location.path}`;
     const urlName = i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
       defaultMessage: 'Open {dashboardTitle}',
-      values: { dashboardTitle: dashboard.panelTitle?.value ?? 'dashboard' },
+      values: { dashboardTitle: getPanelTitle(dashboard) ?? 'dashboard' },
     });
 
     return { url_name: urlName, url_value: url, time_range: 'auto' };
