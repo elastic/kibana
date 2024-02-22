@@ -10,7 +10,9 @@ import { JobId } from '@kbn/reporting-common/types';
 
 // Reading and writing to the local storage must be atomic,
 // i.e. performed in a single operation. This storage queue
-// allows operations to process one at a time.
+// Operations on the localStorage key can happen from various
+// parts of code. Using a queue to manage async operations allows
+// operations to process one at a time
 let operationQueue = Promise.resolve();
 async function addToQueue(func: (error: Error | null) => void) {
   operationQueue = operationQueue.then(() => func(null)).catch(func);

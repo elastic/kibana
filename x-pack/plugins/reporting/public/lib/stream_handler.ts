@@ -175,7 +175,7 @@ export class ReportingNotifierStreamHandler {
         }
 
         // refresh the storage of pending job IDs, minus
-        // completed and failed job IDs
+        // the newly completed and failed jobs
         await setPendingJobIds(newPending);
 
         return { completed: newCompleted, failed: newFailed };
