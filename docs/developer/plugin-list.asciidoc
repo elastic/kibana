@@ -161,7 +161,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -700,7 +700,7 @@ Elastic.
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_shared/README.md[observabilityShared]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_shared/README.md[observabilityShared]
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 

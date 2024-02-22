@@ -577,7 +577,7 @@ x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-m
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/plugins/observability @elastic/obs-ux-management-team
-x-pack/plugins/observability_shared @elastic/observability-ui
+x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -1093,7 +1093,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
-/x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
+/x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
 
 # Observability settings
@@ -1570,7 +1570,7 @@ x-pack/plugins/translations/translations
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
-x-pack/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
 packages/react @elastic/appex-sharedux
