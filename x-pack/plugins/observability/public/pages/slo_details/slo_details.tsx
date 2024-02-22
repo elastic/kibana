@@ -59,7 +59,7 @@ export function SloDetailsPage() {
     instanceId: sloInstanceId,
     shouldRefetch: isAutoRefreshing,
   });
-  const isCloningOrDeleting = Boolean(useIsMutating());
+  const isDeleting = Boolean(useIsMutating(['deleteSlo']));
 
   const [selectedTabId, setSelectedTabId] = useState(() => {
     const searchParams = new URLSearchParams(search);
@@ -109,7 +109,7 @@ export function SloDetailsPage() {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
-  const isPerformingAction = isLoading || isCloningOrDeleting;
+  const isPerformingAction = isLoading || isDeleting;
 
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);

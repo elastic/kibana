@@ -13,16 +13,10 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import {
-  createMockStore,
-  mockGlobalState,
-  mockIndexNames,
-  TestProviders,
-} from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
@@ -135,7 +129,7 @@ describe('GraphOverlay', () => {
       );
 
       expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(
-        mockGlobalState.sourcerer.defaultDataView.patternList
+        mockGlobalState.sourcerer.sourcererScopes.analyzer.selectedPatterns
       );
     });
   });
@@ -175,47 +169,6 @@ describe('GraphOverlay', () => {
 
       const overlayContainer = wrapper.getByTestId('overlayContainer');
       expect(overlayContainer).toHaveStyleRule('width', '100%');
-    });
-
-    test('it gets index pattern from Timeline data view', () => {
-      const mockedDefaultDataViewPattern = 'default-dataview-pattern';
-      render(
-        <TestProviders
-          store={createMockStore({
-            ...mockGlobalState,
-            timeline: {
-              ...mockGlobalState.timeline,
-              timelineById: {
-                [timelineId]: {
-                  ...mockGlobalState.timeline.timelineById[timelineId],
-                  graphEventId: 'definitely-not-null',
-                },
-              },
-            },
-            sourcerer: {
-              ...mockGlobalState.sourcerer,
-              defaultDataView: {
-                ...mockGlobalState.sourcerer.defaultDataView,
-                patternList: [mockedDefaultDataViewPattern],
-              },
-              sourcererScopes: {
-                ...mockGlobalState.sourcerer.sourcererScopes,
-                [SourcererScopeName.timeline]: {
-                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                  selectedPatterns: mockIndexNames,
-                },
-              },
-            },
-          })}
-        >
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
-        </TestProviders>
-      );
-
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual([
-        ...mockIndexNames.sort(),
-        mockedDefaultDataViewPattern,
-      ]);
     });
 
     test('it renders session view controls', () => {
