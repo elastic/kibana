@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { nodeCharts } from './node_charts';
+import { node } from './node';
 
 export const charts = {
-  nodeCharts,
+  node,
 } as const;

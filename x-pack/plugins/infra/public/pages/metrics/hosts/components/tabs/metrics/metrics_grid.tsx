@@ -19,20 +19,20 @@ export const MetricsGrid = () => {
   const { dataView } = useMetricsDataViewContext();
 
   const { value: charts = [] } = useAsync(async () => {
-    const { cpuCharts, diskCharts, memoryCharts, networkCharts } = await model.metrics.getCharts();
+    const { cpu, disk, memory, network } = await model.metrics.getCharts();
     return [
-      cpuCharts.xy.cpuUsage,
-      cpuCharts.xy.normalizedLoad1m,
-      memoryCharts.xy.memoryUsage,
-      memoryCharts.xy.memoryFree,
-      diskCharts.xy.diskUsage,
-      diskCharts.xy.diskSpaceAvailable,
-      diskCharts.xy.diskIORead,
-      diskCharts.xy.diskIOWrite,
-      diskCharts.xy.diskReadThroughput,
-      diskCharts.xy.diskWriteThroughput,
-      networkCharts.xy.rx,
-      networkCharts.xy.tx,
+      cpu.xy.cpuUsage,
+      cpu.xy.normalizedLoad1m,
+      memory.xy.memoryUsage,
+      memory.xy.memoryFree,
+      disk.xy.diskUsage,
+      disk.xy.diskSpaceAvailable,
+      disk.xy.diskIORead,
+      disk.xy.diskIOWrite,
+      disk.xy.diskReadThroughput,
+      disk.xy.diskWriteThroughput,
+      network.xy.rx,
+      network.xy.tx,
     ].map((chart) => ({
       ...chart,
       ...(dataView?.id

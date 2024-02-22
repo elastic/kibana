@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { cpuCharts } from './cpu_charts';
-import { diskCharts } from './disk_charts';
-import { memoryCharts } from './memory_charts';
-import { networkCharts } from './network_charts';
-import { logRateCharts } from './log_rate_charts';
+import { cpu } from './cpu';
+import { disk } from './disk';
+import { memory } from './memory';
+import { network } from './network';
+import { logRate } from './log_rate';
 import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
 
 export const charts = {
-  cpuCharts,
-  diskCharts,
-  memoryCharts,
-  networkCharts,
-  logRateCharts,
-  kubernetesNodeCharts: kubernetesNodeCharts.nodeCharts,
+  cpu,
+  disk,
+  memory,
+  network,
+  logRate,
+  kibernetesNode: kubernetesNodeCharts.node,
 } as const;
 
 export type HostCharts = typeof charts;
