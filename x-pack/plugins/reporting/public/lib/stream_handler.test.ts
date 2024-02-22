@@ -12,8 +12,7 @@ import { coreMock, docLinksServiceMock, themeServiceMock } from '@kbn/core/publi
 import { ReportApiJSON } from '@kbn/reporting-common/types';
 
 import { JobSummary } from '../types';
-import { Job } from './job';
-import { ReportingAPIClient } from './reporting_api_client';
+import { Job, ReportingAPIClient } from '@kbn/reporting-public';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
 Object.defineProperty(window, 'sessionStorage', {
