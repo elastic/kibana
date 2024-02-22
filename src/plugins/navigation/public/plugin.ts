@@ -163,13 +163,8 @@ export class NavigationPublicPlugin
       project.initNavigation(of(navTree), { cloudUrls: cloud });
 
       return getSideNavComponent({
-        navProps: {
-          navigationTree$: navigationTreeUi$,
-        },
-        deps: {
-          core,
-          activeNodes$: activeNavigationNodes$,
-        },
+        navProps: { navigationTree$: navigationTreeUi$ },
+        deps: { core, activeNodes$: activeNavigationNodes$ },
       });
     };
 

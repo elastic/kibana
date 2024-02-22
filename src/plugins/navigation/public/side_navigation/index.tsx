@@ -8,6 +8,7 @@
 
 import React, { Suspense, type FC } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { SideNavComponent as SideNavComponentType } from '@kbn/core-chrome-browser';
 
 import type { Props as NavigationProps } from './side_navigation';
 
@@ -19,6 +20,6 @@ const SideNavComponent: FC<NavigationProps> = (props) => (
   </Suspense>
 );
 
-export const getSideNavComponent = (props: NavigationProps) => {
+export const getSideNavComponent = (props: NavigationProps): SideNavComponentType => {
   return () => <SideNavComponent {...props} />;
 };
