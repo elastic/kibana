@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { TimeRange } from '@kbn/es-query';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
@@ -26,46 +26,54 @@ interface AlertsOverviewProps {
   onRangeSelection?: HostsStateUpdater;
 }
 
-export const AlertsOverview = React.memo(
-  ({ assetName, dateRange, onLoaded, onRangeSelection }: AlertsOverviewProps) => {
-    const { services } = useKibanaContextForPlugin();
-    const [urlState, setUrlState] = useAssetDetailsUrlState();
-    const [alertStatus, setAlertStatus] = useState<AlertStatus>(
-      urlState?.alertStatus ?? ALERT_STATUS_ALL
-    );
+const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
 
-    const alertsEsQueryByStatus = useMemo(
-      () =>
-        createAlertsEsQuery({
-          dateRange,
-          hostNodeNames: [assetName],
-          status: alertStatus,
-        }),
-      [assetName, dateRange, alertStatus]
-    );
+export const AlertsOverview = ({
+  assetName,
+  dateRange,
+  onLoaded,
+  onRangeSelection,
+}: AlertsOverviewProps) => {
+  const { services } = useKibanaContextForPlugin();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const [alertStatus, setAlertStatus] = useState<AlertStatus>(
+    urlState?.alertStatus ?? ALERT_STATUS_ALL
+  );
+  const {
+    charts,
+    triggersActionsUi: {
+      getAlertsStateTable: AlertsStateTable,
+      alertsTableConfigurationRegistry,
+      getAlertSummaryWidget: AlertSummaryWidget,
+    },
+  } = services;
 
-    const alertsEsQuery = useMemo(
-      () =>
-        createAlertsEsQuery({
-          dateRange,
-          hostNodeNames: [assetName],
-          status: ALERT_STATUS_ALL,
-        }),
-      [assetName, dateRange]
-    );
+  const baseTheme = charts.theme.useChartsBaseTheme();
 
-    const summaryTimeRange = useSummaryTimeRange(dateRange);
+  const alertsEsQueryByStatus = useMemo(
+    () =>
+      createAlertsEsQuery({
+        dateRange,
+        hostNodeNames: [assetName],
+        status: alertStatus,
+      }),
+    [assetName, dateRange, alertStatus]
+  );
 
-    const {
-      charts,
-      triggersActionsUi: {
-        getAlertsStateTable: AlertsStateTable,
-        alertsTableConfigurationRegistry,
-        getAlertSummaryWidget: AlertSummaryWidget,
-      },
-    } = services;
+  const alertsEsQuery = useMemo(
+    () =>
+      createAlertsEsQuery({
+        dateRange,
+        hostNodeNames: [assetName],
+        status: ALERT_STATUS_ALL,
+      }),
+    [assetName, dateRange]
+  );
 
-    const onBrushEnd: BrushEndListener = (brushEvent) => {
+  const summaryTimeRange = useSummaryTimeRange(dateRange);
+
+  const onBrushEnd: BrushEndListener = useCallback(
+    (brushEvent) => {
       const { x } = brushEvent as XYBrushEvent;
       if (x && onRangeSelection) {
         const [start, end] = x;
@@ -75,49 +83,52 @@ export const AlertsOverview = React.memo(
 
         onRangeSelection({ dateRange: { from, to } });
       }
-    };
+    },
+    [onRangeSelection]
+  );
 
-    const chartProps = {
-      baseTheme: charts.theme.useChartsBaseTheme(),
+  const chartProps = useMemo(
+    () => ({
+      baseTheme,
       onBrushEnd,
-    };
+    }),
+    [onBrushEnd, baseTheme]
+  );
 
-    const handleAlertStatusChange = (id: AlertStatus) => {
-      setAlertStatus(id);
-      setUrlState({ alertStatus: id });
-    };
+  const handleAlertStatusChange = (id: AlertStatus) => {
+    setAlertStatus(id);
+    setUrlState({ alertStatus: id });
+  };
 
-    return (
-      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <AlertsStatusFilter onChange={handleAlertStatusChange} status={alertStatus} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem>
-          <AlertSummaryWidget
-            chartProps={chartProps}
-            featureIds={infraAlertFeatureIds}
-            filter={alertsEsQuery}
-            timeRange={summaryTimeRange}
-            onLoaded={onLoaded}
-            fullSize
-          />
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <AlertsStatusFilter onChange={handleAlertStatusChange} status={alertStatus} />
         </EuiFlexItem>
-        {
-          <EuiFlexItem>
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              id={'assetDetailsAlertsTable'}
-              configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={[...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY]}
-              showAlertStatusWithFlapping
-              query={alertsEsQueryByStatus}
-              pageSize={5}
-            />
-          </EuiFlexItem>
-        }
       </EuiFlexGroup>
-    );
-  }
-);
+      <EuiFlexItem>
+        <AlertSummaryWidget
+          chartProps={chartProps}
+          featureIds={infraAlertFeatureIds}
+          filter={alertsEsQuery}
+          timeRange={summaryTimeRange}
+          onLoaded={onLoaded}
+          fullSize
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <AlertsStateTable
+          alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+          id={'assetDetailsAlertsTable'}
+          configurationId={AlertConsumers.OBSERVABILITY}
+          featureIds={alertFeatureIds}
+          showAlertStatusWithFlapping
+          query={alertsEsQueryByStatus}
+          pageSize={5}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
