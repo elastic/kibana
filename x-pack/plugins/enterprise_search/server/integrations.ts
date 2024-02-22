@@ -299,9 +299,7 @@ export const registerEnterpriseSearchIntegrations = (
       icons: [
         {
           type: 'svg',
-          src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/onedrive.svg'
-          ),
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/onedrive.svg'),
         },
       ],
       shipper: 'enterprise_search',
