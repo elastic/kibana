@@ -23,16 +23,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../../shared/doc_links';
-import { KibanaLogic } from '../../../../shared/kibana';
-
-interface PlatinumLicensePopoverProps {
+interface NativePopoverProps {
   button: EuiPopoverProps['button'];
   closePopover: () => void;
   isPopoverOpen: boolean;
 }
 
-export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
+export const NativePopover: React.FC<NativePopoverProps> = ({
   button,
   isPopoverOpen,
   closePopover,
@@ -48,9 +45,12 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
       }}
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectConnector.upgradeTitle', {
-          defaultMessage: 'Upgrade to Elastic Platinum',
-        })}
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.newIndex.selectConnectore.nativePopover.title',
+          {
+            defaultMessage: 'Elastic Cloud',
+          }
+        )}
       </EuiPopoverTitle>
       <EuiText
         grow={false}
@@ -61,10 +61,10 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
       >
         <p>
           {i18n.translate(
-            'xpack.enterpriseSearch.content.newIndex.selectConnector.upgradeContent',
+            'xpack.enterpriseSearch.content.newIndex.selectConnectore.nativePopover.description',
             {
               defaultMessage:
-                'Connector clients sending data to a self-managed Elasticsearch instance require at least a Platinum license.',
+                'Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial.',
             }
           )}
         </p>
@@ -72,29 +72,15 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
       <EuiPopoverFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="popout" target="_blank" href={docLinks.licenseManagement}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.selectConnector.subscriptionButtonLabel',
-                {
-                  defaultMessage: 'Subscription plans',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="wrench"
-              iconSide="right"
-              onClick={() =>
-                KibanaLogic.values.navigateToUrl('/app/management/stack/license_management', {
-                  shouldNotCreateHref: true,
-                })
-              }
+              iconType="popout"
+              target="_blank"
+              href="https://www.elastic.co/cloud/cloud-trial-overview"
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.selectConnector.manageLicenseButtonLabel',
+                'xpack.enterpriseSearch.content.newIndex.selectConnector.cloudTrialButton',
                 {
-                  defaultMessage: 'Manage license',
+                  defaultMessage: 'Elastic Cloud Trial',
                 }
               )}
             </EuiButton>
