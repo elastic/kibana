@@ -5,31 +5,39 @@
  * 2.0.
  */
 
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import type { TimeRange } from '@kbn/es-query';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import type { TimeRange } from '@kbn/es-query';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { getGroupFilters } from './helpers/get_group';
+import { Group, SearchConfigurationWithExtractedReferenceType } from './types';
 import type { CustomThresholdExpressionMetric } from './types';
 
 export interface GetViewInAppUrlArgs {
+  searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
   dataViewId?: string;
   endedAt?: string;
-  startedAt?: string;
-  filter?: string;
+  groups?: Group[];
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
   metrics?: CustomThresholdExpressionMetric[];
+  startedAt?: string;
 }
 
 export const getViewInAppUrl = ({
   dataViewId,
   endedAt,
-  startedAt = new Date().toISOString(),
-  filter,
+  groups,
   logsExplorerLocator,
   metrics = [],
+  searchConfiguration,
+  startedAt = new Date().toISOString(),
 }: GetViewInAppUrlArgs) => {
   if (!logsExplorerLocator) return '';
 
+  const dataset = searchConfiguration?.index.title ?? dataViewId;
+  const searchConfigurationQuery = searchConfiguration?.query.query;
+  const searchConfigurationFilters = searchConfiguration?.filter || [];
+  const groupFilters = getGroupFilters(groups);
   const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
   timeRange.to = endedAt ? timeRange.to : 'now';
 
@@ -39,17 +47,18 @@ export const getViewInAppUrl = ({
   };
   const isOneCountConditionWithFilter =
     metrics.length === 1 && metrics[0].aggType === 'count' && metrics[0].filter;
-  if (filter && isOneCountConditionWithFilter) {
-    query.query = `${filter} and ${metrics[0].filter}`;
+  if (searchConfigurationQuery && isOneCountConditionWithFilter) {
+    query.query = `${searchConfigurationQuery} and ${metrics[0].filter}`;
   } else if (isOneCountConditionWithFilter) {
     query.query = metrics[0].filter!;
-  } else if (filter) {
-    query.query = filter;
+  } else if (searchConfigurationQuery) {
+    query.query = searchConfigurationQuery;
   }
 
   return logsExplorerLocator?.getRedirectUrl({
-    dataset: dataViewId,
+    dataset,
     timeRange,
     query,
+    filters: [...searchConfigurationFilters, ...groupFilters],
   });
 };
