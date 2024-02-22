@@ -7,18 +7,10 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPanel,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
@@ -28,14 +20,14 @@ import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { RenderRuleName } from '../../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { FLYOUT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
+import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 
 /**
- * Document details flyout right section header
+ * Alert details flyout right section header
  */
-export const HeaderTitle: FC = memo(() => {
+export const AlertHeaderTitle: FC = memo(() => {
   const {
     dataFormattedForFieldBrowser,
     eventId,
@@ -55,7 +47,7 @@ export const HeaderTitle: FC = memo(() => {
         <FlyoutTitle
           title={ruleName}
           iconType={'warning'}
-          data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
+          data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
         />
       ) : (
         <RenderRuleName
@@ -73,22 +65,11 @@ export const HeaderTitle: FC = memo(() => {
             title={ruleName}
             iconType={'warning'}
             isLink
-            data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
+            data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
           />
         </RenderRuleName>
       ),
     [ruleName, ruleId, eventId, scopeId, isPreview]
-  );
-
-  const eventTitle = (
-    <EuiTitle size="s">
-      <h2>
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.header.headerTitle"
-          defaultMessage="Event details"
-        />
-      </h2>
-    </EuiTitle>
   );
 
   const { refetch } = useRefetchByScope({ scopeId });
@@ -107,47 +88,53 @@ export const HeaderTitle: FC = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      <div data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-        {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
-      </div>
-      <EuiSpacer size="m" />
-      {isAlert && (
-        <EuiPanel
-          hasShadow={false}
-          hasBorder
-          css={css`
-            padding: ${euiTheme.size.m} ${euiTheme.size.s};
-          `}
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
-            <EuiFlexItem
-              css={css`
-                border-right: ${euiTheme.border.thin};
-              `}
-            >
-              <DocumentStatus />
-            </EuiFlexItem>
-            <EuiFlexItem
-              css={css`
-                border-right: ${euiTheme.border.thin};
-              `}
-            >
-              <RiskScore />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Assignees
-                eventId={eventId}
-                assignedUserIds={alertAssignees}
-                onAssigneesUpdated={onAssigneesUpdated}
-                isPreview={isPreview}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+      {isAlert && ruleName ? (
+        ruleTitle
+      ) : (
+        <FlyoutTitle
+          title={i18n.translate('xpack.securitySolution.flyout.right.header.headerTitle', {
+            defaultMessage: 'Document details',
+          })}
+          iconType={'warning'}
+          data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
+        />
       )}
+      <EuiSpacer size="m" />
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        css={css`
+          padding: ${euiTheme.size.m} ${euiTheme.size.s};
+        `}
+        data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+      >
+        <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
+          <EuiFlexItem
+            css={css`
+              border-right: ${euiTheme.border.thin};
+            `}
+          >
+            <DocumentStatus />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              border-right: ${euiTheme.border.thin};
+            `}
+          >
+            <RiskScore />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Assignees
+              eventId={eventId}
+              assignedUserIds={alertAssignees}
+              onAssigneesUpdated={onAssigneesUpdated}
+              isPreview={isPreview}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </>
   );
 });
 
-HeaderTitle.displayName = 'HeaderTitle';
+AlertHeaderTitle.displayName = 'AlertHeaderTitle';
