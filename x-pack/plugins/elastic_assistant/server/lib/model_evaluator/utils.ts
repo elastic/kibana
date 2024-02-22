@@ -8,7 +8,6 @@
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
 import { BaseMessage } from 'langchain/schema';
-import { getFormattedMessageContent } from '../langchain/helpers';
 import { ResponseBody } from '../langchain/types';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 
@@ -60,9 +59,7 @@ export const getMessageFromLangChainResponse = (
   response: PromiseSettledResult<ResponseBody>
 ): string => {
   if (response.status === 'fulfilled' && response.value.data != null) {
-    // TODO: remove this console.log
-    console.log('can we stop doing this???', response.value.data);
-    return getFormattedMessageContent(response.value.data);
+    return response.value.data;
   }
   return 'error';
 };

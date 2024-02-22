@@ -23,6 +23,7 @@ import { appendConversationMessageRoute } from './user_conversations/append_conv
 import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
+import { getEvaluateRoute } from './evaluate/get_evaluate';
 import { postEvaluateRoute } from './evaluate/post_evaluate';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
@@ -67,6 +68,7 @@ export const registerRoutes = (
   postActionsConnectorExecuteRoute(router, getElserId);
 
   // Evaluate
+  getEvaluateRoute(router);
   postEvaluateRoute(router, getElserId);
 
   // Prompts

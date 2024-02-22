@@ -54,24 +54,3 @@ export const requestHasRequiredAnonymizationParams = (
 
   return allowIsValid && allowReplacementIsValid && replacementsIsValid;
 };
-
-/**
- * When `content` is a JSON string, prefixed with "```json\n"
- * and suffixed with "\n```", this function will attempt to parse it and return
- * the `action_input` property if it exists.
- */
-export const getFormattedMessageContent = (content: string): string => {
-  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
-
-  if (formattedContentMatch) {
-    try {
-      const parsedContent = JSON.parse(formattedContentMatch[1]);
-
-      return parsedContent.action_input ?? content;
-    } catch {
-      // we don't want to throw an error here, so we'll fall back to the original content
-    }
-  }
-
-  return content;
-};
