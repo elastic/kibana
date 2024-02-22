@@ -275,14 +275,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_dip_zerodocsfallback':
         case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
-            const indexExists = await es.indices.exists({
+            await es.indices.delete({
               index: dataGenerator,
+              ignore_unavailable: true,
             });
-            if (indexExists) {
-              await es.indices.delete({
-                index: dataGenerator,
-              });
-            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
@@ -329,14 +325,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
 
         case 'large_arrays':
           try {
-            const indexExists = await es.indices.exists({
+            await es.indices.delete({
               index: dataGenerator,
+              ignore_unavailable: true,
             });
-            if (indexExists) {
-              await es.indices.delete({
-                index: dataGenerator,
-              });
-            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
