@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -30,10 +30,19 @@ type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue
 const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
 const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
 
-const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:${idValue}`;
-
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
+
+  public static createId({ idField, idValue }: AssetCriticalityIdParts) {
+    return `${idField}:${idValue}`;
+  }
+
+  public static createIdFromRecord(record: AssetCriticalityRecord) {
+    return AssetCriticalityDataClient.createId({
+      idField: record.id_field,
+      idValue: record.id_value,
+    });
+  }
   /**
    * It will create idex for asset criticality,
    * or update mappings if index exists
@@ -59,14 +68,17 @@ export class AssetCriticalityDataClient {
   public async search({
     query,
     size,
+    sort,
   }: {
     query: ESFilter;
     size?: number;
+    sort?: SearchRequest['sort'];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
       body: { query },
+      sort,
       size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
     });
     return response;
@@ -96,7 +108,7 @@ export class AssetCriticalityDataClient {
   }
 
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
-    const id = createId(idParts);
+    const id = AssetCriticalityDataClient.createId(idParts);
 
     try {
       const body = await this.options.esClient.get<AssetCriticalityRecord>({
@@ -115,7 +127,7 @@ export class AssetCriticalityDataClient {
   }
 
   public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
-    const id = createId(record);
+    const id = AssetCriticalityDataClient.createId(record);
     const doc = {
       id_field: record.idField,
       id_value: record.idValue,
@@ -137,7 +149,7 @@ export class AssetCriticalityDataClient {
 
   public async delete(idParts: AssetCriticalityIdParts) {
     await this.options.esClient.delete({
-      id: createId(idParts),
+      id: AssetCriticalityDataClient.createId(idParts),
       index: this.getIndex(),
     });
   }

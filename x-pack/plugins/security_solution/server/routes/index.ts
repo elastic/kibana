@@ -76,6 +76,7 @@ import {
   assetCriticalityDeleteRoute,
   assetCriticalityPrivilegesRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
+import { entityStoreInitRoute } from '../lib/entity_analytics/entity_store/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 
 export const initRoutes = (
@@ -171,6 +172,10 @@ export const initRoutes = (
     if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
       riskEnginePrivilegesRoute(router, getStartServices);
     }
+  }
+
+  if (config.experimentalFeatures.entityStoreEnabled) {
+    entityStoreInitRoute(router, getStartServices);
   }
 
   assetCriticalityStatusRoute(router, logger);

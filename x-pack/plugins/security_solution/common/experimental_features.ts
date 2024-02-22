@@ -160,6 +160,11 @@ export const allowedExperimentalValues = Object.freeze({
   alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /*
+   * Enables Entity Store POC
+   */
+  entityStoreEnabled: true,
+
+  /*
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: false,

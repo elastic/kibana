@@ -24,6 +24,7 @@ export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
+  getCriticalitiesFromTimestamp: (from: string, size?: number) => Promise<AssetCriticalityRecord[]>;
   isEnabled: () => Promise<boolean>;
 }
 
@@ -87,6 +88,32 @@ const getCriticalitiesByIdentifiers = async ({
   return criticalitySearchResponse.hits.hits.map((hit) => hit._source);
 };
 
+const getCriticalitiesFromTimestamp = async ({
+  assetCriticalityDataClient,
+  from,
+  size,
+}: {
+  assetCriticalityDataClient: AssetCriticalityDataClient;
+  from: string;
+  size?: number;
+}): Promise<AssetCriticalityRecord[]> => {
+  const criticalitySearchResponse = await assetCriticalityDataClient.search({
+    query: {
+      range: {
+        '@timestamp': {
+          gte: from,
+        },
+      },
+    },
+    sort: [{ '@timestamp': 'asc' }],
+    size,
+  });
+
+  return criticalitySearchResponse.hits.hits
+    .map((hit) => hit._source)
+    .filter((source): source is AssetCriticalityRecord => source !== undefined);
+};
+
 interface AssetCriticalityServiceFactoryOptions {
   assetCriticalityDataClient: AssetCriticalityDataClient;
   uiSettingsClient: IUiSettingsClient;
@@ -98,5 +125,7 @@ export const assetCriticalityServiceFactory = ({
 }: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
+  getCriticalitiesFromTimestamp: (from: string, size?: number) =>
+    getCriticalitiesFromTimestamp({ assetCriticalityDataClient, from, size }),
   isEnabled: () => uiSettingsClient.get<boolean>(ENABLE_ASSET_CRITICALITY_SETTING),
 });
