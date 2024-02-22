@@ -62,7 +62,10 @@ if [[ -z "$EMAIL" ]]; then
       EMAIL="kibana-ci-access-coverage@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-ci-es-snapshots-daily")
-      EMAIL="kibana-ci-access-es-snapshots@$GCLOUD_EMAIL_POSTFIX"
+      EMAIL="kibana-ci-access-es-daily@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ci-es-snapshots-permanent")
+      EMAIL="kibana-ci-access-es-permanent@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-so-types-snapshots")
       EMAIL="kibana-ci-access-so-snapshots@$GCLOUD_EMAIL_POSTFIX"

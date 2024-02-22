@@ -20,7 +20,7 @@ import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { APM_HOST_FILTER_FIELD } from '../constants';
-import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
+import { LinkToAlertsRule, LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
@@ -96,7 +96,6 @@ const useRightSideItems = (links?: LinkOptions[]) => {
         <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
       ),
       alertRule: <LinkToAlertsRule />,
-      apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
     }),
     [asset.id, asset.name, asset.type]
   );

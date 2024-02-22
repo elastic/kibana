@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
@@ -22,10 +23,9 @@ import {
   getAlertsByIds,
   getQueryAlertIds,
   getRuleForAlertTesting,
-  setAlertAssignees,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

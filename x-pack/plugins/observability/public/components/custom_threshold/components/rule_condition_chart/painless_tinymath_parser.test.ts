@@ -23,6 +23,16 @@ describe('PainlessTinyMathParser', () => {
     // ✅ checked with Lens Formula editor
     expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
   });
+  it('should parse a simple equation with multi-char aggregation name', () => {
+    const equation = '100 * ABC-abc';
+    const parser = new PainlessTinyMathParser({
+      equation,
+      aggMap: {
+        'ABC-abc': 'average(system.cpu.system.pct)',
+      },
+    });
+    expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
+  });
   it('should parse a simple equation with two aggregations A and B', () => {
     const equation = '100 * A + B / 100';
     const parser = new PainlessTinyMathParser({
@@ -158,6 +168,20 @@ describe('PainlessTinyMathParser', () => {
       },
     });
     // ✅ checked with Lens Formula editor
+    expect(parser.parse()).toEqual(
+      'ifelse(ifelse(average(system.cpu.system.pct)>0,0,1) + ifelse(average(system.cpu.user.pct)==10,0,1) * ifelse(average(system.cpu.system.pct)<200,0,1) + ifelse(average(system.cpu.user.pct)==2,1,0) > 0, 100, ifelse(average(system.cpu.system.pct)==10, 200, 300))'
+    );
+  });
+  it('should parse a complex equation with multi char aggregation name', () => {
+    const equation =
+      '!(aa > 0) || baa !== 10 && !(aa < 200 || baa == 2) ? 100 : aa == 10 ? 200 : 300';
+    const parser = new PainlessTinyMathParser({
+      equation,
+      aggMap: {
+        aa: 'average(system.cpu.system.pct)',
+        baa: 'average(system.cpu.user.pct)',
+      },
+    });
     expect(parser.parse()).toEqual(
       'ifelse(ifelse(average(system.cpu.system.pct)>0,0,1) + ifelse(average(system.cpu.user.pct)==10,0,1) * ifelse(average(system.cpu.system.pct)<200,0,1) + ifelse(average(system.cpu.user.pct)==2,1,0) > 0, 100, ifelse(average(system.cpu.system.pct)==10, 200, 300))'
     );

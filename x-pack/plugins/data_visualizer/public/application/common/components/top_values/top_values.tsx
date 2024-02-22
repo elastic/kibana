@@ -126,7 +126,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                       max={1}
                       color={barColor}
                       size="xs"
-                      label={kibanaFieldFormat(value.key, fieldFormat)}
+                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : fieldValue}
                       className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                       valueText={`${value.doc_count}${
                         totalDocuments !== undefined

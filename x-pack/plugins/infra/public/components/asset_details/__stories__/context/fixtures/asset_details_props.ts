@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { type AssetDetailsProps, ContentTabIds, type Tab } from '../../../types';
 
-const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
+const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails'];
 const tabs: Tab[] = [
   {
     id: ContentTabIds.OVERVIEW,

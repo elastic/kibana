@@ -52,12 +52,14 @@ export const useRiskScoreKpi = ({
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
   const spaceId = useSpaceId();
-  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
-  const defaultIndex = spaceId
-    ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
-      : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
-    : undefined;
+  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
+    useIsNewRiskScoreModuleInstalled();
+  const defaultIndex =
+    spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
+      ? riskEntity === RiskScoreEntity.host
+        ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
+        : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
+      : undefined;
 
   const {
     isDeprecated,

@@ -35,6 +35,7 @@ export const useWelcomeHeaderStyles = () => {
         fontSize: `${euiTheme.base * 2.125}px`,
         color: euiTheme.colors.title,
         fontWeight: euiTheme.font.weight.bold,
+        lineHeight: euiTheme.size.xxl,
       }),
       headerDescriptionStyles: css({
         fontSize: `${euiTheme.base}px`,
@@ -55,6 +56,7 @@ export const useWelcomeHeaderStyles = () => {
     euiTheme.font.weight.regular,
     euiTheme.size.l,
     euiTheme.size.s,
+    euiTheme.size.xxl,
   ]);
   return welcomeHeaderStyles;
 };

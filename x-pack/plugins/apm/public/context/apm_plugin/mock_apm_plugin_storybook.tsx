@@ -13,7 +13,7 @@ import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_k
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
-import { merge } from 'lodash';
+import { merge, noop } from 'lodash';
 import React, { ReactNode } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
@@ -128,6 +128,11 @@ const mockCore = {
 const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  observabilityAIAssistant: {
+    service: {
+      setScreenContext: () => noop,
+    },
+  },
 } as unknown as ApmPluginContextValue;
 
 export function MockApmPluginStorybook({

@@ -1220,17 +1220,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
     },
 
-    async openPalettePanel(chartType: string) {
+    async openPalettePanel() {
       await retry.try(async () => {
-        await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+        await testSubjects.click(`lns_colorEditing_trigger`);
         // wait for the UI to settle
         await PageObjects.common.sleep(100);
-        await testSubjects.existOrFail('lns-indexPattern-PalettePanelContainer', { timeout: 2500 });
+        await testSubjects.existOrFail('lns-indexPattern-SettingWithSiblingFlyout', {
+          timeout: 2500,
+        });
       });
     },
 
     async closePalettePanel() {
-      await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
+      await testSubjects.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
     },
 
     // different picker from the next one
@@ -1257,8 +1259,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async closePaletteEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
-        await testSubjects.missingOrFail('lns-indexPattern-PalettePanelContainerBack');
+        await testSubjects.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
+        await testSubjects.missingOrFail('lns-indexPattern-SettingWithSiblingFlyoutBack');
       });
     },
 

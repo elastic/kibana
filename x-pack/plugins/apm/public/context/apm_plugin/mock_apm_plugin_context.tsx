@@ -9,7 +9,7 @@ import React, { ReactNode, useMemo } from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { useHistory } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
-import { merge } from 'lodash';
+import { merge, noop } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
@@ -170,6 +170,11 @@ export const mockApmPluginContextValue = {
   unifiedSearch: mockUnifiedSearch,
   uiActions: {
     getTriggerCompatibleActions: () => Promise.resolve([]),
+  },
+  observabilityAIAssistant: {
+    service: {
+      setScreenContext: jest.fn().mockImplementation(() => noop),
+    },
   },
 };
 

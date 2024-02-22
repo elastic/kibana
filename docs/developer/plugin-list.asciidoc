@@ -527,7 +527,7 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/dataset_quality/README.md[datasetQuality]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
 
 
@@ -566,7 +566,7 @@ security and spaces filtering.
 activities.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/exploratory_view/README.md[exploratoryView]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/exploratory_view/README.md[exploratoryView]
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
@@ -688,7 +688,7 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_ai_assistant/README.md[observabilityAIAssistant]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
@@ -700,7 +700,7 @@ Elastic.
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_shared/README.md[observabilityShared]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_shared/README.md[observabilityShared]
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
@@ -712,11 +712,11 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
@@ -857,7 +857,7 @@ in their infrastructure.
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ux/readme.md[ux]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/ux/readme.md[ux]
 |https://docs.elastic.dev/kibana-dev-docs/welcome
 
 

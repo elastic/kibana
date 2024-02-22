@@ -65,6 +65,8 @@ export const TRANSACTION_OVERFLOW_COUNT =
   'transaction.aggregation.overflow_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
+export const TRANSACTION_PROFILER_STACK_TRACE_IDS =
+  'transaction.profiler_stack_trace_ids';
 
 export const EVENT_OUTCOME = 'event.outcome';
 

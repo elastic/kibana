@@ -16,6 +16,7 @@ export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;
+  loading: boolean;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -24,7 +25,7 @@ export type Item<T> = EuiSelectableOption & {
   checked?: EuiSelectableOptionCheckedType;
 };
 
-export function SloGroupBy({ onStateChange, state }: Props) {
+export function SloGroupBy({ onStateChange, state, loading }: Props) {
   const [isGroupByPopoverOpen, setIsGroupByPopoverOpen] = useState(false);
   const groupBy = state.groupBy;
 
@@ -99,6 +100,7 @@ export function SloGroupBy({ onStateChange, state }: Props) {
       isPopoverOpen={isGroupByPopoverOpen}
       setIsPopoverOpen={setIsGroupByPopoverOpen}
       label={GROUP_TITLE}
+      loading={loading}
     />
   );
 }

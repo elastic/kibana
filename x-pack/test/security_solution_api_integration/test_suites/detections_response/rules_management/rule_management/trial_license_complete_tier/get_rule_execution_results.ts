@@ -17,17 +17,19 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
+  deleteAllEventLogExecutionEvents,
+  indexEventLogExecutionEvents,
+  waitForEventLogExecuteComplete,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
-  deleteAllEventLogExecutionEvents,
   deleteAllAlerts,
   getRuleForAlertTesting,
-  indexEventLogExecutionEvents,
-  waitForEventLogExecuteComplete,
   waitForRulePartialFailure,
   waitForRuleSuccess,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import {
   failedGapExecution,
   failedRanAfterDisabled,
@@ -47,7 +49,9 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Get Rule Execution Results', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177223
+  // Failing: See https://github.com/elastic/kibana/issues/177223
+  describe.skip('@ess @serverless Get Rule Execution Results', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
