@@ -24,7 +24,7 @@
         "signature": [
           "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; }"
         ],
-        "path": "x-pack/plugins/profiling_data_access/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -67,7 +67,7 @@
           },
           ">; }; }"
         ],
-        "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/server/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -81,10 +81,8 @@
       "tags": [],
       "label": "ProfilingDataAccessPluginSetup",
       "description": [],
-      "signature": [
-        "void"
-      ],
-      "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",
+      "signature": ["void"],
+      "path": "x-pack/plugins/observability_solution/profiling_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -128,7 +126,7 @@
           },
           " | null>"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,7 +137,7 @@
             "tags": [],
             "label": "{\n  packagePolicyClient,\n  soClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -159,7 +157,7 @@
                     "text": "PackagePolicyClient"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -179,7 +177,7 @@
                     "text": "SavedObjectsClientContract"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -223,7 +221,7 @@
           },
           " | undefined>"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -234,7 +232,7 @@
             "tags": [],
             "label": "{\n  soClient,\n  packagePolicyClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -254,7 +252,7 @@
                     "text": "PackagePolicyClient"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -274,7 +272,7 @@
                     "text": "SavedObjectsClientContract"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -318,7 +316,7 @@
           },
           " | undefined>"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -329,7 +327,7 @@
             "tags": [],
             "label": "{\n  soClient,\n  packagePolicyClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -349,7 +347,7 @@
                     "text": "PackagePolicyClient"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -369,7 +367,7 @@
                     "text": "SavedObjectsClientContract"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -399,7 +397,7 @@
           " extends ",
           "ProfilingSetupOptions"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cloud_setup.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +417,7 @@
                 "text": "PackagePolicyClient"
               }
             ],
-            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cloud_setup.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -430,7 +428,7 @@
             "tags": [],
             "label": "isCloudEnabled",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cloud_setup.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -447,10 +445,8 @@
         "tags": [],
         "label": "COLLECTOR_PACKAGE_POLICY_NAME",
         "description": [],
-        "signature": [
-          "\"elastic-universal-profiling-collector\""
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "signature": ["\"elastic-universal-profiling-collector\""],
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -462,10 +458,8 @@
         "tags": [],
         "label": "ELASTIC_CLOUD_APM_POLICY",
         "description": [],
-        "signature": [
-          "\"elastic-cloud-apm\""
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "signature": ["\"elastic-cloud-apm\""],
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -477,10 +471,8 @@
         "tags": [],
         "label": "MAX_BUCKETS",
         "description": [],
-        "signature": [
-          "150000"
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/cluster_settings.ts",
+        "signature": ["150000"],
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cluster_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,10 +484,8 @@
         "tags": [],
         "label": "SYMBOLIZER_PACKAGE_POLICY_NAME",
         "description": [],
-        "signature": [
-          "\"elastic-universal-profiling-symbolizer\""
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "signature": ["\"elastic-universal-profiling-symbolizer\""],
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
