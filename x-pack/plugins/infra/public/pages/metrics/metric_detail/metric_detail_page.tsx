@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -53,8 +53,8 @@ export const MetricDetailPage = () => {
   });
 
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
-  const breadcrumbs = useMemo(
-    () => [
+  useMetricsBreadcrumbs(
+    [
       {
         ...breadcrumbOptions.link,
         text: breadcrumbOptions.text,
@@ -63,10 +63,8 @@ export const MetricDetailPage = () => {
         text: name,
       },
     ],
-    [breadcrumbOptions.link, breadcrumbOptions.text, name]
+    { deeperContextServerless: true }
   );
-
-  useMetricsBreadcrumbs(breadcrumbs, { deeperContextServerless: true });
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
