@@ -212,6 +212,10 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const setChromeStyle = (style: ChromeStyle) => {
+      chromeStyle$.next(style);
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
@@ -238,9 +242,7 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
-      updateChromeStyle: (style) => {
-        chromeStyle$.next(style);
-      },
+      setChromeStyle,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
@@ -261,10 +263,6 @@ export class ChromeService {
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
-
-    const setChromeStyle = (style: ChromeStyle) => {
-      chromeStyle$.next(style);
-    };
 
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyle$.getValue();

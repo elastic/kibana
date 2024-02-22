@@ -54,7 +54,7 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
-  updateChromeStyle: (style: ChromeStyle) => void;
+  setChromeStyle: (style: ChromeStyle) => void;
 }
 
 export class ProjectNavigationService {
@@ -87,7 +87,7 @@ export class ProjectNavigationService {
   private application?: InternalApplicationStart;
   private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
-  private updateChromeStyle: StartDeps['updateChromeStyle'] = () => {};
+  private setChromeStyle: StartDeps['setChromeStyle'] = () => {};
 
   public start({
     application,
@@ -95,14 +95,14 @@ export class ProjectNavigationService {
     http,
     chromeBreadcrumbs$,
     logger,
-    updateChromeStyle,
+    setChromeStyle,
   }: StartDeps) {
     this.application = application;
     this.http = http;
     this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
-    this.updateChromeStyle = updateChromeStyle;
+    this.setChromeStyle = setChromeStyle;
 
     this.handleActiveNodesChange();
     this.handleSolutionNavDefinitionsChange();
@@ -325,7 +325,7 @@ export class ProjectNavigationService {
     SolutionNavigationDefinitions,
     string | null
   ]) {
-    this.updateChromeStyle(id === null ? 'classic' : 'project');
+    this.setChromeStyle(id === null ? 'classic' : 'project');
 
     if (id === null) {
       localStorage.removeItem(SOLUTION_NAV_KEY);
