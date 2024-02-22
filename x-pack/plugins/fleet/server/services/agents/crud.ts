@@ -34,6 +34,17 @@ import { getLatestAvailableVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+const SIMPLIFIED_AGENT_STATUS = [
+  'offline',
+  'error',
+  'online',
+  'inactive',
+  'enrolling',
+  'unenrolling',
+  'unenrolled',
+  'updating',
+  'degraded',
+];
 
 function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
   try {
@@ -350,9 +361,18 @@ export async function getAgentsByKuery(
   }
 
   if (getStatusSummary) {
-    res.aggregations?.status.buckets.forEach((bucket) => {
-      statusSummary[bucket.key] = bucket.doc_count;
-    });
+    if (showUpgradeable) {
+      // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
+      // the bucket count doesn't take in account the upgradeable agents
+      SIMPLIFIED_AGENT_STATUS.forEach((agentStatus) => {
+        const count = getFilteredAgentsCount(agents, agentStatus as AgentStatus);
+        statusSummary[agentStatus as AgentStatus] = count;
+      });
+    } else {
+      res.aggregations?.status.buckets.forEach((bucket) => {
+        statusSummary[bucket.key] = bucket.doc_count;
+      });
+    }
   }
 
   return {
@@ -364,6 +384,11 @@ export async function getAgentsByKuery(
     ...(getStatusSummary ? { statusSummary } : {}),
   };
 }
+
+const getFilteredAgentsCount = (agents: Agent[], status: AgentStatus) => {
+  const filtered = agents.filter((agent) => agent?.status === status);
+  return filtered.length;
+};
 
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
