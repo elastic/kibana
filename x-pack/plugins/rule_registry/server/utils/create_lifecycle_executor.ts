@@ -45,7 +45,6 @@ import {
   VERSION,
   ALERT_FLAPPING,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_CONSECUTIVE_MATCHES,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
@@ -334,7 +333,6 @@ export const createLifecycleExecutor =
             ...(isNew && maintenanceWindowIds?.length
               ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
               : {}),
-            [ALERT_CONSECUTIVE_MATCHES]: activeCount,
           };
 
           return {
