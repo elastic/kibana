@@ -1985,9 +1985,9 @@ Examples: `name`, `description`, `setup`, `note` (Investigation guide)
     </tbody>
   </table>
 
-##### Array fields
+##### Array of string fields
 
-For array fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. For example:
+For array of strings fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. For example:
 
 ```
 base: [test1]
@@ -2218,11 +2218,426 @@ Examples: `risk_score`, `max_signals`
     </tbody>
   </table>
 
-##### Complex objects or array of objects fields
+##### Array of objects fields
+
+Since the fields in each object within the array are highly dependent on one another, the whole object should be treated as a block, and not attempt to diff or merge changes to individual fields within each element.
+
+For example: in a `required_fields` update, if the `type` is updated from `unknown` in the base version to `keyword` in the `target` version, but in the same object the user has updated the base `name` of the field, the change of type will have a high probability of not making sense anymore - there is no way of knowing if the change proposed by Elastic will also apply to the field name that the user is now referring through its customization. Therefore, we should prefer to keep the user's version for the whole block.(See the first element of the array in the first row of the column below).
+
+Examples: `related_integrations,` `required_fields`
+
+###### Proposed algorithm
+
+- Do element by element comparison:
+  - If element index exists in the three versions and the values:
+    - do not differ between all versions (base, current and target), **keep current** version. (A A A)
+    - do not differ between base and current, but updates target, **keep target** version. (A A B)
+    - differ between base and current, but doesn't update target, **keep current** version. (A B A)
+    - differ between base and current, updates target, **keep current** version. (A B B)
+    - differ between all version (base, current and target), **keep current** version. (A B C)
+  - If element index exists in base and current version, but not in target:
+    - If base differs from current: **keep current** version. (A B _)
+    - If base equals current: **remove element**.  (A A _)
+  - If element index exists in base and target version, but not in current:
+    - Remove element. (A _ B) and (A _ A)
+  - If element index exists in current and target version, but not in base:
+    - If base equals current: **add element/keep target**. (_ A A)
+    - If base differs from current: **keep both current and target**. (_ A B)
+    
+<table>
+    <thead>
+      <tr>
+        <th style="border-right:3px solid black">Use case</th>
+        <th>Base version</th>
+        <th>Current version</th>
+        <th style="border-right:3px solid black">Target version</th>
+        <th>Merged version (output)</th>
+      </tr>
+    </thead>
+  <tbody valign="top">
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if element conflicts, but apply changes in elements with clean updates <br> <b>(A B C - keep current) and (A A B - keep target)</b><br><br> Same for: <br><ul><li><b>(A B C) and (A B A - keep current)</b></li><li><b>(A B C) and (A B B - keep current/target)</b></li></ul></td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "host.user.id",
+    type: "keyword"
+  },
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.user.id",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if element conflicts, and remove any <b>uncustomized</b> elements if removed in update <br><br><b>(A B C) and (A A _ - remove element)</b></td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  }
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  }
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if element conflicts, but keep any <b>customized</b> elements if removed in update <br><br><b>(A B C) and (A B _ - keep current)</b></td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.os.type",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.user.id",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  }
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.user.id",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if element conflicts and add new matching element <br><br> <b>(A B C) and (_ A A - keep current/target)</b></td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  }
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "my.new.field",
+    type: "keyword"
+  }
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: false,
+    name: "my.new.field",
+    type: "keyword"
+  },
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "my.new.field",
+    type: "keyword"
+  } ,
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if element conflicts and add both new conflicting elements <br><br> <b>(A B C) and (_ A B - keep both current and target)</b></td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  }
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "my.new.field",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: true,
+    name: "new.elastic.ip",
+    type: "ip"
+  }
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  },
+  {
+    ecs: false,
+    name: "host.user.id",
+    type: "keyword"
+  },
+  {
+    ecs: true,
+    name: "process.executable",
+    type: "keyword"
+  },
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if element conflicts and remove element removed by user <br><br> <b>(A B C) and (A _ A - remove element)</b><br> <b>(A B C) and (A _ B - remove element)</b></td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "unknown"
+  },
+  {
+    ecs: true,
+    name: "process.executable",
+    type: "string"
+  }
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  }
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.action",
+    type: "keyword"
+  },
+  {
+    ecs: true,
+    name: "process.executable.ip",
+    type: "ip"
+  }
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  {
+    ecs: true,
+    name: "event.UPDATED",
+    type: "unknown"
+  }
+]
+        </pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+##### MITRE ATT&CK framework (`threat` field)
+
+The `threat` field has a specific [schema](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts#L250) that can be handled with its own algorithm in case of conflicts, in order to try to obtain the most reasonable merge between versions. 
+
+The `threat``
 
 Examples: `threat` (Mitre Threat), `required_fields`
-
-
   <table>
     <thead>
       <tr>
@@ -2238,7 +2653,7 @@ Examples: `threat` (Mitre Threat), `required_fields`
       <td style="border-right:3px solid black">Keep user customizations on conflicts, but update sections with no conflicts</td>
       <td>
       <pre>
-{
+[{
     "framework":"MITRE ATT&CK",
     "tactic":{
       "id":"TA0003",
@@ -2252,12 +2667,12 @@ Examples: `threat` (Mitre Threat), `required_fields`
           "reference":"https://attack.mitre.org/techniques/T1098/"
       }
     ]
-}
+}]
         </pre>
       </td>
       <td>
         <pre>
-{
+[{
     "framework":"MITRE ATT&CK",
     "tactic":{
       "id":"TA0003",
@@ -2271,12 +2686,12 @@ Examples: `threat` (Mitre Threat), `required_fields`
           "reference":"https://attack.mitre.org/techniques/T1098/"
       }
     ]
-}
+}]
         </pre>
       </td>
       <td style="border-right:3px solid black">
       <pre>
-{
+[{
     "framework":"MITRE ATT&CK",
     "tactic":{
       "id":"TA0003",
@@ -2297,12 +2712,12 @@ Examples: `threat` (Mitre Threat), `required_fields`
           ]
       }
     ]
-}
+}]
         </pre>
         </td>
       <td>
       <pre>
-{
+[{
     "framework":"MITRE ATT&CK",
     "tactic":{
       "id":"TA0003",
@@ -2323,24 +2738,12 @@ Examples: `threat` (Mitre Threat), `required_fields`
           ]
       }
     ]
-}
+}]
         </pre>
       </td>
     </tr>
     </tbody>
   </table>
-
-**TODO:**
-- Add examples to the above tables for `strings`
-- Add a new table for `arrays`
-- Think about how to solve:
-  - complex objects
-  - numbers
-- Add tentative algorithms for all the above. Already something tentative for:
-  - strings
-  - arrays
-
-
 
 
 
