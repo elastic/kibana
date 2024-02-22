@@ -31,21 +31,24 @@ import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { BehaviorSubject } from 'rxjs';
-import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
-import { useSorting } from '../../../../../../../hooks/use_sorting';
-import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
-import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
+import { datemathToEpochMillis } from '../../../../utils/datemath';
+import { useSorting } from '../../../../hooks/use_sorting';
+import { useMetricsK8sAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_k8s_anomalies';
+import { useMetricsHostsAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_hosts_anomalies';
 import type {
   Metric,
   MetricsHostsAnomaly,
   Sort,
-} from '../../../../../../../../common/http_api/infra_ml/results';
+} from '../../../../../common/http_api/infra_ml/results';
 import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
-import { AnomalySeverityIndicator } from '../../../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
-import { useSourceContext } from '../../../../../../../containers/metrics_source';
+import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
-import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
+import {
+  useWaffleViewState,
+  WaffleViewState,
+} from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';

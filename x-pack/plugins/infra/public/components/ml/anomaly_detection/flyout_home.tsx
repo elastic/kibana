@@ -18,15 +18,15 @@ import { EuiTabs } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
-import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
+import { SubscriptionSplashPrompt } from '../../subscription_splash_content';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import {
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
-} from '../../../../../../components/logging/log_analysis_setup';
-import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
-import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { LoadingPrompt } from '../../../../../../components/loading_page';
+} from '../../logging/log_analysis_setup';
+import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
+import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
+import { LoadingPrompt } from '../../loading_page';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
 interface Props {
