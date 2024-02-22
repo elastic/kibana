@@ -25,7 +25,7 @@ import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
 } from '../template/install';
-import { isFields, processFields } from '../../fields/field';
+import { loadTransformFieldsFromYaml, processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
@@ -180,43 +180,6 @@ const processTransformAssetsPerModule = (
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
     const content = safeLoad(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
-
-    // Handling fields.yml and all other files within 'fields' folder
-    if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
-      const validFields = processFields(content);
-      const mappings = generateMappings(validFields);
-      const templateName = getTransformAssetNameForInstallation(
-        installablePackage,
-        transformModuleId,
-        'template'
-      );
-      const indexToModify = destinationIndexTemplates.findIndex(
-        (t) => t.transformModuleId === transformModuleId && t.installationName === templateName
-      );
-      const template = {
-        transformModuleId,
-        _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-        installationName: getTransformAssetNameForInstallation(
-          installablePackage,
-          transformModuleId,
-          'template'
-        ),
-        template: {},
-      } as DestinationIndexTemplateInstallation;
-      if (indexToModify === -1) {
-        destinationIndexTemplates.push(template);
-      } else {
-        destinationIndexTemplates[indexToModify] = template;
-      }
-
-      // If there's already mappings set previously, append it to new
-      const previousMappings =
-        transformsSpecifications.get(transformModuleId)?.get('mappings') ?? {};
-
-      transformsSpecifications.get(transformModuleId)?.set('mappings', {
-        properties: { ...previousMappings.properties, ...mappings.properties },
-      });
-    }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
       const installationOrder =
@@ -393,6 +356,23 @@ const processTransformAssetsPerModule = (
     type: ElasticsearchAssetType.transform,
     version: t.transformVersion,
   }));
+
+  // Load and generate mappings
+  for (const destinationIndexTemplate of destinationIndexTemplates) {
+    if (!destinationIndexTemplate.transformModuleId) {
+      continue;
+    }
+
+    const fields = loadTransformFieldsFromYaml(
+      packageInstallContext,
+      destinationIndexTemplate.transformModuleId
+    );
+    const validFields = processFields(fields);
+    const mappings = generateMappings(validFields);
+    transformsSpecifications
+      .get(destinationIndexTemplate.transformModuleId)
+      ?.set('mappings', mappings);
+  }
 
   return {
     indicesToAddRefs,

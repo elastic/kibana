@@ -6,7 +6,7 @@
  */
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
-import { loadFieldsFromYaml } from '../../fields/field';
+import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
 import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
 
 import { prepareTemplate, prepareToInstallTemplates } from './install';
@@ -16,8 +16,8 @@ jest.mock('../../fields/field', () => ({
   loadFieldsFromYaml: jest.fn(),
 }));
 
-const mockedLoadFieldsFromYaml = loadFieldsFromYaml as jest.MockedFunction<
-  typeof loadFieldsFromYaml
+const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as jest.MockedFunction<
+  typeof loadDatastreamsFieldsFromYaml
 >;
 const packageInstallContext = {
   packageInfo: { name: 'package', version: '0.0.1' },
