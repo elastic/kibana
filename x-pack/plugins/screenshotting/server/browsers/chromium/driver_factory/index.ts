@@ -13,7 +13,7 @@ import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import {
@@ -317,7 +317,10 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent(page as EventEmitter<ConsoleMessage>, 'console').pipe(
+    const consoleMessages$ = Rx.fromEvent(
+      page as EventEmitter<PageEvents['console']>,
+      'console'
+    ).pipe(
       concatMap(async (line) => {
         if (line.type() === 'error') {
           logger
@@ -340,7 +343,10 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent(page as EventEmitter<Error>, 'pageerror').pipe(
+    const uncaughtExceptionPageError$ = Rx.fromEvent(
+      page as EventEmitter<PageEvents['pageerror']>,
+      'pageerror'
+    ).pipe(
       map((err) => {
         logger.warn(
           `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
@@ -349,7 +355,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const pageRequestFailed$ = Rx.fromEvent(
-      page as EventEmitter<HTTPRequest>,
+      page as EventEmitter<PageEvents['requestfailed']>,
       'requestfailed'
     ).pipe(
       map((req) => {
@@ -386,7 +392,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
-    const pageError$ = Rx.fromEvent(page as EventEmitter<Error>, 'error').pipe(
+    const pageError$ = Rx.fromEvent(page as EventEmitter<PageEvents['error']>, 'error').pipe(
       map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
     );
 
