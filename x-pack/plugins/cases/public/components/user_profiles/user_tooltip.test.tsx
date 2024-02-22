@@ -6,7 +6,8 @@
  */
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { UserToolTip } from './user_tooltip';
 
@@ -33,7 +34,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(await screen.findByText('case user'));
+    userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('Some Super User')).toBeInTheDocument();
@@ -62,7 +63,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(await screen.findByText('case user'));
+    userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
 
@@ -93,7 +94,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(await screen.findByText('case user'));
+    userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('Some Super User')).toBeInTheDocument();
@@ -122,7 +123,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(await screen.findByText('case user'));
+    userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('some.user@google.com')).toBeInTheDocument();
@@ -150,7 +151,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(await screen.findByText('case user'));
+    userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
@@ -166,7 +167,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    fireEvent.mouseOver(await screen.findByText('case user'));
+    userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('Unable to find user profile')).toBeInTheDocument();
