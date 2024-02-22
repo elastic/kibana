@@ -173,11 +173,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
         await retry.waitFor('view all matches to load', async () => {
           await PageObjects.discover.waitUntilSearchingHasFinished();
-          const isVisible = await testSubjects.exists('discoverNoResultsViewAllMatches');
-          if (isVisible) {
-            await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage(false);
+          if (!(await testSubjects.exists('discoverNoResultsViewAllMatches'))) {
+            return true;
           }
-          return !isVisible;
+          try {
+            await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage(false);
+          } catch {
+            // we could get an exception here if the button isn't found or isn't in
+            // the DOM by the time we try to click it, so just ignore it and move on
+          }
+          return false;
         });
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);

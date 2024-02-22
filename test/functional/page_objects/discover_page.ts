@@ -534,7 +534,7 @@ export class DiscoverPageObject extends FtrService {
         return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
       });
     }
-    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+    return await this.testSubjects.click('discoverNoResultsViewAllMatches', 1000);
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
