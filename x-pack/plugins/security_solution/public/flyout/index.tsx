@@ -92,13 +92,13 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
 
 /**
  * Flyout used for the Security Solution application
- * We set the z-index to 999 to ensure it is always rendered behind Timeline
+ * We set the z-index to 997 to ensure it is always rendered behind Timeline (which has a z-index of 998)
  */
 export const SecuritySolutionFlyout = memo(() => (
   <ExpandableFlyout
     registeredPanels={expandableFlyoutDocumentsPanels}
     paddingSize="none"
-    customStyles={{ 'z-index': 999 }}
+    customStyles={{ 'z-index': 997 }}
   />
 ));
 
@@ -106,13 +106,15 @@ SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
 /**
  * Flyout used in Timeline
- * We set the z-index to 1001 to ensure it is always rendered above Timeline
+ * We set the z-index to 999 to ensure it is always rendered above Timeline (which has a z-index of 998)
+ * and also behind other flyouts like Create new Case, Add Endpoint exception, Add rule exception, etc...
+ * opened from the Take action button in the footer. These latter flyouts use an overlay mask and that index is set to 1000 so we need to be below that.
  */
 export const TimelineFlyout = memo(() => (
   <ExpandableFlyout
     registeredPanels={expandableFlyoutDocumentsPanels}
     paddingSize="none"
-    customStyles={{ 'z-index': 1001 }}
+    customStyles={{ 'z-index': 999 }}
   />
 ));
 
