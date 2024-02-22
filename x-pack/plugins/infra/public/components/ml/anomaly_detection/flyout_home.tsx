@@ -187,7 +187,9 @@ export const FlyoutHome = (props: Props) => {
             </>
           )}
 
-          {tab === 'anomalies' && <AnomaliesTable closeFlyout={closeFlyout} />}
+          {tab === 'anomalies' && (
+            <AnomaliesTable closeFlyout={closeFlyout} isHostsPage={props.isHostsPage} />
+          )}
         </EuiFlyoutBody>
       </>
     );

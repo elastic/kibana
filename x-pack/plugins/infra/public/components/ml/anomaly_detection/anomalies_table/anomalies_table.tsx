@@ -203,6 +203,7 @@ interface Props {
   hideDatePicker?: boolean;
   // subject to watch the completition of the request
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
+  isHostsPage?: boolean;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -216,6 +217,7 @@ export const AnomaliesTable = ({
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
   request$,
+  isHostsPage,
 }: Props) => {
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
@@ -504,20 +506,22 @@ export const AnomaliesTable = ({
                 isClearable={true}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiComboBox
-                placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
-                  defaultMessage: 'Select group',
-                })}
-                singleSelection={{ asPlainText: true }}
-                options={jobOptions}
-                selectedOptions={selectedJobType}
-                onChange={changeJobType}
-                fullWidth
-                isClearable={false}
-                data-test-subj="anomaliesComboBoxType"
-              />
-            </EuiFlexItem>
+            {!isHostsPage && (
+              <EuiFlexItem grow={1}>
+                <EuiComboBox
+                  placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
+                    defaultMessage: 'Select group',
+                  })}
+                  singleSelection={{ asPlainText: true }}
+                  options={jobOptions}
+                  selectedOptions={selectedJobType}
+                  onChange={changeJobType}
+                  fullWidth
+                  isClearable={false}
+                  data-test-subj="anomaliesComboBoxType"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
