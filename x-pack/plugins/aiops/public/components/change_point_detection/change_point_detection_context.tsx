@@ -21,7 +21,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
+import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
@@ -155,6 +155,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
 
+  const { searchBounds } = useFilerQueryUpdates();
+
   const [resultFilters, setResultFilter] = useState<Filter[]>([]);
   const [selectedChangePoints, setSelectedChangePoints] = useState<
     Record<number, SelectedChangePoint[]>
@@ -267,14 +269,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     mergedQuery.bool!.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: timeRange.from,
-          to: timeRange.to,
+          from: searchBounds.min?.valueOf(),
+          to: searchBounds.max?.valueOf(),
         },
       },
     });
 
     return mergedQuery;
-  }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
+  }, [resultFilters, resultQuery, uiSettings, dataView, searchBounds]);
 
   if (!bucketInterval) return null;
 
@@ -295,7 +297,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   return (
     <ChangePointDetectionContext.Provider value={value}>
-      <FilterQueryContextProvider>{children}</FilterQueryContextProvider>
+      {children}
     </ChangePointDetectionContext.Provider>
   );
 };

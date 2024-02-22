@@ -139,7 +139,7 @@ export const ChartGridEmbeddableWrapper: FC<
   onChange,
   emptyState,
 }) => {
-  const { filters, query, timeRange, searchBounds } = useFilerQueryUpdates();
+  const { filters, query, timeRange, searchBounds, interval } = useFilerQueryUpdates();
 
   const fieldConfig = useMemo(() => {
     return { fn, metricField, splitField };
@@ -149,12 +149,6 @@ export const ChartGridEmbeddableWrapper: FC<
   const { uiSettings } = useAiopsAppContext();
   const timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter();
-
-  const interval = useMemo(() => {
-    timeBuckets.setInterval('auto');
-    timeBuckets.setBounds(timefilter.calculateBounds(timeRange));
-    return timeBuckets.getInterval().expression;
-  }, [timeRange, timeBuckets, timefilter]);
 
   const combinedQuery = useMemo(() => {
     const mergedQuery = createMergedEsQuery(query, filters, dataView, uiSettings);

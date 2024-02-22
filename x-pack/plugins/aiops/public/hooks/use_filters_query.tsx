@@ -19,6 +19,7 @@ export const FilterQueryContext = createContext<{
   query: Query;
   timeRange: TimeRange;
   searchBounds: TimeRangeBounds;
+  interval: string;
 }>({
   get filters(): Filter[] {
     throw new Error('FilterQueryContext is not initialized');
@@ -30,6 +31,9 @@ export const FilterQueryContext = createContext<{
     throw new Error('FilterQueryContext is not initialized');
   },
   get searchBounds(): TimeRangeBounds {
+    throw new Error('FilterQueryContext is not initialized');
+  },
+  get interval(): string {
     throw new Error('FilterQueryContext is not initialized');
   },
 });
@@ -108,6 +112,7 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
         query: resultQuery as Query,
         timeRange: resultTimeRange,
         searchBounds,
+        interval: timeBucketsInterval.expression,
       }}
     >
       {children}
