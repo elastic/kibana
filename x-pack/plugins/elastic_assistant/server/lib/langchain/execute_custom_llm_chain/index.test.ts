@@ -33,7 +33,7 @@ jest.mock('langchain/chains', () => ({
 const mockCall = jest.fn();
 jest.mock('langchain/agents', () => ({
   initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
-    call: mockCall,
+    call: mockCall.mockReturnValueOnce({ output: mockActionResponse.message }),
   })),
 }));
 
@@ -62,10 +62,6 @@ const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurr
 describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    ActionsClientLlm.prototype.getActionResultData = jest
-      .fn()
-      .mockReturnValueOnce(mockActionResponse);
   });
 
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
@@ -154,7 +150,7 @@ describe('callAgentExecutor', () => {
 
     expect(result).toEqual({
       connector_id: 'mock-connector-id',
-      data: mockActionResponse,
+      data: mockActionResponse.message,
       status: 'ok',
     });
   });

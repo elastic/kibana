@@ -71,9 +71,9 @@ describe('ActionsClientLlm', () => {
         request: mockRequest,
       });
 
-      await actionsClientLlm._call(prompt); // ignore the result
+      const result = await actionsClientLlm._call(prompt); // ignore the result
 
-      expect(actionsClientLlm.getActionResultData()).toEqual(mockActionResponse.message);
+      expect(result).toEqual(mockActionResponse.message);
     });
   });
 

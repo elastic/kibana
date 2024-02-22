@@ -229,23 +229,6 @@ describe('API tests', () => {
       expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
     });
 
-    it('returns the value of the action_input property when isEnabledKnowledgeBase is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
-      const response = '```json\n{"action_input": "value from action_input"}\n```';
-
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({
-        status: 'ok',
-        data: response,
-      });
-
-      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
-
-      expect(result).toEqual({
-        response: 'value from action_input',
-        isStream: false,
-        isError: false,
-      });
-    });
-
     it('returns the original content when isEnabledKnowledgeBase is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
       const response = '```json\n{"some_key": "some value"}\n```';
 

@@ -8,9 +8,7 @@
 import {
   getBlockBotConversation,
   getDefaultConnector,
-  getFormattedMessageContent,
   getOptionalRequestParams,
-  hasParsableResponse,
   mergeBaseWithPersistedConversations,
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
@@ -205,43 +203,6 @@ describe('helpers', () => {
     });
   });
 
-  describe('getFormattedMessageContent', () => {
-    it('returns the value of the action_input property when `content` has properly prefixed and suffixed JSON with the action_input property', () => {
-      const content = '```json\n{"action_input": "value from action_input"}\n```';
-
-      expect(getFormattedMessageContent(content)).toBe('value from action_input');
-    });
-
-    it('returns the original content when `content` has properly formatted JSON WITHOUT the action_input property', () => {
-      const content = '```json\n{"some_key": "some value"}\n```';
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` has improperly formatted JSON', () => {
-      const content = '```json\n{"action_input": "value from action_input",}\n```'; // <-- the trailing comma makes it invalid
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` is missing the prefix', () => {
-      const content = '{"action_input": "value from action_input"}\n```'; // <-- missing prefix
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` is missing the suffix', () => {
-      const content = '```json\n{"action_input": "value from action_input"}'; // <-- missing suffix
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` does NOT contain a JSON string', () => {
-      const content = 'plain text content';
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-  });
-
   describe('getOptionalRequestParams', () => {
     it('should return an empty object when alerts is false', () => {
       const params = {
@@ -287,44 +248,6 @@ describe('helpers', () => {
       expect(result).toEqual({
         allow: ['a', 'b', 'c'],
       });
-    });
-  });
-
-  describe('hasParsableResponse', () => {
-    it('returns true when just isEnabledKnowledgeBase is true', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: false,
-        isEnabledKnowledgeBase: true,
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('returns true when just isEnabledRAGAlerts is true', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: true,
-        isEnabledKnowledgeBase: false,
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('returns true when both isEnabledKnowledgeBase and isEnabledRAGAlerts are true', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: true,
-        isEnabledKnowledgeBase: true,
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false when both isEnabledKnowledgeBase and isEnabledRAGAlerts are false', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: false,
-        isEnabledKnowledgeBase: false,
-      });
-
-      expect(result).toBe(false);
     });
   });
 

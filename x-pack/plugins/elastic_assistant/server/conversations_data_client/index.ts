@@ -211,20 +211,15 @@ export class AIAssistantConversationsDataClient {
    * See {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html}
    * for more information around optimistic concurrency control.
    * @param options
-   * @param options.conversationUpdateProps
-   * @param options.id id of the conversation to replace the conversation container data with.
-   * @param options.title The new tilet, or "undefined" if this should not be updated.
-   * @param options.messages The new messages, or "undefined" if this should not be updated.
-   * @param options.excludeFromLastConversationStorage The new value for excludeFromLastConversationStorage, or "undefined" if this should not be updated.
-   * @param options.replacements The new value for replacements, or "undefined" if this should not be updated.
+   * @param options.conversationUpdateProps update properties for the conversation, must include conversation id
+   * @param options.authenticatedUser user making the update
+   * @param options.isPatch if true, the update will be a patch, otherwise it will be a full update
    */
   public updateConversation = async ({
-    existingConversation,
     conversationUpdateProps,
     authenticatedUser,
     isPatch,
   }: {
-    existingConversation: ConversationResponse;
     conversationUpdateProps: ConversationUpdateProps;
     authenticatedUser?: AuthenticatedUser;
     isPatch?: boolean;
@@ -234,7 +229,6 @@ export class AIAssistantConversationsDataClient {
       esClient,
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
-      existingConversation,
       conversationUpdateProps,
       isPatch,
       user: authenticatedUser,
@@ -243,8 +237,7 @@ export class AIAssistantConversationsDataClient {
 
   /**
    * Given a conversation id, this will delete the conversation from the id
-   * @param options
-   * @param options.id The id of the conversation to delete
+   * @param id The id of the conversation to delete
    * @returns The conversation deleted if found, otherwise null
    */
   public deleteConversation = async (id: string) => {

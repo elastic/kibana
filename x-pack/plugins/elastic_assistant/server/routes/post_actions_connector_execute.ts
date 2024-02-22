@@ -10,7 +10,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
 import {
-  ConversationResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
@@ -22,10 +21,7 @@ import {
 } from '../lib/telemetry/event_based_telemetry';
 import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
-import {
-  getLangChainMessages,
-  requestHasRequiredAnonymizationParams,
-} from '../lib/langchain/helpers';
+import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
@@ -77,11 +73,11 @@ export const postActionsConnectorExecuteRoute = (
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
           let onMessageSent;
-          let conversation: ConversationResponse | undefined | null;
           let prevMessages;
-          if (request.body.conversationId) {
-            conversation = await dataClient?.getConversation({
-              id: request.body.conversationId,
+          const conversationId = request.body.conversationId;
+          if (conversationId) {
+            const conversation = await dataClient?.getConversation({
+              id: conversationId,
               authenticatedUser,
             });
             prevMessages = conversation?.messages?.map((c) => ({
@@ -91,15 +87,14 @@ export const postActionsConnectorExecuteRoute = (
 
             if (conversation == null) {
               return response.notFound({
-                body: `conversation id: "${request.body.conversationId}" not found`,
+                body: `conversation id: "${conversationId}" not found`,
               });
             }
 
             if (request.body.replacements) {
               await dataClient?.updateConversation({
-                existingConversation: conversation,
                 conversationUpdateProps: {
-                  id: request.body.conversationId,
+                  id: conversationId,
                   replacements: request.body.replacements,
                 },
               });
@@ -123,9 +118,10 @@ export const postActionsConnectorExecuteRoute = (
                       timestamp: dateTimeString,
                     })),
                   });
+
                   if (res == null) {
                     return response.badRequest({
-                      body: `conversation id: "${request.body.conversationId}" not updated`,
+                      body: `conversation id: "${conversationId}" not updated`,
                     });
                   }
                 }
@@ -135,17 +131,17 @@ export const postActionsConnectorExecuteRoute = (
             await Promise.all(appendMessageFuncs.map((appendMessageFunc) => appendMessageFunc()));
 
             const updatedConversation = await dataClient?.getConversation({
-              id: request.body.conversationId,
+              id: conversationId,
               authenticatedUser,
             });
 
             if (updatedConversation == null) {
               return response.notFound({
-                body: `conversation id: "${request.body.conversationId}" not found`,
+                body: `conversation id: "${conversationId}" not found`,
               });
             }
 
-            onMessageSent = (content: string) => {
+            onMessageSent = (content: string, traceData?: Message['traceData'] = {}) => {
               if (updatedConversation) {
                 dataClient?.appendConversationMessages({
                   existingConversation: updatedConversation,
@@ -157,6 +153,7 @@ export const postActionsConnectorExecuteRoute = (
                           | Record<string, string>
                           | undefined,
                       }),
+                      traceData,
                     }),
                   ],
                 });
@@ -170,10 +167,7 @@ export const postActionsConnectorExecuteRoute = (
           const actions = (await context.elasticAssistant).actions;
 
           // if not langchain, call execute action directly and return the response:
-          if (
-            !request.body.isEnabledKnowledgeBase &&
-            !requestHasRequiredAnonymizationParams(request)
-          ) {
+          if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
             logger.debug('Executing via actions framework directly');
             const result = await executeAction({
               onMessageSent,
@@ -218,7 +212,7 @@ export const postActionsConnectorExecuteRoute = (
 
           // convert the assistant messages to LangChain messages:
           const langChainMessages = getLangChainMessages(
-            ([...(prevMessages ?? []), request.body.params.subActionParams.messages] ??
+            ([...(prevMessages ?? []), ...request.body.params.subActionParams.messages] ??
               []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 
@@ -254,28 +248,26 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
 
-          if (conversation != null) {
-            dataClient?.appendConversationMessages({
-              existingConversation: conversation,
-              messages: [
-                getMessageFromRawResponse({
-                  rawContent: langChainResponseBody.data,
-                  traceData: langChainResponseBody.trace_data
-                    ? {
-                        traceId: langChainResponseBody.trace_data.trace_id,
-                        transactionId: langChainResponseBody.trace_data.transaction_id,
-                      }
-                    : {},
-                }),
-              ],
-            });
-            await dataClient?.updateConversation({
-              existingConversation: conversation,
-              conversationUpdateProps: {
-                id: conversation.id,
-                replacements: latestReplacements,
-              },
-            });
+          if (conversationId) {
+            onMessageSent?.(
+              langChainResponseBody.data,
+              langChainResponseBody.trace_data
+                ? {
+                    traceId: langChainResponseBody.trace_data.trace_id,
+                    transactionId: langChainResponseBody.trace_data.transaction_id,
+                  }
+                : {}
+            );
+
+            if (Object.keys(latestReplacements).length > 0) {
+              // TODO, I think if this request happens before append message is done, it could interrupt append message
+              await dataClient?.updateConversation({
+                conversationUpdateProps: {
+                  id: conversationId,
+                  replacements: latestReplacements,
+                },
+              });
+            }
           }
           return response.ok({
             body: {

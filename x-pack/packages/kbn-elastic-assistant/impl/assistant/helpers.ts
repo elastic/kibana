@@ -82,27 +82,6 @@ export const getDefaultConnector = (
 ): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
   connectors?.length === 1 ? connectors[0] : undefined;
 
-/**
- * When `content` is a JSON string, prefixed with "```json\n"
- * and suffixed with "\n```", this function will attempt to parse it and return
- * the `action_input` property if it exists.
- */
-export const getFormattedMessageContent = (content: string): string => {
-  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
-
-  if (formattedContentMatch) {
-    try {
-      const parsedContent = JSON.parse(formattedContentMatch[1]);
-
-      return parsedContent.action_input ?? content;
-    } catch {
-      // we don't want to throw an error here, so we'll fall back to the original content
-    }
-  }
-
-  return content;
-};
-
 interface OptionalRequestParams {
   alertsIndexPattern?: string;
   allow?: string[];
@@ -140,14 +119,6 @@ export const getOptionalRequestParams = ({
     ...optionalSize,
   };
 };
-
-export const hasParsableResponse = ({
-  isEnabledRAGAlerts,
-  isEnabledKnowledgeBase,
-}: {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
-}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
 
 export const llmTypeDictionary: Record<string, string> = {
   'Amazon Bedrock': 'bedrock',
