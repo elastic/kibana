@@ -13,6 +13,7 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { getBoundsRoundedToInterval } from '../../common/time_buckets';
 import { useTimeBuckets } from './use_time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
+import { useReload } from './use_reload';
 
 export const FilterQueryContext = createContext<{
   filters: Filter[];
@@ -60,6 +61,7 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
   } = useAiopsAppContext();
 
   const timeBuckets = useTimeBuckets();
+  const reload = useReload();
 
   const [resultFilters, setResultFilter] = useState<Filter[]>(filterManager.getFilters());
   const [resultQuery, setResultQuery] = useState<Query | AggregateQuery>(queryString.getQuery());
@@ -88,9 +90,14 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
     return timeRange ?? timeRangeUpdates;
   }, [timeRangeUpdates, timeRange]);
 
+  /**
+   * Search bounds derived from the time range.
+   * Has to be updated on reload, in case relative time range is used.
+   */
   const bounds = useMemo(() => {
     return timefilter.timefilter.calculateBounds(resultTimeRange);
-  }, [resultTimeRange, timefilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultTimeRange, timefilter, reload]);
 
   const timeBucketsInterval = useMemo(() => {
     timeBuckets.setInterval('auto');
@@ -99,7 +106,7 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
   }, [bounds, timeBuckets]);
 
   /**
-   * Search bounds rounded to the time buckets interval
+   * Search bounds rounded to the time buckets interval.
    */
   const searchBounds = useMemo(() => {
     return getBoundsRoundedToInterval(bounds, timeBucketsInterval, false);
