@@ -40,7 +40,11 @@ export const ViewDetailsPopover = (props: Props) => {
         {viewDetailsLabel}
       </EuiLink>
     ) : (
-      <EuiButton color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiButton
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiButton>
     );
