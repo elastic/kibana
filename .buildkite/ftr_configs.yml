@@ -53,16 +53,16 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
-  - x-pack/plugins/profiling/e2e/ftr_config_open.ts
-  - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
-  - x-pack/plugins/profiling/e2e/ftr_config.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_runner.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config.ts
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
   - x-pack/plugins/uptime/e2e/uptime/synthetics_run.ts
   - x-pack/plugins/synthetics/e2e/synthetics/synthetics_run.ts
-  - x-pack/plugins/ux/e2e/synthetics_run.ts
-  - x-pack/plugins/exploratory_view/e2e/synthetics_run.ts
+  - x-pack/plugins/observability_solution/exploratory_view/e2e/synthetics_run.ts
+  - x-pack/plugins/observability_solution/ux/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts

@@ -7,6 +7,7 @@
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
 export const DEFAULT_DATASET_TYPE = 'logs';
+export const DEFAULT_LOGS_DATA_VIEW = 'logs-*-*';
 
 export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
 export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;

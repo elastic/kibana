@@ -14,7 +14,6 @@ export interface Action {
   href?: string;
   onClick?: (event: MouseEvent) => void;
   condition: boolean;
-  showNewBadge?: boolean;
 }
 
 interface Section {
