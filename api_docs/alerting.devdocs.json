@@ -3361,19 +3361,19 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/common.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/common.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/tls_rule/message_utils.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/tls_rule/message_utils.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/tls_rule/tls_rule.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/tls_rule/tls_rule.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
               },
               {
                 "plugin": "uptime",
