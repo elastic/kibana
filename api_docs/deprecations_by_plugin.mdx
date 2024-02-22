@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByPlugin
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2024-02-20
+date: 2024-02-22
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -320,6 +320,14 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibKbnCoreUiSettingsCommonPluginApi" section="def-common.UiSettingsParams.metric" text="metric"/> | [get_definition.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-management/settings/field_definition/get_definition.ts#:~:text=metric) | - |
+
+
+
+## @kbn/monaco
+
+| Deprecated API | Reference location(s) | Remove By |
+| ---------------|-----------|-----------|
+| <DocLink id="kibKbnUiThemePluginApi" section="def-common.darkMode" text="darkMode"/> | [esql_theme.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-monaco/src/esql/lib/monaco/esql_theme.ts#:~:text=darkMode), [esql_theme.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-monaco/src/esql/lib/monaco/esql_theme.ts#:~:text=darkMode) | - |
 
 
 
@@ -734,10 +742,10 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
-| <DocLink id="kibDiscoverPluginApi" section="def-common.DiscoverAppLocatorParams.indexPatternId" text="indexPatternId"/> | [use_discover_link.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx#:~:text=indexPatternId) | - |
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.toMountPoint" text="toMountPoint"/> | [add_to_case_action.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx#:~:text=toMountPoint), [add_to_case_action.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx#:~:text=toMountPoint) | - |
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/application/index.tsx#:~:text=KibanaThemeProvider), [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/application/index.tsx#:~:text=KibanaThemeProvider), [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/application/index.tsx#:~:text=KibanaThemeProvider) | - |
-| <DocLink id="kibKbnCoreSavedObjectsBrowserPluginApi" section="def-common.SavedObjectsStart" text="SavedObjectsStart"/> | [types.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/application/types.ts#:~:text=SavedObjectsStart), [types.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/exploratory_view/public/application/types.ts#:~:text=SavedObjectsStart) | - |
+| <DocLink id="kibDiscoverPluginApi" section="def-common.DiscoverAppLocatorParams.indexPatternId" text="indexPatternId"/> | [use_discover_link.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx#:~:text=indexPatternId) | - |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.toMountPoint" text="toMountPoint"/> | [add_to_case_action.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx#:~:text=toMountPoint), [add_to_case_action.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx#:~:text=toMountPoint) | - |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx#:~:text=KibanaThemeProvider), [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx#:~:text=KibanaThemeProvider), [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx#:~:text=KibanaThemeProvider) | - |
+| <DocLink id="kibKbnCoreSavedObjectsBrowserPluginApi" section="def-common.SavedObjectsStart" text="SavedObjectsStart"/> | [types.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts#:~:text=SavedObjectsStart), [types.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts#:~:text=SavedObjectsStart) | - |
 
 
 
@@ -1213,7 +1221,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.toMountPoint" text="toMountPoint"/> | [header_menu_portal.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx#:~:text=toMountPoint), [header_menu_portal.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx#:~:text=toMountPoint) | - |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.toMountPoint" text="toMountPoint"/> | [header_menu_portal.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx#:~:text=toMountPoint), [header_menu_portal.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx#:~:text=toMountPoint) | - |
 
 
 
@@ -1251,8 +1259,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/profiling/public/app.tsx#:~:text=KibanaThemeProvider), [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/profiling/public/app.tsx#:~:text=KibanaThemeProvider), [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/profiling/public/app.tsx#:~:text=KibanaThemeProvider) | - |
-| <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | [license_context.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx#:~:text=license%24) | 8.8.0 |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/profiling/public/app.tsx#:~:text=KibanaThemeProvider), [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/profiling/public/app.tsx#:~:text=KibanaThemeProvider), [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/profiling/public/app.tsx#:~:text=KibanaThemeProvider) | - |
+| <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | [license_context.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx#:~:text=license%24) | 8.8.0 |
 
 
 
@@ -1447,6 +1455,7 @@ migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_BLOCKLISTS_LIST_ID" text="ENDPOINT_BLOCKLISTS_LIST_ID"/> | [lists.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [lists.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [blocklist_validator.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [blocklist_validator.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [policy_hooks.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [policy_hooks.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [constants.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [constants.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [blocklists_api_client.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/services/blocklists_api_client.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID), [blocklists_api_client.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/services/blocklists_api_client.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_ID)+ 8 more | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_BLOCKLISTS_LIST_NAME" text="ENDPOINT_BLOCKLISTS_LIST_NAME"/> | [constants.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_NAME), [constants.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_NAME), [index.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_NAME), [index.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_NAME) | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION" text="ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION"/> | [constants.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION), [constants.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION), [index.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION), [index.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts#:~:text=ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION) | - |
+| <DocLink id="kibKbnUiThemePluginApi" section="def-common.darkMode" text="darkMode"/> | [use_colors.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/resolver/view/use_colors.ts#:~:text=darkMode), [use_colors.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/resolver/view/use_colors.ts#:~:text=darkMode), [use_colors.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/resolver/view/use_colors.ts#:~:text=darkMode), [use_colors.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/resolver/view/use_colors.ts#:~:text=darkMode), [use_colors.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/resolver/view/use_colors.ts#:~:text=darkMode) | - |
 
 
 
@@ -1614,7 +1623,7 @@ migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/
 
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [ux_app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/ux/public/application/ux_app.tsx#:~:text=KibanaThemeProvider), [ux_app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/ux/public/application/ux_app.tsx#:~:text=KibanaThemeProvider), [ux_app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/ux/public/application/ux_app.tsx#:~:text=KibanaThemeProvider) | - |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [ux_app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx#:~:text=KibanaThemeProvider), [ux_app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx#:~:text=KibanaThemeProvider), [ux_app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx#:~:text=KibanaThemeProvider) | - |
 
 
 
