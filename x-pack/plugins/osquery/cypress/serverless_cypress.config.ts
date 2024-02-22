@@ -34,7 +34,7 @@ export default defineCypressConfig({
     grepOmitFiltered: true,
   },
   e2e: {
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern: './cypress/e2e/tiers/*.cy.ts',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
