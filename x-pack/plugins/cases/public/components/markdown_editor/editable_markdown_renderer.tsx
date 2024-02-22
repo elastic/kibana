@@ -38,8 +38,7 @@ const EditableMarkDownRenderer = forwardRef<
     ref
   ) => {
     const { appId } = useCasesContext();
-    const draftStorageKey = getMarkdownEditorStorageKey({ appId, caseId, commentId: id });
-
+    const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
     const initialState = { content };
 
     const { form } = useForm({
