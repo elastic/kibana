@@ -51,7 +51,7 @@ export const importRulesRoute = (
         timeout: {
           // Rule import rule may take a significant amount of time
           // socket shouldn't be closed during this period
-          idleSocket: 30 * 60 * 1000,
+          idleSocket: 3600 * 1000,
         },
       },
     })
