@@ -42,7 +42,7 @@ describe('TimelineBottomBar', () => {
   test('should not render the event count badge if timeline is open', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <TimelineBottomBar show={false} timelineId={TimelineId.test} openToggleRef={mockRef} />
+        <TimelineBottomBar show={true} timelineId={TimelineId.test} openToggleRef={mockRef} />
       </TestProviders>
     );
 
@@ -54,7 +54,7 @@ describe('TimelineBottomBar', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <TimelineBottomBar show={false} timelineId={TimelineId.test} openToggleRef={mockRef} />
+        <TimelineBottomBar show={true} timelineId={TimelineId.test} openToggleRef={mockRef} />
       </TestProviders>
     );
 
