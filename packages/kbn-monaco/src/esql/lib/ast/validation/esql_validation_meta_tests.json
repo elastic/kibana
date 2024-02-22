@@ -559,11 +559,11 @@
       "error": true
     },
     {
-      "query": "row var = coalesce(\"a\")",
+      "query": "row var = coalesce(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row coalesce(\"a\")",
+      "query": "row coalesce(\"a\", \"a\")",
       "error": false
     },
     {
@@ -727,19 +727,19 @@
       "error": true
     },
     {
-      "query": "row var = greatest(\"a\")",
+      "query": "row var = greatest(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row greatest(\"a\")",
+      "query": "row greatest(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row var = least(\"a\")",
+      "query": "row var = least(\"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row least(\"a\")",
+      "query": "row least(\"a\", \"a\")",
       "error": false
     },
     {
@@ -4615,16 +4615,12 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = coalesce(stringField)",
+      "query": "from a_index | eval var = coalesce(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval coalesce(stringField)",
+      "query": "from a_index | eval coalesce(stringField, stringField)",
       "error": false
-    },
-    {
-      "query": "from a_index | eval var = coalesce(*)",
-      "error": true
     },
     {
       "query": "from a_index | eval var = concat(stringField, stringField, stringField)",
@@ -4835,28 +4831,20 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = greatest(stringField)",
+      "query": "from a_index | eval var = greatest(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval greatest(stringField)",
+      "query": "from a_index | eval greatest(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = greatest(*)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = least(stringField)",
+      "query": "from a_index | eval var = least(stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval least(stringField)",
+      "query": "from a_index | eval least(stringField, stringField)",
       "error": false
-    },
-    {
-      "query": "from a_index | eval var = least(*)",
-      "error": true
     },
     {
       "query": "from a_index | eval var = left(stringField, numberField)",
