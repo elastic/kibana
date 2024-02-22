@@ -25,7 +25,7 @@ import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
 } from '../template/install';
-import { loadTransformFieldsFromYaml, processFields } from '../../fields/field';
+import { isFields, loadTransformFieldsFromYaml, processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
@@ -150,6 +150,15 @@ const installLegacyTransformsAssets = async (
   return { installedTransforms, esReferences };
 };
 
+function loadMappingForTransform(
+  packageInstallContext: PackageInstallContext,
+  transformModuleId: string
+) {
+  const fields = loadTransformFieldsFromYaml(packageInstallContext, transformModuleId);
+  const validFields = processFields(fields);
+  return generateMappings(validFields);
+}
+
 const processTransformAssetsPerModule = (
   packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
@@ -180,6 +189,33 @@ const processTransformAssetsPerModule = (
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
     const content = safeLoad(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
+
+    // Handling fields.yml and all other files within 'fields' folder
+    if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
+      const templateName = getTransformAssetNameForInstallation(
+        installablePackage,
+        transformModuleId,
+        'template'
+      );
+      const indexToModify = destinationIndexTemplates.findIndex(
+        (t) => t.transformModuleId === transformModuleId && t.installationName === templateName
+      );
+      const template = {
+        transformModuleId,
+        _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+        installationName: getTransformAssetNameForInstallation(
+          installablePackage,
+          transformModuleId,
+          'template'
+        ),
+        template: {},
+      } as DestinationIndexTemplateInstallation;
+      if (indexToModify === -1) {
+        destinationIndexTemplates.push(template);
+      } else {
+        destinationIndexTemplates[indexToModify] = template;
+      }
+    }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
       const installationOrder =
@@ -363,15 +399,12 @@ const processTransformAssetsPerModule = (
       continue;
     }
 
-    const fields = loadTransformFieldsFromYaml(
-      packageInstallContext,
-      destinationIndexTemplate.transformModuleId
-    );
-    const validFields = processFields(fields);
-    const mappings = generateMappings(validFields);
     transformsSpecifications
       .get(destinationIndexTemplate.transformModuleId)
-      ?.set('mappings', mappings);
+      ?.set(
+        'mappings',
+        loadMappingForTransform(packageInstallContext, destinationIndexTemplate.transformModuleId)
+      );
   }
 
   return {
