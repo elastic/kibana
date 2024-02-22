@@ -208,4 +208,12 @@ export function setupSavedObjects(
     // attributesToIncludeInAAD: new Set(['enabled', 'start', 'duration', 'createdAt', 'spaceId', 'rule']),
     attributesToExcludeFromAAD: new Set(['status', 'schedule']),
   });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['apiKeyToUse']),
+    // attributesToIncludeInAAD: new Set(['enabled', 'start', 'duration', 'createdAt', 'spaceId', 'rule']),
+    attributesToExcludeFromAAD: new Set(['status', 'schedule']),
+  });
 }
