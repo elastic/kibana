@@ -250,10 +250,10 @@ export class PluginsSystem<T extends PluginType> {
         try {
           const resultMaybe = await withTimeout({
             promise: plugin.stop(),
-            timeoutMs: 30 * Sec,
+            timeoutMs: 15 * Sec,
           });
           if (resultMaybe?.timedout) {
-            this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+            this.log.warn(`"${pluginName}" plugin didn't stop in 15sec., move on to the next.`);
           }
         } catch (e) {
           this.log.warn(`"${pluginName}" thrown during stop: ${e}`);

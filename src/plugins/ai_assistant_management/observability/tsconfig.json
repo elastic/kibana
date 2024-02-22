@@ -15,7 +15,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/serverless",
-    "@kbn/translations-plugin"
+    "@kbn/translations-plugin",
+    "@kbn/enterprise-search-plugin"
   ],
   "exclude": ["target/**/*"]
 }

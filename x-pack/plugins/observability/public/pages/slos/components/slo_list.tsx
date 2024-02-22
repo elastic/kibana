@@ -7,15 +7,18 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
-import React from 'react';
+import React, { useEffect } from 'react';
+import dedent from 'dedent';
+import { groupBy as _groupBy, mapValues } from 'lodash';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
 import { ToggleSLOView } from './toggle_slo_view';
 import { GroupView } from './grouped_slos/group_view';
+import { useKibana } from '../../../utils/kibana_react';
 
 export function SloList() {
-  const { state, onStateChange: storeState } = useUrlSearchState();
+  const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
   const {
@@ -34,16 +37,51 @@ export function SloList() {
     sortDirection: state.sort.direction,
     lastRefresh: state.lastRefresh,
   });
+
+  const {
+    observabilityAIAssistant: {
+      service: { setScreenContext },
+    },
+  } = useKibana().services;
   const { results = [], total = 0 } = sloList ?? {};
 
-  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
-  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
-  const onStateChange = (newState: Partial<SearchState>) => {
-    storeState({ page: 0, ...newState });
-  };
+  useEffect(() => {
+    if (!sloList) {
+      return;
+    }
+
+    const slosByStatus = mapValues(
+      _groupBy(sloList.results, (result) => result.summary.status),
+      (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
+    ) as Record<typeof results[number]['summary']['status'], string>;
+
+    return setScreenContext({
+      screenDescription: dedent(`The user is looking at a list of SLOs.
+
+      ${
+        sloList.total >= 1
+          ? `There are ${sloList.total} SLOs. Out of those, ${sloList.results.length} are visible.
+
+          Violating SLOs:
+          ${slosByStatus.VIOLATED}
+
+          Degrading SLOs:
+          ${slosByStatus.DEGRADING}
+
+          Healthy SLOs:
+          ${slosByStatus.HEALTHY}
+
+          SLOs without data:
+          ${slosByStatus.NO_DATA}
+
+          `
+          : ''
+      }
+      `),
+    });
+  }, [sloList, setScreenContext]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
@@ -54,7 +92,7 @@ export function SloList() {
           onChangeView={(newView) => onStateChange({ view: newView })}
           onStateChange={onStateChange}
           state={state}
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
+          loading={isLoading || isDeletingSlo}
         />
       </EuiFlexItem>
       {groupBy === 'ungrouped' && (

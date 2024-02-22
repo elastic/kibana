@@ -7,3 +7,9 @@
  */
 
 export const EDITOR_MARKER = 'marker_esql_editor';
+
+export const TICKS_REGEX = /^(`)|(`)$/g;
+export const DOUBLE_TICKS_REGEX = /``/g;
+export const SINGLE_TICK_REGEX = /`/g;
+export const SINGLE_BACKTICK = '`';
+export const DOUBLE_BACKTICK = '``';

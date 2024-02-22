@@ -95,4 +95,30 @@ describe('Transform partial URL state into form state', () => {
       transform({ objective: { target: 0.945, timesliceTarget: 0.95, timesliceWindow: '2m' } })
     ).toMatchSnapshot();
   });
+
+  it("handles the 'filters' URL state", () => {
+    expect(
+      transform({
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            good: {
+              kqlQuery: "some.override.filter:'foo'",
+              filters: [
+                {
+                  meta: {
+                    alias: 'override-alias',
+                    negate: true,
+                    disabled: true,
+                    key: 'override',
+                  },
+                },
+              ],
+            },
+            index: 'override-index',
+          },
+        },
+      })
+    ).toMatchSnapshot();
+  });
 });
