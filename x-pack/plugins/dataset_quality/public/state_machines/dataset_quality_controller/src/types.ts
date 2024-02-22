@@ -55,6 +55,7 @@ export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
     datasetDetails?: DataStreamDetails;
+    insightsTimeRange?: TimeRangeConfig;
   };
 }
 
@@ -133,6 +134,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'SELECT_NEW_DATASET';
       dataset: FlyoutDataset;
+    }
+  | {
+      type: 'UPDATE_INSIGHTS_TIME_RANGE';
+      timeRange: TimeRangeConfig;
     }
   | {
       type: 'CLOSE_FLYOUT';

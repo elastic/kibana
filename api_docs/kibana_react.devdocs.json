@@ -1311,15 +1311,15 @@
           },
           {
             "plugin": "profiling",
-            "path": "x-pack/plugins/profiling/public/app.tsx"
+            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
           },
           {
             "plugin": "profiling",
-            "path": "x-pack/plugins/profiling/public/app.tsx"
+            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
           },
           {
             "plugin": "profiling",
-            "path": "x-pack/plugins/profiling/public/app.tsx"
+            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
           },
           {
             "plugin": "apm",

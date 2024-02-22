@@ -4,7 +4,7 @@
 Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 ### Universal profiling setup
-Universal Profiling is enabled by default on [Elastic Cloud](https://www.elastic.co/cloud/), and you can find it under **Observability**. To see data in Universal Profiling, you need to initialize it. 
+Universal Profiling is enabled by default on [Elastic Cloud](https://www.elastic.co/cloud/), and you can find it under **Observability**. To see data in Universal Profiling, you need to initialize it.
 
 ##### **Initialize Universal Profiling**
 Initialize Universal Profiling by navigating to one of the views and clicking the **Set up** button. Clicking this will trigger some checks and install some packages so data can be processed.
@@ -34,7 +34,7 @@ It processes both publicly-available debug symbols and "private" debug symbols.
 
 For public symbols, users don't have to do anything: the symbolizer asynchronously intercepts unsymbolized frames and populates them automatically.
 
-For private symbols, an HTTPS endpoint is provided to users for uploading the debug symbols of the software they own. 
+For private symbols, an HTTPS endpoint is provided to users for uploading the debug symbols of the software they own.
 
 The authentication and authorization on this endpoint are provided as part of the request, in form of an Elasticsearch API key.
 
@@ -43,36 +43,36 @@ The authentication and authorization on this endpoint are provided as part of th
 ### Unit Tests (Jest)
 
 ```
-node scripts/jest --config x-pack/plugins/profiling/jest.config.js [--watchAll]
+node scripts/jest --config x-pack/plugins/observability_solution/profiling/jest.config.js [--watchAll]
 ```
 
 ## E2E Tests (Cypress)
-The E2E tests are located in [`x-pack/plugins/profiling/e2e`](./e2e).
+The E2E tests are located in [`x-pack/plugins/observability_solution/profiling/e2e`](./e2e).
 
-Universal Profiling uses [FTR](../../../packages/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/plugins/profiling/e2e/cypress/e2e`.
+Universal Profiling uses [FTR](../../../packages/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/plugins/observability_solution/profiling/e2e/cypress/e2e`.
 
 ### Start test server
 
 ```
-node x-pack/plugins/profiling/scripts/test/e2e --server
+node x-pack/plugins/observability_solution/profiling/scripts/test/e2e --server
 ```
 
 ### Open cypress dashboard
 
 ```
-node x-pack/plugins/profiling/scripts/test/e2e --open
+node x-pack/plugins/observability_solution/profiling/scripts/test/e2e --open
 ```
 
 ### Run tests in terminal
 
 ```
-node x-pack/plugins/profiling/scripts/test/e2e --runner
+node x-pack/plugins/observability_solution/profiling/scripts/test/e2e --runner
 ```
 
 ### Run like CI
 
 ```
-node x-pack/plugins/profiling/scripts/test/e2e
+node x-pack/plugins/observability_solution/profiling/scripts/test/e2e
 ```
 
 ## Other resources

@@ -10,6 +10,8 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { CreateDatasetQualityController } from './controller';
 import { DatasetQualityProps } from './components/dataset_quality';
 
@@ -26,6 +28,8 @@ export interface DatasetQualityStartDeps {
   share: SharePluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface DatasetQualitySetupDeps {

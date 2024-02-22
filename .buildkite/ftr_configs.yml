@@ -53,9 +53,9 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
-  - x-pack/plugins/profiling/e2e/ftr_config_open.ts
-  - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
-  - x-pack/plugins/profiling/e2e/ftr_config.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_runner.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config.ts
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
