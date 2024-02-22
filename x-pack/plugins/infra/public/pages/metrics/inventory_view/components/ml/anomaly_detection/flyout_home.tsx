@@ -33,6 +33,7 @@ interface Props {
   hasSetupCapabilities: boolean;
   goToSetup(type: 'hosts' | 'kubernetes'): void;
   closeFlyout(): void;
+  isHostsPage: boolean;
 }
 
 type Tab = 'jobs' | 'anomalies';
@@ -181,6 +182,7 @@ export const FlyoutHome = (props: Props) => {
                 hasSetupCapabilities={props.hasSetupCapabilities}
                 createHosts={createHosts}
                 createK8s={createK8s}
+                isHostsPage={props.isHostsPage}
               />
             </>
           )}
@@ -239,6 +241,7 @@ interface CreateJobTab {
   hasK8sJobs: boolean;
   createHosts(): void;
   createK8s(): void;
+  isHostsPage: boolean;
 }
 
 const CreateJobTab = (props: CreateJobTab) => {
@@ -291,50 +294,52 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            isDisabled={!props.hasSetupCapabilities}
-            icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
-            title={
-              <FormattedMessage
-                defaultMessage="Kubernetes Pods"
-                id="xpack.infra.ml.anomalyFlyout.create.k8sTitle"
-              />
-            }
-            description={
-              <FormattedMessage
-                defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
-                id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
-              />
-            }
-            footer={
-              <>
-                {props.hasK8sJobs && (
-                  <EuiButtonEmpty
-                    data-test-subj="infraCreateJobTabRecreateJobsButton"
-                    onClick={props.createK8s}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Recreate jobs"
-                      id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
-                    />
-                  </EuiButtonEmpty>
-                )}
-                {!props.hasK8sJobs && (
-                  <EuiButton
-                    data-test-subj="infraCreateJobTabEnableButton"
-                    onClick={props.createK8s}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Enable"
-                      id="xpack.infra.ml.anomalyFlyout.create.createButton"
-                    />
-                  </EuiButton>
-                )}
-              </>
-            }
-          />
-        </EuiFlexItem>
+        {!props.isHostsPage && (
+          <EuiFlexItem>
+            <EuiCard
+              isDisabled={!props.hasSetupCapabilities}
+              icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
+              title={
+                <FormattedMessage
+                  defaultMessage="Kubernetes Pods"
+                  id="xpack.infra.ml.anomalyFlyout.create.k8sTitle"
+                />
+              }
+              description={
+                <FormattedMessage
+                  defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
+                  id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
+                />
+              }
+              footer={
+                <>
+                  {props.hasK8sJobs && (
+                    <EuiButtonEmpty
+                      data-test-subj="infraCreateJobTabRecreateJobsButton"
+                      onClick={props.createK8s}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Recreate jobs"
+                        id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
+                      />
+                    </EuiButtonEmpty>
+                  )}
+                  {!props.hasK8sJobs && (
+                    <EuiButton
+                      data-test-subj="infraCreateJobTabEnableButton"
+                      onClick={props.createK8s}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Enable"
+                        id="xpack.infra.ml.anomalyFlyout.create.createButton"
+                      />
+                    </EuiButton>
+                  )}
+                </>
+              }
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

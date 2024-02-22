@@ -96,6 +96,18 @@ export const InfrastructurePage = () => {
                               {settingsTabTitle}
                             </EuiHeaderLink>
                             <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                            <Route
+                              path={'/hosts'}
+                              render={() => {
+                                return <AnomalyDetectionFlyout isHostsPage />;
+                              }}
+                            />
+                            <Route
+                              path={'/detail/host'}
+                              render={() => {
+                                return <AnomalyDetectionFlyout isHostsPage />;
+                              }}
+                            />
                             {config.featureFlags.alertsAndRulesDropdownEnabled && (
                               <MetricsAlertDropdown />
                             )}
