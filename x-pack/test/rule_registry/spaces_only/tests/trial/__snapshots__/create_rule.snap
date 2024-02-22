@@ -100,6 +100,9 @@ Object {
   "event.kind": Array [
     "signal",
   ],
+  "kibana.alert.consecutive_matches": Array [
+    0,
+  ],
   "kibana.alert.evaluation.threshold": Array [
     30,
   ],

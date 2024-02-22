@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1[ALERT_UUID]).to.be('string');
       expect(typeof hits1[ALERT_URL]).to.be('string');
       expect(typeof hits1[VERSION]).to.be('string');
+      expect(typeof hits1[ALERT_CONSECUTIVE_MATCHES]).to.be('number');
 
       // remove fields we aren't going to compare directly
       const fields = [
@@ -130,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.uuid',
         'kibana.alert.url',
         'kibana.version',
+        'kibana.alert.consecutive_matches',
       ];
 
       for (const field of fields) {
@@ -145,7 +147,6 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
-        [ALERT_CONSECUTIVE_MATCHES]: 1,
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
@@ -242,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[EVENT_ACTION]).to.be('active');
       expect(hits1[ALERT_DURATION]).to.not.be.lessThan(0);
       expect(hits2[ALERT_DURATION]).not.to.be(0);
+      expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
 
       // remove fields we know will be different
       const fields = [
@@ -251,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.flapping_history',
         'kibana.alert.reason',
         'kibana.alert.rule.execution.uuid',
+        'kibana.alert.consecutive_matches',
       ];
 
       for (const field of fields) {
