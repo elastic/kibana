@@ -44,7 +44,7 @@ export const getVisualization = ({
         defaultMessage: 'Map',
       }),
       sortPriority: 1,
-      showExperimentalBadge: true,
+      showExperimentalBadge: false,
     },
   ],
 
