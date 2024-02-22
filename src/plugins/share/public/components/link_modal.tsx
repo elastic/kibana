@@ -8,7 +8,7 @@
 
 import { EuiCodeBlock, EuiForm, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 interface LinkProps {
@@ -18,6 +18,8 @@ interface LinkProps {
   isEmbedded: boolean;
   shareableUrlForSavedObject?: string;
   shareableUrl?: string;
+  onClose: () => void;
+  setCopyLinkData: Dispatch<SetStateAction<string>>;
 }
 
 interface UrlParams {
@@ -33,6 +35,7 @@ export const LinkModal = ({
   isEmbedded,
   shareableUrl,
   shareableUrlForSavedObject,
+  setCopyLinkData,
 }: LinkProps) => {
   const [urlParams] = useState<UrlParams | undefined>(undefined);
 
@@ -70,8 +73,8 @@ export const LinkModal = ({
   const updateUrlParams = (url: string) => {
     url = isEmbedded ? makeUrlEmbeddable(url) : url;
     url = urlParams ? getUrlParamExtensions(url) : url;
-
-    return url.padEnd(0, '.');
+    setCopyLinkData(url);
+    return url;
   };
 
   const getSavedObjectUrl = () => {
@@ -124,10 +127,10 @@ export const LinkModal = ({
     return getSavedObjectUrl();
   };
 
-  const displayLink = () => {
-    const stringLength = renderLink()?.length;
-    return stringLength! > 40 ? renderLink()?.slice(0, 40).concat('...') : renderLink();
-  };
+  // const displayLink = () => {
+  //   const stringLength = renderLink()?.length;
+  //   return stringLength! > 40 ? renderLink()?.slice(0, 40).concat('...') : renderLink();
+  // };
 
   return (
     <EuiForm>
@@ -140,7 +143,7 @@ export const LinkModal = ({
         />
       </EuiFormHelpText>
       <EuiSpacer size="l" />
-      <EuiCodeBlock onCopy={() => renderLink()}>{displayLink()}</EuiCodeBlock>
+      <EuiCodeBlock whiteSpace="pre">{renderLink()}</EuiCodeBlock>
       <EuiSpacer />
     </EuiForm>
   );
