@@ -33,7 +33,9 @@
             "tags": [],
             "label": "user",
             "description": [],
-            "signature": ["{ id?: string | undefined; name: string; }"],
+            "signature": [
+              "{ id?: string | undefined; name: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -45,7 +47,9 @@
             "tags": [],
             "label": "conversation",
             "description": [],
-            "signature": ["{ id: string; title: string; last_updated: string; }"],
+            "signature": [
+              "{ id: string; title: string; last_updated: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -78,7 +82,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -90,7 +96,9 @@
             "tags": [],
             "label": "numeric_labels",
             "description": [],
-            "signature": ["{ [x: string]: number; }"],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -182,7 +190,9 @@
             "tags": [],
             "label": "confidence",
             "description": [],
-            "signature": ["\"medium\" | \"high\" | \"low\""],
+            "signature": [
+              "\"medium\" | \"high\" | \"low\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -216,7 +226,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["Record<string, string> | undefined"],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -333,7 +345,9 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1374,7 +1388,9 @@
                 "tags": [],
                 "label": "endpoint",
                 "description": [],
-                "signature": ["TEndpoint"],
+                "signature": [
+                  "TEndpoint"
+                ],
                 "path": "packages/kbn-server-route-repository/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1451,7 +1467,13 @@
             "tags": [],
             "label": "getLicense",
             "description": [],
-            "signature": ["() => ", "Observable", "<", "ILicense", ">"],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "ILicense",
+              ">"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1515,7 +1537,9 @@
                     "tags": [],
                     "label": "signal",
                     "description": [],
-                    "signature": ["AbortSignal"],
+                    "signature": [
+                      "AbortSignal"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1532,7 +1556,11 @@
             "tags": [],
             "label": "register",
             "description": [],
-            "signature": ["(fn: ", "ChatRegistrationRenderFunction", ") => void"],
+            "signature": [
+              "(fn: ",
+              "ChatRegistrationRenderFunction",
+              ") => void"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1544,7 +1572,9 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": ["ChatRegistrationRenderFunction"],
+                "signature": [
+                  "ChatRegistrationRenderFunction"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1576,7 +1606,9 @@
                 "tags": [],
                 "label": "screenContext",
                 "description": [],
-                "signature": ["ObservabilityAIAssistantScreenContext"],
+                "signature": [
+                  "ObservabilityAIAssistantScreenContext"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1592,7 +1624,11 @@
             "tags": [],
             "label": "getScreenContexts",
             "description": [],
-            "signature": ["() => ", "ObservabilityAIAssistantScreenContext", "[]"],
+            "signature": [
+              "() => ",
+              "ObservabilityAIAssistantScreenContext",
+              "[]"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2745,7 +2781,11 @@
           "tags": [],
           "label": "ObservabilityAIAssistantContextualInsight",
           "description": [],
-          "signature": ["React.ForwardRefExoticComponent<", "InsightProps", "> | null"],
+          "signature": [
+            "React.ForwardRefExoticComponent<",
+            "InsightProps",
+            "> | null"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -2779,7 +2819,10 @@
           "tags": [],
           "label": "useGenAIConnectors",
           "description": [],
-          "signature": ["() => ", "UseGenAIConnectorsResult"],
+          "signature": [
+            "() => ",
+            "UseGenAIConnectorsResult"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3329,8 +3372,12 @@
           "type": "Object",
           "tags": [],
           "label": "service",
-          "description": ["\nReturns a Observability AI Assistant service instance"],
-          "signature": ["ObservabilityAIAssistantService"],
+          "description": [
+            "\nReturns a Observability AI Assistant service instance"
+          ],
+          "signature": [
+            "ObservabilityAIAssistantService"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -3356,8 +3403,12 @@
           "type": "Object",
           "tags": [],
           "label": "service",
-          "description": ["\nReturns a Observability AI Assistant service instance"],
-          "signature": ["ObservabilityAIAssistantService"],
+          "description": [
+            "\nReturns a Observability AI Assistant service instance"
+          ],
+          "signature": [
+            "ObservabilityAIAssistantService"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -3400,7 +3451,9 @@
             "tags": [],
             "label": "user",
             "description": [],
-            "signature": ["{ id?: string | undefined; name: string; }"],
+            "signature": [
+              "{ id?: string | undefined; name: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3412,7 +3465,9 @@
             "tags": [],
             "label": "conversation",
             "description": [],
-            "signature": ["{ id: string; title: string; last_updated: string; }"],
+            "signature": [
+              "{ id: string; title: string; last_updated: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3445,7 +3500,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3457,7 +3514,9 @@
             "tags": [],
             "label": "numeric_labels",
             "description": [],
-            "signature": ["{ [x: string]: number; }"],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3549,7 +3608,9 @@
             "tags": [],
             "label": "confidence",
             "description": [],
-            "signature": ["\"medium\" | \"high\" | \"low\""],
+            "signature": [
+              "\"medium\" | \"high\" | \"low\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3583,7 +3644,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["Record<string, string> | undefined"],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

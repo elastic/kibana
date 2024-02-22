@@ -146,6 +146,7 @@ export const EntityForm = (props: Props) => {
           label={i18n.translate('xpack.stackAlerts.geoContainment.dataViewLabel', {
             defaultMessage: 'Data view',
           })}
+          data-test-subj="entitiesDataView"
         >
           <DataViewSelect
             dataViewId={props.ruleParams.indexId}
