@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 import { selectOverviewStatus } from '../state/overview_status';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
-import { useLocationNames } from './use_location_names';
 import { useGetUrlParams } from './use_url_params';
 
 export function useMonitorsSortedByStatus() {
@@ -23,7 +22,6 @@ export function useMonitorsSortedByStatus() {
   } = useSelector(selectOverviewState);
 
   const downMonitors = useRef<Record<string, string[]> | null>(null);
-  const locationNames = useLocationNames();
 
   const monitorsSortedByStatus = useMemo(() => {
     if (!status) {
@@ -51,15 +49,14 @@ export function useMonitorsSortedByStatus() {
     const orderedPendingMonitors: MonitorOverviewItem[] = [];
 
     monitors.forEach((monitor) => {
-      const monitorLocation = locationNames[monitor.location.id];
       if (!monitor.isEnabled) {
         orderedDisabledMonitors.push(monitor);
       } else if (
         monitor.configId in downMonitorMap &&
-        downMonitorMap[monitor.configId].includes(monitorLocation)
+        downMonitorMap[monitor.configId].includes(monitor.location.id)
       ) {
         orderedDownMonitors.push(monitor);
-      } else if (pendingConfigs?.[`${monitor.configId}-${locationNames[monitor.location.id]}`]) {
+      } else if (pendingConfigs?.[`${monitor.configId}-${monitor.location.id}`]) {
         orderedPendingMonitors.push(monitor);
       } else {
         orderedUpMonitors.push(monitor);
@@ -73,7 +70,7 @@ export function useMonitorsSortedByStatus() {
       disabled: orderedDisabledMonitors,
       pending: orderedPendingMonitors,
     };
-  }, [monitors, locationNames, downMonitors, status]);
+  }, [monitors, downMonitors, status]);
 
   return useMemo(() => {
     switch (statusFilter) {
@@ -90,6 +87,11 @@ export function useMonitorsSortedByStatus() {
       case 'disabled':
         return {
           monitorsSortedByStatus: monitorsSortedByStatus.disabled,
+          downMonitors: downMonitors.current,
+        };
+      case 'pending':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.pending,
           downMonitors: downMonitors.current,
         };
       default:

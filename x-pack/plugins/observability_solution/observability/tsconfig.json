@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../typings/**/*"
+    "../../../../typings/**/*",
+    "../../observability/public/embeddable/slo/common"
   ],
   "kbn_references": [
     "@kbn/core",

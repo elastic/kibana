@@ -21,12 +21,8 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nUID for license."],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -37,13 +33,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "LicenseStatus",
-              " | undefined"
-            ],
+            "description": ["\nThe validity status of the license."],
+            "signature": ["LicenseStatus", " | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -54,9 +45,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isActive",
-            "description": [
-              "\nDetermine if the status of the license is active."
-            ],
+            "description": ["\nDetermine if the status of the license is active."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -67,12 +56,8 @@
             "type": "number",
             "tags": [],
             "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nUnix epoch of the expiration date of the license."],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -97,9 +82,7 @@
             "parentPluginId": "licensing",
             "id": "def-public.ILicense.mode",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "mode",
             "description": [
               "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
@@ -119,9 +102,7 @@
             "type": "string",
             "tags": [],
             "label": "signature",
-            "description": [
-              "\nSignature of the license content."
-            ],
+            "description": ["\nSignature of the license content."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -132,9 +113,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isAvailable",
-            "description": [
-              "\nDetermine if the license container has information."
-            ],
+            "description": ["\nDetermine if the license container has information."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -145,13 +124,8 @@
             "type": "Function",
             "tags": [],
             "label": "toJSON",
-            "description": [
-              "\nReturns"
-            ],
-            "signature": [
-              "() => ",
-              "PublicLicenseJSON"
-            ],
+            "description": ["\nReturns"],
+            "signature": ["() => ", "PublicLicenseJSON"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -167,9 +141,7 @@
             "description": [
               "\nA potential error denoting the failure of the license from being retrieved."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -183,9 +155,7 @@
             "description": [
               "\nIf the license is not available, provides a string or Error containing the reason."
             ],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -198,9 +168,7 @@
             "type": "Function",
             "tags": [],
             "label": "hasAtLeast",
-            "description": [
-              "\nDetermine if license type >= minimal required license type."
-            ],
+            "description": ["\nDetermine if license type >= minimal required license type."],
             "signature": [
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
@@ -214,9 +182,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license required for the given feature"
-                ],
+                "description": ["the minimum valid license required for the given feature"],
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
@@ -251,12 +217,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "pluginName",
-                "description": [
-                  "the name of the plugin"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["the name of the plugin"],
+                "signature": ["string"],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -268,9 +230,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license for operating the given plugin"
-                ],
+                "description": ["the minimum valid license for operating the given plugin"],
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
@@ -291,10 +251,7 @@
             "description": [
               "\nA specific API for interacting with the specific features of the license."
             ],
-            "signature": [
-              "(name: string) => ",
-              "LicenseFeature"
-            ],
+            "signature": ["(name: string) => ", "LicenseFeature"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -305,12 +262,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": [
-                  "the name of the feature to interact with"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["the name of the feature to interact with"],
+                "signature": ["string"],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -342,9 +295,7 @@
             "description": [
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
-            "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-            ],
+            "signature": ["\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -358,9 +309,7 @@
             "description": [
               "\nA message containing the reason for a license type not being valid."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -423,9 +372,7 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
+            "description": ["\nUID for license."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -436,12 +383,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
-            ],
+            "description": ["\nThe validity status of the license."],
+            "signature": ["\"active\" | \"invalid\" | \"expired\""],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -452,9 +395,7 @@
             "type": "number",
             "tags": [],
             "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
+            "description": ["\nUnix epoch of the expiration date of the license."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -479,9 +420,7 @@
             "parentPluginId": "licensing",
             "id": "def-public.PublicLicense.mode",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "mode",
             "description": [
               "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
@@ -667,10 +606,7 @@
             "tags": [],
             "label": "license",
             "description": [],
-            "signature": [
-              "PublicLicense",
-              " | undefined"
-            ],
+            "signature": ["PublicLicense", " | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -682,10 +618,7 @@
             "tags": [],
             "label": "features",
             "description": [],
-            "signature": [
-              "PublicFeatures",
-              " | undefined"
-            ],
+            "signature": ["PublicFeatures", " | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -714,9 +647,7 @@
         "tags": [],
         "label": "LicenseCheckState",
         "description": [],
-        "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-        ],
+        "signature": ["\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -729,9 +660,7 @@
         "tags": [],
         "label": "LicenseStatus",
         "description": [],
-        "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
-        ],
+        "signature": ["\"active\" | \"invalid\" | \"expired\""],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -761,11 +690,7 @@
         "description": [
           "\nProvides information about feature availability for the current license."
         ],
-        "signature": [
-          "{ [x: string]: ",
-          "LicenseFeature",
-          "; }"
-        ],
+        "signature": ["{ [x: string]: ", "LicenseFeature", "; }"],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -788,19 +713,10 @@
           "parentPluginId": "licensing",
           "id": "def-public.LicensingPluginSetup.license$",
           "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "license$",
-          "description": [
-            "\nSteam of licensing information {@link ILicense}."
-          ],
-          "signature": [
-            "Observable",
-            "<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nSteam of licensing information {@link ILicense}."],
+          "signature": ["Observable", "<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
@@ -828,7 +744,7 @@
             },
             {
               "plugin": "profiling",
-              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
+              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
             },
             {
               "plugin": "apm",
@@ -872,18 +788,10 @@
           "parentPluginId": "licensing",
           "id": "def-public.LicensingPluginSetup.refresh",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "refresh",
-          "description": [
-            "\nTriggers licensing information re-fetch."
-          ],
-          "signature": [
-            "() => Promise<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nTriggers licensing information re-fetch."],
+          "signature": ["() => Promise<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
@@ -898,12 +806,8 @@
           "type": "Object",
           "tags": [],
           "label": "featureUsage",
-          "description": [
-            "\nAPIs to register licensed feature usage."
-          ],
-          "signature": [
-            "FeatureUsageServiceSetup"
-          ],
+          "description": ["\nAPIs to register licensed feature usage."],
+          "signature": ["FeatureUsageServiceSetup"],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -929,15 +833,8 @@
           "type": "Object",
           "tags": [],
           "label": "license$",
-          "description": [
-            "\nSteam of licensing information {@link ILicense}."
-          ],
-          "signature": [
-            "Observable",
-            "<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nSteam of licensing information {@link ILicense}."],
+          "signature": ["Observable", "<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -948,14 +845,8 @@
           "type": "Function",
           "tags": [],
           "label": "refresh",
-          "description": [
-            "\nTriggers licensing information re-fetch."
-          ],
-          "signature": [
-            "() => Promise<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nTriggers licensing information re-fetch."],
+          "signature": ["() => Promise<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -968,12 +859,8 @@
           "type": "Object",
           "tags": [],
           "label": "featureUsage",
-          "description": [
-            "\nAPIs to manage licensed feature usage."
-          ],
-          "signature": [
-            "FeatureUsageServiceStart"
-          ],
+          "description": ["\nAPIs to manage licensed feature usage."],
+          "signature": ["FeatureUsageServiceStart"],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -1107,9 +994,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/licensing/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1151,9 +1036,7 @@
                 "tags": [],
                 "label": "featureName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1197,12 +1080,8 @@
             "type": "Function",
             "tags": [],
             "label": "notifyUsage",
-            "description": [
-              "\nNotify of a registered feature usage at given time.\n"
-            ],
-            "signature": [
-              "(featureName: string, usedAt?: number | Date | undefined) => void"
-            ],
+            "description": ["\nNotify of a registered feature usage at given time.\n"],
+            "signature": ["(featureName: string, usedAt?: number | Date | undefined) => void"],
             "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1213,12 +1092,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "featureName",
-                "description": [
-                  "- the name of the feature to notify usage of"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the name of the feature to notify usage of"],
+                "signature": ["string"],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1233,9 +1108,7 @@
                 "description": [
                   "- Either a `Date` or an unix timestamp with ms. If not specified, it will be set to the current time."
                 ],
-                "signature": [
-                  "number | Date | undefined"
-                ],
+                "signature": ["number | Date | undefined"],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1253,11 +1126,7 @@
             "description": [
               "\nReturn a map containing last usage timestamp for all features.\nFeatures that were not used yet do not appear in the map."
             ],
-            "signature": [
-              "() => ",
-              "LastFeatureUsage",
-              "[]"
-            ],
+            "signature": ["() => ", "LastFeatureUsage", "[]"],
             "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1284,12 +1153,8 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nUID for license."],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1300,13 +1165,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "LicenseStatus",
-              " | undefined"
-            ],
+            "description": ["\nThe validity status of the license."],
+            "signature": ["LicenseStatus", " | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1317,9 +1177,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isActive",
-            "description": [
-              "\nDetermine if the status of the license is active."
-            ],
+            "description": ["\nDetermine if the status of the license is active."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1330,12 +1188,8 @@
             "type": "number",
             "tags": [],
             "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nUnix epoch of the expiration date of the license."],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1360,9 +1214,7 @@
             "parentPluginId": "licensing",
             "id": "def-server.ILicense.mode",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "mode",
             "description": [
               "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
@@ -1382,9 +1234,7 @@
             "type": "string",
             "tags": [],
             "label": "signature",
-            "description": [
-              "\nSignature of the license content."
-            ],
+            "description": ["\nSignature of the license content."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1395,9 +1245,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isAvailable",
-            "description": [
-              "\nDetermine if the license container has information."
-            ],
+            "description": ["\nDetermine if the license container has information."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1408,13 +1256,8 @@
             "type": "Function",
             "tags": [],
             "label": "toJSON",
-            "description": [
-              "\nReturns"
-            ],
-            "signature": [
-              "() => ",
-              "PublicLicenseJSON"
-            ],
+            "description": ["\nReturns"],
+            "signature": ["() => ", "PublicLicenseJSON"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1430,9 +1273,7 @@
             "description": [
               "\nA potential error denoting the failure of the license from being retrieved."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1446,9 +1287,7 @@
             "description": [
               "\nIf the license is not available, provides a string or Error containing the reason."
             ],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1461,9 +1300,7 @@
             "type": "Function",
             "tags": [],
             "label": "hasAtLeast",
-            "description": [
-              "\nDetermine if license type >= minimal required license type."
-            ],
+            "description": ["\nDetermine if license type >= minimal required license type."],
             "signature": [
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
@@ -1477,9 +1314,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license required for the given feature"
-                ],
+                "description": ["the minimum valid license required for the given feature"],
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
@@ -1514,12 +1349,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "pluginName",
-                "description": [
-                  "the name of the plugin"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["the name of the plugin"],
+                "signature": ["string"],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1531,9 +1362,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license for operating the given plugin"
-                ],
+                "description": ["the minimum valid license for operating the given plugin"],
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
@@ -1554,10 +1383,7 @@
             "description": [
               "\nA specific API for interacting with the specific features of the license."
             ],
-            "signature": [
-              "(name: string) => ",
-              "LicenseFeature"
-            ],
+            "signature": ["(name: string) => ", "LicenseFeature"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1568,12 +1394,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": [
-                  "the name of the feature to interact with"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["the name of the feature to interact with"],
+                "signature": ["string"],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1605,9 +1427,7 @@
             "description": [
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
-            "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-            ],
+            "signature": ["\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1621,9 +1441,7 @@
             "description": [
               "\nA message containing the reason for a license type not being valid."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1707,9 +1525,7 @@
             "tags": [],
             "label": "license",
             "description": [],
-            "signature": [
-              "ILicense"
-            ],
+            "signature": ["ILicense"],
             "path": "x-pack/plugins/licensing/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1736,9 +1552,7 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
+            "description": ["\nUID for license."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1749,12 +1563,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
-            ],
+            "description": ["\nThe validity status of the license."],
+            "signature": ["\"active\" | \"invalid\" | \"expired\""],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1765,9 +1575,7 @@
             "type": "number",
             "tags": [],
             "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
+            "description": ["\nUnix epoch of the expiration date of the license."],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1792,9 +1600,7 @@
             "parentPluginId": "licensing",
             "id": "def-server.PublicLicense.mode",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "mode",
             "description": [
               "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
@@ -1980,10 +1786,7 @@
             "tags": [],
             "label": "license",
             "description": [],
-            "signature": [
-              "PublicLicense",
-              " | undefined"
-            ],
+            "signature": ["PublicLicense", " | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1995,10 +1798,7 @@
             "tags": [],
             "label": "features",
             "description": [],
-            "signature": [
-              "PublicFeatures",
-              " | undefined"
-            ],
+            "signature": ["PublicFeatures", " | undefined"],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2057,9 +1857,7 @@
             "tags": [],
             "label": "license",
             "description": [],
-            "signature": [
-              "ILicense"
-            ],
+            "signature": ["ILicense"],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2074,9 +1872,7 @@
         "tags": [],
         "label": "LicenseCheckState",
         "description": [],
-        "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-        ],
+        "signature": ["\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2089,9 +1885,7 @@
         "tags": [],
         "label": "LicenseStatus",
         "description": [],
-        "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
-        ],
+        "signature": ["\"active\" | \"invalid\" | \"expired\""],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2121,11 +1915,7 @@
         "description": [
           "\nProvides information about feature availability for the current license."
         ],
-        "signature": [
-          "{ [x: string]: ",
-          "LicenseFeature",
-          "; }"
-        ],
+        "signature": ["{ [x: string]: ", "LicenseFeature", "; }"],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2148,19 +1938,10 @@
           "parentPluginId": "licensing",
           "id": "def-server.LicensingPluginSetup.license$",
           "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "license$",
-          "description": [
-            "\nSteam of licensing information {@link ILicense}."
-          ],
-          "signature": [
-            "Observable",
-            "<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nSteam of licensing information {@link ILicense}."],
+          "signature": ["Observable", "<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
@@ -2288,18 +2069,10 @@
           "parentPluginId": "licensing",
           "id": "def-server.LicensingPluginSetup.refresh",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "refresh",
-          "description": [
-            "\nTriggers licensing information re-fetch."
-          ],
-          "signature": [
-            "() => Promise<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nTriggers licensing information re-fetch."],
+          "signature": ["() => Promise<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
@@ -2319,9 +2092,7 @@
           "type": "Object",
           "tags": [],
           "label": "featureUsage",
-          "description": [
-            "\nAPIs to register licensed feature usage."
-          ],
+          "description": ["\nAPIs to register licensed feature usage."],
           "signature": [
             {
               "pluginId": "licensing",
@@ -2356,15 +2127,8 @@
           "type": "Object",
           "tags": [],
           "label": "license$",
-          "description": [
-            "\nSteam of licensing information {@link ILicense}."
-          ],
-          "signature": [
-            "Observable",
-            "<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nSteam of licensing information {@link ILicense}."],
+          "signature": ["Observable", "<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -2375,14 +2139,8 @@
           "type": "Function",
           "tags": [],
           "label": "refresh",
-          "description": [
-            "\nTriggers licensing information re-fetch."
-          ],
-          "signature": [
-            "() => Promise<",
-            "ILicense",
-            ">"
-          ],
+          "description": ["\nTriggers licensing information re-fetch."],
+          "signature": ["() => Promise<", "ILicense", ">"],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -2447,9 +2205,7 @@
               "tags": [],
               "label": "pollingFrequency",
               "description": [],
-              "signature": [
-                "number"
-              ],
+              "signature": ["number"],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -2464,9 +2220,7 @@
           "type": "Object",
           "tags": [],
           "label": "featureUsage",
-          "description": [
-            "\nAPIs to manage licensed feature usage."
-          ],
+          "description": ["\nAPIs to manage licensed feature usage."],
           "signature": [
             {
               "pluginId": "licensing",
