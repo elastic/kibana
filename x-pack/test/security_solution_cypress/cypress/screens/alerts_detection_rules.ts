@@ -341,5 +341,4 @@ export const ESQL_QUERY_TITLE = '[data-test-subj="esqlQueryPropertyTitle"]';
 export const ESQL_QUERY_VALUE = '[data-test-subj="esqlQueryPropertyValue"]';
 
 export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffWrapper"]';
-export const PER_FIELD_DIFF_DEFINITION_SECTION =
-  '[data-test-subj="perFieldDiffDefinitiontSection"]';
+export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';

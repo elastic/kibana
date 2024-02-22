@@ -985,6 +985,8 @@ Given a prebuilt rule is installed in Kibana
 And this rule has an update available that changes the rule type
 When user opens the upgrade preview
 Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
+# When tooltip enhancement is added, this step needs to be added to the corresponding test scenario
+And a tooltip is displayed with information about changing rule types
 ```
 
 #### **Scenario: Field groupings should be rendered together in the same accordion panel**

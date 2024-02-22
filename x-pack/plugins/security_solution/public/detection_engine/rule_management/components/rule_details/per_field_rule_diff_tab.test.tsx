@@ -81,16 +81,14 @@ describe('PerFieldRuleDiffTab', () => {
     const wrapper = renderPerFieldRuleDiffTab(mockData);
 
     const matchedSubtitleElements = wrapper.queryAllByTestId('ruleUpgradePerFieldDiffSubtitle');
-    const subtitles = matchedSubtitleElements.map((element) => {
-      return element.textContent;
-    });
+    const subtitles = matchedSubtitleElements.map((element) => element.textContent);
 
     // `filters` and `type` have not changed between versions so shouldn't be displayed
     expect(subtitles).toEqual(['Query', 'Language']);
   });
 
   describe('Undefined values are displayed with empty diffs', () => {
-    test('when a new field is added', () => {
+    test('Displays only an updated field value when changed from undefined', () => {
       const mockData: PartialRuleDiff = {
         ...ruleFieldsDiffMock,
         fields: {
@@ -110,7 +108,7 @@ describe('PerFieldRuleDiffTab', () => {
       expect(diffContent).toEqual('+new timestamp field');
     });
 
-    test('when an old field is removed', () => {
+    test('Displays only an outdated field value when incoming update is undefined', () => {
       const mockData: PartialRuleDiff = {
         ...ruleFieldsDiffMock,
         fields: {
@@ -161,17 +159,13 @@ describe('PerFieldRuleDiffTab', () => {
     const wrapper = renderPerFieldRuleDiffTab(mockData);
 
     const matchedSectionElements = wrapper.queryAllByTestId('ruleUpgradePerFieldDiffSectionHeader');
-    const sectionLabels = matchedSectionElements.map((element) => {
-      return element.textContent;
-    });
+    const sectionLabels = matchedSectionElements.map((element) => element.textContent);
 
     // Schedule doesn't have any fields in the diff and shouldn't be displayed
     expect(sectionLabels).toEqual(['About', 'Definition', 'Setup guide']);
 
     const matchedFieldElements = wrapper.queryAllByTestId('ruleUpgradePerFieldDiffLabel');
-    const fieldLabels = matchedFieldElements.map((element) => {
-      return element.textContent;
-    });
+    const fieldLabels = matchedFieldElements.map((element) => element.textContent);
 
     expect(fieldLabels).toEqual(['Name', 'Timestamp Field', 'Setup']);
   });

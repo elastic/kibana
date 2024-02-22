@@ -53,7 +53,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
         <RuleDiffSection
           title={i18n.DEFINITION_SECTION_LABEL}
           fieldGroups={definitionFields}
-          dataTestSubj="perFieldDiffDefinitiontSection"
+          dataTestSubj="perFieldDiffDefinitionSection"
         />
       )}
       {scheduleFields.length !== 0 && (
