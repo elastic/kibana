@@ -1955,19 +1955,390 @@ Examples: `name`, `description`, `setup`, `note` (Investigation guide)
     </thead>
     <tbody align="center">
       <tr>
-        <td style="border-right:3px solid black">Keep customizations on conflicts, but add updates in parts with no conflicts</td>
-        <td><code>This is a prebuilt rule name</code></td>
-        <td><code>This is a customized prebuilt rule name</code></td>
-        <td style="border-right:3px solid black"><code>This is an updated prebuilt rule name. Much better.</code></td>
-        <td><code>This is a customized prebuilt rule name. Much better.</code></td>
+        <td style="border-right:3px solid black">Keep user customizations when whole string conflicts</td>
+        <td><code>Prebuilt rule name</code></td>
+        <td><code>Completely different string</code></td>
+        <td style="border-right:3px solid black"><code>Updated prebuilt rule name</code></td>
+        <td><code>Completely different string</code></td>
+      </tr>
+      <tr>
+        <td style="border-right:3px solid black">Keep user-added prefixes and accept other modifications</td>
+        <td><code>Prebuilt rule name</code></td>
+        <td><code>[Security Solution] Prebuilt rule name</code></td>
+        <td style="border-right:3px solid black"><code>Updated prebuilt rule name</code></td>
+        <td><code>[Security Solution] Updated prebuilt rule name</code></td>
+      </tr>
+      <tr>
+        <td style="border-right:3px solid black">Keep user-added suffixes and accept other modifications</td>
+        <td><code>Prebuilt rule name</code></td>
+        <td><code>Prebuilt rule name - (Custom version 3)</code></td>
+        <td style="border-right:3px solid black"><code>Updated prebuilt rule name</code></td>
+        <td><code>Updated prebuilt rule name - (Custom version 3)</code></td>
+      </tr>
+      <tr>
+        <td style="border-right:3px solid black">Keep user customizations on conflicts, but add updates in sections with no conflicts</td>
+        <td><code>Prebuilt rule name</code></td>
+        <td><code>Customized prebuilt rule name</code></td>
+        <td style="border-right:3px solid black"><code>Updated prebuilt rule name. Much better.</code></td>
+        <td><code>Customized prebuilt rule name. Much better.</code></td>
       </tr>
     </tbody>
   </table>
 
+##### Array fields
+
+For array fields, conflict resolution will take place on an element by element basis - that means that the algorithm will not consider or try to solve changes within a single element. For example:
+
+```
+base: [test1]
+current: [my-test1]
+target: [test2]
+output: [my-test1]
+```
+The example above shows that the algorithm should understand the above scenario as a conflict and not try to merge the single element by breaking it into parts.
+
+Example fields: `index`, `tags`, `references`,
+
+<table>
+    <thead>
+      <tr>
+        <th style="border-right:3px solid black">Use case</th>
+        <th>Base version</th>
+        <th>Current version</th>
+        <th style="border-right:3px solid black">Target version</th>
+        <th>Merged version (output)</th>
+      </tr>
+    </thead>
+  <tbody valign="top">
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes if all elements conflict</td>
+      <td>
+      <pre>
+[
+  logs-*,
+  logstash-*
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  cluster_one:logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  new-index1-*,
+  new-index2-*,
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  cluster_one:logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes to any element, but add appended elements</td>
+      <td>
+      <pre>
+[
+  logs-*,
+  logstash-*
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  logs-*,
+  logstash-*,
+  new-target
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  logs-*,
+  cluster_one:logstash-*,
+  new-target
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes to any element, but add prepended elements</td>
+      <td>
+      <pre>
+[
+  logs-*,
+  logstash-*
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  pre-target,
+  logs-*,
+  logstash-*,
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  pre-target,
+  logs-*,
+  cluster_one:logstash-*,
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep user changes to any element, but add insertions in middle</td>
+      <td>
+      <pre>
+[
+  logs-*,
+  logstash-*
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  cluster_one:logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  logs-*,
+  middle-target,
+  logstash-*,
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  cluster_one:logs-*,
+  middle-target,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-right:3px solid black">Keep elements removed in the target version if they have been customized by user</td>
+      <td>
+      <pre>
+[
+  logs-*,
+  logstash-*
+]
+        </pre>
+      </td>
+      <td>
+        <pre>
+[
+  cluster_one:logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+[
+  logs-*,
+]
+        </pre>
+        </td>
+      <td>
+      <pre>
+[
+  cluster_one:logs-*,
+  cluster_one:logstash-*
+]
+        </pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+##### Number fields
+
+Examples: `risk_score`, `max_signals`
+
+  <table>
+    <thead>
+      <tr>
+        <th style="border-right:3px solid black">Use case</th>
+        <th>Base version</th>
+        <th>Current version</th>
+        <th style="border-right:3px solid black">Target version</th>
+        <th>Merged version (output)</th>
+      </tr>
+    </thead>
+    <tbody align="center">
+      <tr>
+        <td style="border-right:3px solid black">Keep customizations if conflict</td>
+        <td><code>50</code></td>
+        <td><code>65</code></td>
+        <td style="border-right:3px solid black"><code>20</code></td>
+        <td><code>65</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+##### Complex objects or array of objects fields
+
+Examples: `threat` (Mitre Threat), `required_fields`
 
 
+  <table>
+    <thead>
+      <tr>
+        <th style="border-right:3px solid black">Use case</th>
+        <th>Base version</th>
+        <th>Current version</th>
+        <th style="border-right:3px solid black">Target version</th>
+        <th>Merged version (output)</th>
+      </tr>
+    </thead>
+    <tbody valign="top">
+    <tr>
+      <td style="border-right:3px solid black">Keep user customizations on conflicts, but update sections with no conflicts</td>
+      <td>
+      <pre>
+{
+    "framework":"MITRE ATT&CK",
+    "tactic":{
+      "id":"TA0003",
+      "name":"Persistence",
+      "reference":"https://attack.mitre.org/tactics/TA0003/"
+    },
+    "technique":[
+      {
+          "id":"T1098",
+          "name":"Account Manipulation",
+          "reference":"https://attack.mitre.org/techniques/T1098/"
+      }
+    ]
+}
+        </pre>
+      </td>
+      <td>
+        <pre>
+{
+    "framework":"MITRE ATT&CK",
+    "tactic":{
+      "id":"TA0003",
+      "name":"My customized name",
+      "reference":"https://attack.mitre.org/tactics/TA0003/My_custom_url"
+    },
+    "technique":[
+      {
+          "id":"T1098",
+          "name":"Account Manipulation",
+          "reference":"https://attack.mitre.org/techniques/T1098/"
+      }
+    ]
+}
+        </pre>
+      </td>
+      <td style="border-right:3px solid black">
+      <pre>
+{
+    "framework":"MITRE ATT&CK",
+    "tactic":{
+      "id":"TA0003",
+      "name":"Persistence",
+      "reference":"https://attack.mitre.org/tactics/TA0003/"
+    },
+    "technique":[
+      {
+          "id":"T1556",
+          "name":"Modify Authentication Process",
+          "reference":"https://attack.mitre.org/techniques/T1556/",
+          "subtechnique":[
+            {
+                "id":"T1556.006",
+                "name":"Multi-Factor Authentication",
+                "reference":"https://attack.mitre.org/techniques/T1556/006/"
+            }
+          ]
+      }
+    ]
+}
+        </pre>
+        </td>
+      <td>
+      <pre>
+{
+    "framework":"MITRE ATT&CK",
+    "tactic":{
+      "id":"TA0003",
+      "name":"My customized name",
+      "reference":"https://attack.mitre.org/tactics/TA0003/My_custom_url"
+    },
+    "technique":[
+      {
+          "id":"T1556",
+          "name":"Modify Authentication Process",
+          "reference":"https://attack.mitre.org/techniques/T1556/",
+          "subtechnique":[
+            {
+                "id":"T1556.006",
+                "name":"Multi-Factor Authentication",
+                "reference":"https://attack.mitre.org/techniques/T1556/006/"
+            }
+          ]
+      }
+    ]
+}
+        </pre>
+      </td>
+    </tr>
+    </tbody>
+  </table>
 
-
+**TODO:**
+- Add examples to the above tables for `strings`
+- Add a new table for `arrays`
+- Think about how to solve:
+  - complex objects
+  - numbers
+- Add tentative algorithms for all the above. Already something tentative for:
+  - strings
+  - arrays
 
 
 
@@ -1978,7 +2349,7 @@ Examples: `name`, `description`, `setup`, `note` (Investigation guide)
 
 ### Rule field diff algorithms
 
-TODO
+
 
 
 ## Scenarios for bulk accepting updates
