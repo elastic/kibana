@@ -5,7 +5,7 @@ script for standing up the test server.
 
 ### Start the server
 
-From `~/x-pack/plugins/synthetics/scripts`, run `node e2e.js --server`. Wait for the server to startup. It will provide you
+From `~/x-pack/plugins/observability_solution/synthetics/scripts`, run `node e2e.js --server`. Wait for the server to startup. It will provide you
 with an example run command when it finishes.
 
 ### Run the tests
@@ -22,7 +22,7 @@ script for standing up the test server.
 
 ### Start the server
 
-From `~/x-pack/plugins/synthetics/scripts`, run `node uptime_e2e.js --server`. Wait for the server to startup. It will provide you
+From `~/x-pack/plugins/observability_solution/synthetics/scripts`, run `node uptime_e2e.js --server`. Wait for the server to startup. It will provide you
 with an example run command when it finishes.
 
 ### Run the tests
