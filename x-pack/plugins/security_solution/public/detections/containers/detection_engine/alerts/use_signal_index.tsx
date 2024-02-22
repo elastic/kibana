@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { sourcererSelectors } from '../../../../common/store';
 
 type Func = () => Promise<void>;
 
@@ -38,6 +40,14 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   });
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
+
+  const getDataViewsSelector = useMemo(
+    () => sourcererSelectors.getSourcererDataViewsSelector(),
+    []
+  );
+  const { signalIndexMappingOutdated, signalIndexName } = useDeepEqualSelector((state) =>
+    getDataViewsSelector(state)
+  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -104,7 +114,15 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       }
     };
 
-    if (hasIndexRead) {
+    if (signalIndexName) {
+      setSignalIndex({
+        signalIndexExists: true,
+        signalIndexName,
+        signalIndexMappingOutdated,
+        createDeSignalIndex: createIndex,
+      });
+      setLoading(false);
+    } else if (hasIndexRead) {
       fetchData();
     } else {
       // Skip data fetching as the current user doesn't have enough priviliges.
@@ -115,7 +133,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addError, hasIndexRead]);
+  }, [addError, hasIndexRead, signalIndexName, signalIndexMappingOutdated]);
 
   return { loading, ...signalIndex };
 };

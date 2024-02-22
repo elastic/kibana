@@ -21,6 +21,9 @@ export const sourcererKibanaDataViewsSelector = ({
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
+export const sourcererSignalIndexMappingOutdatedSelector = ({ sourcerer }: State): boolean | null =>
+  sourcerer.signalIndexMappingOutdated;
+
 export const sourcererDefaultDataViewSelector = ({
   sourcerer,
 }: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
@@ -44,6 +47,12 @@ export const kibanaDataViewsSelector = () =>
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
+export const signalIndexMappingOutdatedSelector = () =>
+  createSelector(
+    sourcererSignalIndexMappingOutdatedSelector,
+    (signalIndexMappingOutdated) => signalIndexMappingOutdated
+  );
+
 export const defaultDataViewSelector = () =>
   createSelector(sourcererDefaultDataViewSelector, (dataViews) => dataViews);
 
@@ -59,15 +68,18 @@ export const getSourcererDataViewsSelector = () => {
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
   const getSignalIndexNameSelector = signalIndexNameSelector();
+  const getSignalIndexMappingOutdatedSelector = signalIndexMappingOutdatedSelector();
   return (state: State): Omit<SourcererModel, 'sourcererScopes'> => {
     const kibanaDataViews = getKibanaDataViewsSelector(state);
     const defaultDataView = getDefaultDataViewSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
+    const signalIndexMappingOutdated = getSignalIndexMappingOutdatedSelector(state);
 
     return {
       defaultDataView,
       kibanaDataViews,
       signalIndexName,
+      signalIndexMappingOutdated,
     };
   };
 };
