@@ -170,10 +170,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show matches when time range is expanded', async () => {
+        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
         await retry.waitFor('view all matches to load', async () => {
-          await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
           await PageObjects.discover.waitUntilSearchingHasFinished();
-          return !(await testSubjects.exists('discoverNoResultsViewAllMatches'));
+          const isVisible = await testSubjects.exists('discoverNoResultsViewAllMatches');
+          if (isVisible) {
+            await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage(false);
+          }
+          return !isVisible;
         });
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);

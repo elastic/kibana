@@ -528,10 +528,12 @@ export class DiscoverPageObject extends FtrService {
     return this.testSubjects.getVisibleText('discoverErrorCalloutMessage');
   }
 
-  public async expandTimeRangeAsSuggestedInNoResultsMessage() {
-    await this.retry.waitFor('the button before pressing it', async () => {
-      return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
-    });
+  public async expandTimeRangeAsSuggestedInNoResultsMessage(checkIfExists = true) {
+    if (checkIfExists) {
+      await this.retry.waitFor('the button before pressing it', async () => {
+        return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
+      });
+    }
     return await this.testSubjects.click('discoverNoResultsViewAllMatches');
   }
 
