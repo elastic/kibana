@@ -100,7 +100,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async setLimitSize(size: 5000 | 10000 | 100000 | 1000000 | 'none') {
-      await retry.tryForTime(20000, async () => {
+      await retry.tryForTime(5000, async () => {
         // escape popover
         await browser.pressKeys(browser.keys.ESCAPE);
 
