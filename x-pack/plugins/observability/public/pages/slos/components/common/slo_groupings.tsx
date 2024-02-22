@@ -26,7 +26,7 @@ export interface Props {
 }
 
 export function SLOGroupings({ slo, direction = 'row', truncate = true }: Props) {
-  const groups = Object.entries(slo.groupings);
+  const groups = Object.entries(slo?.groupings || []);
   const shouldTruncate = truncate && groups.length > 3;
   const firstThree = shouldTruncate ? groups.slice(0, 3) : groups;
   const rest = shouldTruncate ? groups.slice(3, groups.length) : [];
@@ -37,19 +37,24 @@ export function SLOGroupings({ slo, direction = 'row', truncate = true }: Props)
     }
   `;
 
+  if (!groups.length) {
+    return null;
+  }
+
   return (
     <>
       {shouldTruncate ? (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiAccordion
+              id="sloGroupingsAccordion"
               arrowDisplay="right"
               buttonElement="div"
               buttonProps={{ css: buttonCss }}
               buttonContent={
                 <>
                   <EuiFlexGroup
-                    alignItems={direction === 'column' ? 'flex-start' : 'center'}
+                    alignItems={direction === 'column' ? 'flexStart' : 'center'}
                     gutterSize="s"
                     direction={direction}
                   >
@@ -90,7 +95,7 @@ function Entries({
   entries,
   direction,
 }: {
-  entries: Array<[string, string]>;
+  entries: Array<[string, unknown]>;
   direction: 'row' | 'column';
 }) {
   const { euiTheme } = useEuiTheme();
@@ -102,7 +107,7 @@ function Entries({
           <EuiText size="s">
             <span>
               {`${key}: `}
-              <EuiCopy textToCopy={value}>
+              <EuiCopy textToCopy={`${value}`}>
                 {(copy) => (
                   <EuiLink
                     data-test-subj="sloInstanceCopy"
@@ -110,7 +115,7 @@ function Entries({
                       fontWeight: euiTheme.font.weight.semiBold,
                     }}
                     color="text"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       copy();
                     }}
