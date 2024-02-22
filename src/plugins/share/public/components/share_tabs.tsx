@@ -37,6 +37,8 @@ export interface ShareContextTabProps {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
+  isDirty: boolean;
+  isEmbedded: boolean;
 }
 
 // this file is intended to replace share_context_menu
@@ -47,6 +49,9 @@ export const ShareMenuTabs = ({
   onClose,
   objectType,
   embedUrlParamExtensions,
+  objectId,
+  isDirty,
+  isEmbedded,
 }: ShareContextTabProps) => {
   const getTabs = () => {
     const tabs = [];
@@ -59,7 +64,14 @@ export const ShareMenuTabs = ({
       sortOrder: 0,
       // do not break functional tests
       'data-test-subj': 'Permalinks',
-      content: <LinkModal objectType={objectType} />,
+      content: (
+        <LinkModal
+          objectType={objectType}
+          objectId={objectId}
+          isDirty={isDirty}
+          isEmbedded={isEmbedded}
+        />
+      ),
     });
     if (allowEmbed) {
       tabs.push({
@@ -74,8 +86,11 @@ export const ShareMenuTabs = ({
       });
     }
 
-    shareMenuItems.map((item) => {
-      console.log(item);
+    shareMenuItems.map(({ shareMenuItem, panel }) => {
+      tabs.push({
+        ...shareMenuItem,
+        id: panel.id,
+      });
     });
     return tabs;
   };

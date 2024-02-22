@@ -83,6 +83,7 @@ export class ShareMenuManager {
     disabledShareUrl,
     overlays,
     i18n,
+    isDirty,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -92,6 +93,7 @@ export class ShareMenuManager {
     onClose: () => void;
     overlays: OverlayStart;
     i18n: CoreStart['i18n'];
+    isDirty: boolean;
   }) {
     if (this.isOpen) {
       onClose();
@@ -155,7 +157,6 @@ export class ShareMenuManager {
             onClose={() => {
               onClose();
               session.close();
-              !this.isOpen;
             }}
             embedUrlParamExtensions={embedUrlParamExtensions}
             anonymousAccess={anonymousAccess}
@@ -163,6 +164,8 @@ export class ShareMenuManager {
             urlService={urlService}
             snapshotShareWarning={snapshotShareWarning}
             disabledShareUrl={disabledShareUrl}
+            isDirty={isDirty}
+            isEmbedded={allowEmbed}
           />,
           { i18n, theme }
         ),
