@@ -13,11 +13,11 @@ import { i18n } from '@kbn/i18n';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
   DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
-  STATUS_SOLUTION_NAV_UI_SETTING_ID,
+  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
 } from '../common/constants';
 import { NavigationConfig } from './config';
 
-const statusOptionLabels = {
+const optInStatusOptionLabels = {
   visible: i18n.translate('navigation.advancedSettings.optInVisibleStatus', {
     defaultMessage: 'Visible',
   }),
@@ -30,7 +30,7 @@ const statusOptionLabels = {
 };
 
 const solutionsOptionLabels = {
-  ask: i18n.translate('navigation.advancedSettings.searchSolution', {
+  ask: i18n.translate('navigation.advancedSettings.askUserWhichSolution', {
     defaultMessage: 'Ask user to choose a solution',
   }),
   es: i18n.translate('navigation.advancedSettings.searchSolution', {
@@ -65,36 +65,36 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
       value: config.solutionNavigation.enabled,
       order: 1,
     },
-    [STATUS_SOLUTION_NAV_UI_SETTING_ID]: {
+    [OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID]: {
       category: [categoryLabel],
-      description: i18n.translate('navigation.uiSettings.statusSolutionNav.description', {
-        defaultMessage: `Define how user will discover the new navigation.
+      description: i18n.translate('navigation.uiSettings.optInStatusSolutionNav.description', {
+        defaultMessage: `Define how user will opt-in to the new navigation.
       <ul>
-        <li><strong>{visible}:</strong> The new navigation is visible immediately to all user. For users who have opt out, changing the status to "visible" has no effect for them.</li>
-        <li><strong>{hidden}:</strong> The new navigation is hidden by default. Users can opt in from inside their user profile. No banners are shown.</li>
-        <li><strong>{ask}:</strong> Display a banner to the user asking them if they want to experience the new navigation.</li>
+        <li><strong>{visible}:</strong> The new navigation is visible immediately to all user. They will be able to opt-out from their user profile.</li>
+        <li><strong>{hidden}:</strong> The new navigation is hidden by default. Users can opt-in from their user profile. No banners are shown.</li>
+        <li><strong>{ask}:</strong> Show a banner to the users inviting them to try the new navigation experience.</li>
       </ul>`,
         values: {
-          visible: statusOptionLabels.visible,
-          hidden: statusOptionLabels.hidden,
-          ask: statusOptionLabels.ask,
+          visible: optInStatusOptionLabels.visible,
+          hidden: optInStatusOptionLabels.hidden,
+          ask: optInStatusOptionLabels.ask,
         },
       }),
-      name: i18n.translate('navigation.uiSettings.statusSolutionNav.name', {
-        defaultMessage: 'Solution navigation default status',
+      name: i18n.translate('navigation.uiSettings.optInStatusSolutionNav.name', {
+        defaultMessage: 'Opt-in behaviour',
       }),
       type: 'select',
       schema: schema.string(),
       value: config.solutionNavigation.status,
       options: ['visible', 'hidden', 'ask'],
-      optionLabels: statusOptionLabels,
+      optionLabels: optInStatusOptionLabels,
       order: 2,
     },
     [DEFAULT_SOLUTION_NAV_UI_SETTING_ID]: {
       category: [categoryLabel],
       description: i18n.translate('navigation.uiSettings.defaultSolutionNav.description', {
         defaultMessage:
-          'The default solution to display to the users once they opt in to the new navigation.',
+          'The default solution to display to the users once they opt-in to the new navigation.',
       }),
       name: i18n.translate('navigation.uiSettings.defaultSolutionNav.name', {
         defaultMessage: 'Default solution',

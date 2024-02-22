@@ -25,7 +25,7 @@ import type {
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
-  STATUS_SOLUTION_NAV_UI_SETTING_ID,
+  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
   DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
 } from '../common';
 import {
@@ -105,7 +105,7 @@ export class NavigationPublicPlugin
 
       combineLatest([
         core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-        core.settings.globalClient.get$(STATUS_SOLUTION_NAV_UI_SETTING_ID),
+        core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
         core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
       ])
         .pipe(takeUntil(this.stop$), debounceTime(10))

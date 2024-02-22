@@ -8,6 +8,6 @@
 
 export const ENABLE_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:enable';
 
-export const STATUS_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:status';
+export const OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:optInStatus';
 
 export const DEFAULT_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:default';
