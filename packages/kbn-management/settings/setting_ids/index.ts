@@ -123,8 +123,8 @@ export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
   'observability:enableInfrastructureHostsView';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID =
-  'observability:enableInfrastructureHostsCustomDashboards';
+export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
+  'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =

@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.10.0",
+    "node": "20.11.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -101,7 +101,7 @@
     "@dnd-kit/utilities": "^2.0.0",
     "@elastic/apm-rum": "^5.16.0",
     "@elastic/apm-rum-react": "^2.0.2",
-    "@elastic/charts": "63.1.0",
+    "@elastic/charts": "64.0.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/ecs": "^8.11.1",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.9.1-canary.1",
@@ -1652,7 +1652,7 @@
     "rxjs-marbles": "^7.0.1",
     "sass-embedded": "^1.70.0",
     "sass-loader": "^10.5.1",
-    "selenium-webdriver": "^4.17.0",
+    "selenium-webdriver": "^4.18.1",
     "sharp": "0.32.6",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
