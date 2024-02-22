@@ -13,18 +13,14 @@ import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from './utils/merge_selected_columns_with_configuration';
-
-const getTableColumnsLocalStorageKey = (appId: string) => {
-  const filteringKey = LOCAL_STORAGE_KEYS.casesTableColumns;
-  return `${appId}.${filteringKey}`;
-};
+import { getLocalStorageKey } from './utils';
 
 export function useCasesColumnsSelection() {
   const { appId } = useCasesContext();
   const casesColumnsConfig = useCasesColumnsConfiguration();
 
   const [selectedColumns, setSelectedColumns] = useLocalStorage<CasesColumnSelection[]>(
-    getTableColumnsLocalStorageKey(appId)
+    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableColumns, appId)
   );
 
   const columns = selectedColumns || [];
