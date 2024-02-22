@@ -9,6 +9,31 @@ import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+export interface EsBucket {
+  key: string;
+  doc_count: number;
+}
+export interface ApiKeyAggregationResult {
+  aggregations: {
+    usernames: {
+      doc_count_error_upper_bound: 0;
+      sum_other_doc_count: 0;
+      buckets: EsBucket[];
+    };
+    types: {
+      doc_count_error_upper_bound: 0;
+      sum_other_doc_count: 0;
+      buckets: EsBucket[];
+    };
+    invalidated: {
+      doc_count_error_upper_bound: 0;
+      sum_other_doc_count: 0;
+      buckets: EsBucket[];
+    };
+    expired: { doc_count: 0 };
+  };
+}
+
 export function defineQueryApiKeysAggregationsRoute({
   router,
   getAuthenticationService,
@@ -21,26 +46,12 @@ export function defineQueryApiKeysAggregationsRoute({
         access: 'internal',
       },
     },
-    createLicensedRouteHandler(async (context, request, response) => {
+    createLicensedRouteHandler(async (context, _request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;
         const authenticationService = getAuthenticationService();
 
-        const [{ cluster: clusterPrivileges }, areApiKeysEnabled, areCrossClusterApiKeysEnabled] =
-          await Promise.all([
-            esClient.asCurrentUser.security.hasPrivileges({
-              body: {
-                cluster: [
-                  'manage_security',
-                  'read_security',
-                  'manage_api_key',
-                  'manage_own_api_key',
-                ],
-              },
-            }),
-            authenticationService.apiKeys.areAPIKeysEnabled(),
-            authenticationService.apiKeys.areCrossClusterAPIKeysEnabled(),
-          ]);
+        const areApiKeysEnabled = await authenticationService.apiKeys.areAPIKeysEnabled();
 
         if (!areApiKeysEnabled) {
           return response.notFound({
@@ -51,39 +62,39 @@ export function defineQueryApiKeysAggregationsRoute({
           });
         }
 
-        const transportResponse = await esClient.asCurrentUser.transport.request({
-          method: 'POST',
-          path: '/_security/_query/api_key',
-          body: {
-            size: 0,
-            aggs: {
-              usernames: {
-                terms: {
-                  field: 'username',
+        const transportResponse =
+          await esClient.asCurrentUser.transport.request<ApiKeyAggregationResult>({
+            method: 'POST',
+            path: '/_security/_query/api_key',
+            body: {
+              size: 0,
+              aggs: {
+                usernames: {
+                  terms: {
+                    field: 'username',
+                  },
                 },
-              },
-              types: {
-                terms: {
-                  field: 'type',
+                types: {
+                  terms: {
+                    field: 'type',
+                  },
                 },
-              },
-              invalidated: {
-                terms: {
-                  field: 'invalidated',
+                invalidated: {
+                  terms: {
+                    field: 'invalidated',
+                  },
                 },
-              },
-              expired: {
-                filter: {
-                  range: { expiration: { lte: 'now/m' } },
+                expired: {
+                  filter: {
+                    range: { expiration: { lte: 'now/m' } },
+                  },
                 },
               },
             },
-          },
-        });
+          });
 
-        return response.ok<any>({
+        return response.ok<ApiKeyAggregationResult>({
           body: {
-            // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
             aggregations: transportResponse.aggregations,
           },
         });

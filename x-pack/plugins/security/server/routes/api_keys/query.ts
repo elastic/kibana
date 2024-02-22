@@ -82,7 +82,7 @@ export function defineQueryApiKeysRoute({
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
             apiKeys: validKeys,
             total: queryResponse.total,
-            count: queryResponse.count,
+            count: validKeys.length,
             canManageCrossClusterApiKeys:
               clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
             canManageApiKeys: clusterPrivileges.manage_api_key,

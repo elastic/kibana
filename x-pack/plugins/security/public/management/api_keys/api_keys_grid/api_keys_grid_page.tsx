@@ -62,6 +62,7 @@ interface UseAsyncTableResult {
   query: QueryContainer;
   from: number;
   pageSize: number;
+  totalKeys: number;
   setQuery: React.Dispatch<React.SetStateAction<QueryContainer>>;
   setFrom: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
@@ -70,11 +71,17 @@ interface UseAsyncTableResult {
 
 const useAsyncTable = (): UseAsyncTableResult => {
   const [state, setState] = useState<QueryApiKeyResult>({} as QueryApiKeyResult);
+  const [totalKeys, setTotalKeys] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<QueryContainer>({});
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(25);
   const { services } = useKibana<CoreStart>();
+
+  const fetchApiKeyTotal = async () => {
+    const response = await new APIKeysAPIClient(services.http).queryApiKeys();
+    setTotalKeys(response.total || 0);
+  };
 
   const fetchApiKeys = async () => {
     setIsLoading(true);
@@ -98,11 +105,16 @@ const useAsyncTable = (): UseAsyncTableResult => {
     fetchApiKeys();
   }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    fetchApiKeyTotal();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return {
     state,
     isLoading,
     query,
     from,
+    totalKeys,
     setQuery,
     setFrom,
     fetchApiKeys,
@@ -133,6 +145,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
     state: requestState,
     isLoading,
     from,
+    totalKeys,
     setQuery,
     setFrom,
     fetchApiKeys,
@@ -235,7 +248,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           readOnly={readOnly}
         />
       )}
-      {!requestState.apiKeys.length ? (
+      {totalKeys === 0 ? (
         <ApiKeysEmptyPrompt readOnly={readOnly}>
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
