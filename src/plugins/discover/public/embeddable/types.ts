@@ -13,6 +13,10 @@ import type {
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
+import type { Adapters } from '@kbn/embeddable-plugin/public';
+import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
+import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
+import type { DiscoverServices } from '../build_services';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput;
 
@@ -29,3 +33,13 @@ export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
   type: string;
 }
+
+export type EmbeddableComponentSearchProps = DiscoverGridEmbeddableSearchProps &
+  DocTableEmbeddableSearchProps;
+export type SearchProps = EmbeddableComponentSearchProps & {
+  sampleSizeState: number | undefined;
+  description?: string;
+  sharedItemTitle?: string;
+  inspectorAdapters?: Adapters;
+  services: DiscoverServices;
+};
