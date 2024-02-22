@@ -25,8 +25,7 @@ import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
 } from '../template/install';
-import { isFields, loadTransformFieldsFromYaml, processFields } from '../../fields/field';
-import { generateMappings } from '../template/template';
+import { isFields } from '../../fields/field';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
@@ -47,6 +46,7 @@ import { isUserSettingsTemplate } from '../template/utils';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
+import { loadMappingForTransform } from './mappings';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -149,15 +149,6 @@ const installLegacyTransformsAssets = async (
 
   return { installedTransforms, esReferences };
 };
-
-function loadMappingForTransform(
-  packageInstallContext: PackageInstallContext,
-  transformModuleId: string
-) {
-  const fields = loadTransformFieldsFromYaml(packageInstallContext, transformModuleId);
-  const validFields = processFields(fields);
-  return generateMappings(validFields);
-}
 
 const processTransformAssetsPerModule = (
   packageInstallContext: PackageInstallContext,
