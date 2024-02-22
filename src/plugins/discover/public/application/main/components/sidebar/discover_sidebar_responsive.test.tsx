@@ -36,13 +36,43 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import type { SearchBarCustomization } from '../../../../customizations';
+import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
   CustomDataViewPicker: jest
     .fn(() => <div data-test-subj="custom-data-view-picker" />)
     .mockName('CustomDataViewPickerMock'),
+};
+
+const smartFields = [
+  {
+    name: 'mock_field',
+    displayName: 'mock_field',
+    type: 'smart_field',
+  } as DataViewField,
+];
+
+export const additionalFieldGroups = [
+  {
+    SmartFields: {
+      fields: smartFields,
+      fieldCount: smartFields.length,
+      isAffectedByGlobalFilter: false,
+      isAffectedByTimeFilter: false,
+      isInitiallyOpen: true,
+      showInAccordion: true,
+      hideDetails: false,
+      hideIfEmpty: true,
+      title: 'Smart fields',
+    },
+  },
+];
+
+const mockFieldListCustomisation: FieldListCustomization = {
+  id: 'field_list',
+  additionalFieldGroups,
 };
 
 let mockUseCustomizations = false;
@@ -57,6 +87,8 @@ jest.mock('../../../../customizations', () => ({
     switch (id) {
       case 'search_bar':
         return mockSearchBarCustomization;
+      case 'field_list':
+        return mockFieldListCustomisation;
       default:
         throw new Error(`Unknown customization id: ${id}`);
     }

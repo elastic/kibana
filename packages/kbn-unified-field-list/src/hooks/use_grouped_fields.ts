@@ -356,6 +356,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     isAffectedByTimeFilter,
     popularFieldsLimit,
     sortedSelectedFields,
+    additionalFieldGroups,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
