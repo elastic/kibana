@@ -153,7 +153,7 @@ export async function installYarnDeps(log, opts = undefined) {
       RE2_DOWNLOAD_MIRROR:
         'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
       PUPPETEER_DOWNLOAD_BASE_URL:
-         'https://storage.googleapis.com/chrome-for-testing-public-test-xoxo/'
+         'https://storage.googleapis.com/chrome-for-testing-public-test/'
     },
   });
 
