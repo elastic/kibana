@@ -43,6 +43,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
+  additionalFieldGroups?: Array<FieldListGroups<T>>;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -70,6 +71,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   getNewFieldsBySpec,
+  additionalFieldGroups,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -307,6 +309,13 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       },
     };
 
+    additionalFieldGroups?.forEach((group) => {
+      fieldGroupDefinitions = {
+        ...fieldGroupDefinitions,
+        ...group,
+      };
+    });
+
     // the fieldsExistenceInfoUnavailable check should happen only for dataview based
     const dataViewFieldsExistenceUnavailable = dataViewId && fieldsExistenceInfoUnavailable;
     // for textbased queries, rely on the empty fields length
@@ -413,6 +422,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 const collator = new Intl.Collator(undefined, {
   sensitivity: 'base',
 });
+
 function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {
   return collator.compare(fieldA.displayName || fieldA.name, fieldB.displayName || fieldB.name);
 }
