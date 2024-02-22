@@ -1935,7 +1935,7 @@ The algorithm for calculating rule version diffs' core structure is [fully imple
 
 We propose developing more adaptable diff algorithms tailored to specific rule fields or rule field types. These more specific algorithms aim to minimize conflicts and automate merging of changes, doing the best effort to keep the intended customizations applied by the user, as well as the updates proposed by Elastic. Hopefully, the user will be able to simply review the proposal and accept it.
 
-#### Concrete field diff algorithm by type
+#### Concrete field diff algorithms by type
 
 Depending on the specific field or type of field we might want to apply a specific merging algorithm when conflicts arise. Let's propose different types.
 
@@ -2635,9 +2635,8 @@ Examples: `related_integrations,` `required_fields`
 
 The `threat` field has a specific [schema](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts#L250) that can be handled with its own algorithm in case of conflicts, in order to try to obtain the most reasonable merge between versions. 
 
-The `threat``
+TODO: write algorithm specific to this field
 
-Examples: `threat` (Mitre Threat), `required_fields`
   <table>
     <thead>
       <tr>
@@ -2750,8 +2749,6 @@ Examples: `threat` (Mitre Threat), `required_fields`
 
 ### Changes to upgrade `_perform` endpoints
 
-### Rule field diff algorithms
-
 
 
 
@@ -2768,23 +2765,5 @@ Examples: `threat` (Mitre Threat), `required_fields`
 - User Config
   Create a user config/setting that the user can turn on to accept updates automatically if there are no conflicts.
   Or we should more concretely how we want this setting to behave
-
-## Marking rules (and their fields) as customized
-
-We’d like to know if the rules has been customized in any way (at least 1 field modified from the base version) in order to mark the rule as “customized”
-
-- Use the `customized`
-  IDEALLY:
-- Know specifically which fields have been customized.
-- How the fields have been customized, show their diffs.
-
-- To keep track of how the rule has changed
-  - Introduce a new endpoint that calculates the diffs for the required fields. We could have new tab in the Rules Flyout tab that only calls an endpoint when it is opened. This endpoint would calcualte which fields where modified and return the base and current versions for each.
-  - **\*\***PROs:**\*\***
-    - We don’t need to keep track of which fields were customized in the SO, and no changes to the rule schema are changed.
-    - Most of the logic for the endpoint needed is already implemented.
-  - **\*\*\*\***CONs:**\*\*\*\***
-    - We do not keep in the SO the list of which rules were customized. This stops us from showing, in the Rules Detail page, which fields were customized, at least wihtout making an additional call to the backend, to calculate diffs.
-    - We can solve this by making a non-blocking request to the endpoint after the page loads. Alternatively, show it only when the user opens a flyout desgined to show these diffs.
 
 ## Other open questions
