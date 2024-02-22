@@ -12,8 +12,3 @@ import { CustomThresholdAlertFields, CustomThresholdRuleTypeParams } from '../ty
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
 export type CustomThresholdAlert = TopAlert<CustomThresholdAlertFields>;
-
-export interface Group {
-  field: string;
-  value: string;
-}
