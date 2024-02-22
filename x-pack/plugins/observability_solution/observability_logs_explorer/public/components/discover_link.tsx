@@ -10,7 +10,7 @@ import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { hydrateDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import {
-  getDiscoverColumnsFromDisplayOptions,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -53,18 +53,22 @@ export const DiscoverLinkForValidState = React.memo(
     discover: DiscoverStart;
     pageState: InitializedPageState;
   }) => {
-    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(
-      () => ({
+    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(() => {
+      const index = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
+      return {
         breakdownField: logsExplorerState.chart.breakdownField ?? undefined,
-        columns: getDiscoverColumnsFromDisplayOptions(logsExplorerState),
-        filters: getDiscoverFiltersFromState(logsExplorerState.filters, logsExplorerState.controls),
+        columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(logsExplorerState),
+        filters: getDiscoverFiltersFromState(
+          index.id,
+          logsExplorerState.filters,
+          logsExplorerState.controls
+        ),
         query: logsExplorerState.query,
         refreshInterval: logsExplorerState.refreshInterval,
         timeRange: logsExplorerState.time,
-        dataViewSpec: hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec(),
-      }),
-      [logsExplorerState]
-    );
+        dataViewSpec: index,
+      };
+    }, [logsExplorerState]);
 
     return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
   }

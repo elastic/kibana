@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { monaco } from '../../../../monaco_imports';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { getAstContext } from '../shared/context';
-import { monacoPositionToOffset, getFunctionDefinition, isSourceItem } from '../shared/helpers';
+import {
+  monacoPositionToOffset,
+  getFunctionDefinition,
+  isSourceItem,
+  isSettingItem,
+  getCommandDefinition,
+} from '../shared/helpers';
 import { getPolicyHelper } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import type { AstProviderFn } from '../types';
@@ -47,32 +53,47 @@ export async function getHoverItem(
   }
 
   if (astContext.type === 'expression') {
-    if (
-      astContext.node &&
-      isSourceItem(astContext.node) &&
-      astContext.node.sourceType === 'policy'
-    ) {
-      const policyMetadata = await getPolicyMetadata(astContext.node.name);
-      if (policyMetadata) {
-        return {
-          contents: [
-            {
-              value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
-                defaultMessage: '**Indexes**',
-              })}: ${policyMetadata.sourceIndices.join(', ')}`,
-            },
-            {
-              value: `${i18n.translate('monaco.esql.hover.policyMatchingField', {
-                defaultMessage: '**Matching field**',
-              })}: ${policyMetadata.matchField}`,
-            },
-            {
-              value: `${i18n.translate('monaco.esql.hover.policyEnrichedFields', {
-                defaultMessage: '**Fields**',
-              })}: ${policyMetadata.enrichFields.join(', ')}`,
-            },
-          ],
-        };
+    if (astContext.node) {
+      if (isSourceItem(astContext.node) && astContext.node.sourceType === 'policy') {
+        const policyMetadata = await getPolicyMetadata(astContext.node.name);
+        if (policyMetadata) {
+          return {
+            contents: [
+              {
+                value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
+                  defaultMessage: '**Indexes**',
+                })}: ${policyMetadata.sourceIndices.join(', ')}`,
+              },
+              {
+                value: `${i18n.translate('monaco.esql.hover.policyMatchingField', {
+                  defaultMessage: '**Matching field**',
+                })}: ${policyMetadata.matchField}`,
+              },
+              {
+                value: `${i18n.translate('monaco.esql.hover.policyEnrichedFields', {
+                  defaultMessage: '**Fields**',
+                })}: ${policyMetadata.enrichFields.join(', ')}`,
+              },
+            ],
+          };
+        }
+      }
+      if (isSettingItem(astContext.node)) {
+        const commandDef = getCommandDefinition(astContext.command.name);
+        const settingDef = commandDef?.modes.find(({ values }) =>
+          values.some(({ name }) => name === astContext.node!.name)
+        );
+        if (settingDef) {
+          const mode = settingDef.values.find(({ name }) => name === astContext.node!.name)!;
+          return {
+            contents: [
+              { value: settingDef.description },
+              {
+                value: `**${mode.name}**: ${mode.description}`,
+              },
+            ],
+          };
+        }
       }
     }
   }

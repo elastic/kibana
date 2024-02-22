@@ -101,7 +101,7 @@ export async function retrieveFieldsFromStringSources(
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks) {
+  if (!callbacks || !callbacks?.getMetaFields) {
     return new Map();
   }
   const customQuery = buildQueryForFieldsForStringSources(queryString, commands);

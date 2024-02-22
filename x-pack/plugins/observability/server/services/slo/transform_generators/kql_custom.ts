@@ -10,7 +10,7 @@ import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { getElastichsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
+import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -53,7 +53,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
                 },
               },
             },
-            getElastichsearchQueryOrThrow(indicator.params.filter),
+            getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },
       },
@@ -68,8 +68,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
-    const numerator = getElastichsearchQueryOrThrow(indicator.params.good);
-    const denominator = getElastichsearchQueryOrThrow(indicator.params.total);
+    const numerator = getElasticsearchQueryOrThrow(indicator.params.good);
+    const denominator = getElasticsearchQueryOrThrow(indicator.params.total);
 
     return {
       'slo.numerator': {

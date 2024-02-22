@@ -43,7 +43,6 @@ import {
   getPolicyName,
   getMatchField,
   getEnrichClauses,
-  getPolicySettings,
 } from './ast_walker';
 import type { ESQLAst } from './types';
 
@@ -117,10 +116,12 @@ export class AstListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
     const metadataContext = ctx.metadata();
-    if (metadataContext) {
-      const option = createOption(metadataContext.METADATA().text.toLowerCase(), metadataContext);
+    const metadataContent =
+      metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
+    if (metadataContent) {
+      const option = createOption(metadataContent.METADATA().text.toLowerCase(), metadataContent);
       commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContext));
+      option.args.push(...collectAllColumnIdentifiers(metadataContent));
     }
   }
 
@@ -251,11 +252,6 @@ export class AstListener implements ESQLParserListener {
   exitEnrichCommand(ctx: EnrichCommandContext) {
     const command = createCommand('enrich', ctx);
     this.ast.push(command);
-    command.args.push(
-      ...getPolicySettings(ctx),
-      ...getPolicyName(ctx),
-      ...getMatchField(ctx),
-      ...getEnrichClauses(ctx)
-    );
+    command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
   }
 }

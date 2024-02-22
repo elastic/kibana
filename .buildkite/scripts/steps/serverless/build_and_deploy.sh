@@ -22,6 +22,7 @@ deploy() {
   esac
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
+  is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
     "region_id": "aws-eu-west-1",
@@ -67,7 +68,7 @@ deploy() {
 
     echo "Get credentials..."
     curl -s -XPOST -H "Authorization: ApiKey $PROJECT_API_KEY" \
-      "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}/_reset-credentials" &>> $DEPLOY_LOGS
+      "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}/_reset-internal-credentials" &>> $DEPLOY_LOGS
 
     PROJECT_USERNAME=$(jq -r --slurp '.[2].username' $DEPLOY_LOGS)
     PROJECT_PASSWORD=$(jq -r --slurp '.[2].password' $DEPLOY_LOGS)

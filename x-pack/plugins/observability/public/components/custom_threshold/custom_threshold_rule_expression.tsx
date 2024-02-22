@@ -405,7 +405,7 @@ export default function Expressions(props: Props) {
         indexPatterns={dataView ? [dataView] : undefined}
         showQueryInput={true}
         showQueryMenu={false}
-        showFilterBar={false}
+        showFilterBar={!!ruleParams.searchConfiguration?.filter}
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
@@ -413,6 +413,16 @@ export default function Expressions(props: Props) {
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query as Query}
+        filters={ruleParams.searchConfiguration?.filter}
+        onFiltersUpdated={(filter) => {
+          // Since rule params will be sent to the API as is, and we only need meta and query parameters to be
+          // saved in the rule's saved object, we filter extra fields here (such as $state).
+          const filters = filter.map(({ meta, query }) => ({ meta, query }));
+          setRuleParams('searchConfiguration', {
+            ...ruleParams.searchConfiguration,
+            filter: filters,
+          });
+        }}
       />
       {errors.filterQuery && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
@@ -454,7 +464,7 @@ export default function Expressions(props: Props) {
                 <PreviewChart
                   metricExpression={e}
                   dataView={dataView}
-                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
+                  searchConfiguration={ruleParams.searchConfiguration}
                   groupBy={ruleParams.groupBy}
                   error={(errors[idx] as IErrorObject) || emptyError}
                   timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}

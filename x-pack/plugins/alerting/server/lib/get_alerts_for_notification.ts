@@ -27,6 +27,7 @@ export function getAlertsForNotification<
   startedAt?: string | null
 ) {
   const currentActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  let delayedAlertsCount = 0;
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
@@ -37,6 +38,7 @@ export function getAlertsForNotification<
     if (alert.getActiveCount() < alertDelay) {
       // remove from new alerts
       delete newAlerts[id];
+      delayedAlertsCount += 1;
     } else {
       currentActiveAlerts[id] = alert;
       // if the active count is equal to the alertDelay it is considered a new alert
@@ -100,5 +102,6 @@ export function getAlertsForNotification<
     currentActiveAlerts,
     recoveredAlerts,
     currentRecoveredAlerts,
+    delayedAlertsCount,
   };
 }

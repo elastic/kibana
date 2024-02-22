@@ -1301,31 +1301,6 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
-    it('#preboot registers expected static dirs', async () => {
-      prebootDeps.http.staticAssets.getPluginServerPath.mockImplementation(
-        (pluginName: string) => `/static-assets/${pluginName}`
-      );
-      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      await pluginsService.preboot(prebootDeps);
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledTimes(prebootPlugins.length * 2);
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-1-preboot',
-        expect.any(String)
-      );
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-1-preboot/assets/{path*}',
-        expect.any(String)
-      );
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-2-preboot',
-        expect.any(String)
-      );
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-2-preboot/assets/{path*}',
-        expect.any(String)
-      );
-    });
-
     it('#setup does initialize `standard` plugins if plugins.initialize is true', async () => {
       config$.next({ plugins: { initialize: true } });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
@@ -1345,32 +1320,6 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(initialized).toBe(false);
-    });
-
-    it('#setup registers expected static dirs', async () => {
-      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      await pluginsService.preboot(prebootDeps);
-      setupDeps.http.staticAssets.getPluginServerPath.mockImplementation(
-        (pluginName: string) => `/static-assets/${pluginName}`
-      );
-      await pluginsService.setup(setupDeps);
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledTimes(standardPlugins.length * 2);
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-1-standard',
-        expect.any(String)
-      );
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-1-standard/assets/{path*}',
-        expect.any(String)
-      );
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-2-standard',
-        expect.any(String)
-      );
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-2-standard/assets/{path*}',
-        expect.any(String)
-      );
     });
   });
 

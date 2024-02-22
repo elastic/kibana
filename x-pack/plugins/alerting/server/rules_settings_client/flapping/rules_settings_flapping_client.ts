@@ -130,19 +130,14 @@ export class RulesSettingsFlappingClient {
     }
   }
 
-  public async getSettings(): Promise<SavedObject<RulesSettings>> {
-    try {
-      return await this.savedObjectsClient.get<RulesSettings>(
-        RULES_SETTINGS_SAVED_OBJECT_TYPE,
-        RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
-      );
-    } catch (e) {
-      this.logger.error(`Failed to get flapping rules setting for current space. Error: ${e}`);
-      throw e;
-    }
+  private async getSettings(): Promise<SavedObject<RulesSettings>> {
+    return await this.savedObjectsClient.get<RulesSettings>(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+    );
   }
 
-  public async createSettings(): Promise<SavedObject<RulesSettings>> {
+  private async createSettings(): Promise<SavedObject<RulesSettings>> {
     const modificationMetadata = await this.getModificationMetadata();
     try {
       return await this.savedObjectsClient.create<RulesSettings>(

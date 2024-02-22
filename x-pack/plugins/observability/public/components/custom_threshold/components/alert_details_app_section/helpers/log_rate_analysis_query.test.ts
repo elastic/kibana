@@ -72,6 +72,30 @@ describe('buildEsQuery', () => {
       alert: {},
     },
     {
+      title: 'rule without filter and with group by',
+      params: {
+        groupBy: ['host.hostname'],
+        searchConfiguration: {
+          index,
+          query: { query: '', language: 'kuery' },
+        },
+        criteria: [
+          {
+            metrics: [{ name: 'A', aggType: Aggregators.COUNT }],
+            timeSize: 1,
+            timeUnit: 'm',
+            threshold: [90],
+            comparator: Comparator.GT,
+          },
+        ],
+      },
+      alert: {
+        fields: {
+          'kibana.alert.group': [mockedAlertWithMultipleGroups.fields['kibana.alert.group'][0]],
+        },
+      },
+    },
+    {
       title: 'rule with multiple metrics',
       params: {
         ...mockedParams,

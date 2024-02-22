@@ -22,9 +22,11 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useIsElementMounted } from '../rules_table/guided_onboarding/use_is_element_mounted';
+import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from '../upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import * as i18n from './translations';
 
 export interface RulesFeatureTourContextType {
@@ -32,7 +34,7 @@ export interface RulesFeatureTourContextType {
   actions: EuiTourActions;
 }
 
-export const SEARCH_CAPABILITIES_TOUR_ANCHOR = 'search-capabilities-tour-anchor';
+export const PER_FIELD_UPGRADE_TOUR_ANCHOR = 'updates';
 
 const TOUR_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE;
 const TOUR_POPOVER_WIDTH = 400;
@@ -41,14 +43,14 @@ const tourConfig: EuiTourState = {
   currentTourStep: 1,
   isTourActive: true,
   tourPopoverWidth: TOUR_POPOVER_WIDTH,
-  tourSubtitle: i18n.TOUR_TITLE,
+  tourSubtitle: '',
 };
 
 const stepsConfig: EuiStatelessTourStep[] = [
   {
     step: 1,
-    title: i18n.SEARCH_CAPABILITIES_TITLE,
-    content: <EuiText>{i18n.SEARCH_CAPABILITIES_DESCRIPTION}</EuiText>,
+    title: i18n.UPDATE_TOUR_TITLE,
+    content: <EuiText>{i18n.UPDATE_TOUR_DESCRIPTION}</EuiText>,
     stepsTotal: 1,
     children: <></>,
     onFinish: noop,
@@ -56,7 +58,7 @@ const stepsConfig: EuiStatelessTourStep[] = [
   },
 ];
 
-export const RulesFeatureTour: FC = () => {
+export const RuleFeatureTour: FC = () => {
   const { storage } = useKibana().services;
 
   const restoredState = useMemo<EuiTourState>(
@@ -74,28 +76,9 @@ export const RulesFeatureTour: FC = () => {
     storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
-  const [shouldShowSearchCapabilitiesTour, setShouldShowSearchCapabilitiesTour] = useState(false);
-
-  useEffect(() => {
-    /**
-     * Wait until the tour target elements are visible on the page and mount
-     * EuiTourStep components only after that. Otherwise, the tours would never
-     * show up on the page.
-     */
-    const observer = new MutationObserver(() => {
-      if (document.querySelector(`#${SEARCH_CAPABILITIES_TOUR_ANCHOR}`)) {
-        setShouldShowSearchCapabilitiesTour(true);
-        observer.disconnect();
-      }
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  const isTourAnchorMounted = useIsElementMounted(PER_FIELD_UPGRADE_TOUR_ANCHOR);
+  const isFlyoutOpen = useIsElementMounted(PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR);
+  const shouldShowRuleUpgradeTour = isTourAnchorMounted && !isFlyoutOpen;
 
   const enhancedSteps = useMemo(
     () =>
@@ -135,7 +118,7 @@ export const RulesFeatureTour: FC = () => {
     [tourSteps, tourActions]
   );
 
-  return shouldShowSearchCapabilitiesTour ? (
+  return shouldShowRuleUpgradeTour ? (
     <EuiTourStep
       {...enhancedSteps[0]}
       /**
@@ -144,7 +127,7 @@ export const RulesFeatureTour: FC = () => {
        */
       // eslint-disable-next-line react/no-children-prop
       children={undefined}
-      anchor={`#${SEARCH_CAPABILITIES_TOUR_ANCHOR}`}
+      anchor={`#${PER_FIELD_UPGRADE_TOUR_ANCHOR}`}
       anchorPosition="downCenter"
     />
   ) : null;

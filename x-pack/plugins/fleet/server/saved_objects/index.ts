@@ -89,7 +89,7 @@ import { settingsV1 } from './model_versions/v1';
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
+export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -230,6 +230,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             random: { type: 'boolean' },
           },
         },
+        topic: { type: 'text', index: false },
         topics: {
           dynamic: false,
           properties: {
@@ -358,6 +359,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
+      },
+      '6': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              topic: { type: 'text', index: false },
             },
           },
         ],
@@ -703,23 +714,27 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
 }
 
+export const OUTPUT_EXLCUDE_AAD_FIELDS = new Set([
+  'service_token',
+  'shipper',
+  'allow_edit',
+  'broker_ack_reliability',
+  'broker_buffer_size',
+  'channel_buffer_size',
+]);
+
+export const OUTPUT_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
+  { key: 'password', dangerouslyExposeValue: true },
+]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([
-      { key: 'ssl', dangerouslyExposeValue: true },
-      { key: 'password', dangerouslyExposeValue: true },
-    ]),
-    attributesToIncludeInAAD: new Set([
-      'service_token',
-      'shipper',
-      'allow_edit',
-      'broker_ack_reliability',
-      'broker_buffer_size',
-      'channel_buffer_size',
-    ]),
+    attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
+    attributesToIncludeInAAD: OUTPUT_EXLCUDE_AAD_FIELDS,
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({

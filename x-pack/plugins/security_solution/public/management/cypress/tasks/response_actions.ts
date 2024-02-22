@@ -43,7 +43,7 @@ export const validateAvailableCommands = () => {
 };
 export const addEndpointResponseAction = () => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click();
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
   });
 };
 export const focusAndOpenCommandDropdown = (number = 0) => {
@@ -99,12 +99,10 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
 
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
-      'be.disabled'
-    );
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
   });
   // Try adding new action, should not add list item.
-  cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click({
+  cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({
     force: true,
   });
   cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');

@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { Query, Filter } from '@kbn/es-query';
 import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,26 +39,38 @@ import {
   LensFieldFormat,
 } from './helpers';
 
+interface ChartOptions {
+  seriesType?: SeriesType;
+  interval?: string;
+}
+
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
+  searchConfiguration: SerializedSearchSourceFields;
   dataView?: DataView;
-  filterQuery?: string;
   groupBy?: string | string[];
   error?: IErrorObject;
   timeRange: TimeRange;
   annotations?: EventAnnotationConfig[];
-  seriesType?: SeriesType;
+  chartOptions?: ChartOptions;
+  additionalFilters?: Filter[];
 }
+
+const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
+};
 
 export function RuleConditionChart({
   metricExpression,
+  searchConfiguration,
   dataView,
-  filterQuery,
   groupBy,
   error,
   annotations,
   timeRange,
-  seriesType,
+  chartOptions: { seriesType, interval } = {},
+  additionalFilters = [],
 }: RuleConditionChartProps) {
   const {
     services: { lens },
@@ -68,6 +83,7 @@ export function RuleConditionChart({
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
+  const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
@@ -223,7 +239,7 @@ export function RuleConditionChart({
       buckets: {
         type: 'date_histogram',
         params: {
-          interval: `${timeSize}${timeUnit}`,
+          interval: interval || `${timeSize}${timeUnit}`,
         },
       },
       seriesType: seriesType ? seriesType : 'bar',
@@ -283,10 +299,11 @@ export function RuleConditionChart({
     comparator,
     dataView,
     equation,
-    filterQuery,
+    searchConfiguration,
     formula,
     formulaAsync.value,
     groupBy,
+    interval,
     metrics,
     threshold,
     thresholdReferenceLine,
@@ -328,6 +345,7 @@ export function RuleConditionChart({
       </div>
     );
   }
+
   return (
     <div>
       <lens.EmbeddableComponent
@@ -337,10 +355,8 @@ export function RuleConditionChart({
         timeRange={timeRange}
         attributes={attributes}
         disableTriggers={true}
-        query={{
-          language: 'kuery',
-          query: filterQuery || '',
-        }}
+        query={(searchConfiguration.query as Query) || defaultQuery}
+        filters={filters}
       />
     </div>
   );

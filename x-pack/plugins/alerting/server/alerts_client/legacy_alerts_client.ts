@@ -141,6 +141,7 @@ export class LegacyAlertsClient<
     flappingSettings,
     maintenanceWindowIds,
     alertDelay,
+    ruleRunMetricsStore,
   }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
@@ -176,6 +177,7 @@ export class LegacyAlertsClient<
       processedAlertsRecoveredCurrent,
       this.startedAtString
     );
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(alerts.delayedAlertsCount);
     alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
     this.processedAlerts.new = alerts.newAlerts;
@@ -213,6 +215,7 @@ export class LegacyAlertsClient<
       flappingSettings,
       maintenanceWindowIds,
       alertDelay,
+      ruleRunMetricsStore,
     });
 
     this.logAlerts({

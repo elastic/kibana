@@ -12,9 +12,9 @@ import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_i
 import {
   Aggregators,
   CustomMetricExpressionParams,
+  SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { AdditionalContext } from '../utils';
-import { SearchConfigurationType } from '../types';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
@@ -69,7 +69,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         dataView,
         timeFieldName,
         groupBy,
-        searchConfiguration.query.query,
+        searchConfiguration,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -83,7 +83,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         dataView,
         timeFieldName,
         groupBy,
-        searchConfiguration.query.query,
+        searchConfiguration,
         logger,
         calculatedTimerange,
         missingGroups
