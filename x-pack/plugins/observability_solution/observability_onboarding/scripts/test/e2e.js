@@ -65,7 +65,7 @@ if (cypressCliArgs.grep) {
 
 const ftrConfig = argv.open ? './ftr_config_open.ts' : './ftr_config_runner.ts';
 const spawnArgs = [
-  `../../../../scripts/${ftrScript}`,
+  `../../../../../scripts/${ftrScript}`,
   `--config=${ftrConfig}`,
   `--kibana-install-dir=${argv.kibanaInstallDir}`,
   ...(argv.bail ? [`--bail`] : []),
