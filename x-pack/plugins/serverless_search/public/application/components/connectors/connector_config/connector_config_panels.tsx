@@ -55,7 +55,6 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
         status={connector.status}
       />
       <EuiSpacer />
-      <EuiSpacer />
       <ApiKeyPanel connector={connector} />
       <EuiSpacer />
     </>
