@@ -19,18 +19,19 @@ export function HeaderMenu(): React.ReactElement | null {
     observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useKibana().services;
 
-  const {
-    appMountParameters: { setHeaderActionMenu },
-  } = usePluginContext();
+  const { appMountParameters } = usePluginContext();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
+    <HeaderMenuPortal
+      setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
+      theme$={theme.theme$}
+    >
       <EuiFlexGroup responsive={false} gutterSize="s">
-        {ObservabilityAIAssistantActionMenuItem ? (
+        {ObservabilityAIAssistantActionMenuItem && (
           <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
           </EuiFlexItem>
-        ) : null}
+        )}
         <EuiFlexItem>
           <EuiHeaderLinks>
             <EuiHeaderLink
