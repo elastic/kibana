@@ -13,17 +13,29 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 
 interface LinkProps {
   objectType: string;
-  objectId: string;
+  objectId?: string;
   isDirty: boolean;
   isEmbedded: boolean;
-  shareableUrlForSavedObject?: string; 
-  shareableUrl?: string; 
+  shareableUrlForSavedObject?: string;
+  shareableUrl?: string;
 }
 
-export const LinkModal = ({ objectType, objectId, isDirty, isEmbedded, shareableUrl, shareableUrlForSavedObject }: LinkProps) => {
-  const [urlParams, setUrlParams] = useState<any>();
-  
-  
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
+}
+
+export const LinkModal = ({
+  objectType,
+  objectId,
+  isDirty,
+  isEmbedded,
+  shareableUrl,
+  shareableUrlForSavedObject,
+}: LinkProps) => {
+  const [urlParams] = useState<UrlParams | undefined>(undefined);
+
   const isNotSaved = () => {
     return objectId === undefined || objectId === '' || isDirty;
   };
@@ -59,7 +71,7 @@ export const LinkModal = ({ objectType, objectId, isDirty, isEmbedded, shareable
     url = isEmbedded ? makeUrlEmbeddable(url) : url;
     url = urlParams ? getUrlParamExtensions(url) : url;
 
-    return url;
+    return url.padEnd(0, '.');
   };
 
   const getSavedObjectUrl = () => {
@@ -106,12 +118,17 @@ export const LinkModal = ({ objectType, objectId, isDirty, isEmbedded, shareable
   };
 
   const renderLink = () => {
-    if (objectType === 'lens') {
-      return getSavedObjectUrl();
-    } else if (objectType === 'dashboard' || objectType === 'search') {
+    if (objectType === 'dashboard' || objectType === 'search') {
       return getSnapshotUrl();
     }
+    return getSavedObjectUrl();
   };
+
+  const displayLink = () => {
+    const stringLength = renderLink()?.length;
+    return stringLength! > 40 ? renderLink()?.slice(0, 40).concat('...') : renderLink();
+  };
+
   return (
     <EuiForm>
       <EuiSpacer size="s" />
@@ -122,8 +139,8 @@ export const LinkModal = ({ objectType, objectId, isDirty, isEmbedded, shareable
           values={{ objectType }}
         />
       </EuiFormHelpText>
-      <EuiSpacer size="m" />
-      <EuiCodeBlock isCopyable>{renderLink()}</EuiCodeBlock>
+      <EuiSpacer size="l" />
+      <EuiCodeBlock onCopy={() => renderLink()}>{displayLink()}</EuiCodeBlock>
       <EuiSpacer />
     </EuiForm>
   );
