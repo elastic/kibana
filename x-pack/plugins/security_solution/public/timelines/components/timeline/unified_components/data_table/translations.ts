@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DRAG_DROP_FIELD = i18n.translate('discover.dropZoneTableLabel', {
-  defaultMessage: 'Drop zone to add field as a column to the table',
-});
+export const DRAG_DROP_FIELD = i18n.translate(
+  'xpack.securitySolution.timeline.dataTable.dropZoneTableLabel',
+  {
+    defaultMessage: 'Drop zone to add field as a column to the table',
+  }
+);
 
 export const FULL_SCREEN = i18n.translate(
   'xpack.securitySolution.timeline.dataTable.fullScreenButton',
@@ -25,19 +28,19 @@ export const EXIT_FULL_SCREEN = i18n.translate(
   }
 );
 
-export const EVENTS = i18n.translate('xpack.securitySolution.footer.events', {
+export const EVENTS = i18n.translate('xpack.securitySolution.timeline.footer.events', {
   defaultMessage: 'Events',
 });
 
-export const OF = i18n.translate('xpack.securitySolution.footer.of', {
+export const OF = i18n.translate('xpack.securitySolution.timeline.footer.of', {
   defaultMessage: 'of',
 });
 
-export const ROWS = i18n.translate('xpack.securitySolution.footer.rows', {
+export const ROWS = i18n.translate('xpack.securitySolution.timeline.footer.rows', {
   defaultMessage: 'rows',
 });
 
-export const LOADING = i18n.translate('xpack.securitySolution.footer.loadingLabel', {
+export const LOADING = i18n.translate('xpack.securitySolution.timeline.footer.loadingLabel', {
   defaultMessage: 'Loading',
 });
 
