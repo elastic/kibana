@@ -142,6 +142,7 @@ kibana_vars=(
     savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
+    server.cdn.url
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors

@@ -821,6 +821,69 @@ ssl.test: 123
       }
     `);
   });
+
+  it('should work with kafka output', () => {
+    const policyOutput = transformOutputToFullPolicyOutput({
+      id: 'id123',
+      hosts: ['test:9999'],
+      topics: [
+        {
+          topic: 'test',
+        },
+        // Deprecated conditionnal topic
+        {
+          topic: 'deprecated',
+          when: { condition: 'test:100', type: 'equals' },
+        },
+      ],
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      auth_type: 'none',
+      connection_type: 'plaintext',
+      partition: 'random',
+      random: {
+        group_events: 1,
+      },
+      headers: [
+        {
+          key: '',
+          value: '',
+        },
+      ],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    });
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "broker_timeout": 30,
+        "client_id": "Elastic",
+        "compression": "none",
+        "headers": Array [],
+        "hosts": Array [
+          "test:9999",
+        ],
+        "key": undefined,
+        "partition": Object {
+          "random": Object {
+            "group_events": 1,
+          },
+        },
+        "required_acks": 1,
+        "timeout": 30,
+        "topic": "test",
+        "type": "kafka",
+        "version": "1.0.0",
+      }
+    `);
+  });
 });
 
 describe('generateFleetConfig', () => {

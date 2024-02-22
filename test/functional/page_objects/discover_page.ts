@@ -28,6 +28,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -150,6 +151,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async loadSavedSearch(searchName: string) {
     await this.openLoadSavedSearchPanel();
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -549,13 +551,18 @@ export class DiscoverPageObject extends FtrService {
     return hasBadge;
   }
 
-  public async selectIndexPattern(indexPattern: string) {
+  public async selectIndexPattern(
+    indexPattern: string,
+    waitUntilLoadingHasFinished: boolean = true
+  ) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
     );
-    await this.header.waitUntilLoadingHasFinished();
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async getIndexPatterns() {

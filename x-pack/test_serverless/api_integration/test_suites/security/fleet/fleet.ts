@@ -7,14 +7,19 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import {
+  expectDefaultElasticsearchOutput,
+  expectDefaultFleetServer,
+} from '../../common/fleet/default_setup';
 
-export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+export default function (ctx: FtrProviderContext) {
+  const svlCommonApi = ctx.getService('svlCommonApi');
+  const supertest = ctx.getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176754
-  describe.skip('fleet', function () {
+  describe('fleet', function () {
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
+      await expectDefaultFleetServer(ctx);
+
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
@@ -33,6 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('accepts request to create a new fleet server hosts if host url is same as default', async () => {
+      await expectDefaultFleetServer(ctx);
+
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
@@ -51,6 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('rejects request to create a new elasticsearch output if host is different from default', async () => {
+      await expectDefaultElasticsearchOutput(ctx);
+
       const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
@@ -71,6 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('accepts request to create a new elasticsearch output if host url is same as default', async () => {
+      await expectDefaultElasticsearchOutput(ctx);
+
       const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())

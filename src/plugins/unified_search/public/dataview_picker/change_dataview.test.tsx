@@ -14,10 +14,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock } from './mocks/dataview';
-import { DataViewPickerPropsExtended, TextBasedLanguages } from './data_view_picker';
+import { DataViewPickerPropsExtended } from './data_view_picker';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -223,5 +226,45 @@ describe('DataView component', () => {
         isAdhoc: true,
       },
     ]);
+  });
+
+  describe('test based language switch warning icon', () => {
+    beforeAll(() => {
+      // Enzyme doesn't clean the DOM between tests, so we need to do it manually
+      document.body.innerHTML = '';
+    });
+
+    it('should show text based language switch warning icon', () => {
+      render(
+        wrapDataViewComponentInContext(
+          {
+            ...props,
+            onDataViewCreated: jest.fn(),
+            textBasedLanguages: [TextBasedLanguages.ESQL],
+            textBasedLanguage: TextBasedLanguages.ESQL,
+          },
+          false
+        )
+      );
+      userEvent.click(screen.getByTestId('dataview-trigger'));
+      expect(screen.queryByTestId('textBasedLang-warning')).toBeInTheDocument();
+    });
+
+    it('should not show text based language switch warning icon when shouldShowTextBasedLanguageTransitionModal is false', () => {
+      render(
+        wrapDataViewComponentInContext(
+          {
+            ...props,
+            onDataViewCreated: jest.fn(),
+            textBasedLanguages: [TextBasedLanguages.ESQL],
+            textBasedLanguage: TextBasedLanguages.ESQL,
+            shouldShowTextBasedLanguageTransitionModal: false,
+          },
+          false
+        )
+      );
+      userEvent.click(screen.getByTestId('dataview-trigger'));
+      expect(screen.queryByTestId('textBasedLang-warning')).not.toBeInTheDocument();
+    });
   });
 });
