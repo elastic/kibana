@@ -10,7 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { type InfraMetadata, InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
@@ -25,7 +25,7 @@ interface UseMetadataProps {
     from: number;
     to: number;
   };
-  request$?: Subject<() => Promise<unknown>>;
+  request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 export function useMetadata({
   assetId,
