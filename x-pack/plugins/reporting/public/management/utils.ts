@@ -7,7 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { Job } from '../lib/job';
+import { Job } from '@kbn/reporting-public';
 
 /**
  * This is not the most forward-compatible way of mapping to an {@link IconType} for an application.
