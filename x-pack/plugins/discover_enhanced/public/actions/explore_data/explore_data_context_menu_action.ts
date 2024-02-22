@@ -31,8 +31,8 @@ export class ExploreDataContextMenuAction
 
   public readonly order = 200;
 
-  public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
-    return await super.isCompatible({ embeddable });
+  public async isCompatible(api: EmbeddableApiContext): Promise<boolean> {
+    return await super.isCompatible(api);
   }
 
   public async getLocation({ embeddable }: EmbeddableApiContext): Promise<KibanaLocation> {

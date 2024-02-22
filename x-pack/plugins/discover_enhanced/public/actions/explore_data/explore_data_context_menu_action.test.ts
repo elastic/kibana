@@ -192,6 +192,7 @@ describe('"Explore underlying data" panel action', () => {
       expect(locator.getLocation).toHaveBeenCalledTimes(1);
       expect(locator.getLocation).toHaveBeenCalledWith({
         dataViewId: 'index-ptr-foo',
+        filters: [],
       });
     });
   });
