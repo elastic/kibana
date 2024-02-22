@@ -8,8 +8,6 @@
     "server": true,
     "browser": true,
     "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils"
     ]
   }
 }

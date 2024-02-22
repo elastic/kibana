@@ -68,7 +68,9 @@ export const ShareMenuTabs = ({
           defaultMessage: 'Embed',
         }),
         sortOrder: 1,
-        content: <EmbedModal urlParamExtensions={embedUrlParamExtensions} />,
+        content: (
+          <EmbedModal urlParamExtensions={embedUrlParamExtensions} urlService={urlService} />
+        ),
       });
     }
 
