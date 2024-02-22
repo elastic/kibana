@@ -31,7 +31,7 @@ export async function getPendingJobIds(): Promise<JobId[]> {
 }
 
 export async function addPendingJobId(jobId: JobId) {
-  addToQueue(async (error: Error | null) => {
+  await addToQueue(async (error: Error | null) => {
     return new Promise((resolve, reject) => {
       if (error) {
         window.console.error(error);
@@ -50,7 +50,7 @@ export async function addPendingJobId(jobId: JobId) {
 }
 
 export async function setPendingJobIds(jobIds: JobId[]) {
-  addToQueue(async (error: Error | null) => {
+  await addToQueue(async (error: Error | null) => {
     return new Promise((resolve, reject) => {
       if (error) {
         reject(error);
