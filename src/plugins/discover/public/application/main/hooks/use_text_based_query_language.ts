@@ -9,7 +9,6 @@ import { isEqual } from 'lodash';
 import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { switchMap } from 'rxjs';
 import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
@@ -122,14 +121,16 @@ export function useTextBasedQueryLanguage({
               prev.current.query = query[language];
               prev.current.columns = nextColumns;
             }
-            const nextState = {
-              ...(addDataViewToState && { index: undefined }),
-              ...((addColumnsToState || queryChanged) && { columns: nextColumns }),
-              ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
-                viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
-              }),
-            };
-            await stateContainer.appState.replaceUrlState(nextState);
+            // just change URL state if necessary
+            if (addDataViewToState || addColumnsToState || changeViewMode) {
+              const nextState = {
+                ...(addDataViewToState && { index: undefined }),
+                ...(addColumnsToState && { columns: nextColumns }),
+                ...(changeViewMode && { viewMode: undefined }),
+              };
+              await stateContainer.appState.replaceUrlState(nextState);
+            }
+
             sendComplete();
           } else {
             // cleanup for a "regular" query

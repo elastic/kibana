@@ -47,7 +47,22 @@ export const buildStateSubscribe =
     const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
     const prevQuery = savedSearch.searchSource.getField('query');
+    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
     const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+    // check if prevState and nextState are equal except for index
+
+    if (
+      isTextBasedQueryLang &&
+      (nextState.index === undefined || nextState.viewMode === undefined) &&
+      !queryChanged
+    ) {
+      // this is just used to unset the index/viewmode when switching to a text based query, nothing to do here
+      addLog('[appstate] subscribe update ignored for text base ql', {
+        prevState,
+        nextState,
+      });
+      return;
+    }
     if (isEqualState(prevState, nextState) && !queryChanged) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
@@ -55,7 +70,6 @@ export const buildStateSubscribe =
     addLog('[appstate] subscribe triggered', nextState);
     const { hideChart, interval, breakdownField, sampleSize, sort, index } = prevState;
 
-    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
     if (isTextBasedQueryLang) {
       const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
       if (!isTextBasedQueryLangPrev) {

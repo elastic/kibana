@@ -107,15 +107,14 @@ describe('useTextBasedQueryLanguage', () => {
     stateContainer.dataState.data$.documents$.next(msgComplete);
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
-  test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
+  test('should change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
       viewMode: VIEW_MODE.AGGREGATED_LEVEL,
     });
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-      columns: [],
+      viewMode: undefined,
     });
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {
@@ -253,16 +252,9 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite existing state columns on initial fetch', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
       columns: ['field1'],
-      index: 'the-data-view-id',
     });
     const documents$ = stateContainer.dataState.data$.documents$;
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: [],
-      });
-    });
-    replaceUrlState.mockReset();
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -281,7 +273,6 @@ describe('useTextBasedQueryLanguage', () => {
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
         columns: ['field1', 'field2'],
-        index: undefined,
       });
     });
     replaceUrlState.mockReset();
@@ -326,9 +317,8 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('it should overwrite existing state columns on transitioning from a query with non transformational commands to a query with transformational', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
-      index: 'the-data-view-id',
-    });
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {});
+
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
@@ -343,7 +333,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
     });
-    expect(replaceUrlState).toHaveBeenCalledTimes(2);
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
@@ -356,7 +346,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });
