@@ -291,7 +291,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 expect(tableRows.length).to.be(ACTIVE_ALERTS);
               });
               const pageUrl = await browser.getCurrentUrl();
-              expect(pageUrl).to.contain('alertStatus:active');
+              expect(pageUrl).to.contain('alertStatus%3Aactive');
             });
 
             it('can be filtered to only show "recovered" alerts using the filter button', async () => {
@@ -301,7 +301,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 expect(tableRows.length).to.be(RECOVERED_ALERTS);
               });
               const pageUrl = await browser.getCurrentUrl();
-              expect(pageUrl).to.contain('alertStatus:recovered');
+              expect(pageUrl).to.contain('alertStatus%3Arecovered');
             });
 
             it('can be filtered to only show "untracked" alerts using the filter button', async () => {
@@ -311,7 +311,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 expect(tableRows.length).to.be(0);
               });
               const pageUrl = await browser.getCurrentUrl();
-              expect(pageUrl).to.contain('alertStatus:untracked');
+              expect(pageUrl).to.contain('alertStatus%3Auntracked');
             });
           });
         });
