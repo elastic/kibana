@@ -22,11 +22,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestionStatus } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../../common/types/api';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
-import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 

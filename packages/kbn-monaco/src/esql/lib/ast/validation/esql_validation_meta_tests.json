@@ -519,11 +519,11 @@
       "error": false
     },
     {
-      "query": "row var = case(true, \"a\")",
+      "query": "row var = case(true, \"a\", \"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row case(true, \"a\")",
+      "query": "row case(true, \"a\", \"a\", \"a\")",
       "error": false
     },
     {
@@ -543,19 +543,19 @@
       "error": true
     },
     {
-      "query": "row var = cidr_match(to_ip(\"127.0.0.1\"), \"a\")",
+      "query": "row var = cidr_match(to_ip(\"127.0.0.1\"), \"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row cidr_match(to_ip(\"127.0.0.1\"), \"a\")",
+      "query": "row cidr_match(to_ip(\"127.0.0.1\"), \"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row var = cidr_match(to_ip(\"a\"), to_string(\"a\"))",
+      "query": "row var = cidr_match(to_ip(\"a\"), to_string(\"a\"), to_string(\"a\"))",
       "error": false
     },
     {
-      "query": "row var = cidr_match(\"a\", 5)",
+      "query": "row var = cidr_match(\"a\", 5, 5)",
       "error": true
     },
     {
@@ -567,19 +567,19 @@
       "error": false
     },
     {
-      "query": "row var = concat(\"a\")",
+      "query": "row var = concat(\"a\", \"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row concat(\"a\")",
+      "query": "row concat(\"a\", \"a\", \"a\")",
       "error": false
     },
     {
-      "query": "row var = concat(to_string(\"a\"))",
+      "query": "row var = concat(to_string(\"a\"), to_string(\"a\"), to_string(\"a\"))",
       "error": false
     },
     {
-      "query": "row var = concat(5)",
+      "query": "row var = concat(5, 5, 5)",
       "error": true
     },
     {
@@ -3535,11 +3535,11 @@
       "error": true
     },
     {
-      "query": "from a_index | where length(concat(stringField)) > 0",
+      "query": "from a_index | where length(concat(stringField, stringField, stringField)) > 0",
       "error": false
     },
     {
-      "query": "from a_index | where length(concat(numberField)) > 0",
+      "query": "from a_index | where length(concat(numberField, numberField, numberField)) > 0",
       "error": true
     },
     {
@@ -4567,11 +4567,11 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = case(booleanField, stringField)",
+      "query": "from a_index | eval var = case(booleanField, stringField, stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval case(booleanField, stringField)",
+      "query": "from a_index | eval case(booleanField, stringField, stringField, stringField)",
       "error": false
     },
     {
@@ -4599,19 +4599,19 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = cidr_match(ipField, stringField)",
+      "query": "from a_index | eval var = cidr_match(ipField, stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval cidr_match(ipField, stringField)",
+      "query": "from a_index | eval cidr_match(ipField, stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = cidr_match(to_ip(stringField), to_string(stringField))",
+      "query": "from a_index | eval var = cidr_match(to_ip(stringField), to_string(stringField), to_string(stringField))",
       "error": false
     },
     {
-      "query": "from a_index | eval cidr_match(stringField, numberField)",
+      "query": "from a_index | eval cidr_match(stringField, numberField, numberField)",
       "error": true
     },
     {
@@ -4627,23 +4627,19 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = concat(stringField)",
+      "query": "from a_index | eval var = concat(stringField, stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(stringField)",
+      "query": "from a_index | eval concat(stringField, stringField, stringField)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = concat(to_string(stringField))",
+      "query": "from a_index | eval var = concat(to_string(stringField), to_string(stringField), to_string(stringField))",
       "error": false
     },
     {
-      "query": "from a_index | eval concat(numberField)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval var = concat(*)",
+      "query": "from a_index | eval concat(numberField, numberField, numberField)",
       "error": true
     },
     {
