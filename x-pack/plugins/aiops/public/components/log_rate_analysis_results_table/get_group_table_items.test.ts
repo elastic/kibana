@@ -15,33 +15,6 @@ describe('getGroupTableItems', () => {
 
     expect(groupTableItems).toEqual([
       {
-        docCount: 632,
-        groupItemsSortedByUniqueness: [
-          {
-            key: 'user:Peter',
-            type: 'keyword',
-            fieldName: 'user',
-            fieldValue: 'Peter',
-            docCount: 632,
-            duplicate: 2,
-            pValue: 0.012783309213417932,
-          },
-          {
-            key: 'url:login.php',
-            type: 'keyword',
-            fieldName: 'url',
-            fieldValue: 'login.php',
-            docCount: 790,
-            duplicate: 2,
-            pValue: 0.012783309213417932,
-          },
-        ],
-        histogram: undefined,
-        id: '1937394803',
-        pValue: 0.012783309213417932,
-        uniqueItemsCount: 0,
-      },
-      {
         docCount: 792,
         groupItemsSortedByUniqueness: [
           {
@@ -77,7 +50,7 @@ describe('getGroupTableItems', () => {
             fieldName: 'url',
             fieldValue: 'login.php',
             docCount: 790,
-            duplicate: 2,
+            duplicate: 1,
             pValue: 0.012783309213417932,
           },
           {
@@ -93,7 +66,7 @@ describe('getGroupTableItems', () => {
         histogram: undefined,
         id: '3819687732',
         pValue: 0.012783309213417932,
-        uniqueItemsCount: 0,
+        uniqueItemsCount: 1,
       },
       {
         docCount: 636,
@@ -104,8 +77,8 @@ describe('getGroupTableItems', () => {
             fieldName: 'user',
             fieldValue: 'Peter',
             docCount: 636,
-            duplicate: 2,
-            pValue: 0.00974308761016614,
+            duplicate: 1,
+            pValue: 0.012783309213417932,
           },
           {
             key: 'url:home.php',
@@ -114,13 +87,13 @@ describe('getGroupTableItems', () => {
             fieldValue: 'home.php',
             docCount: 792,
             duplicate: 2,
-            pValue: 0.00974308761016614,
+            pValue: 0.012783309213417932,
           },
         ],
         histogram: undefined,
-        id: '2091742187',
-        pValue: 0.00974308761016614,
-        uniqueItemsCount: 0,
+        id: '1807570559',
+        pValue: 0.012783309213417932,
+        uniqueItemsCount: 1,
       },
     ]);
   });

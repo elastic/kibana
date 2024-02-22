@@ -185,7 +185,7 @@ export async function fetchFrequentItemSets(
 
   fiss.forEach((fis) => {
     const result: ItemSet = {
-      set: {},
+      set: [],
       size: 0,
       maxPValue: 0,
       doc_count: 0,
@@ -193,16 +193,18 @@ export async function fetchFrequentItemSets(
       total_doc_count: 0,
     };
     let maxPValue: number | undefined;
-    Object.entries(fis.key).forEach(([key, value]) => {
-      result.set[key] = value[0];
+    Object.entries(fis.key).forEach(([key, values]) => {
+      values.forEach((value) => {
+        result.set.push({ fieldName: key, fieldValue: value });
 
-      const pValue = sortedSignificantItems.find(
-        (t) => t.fieldName === key && t.fieldValue === value[0]
-      )?.pValue;
+        const pValue = sortedSignificantItems.find(
+          (t) => t.fieldName === key && t.fieldValue === value
+        )?.pValue;
 
-      if (pValue !== undefined && pValue !== null) {
-        maxPValue = Math.max(maxPValue ?? 0, pValue);
-      }
+        if (pValue !== undefined && pValue !== null) {
+          maxPValue = Math.max(maxPValue ?? 0, pValue);
+        }
+      });
     });
 
     if (maxPValue === undefined) {
@@ -222,7 +224,7 @@ export async function fetchFrequentItemSets(
     return b.doc_count - a.doc_count;
   });
 
-  const uniqueFields = uniq(results.flatMap((r) => Object.keys(r.set)));
+  const uniqueFields = uniq(results.flatMap((r) => r.set.map((d) => d.fieldName)));
 
   return {
     fields: uniqueFields,

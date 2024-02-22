@@ -77,7 +77,7 @@ describe('streamReducer', () => {
     );
 
     expect(state2.significantItems).toHaveLength(4);
-    expect(state2.significantItemsGroups).toHaveLength(4);
+    expect(state2.significantItemsGroups).toHaveLength(3);
 
     const state3 = streamReducer(state2, resetGroupsAction());
 

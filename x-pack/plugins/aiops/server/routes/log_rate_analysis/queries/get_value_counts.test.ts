@@ -16,7 +16,7 @@ describe('getValueCounts', () => {
   });
 
   it('get value counts for field url', () => {
-    expect(getValueCounts(frequentItemSets, 'url')).toEqual({ 'home.php': 2, 'login.php': 2 });
+    expect(getValueCounts(frequentItemSets, 'url')).toEqual({ 'home.php': 3, 'login.php': 1 });
   });
 
   it('get value counts for field user', () => {
