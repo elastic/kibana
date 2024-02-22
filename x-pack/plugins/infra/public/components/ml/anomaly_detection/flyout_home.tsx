@@ -105,24 +105,23 @@ export const FlyoutHome = (props: Props) => {
               />
             </h2>
           </EuiTitle>
+          <EuiTabs>
+            <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
+              {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
+                defaultMessage: 'Jobs',
+              })}
+            </EuiTab>
+            <EuiTab
+              isSelected={tab === 'anomalies'}
+              onClick={() => setTab('anomalies')}
+              data-test-subj="anomalyFlyoutAnomaliesTab"
+            >
+              {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
+                defaultMessage: 'Anomalies',
+              })}
+            </EuiTab>
+          </EuiTabs>
         </EuiFlyoutHeader>
-
-        <EuiTabs>
-          <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
-            {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
-              defaultMessage: 'Jobs',
-            })}
-          </EuiTab>
-          <EuiTab
-            isSelected={tab === 'anomalies'}
-            onClick={() => setTab('anomalies')}
-            data-test-subj="anomalyFlyoutAnomaliesTab"
-          >
-            {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
-              defaultMessage: 'Anomalies',
-            })}
-          </EuiTab>
-        </EuiTabs>
 
         <EuiFlyoutBody
           banner={
