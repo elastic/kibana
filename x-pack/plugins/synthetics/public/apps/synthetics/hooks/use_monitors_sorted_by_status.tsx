@@ -89,6 +89,11 @@ export function useMonitorsSortedByStatus() {
           monitorsSortedByStatus: monitorsSortedByStatus.disabled,
           downMonitors: downMonitors.current,
         };
+      case 'pending':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.pending,
+          downMonitors: downMonitors.current,
+        };
       default:
         break;
     }

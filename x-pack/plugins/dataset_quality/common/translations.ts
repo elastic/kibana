@@ -31,6 +31,10 @@ export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSumm
   defaultMessage: 'of',
 });
 
+/*
+Flyout
+*/
+
 export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCancelText', {
   defaultMessage: 'Cancel',
 });
@@ -81,6 +85,28 @@ export const flyoutIntegrationNameText = i18n.translate(
   'xpack.datasetQuality.flyoutIntegrationNameText',
   {
     defaultMessage: 'Name',
+  }
+);
+
+export const flyoutDegradedDocsText = i18n.translate(
+  'xpack.datasetQuality.flyout.degradedDocsTitle',
+  {
+    defaultMessage: 'Degraded docs',
+  }
+);
+
+export const flyoutDegradedDocsTrendText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedDocsViz',
+  {
+    defaultMessage: 'Degraded documents trend',
+  }
+);
+
+export const flyoutDegradedDocsPercentageText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedDocsPercentage',
+  {
+    defaultMessage: 'Degraded docs %',
+    description: 'Tooltip label for the percentage of degraded documents chart.',
   }
 );
 
