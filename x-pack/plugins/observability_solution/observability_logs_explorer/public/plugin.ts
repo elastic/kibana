@@ -97,7 +97,9 @@ export class ObservabilityLogsExplorerPlugin
       })
     );
     const datasetQualityLocator = share.url.locators.create(
-      new DatasetQualityLocatorDefinition({})
+      new DatasetQualityLocatorDefinition({
+        useHash,
+      })
     );
 
     const dataViewLocator = share.url.locators.create(

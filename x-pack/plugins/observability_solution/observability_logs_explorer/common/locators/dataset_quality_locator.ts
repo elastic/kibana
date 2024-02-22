@@ -23,6 +23,7 @@ export class DatasetQualityLocatorDefinition
   constructor(protected readonly deps: DatasetQualityLocatorDependencies) {}
 
   public readonly getLocation = async (params: DatasetQualityLocatorParams) => {
-    return constructDatasetQualityLocatorPath(params);
+    const { useHash } = this.deps;
+    return constructDatasetQualityLocatorPath({ useHash, locatorParams: params });
   };
 }

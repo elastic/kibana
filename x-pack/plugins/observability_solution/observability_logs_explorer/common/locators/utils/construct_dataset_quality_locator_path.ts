@@ -14,8 +14,16 @@ import {
 } from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
 
-export const constructDatasetQualityLocatorPath = async (params: DatasetQualityLocatorParams) => {
-  const { filters } = params;
+interface LocatorPathConstructionParams {
+  locatorParams: DatasetQualityLocatorParams;
+  useHash: boolean;
+}
+
+export const constructDatasetQualityLocatorPath = async (params: LocatorPathConstructionParams) => {
+  const {
+    locatorParams: { filters },
+    useHash,
+  } = params;
 
   const pageState = datasetQualityUrlSchemaV1.urlSchemaRT.encode(
     deepCompactObject({
@@ -27,7 +35,7 @@ export const constructDatasetQualityLocatorPath = async (params: DatasetQualityL
   const path = setStateToKbnUrl(
     OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
     pageState,
-    { useHash: false, storeInHashQuery: false },
+    { useHash, storeInHashQuery: false },
     '/dataset-quality'
   );
 
