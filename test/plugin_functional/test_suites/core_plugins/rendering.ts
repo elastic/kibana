@@ -162,7 +162,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.show_license_expiration (boolean)',
         'navigation.solutionNavigation.featureOn',
         'navigation.solutionNavigation.enabled',
-        'navigation.solutionNavigation.optInstatus',
+        'navigation.solutionNavigation.optInStatus',
         'navigation.solutionNavigation.defaultSolution',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',

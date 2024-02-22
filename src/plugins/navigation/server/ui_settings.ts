@@ -85,7 +85,7 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
       }),
       type: 'select',
       schema: schema.string(),
-      value: config.solutionNavigation.status,
+      value: config.solutionNavigation.optInStatus,
       options: ['visible', 'hidden', 'ask'],
       optionLabels: optInStatusOptionLabels,
       order: 2,

@@ -13,7 +13,7 @@ const configSchema = schema.object({
   solutionNavigation: schema.object({
     featureOn: schema.boolean({ defaultValue: false }),
     enabled: schema.boolean({ defaultValue: false }),
-    status: schema.oneOf(
+    optInStatus: schema.oneOf(
       [schema.literal('visible'), schema.literal('hidden'), schema.literal('ask')],
       { defaultValue: 'ask' }
     ),
