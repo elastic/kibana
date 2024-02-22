@@ -147,18 +147,13 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: (
-                    <ApiKeyConfig
-                      indexName={index.connector.name}
-                      hasApiKey={hasApiKey}
-                      isNative
-                      secretId={index.connector.api_key_secret_id}
-                    />
+                    <ApiKeyConfig indexName={index.connector.name} hasApiKey={hasApiKey} isNative />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.regenerateApiKeyTitle',
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
                     {
-                      defaultMessage: 'Regenerate API key',
+                      defaultMessage: 'Manage API key',
                     }
                   ),
                   titleSize: 'xs',

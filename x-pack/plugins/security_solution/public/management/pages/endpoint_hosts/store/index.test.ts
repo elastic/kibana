@@ -42,6 +42,7 @@ describe('EndpointList store concerns', () => {
     test('it creates default state', () => {
       expect(store.getState()).toEqual({
         hosts: [],
+        isInitialized: false,
         pageSize: 10,
         pageIndex: 0,
         sortField: ENDPOINT_DEFAULT_SORT_FIELD,
