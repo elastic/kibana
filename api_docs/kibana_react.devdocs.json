@@ -2722,11 +2722,11 @@
           },
           {
             "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "telemetry",
