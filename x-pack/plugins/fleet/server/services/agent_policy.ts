@@ -66,8 +66,8 @@ import {
   FLEET_ELASTIC_AGENT_PACKAGE,
 } from '../../common/constants';
 import type {
-  AgentPolicyClientFetchAllAgentPoliciesOptions,
-  AgentPolicyClientFetchAllAgentPolicyIdsOptions,
+  FetchAllAgentPoliciesOptions,
+  FetchAllAgentPolicyIdsOptions,
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
   Installation,
@@ -1378,7 +1378,7 @@ class AgentPolicyService {
 
   public fetchAllAgentPolicyIds(
     soClient: SavedObjectsClientContract,
-    { perPage = 1000, kuery = undefined }: AgentPolicyClientFetchAllAgentPolicyIdsOptions = {}
+    { perPage = 1000, kuery = undefined }: FetchAllAgentPolicyIdsOptions = {}
   ): AsyncIterable<string[]> {
     return createSoFindIterable<{}>({
       soClient,
@@ -1411,7 +1411,7 @@ class AgentPolicyService {
       sortOrder = 'asc',
       sortField = 'created_at',
       fields = [],
-    }: AgentPolicyClientFetchAllAgentPoliciesOptions = {}
+    }: FetchAllAgentPoliciesOptions = {}
   ): AsyncIterable<AgentPolicy[]> {
     return createSoFindIterable<AgentPolicySOAttributes>({
       soClient,

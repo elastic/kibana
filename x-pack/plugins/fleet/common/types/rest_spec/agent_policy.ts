@@ -84,12 +84,9 @@ export interface GetFullAgentManifestResponse {
   item: string;
 }
 
-export type AgentPolicyClientFetchAllAgentPoliciesOptions = Pick<
+export type FetchAllAgentPoliciesOptions = Pick<
   ListWithKuery,
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
 > & { fields?: string[] };
 
-export type AgentPolicyClientFetchAllAgentPolicyIdsOptions = Pick<
-  ListWithKuery,
-  'perPage' | 'kuery'
->;
+export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
