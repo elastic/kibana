@@ -9,7 +9,7 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
 } from '../../../common/mock';
 
 import type { State } from '../../../common/store/types';
@@ -32,10 +32,10 @@ const setChangedMock = setChanged as unknown as jest.Mock;
 describe('Timeline changed middleware', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     setChangedMock.mockClear();
   });
 
