@@ -229,7 +229,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickUserAvatar() {
-      testSubjects.click('userMenuAvatar');
+      await testSubjects.click('userMenuAvatar');
     },
 
     async assertUserAvatarExists() {

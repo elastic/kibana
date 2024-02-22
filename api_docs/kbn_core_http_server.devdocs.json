@@ -24,9 +24,7 @@
         "type": "Class",
         "tags": [],
         "label": "RouteValidationError",
-        "description": [
-          "\nError to return when the validation is not successful."
-        ],
+        "description": ["\nError to return when the validation is not successful."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -55,9 +53,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -69,9 +65,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "string | Error"
-                ],
+                "signature": ["string | Error"],
                 "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -84,9 +78,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -130,9 +122,7 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "\nVersion to assign to this route"
-            ],
+            "description": ["\nVersion to assign to this route"],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -143,9 +133,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "validate",
-            "description": [
-              "\nValidation for this version of a route"
-            ],
+            "description": ["\nValidation for this version of a route"],
             "signature": [
               "false | ",
               {
@@ -170,9 +158,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthRedirectedParams",
-        "description": [
-          "\nResult of auth redirection."
-        ],
+        "description": ["\nResult of auth redirection."],
         "path": "packages/core/http/core-http-server/src/lifecycle/auth.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -296,9 +282,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthResultParams",
-        "description": [
-          "\nResult of successful authentication."
-        ],
+        "description": ["\nResult of successful authentication."],
         "path": "packages/core/http/core-http-server/src/lifecycle/auth.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -312,9 +296,7 @@
             "description": [
               "\nData to associate with an incoming request. Any downstream plugin may get access to the data."
             ],
-            "signature": [
-              "Record<string, any> | undefined"
-            ],
+            "signature": ["Record<string, any> | undefined"],
             "path": "packages/core/http/core-http-server/src/lifecycle/auth.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -577,9 +559,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CustomHttpResponseOptions",
-        "description": [
-          "\nHTTP response parameters for a response with adjustable status code."
-        ],
+        "description": ["\nHTTP response parameters for a response with adjustable status code."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -600,12 +580,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "HTTP message to send to the client"
-            ],
-            "signature": [
-              "T | undefined"
-            ],
+            "description": ["HTTP message to send to the client"],
+            "signature": ["T | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -616,9 +592,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "HTTP Headers with additional information about response"
-            ],
+            "description": ["HTTP Headers with additional information about response"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -639,12 +613,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "bypassErrorFormat",
-            "description": [
-              "Bypass the default error formatting"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["Bypass the default error formatting"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -669,9 +639,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ErrorHttpResponseOptions",
-        "description": [
-          "\nHTTP response parameters"
-        ],
+        "description": ["\nHTTP response parameters"],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -682,9 +650,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "body",
-            "description": [
-              "HTTP message to send to the client"
-            ],
+            "description": ["HTTP message to send to the client"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -705,9 +671,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "HTTP Headers with additional information about response"
-            ],
+            "description": ["HTTP Headers with additional information about response"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -744,9 +708,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "The headers associated with the request."
-            ],
+            "description": ["The headers associated with the request."],
             "signature": [
               "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
@@ -760,9 +722,7 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": [
-              "The path of the request"
-            ],
+            "description": ["The path of the request"],
             "path": "packages/core/http/core-http-server/src/router/raw_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -774,9 +734,7 @@
             "tags": [],
             "label": "method",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-server/src/router/raw_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -788,10 +746,7 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": [
-              "URL",
-              " | undefined"
-            ],
+            "signature": ["URL", " | undefined"],
             "path": "packages/core/http/core-http-server/src/router/raw_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -803,9 +758,7 @@
             "tags": [],
             "label": "app",
             "description": [],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/core/http/core-http-server/src/router/raw_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -817,9 +770,7 @@
             "tags": [],
             "label": "auth",
             "description": [],
-            "signature": [
-              "{ isAuthenticated?: boolean | undefined; } | undefined"
-            ],
+            "signature": ["{ isAuthenticated?: boolean | undefined; } | undefined"],
             "path": "packages/core/http/core-http-server/src/router/raw_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -857,9 +808,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileHttpResponseOptions",
-        "description": [
-          "\nHTTP response parameters for a response with adjustable status code."
-        ],
+        "description": ["\nHTTP response parameters for a response with adjustable status code."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -880,12 +829,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "Attachment content to send to the client"
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["Attachment content to send to the client"],
+            "signature": ["T"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -912,9 +857,7 @@
             "description": [
               "Explicitly set the attachment content type. Tries to detect the type based on extension and defaults to application/octet-stream"
             ],
-            "signature": [
-              "string | null | undefined"
-            ],
+            "signature": ["string | null | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -928,9 +871,7 @@
             "description": [
               "Attachment content size in bytes, Tries to detect the content size from body"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -941,9 +882,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "HTTP Headers with additional information about response"
-            ],
+            "description": ["HTTP Headers with additional information about response"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -964,12 +903,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "bypassErrorFormat",
-            "description": [
-              "Bypass the default error formatting"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["Bypass the default error formatting"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -983,9 +918,7 @@
             "description": [
               "Bypass filename encoding, only set to true if the filename is already encoded"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -999,9 +932,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FullValidationConfig",
-        "description": [
-          "\nVersioned route validation"
-        ],
+        "description": ["\nVersioned route validation"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -1022,9 +953,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "request",
-            "description": [
-              "\nValidation to run against route inputs: params, query and body"
-            ],
+            "description": ["\nValidation to run against route inputs: params, query and body"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1043,13 +972,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.FullValidationConfig.response",
             "type": "Object",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "response",
-            "description": [
-              "\nValidation to run against route output"
-            ],
+            "description": ["\nValidation to run against route output"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1191,9 +1116,7 @@
         "type": "Interface",
         "tags": [],
         "label": "HttpResponseOptions",
-        "description": [
-          "\nHTTP response parameters"
-        ],
+        "description": ["\nHTTP response parameters"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -1214,12 +1137,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "HTTP message to send to the client"
-            ],
-            "signature": [
-              "T | undefined"
-            ],
+            "description": ["HTTP message to send to the client"],
+            "signature": ["T | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1230,9 +1149,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "HTTP Headers with additional information about response"
-            ],
+            "description": ["HTTP Headers with additional information about response"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1253,12 +1170,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "bypassErrorFormat",
-            "description": [
-              "Bypass the default error formatting"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["Bypass the default error formatting"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1285,9 +1198,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "The name of the Kibana server"
-            ],
+            "description": ["The name of the Kibana server"],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1298,9 +1209,7 @@
             "type": "string",
             "tags": [],
             "label": "hostname",
-            "description": [
-              "The hostname of the server"
-            ],
+            "description": ["The hostname of the server"],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1311,9 +1220,7 @@
             "type": "number",
             "tags": [],
             "label": "port",
-            "description": [
-              "The port the server is listening on"
-            ],
+            "description": ["The port the server is listening on"],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1324,12 +1231,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "protocol",
-            "description": [
-              "The protocol used by the server"
-            ],
-            "signature": [
-              "\"http\" | \"https\" | \"socket\""
-            ],
+            "description": ["The protocol used by the server"],
+            "signature": ["\"http\" | \"https\" | \"socket\""],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1391,9 +1294,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/http_contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1431,9 +1332,7 @@
             "type": "Object",
             "tags": [],
             "label": "basePath",
-            "description": [
-              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
-            ],
+            "description": ["\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1587,9 +1486,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "{@link OnPreRoutingHandler } - function to call."
-                ],
+                "description": ["{@link OnPreRoutingHandler } - function to call."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1637,9 +1534,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "{@link OnPreRoutingHandler } - function to call."
-                ],
+                "description": ["{@link OnPreRoutingHandler } - function to call."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1737,9 +1632,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "{@link OnPostAuthHandler } - function to call."
-                ],
+                "description": ["{@link OnPostAuthHandler } - function to call."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1763,9 +1656,7 @@
             "type": "Function",
             "tags": [],
             "label": "registerOnPreResponse",
-            "description": [
-              "\nTo define custom logic to perform for the server response.\n"
-            ],
+            "description": ["\nTo define custom logic to perform for the server response.\n"],
             "signature": [
               "(handler: ",
               {
@@ -1787,9 +1678,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "{@link OnPreResponseHandler } - function to call."
-                ],
+                "description": ["{@link OnPreResponseHandler } - function to call."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1813,9 +1702,7 @@
             "type": "Object",
             "tags": [],
             "label": "basePath",
-            "description": [
-              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
-            ],
+            "description": ["\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1857,9 +1744,7 @@
             "type": "Object",
             "tags": [],
             "label": "csp",
-            "description": [
-              "\nThe CSP config used for Kibana."
-            ],
+            "description": ["\nThe CSP config used for Kibana."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1905,9 +1790,7 @@
             "type": "Function",
             "tags": [],
             "label": "registerRouteHandlerContext",
-            "description": [
-              "\nRegister a context provider for a route handler."
-            ],
+            "description": ["\nRegister a context provider for a route handler."],
             "signature": [
               "<Context extends DefaultRequestHandlerType, ContextName extends Exclude<keyof Context, \"resolve\">>(contextName: ContextName, provider: ",
               {
@@ -1937,9 +1820,7 @@
                 "tags": [],
                 "label": "contextName",
                 "description": [],
-                "signature": [
-                  "ContextName"
-                ],
+                "signature": ["ContextName"],
                 "path": "packages/core/http/core-http-server/src/http_contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2015,9 +1896,7 @@
             "type": "Object",
             "tags": [],
             "label": "basePath",
-            "description": [
-              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
-            ],
+            "description": ["\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -2059,9 +1938,7 @@
             "type": "Object",
             "tags": [],
             "label": "auth",
-            "description": [
-              "\nAuth status.\nSee {@link HttpAuth}"
-            ],
+            "description": ["\nAuth status.\nSee {@link HttpAuth}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -2173,9 +2050,7 @@
                 "tags": [],
                 "label": "headers",
                 "description": [],
-                "signature": [
-                  "{ [x: string]: string | string[]; }"
-                ],
+                "signature": ["{ [x: string]: string | string[]; }"],
                 "path": "packages/core/http/core-http-server/src/auth_headers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2245,9 +2120,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IBasePath",
-        "description": [
-          "\nAccess or manipulate the Kibana base path\n"
-        ],
+        "description": ["\nAccess or manipulate the Kibana base path\n"],
         "path": "packages/core/http/core-http-server/src/base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2274,9 +2147,7 @@
             "description": [
               "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link IBasePath.serverBasePath}.\n"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-server/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2287,9 +2158,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nreturns `basePath` value, specific for an incoming request."
-            ],
+            "description": ["\nreturns `basePath` value, specific for an incoming request."],
             "signature": [
               "(request: ",
               {
@@ -2336,9 +2205,7 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": [
-              "\nsets `basePath` value, specific for an incoming request."
-            ],
+            "description": ["\nsets `basePath` value, specific for an incoming request."],
             "signature": [
               "(request: ",
               {
@@ -2383,9 +2250,7 @@
                 "tags": [],
                 "label": "requestSpecificBasePath",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2400,12 +2265,8 @@
             "type": "Function",
             "tags": [],
             "label": "prepend",
-            "description": [
-              "\nPrepends `path` with the basePath."
-            ],
-            "signature": [
-              "(path: string) => string"
-            ],
+            "description": ["\nPrepends `path` with the basePath."],
+            "signature": ["(path: string) => string"],
             "path": "packages/core/http/core-http-server/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2417,9 +2278,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2434,12 +2293,8 @@
             "type": "Function",
             "tags": [],
             "label": "remove",
-            "description": [
-              "\nRemoves the prepended basePath from the `path`."
-            ],
-            "signature": [
-              "(path: string) => string"
-            ],
+            "description": ["\nRemoves the prepended basePath from the `path`."],
+            "signature": ["(path: string) => string"],
             "path": "packages/core/http/core-http-server/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2451,9 +2306,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2484,9 +2337,7 @@
             "type": "Function",
             "tags": [],
             "label": "registerContext",
-            "description": [
-              "\nRegister a new context provider.\n"
-            ],
+            "description": ["\nRegister a new context provider.\n"],
             "signature": [
               "<Context extends ",
               {
@@ -2519,9 +2370,7 @@
                 "description": [
                   "- The plugin opaque ID for the plugin that registers this context."
                 ],
-                "signature": [
-                  "symbol"
-                ],
+                "signature": ["symbol"],
                 "path": "packages/core/http/core-http-server/src/router/context_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2536,9 +2385,7 @@
                 "description": [
                   "- The key of the `TContext` object this provider supplies the value for."
                 ],
-                "signature": [
-                  "ContextName"
-                ],
+                "signature": ["ContextName"],
                 "path": "packages/core/http/core-http-server/src/router/context_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2569,9 +2416,7 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "The {@link IContextContainer } for method chaining."
-            ]
+            "returnComment": ["The {@link IContextContainer } for method chaining."]
           },
           {
             "parentPluginId": "@kbn/core-http-server",
@@ -2646,9 +2491,7 @@
                 "description": [
                   "- The plugin opaque ID for the plugin that registers this handler."
                 ],
-                "signature": [
-                  "symbol"
-                ],
+                "signature": ["symbol"],
                 "path": "packages/core/http/core-http-server/src/router/context_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2660,9 +2503,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "- Handler function to pass context object to."
-                ],
+                "description": ["- Handler function to pass context object to."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -2708,9 +2549,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ICspConfig",
-        "description": [
-          "\nCSP configuration for use in Kibana."
-        ],
+        "description": ["\nCSP configuration for use in Kibana."],
         "path": "packages/core/http/core-http-server/src/csp.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2776,9 +2615,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IExternalUrlConfig",
-        "description": [
-          "\nExternal Url configuration for use in Kibana."
-        ],
+        "description": ["\nExternal Url configuration for use in Kibana."],
         "path": "packages/core/http/core-http-server/src/external_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2789,9 +2626,7 @@
             "type": "Array",
             "tags": [],
             "label": "policy",
-            "description": [
-              "\nA set of policies describing which external urls are allowed."
-            ],
+            "description": ["\nA set of policies describing which external urls are allowed."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-common",
@@ -2815,9 +2650,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IHttpEluMonitorConfig",
-        "description": [
-          "\nHTTP request ELU monitor config"
-        ],
+        "description": ["\nHTTP request ELU monitor config"],
         "path": "packages/core/http/core-http-server/src/elu_monitor.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2893,9 +2726,7 @@
             "tags": [],
             "label": "payload",
             "description": [],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2930,9 +2761,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IKibanaSocket",
-        "description": [
-          "\nA tiny abstraction for TCP socket."
-        ],
+        "description": ["\nA tiny abstraction for TCP socket."],
         "path": "packages/core/http/core-http-server/src/router/socket.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2966,9 +2795,7 @@
                 "tags": [],
                 "label": "detailed",
                 "description": [],
-                "signature": [
-                  "true"
-                ],
+                "signature": ["true"],
                 "path": "packages/core/http/core-http-server/src/router/socket.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3006,9 +2833,7 @@
                 "tags": [],
                 "label": "detailed",
                 "description": [],
-                "signature": [
-                  "false"
-                ],
+                "signature": ["false"],
                 "path": "packages/core/http/core-http-server/src/router/socket.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3047,21 +2872,15 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "detailed",
-                "description": [
-                  "- If true; the full chain with issuer property will be returned."
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "description": ["- If true; the full chain with issuer property will be returned."],
+                "signature": ["boolean | undefined"],
                 "path": "packages/core/http/core-http-server/src/router/socket.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "An object representing the peer's certificate."
-            ]
+            "returnComment": ["An object representing the peer's certificate."]
           },
           {
             "parentPluginId": "@kbn/core-http-server",
@@ -3072,9 +2891,7 @@
             "description": [
               "\nReturns a string containing the negotiated SSL/TLS protocol version of the current connection. The value 'unknown' will be returned for\nconnected sockets that have not completed the handshaking process. The value null will be returned for server sockets or disconnected\nclient sockets. See https://www.openssl.org/docs/man1.0.2/ssl/SSL_get_version.html for more information."
             ],
-            "signature": [
-              "() => string | null"
-            ],
+            "signature": ["() => string | null"],
             "path": "packages/core/http/core-http-server/src/router/socket.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3115,9 +2932,7 @@
                     "tags": [],
                     "label": "rejectUnauthorized",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/core/http/core-http-server/src/router/socket.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3129,9 +2944,7 @@
                     "tags": [],
                     "label": "requestCert",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/core/http/core-http-server/src/router/socket.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3152,9 +2965,7 @@
             "description": [
               "\nIndicates whether or not the peer certificate was signed by one of the specified CAs. When TLS\nisn't used the value is `undefined`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-server/src/router/socket.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3168,9 +2979,7 @@
             "description": [
               "\nThe reason why the peer's certificate has not been verified. This property becomes available\nonly when `authorized` is `false`."
             ],
-            "signature": [
-              "Error | undefined"
-            ],
+            "signature": ["Error | undefined"],
             "path": "packages/core/http/core-http-server/src/router/socket.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3184,9 +2993,7 @@
             "description": [
               "\nThe string representation of the remote IP address. For example,`'74.125.127.100'` or\n`'2001:4860:a005::68'`. Value may be `undefined` if the socket is destroyed (for example, if\nthe client disconnected)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-server/src/router/socket.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3223,9 +3030,7 @@
             "type": "string",
             "tags": [],
             "label": "routerPath",
-            "description": [
-              "\nResulted path"
-            ],
+            "description": ["\nResulted path"],
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3234,13 +3039,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IRouter.get",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "get",
-            "description": [
-              "\nRegister a route handler for `GET` request."
-            ],
+            "description": ["\nRegister a route handler for `GET` request."],
             "signature": [
               "<P, Q, B>(route: ",
               {
@@ -4358,35 +4159,35 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/flamechart.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/functions.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/topn.ts"
               },
               {
                 "plugin": "reporting",
@@ -5657,9 +5458,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "route",
-                "description": [
-                  "{@link RouteConfig } - a route configuration."
-                ],
+                "description": ["{@link RouteConfig } - a route configuration."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -5730,9 +5529,7 @@
                     "tags": [],
                     "label": "context",
                     "description": [],
-                    "signature": [
-                      "Context"
-                    ],
+                    "signature": ["Context"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -5765,9 +5562,7 @@
                     "tags": [],
                     "label": "response",
                     "description": [],
-                    "signature": [
-                      "ResponseFactory"
-                    ],
+                    "signature": ["ResponseFactory"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -5780,13 +5575,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IRouter.post",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "post",
-            "description": [
-              "\nRegister a route handler for `POST` request."
-            ],
+            "description": ["\nRegister a route handler for `POST` request."],
             "signature": [
               "<P, Q, B>(route: ",
               {
@@ -6816,7 +6607,7 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "reporting",
@@ -7851,9 +7642,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "route",
-                "description": [
-                  "{@link RouteConfig } - a route configuration."
-                ],
+                "description": ["{@link RouteConfig } - a route configuration."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -7924,9 +7713,7 @@
                     "tags": [],
                     "label": "context",
                     "description": [],
-                    "signature": [
-                      "Context"
-                    ],
+                    "signature": ["Context"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7959,9 +7746,7 @@
                     "tags": [],
                     "label": "response",
                     "description": [],
-                    "signature": [
-                      "ResponseFactory"
-                    ],
+                    "signature": ["ResponseFactory"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7974,13 +7759,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IRouter.put",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "put",
-            "description": [
-              "\nRegister a route handler for `PUT` request."
-            ],
+            "description": ["\nRegister a route handler for `PUT` request."],
             "signature": [
               "<P, Q, B>(route: ",
               {
@@ -8541,9 +8322,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "route",
-                "description": [
-                  "{@link RouteConfig } - a route configuration."
-                ],
+                "description": ["{@link RouteConfig } - a route configuration."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -8614,9 +8393,7 @@
                     "tags": [],
                     "label": "context",
                     "description": [],
-                    "signature": [
-                      "Context"
-                    ],
+                    "signature": ["Context"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -8649,9 +8426,7 @@
                     "tags": [],
                     "label": "response",
                     "description": [],
-                    "signature": [
-                      "ResponseFactory"
-                    ],
+                    "signature": ["ResponseFactory"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -8664,13 +8439,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IRouter.patch",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "patch",
-            "description": [
-              "\nRegister a route handler for `PATCH` request."
-            ],
+            "description": ["\nRegister a route handler for `PATCH` request."],
             "signature": [
               "<P, Q, B>(route: ",
               {
@@ -8827,9 +8598,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "route",
-                "description": [
-                  "{@link RouteConfig } - a route configuration."
-                ],
+                "description": ["{@link RouteConfig } - a route configuration."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -8900,9 +8669,7 @@
                     "tags": [],
                     "label": "context",
                     "description": [],
-                    "signature": [
-                      "Context"
-                    ],
+                    "signature": ["Context"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -8935,9 +8702,7 @@
                     "tags": [],
                     "label": "response",
                     "description": [],
-                    "signature": [
-                      "ResponseFactory"
-                    ],
+                    "signature": ["ResponseFactory"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -8950,13 +8715,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IRouter.delete",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "delete",
-            "description": [
-              "\nRegister a route handler for `DELETE` request."
-            ],
+            "description": ["\nRegister a route handler for `DELETE` request."],
             "signature": [
               "<P, Q, B>(route: ",
               {
@@ -9437,9 +9198,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "route",
-                "description": [
-                  "{@link RouteConfig } - a route configuration."
-                ],
+                "description": ["{@link RouteConfig } - a route configuration."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -9510,9 +9269,7 @@
                     "tags": [],
                     "label": "context",
                     "description": [],
-                    "signature": [
-                      "Context"
-                    ],
+                    "signature": ["Context"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9545,9 +9302,7 @@
                     "tags": [],
                     "label": "response",
                     "description": [],
-                    "signature": [
-                      "ResponseFactory"
-                    ],
+                    "signature": ["ResponseFactory"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9635,9 +9390,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "{@link RequestHandler } - a route handler to wrap"
-                ],
+                "description": ["{@link RequestHandler } - a route handler to wrap"],
                 "signature": [
                   "(context: Context, request: ",
                   {
@@ -9677,9 +9430,7 @@
                     "tags": [],
                     "label": "context",
                     "description": [],
-                    "signature": [
-                      "Context"
-                    ],
+                    "signature": ["Context"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9712,9 +9463,7 @@
                     "tags": [],
                     "label": "response",
                     "description": [],
-                    "signature": [
-                      "ResponseFactory"
-                    ],
+                    "signature": ["ResponseFactory"],
                     "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9727,9 +9476,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IRouter.versioned",
             "type": "Object",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "versioned",
             "description": [
               "\nAn instance very similar to {@link IRouter} that can be used for versioning HTTP routes\nfollowing the Elastic versioning specification.\n"
@@ -9757,9 +9504,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IStaticAssets",
-        "description": [
-          "\nAPIs for creating hrefs to static assets.\n"
-        ],
+        "description": ["\nAPIs for creating hrefs to static assets.\n"],
         "path": "packages/core/http/core-http-server/src/static_assets.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9773,9 +9518,7 @@
             "description": [
               "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
             ],
-            "signature": [
-              "(assetPath: string) => string"
-            ],
+            "signature": ["(assetPath: string) => string"],
             "path": "packages/core/http/core-http-server/src/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9787,9 +9530,7 @@
                 "tags": [],
                 "label": "assetPath",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9802,16 +9543,12 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.IStaticAssets.prependPublicUrl",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "prependPublicUrl",
             "description": [
               "\nWill return an href, either a path for or full URL with the provided path\nappended to the static assets public base path.\n\nUseful for instances were you need to render your own HTML page and link to\ncertain static assets.\n"
             ],
-            "signature": [
-              "(pathname: string) => string"
-            ],
+            "signature": ["(pathname: string) => string"],
             "path": "packages/core/http/core-http-server/src/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9823,9 +9560,7 @@
                 "tags": [],
                 "label": "pathname",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9972,9 +9707,7 @@
             "type": "Function",
             "tags": [],
             "label": "forbidden",
-            "description": [
-              "\nServer cannot grant access to a resource.\nStatus code: `403`."
-            ],
+            "description": ["\nServer cannot grant access to a resource.\nStatus code: `403`."],
             "signature": [
               "(options?: ",
               {
@@ -10149,9 +9882,7 @@
             "type": "Function",
             "tags": [],
             "label": "customError",
-            "description": [
-              "\nCreates an error response with defined status code and payload."
-            ],
+            "description": ["\nCreates an error response with defined status code and payload."],
             "signature": [
               "(options: ",
               {
@@ -10242,9 +9973,7 @@
             "type": "Function",
             "tags": [],
             "label": "notModified",
-            "description": [
-              "\nContent not modified.\nStatus code: `304`."
-            ],
+            "description": ["\nContent not modified.\nStatus code: `304`."],
             "signature": [
               "(options: ",
               {
@@ -10315,9 +10044,7 @@
             "type": "Function",
             "tags": [],
             "label": "redirected",
-            "description": [
-              "\nRedirect to a different URI.\nStatus code: `302`."
-            ],
+            "description": ["\nRedirect to a different URI.\nStatus code: `302`."],
             "signature": [
               "(options: ",
               {
@@ -10376,9 +10103,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaRequest",
-        "description": [
-          "\nKibana specific abstraction for an incoming request."
-        ],
+        "description": ["\nKibana specific abstraction for an incoming request."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -10399,9 +10124,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nA identifier to identify this request.\n"
-            ],
+            "description": ["\nA identifier to identify this request.\n"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10412,9 +10135,7 @@
             "type": "string",
             "tags": [],
             "label": "uuid",
-            "description": [
-              "\nA UUID to identify this request.\n"
-            ],
+            "description": ["\nA UUID to identify this request.\n"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10425,12 +10146,8 @@
             "type": "Object",
             "tags": [],
             "label": "url",
-            "description": [
-              "a WHATWG URL standard object."
-            ],
-            "signature": [
-              "URL"
-            ],
+            "description": ["a WHATWG URL standard object."],
+            "signature": ["URL"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10441,9 +10158,7 @@
             "type": "Object",
             "tags": [],
             "label": "route",
-            "description": [
-              "matched route details"
-            ],
+            "description": ["matched route details"],
             "signature": [
               "{ readonly path: string; readonly method: ",
               {
@@ -10481,9 +10196,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "\nReadonly copy of incoming request headers."
-            ],
+            "description": ["\nReadonly copy of incoming request headers."],
             "signature": [
               "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
@@ -10521,13 +10234,9 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.KibanaRequest.isInternalApiRequest",
             "type": "boolean",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "isInternalApiRequest",
-            "description": [
-              "\nAn internal request has access to internal routes."
-            ],
+            "description": ["\nAn internal request has access to internal routes."],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10582,9 +10291,7 @@
             "type": "Object",
             "tags": [],
             "label": "auth",
-            "description": [
-              "\nThe auth status of this request.\nSee {@link KibanaRequestAuth}."
-            ],
+            "description": ["\nThe auth status of this request.\nSee {@link KibanaRequestAuth}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -10604,13 +10311,8 @@
             "type": "Object",
             "tags": [],
             "label": "rewrittenUrl",
-            "description": [
-              "\nURL rewritten in onPreRouting request interceptor."
-            ],
-            "signature": [
-              "URL",
-              " | undefined"
-            ],
+            "description": ["\nURL rewritten in onPreRouting request interceptor."],
+            "signature": ["URL", " | undefined"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10621,12 +10323,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [
-              "\nThe path parameter of this request."
-            ],
-            "signature": [
-              "Params"
-            ],
+            "description": ["\nThe path parameter of this request."],
+            "signature": ["Params"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10637,12 +10335,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "query",
-            "description": [
-              "\nThe query parameter of this request."
-            ],
-            "signature": [
-              "Query"
-            ],
+            "description": ["\nThe query parameter of this request."],
+            "signature": ["Query"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10653,12 +10347,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "\nThe body payload of this request."
-            ],
-            "signature": [
-              "Body"
-            ],
+            "description": ["\nThe body payload of this request."],
+            "signature": ["Body"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10672,9 +10362,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaRequestAuth",
-        "description": [
-          "\nAuth status for this request."
-        ],
+        "description": ["\nAuth status for this request."],
         "path": "packages/core/http/core-http-server/src/router/request.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10701,9 +10389,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaRequestEvents",
-        "description": [
-          "\nRequest events."
-        ],
+        "description": ["\nRequest events."],
         "path": "packages/core/http/core-http-server/src/router/request.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10717,10 +10403,7 @@
             "description": [
               "\nObservable that emits once if and when the request has been aborted."
             ],
-            "signature": [
-              "Observable",
-              "<void>"
-            ],
+            "signature": ["Observable", "<void>"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10734,10 +10417,7 @@
             "description": [
               "\nObservable that emits once if and when the request has been completely handled.\n"
             ],
-            "signature": [
-              "Observable",
-              "<void>"
-            ],
+            "signature": ["Observable", "<void>"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10751,9 +10431,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaRequestRoute",
-        "description": [
-          "\nRequest specific route information exposed to a handler."
-        ],
+        "description": ["\nRequest specific route information exposed to a handler."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -10786,9 +10464,7 @@
             "tags": [],
             "label": "method",
             "description": [],
-            "signature": [
-              "Method"
-            ],
+            "signature": ["Method"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10877,10 +10553,7 @@
             "tags": [],
             "label": "rewrittenUrl",
             "description": [],
-            "signature": [
-              "URL",
-              " | undefined"
-            ],
+            "signature": ["URL", " | undefined"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10892,9 +10565,7 @@
             "tags": [],
             "label": "traceId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10906,9 +10577,7 @@
             "tags": [],
             "label": "measureElu",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10958,9 +10627,7 @@
             "tags": [],
             "label": "access",
             "description": [],
-            "signature": [
-              "\"public\" | \"internal\""
-            ],
+            "signature": ["\"public\" | \"internal\""],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10985,9 +10652,7 @@
             "type": "Function",
             "tags": [],
             "label": "ok",
-            "description": [
-              "\nThe request has succeeded.\nStatus code: `200`."
-            ],
+            "description": ["\nThe request has succeeded.\nStatus code: `200`."],
             "signature": [
               "<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
@@ -11054,9 +10719,7 @@
             "type": "Function",
             "tags": [],
             "label": "accepted",
-            "description": [
-              "\nThe request has been accepted for processing.\nStatus code: `202`."
-            ],
+            "description": ["\nThe request has been accepted for processing.\nStatus code: `202`."],
             "signature": [
               "<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
@@ -11230,9 +10893,7 @@
             "type": "Function",
             "tags": [],
             "label": "next",
-            "description": [
-              "To pass request to the next handler"
-            ],
+            "description": ["To pass request to the next handler"],
             "signature": [
               "() => ",
               {
@@ -11303,9 +10964,7 @@
             "type": "Function",
             "tags": [],
             "label": "next",
-            "description": [
-              "To pass request to the next handler"
-            ],
+            "description": ["To pass request to the next handler"],
             "signature": [
               "() => ",
               {
@@ -11331,9 +10990,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OnPreResponseExtensions",
-        "description": [
-          "\nAdditional data to extend a response."
-        ],
+        "description": ["\nAdditional data to extend a response."],
         "path": "packages/core/http/core-http-server/src/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11344,9 +11001,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "additional headers to attach to the response"
-            ],
+            "description": ["additional headers to attach to the response"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -11370,9 +11025,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OnPreResponseInfo",
-        "description": [
-          "\nResponse status code."
-        ],
+        "description": ["\nResponse status code."],
         "path": "packages/core/http/core-http-server/src/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11397,9 +11050,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OnPreResponseRender",
-        "description": [
-          "\nAdditional data to extend a response when rendering a new body"
-        ],
+        "description": ["\nAdditional data to extend a response when rendering a new body"],
         "path": "packages/core/http/core-http-server/src/lifecycle/on_pre_response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11410,9 +11061,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "additional headers to attach to the response"
-            ],
+            "description": ["additional headers to attach to the response"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -11433,9 +11082,7 @@
             "type": "string",
             "tags": [],
             "label": "body",
-            "description": [
-              "the body to use in the response"
-            ],
+            "description": ["the body to use in the response"],
             "path": "packages/core/http/core-http-server/src/lifecycle/on_pre_response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11585,9 +11232,7 @@
             "type": "Function",
             "tags": [],
             "label": "render",
-            "description": [
-              "To override the response with a different body"
-            ],
+            "description": ["To override the response with a different body"],
             "signature": [
               "(responseRender: ",
               {
@@ -11640,9 +11285,7 @@
             "type": "Function",
             "tags": [],
             "label": "next",
-            "description": [
-              "To pass request to the next handler"
-            ],
+            "description": ["To pass request to the next handler"],
             "signature": [
               "(responseExtensions?: ",
               {
@@ -11791,9 +11434,7 @@
             "type": "Function",
             "tags": [],
             "label": "next",
-            "description": [
-              "To pass request to the next handler"
-            ],
+            "description": ["To pass request to the next handler"],
             "signature": [
               "() => ",
               {
@@ -11840,9 +11481,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-server/src/lifecycle/on_pre_routing.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11860,9 +11499,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RequestHandlerContextBase",
-        "description": [
-          "\nBase, abstract type for request handler contexts."
-        ],
+        "description": ["\nBase, abstract type for request handler contexts."],
         "path": "packages/core/http/core-http-server/src/router/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11873,9 +11510,7 @@
             "type": "Function",
             "tags": [],
             "label": "resolve",
-            "description": [
-              "\nAwait all the specified context parts and return them.\n"
-            ],
+            "description": ["\nAwait all the specified context parts and return them.\n"],
             "signature": [
               "<T extends Exclude<keyof this, \"resolve\">>(parts: T[]) => Promise<",
               {
@@ -11898,9 +11533,7 @@
                 "tags": [],
                 "label": "parts",
                 "description": [],
-                "signature": [
-                  "T[]"
-                ],
+                "signature": ["T[]"],
                 "path": "packages/core/http/core-http-server/src/router/request_handler_context.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11918,9 +11551,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RouteConfig",
-        "description": [
-          "\nRoute specific configuration."
-        ],
+        "description": ["\nRoute specific configuration."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -11941,9 +11572,7 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": [
-              "\nThe endpoint _within_ the router path to register the route.\n"
-            ],
+            "description": ["\nThe endpoint _within_ the router path to register the route.\n"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11978,9 +11607,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "\nAdditional route options {@link RouteConfigOptions}."
-            ],
+            "description": ["\nAdditional route options {@link RouteConfigOptions}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -12004,9 +11631,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RouteConfigOptions",
-        "description": [
-          "\nAdditional route options."
-        ],
+        "description": ["\nAdditional route options."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -12030,9 +11655,7 @@
             "description": [
               "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.\n              Can be useful when we grant access to a resource but want to identify a user if possible.\n\nDefaults to `true` if an auth mechanism is registered."
             ],
-            "signature": [
-              "boolean | \"optional\" | undefined"
-            ],
+            "signature": ["boolean | \"optional\" | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12046,9 +11669,7 @@
             "description": [
               "\nDefines xsrf protection requirements for a route:\n- true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.\n- false. Disables xsrf protection.\n\nSet to true by default"
             ],
-            "signature": [
-              "(Method extends \"get\" ? never : boolean) | undefined"
-            ],
+            "signature": ["(Method extends \"get\" ? never : boolean) | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12062,9 +11683,7 @@
             "description": [
               "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
-            "signature": [
-              "\"public\" | \"internal\" | undefined"
-            ],
+            "signature": ["\"public\" | \"internal\" | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12075,12 +11694,8 @@
             "type": "Object",
             "tags": [],
             "label": "tags",
-            "description": [
-              "\nAdditional metadata tag strings to attach to the route."
-            ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "description": ["\nAdditional metadata tag strings to attach to the route."],
+            "signature": ["readonly string[] | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12091,9 +11706,7 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "\nAdditional body options {@link RouteConfigOptionsBody}."
-            ],
+            "description": ["\nAdditional body options {@link RouteConfigOptionsBody}."],
             "signature": [
               "(Method extends \"get\" | \"options\" ? undefined : ",
               {
@@ -12115,9 +11728,7 @@
             "type": "Object",
             "tags": [],
             "label": "timeout",
-            "description": [
-              "\nDefines per-route timeouts."
-            ],
+            "description": ["\nDefines per-route timeouts."],
             "signature": [
               "{ payload?: (Method extends \"get\" | \"options\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
             ],
@@ -12134,9 +11745,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RouteConfigOptionsBody",
-        "description": [
-          "\nAdditional body options for a route"
-        ],
+        "description": ["\nAdditional body options for a route"],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12174,9 +11783,7 @@
             "description": [
               "\nA mime type string overriding the 'Content-Type' header value received."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12190,9 +11797,7 @@
             "description": [
               "\nLimits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.\n\nDefault value: The one set in the kibana.yml config file under the parameter `server.maxPayload`."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12206,9 +11811,7 @@
             "description": [
               "\nThe processed payload format. The value must be one of:\n* 'data' - the incoming payload is read fully into memory. If parse is true, the payload is parsed (JSON, form-decoded, multipart) based on the 'Content-Type' header. If parse is false, a raw\nBuffer is returned.\n* 'stream' - the incoming payload is made available via a Stream.Readable interface. If the payload is 'multipart/form-data' and parse is true, field values are presented as text while files\nare provided as streams. File streams from a 'multipart/form-data' upload will also have a hapi property containing the filename and headers properties. Note that payload streams for multipart\npayloads are a synthetic interface created on top of the entire multipart content loaded into memory. To avoid loading large multipart payloads into memory, set parse to false and handle the\nmultipart payload in the handler using a streaming parser (e.g. pez).\n\nDefault value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure."
             ],
-            "signature": [
-              "\"data\" | \"stream\" | undefined"
-            ],
+            "signature": ["\"data\" | \"stream\" | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12222,9 +11825,7 @@
             "description": [
               "\nDetermines if the incoming payload is processed or presented raw. Available values:\n* true - if the request 'Content-Type' matches the allowed mime types set by allow (for the whole payload as well as parts), the payload is converted into an object when possible. If the\nformat is unknown, a Bad Request (400) error response is sent. Any known content encoding is decoded.\n* false - the raw payload is returned unmodified.\n* 'gunzip' - the raw payload is returned unmodified after any known content encoding is decoded.\n\nDefault value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure."
             ],
-            "signature": [
-              "boolean | \"gunzip\" | undefined"
-            ],
+            "signature": ["boolean | \"gunzip\" | undefined"],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12340,9 +11941,7 @@
                 "tags": [],
                 "label": "req",
                 "description": [],
-                "signature": [
-                  "Request"
-                ],
+                "signature": ["Request"],
                 "path": "packages/core/http/core-http-server/src/router/router.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12355,9 +11954,7 @@
                 "tags": [],
                 "label": "responseToolkit",
                 "description": [],
-                "signature": [
-                  "ResponseToolkit"
-                ],
+                "signature": ["ResponseToolkit"],
                 "path": "packages/core/http/core-http-server/src/router/router.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12389,9 +11986,7 @@
             "tags": [],
             "label": "ok",
             "description": [],
-            "signature": [
-              "<T>(value: T) => { value: T; }"
-            ],
+            "signature": ["<T>(value: T) => { value: T; }"],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12403,9 +11998,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12443,9 +12036,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "string | Error"
-                ],
+                "signature": ["string | Error"],
                 "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12458,9 +12049,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
+                "signature": ["string[] | undefined"],
                 "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12501,9 +12090,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "params",
-            "description": [
-              "\nValidation logic for the URL params"
-            ],
+            "description": ["\nValidation logic for the URL params"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -12524,9 +12111,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "query",
-            "description": [
-              "\nValidation logic for the Query params"
-            ],
+            "description": ["\nValidation logic for the Query params"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -12547,9 +12132,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "body",
-            "description": [
-              "\nValidation logic for the body payload"
-            ],
+            "description": ["\nValidation logic for the body payload"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -12605,9 +12188,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SessionCookieValidationResult",
-        "description": [
-          "\nReturn type from a function to validate cookie contents."
-        ],
+        "description": ["\nReturn type from a function to validate cookie contents."],
         "path": "packages/core/http/core-http-server/src/session_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12618,9 +12199,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isValid",
-            "description": [
-              "\nWhether the cookie is valid or not."
-            ],
+            "description": ["\nWhether the cookie is valid or not."],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12634,9 +12213,7 @@
             "description": [
               "\nThe \"Path\" attribute of the cookie; if the cookie is invalid, this is used to clear it."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12650,9 +12227,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SessionStorage",
-        "description": [
-          "\nProvides an interface to store and retrieve data across requests."
-        ],
+        "description": ["\nProvides an interface to store and retrieve data across requests."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -12673,12 +12248,8 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nRetrieves session value from the session storage."
-            ],
-            "signature": [
-              "() => Promise<T | null>"
-            ],
+            "description": ["\nRetrieves session value from the session storage."],
+            "signature": ["() => Promise<T | null>"],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12691,12 +12262,8 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": [
-              "\nPuts current session value into the session storage."
-            ],
-            "signature": [
-              "(sessionValue: T) => void"
-            ],
+            "description": ["\nPuts current session value into the session storage."],
+            "signature": ["(sessionValue: T) => void"],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12707,12 +12274,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "sessionValue",
-                "description": [
-                  "- value to put"
-                ],
-                "signature": [
-                  "T"
-                ],
+                "description": ["- value to put"],
+                "signature": ["T"],
                 "path": "packages/core/http/core-http-server/src/session_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12727,12 +12290,8 @@
             "type": "Function",
             "tags": [],
             "label": "clear",
-            "description": [
-              "\nClears current session."
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nClears current session."],
+            "signature": ["() => void"],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12771,9 +12330,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nName of the session cookie."
-            ],
+            "description": ["\nName of the session cookie."],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12797,9 +12354,7 @@
             "type": "Function",
             "tags": [],
             "label": "validate",
-            "description": [
-              "\nFunction called to validate a cookie's decrypted value."
-            ],
+            "description": ["\nFunction called to validate a cookie's decrypted value."],
             "signature": [
               "(sessionValue: T | T[]) => ",
               {
@@ -12821,9 +12376,7 @@
                 "tags": [],
                 "label": "sessionValue",
                 "description": [],
-                "signature": [
-                  "T | T[]"
-                ],
+                "signature": ["T | T[]"],
                 "path": "packages/core/http/core-http-server/src/session_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12854,9 +12407,7 @@
             "description": [
               "\nDefines SameSite attribute of the Set-Cookie Header.\nhttps://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite"
             ],
-            "signature": [
-              "\"None\" | \"Strict\" | \"Lax\" | undefined"
-            ],
+            "signature": ["\"None\" | \"Strict\" | \"Lax\" | undefined"],
             "path": "packages/core/http/core-http-server/src/session_storage.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12870,9 +12421,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SessionStorageFactory",
-        "description": [
-          "\nSessionStorage factory to bind one to an incoming request"
-        ],
+        "description": ["\nSessionStorage factory to bind one to an incoming request"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -12951,9 +12500,7 @@
         "type": "Interface",
         "tags": [],
         "label": "VersionedRoute",
-        "description": [
-          "\nA versioned route"
-        ],
+        "description": ["\nA versioned route"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -12974,9 +12521,7 @@
             "type": "Function",
             "tags": [],
             "label": "addVersion",
-            "description": [
-              "\nAdd a new version of this route"
-            ],
+            "description": ["\nAdd a new version of this route"],
             "signature": [
               "<P = unknown, Q = unknown, B = unknown>(options: ",
               {
@@ -13060,9 +12605,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
-                "description": [
-                  "The request handler for this version of a route"
-                ],
+                "description": ["The request handler for this version of a route"],
                 "signature": [
                   "(context: Ctx, request: ",
                   {
@@ -13138,9 +12681,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRouter.get",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "get",
             "description": [],
             "signature": [
@@ -14145,9 +13686,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRouter.put",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "put",
             "description": [],
             "signature": [
@@ -14420,9 +13959,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRouter.post",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "post",
             "description": [],
             "signature": [
@@ -15371,9 +14908,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRouter.patch",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "patch",
             "description": [],
             "signature": [
@@ -15498,9 +15033,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRouter.delete",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "delete",
             "description": [],
             "signature": [
@@ -15792,9 +15325,7 @@
             "tags": [],
             "label": "unsafe",
             "description": [],
-            "signature": [
-              "{ body?: boolean | undefined; } | undefined"
-            ],
+            "signature": ["{ body?: boolean | undefined; } | undefined"],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -15822,9 +15353,7 @@
         "type": "Enum",
         "tags": [],
         "label": "AuthStatus",
-        "description": [
-          "\nStatus indicating an outcome of the authentication."
-        ],
+        "description": ["\nStatus indicating an outcome of the authentication."],
         "path": "packages/core/http/core-http-server/src/auth_state.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15860,18 +15389,10 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.ApiVersion",
         "type": "Type",
-        "tags": [
-          "note",
-          "note",
-          "experimental"
-        ],
+        "tags": ["note", "note", "experimental"],
         "label": "ApiVersion",
-        "description": [
-          "\nA Kibana HTTP API version\n"
-        ],
-        "signature": [
-          "string"
-        ],
+        "description": ["\nA Kibana HTTP API version\n"],
+        "signature": ["string"],
         "path": "packages/core/http/core-http-common/src/versioning.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15883,9 +15404,7 @@
         "type": "Type",
         "tags": [],
         "label": "AuthenticationHandler",
-        "description": [
-          "\nSee {@link AuthToolkit}."
-        ],
+        "description": ["\nSee {@link AuthToolkit}."],
         "signature": [
           "(request: ",
           {
@@ -16029,9 +15548,7 @@
         "tags": [],
         "label": "AuthHeaders",
         "description": [],
-        "signature": [
-          "{ [x: string]: string | string[]; }"
-        ],
+        "signature": ["{ [x: string]: string | string[]; }"],
         "path": "packages/core/http/core-http-server/src/lifecycle/auth.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16080,12 +15597,8 @@
         "type": "Type",
         "tags": [],
         "label": "DestructiveRouteMethod",
-        "description": [
-          "\nSet of HTTP methods changing the state of the server."
-        ],
-        "signature": [
-          "\"delete\" | \"post\" | \"put\" | \"patch\""
-        ],
+        "description": ["\nSet of HTTP methods changing the state of the server."],
+        "signature": ["\"delete\" | \"post\" | \"put\" | \"patch\""],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16095,13 +15608,9 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.GetAuthHeaders",
         "type": "Type",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "GetAuthHeaders",
-        "description": [
-          "\nGet headers to authenticate a user against Elasticsearch."
-        ],
+        "description": ["\nGet headers to authenticate a user against Elasticsearch."],
         "signature": [
           "(request: ",
           {
@@ -16124,9 +15633,7 @@
         "path": "packages/core/http/core-http-server/src/auth_headers.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [
-          "authentication headers {@link AuthHeaders } for - an incoming request."
-        ],
+        "returnComment": ["authentication headers {@link AuthHeaders } for - an incoming request."],
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server",
@@ -16134,9 +15641,7 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": [
-              "{@link KibanaRequest } - an incoming request."
-            ],
+            "description": ["{@link KibanaRequest } - an incoming request."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -16193,9 +15698,7 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": [
-              "{@link KibanaRequest } - an incoming request."
-            ],
+            "description": ["{@link KibanaRequest } - an incoming request."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -16247,9 +15750,7 @@
         "description": [
           "\nA function that accepts a context object and an optional number of additional arguments. Used for the generic types\nin {@link IContextContainer}\n"
         ],
-        "signature": [
-          "(context: T, ...args: any[]) => any"
-        ],
+        "signature": ["(context: T, ...args: any[]) => any"],
         "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16262,9 +15763,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -16276,9 +15775,7 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": [
-              "any[]"
-            ],
+            "signature": ["any[]"],
             "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -16295,9 +15792,7 @@
         "description": [
           "\nExtracts the types of the additional arguments of a {@link HandlerFunction}, excluding the\n{@link HandlerContextType}.\n"
         ],
-        "signature": [
-          "T extends (context: any, ...args: infer U) => any ? U : never"
-        ],
+        "signature": ["T extends (context: any, ...args: infer U) => any ? U : never"],
         "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16309,9 +15804,7 @@
         "type": "Type",
         "tags": [],
         "label": "Headers",
-        "description": [
-          "\nHttp request headers to read."
-        ],
+        "description": ["\nHttp request headers to read."],
         "signature": [
           "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
@@ -16326,14 +15819,8 @@
         "type": "Type",
         "tags": [],
         "label": "HttpResponsePayload",
-        "description": [
-          "\nData send to the client as a response payload."
-        ],
-        "signature": [
-          "string | Record<string, any> | Buffer | ",
-          "Stream",
-          " | undefined"
-        ],
+        "description": ["\nData send to the client as a response payload."],
+        "signature": ["string | Record<string, any> | Buffer | ", "Stream", " | undefined"],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16391,9 +15878,7 @@
             "description": [
               "- A partial context object containing only the keys for values provided by plugin dependencies"
             ],
-            "signature": [
-              "{ [P in Exclude<keyof Context, ContextName>]: Context[P]; }"
-            ],
+            "signature": ["{ [P in Exclude<keyof Context, ContextName>]: Context[P]; }"],
             "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -16439,9 +15924,7 @@
         "type": "Type",
         "tags": [],
         "label": "IsAuthenticated",
-        "description": [
-          "\nReturns authentication status for a request."
-        ],
+        "description": ["\nReturns authentication status for a request."],
         "signature": [
           "(request: ",
           {
@@ -16464,9 +15947,7 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": [
-              "{@link KibanaRequest } - an incoming request."
-            ],
+            "description": ["{@link KibanaRequest } - an incoming request."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -16623,9 +16104,7 @@
         "type": "Type",
         "tags": [],
         "label": "KnownHeaders",
-        "description": [
-          "\nSet of well-known HTTP headers."
-        ],
+        "description": ["\nSet of well-known HTTP headers."],
         "signature": [
           "\"date\" | \"warning\" | \"location\" | \"range\" | \"from\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
@@ -16640,9 +16119,7 @@
         "type": "Type",
         "tags": [],
         "label": "KnownKeys",
-        "description": [
-          "\nCreates a Union type of all known keys of a given interface."
-        ],
+        "description": ["\nCreates a Union type of all known keys of a given interface."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -16695,9 +16172,7 @@
         "type": "Type",
         "tags": [],
         "label": "OnPostAuthHandler",
-        "description": [
-          "\nSee {@link OnPostAuthToolkit}."
-        ],
+        "description": ["\nSee {@link OnPostAuthToolkit}."],
         "signature": [
           "(request: ",
           {
@@ -16873,9 +16348,7 @@
         "type": "Type",
         "tags": [],
         "label": "OnPreAuthHandler",
-        "description": [
-          "\nSee {@link OnPreAuthToolkit}."
-        ],
+        "description": ["\nSee {@link OnPreAuthToolkit}."],
         "signature": [
           "(request: ",
           {
@@ -17051,9 +16524,7 @@
         "type": "Type",
         "tags": [],
         "label": "OnPreResponseHandler",
-        "description": [
-          "\nSee {@link OnPreResponseToolkit}."
-        ],
+        "description": ["\nSee {@link OnPreResponseToolkit}."],
         "signature": [
           "(request: ",
           {
@@ -17201,9 +16672,7 @@
         "type": "Type",
         "tags": [],
         "label": "OnPreRoutingHandler",
-        "description": [
-          "\nSee {@link OnPreRoutingToolkit}."
-        ],
+        "description": ["\nSee {@link OnPreRoutingToolkit}."],
         "signature": [
           "(request: ",
           {
@@ -17398,9 +16867,7 @@
         "type": "Type",
         "tags": [],
         "label": "RedirectResponseOptions",
-        "description": [
-          "\nHTTP response parameters for redirection response"
-        ],
+        "description": ["\nHTTP response parameters for redirection response"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -17474,9 +16941,7 @@
             "description": [
               "{@link RequestHandlerContext } - the core context exposed for this request."
             ],
-            "signature": [
-              "Context"
-            ],
+            "signature": ["Context"],
             "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -17513,9 +16978,7 @@
             "description": [
               "{@link KibanaResponseFactory } - a set of helper functions used to respond to a request."
             ],
-            "signature": [
-              "ResponseFactory"
-            ],
+            "signature": ["ResponseFactory"],
             "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -17529,9 +16992,7 @@
         "type": "Type",
         "tags": [],
         "label": "RequestHandlerWrapper",
-        "description": [
-          "\nType-safe wrapper for {@link RequestHandler} function."
-        ],
+        "description": ["\nType-safe wrapper for {@link RequestHandler} function."],
         "signature": [
           "<P, Q, B, Context extends ",
           {
@@ -17642,9 +17103,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "Context"
-                ],
+                "signature": ["Context"],
                 "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -17677,9 +17136,7 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": [
-                  "ResponseFactory"
-                ],
+                "signature": ["ResponseFactory"],
                 "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -17695,9 +17152,7 @@
         "type": "Type",
         "tags": [],
         "label": "ResponseError",
-        "description": [
-          "\nError message and optional data send to the client in case of error."
-        ],
+        "description": ["\nError message and optional data send to the client in case of error."],
         "signature": [
           "string | Error | { message: string | Error; attributes?: ",
           {
@@ -17720,12 +17175,8 @@
         "type": "Type",
         "tags": [],
         "label": "ResponseErrorAttributes",
-        "description": [
-          "\nAdditional data to provide error details."
-        ],
-        "signature": [
-          "{ [x: string]: any; }"
-        ],
+        "description": ["\nAdditional data to provide error details."],
+        "signature": ["{ [x: string]: any; }"],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -17737,9 +17188,7 @@
         "type": "Type",
         "tags": [],
         "label": "ResponseHeaders",
-        "description": [
-          "\nHttp response headers to set."
-        ],
+        "description": ["\nHttp response headers to set."],
         "signature": [
           "Record<string, string | string[]> | Record<\"date\" | \"warning\" | \"location\" | \"range\" | \"from\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
         ],
@@ -17754,9 +17203,7 @@
         "type": "Type",
         "tags": [],
         "label": "RouteContentType",
-        "description": [
-          "\nThe set of supported parseable Content-Types"
-        ],
+        "description": ["\nThe set of supported parseable Content-Types"],
         "signature": [
           "\"application/json\" | \"multipart/form-data\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"text/*\""
         ],
@@ -17771,9 +17218,7 @@
         "type": "Type",
         "tags": [],
         "label": "RouteMethod",
-        "description": [
-          "\nThe set of common HTTP methods supported by Kibana routing."
-        ],
+        "description": ["\nThe set of common HTTP methods supported by Kibana routing."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -17802,9 +17247,7 @@
         "type": "Type",
         "tags": [],
         "label": "RouteRegistrar",
-        "description": [
-          "\nRoute handler common definition\n"
-        ],
+        "description": ["\nRoute handler common definition\n"],
         "signature": [
           "<P, Q, B>(route: ",
           {
@@ -17912,9 +17355,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "Context"
-                ],
+                "signature": ["Context"],
                 "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -17947,9 +17388,7 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": [
-                  "ResponseFactory"
-                ],
+                "signature": ["ResponseFactory"],
                 "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -17999,9 +17438,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -18075,9 +17512,7 @@
         "type": "Type",
         "tags": [],
         "label": "RouteValidatorFullConfig",
-        "description": [
-          "\nRoute validations config and options merged into one object"
-        ],
+        "description": ["\nRoute validations config and options merged into one object"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
@@ -18106,12 +17541,8 @@
         "type": "Type",
         "tags": [],
         "label": "SafeRouteMethod",
-        "description": [
-          "\nSet of HTTP methods not changing the state of the server."
-        ],
-        "signature": [
-          "\"get\" | \"options\""
-        ],
+        "description": ["\nSet of HTTP methods not changing the state of the server."],
+        "signature": ["\"get\" | \"options\""],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -18176,9 +17607,7 @@
             "tags": [],
             "label": "headers",
             "description": [],
-            "signature": [
-              "{ [x: string]: string | string[]; }"
-            ],
+            "signature": ["{ [x: string]: string | string[]; }"],
             "path": "packages/core/http/core-http-server/src/auth_headers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -18209,9 +17638,7 @@
         "type": "Type",
         "tags": [],
         "label": "VersionedRouteConfig",
-        "description": [
-          "\nConfiguration for a versioned route"
-        ],
+        "description": ["\nConfiguration for a versioned route"],
         "signature": [
           "Omit<",
           {
@@ -18242,9 +17669,7 @@
         "type": "Type",
         "tags": [],
         "label": "VersionedRouteRegistrar",
-        "description": [
-          "\nCreate an {@link VersionedRoute | versioned route}.\n"
-        ],
+        "description": ["\nCreate an {@link VersionedRoute | versioned route}.\n"],
         "signature": [
           "(config: ",
           {
@@ -18267,9 +17692,7 @@
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [
-          "A versioned route"
-        ],
+        "returnComment": ["A versioned route"],
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server",
@@ -18277,9 +17700,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "config",
-            "description": [
-              "- The route configuration"
-            ],
+            "description": ["- The route configuration"],
             "signature": [
               "Omit<",
               {
@@ -18343,12 +17764,8 @@
         "type": "Object",
         "tags": [],
         "label": "validBodyOutput",
-        "description": [
-          "\nThe set of valid body.output"
-        ],
-        "signature": [
-          "readonly [\"data\", \"stream\"]"
-        ],
+        "description": ["\nThe set of valid body.output"],
+        "signature": ["readonly [\"data\", \"stream\"]"],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
         "deprecated": false,
         "trackAdoption": false,
