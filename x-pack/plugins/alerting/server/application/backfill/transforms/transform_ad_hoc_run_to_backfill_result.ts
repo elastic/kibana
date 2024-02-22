@@ -20,10 +20,24 @@ export const transformAdHocRunToBackfillResult = ({
     return createBackfillError(error.error, error.message);
   }
 
-  if (!id || !attributes || !references || !references.length) {
+  if (!id) {
     return createBackfillError(
       'Internal Server Error',
-      'Malformed saved object bulkCreate response'
+      'Malformed saved object in bulkCreate response - Missing "id".'
+    );
+  }
+
+  if (!attributes) {
+    return createBackfillError(
+      'Internal Server Error',
+      'Malformed saved object in bulkCreate response - Missing "attributes".'
+    );
+  }
+
+  if (!references || !references.length) {
+    return createBackfillError(
+      'Internal Server Error',
+      'Malformed saved object in bulkCreate response - Missing "references".'
     );
   }
 

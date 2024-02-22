@@ -15,7 +15,13 @@ export interface AdHocRunSchedule extends Record<string, unknown> {
 }
 
 // This is the rule information stored in the AD_HOC_RUN_SAVED_OBJECT_TYPE saved object
-// It does not include the rule ID because that is stored in the SO references array
+// - we do not include the rule ID because that is stored in the SO references array
+// - we copy over the API key from the rule at the time the backfill was scheduled to use in
+//   the ad hoc task runner
+// - all the other rule fields are copied because we use it as part of rule execution
+// - we copy over this information in order to run the rule as it was configured when
+//   the backfill job was scheduled. if there are updates to the rule configuration
+//   after the backfill is scheduled, they will not be reflected during the backfill run.
 type AdHocRunSORule = Pick<
   RuleDomain,
   | 'name'

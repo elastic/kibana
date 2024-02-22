@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type { AdHocRunStatus } from './ad_hoc_run_status';
-export { adHocRunStatus } from './ad_hoc_run_status';
-export { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from './backfill';
-export { PLUGIN } from './plugin';
+export const MAX_SCHEDULE_BACKFILL_BULK_SIZE = 100;

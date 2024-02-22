@@ -156,7 +156,7 @@ describe('transformAdHocRunToBackfillResult', () => {
     ).toEqual({
       error: {
         error: 'Internal Server Error',
-        message: 'Malformed saved object bulkCreate response',
+        message: 'Malformed saved object in bulkCreate response - Missing "id".',
       },
     });
     expect(
@@ -178,7 +178,7 @@ describe('transformAdHocRunToBackfillResult', () => {
     ).toEqual({
       error: {
         error: 'Internal Server Error',
-        message: 'Malformed saved object bulkCreate response',
+        message: 'Malformed saved object in bulkCreate response - Missing "attributes".',
       },
     });
     expect(
@@ -200,7 +200,7 @@ describe('transformAdHocRunToBackfillResult', () => {
     ).toEqual({
       error: {
         error: 'Internal Server Error',
-        message: 'Malformed saved object bulkCreate response',
+        message: 'Malformed saved object in bulkCreate response - Missing "references".',
       },
     });
     expect(
@@ -222,7 +222,7 @@ describe('transformAdHocRunToBackfillResult', () => {
     ).toEqual({
       error: {
         error: 'Internal Server Error',
-        message: 'Malformed saved object bulkCreate response',
+        message: 'Malformed saved object in bulkCreate response - Missing "references".',
       },
     });
   });

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../../common/constants';
 
 export const scheduleBackfillParamSchema = schema.object(
   {
@@ -37,5 +38,5 @@ export const scheduleBackfillParamSchema = schema.object(
 
 export const scheduleBackfillParamsSchema = schema.arrayOf(scheduleBackfillParamSchema, {
   minSize: 1,
-  maxSize: 10,
+  maxSize: MAX_SCHEDULE_BACKFILL_BULK_SIZE,
 });
