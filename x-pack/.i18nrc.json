@@ -99,7 +99,7 @@
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.synthetics": ["plugins/synthetics"],
-    "xpack.ux": ["plugins/ux"],
+    "xpack.ux": ["plugins/observability_solution/ux"],
     "xpack.uptime": ["plugins/uptime"],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
     "xpack.watcher": "plugins/watcher"
