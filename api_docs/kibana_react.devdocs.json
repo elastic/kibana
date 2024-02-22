@@ -1619,15 +1619,15 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
           },
           {
             "plugin": "transform",
@@ -3078,67 +3078,67 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
           },
           {
             "plugin": "uptime",

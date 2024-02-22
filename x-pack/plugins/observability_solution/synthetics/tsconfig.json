@@ -1,7 +1,7 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__mocks__/**/*",
@@ -9,7 +9,7 @@
     "scripts/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../typings/**/*"
+    "../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/alerting-plugin",
@@ -83,9 +83,7 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/serverless",
-    "@kbn/repo-info",
+    "@kbn/repo-info"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

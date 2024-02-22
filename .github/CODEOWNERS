@@ -790,7 +790,7 @@ test/server_integration/plugins/status_plugin_b @elastic/kibana-core
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
-x-pack/plugins/synthetics @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-infra_services-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/plugins/task_manager @elastic/response-ops

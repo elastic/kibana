@@ -98,7 +98,7 @@
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
-    "xpack.synthetics": ["plugins/synthetics"],
+    "xpack.synthetics": ["plugins/observability_solution/synthetics"],
     "xpack.ux": ["plugins/observability_solution/ux"],
     "xpack.uptime": ["plugins/uptime"],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
