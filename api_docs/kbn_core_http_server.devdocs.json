@@ -4159,35 +4159,35 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/flamechart.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/functions.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/topn.ts"
               },
               {
                 "plugin": "reporting",
@@ -6607,7 +6607,7 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "reporting",

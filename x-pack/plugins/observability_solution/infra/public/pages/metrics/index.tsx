@@ -31,9 +31,6 @@ import { SnapshotPage } from './inventory_view';
 import { NodeDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { SourceLoadingPage } from '../../components/source_loading_page';
-import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
-import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
-import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
@@ -44,6 +41,7 @@ import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { HostsPage } from './hosts';
+import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -75,77 +73,79 @@ export const InfrastructurePage = () => {
 
   return (
     <EuiErrorBoundary>
-      <AlertPrefillProvider>
-        <WaffleOptionsProvider>
-          <WaffleTimeProvider>
-            <WaffleFiltersProvider>
-              <ReactQueryProvider>
-                <InfraMLCapabilitiesProvider>
-                  <HelpCenterContent
-                    feedbackLink="https://discuss.elastic.co/c/metrics"
-                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
-                  {setHeaderActionMenu && theme$ && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                      <EuiFlexGroup responsive={false} gutterSize="s">
-                        <EuiFlexItem>
-                          <EuiHeaderLinks gutterSize="xs">
-                            <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                              {settingsTabTitle}
-                            </EuiHeaderLink>
-                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                            {config.featureFlags.alertsAndRulesDropdownEnabled && (
-                              <MetricsAlertDropdown />
-                            )}
-                            <EuiHeaderLink
-                              href={kibana.services?.application?.getUrlForApp(
-                                '/integrations/browse'
-                              )}
-                              color="primary"
-                              iconType="indexOpen"
-                            >
-                              {ADD_DATA_LABEL}
-                            </EuiHeaderLink>
-                          </EuiHeaderLinks>
-                        </EuiFlexItem>
-                        {ObservabilityAIAssistantActionMenuItem ? (
-                          <EuiFlexItem>
-                            <ObservabilityAIAssistantActionMenuItem />
-                          </EuiFlexItem>
-                        ) : null}
-                      </EuiFlexGroup>
-                    </HeaderMenuPortal>
+      <ReactQueryProvider>
+        <AlertPrefillProvider>
+          <InfraMLCapabilitiesProvider>
+            <HelpCenterContent
+              feedbackLink="https://discuss.elastic.co/c/metrics"
+              appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                defaultMessage: 'Metrics',
+              })}
+            />
+            {setHeaderActionMenu && theme$ && (
+              <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+                <EuiFlexGroup responsive={false} gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiHeaderLinks gutterSize="xs">
+                      <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                        {settingsTabTitle}
+                      </EuiHeaderLink>
+                      <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                      {config.featureFlags.alertsAndRulesDropdownEnabled && (
+                        <MetricsAlertDropdown />
+                      )}
+                      <EuiHeaderLink
+                        href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+                        color="primary"
+                        iconType="indexOpen"
+                      >
+                        {ADD_DATA_LABEL}
+                      </EuiHeaderLink>
+                    </EuiHeaderLinks>
+                  </EuiFlexItem>
+                  {ObservabilityAIAssistantActionMenuItem ? (
+                    <EuiFlexItem>
+                      <ObservabilityAIAssistantActionMenuItem />
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </HeaderMenuPortal>
+            )}
+
+            <Routes>
+              <Route path="/inventory" component={SnapshotPage} />
+              {config.featureFlags.metricsExplorerEnabled && (
+                <Route
+                  path="/explorer"
+                  render={() => (
+                    <MetricsExplorerOptionsContainer>
+                      <WithMetricsExplorerOptionsUrlState />
+                      {source?.configuration ? (
+                        <PageContent
+                          configuration={source.configuration}
+                          createDerivedIndexPattern={createDerivedIndexPattern}
+                        />
+                      ) : (
+                        <SourceLoadingPage />
+                      )}
+                    </MetricsExplorerOptionsContainer>
                   )}
-                  <Routes>
-                    <Route path={'/inventory'} component={SnapshotPage} />
-                    {config.featureFlags.metricsExplorerEnabled && (
-                      <Route path={'/explorer'}>
-                        <MetricsExplorerOptionsContainer>
-                          <WithMetricsExplorerOptionsUrlState />
-                          {source?.configuration ? (
-                            <PageContent
-                              configuration={source.configuration}
-                              createDerivedIndexPattern={createDerivedIndexPattern}
-                            />
-                          ) : (
-                            <SourceLoadingPage />
-                          )}
-                        </MetricsExplorerOptionsContainer>
-                      </Route>
-                    )}
-                    <Route path="/detail/:type/:node" component={NodeDetail} />
-                    {isHostsViewEnabled && <Route path={'/hosts'} component={HostsPage} />}
-                    <Route path={'/settings'} component={MetricsSettingsPage} />
-                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
-                  </Routes>
-                </InfraMLCapabilitiesProvider>
-              </ReactQueryProvider>
-            </WaffleFiltersProvider>
-          </WaffleTimeProvider>
-        </WaffleOptionsProvider>
-      </AlertPrefillProvider>
+                />
+              )}
+
+              <Route path="/detail/:type/:node" component={NodeDetail} />
+              {isHostsViewEnabled && <Route path="/hosts" component={HostsPage} />}
+              <Route path="/settings" component={MetricsSettingsPage} />
+
+              <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
+              <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
+              <RedirectWithQueryParams from="/" exact to="/inventory" />
+
+              <Route render={() => <NotFoundPage title="Infrastructure" />} />
+            </Routes>
+          </InfraMLCapabilitiesProvider>
+        </AlertPrefillProvider>
+      </ReactQueryProvider>
     </EuiErrorBoundary>
   );
 };
