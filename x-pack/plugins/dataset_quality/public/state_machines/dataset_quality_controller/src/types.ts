@@ -6,6 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
@@ -29,13 +30,21 @@ interface TableCriteria {
   };
 }
 
+export interface TimeRangeConfig {
+  from: string;
+  to: string;
+  refresh: {
+    isPaused: boolean;
+    interval: number;
+  };
+}
+
 interface FiltersCriteria {
   inactive: boolean;
   fullNames: boolean;
-  timeRange: {
-    from: string;
-    to: string;
-  };
+  timeRange: TimeRangeConfig;
+  integrations: string[];
+  query?: string;
 }
 
 export interface WithTableOptions {
@@ -46,6 +55,7 @@ export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
     datasetDetails?: DataStreamDetails;
+    insightsTimeRange?: TimeRangeConfig;
   };
 }
 
@@ -65,12 +75,17 @@ export interface WithDatasets {
   datasets: DataStreamStat[];
 }
 
-export type DefaultDatasetQualityControllerState = WithTableOptions &
+export interface WithIntegrations {
+  integrations: Integration[];
+}
+
+export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
   Partial<WithDataStreamStats> &
   Partial<WithDegradedDocs> &
   WithFlyoutOptions &
   WithDatasets &
-  WithFilters;
+  WithFilters &
+  WithIntegrations;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -121,6 +136,10 @@ export type DatasetQualityControllerEvent =
       dataset: FlyoutDataset;
     }
   | {
+      type: 'UPDATE_INSIGHTS_TIME_RANGE';
+      timeRange: TimeRangeConfig;
+    }
+  | {
       type: 'CLOSE_FLYOUT';
     }
   | {
@@ -128,6 +147,21 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'TOGGLE_FULL_DATASET_NAMES';
+    }
+  | {
+      type: 'UPDATE_TIME_RANGE';
+      timeRange: TimeRangeConfig;
+    }
+  | {
+      type: 'REFRESH_DATA';
+    }
+  | {
+      type: 'UPDATE_INTEGRATIONS';
+      integrations: string[];
+    }
+  | {
+      type: 'UPDATE_QUERY';
+      query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

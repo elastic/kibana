@@ -34,7 +34,9 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
   const isDatasetsQualityLoading = useSelector(
     summaryPanelStateService,
     (state) =>
-      state.matches('datasetsQuality.fetching') || state.matches('datasetsQuality.retrying')
+      state.matches('datasetsQuality.fetching') ||
+      state.matches('datasetsQuality.retrying') ||
+      state.matches('datasetsActivity.fetching')
   );
 
   /*

@@ -16,7 +16,7 @@ export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noData
 });
 
 export const noDatasetsTitle = i18n.translate('xpack.datasetQuality.noDatasetsTitle', {
-  defaultMessage: 'There is no data to display.',
+  defaultMessage: 'No matching data streams found',
 });
 
 export const loadingDatasetsText = i18n.translate('xpack.datasetQuality.loadingDatasetsText', {
@@ -30,6 +30,10 @@ export const tableSummaryAllText = i18n.translate('xpack.datasetQuality.tableSum
 export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSummaryOfText', {
   defaultMessage: 'of',
 });
+
+/*
+Flyout
+*/
 
 export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCancelText', {
   defaultMessage: 'Cancel',
@@ -81,6 +85,28 @@ export const flyoutIntegrationNameText = i18n.translate(
   'xpack.datasetQuality.flyoutIntegrationNameText',
   {
     defaultMessage: 'Name',
+  }
+);
+
+export const flyoutDegradedDocsText = i18n.translate(
+  'xpack.datasetQuality.flyout.degradedDocsTitle',
+  {
+    defaultMessage: 'Degraded docs',
+  }
+);
+
+export const flyoutDegradedDocsTrendText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedDocsViz',
+  {
+    defaultMessage: 'Degraded documents trend',
+  }
+);
+
+export const flyoutDegradedDocsPercentageText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedDocsPercentage',
+  {
+    defaultMessage: 'Degraded docs %',
+    description: 'Tooltip label for the percentage of degraded documents chart.',
   }
 );
 

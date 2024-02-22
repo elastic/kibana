@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
+import {
+  EuiErrorBoundary,
+  EuiHeaderLinks,
+  EuiHeaderLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
@@ -83,25 +89,33 @@ export const InfrastructurePage = () => {
                   />
                   {setHeaderActionMenu && theme$ && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                      <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        {config.featureFlags.alertsAndRulesDropdownEnabled && (
-                          <MetricsAlertDropdown />
-                        )}
-                        <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
-                          color="primary"
-                          iconType="indexOpen"
-                        >
-                          {ADD_DATA_LABEL}
-                        </EuiHeaderLink>
+                      <EuiFlexGroup responsive={false} gutterSize="s">
+                        <EuiFlexItem>
+                          <EuiHeaderLinks gutterSize="xs">
+                            <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                              {settingsTabTitle}
+                            </EuiHeaderLink>
+                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                            {config.featureFlags.alertsAndRulesDropdownEnabled && (
+                              <MetricsAlertDropdown />
+                            )}
+                            <EuiHeaderLink
+                              href={kibana.services?.application?.getUrlForApp(
+                                '/integrations/browse'
+                              )}
+                              color="primary"
+                              iconType="indexOpen"
+                            >
+                              {ADD_DATA_LABEL}
+                            </EuiHeaderLink>
+                          </EuiHeaderLinks>
+                        </EuiFlexItem>
                         {ObservabilityAIAssistantActionMenuItem ? (
-                          <ObservabilityAIAssistantActionMenuItem />
+                          <EuiFlexItem>
+                            <ObservabilityAIAssistantActionMenuItem />
+                          </EuiFlexItem>
                         ) : null}
-                      </EuiHeaderLinks>
+                      </EuiFlexGroup>
                     </HeaderMenuPortal>
                   )}
                   <Routes>
