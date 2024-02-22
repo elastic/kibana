@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
-import React from 'react';
+import React, { MouseEvent, useCallback } from 'react';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';
 import { toDurationLabel } from '../../../../utils/slo/labels';
 
@@ -20,14 +21,33 @@ export interface Props {
 }
 
 export function SloTimeWindowBadge({ slo, color }: Props) {
+  const { onStateChange } = useUrlSearchState();
+
+  const onBadgeClick = useCallback(() => {
+    onStateChange({
+      kqlQuery: `slo.timeWindow.duration: "${slo.timeWindow.duration}"`,
+    });
+  }, [onStateChange, slo.timeWindow.duration]);
+
   const unit = slo.timeWindow.duration.slice(-1);
   if (rollingTimeWindowTypeSchema.is(slo.timeWindow.type)) {
     return (
       <EuiFlexItem grow={false}>
         <EuiBadge
+          onClick={() => onBadgeClick()}
+          onClickAriaLabel={i18n.translate(
+            'xpack.observability.slo.timeWindowBadge.clickToFilter',
+            {
+              defaultMessage: 'Click to filter by {timeWindow} SLOs',
+              values: { timeWindow: toDurationLabel(slo.timeWindow.duration) },
+            }
+          )}
           color={color ?? euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
           iconSide="left"
+          onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation(); // stops propagation of metric onElementClick
+          }}
         >
           {toDurationLabel(slo.timeWindow.duration)}
         </EuiBadge>
