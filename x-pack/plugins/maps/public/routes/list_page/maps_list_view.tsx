@@ -139,7 +139,9 @@ function MapsListViewComp({ history }: Props) {
         defaultMessage: 'maps',
       })}
       title={APP_NAME}
-      onClickTitle={({ id }) => history.push(getEditPath(id))}
+      getOnClickTitle={({ id }) =>
+        () =>
+          history.push(getEditPath(id))}
     />
   );
 }
