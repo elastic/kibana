@@ -61,8 +61,6 @@ export const getRequestWithStreamOption = (url: string, body: string, stream: bo
 export const transformApiUrlToRegex = (apiUrl: string): RegExp => {
   return new RegExp(
     apiUrl
-      .replaceAll(`/`, `\/`)
-      .replaceAll(`.`, `\.`)
       .replace(`{your-resource-name}`, `[^.]+`)
       .replace(`{deployment-id}`, `[^\/]+`)
       .replace(`?api-version={api-version}`, ``),
