@@ -7,29 +7,27 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink, EuiTitle } from '@elastic/eui';
+
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { SloOverviewDetails } from '../common/slo_overview_details';
-import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
-import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
 
+import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
 import { EmbeddableSloProps } from './types';
+import { SloOverviewDetails } from '../common/slo_overview_details'; // TODO change to slo_details
+import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
 
-export function SloOverview({
+export function SloErrorBudget({
   sloId,
   sloInstanceId,
   onRenderComplete,
   reloadSubject,
 }: EmbeddableSloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -41,6 +39,23 @@ export function SloOverview({
     };
   }, [reloadSubject]);
 
+  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+    useFetchHistoricalSummary({
+      list: [{ sloId: sloId!, instanceId: sloInstanceId ?? ALL_VALUE }],
+      shouldRefetch: false,
+    });
+
+  const sloHistoricalSummary = historicalSummaries.find(
+    (historicalSummary) =>
+      historicalSummary.sloId === sloId &&
+      historicalSummary.instanceId === (sloInstanceId ?? ALL_VALUE)
+  );
+
+  const errorBudgetBurnDownData = formatHistoricalData(
+    sloHistoricalSummary?.data,
+    'error_budget_remaining'
+  );
+
   const {
     isLoading,
     data: slo,
@@ -50,20 +65,6 @@ export function SloOverview({
     sloId,
     instanceId: sloInstanceId,
   });
-
-  const { data: rulesBySlo } = useFetchRulesForSlo({
-    sloIds: sloId ? [sloId] : [],
-  });
-
-  const { data: activeAlertsBySlo } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]] : [],
-  });
-
-  const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
-    list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
-  });
-
-  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
 
   useEffect(() => {
     refetch();
@@ -100,36 +101,51 @@ export function SloOverview({
       </LoadingContainer>
     );
   }
-
-  const rules = rulesBySlo?.[slo?.id];
-  const activeAlerts = activeAlertsBySlo.get(slo);
-
-  const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
-
-  const historicalSummary = historicalSummaries.find(
-    (histSummary) =>
-      histSummary.sloId === slo.id && histSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-  )?.data;
-
-  const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
-
+  const hasGroupBy = slo.instanceId !== ALL_VALUE;
   return (
-    <div ref={containerRef} style={{ width: '100%' }}>
-      <SloCardChart
-        slo={slo}
-        historicalSliData={historicalSliData ?? []}
-        onClick={() => {
-          setSelectedSlo(slo);
-        }}
-      />
-      <SloCardBadgesPortal containerRef={containerRef}>
-        <SloCardItemBadges
-          slo={slo}
-          rules={rules}
-          activeAlerts={activeAlerts}
-          hasGroupBy={hasGroupBy}
+    <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem>
+          {hasGroupBy ? (
+            <EuiTitle size="xs">
+              <h4>{slo.name}</h4>
+            </EuiTitle>
+          ) : (
+            <EuiLink
+              css={{ fontSize: '16px' }}
+              data-test-subj="o11ySloErrorBudgetLink"
+              onClick={() => {
+                setSelectedSlo(slo);
+              }}
+            >
+              <h4>{slo.name}</h4>
+            </EuiLink>
+          )}
+        </EuiFlexItem>
+
+        {hasGroupBy && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="o11ySloErrorBudgetLink"
+              onClick={() => {
+                setSelectedSlo(slo);
+              }}
+            >
+              {slo.groupBy}: {slo.instanceId}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <ErrorBudgetHeader showTitle={false} slo={slo} />
+        <ErrorBudgetChart
+          data={errorBudgetBurnDownData}
+          isLoading={historicalSummaryLoading}
+          slo={slo!}
         />
-      </SloCardBadgesPortal>
+      </EuiFlexGroup>
+
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </div>
   );
