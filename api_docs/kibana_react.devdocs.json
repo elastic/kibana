@@ -1515,15 +1515,15 @@
           },
           {
             "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
           },
           {
             "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
           },
           {
             "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
           },
           {
             "plugin": "painlessLab",

@@ -5356,7 +5356,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
   version "0.0.0"
   uid ""
 

@@ -696,7 +696,7 @@ Elastic.
 |This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_onboarding/README.md[observabilityOnboarding]
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
