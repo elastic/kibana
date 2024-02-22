@@ -8,16 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
-import { EuiWrappingPopover } from '@elastic/eui';
-
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ShareContextMenu } from '../components/share_context_menu';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
+import { ShareMenuTabs } from '../components/share_tabs';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -52,6 +49,8 @@ export class ShareMenuManager {
           urlService,
           anonymousAccess,
           theme: core.theme,
+          overlays: core.overlays,
+          i18n: core.i18n,
         });
       },
     };
@@ -82,12 +81,17 @@ export class ShareMenuManager {
     onClose,
     objectTypeTitle,
     disabledShareUrl,
+    overlays,
+    i18n,
   }: ShowShareMenuOptions & {
+    anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
     onClose: () => void;
+    overlays: OverlayStart;
+    i18n: CoreStart['i18n'];
   }) {
     if (this.isOpen) {
       onClose();
@@ -95,43 +99,80 @@ export class ShareMenuManager {
     }
 
     this.isOpen = true;
-
     document.body.appendChild(this.container);
-    const element = (
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <EuiWrappingPopover
-            id="sharePopover"
-            button={anchorElement}
-            isOpen={true}
-            closePopover={onClose}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <ShareContextMenu
-              allowEmbed={allowEmbed}
-              allowShortUrl={allowShortUrl}
-              objectId={objectId}
-              objectType={objectType}
-              objectTypeTitle={objectTypeTitle}
-              shareMenuItems={menuItems}
-              sharingData={sharingData}
-              shareableUrl={shareableUrl}
-              shareableUrlForSavedObject={shareableUrlForSavedObject}
-              shareableUrlLocatorParams={shareableUrlLocatorParams}
-              onClose={onClose}
-              embedUrlParamExtensions={embedUrlParamExtensions}
-              anonymousAccess={anonymousAccess}
-              showPublicUrlSwitch={showPublicUrlSwitch}
-              urlService={urlService}
-              snapshotShareWarning={snapshotShareWarning}
-              disabledShareUrl={disabledShareUrl}
-            />
-          </EuiWrappingPopover>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    );
-    ReactDOM.render(element, this.container);
+
+    //   const element = (
+    //     <I18nProvider>
+    //       <KibanaThemeProvider theme$={theme.theme$}>
+    //         <EuiWrappingPopover
+    //           id="sharePopover"
+    //           button={anchorElement}
+    //           isOpen={true}
+    //           closePopover={onClose}
+    //           panelPaddingSize="none"
+    //           anchorPosition="downLeft"
+    //         >
+    //           <ShareContextMenu
+    //             allowEmbed={allowEmbed}
+    //             allowShortUrl={allowShortUrl}
+    //             objectId={objectId}
+    //             objectType={objectType}
+    //             objectTypeTitle={objectTypeTitle}
+    //             shareMenuItems={menuItems}
+    //             sharingData={sharingData}
+    //             shareableUrl={shareableUrl}
+    //             shareableUrlForSavedObject={shareableUrlForSavedObject}
+    //             shareableUrlLocatorParams={shareableUrlLocatorParams}
+    //             onClose={onClose}
+    //             embedUrlParamExtensions={embedUrlParamExtensions}
+    //             anonymousAccess={anonymousAccess}
+    //             showPublicUrlSwitch={showPublicUrlSwitch}
+    //             urlService={urlService}
+    //             snapshotShareWarning={snapshotShareWarning}
+    //             disabledShareUrl={disabledShareUrl}
+    //           />
+    //         </EuiWrappingPopover>
+    //       </KibanaThemeProvider>
+    //     </I18nProvider>
+    //   );
+    //   ReactDOM.render(element, this.container);
+    // }
+
+    const openModal = () => {
+      const session = overlays.openModal(
+        toMountPoint(
+          <ShareMenuTabs
+            allowEmbed={allowEmbed}
+            allowShortUrl={allowShortUrl}
+            objectId={objectId}
+            objectType={objectType}
+            objectTypeTitle={objectTypeTitle}
+            shareMenuItems={menuItems}
+            sharingData={sharingData}
+            shareableUrl={shareableUrl}
+            shareableUrlForSavedObject={shareableUrlForSavedObject}
+            shareableUrlLocatorParams={shareableUrlLocatorParams}
+            onClose={() => {
+              onClose();
+              session.close();
+              !this.isOpen;
+            }}
+            embedUrlParamExtensions={embedUrlParamExtensions}
+            anonymousAccess={anonymousAccess}
+            showPublicUrlSwitch={showPublicUrlSwitch}
+            urlService={urlService}
+            snapshotShareWarning={snapshotShareWarning}
+            disabledShareUrl={disabledShareUrl}
+          />,
+          { i18n, theme }
+        ),
+        { 'data-test-subj': 'share-modal' }
+      );
+    };
+
+    // @ts-ignore
+    anchorElement.onclick!(openModal());
   }
 }
+
 export type ShareMenuManagerStart = ReturnType<ShareMenuManager['start']>;
