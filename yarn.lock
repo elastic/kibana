@@ -4628,7 +4628,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/exploratory-view-plugin@link:x-pack/plugins/exploratory_view":
+"@kbn/exploratory-view-plugin@link:x-pack/plugins/observability_solution/exploratory_view":
   version "0.0.0"
   uid ""
 
