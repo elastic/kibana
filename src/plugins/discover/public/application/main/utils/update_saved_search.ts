@@ -41,7 +41,9 @@ export function updateSavedSearch({
 }) {
   if (dataView && savedSearch.searchSource.getField('index')?.id !== dataView.id) {
     savedSearch.searchSource.setField('index', dataView);
-    savedSearch.usesAdHocDataView = !dataView.isPersisted();
+    if (!dataView.isPersisted()) {
+      savedSearch.usesAdHocDataView = true;
+    }
   }
   if (useFilterAndQueryServices) {
     savedSearch.searchSource
