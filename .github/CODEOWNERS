@@ -569,7 +569,7 @@ test/common/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
-x-pack/plugins/observability_ai_assistant @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-knowledge-team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
@@ -856,7 +856,7 @@ x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kib
 packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
-x-pack/plugins/ux @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/ux @elastic/obs-ux-infra_services-team
 examples/v8_profiler_examples @elastic/response-ops
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 src/plugins/vis_default_editor @elastic/kibana-visualizations

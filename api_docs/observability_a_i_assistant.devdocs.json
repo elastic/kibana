@@ -11,7 +11,7 @@
         "tags": [],
         "label": "Conversation",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +22,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -36,7 +36,7 @@
             "signature": [
               "{ id?: string | undefined; name: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,7 +50,7 @@
             "signature": [
               "{ id: string; title: string; last_updated: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,7 +85,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,7 +99,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +121,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -135,7 +135,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntry",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +146,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -157,7 +157,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -168,7 +168,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,7 +179,7 @@
             "tags": [],
             "label": "doc_id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,7 +193,7 @@
             "signature": [
               "\"medium\" | \"high\" | \"low\""
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -204,7 +204,7 @@
             "tags": [],
             "label": "is_correction",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -215,7 +215,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -229,7 +229,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -249,7 +249,7 @@
                 "text": "KnowledgeBaseEntryRole"
               }
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,7 +263,7 @@
         "tags": [],
         "label": "Message",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,7 +274,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,7 +320,7 @@
               },
               ".Elastic; } | undefined; data?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -334,7 +334,7 @@
         "tags": [],
         "label": "ObservabilityAIAssistantService",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -348,7 +348,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1376,7 +1376,7 @@
               "ObservabilityAIAssistantRouteCreateOptions",
               "; }, TEndpoint>>"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1454,7 +1454,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1474,7 +1474,7 @@
               "ILicense",
               ">"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1497,7 +1497,7 @@
                 "text": "SharePublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1515,7 +1515,7 @@
               "ObservabilityAIAssistantChatService",
               ">"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1526,7 +1526,7 @@
                 "tags": [],
                 "label": "{}",
                 "description": [],
-                "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1540,7 +1540,7 @@
                     "signature": [
                       "AbortSignal"
                     ],
-                    "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1561,7 +1561,7 @@
               "ChatRegistrationRenderFunction",
               ") => void"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1575,7 +1575,7 @@
                 "signature": [
                   "ChatRegistrationRenderFunction"
                 ],
-                "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1595,7 +1595,7 @@
               "ObservabilityAIAssistantScreenContext",
               ") => () => void"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1609,7 +1609,7 @@
                 "signature": [
                   "ObservabilityAIAssistantScreenContext"
                 ],
-                "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1629,7 +1629,7 @@
               "ObservabilityAIAssistantScreenContext",
               "[]"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1647,7 +1647,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntryRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1659,7 +1659,7 @@
         "tags": [],
         "label": "MessageRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2176,7 +2176,7 @@
           "ServerRouteCreateOptions",
           " ? TReturnType : never"
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2707,7 +2707,7 @@
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2722,7 +2722,7 @@
         "signature": [
           "\"POST /internal/observability_ai_assistant/chat\" | \"POST /internal/observability_ai_assistant/chat/complete\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"GET /internal/observability_ai_assistant/functions\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarize\" | \"POST /internal/observability_ai_assistant/kb/setup\" | \"GET /internal/observability_ai_assistant/kb/status\" | \"GET /internal/observability_ai_assistant/kb/entries\" | \"POST /internal/observability_ai_assistant/kb/entries/import\" | \"POST /internal/observability_ai_assistant/kb/entries/save\" | \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\""
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2736,7 +2736,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -2750,7 +2750,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2770,7 +2770,7 @@
               "text": "ObservabilityAIAssistantService"
             }
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2786,7 +2786,7 @@
             "InsightProps",
             "> | null"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2808,7 +2808,7 @@
             },
             ", \"key\" | \"css\" | \"analytics\"> & React.RefAttributes<{}>> | null"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2823,7 +2823,7 @@
             "() => ",
             "UseGenAIConnectorsResult"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -3348,7 +3348,7 @@
           "ObservabilityAIAssistantRouteCreateOptions",
           "; }"
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/server/routes/get_global_observability_ai_assistant_route_repository.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/routes/get_global_observability_ai_assistant_route_repository.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3362,7 +3362,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3378,7 +3378,7 @@
           "signature": [
             "ObservabilityAIAssistantService"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3393,7 +3393,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3409,7 +3409,7 @@
           "signature": [
             "ObservabilityAIAssistantService"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3429,7 +3429,7 @@
         "tags": [],
         "label": "Conversation",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3440,7 +3440,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3454,7 +3454,7 @@
             "signature": [
               "{ id?: string | undefined; name: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3468,7 +3468,7 @@
             "signature": [
               "{ id: string; title: string; last_updated: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3489,7 +3489,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3503,7 +3503,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3517,7 +3517,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3528,7 +3528,7 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3539,7 +3539,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3553,7 +3553,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntry",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3564,7 +3564,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3575,7 +3575,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3586,7 +3586,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3597,7 +3597,7 @@
             "tags": [],
             "label": "doc_id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3611,7 +3611,7 @@
             "signature": [
               "\"medium\" | \"high\" | \"low\""
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3622,7 +3622,7 @@
             "tags": [],
             "label": "is_correction",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3633,7 +3633,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3647,7 +3647,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3667,7 +3667,7 @@
                 "text": "KnowledgeBaseEntryRole"
               }
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3681,7 +3681,7 @@
         "tags": [],
         "label": "Message",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3692,7 +3692,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3738,7 +3738,7 @@
               },
               ".Elastic; } | undefined; data?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3754,7 +3754,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntryRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3766,7 +3766,7 @@
         "tags": [],
         "label": "MessageRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
