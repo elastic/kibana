@@ -33,18 +33,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.excludeExists', {
         defaultMessage: 'DOES NOT',
       }),
-    getInvalidSelectionWarningTitle: (invalidSelectionCount: number) =>
-      i18n.translate('controls.optionsList.control.invalidSelectionWarningTitle', {
+    getInvalidSelectionWarningLabel: (invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.control.invalidSelectionWarningLabel', {
         defaultMessage:
-          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results',
-        values: {
-          invalidSelectionCount,
-        },
-      }),
-    getInvalidSelectionWarningContent: (invalidSelectionCount: number) =>
-      i18n.translate('controls.optionsList.control.invalidSelectionWarningMessage', {
-        defaultMessage:
-          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results. Remove {invalidSelectionCount, plural, one {it} other {them}} for complete results.',
+          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results.',
         values: {
           invalidSelectionCount,
         },

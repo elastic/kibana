@@ -150,7 +150,7 @@ export const OptionsListControl = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={OptionsListStrings.control.getInvalidSelectionWarningContent(
+                content={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                   invalidSelections.length
                 )}
                 delay="long"
@@ -162,7 +162,7 @@ export const OptionsListControl = ({
                   color="euiColorVis5"
                   shape="square"
                   fill="dark"
-                  title={OptionsListStrings.control.getInvalidSelectionWarningTitle(
+                  title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.length
                   )}
                   css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge

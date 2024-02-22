@@ -11,34 +11,17 @@ import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
   invalidControlWarning: {
-    getTourTitle: (controlType: string) => {
-      switch (controlType) {
-        case RANGE_SLIDER_CONTROL: {
-          return i18n.translate(
-            'controls.controlGroup.invalidControlWarning.tourStepTitle.rangeSlider',
-            {
-              defaultMessage: 'Invalid range selections are no longer ignored',
-            }
-          );
-        }
-        default: {
-          return i18n.translate(
-            'controls.controlGroup.invalidControlWarning.tourStepTitle.default',
-            {
-              defaultMessage: 'Invalid selections are no longer ignored',
-            }
-          );
-        }
-      }
-    },
+    getTourTitle: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.tourStepTitle.default', {
+        defaultMessage: 'Invalid selections are no longer ignored',
+      }),
     getTourContent: (controlType: string) => {
       switch (controlType) {
         case RANGE_SLIDER_CONTROL: {
           return i18n.translate(
             'controls.controlGroup.invalidControlWarning.tourStepContent.rangeSlider',
             {
-              defaultMessage:
-                'The selected range is returning no results. For full results, change the selected range.',
+              defaultMessage: 'The selected range is returning no results. Try changing the range.',
             }
           );
         }
@@ -47,7 +30,7 @@ export const ControlGroupStrings = {
             'controls.controlGroup.invalidControlWarning.tourStepContent.default',
             {
               defaultMessage:
-                'Some selections are returning no results. For full results, change the selections.',
+                'Some selections are returning no results. For full results, try changing the selections.',
             }
           );
         }

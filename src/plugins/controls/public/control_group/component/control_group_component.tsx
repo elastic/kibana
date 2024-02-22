@@ -116,9 +116,7 @@ export const ControlGroup = () => {
             <EuiFlexItem grow={false}>
               <EuiIcon type="warning" color="warning" />
             </EuiFlexItem>
-            <EuiFlexItem>
-              {ControlGroupStrings.invalidControlWarning.getTourTitle(invalidControlType)}
-            </EuiFlexItem>
+            <EuiFlexItem>{ControlGroupStrings.invalidControlWarning.getTourTitle()}</EuiFlexItem>
           </EuiFlexGroup>
         }
         content={ControlGroupStrings.invalidControlWarning.getTourContent(invalidControlType)}

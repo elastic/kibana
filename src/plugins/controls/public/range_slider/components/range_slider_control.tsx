@@ -170,7 +170,7 @@ export const RangeSliderControl: FC = () => {
             <div className="rangeSlider__invalidToken">
               <EuiToolTip
                 position="top"
-                content={RangeSliderStrings.control.getInvalidSelectionWarningContent()}
+                content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 delay="long"
               >
                 <EuiToken
@@ -180,7 +180,7 @@ export const RangeSliderControl: FC = () => {
                   color="euiColorVis5"
                   shape="square"
                   fill="dark"
-                  title={RangeSliderStrings.control.getInvalidSelectionWarningTitle()}
+                  title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 />
               </EuiToolTip>
             </div>

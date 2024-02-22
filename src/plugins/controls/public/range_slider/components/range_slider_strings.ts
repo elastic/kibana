@@ -10,14 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
   control: {
-    getInvalidSelectionWarningTitle: () =>
-      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningTitle', {
-        defaultMessage: 'Selected range returns no results',
-      }),
-    getInvalidSelectionWarningContent: () =>
-      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningMessage', {
-        defaultMessage:
-          'Selected range returns no results. Select a different range for complete results.',
+    getInvalidSelectionWarningLabel: () =>
+      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {
+        defaultMessage: 'Selected range returns no results.',
       }),
   },
   editor: {
