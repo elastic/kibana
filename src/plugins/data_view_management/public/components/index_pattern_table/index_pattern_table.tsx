@@ -27,7 +27,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/common';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
