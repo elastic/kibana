@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { ServerlessRoleName } from '../support/roles';
 import { cleanupRule, loadRule } from './api_fixtures';
 import { closeDateTabIfVisible } from './integrations';
@@ -37,13 +38,28 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
     cy.visit(`/app/security/rules/id/${ruleId}/edit`);
     cy.getBySel('globalLoadingIndicator').should('not.exist');
 
-    // 2 calls are made to get the rule, so we need to wait for both since only on the second one the UI is updated
+    // 2 calls are made to get the rule, so we need to wait for both since only on the second one's success the UI is updated
     cy.wait('@getRule', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
     cy.wait('@getRule', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+
     closeDateTabIfVisible();
     cy.getBySel('edit-rule-actions-tab').click();
-    cy.contains('Response actions are run on each rule execution.');
-    cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
+
+    // In rare cases, the button is not clickable due to the page not being fully loaded
+    recurse(
+      () => {
+        cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
+        if (enabled) {
+          return cy.getBySel('response-actions-error').should(Cypress._.noop);
+        } else {
+          return cy.getBySel('alertActionAccordion').should(Cypress._.noop);
+        }
+      },
+      ($el) => $el.length === 1,
+      { limit: 5, delay: 2000 }
+    );
+
+    // At this point we should have the response actions available or not
     if (enabled) {
       cy.getBySel(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).click();
       cy.contains('Query is a required field');
