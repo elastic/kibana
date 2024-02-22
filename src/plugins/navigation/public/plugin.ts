@@ -70,8 +70,6 @@ export class NavigationPublicPlugin
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
 
-    this.addDefaultSolutionNavigation({ core, chrome, cloud });
-
     /*
      *
      *  This helps clients of navigation to create
@@ -98,6 +96,8 @@ export class NavigationPublicPlugin
     } = config;
 
     if (isSolutionNavigationFeatureOn) {
+      this.addDefaultSolutionNavigation({ core, chrome, cloud });
+
       core.settings.globalClient
         .get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
         .pipe(takeUntil(this.stop$), distinctUntilChanged())
