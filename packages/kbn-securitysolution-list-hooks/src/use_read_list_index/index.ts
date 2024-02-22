@@ -38,7 +38,7 @@ export const useReadListIndex = ({
       retry: false,
       refetchOnWindowFocus: false,
       enabled: isEnabled,
-      staleTime: 5 * 60 * 1000, // 5min
+      staleTime: Infinity
     }
   );
 
