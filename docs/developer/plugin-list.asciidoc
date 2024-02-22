@@ -848,7 +848,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/uptime/README.md[uptime]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
 

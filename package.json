@@ -833,7 +833,7 @@
     "@kbn/unified-search-plugin": "link:src/plugins/unified_search",
     "@kbn/unsaved-changes-badge": "link:packages/kbn-unsaved-changes-badge",
     "@kbn/upgrade-assistant-plugin": "link:x-pack/plugins/upgrade_assistant",
-    "@kbn/uptime-plugin": "link:x-pack/plugins/uptime",
+    "@kbn/uptime-plugin": "link:x-pack/plugins/observability_solution/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",

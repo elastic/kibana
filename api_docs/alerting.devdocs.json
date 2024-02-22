@@ -3377,19 +3377,19 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/common.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/common.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/tls.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/tls.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
               },
               {
                 "plugin": "ruleRegistry",

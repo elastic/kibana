@@ -6432,7 +6432,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/uptime":
+"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
   version "0.0.0"
   uid ""
 

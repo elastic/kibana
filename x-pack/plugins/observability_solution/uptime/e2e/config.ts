@@ -14,10 +14,10 @@ const SERVICE_USERNAME = 'xpack.uptime.service.username';
 
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../../test/common/config.js')
+    require.resolve('../../../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('../../../../test/functional/config.base.js')
   );
 
   const kibanaConfig = readKibanaConfig();
