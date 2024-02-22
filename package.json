@@ -739,6 +739,7 @@
     "@kbn/session-view-plugin": "link:x-pack/plugins/session_view",
     "@kbn/set-map": "link:packages/kbn-set-map",
     "@kbn/share-examples-plugin": "link:examples/share_examples",
+    "@kbn/share-modal": "link:packages/kbn-share-modal",
     "@kbn/share-plugin": "link:src/plugins/share",
     "@kbn/shared-svg": "link:packages/kbn-shared-svg",
     "@kbn/shared-ux-avatar-solution": "link:packages/shared-ux/avatar/solution",

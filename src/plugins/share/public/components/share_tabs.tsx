@@ -8,16 +8,13 @@
 
 import { Capabilities } from '@kbn/core-capabilities-common';
 import React from 'react';
-import { EuiModal } from '@elastic/eui';
+import { ShareModal } from '@kbn/share-modal';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
 import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
-
-export interface ModalTabActionHandler {
-  id: string;
-  dataTestSubj: string;
-  formattedMessageId: string;
-  defaultMessage: string;
-}
+import { LinkModal } from './link_modal';
+import { EmbedModal } from './embed_modal';
 
 export interface ShareContextTabProps {
   allowEmbed: boolean;
@@ -40,10 +37,74 @@ export interface ShareContextTabProps {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
-  isDirty: boolean;
-  isEmbedded: boolean;
 }
 
-export const ShareMenuTabs = ({ onClose }: ShareContextTabProps) => {
-  return <EuiModal onClose={onClose}>{'placeholder'}</EuiModal>;
+// this file is intended to replace share_context_menu
+export const ShareMenuTabs = ({
+  allowEmbed,
+  shareMenuItems,
+  urlService,
+  onClose,
+  objectType,
+  embedUrlParamExtensions,
+}: ShareContextTabProps) => {
+  const getTabs = () => {
+    const tabs = [];
+
+    tabs.push({
+      id: 'link',
+      name: i18n.translate('share.contextMenu.permalinksLabel', {
+        defaultMessage: 'Links',
+      }),
+      sortOrder: 0,
+      // do not break functional tests
+      'data-test-subj': 'Permalinks',
+      content: <LinkModal objectType={objectType} />,
+    });
+    if (allowEmbed) {
+      tabs.push({
+        id: 'embed',
+        name: i18n.translate('share.contextMenu.embedCodeLabel', {
+          defaultMessage: 'Embed',
+        }),
+        sortOrder: 1,
+        content: <EmbedModal urlParamExtensions={embedUrlParamExtensions} />,
+      });
+    }
+
+    shareMenuItems.map((item) => {
+      console.log(item);
+    });
+    return tabs;
+  };
+
+  const getModalBodyDescriptions = () => [
+    {
+      id: 'dashboard-link',
+      description: (
+        <FormattedMessage
+          id="share.dashboard.link.description"
+          defaultMessage="Share a direct link to this search."
+        />
+      ),
+    },
+    {
+      id: 'dashboard-embed',
+      description: (
+        <FormattedMessage
+          id="share.dashboard.embed.description"
+          defaultMessage="Embed this dashboard into another webpage. Select which menu items to include in the embeddable view."
+        />
+      ),
+    },
+  ];
+
+  return (
+    <ShareModal
+      objectType={objectType}
+      modalBodyDescriptions={getModalBodyDescriptions()}
+      onClose={onClose}
+      tabs={getTabs()}
+    />
+  );
 };
