@@ -25,7 +25,8 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('suggestions when data is loaded', { config: 'basic', archives: [] }, async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177538
+  registry.when.skip('suggestions when data is loaded', { config: 'basic', archives: [] }, async () => {
     before(async () => {
       await generateData({
         synthtraceEsClient,
