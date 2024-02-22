@@ -1737,11 +1737,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { status, number },
         description: 'Screen reader text describing the state of a tour step',
       }),
-    'euiTreeView.ariaLabel': ({ nodeLabel, ariaLabel }: EuiValues) =>
-      i18n.translate('core.euiTreeView.ariaLabel', {
-        defaultMessage: '{nodeLabel} child of {ariaLabel}',
-        values: { nodeLabel, ariaLabel },
-      }),
     'euiTreeView.listNavigationInstructions': i18n.translate(
       'core.euiTreeView.listNavigationInstructions',
       {
