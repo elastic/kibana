@@ -21,16 +21,10 @@ const mockSourceObj = {
   },
   labels: {
     team: 'test',
+    event: ['event-0', 'event-1'],
   },
   agent: {
     name: 'nodejs',
-  },
-};
-
-const mockSourceObj2 = {
-  ...mockSourceObj,
-  labels: {
-    team: ['test1', 'test2'],
   },
 };
 
@@ -42,14 +36,6 @@ const mockBucket = {
   },
 };
 
-const mockBucket2 = {
-  source_fields: {
-    hits: {
-      hits: [{ _source: mockSourceObj2 }],
-    },
-  },
-};
-
 describe('getSourceFields', () => {
   it('should return a flattened record of fields and values for a given bucket except for labels', () => {
     const result = getServiceGroupFields(mockBucket);
@@ -57,25 +43,11 @@ describe('getSourceFields', () => {
       Object {
         "agent.name": "nodejs",
         "labels": Object {
-          "team": "test",
-        },
-        "service.environment": "testing",
-        "service.language.name": "typescript",
-        "service.name": "testbeans",
-      }
-    `);
-  });
-
-  it('should not flatten labels', () => {
-    const result = getServiceGroupFields(mockBucket2);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "agent.name": "nodejs",
-        "labels": Object {
-          "team": Array [
-            "test1",
-            "test2",
+          "event": Array [
+            "event-0",
+            "event-1",
           ],
+          "team": "test",
         },
         "service.environment": "testing",
         "service.language.name": "typescript",
@@ -147,25 +119,11 @@ describe('flattenSourceDoc', () => {
       Object {
         "agent.name": "nodejs",
         "labels": Object {
-          "team": "test",
-        },
-        "service.environment": "testing",
-        "service.language.name": "typescript",
-        "service.name": "testbeans",
-      }
-    `);
-  });
-
-  it('should not flatten labels', () => {
-    const result = flattenSourceDoc(mockSourceObj2);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "agent.name": "nodejs",
-        "labels": Object {
-          "team": Array [
-            "test1",
-            "test2",
+          "event": Array [
+            "event-0",
+            "event-1",
           ],
+          "team": "test",
         },
         "service.environment": "testing",
         "service.language.name": "typescript",
