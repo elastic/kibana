@@ -35,7 +35,6 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const {
     services: {
       telemetry,
-      serverless,
       observabilityShared: {
         navigation: { PageTemplate },
       },
@@ -57,14 +56,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     [breadcrumbOptions, asset.name]
   );
 
-  useMetricsBreadcrumbs(breadcrumbs);
-  useEffect(() => {
-    if (serverless) {
-      // For deeper context breadcrumbs serveless provides its own breadcrumb service.
-      // docs.elastic.dev/kibana-dev-docs/serverless-project-navigation#breadcrumbs
-      serverless.setBreadcrumbs(breadcrumbs);
-    }
-  }, [serverless, breadcrumbs]);
+  useMetricsBreadcrumbs(breadcrumbs, { deeperContextServerless: true });
 
   useEffect(() => {
     if (trackOnlyOnce.current) {

@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
@@ -28,9 +27,6 @@ export const MetricDetailPage = () => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId, metricIndicesExist } = useSourceContext();
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
-  const {
-    services: { serverless },
-  } = useKibanaContextForPlugin();
 
   const {
     timeRange,
@@ -69,14 +65,8 @@ export const MetricDetailPage = () => {
     ],
     [breadcrumbOptions.link, breadcrumbOptions.text, name]
   );
-  useMetricsBreadcrumbs(breadcrumbs);
-  useEffect(() => {
-    if (serverless) {
-      // For deeper context breadcrumbs serveless provides its own breadcrumb service.
-      // docs.elastic.dev/kibana-dev-docs/serverless-project-navigation#breadcrumbs
-      serverless.setBreadcrumbs(breadcrumbs);
-    }
-  }, [serverless, breadcrumbs]);
+
+  useMetricsBreadcrumbs(breadcrumbs, { deeperContextServerless: true });
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
