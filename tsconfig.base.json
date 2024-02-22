@@ -1472,6 +1472,8 @@
       "@kbn/set-map/*": ["packages/kbn-set-map/*"],
       "@kbn/share-examples-plugin": ["examples/share_examples"],
       "@kbn/share-examples-plugin/*": ["examples/share_examples/*"],
+      "@kbn/share-modal": ["packages/kbn-share-modal"],
+      "@kbn/share-modal/*": ["packages/kbn-share-modal/*"],
       "@kbn/share-plugin": ["src/plugins/share"],
       "@kbn/share-plugin/*": ["src/plugins/share/*"],
       "@kbn/shared-svg": ["packages/kbn-shared-svg"],
