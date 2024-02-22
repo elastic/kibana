@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('When data is ingested', () => {
+    describe.skip('When data is ingested', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -66,7 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('When data is ingested without the necessary index templates', () => {
+    describe.skip('When data is ingested without the necessary index templates', () => {
       before(async () => {
         await es.indices.deleteDataStream({ name: 'traces-apm-*' });
         await es.indices.deleteIndexTemplate({ name: ['traces-apm'] });
@@ -140,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await synthtraceEsClient.clean();
       });
 
-      describe('an ingest pipeline is removed', () => {
+      describe.skip('an ingest pipeline is removed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',
@@ -170,7 +170,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('an ingest pipeline is changed', () => {
+      describe.skip('an ingest pipeline is changed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',

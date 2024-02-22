@@ -13,12 +13,10 @@ import {
   EuiListGroupItemProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { EuiListGroupProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (
@@ -62,24 +60,12 @@ export const Section = styled.div`
 `;
 
 export type SectionLinkProps = EuiListGroupItemProps;
-export function SectionLink({
-  showNewBadge,
-  ...props
-}: SectionLinkProps & { showNewBadge?: boolean }) {
+export function SectionLink({ ...props }: SectionLinkProps) {
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
         <EuiListGroupItem style={{ padding: 0 }} size={'xs'} {...props} />
       </EuiFlexItem>
-      {showNewBadge && (
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiBadge color="accent">
-            {i18n.translate('xpack.observabilityShared.sectionLink.newLabel', {
-              defaultMessage: 'New',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 }
