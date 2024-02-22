@@ -35,7 +35,7 @@ import {
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1nYDMcAYwAWJWlADEEOmHbiAbtQDWctJmx5CpCjXpMWbTt019B6UeKgJF1IRhJ0A2gAYAuq7eJQAB2qwyR1pvEAAPRAAWADYARnYATgBmAHYo+OSADniYlwBWGIAaEHJEZIAmDPYI+JcImJissuSXDIiAXzai9R4tYjIqOkZmVg4uDV4BYTEJSTYmDh8iDH5qBgBbdm7NAj7dQYMR43H0MymrG1ole3Qgz08QvwCbuhDwhCjKiNqY3OTE9LKEWqZSKJQQ5Vy7GS0Xq8Si0KBETKHS6JhwOx0A30wyMYx6fCI1FQEEgkgAqgAFZAAQQAKgBRAD6tOpACEADJMygAJQAkgy+dT7kgQI9Ai8RW9ctl2IkYpkMnL4oqIolQYgcnkEmVclEorkXPEykb4SiQFt0dp+nohoZRmiTuxCcTSbSAPIAcQ9nMZvIActTKLTeQA1Jk0lkAZXptMjwt8-nFwUliDSyXYaUSZUNSWVLnK6oQGRa7DKctyBuVcpciSiZotvUxNoOuIdBKJJIgkndXp9ADEyez2YyI9To7TGQGALL0uPuB6J57J0BvbOVeFRMvy3IRHcufWFzWQo26-WG41lPX1h0Y637HGjMBQBguiDIOynCzTKQyWhyWyqJsN5Wns2J2pwT4vp275CJ+lgSBcVwOM47jxqKi5BK8pQZJCyQxNmubpBEyTpIeTRxBkZQ6k0NapHWnTmsBuxYrahwks+r4wXB36zAw8zsIsyyrBsDa3qBrG4pBnEfpMX7nLY1y3Kh84imKS5Ye8UTsDEqrlC4LiAlkMTxPEZE4aWGTGS0yQ2Yk+7XscYksS2HD8EQ5DUPg6CSNGnJBpO9IAOojnSY4xmhamYSm4JxFRHzKmUOTRCkpnFIg-yQrq0TxF8dQxGkDk9E5zYPgI7med5lDsm60aMn27IAJpumStIRRhEorqUsWXlklFJVEKWHjpspVoqOVGkaeGFdsIHOaVbkeV5snwT+sjyJcKhqExTb3uBC0Vct36IXYyG0HcKkJk8UWdUWrTsAa8KpJZ+U2alYKJNE2q5JRmR1FE+aJNNlrMSVe3lUt5grbx-GCegKzrEBjmzaDhz7RDZwIQpp3nV4qntcuYSIBkfwZtCMQpNmOT-IWiVaYlLj5RkA2Klk9kMaJyO7aj4PoE6HaklVNVMvVTUtW1V0dYTCDxN991ZNCgJGsTTSHiWlkVv8Ro-ArMRA42d5gdzi280IhLYF2boUvSfp1Y1zWtRd6ESwTbx1BE7DFtKOUpLW+nkzTuRlNpNQ6fhm6ZKaZq0NQJLwCKHMg1zbALs7GkALTGh7upNCZyT5C0DOFmn+oJD8FRjTL-2UXrxVJ-axxx5dSYadmVTfL8-zlEC2RRIWuSJMeEStIl+S6j8Nec4brYN4dVgp830U0VCHw2fUSW9YWm6JLK5MqtWu7Iuz20GxJ9f4nzr7z+p0X5PE2kkfC+EU4ahbZOmdlexlaQyxPidT4+HFoIfivtdKWDRtK6WzAZIe2QTJDXyKWJIuo8KAmaDlX+O1-4QUAZALis8JAgMlq7LUNYZb4SyP3HCEQyKJHXN9dIJljI7gGhgk+LlsFQVwTJZ0nZCEu0iBkSoOp9TdzsruBmvc0oIHJlEd2WtoRoKpkPVh4l2Fo3QHwlu284q9XpslTIyQaZxHEfhVUMsmj-RYUfJGf9T5lWNvgqAmjor-UhLUL4hpfjFmIrkGmeoEi7nqHheoA0NwqLmmDBxPDIDOJuvUIeWdqgM1SB9SiNNMgZmqP8Sy+oPj6nCSjIw6j2Cm38DEvGqdop2XTDuOoJEXqqgHoeFI91AQDyrozJIh8OhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1nYDMcAYwAWJWlADEEOmHbiAbtQDWctJmx5CpCjXpMWbTt019B6UeKgJF1IRhJ0A2gAYAuq7eJQAB2qwyR1pvEAAPRAAWADYARnYATgBmAHYo+OSADniYlwBWGIAaEHJEZIAmDPYI+JcImJissuSXDIiAXzai9R4tYjIqOkZmVg4uDV4BYTEJSTYmDh8iDH5qBgBbdm7NAj7dQYMR43H0MymrG1ole3Qgz08QvwCbuhDwhCjKiNqY3OTE9LKEWqZSKJQQ5Vy7GS0Xq8Si0KBETKHS6JhwOx0A30wyMYx6fCI1FQEEgkgAqgAFZAAQQAKgBRAD6tOpACEADJMygAJQAkgy+dT7kgQI9Ai8RW9ctl2IkYpkMnL4oqIolQYgcnkEmVclEorkXPEykb4SiQFt0dp+nohoZRmiTuxCcTSbSAPIAcQ9nMZvIActTKLTeQA1Jk0lkAZXptMjwt8-nFwUliDSyXYaUSZUNSWVLnK6oQGRa7DKctyBuVcpciSiZotvUxNoOuIdBKJJIgkndXp9ADEyez2YyI9To7TGQGALL0uPuB6J57J0BvbOVeFRMvy3IRHcufWFzWQo26-WG41lPX1h0Y637HGjMBQBguiDIOynCzTKQyWhyWyqJsN5Wns2J2pwT4vp275CJ+lgSBcVwOM47jxqKi5BK8pQZJCyQxNmubpBEyTpIeTRxBkZQ6k0NapHWnTmsBuxYrahwks+r4wXB36zAw8zsIsyyrBsDa3qBrG4pBnEfpMX7nLY1y3Kh84imKS5Ye8UTsDEqrlC4LiAlkMTxPEZE4aWGTGS0yQ2Yk+7XscYksS2HD8EQ5DUPg6CSNGnJBpO9IAOojnSY4xmhamYSm4JxFRHzKmUOTRCkpnFIg-yQrq0TxF8dQxGkDk9E5zYPgI7med5lDsm60aMn27IAJpumStIRRhEorqUsWXlklFJVEKWHjpspVoqOVGkaeGFdsIHOaVbkeV5snwT+sjyJcKhqExTb3uBC0Vct36IXYyG0HcKkJk8UWdUWrTsAa8KpJZ+U2alYKJNE2q5JRmR1FE+aJNNlrMSVe3lUt5grbx-GCegKzrEBjmzaDhz7RDZwIQpp3nV4qntcuYSIBkfwZtCMQpNmOT-IWiVaYlLj5RkA2Klk9kMaJyO7aj4PoE6HaklVNVMvVTUtW1V0dYTCDxN991ZNCgJGsTTSHiWlkVv8Ro-ArMRA42d5gdzi2886nbklSdJMv6ka8h6AASsbMryM6Mty1J+h69Li0mGn4SkVQ-GWmSxJThRpQg9SQuT8rQi08J5BkevFVzRho7zQiEtgXZuhS9J+nVjXNa1F3oRLBNvHUETsMW0o5Sktb6eTNO5GU2k1Dp+GbsHyQdAxtDUCS8AihzIMpwwC5lxpAC0xrV7qTQmck+QtAzhZT-q1d2VmBkA9U+FJ5zhutscQ+XT70XZlU3y-P85RAtkUSFrkiTHjUSRZtCGSWci7PbQbEn2hPodKwE9z43RolCD4Nl6hJV6oWTciRZTkxVNWXcP9URI1HkfQB+I+avlAepaK+R4jaRIvCP2ek3qIGyOmOytcMppBlgfLBACIIcWgh+Ah10pYNG0rpbMBkIhGRMkNfIsoG4KjGkvdBjFME7WwWwqCkAuLAIkFwyWFctQ1hlvhLIz8cIRDIokdc310gmWMjuAazD5GsPYkot8MlTaQHUeXSIX9Sy6h3NUOyu4GaP3DuTKIVctbQmaNkGsQjrH-xcmVY2LiNJllLD1BK-UUjExpnEYEA1mhNHlqqKJ4kYlp1UVAeJ0V-qQlqF8Q0vxizEVyDTPUCRdz1DwvUAaG4ClzTBsbPBnYyk3XqEIue1QGapA+pRGmmQMzeOVPlXUTNchdJRqnHm7AM7+GcXjSe0U7Lpi8fKB+0JEgv0PP7FuqpdQtEZkkH+HQgA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -147,6 +147,9 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'closed',
                   actions: ['resetFlyoutOptions'],
                 },
+                UPDATE_INSIGHTS_TIME_RANGE: {
+                  actions: ['storeFlyoutOptions'],
+                },
               },
             },
             closed: {
@@ -238,6 +241,13 @@ export const createPureDatasetQualityControllerStateMachine = (
                 flyout: {
                   ...context.flyout,
                   dataset: event.dataset as FlyoutDataset,
+                },
+              }
+            : 'timeRange' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  insightsTimeRange: event.timeRange,
                 },
               }
             : {};
