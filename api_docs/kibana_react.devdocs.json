@@ -1659,15 +1659,15 @@
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "watcher",
@@ -3142,23 +3142,23 @@
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
           },
           {
             "plugin": "cloudLinks",

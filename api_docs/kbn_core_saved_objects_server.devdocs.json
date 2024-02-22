@@ -9860,7 +9860,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
               },
               {
                 "plugin": "dashboard",

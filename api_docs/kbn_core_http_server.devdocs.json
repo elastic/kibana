@@ -4359,7 +4359,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -6731,7 +6731,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -8119,7 +8119,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -9035,7 +9035,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -13509,7 +13509,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "controls",
@@ -13886,7 +13886,7 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
