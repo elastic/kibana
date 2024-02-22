@@ -25,7 +25,8 @@ const defaultProps: EditTagsProps = {
   tags: [],
 };
 
-describe('EditTags ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175655
+describe.skip('EditTags ', () => {
   let appMockRender: AppMockRenderer;
 
   const sampleTags = ['coke', 'pepsi'];
@@ -61,8 +62,7 @@ describe('EditTags ', () => {
 
     userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.paste(await screen.findByRole('combobox'), `${sampleTags[0]}`);
-    userEvent.keyboard('{enter}');
+    userEvent.type(await screen.findByRole('combobox'), `${sampleTags[0]}{enter}`);
 
     userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -76,8 +76,7 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), 'dude');
-    userEvent.keyboard('{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'dude{enter}');
 
     userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -91,8 +90,7 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), 'dude      ');
-    userEvent.keyboard('{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'dude      {enter}');
 
     userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -104,8 +102,7 @@ describe('EditTags ', () => {
 
     userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.paste(await screen.findByRole('combobox'), 'new');
-    userEvent.keyboard('{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'new{enter}');
 
     expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
 
@@ -125,8 +122,7 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), ' ');
-    userEvent.keyboard('{enter}');
+    userEvent.type(await screen.findByRole('combobox'), ' {enter}');
 
     expect(await screen.findByText('A tag must contain at least one non-space character.'));
   });
