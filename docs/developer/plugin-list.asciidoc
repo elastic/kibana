@@ -566,7 +566,7 @@ security and spaces filtering.
 activities.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/exploratory_view/README.md[exploratoryView]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/exploratory_view/README.md[exploratoryView]
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
@@ -712,11 +712,11 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
@@ -857,7 +857,7 @@ in their infrastructure.
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ux/readme.md[ux]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/ux/readme.md[ux]
 |https://docs.elastic.dev/kibana-dev-docs/welcome
 
 
