@@ -10,14 +10,16 @@
  *
  * Node.js is built upon an event loop and has definition of micro and macro tasks.
  *
- * Macro tasks are functions scheduled via setTimeout, setImmediate and etc to be executed in event loop.
- * Macro tasks scheduled in the current event loop cycle will be executed in the next cycle giving a chance to the other
- * macro tasks to be executed.
+ * Macro tasks are functions scheduled via setTimeout, setImmediate and etc to be
+ * executed in event loop. Macro tasks scheduled in the current event loop cycle
+ * will be executed in the next cycle giving a chance to the other macro tasks to
+ * be executed.
  *
- * Micro tasks are also functions by scheduled via a Promise. Micro tasks get added to a micro task queue which must be
- * depleted before event loop can move to the next cycle. It means that any microtask scheduled in the current event loop
- * cycle will be executed in the same cycle. Potentially it can lead to blocking the event loop for longer periods or even
- * infinitely.
+ * Micro tasks are also functions by scheduled via a Promise. Micro tasks get added
+ * to a micro task queue which must be depleted before event loop can move to
+ * the next cycle. It means that any microtask scheduled in the current event loop
+ * cycle will be executed in the same cycle. Potentially it can lead to blocking
+ * the event loop for longer periods or even infinitely.
  *
  * For more details check the following sources
  * - [MDN Microtask guide](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide)
