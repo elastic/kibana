@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Message } from './types';
+import { Conversation, type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -15,6 +15,7 @@ export enum StreamingChatResponseEventType {
   MessageAdd = 'messageAdd',
   ChatCompletionError = 'chatCompletionError',
   BufferFlush = 'bufferFlush',
+  TokenCount = 'tokenCount',
 }
 
 type StreamingChatResponseEventBase<
@@ -41,22 +42,14 @@ export type ChatCompletionChunkEvent = StreamingChatResponseEventBase<
 export type ConversationCreateEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ConversationCreate,
   {
-    conversation: {
-      id: string;
-      title: string;
-      last_updated: string;
-    };
+    conversation: Conversation['conversation'];
   }
 >;
 
 export type ConversationUpdateEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ConversationUpdate,
   {
-    conversation: {
-      id: string;
-      title: string;
-      last_updated: string;
-    };
+    conversation: Conversation['conversation'];
   }
 >;
 
@@ -81,6 +74,17 @@ export type BufferFlushEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.BufferFlush,
   {
     data?: string;
+  }
+>;
+
+export type TokenCountEvent = StreamingChatResponseEventBase<
+  StreamingChatResponseEventType.TokenCount,
+  {
+    tokens: {
+      completion: number;
+      prompt: number;
+      total: number;
+    };
   }
 >;
 

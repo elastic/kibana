@@ -11,7 +11,11 @@ import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
 
 export function registerVisualizeESQLFunction({
+<<<<<<< HEAD:x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/visualize_esql.ts
   functions,
+=======
+  registerFunction,
+>>>>>>> 2c844a8e0f7 (Add token count to stream):x-pack/plugins/observability_solution/observability_ai_assistant/server/functions/visualize_esql.ts
   resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(

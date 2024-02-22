@@ -337,6 +337,11 @@ describe('Observability AI Assistant client', () => {
               title: 'New conversation',
               id: expect.any(String),
               last_updated: expect.any(String),
+              token_count: {
+                completion: 2,
+                prompt: 174,
+                total: 176,
+              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -390,6 +395,11 @@ describe('Observability AI Assistant client', () => {
               title: 'An auto-generated title',
               id: expect.any(String),
               last_updated: expect.any(String),
+              token_count: {
+                completion: 8,
+                prompt: 395,
+                total: 403,
+              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -403,6 +413,11 @@ describe('Observability AI Assistant client', () => {
                 id: expect.any(String),
                 last_updated: expect.any(String),
                 title: 'An auto-generated title',
+                token_count: {
+                  completion: 8,
+                  prompt: 395,
+                  total: 403,
+                },
               },
               labels: {},
               numeric_labels: {},
@@ -525,6 +540,11 @@ describe('Observability AI Assistant client', () => {
           title: 'My stored conversation',
           id: expect.any(String),
           last_updated: expect.any(String),
+          token_count: {
+            completion: 2,
+            prompt: 174,
+            total: 176,
+          },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
       });
@@ -539,6 +559,11 @@ describe('Observability AI Assistant client', () => {
             id: expect.any(String),
             last_updated: expect.any(String),
             title: 'My stored conversation',
+            token_count: {
+              completion: 2,
+              prompt: 174,
+              total: 176,
+            },
           },
           labels: {},
           numeric_labels: {},
@@ -765,6 +790,7 @@ describe('Observability AI Assistant client', () => {
         expect(functionClientMock.executeFunction).toHaveBeenCalledWith({
           connectorId: 'foo',
           name: 'my-function',
+          chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
           messages: [
@@ -889,6 +915,11 @@ describe('Observability AI Assistant client', () => {
               id: expect.any(String),
               last_updated: expect.any(String),
               title: 'My predefined title',
+              token_count: {
+                completion: 24,
+                prompt: 698,
+                total: 722,
+              },
             },
           });
 
