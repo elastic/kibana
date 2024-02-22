@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
 
-import { Job, ReportingAPIClient } from '@kbn/reporting-public';
+import { Job, ReportingAPIClient, getPendingJobIds, setPendingJobIds } from '@kbn/reporting-public';
 import {
   getFailureToast,
   getGeneralErrorToast,
@@ -22,7 +22,6 @@ import {
   getWarningMaxSizeToast,
   getWarningToast,
 } from '../notifier';
-import { getPendingJobIds, setPendingJobIds } from '../notifier/job_completion_notifications';
 import { JobSummary, JobSummarySet } from '../types';
 
 /**
