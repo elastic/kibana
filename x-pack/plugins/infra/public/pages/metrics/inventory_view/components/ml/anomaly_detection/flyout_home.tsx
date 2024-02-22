@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
+import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,9 @@ import moment from 'moment';
 import { EuiTabs } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { css } from '@emotion/react';
+import { KibanaEnvironmentContext } from '../../../../../../hooks/use_kibana';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
@@ -51,6 +53,11 @@ export const FlyoutHome = (props: Props) => {
   } = useMetricK8sModuleContext();
   const { hasInfraMLCapabilities, hasInfraMLReadCapabilities, hasInfraMLSetupCapabilities } =
     useInfraMLCapabilitiesContext();
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
+  const { euiTheme } = useEuiTheme();
+
+  const INFRA_ML_FLYOUT_FEEDBACK_LINK =
+    'https://docs.google.com/forms/d/e/1FAIpQLSfBixH_1HTuqeMCy38iK9w1mB8vl_eVvcLUlSPAPiWKBHeHiQ/viewform';
 
   const createHosts = useCallback(() => {
     goToSetup('hosts');
@@ -95,33 +102,57 @@ export const FlyoutHome = (props: Props) => {
   } else {
     return (
       <>
-        <EuiFlyoutHeader>
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                defaultMessage="Machine Learning anomaly detection"
-                id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Machine Learning anomaly detection"
+                    id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                margin-right: ${euiTheme.size.l};
+              `}
+            >
+              <FeatureFeedbackButton
+                data-test-subj="infraMLFlyoutFeedbackLink"
+                formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+                kibanaVersion={kibanaVersion}
+                isCloudEnv={isCloudEnv}
+                isServerlessEnv={isServerlessEnv}
               />
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-
-        <EuiTabs>
-          <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
-            {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
-              defaultMessage: 'Jobs',
-            })}
-          </EuiTab>
-          <EuiTab
-            isSelected={tab === 'anomalies'}
-            onClick={() => setTab('anomalies')}
-            data-test-subj="anomalyFlyoutAnomaliesTab"
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiTabs
+            bottomBorder
+            css={css`
+              margin-bottom: calc(-1 * (${euiTheme.size.l} + 1px));
+            `}
+            size="s"
           >
-            {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
-              defaultMessage: 'Anomalies',
-            })}
-          </EuiTab>
-        </EuiTabs>
+            <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
+              {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
+                defaultMessage: 'Jobs',
+              })}
+            </EuiTab>
+            <EuiTab
+              isSelected={tab === 'anomalies'}
+              onClick={() => setTab('anomalies')}
+              data-test-subj="anomalyFlyoutAnomaliesTab"
+            >
+              {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
+                defaultMessage: 'Anomalies',
+              })}
+            </EuiTab>
+          </EuiTabs>
+        </EuiFlyoutHeader>
 
         <EuiFlyoutBody
           banner={
