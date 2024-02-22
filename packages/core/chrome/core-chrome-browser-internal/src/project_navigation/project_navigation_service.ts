@@ -182,8 +182,14 @@ export class ProjectNavigationService {
           )
         );
       },
+      /** In stateful Kibana, get the registered solution navigations */
+      getSolutionsNavDefinitions$: this.getSolutionsNavDefinitions$.bind(this),
+      /** In stateful Kibana, update the registered solution navigations */
       updateSolutionNavigations: this.updateSolutionNavigations.bind(this),
+      /** In stateful Kibana, change the active solution navigation */
       changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
+      /** In stateful Kibana, get the active solution navigation definition */
+      getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
     };
   }
 
@@ -307,6 +313,26 @@ export class ProjectNavigationService {
     this.activeSolutionNavDefinitionId$.next(id);
   }
 
+  private getSolutionsNavDefinitions$() {
+    return this.solutionNavDefinitions$.asObservable();
+  }
+
+  private getActiveSolutionNavDefinition$() {
+    return combineLatest([this.solutionNavDefinitions$, this.activeSolutionNavDefinitionId$]).pipe(
+      takeUntil(this.stop$),
+      map(([definitions, id]) => {
+        if (id === null) return null;
+        if (Object.keys(definitions).length === 0) return null;
+        if (!definitions[id]) {
+          throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
+        }
+        // We strip out the sideNavComponentGetter from the definition as it should only be used internally
+        const { sideNavComponentGetter, ...definition } = definitions[id];
+        return definition;
+      })
+    );
+  }
+
   private updateSolutionNavigations(
     solutionNavs: SolutionNavigationDefinitions,
     replace: boolean = false
@@ -325,9 +351,12 @@ export class ProjectNavigationService {
     SolutionNavigationDefinitions,
     string | null
   ]) {
-    this.setChromeStyle(id === null ? 'classic' : 'project');
+    if (Object.keys(definitions).length === 0) {
+      return; // no solution navs
+    }
 
     if (id === null) {
+      this.setChromeStyle('classic');
       localStorage.removeItem(SOLUTION_NAV_KEY);
       this.navigationTree$.next(undefined);
     } else {
@@ -336,6 +365,8 @@ export class ProjectNavigationService {
       if (!definition) {
         throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
       }
+
+      this.setChromeStyle('project');
       localStorage.setItem(SOLUTION_NAV_KEY, id);
       const { sideNavComponentGetter } = definition;
       if (sideNavComponentGetter) {

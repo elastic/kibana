@@ -374,11 +374,24 @@ export interface NavigationTreeDefinitionUI {
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
 
+/**
+ * @public
+ *
+ * Definition for a solution navigation in stateful Kibana.
+ *
+ * This definition is used to register a solution navigation in the Chrome service
+ * for the side navigation evolution to align with the Serverless UX.
+ */
+
 export interface SolutionNavigationDefinition {
+  /** Unique id for the solution navigation. */
   id: string;
+  /** Title for the solution navigation. */
   title: string;
+  /** Optional icon for the solution navigation. */
   icon?: IconType;
   sideNavComponentGetter?: () => SideNavComponent;
+  /** The page to navigate to when switching to this solution navigation. */
   homePage?: AppDeepLinkId;
 }
 
