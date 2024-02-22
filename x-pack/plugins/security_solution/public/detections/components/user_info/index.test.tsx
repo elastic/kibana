@@ -18,6 +18,12 @@ import { UserPrivilegesProvider } from '../../../common/components/user_privileg
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
 jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../common/hooks/use_selector', () => ({
+  useDeepEqualSelector: jest.fn().mockReturnValue({
+    signalIndexMappingOutdated: null,
+    signalIndexName: null,
+  }),
+}));
 
 describe('useUserInfo', () => {
   beforeAll(() => {
