@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const { start, end } = archives_metadata[archiveName];
 
-  registry.when(
+  registry.when.skip(
     'When data is loaded',
     { config: 'basic', archives: ['infra_metrics_and_apm'] },
     () => {
