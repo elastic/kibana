@@ -14,6 +14,8 @@ const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 const SANITIZED_PATH_PARAM = 'entry.1876422621';
 const ML_JOB_TYPE = 'entry.170406579';
 
+type NodeType = 'host' | 'pod';
+
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
     return 'Serverless (fully-managed projects)';
@@ -24,11 +26,11 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed (you manage)';
 };
 
-const getMLJobType = (mlJobType: 'host' | 'pod'): string | undefined => {
+const getMLJobType = (mlJobType: NodeType): string | undefined => {
   if (mlJobType === 'pod') {
-    return 'Pod+Anomalies';
+    return 'Pod Anomalies';
   }
-  return 'Host+Anomalies';
+  return 'Host Anomalies';
 };
 
 const getSurveyFeedbackURL = ({
@@ -89,7 +91,7 @@ interface FeatureFeedbackButtonProps {
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
   sanitizedPath?: string;
-  nodeType?: 'pod' | 'host';
+  nodeType?: NodeType;
   formConfig?: FormConfig;
 }
 
