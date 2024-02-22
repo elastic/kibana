@@ -196,8 +196,8 @@ exports[`GaugeComponent renders the chart 1`] = `
           "barBackground": "#343741",
           "border": "#EDF0F5",
           "colorBands": Array [
-            "#D9C6EF",
             "#AA87D1",
+            "#D9C6EF",
           ],
           "fallbackBandColor": "#98A2B3",
           "minHeight": 64,
@@ -536,7 +536,6 @@ exports[`GaugeComponent renders the chart 1`] = `
       />
     }
     onRenderChange={[Function]}
-    onResize={[Function]}
     theme={
       Array [
         Object {
