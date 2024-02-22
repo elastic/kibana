@@ -98,11 +98,6 @@ export class NavigationPublicPlugin
     if (isSolutionNavigationFeatureOn) {
       this.addDefaultSolutionNavigation({ core, chrome, cloud });
 
-      core.settings.globalClient
-        .get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
-        .pipe(takeUntil(this.stop$), distinctUntilChanged())
-        .subscribe((enabled) => {});
-
       combineLatest([
         core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
         core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
@@ -113,7 +108,7 @@ export class NavigationPublicPlugin
           if (!isSolutionNavigationFeatureOn || !enabled) {
             chrome.project.changeActiveSolutionNavigation(null);
           } else {
-            // Here check if the user has opt in or not....
+            // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
             const changeImmediately = status === 'visible';
             chrome.project.changeActiveSolutionNavigation(
               changeImmediately ? defaultSolution : null,

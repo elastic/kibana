@@ -19,7 +19,7 @@ export { TopNavMenu, TopNavMenuItems, TopNavMenuBadges } from './top_nav_menu';
 export type {
   NavigationPublicSetup as NavigationPublicPluginSetup,
   NavigationPublicStart as NavigationPublicPluginStart,
-  SolutionNavigationStatus,
+  SolutionNavigationOptInStatus,
   SolutionType,
 } from './types';
 

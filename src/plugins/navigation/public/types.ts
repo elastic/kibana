@@ -29,6 +29,7 @@ export interface NavigationPublicStart {
       customExtensions?: RegisteredTopNavMenuData[]
     ) => ReturnType<typeof createTopNav>;
   };
+  /** Add a solution navigation to the header nav switcher. */
   addSolutionNavigation: (solutionNavigation: SolutionNavigation) => void;
 }
 
@@ -41,15 +42,15 @@ export interface NavigationPublicStartDependencies {
   cloud?: CloudStart;
 }
 
-export type SolutionNavigationStatus = 'visible' | 'hidden' | 'ask';
+export type SolutionNavigationOptInStatus = 'visible' | 'hidden' | 'ask';
 
-export type SolutionType = 'ask' | 'es' | 'oblt' | 'security';
+export type SolutionType = 'es' | 'oblt' | 'security';
 
 export interface ConfigSchema {
   solutionNavigation: {
     featureOn: boolean;
     enabled: boolean;
-    status: SolutionNavigationStatus;
-    defaultSolution: SolutionType;
+    optInStatus: SolutionNavigationOptInStatus;
+    defaultSolution: SolutionType & 'ask';
   };
 }
