@@ -105,7 +105,7 @@ export class NavigationPublicPlugin
       ])
         .pipe(takeUntil(this.stop$), debounceTime(10))
         .subscribe(([enabled, status, defaultSolution]) => {
-          if (!isSolutionNavigationFeatureOn || !enabled) {
+          if (!enabled) {
             chrome.project.changeActiveSolutionNavigation(null);
           } else {
             // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
@@ -116,8 +116,6 @@ export class NavigationPublicPlugin
             );
           }
         });
-    } else {
-      chrome.project.changeActiveSolutionNavigation(null);
     }
 
     return {

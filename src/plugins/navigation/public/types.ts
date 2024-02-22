@@ -51,6 +51,6 @@ export interface ConfigSchema {
     featureOn: boolean;
     enabled: boolean;
     optInStatus: SolutionNavigationOptInStatus;
-    defaultSolution: SolutionType & 'ask';
+    defaultSolution: SolutionType | 'ask';
   };
 }
