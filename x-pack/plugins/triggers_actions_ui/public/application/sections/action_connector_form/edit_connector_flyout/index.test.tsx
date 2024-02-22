@@ -338,8 +338,8 @@ describe('EditConnectorFlyout', () => {
       expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
     });
 
-    it('does not show `beta` badge when `isBeta` is `false`', async () => {
-      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isBeta: false });
+    it('does not show `Technical Preview` badge when `isExperimental` is `false`', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
       const { queryByText } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -352,8 +352,8 @@ describe('EditConnectorFlyout', () => {
       expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
     });
 
-    it('shows `beta` badge when `isBeta` is `true`', async () => {
-      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isBeta: true });
+    it('shows `Technical Preview` badge when `isExperimental` is `true`', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
       const { getByText } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
