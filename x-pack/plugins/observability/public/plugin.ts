@@ -68,6 +68,7 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -494,10 +495,22 @@ export class Plugin
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
+        config,
+        core: coreStart,
+        isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        isServerless: !!pluginsStart.serverless,
+      }),
     };
   }
 }

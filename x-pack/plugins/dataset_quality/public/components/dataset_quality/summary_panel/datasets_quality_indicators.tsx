@@ -31,8 +31,10 @@ import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 import { InfoIndicators } from '../../common';
 
 export function DatasetsQualityIndicators() {
-  const { datasetsQuality, isDatasetsQualityLoading } = useSummaryPanelContext();
+  const { datasetsQuality, isDatasetsQualityLoading, datasetsActivity } = useSummaryPanelContext();
   const qualityCounts = mapPercentagesToQualityCounts(datasetsQuality.percentages);
+  const datasetsWithoutIgnoredField =
+    datasetsActivity.total > 0 ? datasetsActivity.total - datasetsQuality.percentages.length : 0;
 
   return (
     <EuiPanel hasBorder>
@@ -61,7 +63,7 @@ export function DatasetsQualityIndicators() {
           />
           <span css={verticalRule} />
           <QualityIndicator
-            value={qualityCounts.good}
+            value={qualityCounts.good + datasetsWithoutIgnoredField}
             quality="success"
             description={summaryPanelQualityGoodText}
             isLoading={isDatasetsQualityLoading}
