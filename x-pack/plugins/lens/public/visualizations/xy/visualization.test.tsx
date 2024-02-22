@@ -7,6 +7,7 @@
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
+import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 import {
   Operation,
   OperationDescriptor,
@@ -221,7 +222,24 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "colorMapping": undefined,
+              "colorMapping": Object {
+                "assignments": Array [],
+                "colorMode": Object {
+                  "type": "categorical",
+                },
+                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "type": "loop",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
               "layerId": "l1",
               "layerType": "data",
               "palette": undefined,

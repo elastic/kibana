@@ -18,12 +18,21 @@ export interface UseGetPreviewData {
   isError: boolean;
 }
 
-export function useGetPreviewData(
-  isValid: boolean,
-  indicator: Indicator,
-  range: { start: number; end: number },
-  objective?: Objective
-): UseGetPreviewData {
+export function useGetPreviewData({
+  isValid,
+  range,
+  indicator,
+  objective,
+  groupBy,
+  instanceId,
+}: {
+  isValid: boolean;
+  groupBy?: string;
+  instanceId?: string;
+  objective?: Objective;
+  indicator: Indicator;
+  range: { start: number; end: number };
+}): UseGetPreviewData {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
@@ -35,6 +44,8 @@ export function useGetPreviewData(
           body: JSON.stringify({
             indicator,
             range,
+            groupBy,
+            instanceId,
             ...(objective ? { objective } : null),
           }),
           signal,

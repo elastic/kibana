@@ -24,6 +24,7 @@ import {
   FILTER_BY_ASSIGNEES_BUTTON,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  ALERT_ASSIGNEES_SELECTABLE_OPTIONS,
 } from '../screens/alerts';
 import { PAGE_TITLE } from '../screens/common/page';
 import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES } from '../screens/expandable_flyout/alert_details_right_panel';
@@ -38,8 +39,8 @@ export const waitForAssigneesToPopulatePopover = () => {
     () => {
       cy.log('Waiting for assignees to appear in popover');
       return cy.root().then(($el) => {
-        const $updateButton = $el.find(ALERT_ASSIGNEES_UPDATE_BUTTON);
-        return !$updateButton.prop('disabled');
+        const $assigneesOptions = $el.find(ALERT_ASSIGNEES_SELECTABLE_OPTIONS);
+        return $assigneesOptions.length > 0;
       });
     },
     { interval: 500, timeout: 12000 }

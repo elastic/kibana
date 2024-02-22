@@ -1040,6 +1040,18 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
           },
           {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
+          },
+          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/application.tsx"
           },
@@ -1688,18 +1700,6 @@
             "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
             "plugin": "watcher",
             "path": "x-pack/plugins/watcher/public/application/shared_imports.ts"
           },
@@ -1726,6 +1726,18 @@
           {
             "plugin": "cloudDataMigration",
             "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
+          },
+          {
+            "plugin": "ux",
+            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
+          },
+          {
+            "plugin": "ux",
+            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
+          },
+          {
+            "plugin": "ux",
+            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
           },
           {
             "plugin": "triggersActionsUi",

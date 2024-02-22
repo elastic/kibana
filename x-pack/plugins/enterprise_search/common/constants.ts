@@ -227,6 +227,7 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
+  showAIPlayground: false,
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';

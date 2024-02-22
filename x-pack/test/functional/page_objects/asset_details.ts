@@ -43,6 +43,33 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async getAssetDetailsServicesWithIconsAndNames() {
+      await testSubjects.existOrFail('infraAssetDetailsServicesContainer');
+      const container = await testSubjects.find('infraAssetDetailsServicesContainer');
+      const serviceLinks = await container.findAllByCssSelector('[data-test-subj="serviceLink"]');
+
+      const servicesWithIconsAndNames = await Promise.all(
+        serviceLinks.map(async (link, index) => {
+          const icon = await link.findByTagName('img');
+          const iconSrc = await icon.getAttribute('src');
+          await testSubjects.existOrFail(`serviceNameText-service-${index}`);
+          const serviceElement = await link.findByCssSelector(
+            `[data-test-subj="serviceNameText-service-${index}"]`
+          );
+          const serviceName = await serviceElement.getVisibleText();
+          const serviceUrl = await link.getAttribute('href');
+
+          return {
+            serviceName,
+            serviceUrl,
+            iconSrc,
+          };
+        })
+      );
+
+      return servicesWithIconsAndNames;
+    },
+
     async getAssetDetailsKubernetesMetricsCharts() {
       const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
       return container.findAllByCssSelector(
@@ -84,6 +111,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
     async alertsSectionCollapsibleExist() {
       return await testSubjects.existOrFail('infraAssetDetailsAlertsCollapsible');
+    },
+    async servicesSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsServicesCollapsible');
     },
     async metricsSectionCollapsibleExist() {
       return await testSubjects.existOrFail('infraAssetDetailsMetricsCollapsible');

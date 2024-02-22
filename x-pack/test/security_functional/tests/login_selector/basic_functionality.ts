@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
+  const toasts = getService('toasts');
 
   describe('Basic functionality', function () {
     this.tags('includeFirefox');
@@ -154,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show toast with error if SSO fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('saml', 'unknown_saml');
 
-      const toastTitle = await PageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Could not perform login.');
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
@@ -163,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show toast with error if anonymous login fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('anonymous', 'anonymous1');
 
-      const toastTitle = await PageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Could not perform login.');
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();

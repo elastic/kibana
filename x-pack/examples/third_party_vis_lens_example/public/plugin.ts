@@ -7,7 +7,7 @@
 
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -90,7 +90,7 @@ export class EmbeddedLensExamplePlugin
     core.application.register({
       id: 'third_party_lens_vis_example',
       title: 'Third party Lens vis example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: ({ history }) => {
         (async () => {
           const [coreStart, { lens: lensStart, dataViews }] = await core.getStartServices();
