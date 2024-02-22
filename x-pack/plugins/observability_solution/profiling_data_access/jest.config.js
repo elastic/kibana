@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+const path = require('path');
+
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/profiling'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/profiling',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/profiling/{common,public,server}/**/*.{ts,tsx}'],
+  rootDir: path.resolve(__dirname, '../../../..'),
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/profiling_data_access'],
 };

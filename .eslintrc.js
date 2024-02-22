@@ -918,7 +918,7 @@ module.exports = {
         'x-pack/plugins/observability_shared/observability_ai_assistant/**/*.tsx',
         'x-pack/plugins/observability_onboarding/**/*.tsx',
         'x-pack/plugins/observability_shared/**/*.tsx',
-        'x-pack/plugins/profiling/**/*.tsx',
+        'x-pack/plugins/observability_solution/profiling/**/*.tsx',
         'x-pack/plugins/synthetics/**/*.tsx',
         'x-pack/plugins/observability_solution/ux/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
@@ -936,7 +936,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_onboarding/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/synthetics/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/ux/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
@@ -960,7 +960,7 @@ module.exports = {
     },
     // Profiling
     {
-      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/plugins/observability_solution/profiling/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': [
