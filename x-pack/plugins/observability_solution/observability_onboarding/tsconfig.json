@@ -1,10 +1,10 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
-    "../../../typings/**/*",
+    "../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "typings/**/*",
@@ -36,7 +36,5 @@
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-link-redirect-app"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

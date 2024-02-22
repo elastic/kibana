@@ -1,19 +1,10 @@
 {
-  "extends": "../../../../tsconfig.base.json",
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "tmp",
-    "target/**/*"
-  ],
+  "extends": "../../../../../tsconfig.base.json",
+  "include": ["**/*"],
+  "exclude": ["tmp", "target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "cypress",
-      "node",
-      "cypress-real-events"
-    ],
+    "types": ["cypress", "node", "cypress-real-events"],
     "isolatedModules": false
   },
   "kbn_references": [
@@ -21,6 +12,6 @@
     { "path": "../../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/dev-utils",
-    "@kbn/cypress-config",
+    "@kbn/cypress-config"
   ]
 }
