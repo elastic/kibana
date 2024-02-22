@@ -20,21 +20,30 @@ export const getFieldsListCreationOptions: UnifiedFieldListSidebarContainerProps
       showSidebarToggleButton: true,
       disablePopularFields: false,
       buttonAddFieldToWorkspaceProps: {
-        'aria-label': i18n.translate('timeline.fieldChooser.timelineField.addFieldTooltip', {
-          defaultMessage: 'Add field as column',
-        }),
+        'aria-label': i18n.translate(
+          'xpack.securitySolution.fieldChooser.timelineField.addFieldTooltip',
+          {
+            defaultMessage: 'Add field as column',
+          }
+        ),
       },
       buttonRemoveFieldFromWorkspaceProps: {
-        'aria-label': i18n.translate('timeline.fieldChooser.timelineField.removeFieldTooltip', {
-          defaultMessage: 'Remove field from table',
-        }),
+        'aria-label': i18n.translate(
+          'xpack.securitySolution.timeline.fieldChooser.timelineField.removeFieldTooltip',
+          {
+            defaultMessage: 'Remove field from table',
+          }
+        ),
       },
       onOverrideFieldGroupDetails: (groupName) => {
         if (groupName === FieldsGroupNames.AvailableFields) {
           return {
-            helpText: i18n.translate('timeline.fieldChooser.availableFieldsTooltip', {
-              defaultMessage: 'Fields available for display in the table.',
-            }),
+            helpText: i18n.translate(
+              'xpack.securitySolution.timeline.fieldChooser.availableFieldsTooltip',
+              {
+                defaultMessage: 'Fields available for display in the table.',
+              }
+            ),
           };
         }
       },
