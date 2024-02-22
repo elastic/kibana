@@ -108,7 +108,7 @@
     "@kbn/aiops-utils",
     "@kbn/event-annotation-common",
     "@kbn/controls-plugin",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*"

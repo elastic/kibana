@@ -94,7 +94,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
 
   const content = useMemo(
     () => (
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
