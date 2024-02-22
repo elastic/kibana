@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import type { DataViewFieldBase } from '@kbn/es-query';
@@ -254,7 +255,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
-              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
+              const indexPatterns = new IndexPatternsFetcher(esClient, true);
+
+              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
+              // console.log('inputIndex', inputIndex);
+              // console.log('existingIndices', existingIndices);
+              const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
 
               const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
                 await hasReadIndexPrivileges({
