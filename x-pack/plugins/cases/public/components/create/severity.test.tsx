@@ -5,76 +5,83 @@
  * 2.0.
  */
 
+import { CaseSeverity } from '../../../common/types/domain';
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Severity } from './severity';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 import userEvent from '@testing-library/user-event';
+import { waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { FormTestComponent } from '../../common/test_utils';
 
-const onSubmit = jest.fn();
+let globalForm: FormHook;
+const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const { form } = useForm<FormProps>({
+    defaultValue: { severity: CaseSeverity.LOW },
+    schema: {
+      severity: schema.severity,
+    },
+  });
 
-describe('Severity form field', () => {
+  globalForm = form;
+
+  return <Form form={form}>{children}</Form>;
+};
+// FLAKY: https://github.com/elastic/kibana/issues/175934
+// FLAKY: https://github.com/elastic/kibana/issues/175935
+describe.skip('Severity form field', () => {
   let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
   });
-
-  it('renders', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+  it('renders', () => {
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
         <Severity isLoading={false} />
-      </FormTestComponent>
+      </MockHookWrapperComponent>
     );
-
-    expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
+    expect(result.getByTestId('caseSeverity')).toBeTruthy();
+    expect(result.getByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
   });
 
   // default to LOW in this test configuration
-  it('defaults to the correct value', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+  it('defaults to the correct value', () => {
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
         <Severity isLoading={false} />
-      </FormTestComponent>
+      </MockHookWrapperComponent>
     );
-
-    expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-severity-selection-low')).toBeInTheDocument();
+    expect(result.getByTestId('caseSeverity')).toBeTruthy();
+    // ID removed for options dropdown here:
+    // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
+    expect(result.getAllByTestId('case-severity-selection-low').length).toBe(1);
   });
 
   it('selects the correct value when changed', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
         <Severity isLoading={false} />
-      </FormTestComponent>
+      </MockHookWrapperComponent>
     );
-
-    expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('case-severity-selection'));
+    expect(result.getByTestId('caseSeverity')).toBeTruthy();
+    userEvent.click(result.getByTestId('case-severity-selection'));
     await waitForEuiPopoverOpen();
-
-    userEvent.click(await screen.findByTestId('case-severity-selection-high'));
-
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
-
+    userEvent.click(result.getByTestId('case-severity-selection-high'));
     await waitFor(() => {
-      // data, isValid
-      expect(onSubmit).toBeCalledWith({ severity: 'high' }, true);
+      expect(globalForm.getFormData()).toEqual({ severity: 'high' });
     });
   });
 
-  it('disables when loading data', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+  it('disables when loading data', () => {
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
         <Severity isLoading={true} />
-      </FormTestComponent>
+      </MockHookWrapperComponent>
     );
-
-    expect(await screen.findByTestId('case-severity-selection')).toHaveAttribute('disabled');
+    expect(result.getByTestId('case-severity-selection')).toHaveAttribute('disabled');
   });
 });

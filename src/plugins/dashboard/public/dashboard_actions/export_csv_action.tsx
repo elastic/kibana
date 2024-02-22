@@ -17,7 +17,11 @@ import {
   HasInspectorAdapters,
   type Adapters,
 } from '@kbn/inspector-plugin/public';
-import { EmbeddableApiContext, PublishesPanelTitle } from '@kbn/presentation-publishing';
+import {
+  EmbeddableApiContext,
+  getPanelTitle,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
 
@@ -98,7 +102,7 @@ export class ExportCSVAction implements Action<ExportContext> {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
             const untitledFilename = dashboardExportCsvActionStrings.getUntitledFilename();
 
-            memo[`${embeddable.panelTitle?.value || untitledFilename}${postFix}.csv`] = {
+            memo[`${getPanelTitle(embeddable) || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
                 csvSeparator: this.uiSettings.get('csv:separator', ','),
                 quoteValues: this.uiSettings.get('csv:quoteValues', true),
