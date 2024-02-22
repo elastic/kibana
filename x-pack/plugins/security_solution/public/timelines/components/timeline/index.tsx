@@ -51,6 +51,7 @@ export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
+  openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
 const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
@@ -68,6 +69,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   renderCellValue,
   rowRenderers,
   timelineId,
+  openToggleRef,
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -235,7 +237,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
             $isVisible={!timelineFullScreen}
             data-test-subj="timeline-hide-show-container"
           >
-            <TimelineModalHeader timelineId={timelineId} />
+            <TimelineModalHeader timelineId={timelineId} openToggleRef={openToggleRef} />
           </HideShowContainer>
 
           <TabsContent
