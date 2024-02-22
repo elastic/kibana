@@ -153,6 +153,31 @@ describe('useLensAttributes', () => {
     ]);
   });
 
+  it('should not apply tabs and pages when applyPageAndTabsFilters = false', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'elastic',
+        pageName: 'user',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          applyPageAndTabsFilters: false,
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes().state.filters,
+      ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
+    ]);
+  });
+
   it('should add data view id to references', () => {
     const { result } = renderHook(
       () =>

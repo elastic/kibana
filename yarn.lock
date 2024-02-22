@@ -1658,10 +1658,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@63.1.0":
-  version "63.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-63.1.0.tgz#6348ffe01d6e77ddd150382b57515134f76293b3"
-  integrity sha512-UdzsErplc5z2cQxRY7N4kXZXRfb0pdDdsC7V4ag2WIlDiYDpygB3iThb83sG99E9KtOqIkHPE5nyDmWI6GwfOg==
+"@elastic/charts@64.0.0":
+  version "64.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-64.0.0.tgz#fd9bd6b3a1d123a7c44c3c5bab21e13f9f128021"
+  integrity sha512-qTsxlO4kgBxvK56ixWp406AIe0UTb1kfcbD/y8Nz/l5cE2u0JP/Cuajp5VziLKmY4NjHswPg9qjIHC87lG1hDw==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -1679,7 +1679,6 @@
     react-redux "^7.1.0"
     redux "^4.0.4"
     reselect "^4.0.0"
-    resize-observer-polyfill "^1.5.1"
     ts-debounce "^4.0.0"
     utility-types "^3.10.0"
     uuid "^9"
@@ -1744,10 +1743,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.0.0":
-  version "93.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.0.0.tgz#43ba256d94f3d3acddee23427c9fa5285a43d7e4"
-  integrity sha512-Q5gY9roWZsB1At0rxG5d9M5P7+J4hfv8fzvuqNHoVjIxbeibHRCSq2TtOQcSUjhKE5Tu/BIZijzuYX8vITGaSQ==
+"@elastic/eui@93.1.1":
+  version "93.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.1.1.tgz#03c9667456664978c3477abef52afd6aceb48ebf"
+  integrity sha512-YnmNST8PmgAyeahDFTUTpToiBAc6gOyK/RSSqx6NTxCmUCwXnV7Oog9TUHlQ8tYGLjfFXrAja6Msy0X2VuxHOA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -5333,7 +5332,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -5469,11 +5468,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/profiling_data_access":
+"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/profiling":
+"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
   version "0.0.0"
   uid ""
 
@@ -6481,7 +6480,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ux-plugin@link:x-pack/plugins/ux":
+"@kbn/ux-plugin@link:x-pack/plugins/observability_solution/ux":
   version "0.0.0"
   uid ""
 
@@ -27614,10 +27613,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.17.0:
-  version "4.17.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.17.0.tgz#f6c93a9df3e0543df7dc2329d81968af42845a7f"
-  integrity sha512-e2E+2XBlGepzwgFbyQfSwo9Cbj6G5fFfs9MzAS00nC99EewmcS2rwn2MwtgfP7I5p1e7DYv4HQJXtWedsu6DvA==
+selenium-webdriver@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.18.1.tgz#bcd19048b4aba5411edb7b5266d9390578fc7fed"
+  integrity sha512-uP4OJ5wR4+VjdTi5oi/k8oieV2fIhVdVuaOPrklKghgS59w7Zz3nGa5gcG73VcU9EBRv5IZEBRhPr7qFJAj5mQ==
   dependencies:
     jszip "^3.10.1"
     tmp "^0.2.1"
