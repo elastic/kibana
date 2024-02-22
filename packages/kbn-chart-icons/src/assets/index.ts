@@ -40,4 +40,7 @@ export { IconRegionMap } from './region_map';
 export { IconChartHeatmap } from './chart_heatmap';
 export { IconChartHorizontalBullet } from './chart_horizontal_bullet';
 export { IconChartVerticalBullet } from './chart_vertical_bullet';
+export { IconChartGaugeHalfCircle } from './chart_gauge_half_circle';
+export { IconChartGaugeTwoThirdsCircle } from './chart_gauge_two_thirds_circle';
+export { IconChartGaugeCircle } from './chart_gauge_circle';
 export { IconChartTagcloud } from './chart_tagcloud';
