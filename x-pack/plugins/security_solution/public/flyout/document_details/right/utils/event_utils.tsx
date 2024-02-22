@@ -14,21 +14,7 @@ export interface AllowedValue {
   name?: string;
 }
 
-export interface EcsMetadata {
-  allowed_values?: AllowedValue[];
-  dashed_name?: string;
-  description?: string;
-  example?: string;
-  flat_name?: string;
-  format?: string;
-  ignore_above?: number;
-  level?: string;
-  name?: string;
-  normalize?: string[];
-  required?: boolean;
-  short?: string;
-  type?: string;
-}
+type FieldName = 'event.kind' | 'event.category';
 
 /**
  * Helper function to return if the value is in the allowed value list of an ecs field
@@ -36,12 +22,14 @@ export interface EcsMetadata {
  * @param value
  * @returns boolean if value is an allowed value
  */
-export const isEcsAllowedValue = (fieldName: string, value: string | undefined | null): boolean => {
+export const isEcsAllowedValue = (
+  fieldName: FieldName,
+  value: string | undefined | null
+): boolean => {
   if (!value || value == null) {
     return false;
   }
-  const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;
-  const allowedValues: AllowedValue[] | undefined = ecsMetadata[fieldName]?.allowed_values;
+  const allowedValues: AllowedValue[] = EcsFlat[fieldName]?.allowed_values ?? [];
   return Boolean(allowedValues?.find((item) => item.name === value));
 };
 
@@ -51,11 +39,10 @@ export const isEcsAllowedValue = (fieldName: string, value: string | undefined |
  * @param value
  * @returns ecs description of the value
  */
-export const getEcsAllowedValueDescription = (fieldName: string, value: string): string => {
-  const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;
-  const eventKindArray: AllowedValue[] | undefined = ecsMetadata[fieldName]?.allowed_values;
+export const getEcsAllowedValueDescription = (fieldName: FieldName, value: string): string => {
+  const allowedValues: AllowedValue[] = EcsFlat[fieldName]?.allowed_values ?? [];
   return (
-    eventKindArray?.find((item) => item.name === value)?.description ??
+    allowedValues?.find((item) => item.name === value)?.description ??
     i18n.translate('xpack.securitySolution.flyout.right.about.noEventKindDescriptionMessage', {
       defaultMessage: 'This field is not an ecs field, description is not available.',
     })

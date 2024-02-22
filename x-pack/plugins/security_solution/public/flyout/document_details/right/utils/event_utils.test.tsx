@@ -11,7 +11,6 @@ describe('test isEcsAllowedValue', () => {
     expect(isEcsAllowedValue('event.kind', 'event')).toBe(true);
     expect(isEcsAllowedValue('event.kind', 'not ecs')).toBe(false);
     expect(isEcsAllowedValue('event.category', 'not ecs')).toBe(false);
-    expect(isEcsAllowedValue('not ecs field', 'file')).toBe(false);
   });
 });
 
