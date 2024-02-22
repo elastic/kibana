@@ -100,7 +100,7 @@ export function useFetchAgentsData() {
   >();
   const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
-  const [shownAgents, setShownAgents] = useState(0);
+  const [nAgentsInTable, setNAgentsInTable] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
@@ -199,7 +199,7 @@ export function useFetchAgentsData() {
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
-          setShownAgents(agentsResponse.data.total);
+          setNAgentsInTable(agentsResponse.data.total);
           setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
 
           const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
@@ -289,7 +289,7 @@ export function useFetchAgentsData() {
     agentsOnCurrentPage,
     agentsStatus,
     isLoading,
-    shownAgents,
+    nAgentsInTable,
     totalInactiveAgents,
     totalManagedAgentIds,
     managedAgentsOnCurrentPage,

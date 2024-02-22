@@ -46,7 +46,7 @@ export interface SearchAndFilterBarProps {
   tags: string[];
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
-  shownAgents: number;
+  nAgentsInTable: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
@@ -55,7 +55,7 @@ export interface SearchAndFilterBarProps {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
 }
@@ -74,7 +74,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   tags,
   selectedTags,
   onSelectedTagsChange,
-  shownAgents,
+  nAgentsInTable,
   totalInactiveAgents,
   totalManagedAgentIds,
   selectionMode,
@@ -83,7 +83,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   refreshAgents,
   onClickAddAgent,
   onClickAddFleetServer,
-  visibleAgents,
+  agentsOnCurrentPage,
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
@@ -194,15 +194,15 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
               </EuiFilterGroup>
             </EuiFlexItem>
             {(selectionMode === 'manual' && selectedAgents.length) ||
-            (selectionMode === 'query' && shownAgents > 0) ? (
+            (selectionMode === 'query' && nAgentsInTable > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
-                  shownAgents={shownAgents}
+                  nAgentsInTable={nAgentsInTable}
                   totalManagedAgentIds={totalManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}
-                  visibleAgents={visibleAgents}
+                  agentsOnCurrentPage={agentsOnCurrentPage}
                   refreshAgents={refreshAgents}
                   allTags={tags}
                   agentPolicies={agentPolicies}

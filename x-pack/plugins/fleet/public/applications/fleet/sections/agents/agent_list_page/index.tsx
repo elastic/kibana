@@ -54,7 +54,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     agentsOnCurrentPage,
     agentsStatus,
     isLoading,
-    shownAgents,
+    nAgentsInTable,
     totalInactiveAgents,
     totalManagedAgentIds,
     managedAgentsOnCurrentPage,
@@ -396,7 +396,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         tags={allTags ?? []}
         selectedTags={selectedTags}
         onSelectedTagsChange={setSelectedTags}
-        shownAgents={shownAgents}
+        nAgentsInTable={nAgentsInTable}
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
         selectionMode={selectionMode}
@@ -405,7 +405,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
-        visibleAgents={agentsOnCurrentPage}
+        agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
       />
@@ -413,7 +413,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
-        totalAgents={shownAgents}
+        totalAgents={nAgentsInTable}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}
         managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}
@@ -442,7 +442,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
         pagination={pagination}
-        totalAgents={Math.min(shownAgents, SO_SEARCH_LIMIT)}
+        totalAgents={Math.min(nAgentsInTable, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}

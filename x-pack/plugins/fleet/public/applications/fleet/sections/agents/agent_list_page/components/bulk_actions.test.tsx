@@ -34,7 +34,7 @@ const defaultProps = {
   selectionMode: 'manual',
   currentQuery: '',
   selectedAgents: [],
-  visibleAgents: [],
+  agentsOnCurrentPage: [],
   refreshAgents: () => undefined,
   allTags: [],
   agentPolicies: [],

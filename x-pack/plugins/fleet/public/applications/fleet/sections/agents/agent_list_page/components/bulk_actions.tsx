@@ -35,24 +35,24 @@ import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
-  shownAgents: number;
+  nAgentsInTable: number;
   totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
-  shownAgents,
+  nAgentsInTable,
   totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
-  visibleAgents,
+  agentsOnCurrentPage,
   refreshAgents,
   allTags,
   agentPolicies,
@@ -91,7 +91,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
   const agentCount =
-    selectionMode === 'manual' ? selectedAgents.length : shownAgents - totalManagedAgentIds?.length;
+    selectionMode === 'manual'
+      ? selectedAgents.length
+      : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
@@ -225,8 +227,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   ];
 
   const getSelectedTagsFromAgents = useMemo(
-    () => getCommonTags(agents, visibleAgents ?? [], agentPolicies),
-    [agents, visibleAgents, agentPolicies]
+    () => getCommonTags(agents, agentsOnCurrentPage ?? [], agentPolicies),
+    [agents, agentsOnCurrentPage, agentPolicies]
   );
 
   return (
