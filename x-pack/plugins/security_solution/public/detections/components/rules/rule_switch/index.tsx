@@ -7,13 +7,14 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { ruleSwitchAriaLabel } from './translations';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -31,6 +32,7 @@ export interface RuleSwitchProps {
   isLoading?: boolean;
   startMlJobsIfNeeded?: () => Promise<void>;
   onChange?: (enabled: boolean) => void;
+  ruleName?: string;
 }
 
 /**
@@ -43,8 +45,10 @@ export const RuleSwitchComponent = ({
   enabled,
   startMlJobsIfNeeded,
   onChange,
+  ruleName,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
+  const [arialLabel, setAriaLabel] = useState<string | undefined>();
   const rulesTableContext = useRulesTableContextOptional();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: !rulesTableContext });
@@ -72,6 +76,10 @@ export const RuleSwitchComponent = ({
     [enabled, executeBulkAction, id, onChange, startMlJobsIfNeeded, startTransaction]
   );
 
+  useEffect(() => {
+    setAriaLabel(ruleName ? ruleSwitchAriaLabel(ruleName, enabled) : undefined);
+  }, [enabled, ruleName]);
+
   const showLoader = useMemo((): boolean => {
     if (myIsLoading !== isLoading) {
       return isLoading || myIsLoading;
@@ -93,6 +101,7 @@ export const RuleSwitchComponent = ({
             disabled={isDisabled}
             checked={enabled}
             onChange={onRuleStateChange}
+            aria-label={arialLabel}
           />
         )}
       </EuiFlexItem>
