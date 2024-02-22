@@ -35,6 +35,11 @@ import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics } from './metrics';
 
+interface EventEmitter<T> {
+  on(eventName: string, handler: (t: T, ...args: any[]) => any): void;
+  off(eventName: string, handler: (t: T, ...args: any[]) => any): void;
+}
+
 interface CreatePageOptions {
   browserTimezone?: string;
   defaultViewport: { width?: number; deviceScaleFactor?: number };
@@ -312,7 +317,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page as any, 'console').pipe(
+    const consoleMessages$ = Rx.fromEvent(page as EventEmitter<ConsoleMessage>, 'console').pipe(
       concatMap(async (line) => {
         if (line.type() === 'error') {
           logger
@@ -335,7 +340,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page as any, 'pageerror').pipe(
+    const uncaughtExceptionPageError$ = Rx.fromEvent(page as EventEmitter<Error>, 'pageerror').pipe(
       map((err) => {
         logger.warn(
           `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
@@ -343,7 +348,10 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<HTTPRequest>(page as any, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent(
+      page as EventEmitter<HTTPRequest>,
+      'requestfailed'
+    ).pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -378,7 +386,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
-    const pageError$ = Rx.fromEvent<Error>(page as any, 'error').pipe(
+    const pageError$ = Rx.fromEvent(page as EventEmitter<Error>, 'error').pipe(
       map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
     );
 
