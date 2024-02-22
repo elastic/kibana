@@ -120,7 +120,6 @@ export class NavigationPublicPlugin
               { onlyIfNotSet: true }
             );
           }
-          console.log({ enabled, status, defaultSolution });
         });
     } else {
       chrome.project.changeActiveSolutionNavigation(null);

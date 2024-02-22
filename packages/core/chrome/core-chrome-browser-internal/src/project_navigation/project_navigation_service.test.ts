@@ -68,6 +68,7 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
+    updateChromeStyle: jest.fn(),
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$ };
