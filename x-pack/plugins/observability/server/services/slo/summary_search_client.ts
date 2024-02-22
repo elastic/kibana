@@ -7,30 +7,15 @@
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALL_VALUE, Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
+import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { SLO, SLOId, Status, Summary } from '../../domain/models';
+import { SLO, SLOId, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
-import { isLeft } from 'fp-ts/lib/Either';
-
-interface EsSummaryDocument {
-  slo: {
-    id: string;
-    revision: number;
-    instanceId: string;
-  };
-  sliValue: number;
-  errorBudgetConsumed: number;
-  errorBudgetRemaining: number;
-  errorBudgetInitial: number;
-  errorBudgetEstimated: boolean;
-  statusCode: number;
-  status: Status;
-  isTempDoc: boolean;
-}
+import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
 
 export interface SLOSummary {
   id: SLOId;
@@ -143,28 +128,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           const unsafeIsRemote = doc._index.includes('remote_cluster:');
           let unsafeSlo = undefined;
           if (unsafeIsRemote) {
-            const res = sloSchema.decode({
-              ...doc._source!.slo,
-              indicator: {
-                type: 'sli.kql.custom',
-                params: {
-                  index: 'foo',
-                  good: 'good',
-                  total: 'total',
-                  timestampField: '@timestamp',
-                },
-              },
-              settings: { syncDelay: '1m', frequency: '1m' },
-              enabled: true,
-              createdAt: '2024-01-01T00:00:00.000Z',
-              updatedAt: '2024-01-01T00:00:00.000Z',
-              version: 2,
-            });
-
-            if (isLeft(res)) {
+            unsafeSlo = fromSummaryDocumentToSlo(doc._source!);
+            if (unsafeSlo === undefined) {
               this.logger.error(`Invalid remote stored SLO with id [${doc._source!.slo.id}]`);
-            } else {
-              unsafeSlo = res.right;
             }
           }
 

@@ -5,10 +5,54 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO } from '../../../../domain/models';
+import {
+  ALL_VALUE,
+  BudgetingMethod,
+  IndicatorType,
+  Objective,
+  timeWindowSchema,
+} from '@kbn/slo-schema';
+import * as t from 'io-ts';
+import { SLO, Status } from '../../../../domain/models';
 
-export function createTempSummaryDocument(slo: SLO, spaceId: string) {
+export type EsSummaryDocument = {
+  service: {
+    environment: string | null;
+    name: string | null;
+  };
+  transaction: {
+    name: string | null;
+    type: string | null;
+  };
+  slo: {
+    indicator: {
+      type: IndicatorType;
+    };
+    timeWindow: t.OutputOf<typeof timeWindowSchema>;
+    groupBy: string;
+    instanceId: string;
+    name: string;
+    description: string;
+    id: string;
+    budgetingMethod: BudgetingMethod;
+    revision: number;
+    objective: Objective;
+    tags: string[];
+  };
+  goodEvents: number;
+  totalEvents: number;
+  errorBudgetEstimated: boolean;
+  errorBudgetRemaining: number;
+  errorBudgetConsumed: number;
+  errorBudgetInitial: number;
+  sliValue: number;
+  statusCode: number;
+  status: Status;
+  isTempDoc: boolean;
+  spaceId: string;
+};
+
+export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryDocument {
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
 
   return {
@@ -37,8 +81,8 @@ export function createTempSummaryDocument(slo: SLO, spaceId: string) {
       revision: slo.revision,
       objective: {
         target: slo.objective.target,
-        timesliceTarget: slo.objective.timesliceTarget ?? null,
-        timesliceWindow: slo.objective.timesliceWindow?.format() ?? null,
+        timesliceTarget: slo.objective.timesliceTarget ?? undefined,
+        timesliceWindow: slo.objective.timesliceWindow?.format() ?? undefined,
       },
       tags: slo.tags,
     },

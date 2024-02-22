@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '@kbn/observability-plugin/common/slo/constants';
 import {
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
@@ -16,13 +17,15 @@ import { SLORepository } from './slo_repository';
 export class FetchHistoricalSummary {
   constructor(
     private repository: SLORepository,
-    private historicalSummaryClient: HistoricalSummaryClient
+    private historicalSummaryClient: HistoricalSummaryClient,
+    private esClient: ElasticsearchClient
   ) {}
 
   public async execute(
     params: FetchHistoricalSummaryParams
   ): Promise<FetchHistoricalSummaryResponse> {
     const sloIds = params.list.map((slo) => slo.sloId);
+
     const sloList = await this.repository.findAllByIds(sloIds);
 
     const list: SLOWithInstanceId[] = params.list

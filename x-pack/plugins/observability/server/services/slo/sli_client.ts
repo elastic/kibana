@@ -65,7 +65,7 @@ export class DefaultSLIClient implements SLIClient {
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
-        index: SLO_DESTINATION_INDEX_PATTERN,
+        index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
         aggs: toLookbackWindowsAggregationsQuery(
           longestDateRange.to,
           sortedLookbackWindows,
@@ -79,7 +79,7 @@ export class DefaultSLIClient implements SLIClient {
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
-        index: SLO_DESTINATION_INDEX_PATTERN,
+        index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
         aggs: toLookbackWindowsSlicedAggregationsQuery(
           longestDateRange.to,
           sortedLookbackWindows,

@@ -35,7 +35,7 @@ export class DefaultSummaryClient implements SummaryClient {
       isDefinedWithGroupBy && hasInstanceId ? [{ term: { 'slo.instanceId': instanceId } }] : [];
 
     const result = await this.esClient.search({
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
       size: 0,
       query: {
         bool: {

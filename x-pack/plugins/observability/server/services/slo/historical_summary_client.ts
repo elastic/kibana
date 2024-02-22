@@ -69,7 +69,7 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
     }, {});
 
     const searches = list.flatMap(({ sloId, instanceId, slo }) => [
-      { index: SLO_DESTINATION_INDEX_PATTERN },
+      { index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}` },
       generateSearchQuery(slo, instanceId, dateRangeBySlo[sloId]),
     ]);
 

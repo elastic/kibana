@@ -8,10 +8,13 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { Duration } from '../../domain/models';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '@kbn/observability-plugin/common/slo/constants';
+import { Duration, SLO } from '../../domain/models';
 import { computeBurnRate, computeSLI } from '../../domain/services';
 import { DefaultSLIClient } from './sli_client';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
 
 interface Services {
   soClient: SavedObjectsClientContract;
@@ -34,13 +37,38 @@ export async function getBurnRates(
 
   const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
   const sliClient = new DefaultSLIClient(esClient);
-  const slo = await repository.findById(sloId);
 
-  const sliData = await sliClient.fetchSLIDataFrom(slo, instanceId, windows);
+  // find a way to set this based on the sloId used
+  const unsafeIsRemote = true;
+  let slo: SLO | undefined;
+  if (unsafeIsRemote) {
+    const summarySearch = await esClient.search<EsSummaryDocument>({
+      index: `remote_cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+      query: {
+        bool: {
+          filter: [
+            { term: { spaceId: 'default' } },
+            { term: { 'slo.id': sloId } },
+            { term: { 'slo.instanceId': instanceId } },
+          ],
+        },
+      },
+    });
+
+    if (summarySearch.hits.hits.length === 0) {
+      throw new Error('SLO not found');
+    }
+
+    slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!);
+  } else {
+    slo = await repository.findById(sloId);
+  }
+
+  const sliData = await sliClient.fetchSLIDataFrom(slo!, instanceId, windows);
   return Object.keys(sliData).map((key) => {
     return {
       name: key,
-      burnRate: computeBurnRate(slo, sliData[key]),
+      burnRate: computeBurnRate(slo!, sliData[key]),
       sli: computeSLI(sliData[key].good, sliData[key].total),
     };
   });

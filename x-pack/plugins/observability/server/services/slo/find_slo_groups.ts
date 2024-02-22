@@ -46,6 +46,7 @@ export class FindSLOGroups {
     private logger: Logger,
     private spaceId: string
   ) {}
+
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
@@ -60,7 +61,7 @@ export class FindSLOGroups {
     }
 
     const response = await typedSearch(this.esClient, {
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: `remote_cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN},${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
       size: 0,
       query: {
         bool: {

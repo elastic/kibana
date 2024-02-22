@@ -245,7 +245,7 @@ const getSLORoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const summaryClient = new DefaultSummaryClient(esClient);
-    const getSLO = new GetSLO(repository, summaryClient);
+    const getSLO = new GetSLO(repository, summaryClient, esClient);
 
     const response = await getSLO.execute(params.path.id, params.query);
 
@@ -441,7 +441,11 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
 
-    const fetchSummaryData = new FetchHistoricalSummary(repository, historicalSummaryClient);
+    const fetchSummaryData = new FetchHistoricalSummary(
+      repository,
+      historicalSummaryClient,
+      esClient
+    );
 
     const response = await fetchSummaryData.execute(params.body);
 
