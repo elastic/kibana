@@ -61,6 +61,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
       await transform.alerting.openAddRuleVariable();
       await commonScreenshots.takeScreenshot('transform-alert-actions', screenshotDirectories);
+      await transform.testExecution.logTestStep('set summary action frequency and take screenshot');
+      const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+      await actionFrequency.click();
+      const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+      await actionSummary.click();
+      await commonScreenshots.takeScreenshot(
+        'transform-alert-summary-actions',
+        screenshotDirectories
+      );
       await transform.alerting.clickCancelSaveRuleButton();
     });
   });
