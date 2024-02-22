@@ -255,11 +255,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
-              const indexPatterns = new IndexPatternsFetcher(esClient, true);
-
+              const indexPatterns = new IndexPatternsFetcher(
+                scopedClusterClient.asInternalUser,
+                true
+              );
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
-              // console.log('inputIndex', inputIndex);
-              // console.log('existingIndices', existingIndices);
               const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
 
               const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =

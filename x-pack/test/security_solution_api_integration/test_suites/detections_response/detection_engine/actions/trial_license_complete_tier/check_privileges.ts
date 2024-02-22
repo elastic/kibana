@@ -16,6 +16,7 @@ import {
   deleteAllAlerts,
   createAlertsIndex,
   waitForRulePartialFailure,
+  waitForRuleSuccess,
   getRuleForAlertTesting,
 } from '../../../../../../common/utils/security_solution';
 import {
@@ -52,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    context('when user cannot read indices', () => {
+    context('when all indices exist but user cannot read host_alias', () => {
       const indexTestCases = [
         ['host_alias'],
         ['host_alias', 'auditbeat-8.0.0'],
@@ -60,79 +61,112 @@ export default ({ getService }: FtrProviderContext) => {
         ['host_alias*', 'auditbeat-*'],
       ];
 
-      context('when all indices exist', () => {
-        indexTestCases.forEach((index) => {
-          it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
-            const rule = {
-              ...getRuleForAlertTesting(index),
-              query: 'process.executable: "/usr/bin/sudo"',
-            };
-            await createUserAndRole(getService, ROLES.detections_admin);
-            const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
-              user: ROLES.detections_admin,
-              pass: 'changeme',
-            });
-            await waitForRulePartialFailure({
-              supertest,
-              log,
-              id,
-            });
-            const { body } = await supertest
-              .get(DETECTION_ENGINE_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .query({ id })
-              .expect(200);
-
-            // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-            expect(body?.execution_summary?.last_execution.message).to.eql(
-              `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
-            );
-
-            await deleteUserAndRole(getService, ROLES.detections_admin);
+      indexTestCases.forEach((index) => {
+        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
+          const rule = {
+            ...getRuleForAlertTesting(index),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          await createUserAndRole(getService, ROLES.detections_admin);
+          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+            user: ROLES.detections_admin,
+            pass: 'changeme',
           });
+          await waitForRulePartialFailure({
+            supertest,
+            log,
+            id,
+          });
+          const { body } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .query({ id })
+            .expect(200);
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          expect(body?.execution_summary?.last_execution.message).to.eql(
+            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+          );
+
+          await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
+    });
 
-      context('for threshold rules', () => {
-        const thresholdIndexTestCases = [
-          ['host_alias', 'auditbeat-8.0.0'],
-          ['host_alias*', 'auditbeat-*'],
-        ];
+    context('when some specified indices do not exist, but user can read all others', () => {
+      const index = ['non-existent-index', 'auditbeat-*'];
 
-        thresholdIndexTestCases.forEach((index) => {
-          it(`with index param: ${index}`, async () => {
-            const rule: ThresholdRuleCreateProps = {
-              ...getThresholdRuleForAlertTesting(index),
-              threshold: {
-                field: [],
-                value: 700,
-              },
-            };
-            await createUserAndRole(getService, ROLES.detections_admin);
-            const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
-              user: ROLES.detections_admin,
-              pass: 'changeme',
-            });
-            await waitForRulePartialFailure({
-              supertest,
-              log,
-              id,
-            });
-            const { body } = await supertest
-              .get(DETECTION_ENGINE_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .set('elastic-api-version', '2023-10-31')
-              .query({ id })
-              .expect(200);
+      it(`sets rule status to success for KQL rule with index param: ${index}`, async () => {
+        const rule = {
+          ...getRuleForAlertTesting(index),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
+        await createUserAndRole(getService, ROLES.detections_admin);
+        const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+          user: ROLES.detections_admin,
+          pass: 'changeme',
+        });
 
-            // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-            expect(body?.execution_summary?.last_execution.message).to.eql(
-              `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
-            );
+        await waitForRuleSuccess({
+          supertest,
+          log,
+          id,
+        });
+        const { body } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .query({ id })
+          .expect(200);
 
-            await deleteUserAndRole(getService, ROLES.detections_admin);
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        expect(body?.execution_summary?.last_execution.message).to.eql(
+          'Rule execution completed successfully'
+        );
+
+        await deleteUserAndRole(getService, ROLES.detections_admin);
+      });
+    });
+
+    context('for threshold rules', () => {
+      const thresholdIndexTestCases = [
+        ['host_alias', 'auditbeat-8.0.0'],
+        ['host_alias*', 'auditbeat-*'],
+      ];
+
+      thresholdIndexTestCases.forEach((index) => {
+        it(`with index param: ${index}`, async () => {
+          const rule: ThresholdRuleCreateProps = {
+            ...getThresholdRuleForAlertTesting(index),
+            threshold: {
+              field: [],
+              value: 700,
+            },
+          };
+          await createUserAndRole(getService, ROLES.detections_admin);
+          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+            user: ROLES.detections_admin,
+            pass: 'changeme',
           });
+          await waitForRulePartialFailure({
+            supertest,
+            log,
+            id,
+          });
+          const { body } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .query({ id })
+            .expect(200);
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          expect(body?.execution_summary?.last_execution.message).to.eql(
+            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+          );
+
+          await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
     });
