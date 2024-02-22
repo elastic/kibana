@@ -350,13 +350,29 @@ export function isEqualFilters(
  * Helper function to compare 2 different state, is needed since comparing filters
  * works differently
  */
-export function isEqualState(stateA: DiscoverAppState, stateB: DiscoverAppState) {
+export function isEqualState(
+  stateA: DiscoverAppState,
+  stateB: DiscoverAppState,
+  exclude: string[] = []
+) {
   if (!stateA && !stateB) {
     return true;
   } else if (!stateA || !stateB) {
     return false;
   }
+
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
-  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
+
+  const filteredStateAPartial = excludeKeys(stateAPartial, exclude);
+  const filteredStateBPartial = excludeKeys(stateBPartial, exclude);
+
+  return (
+    isEqual(filteredStateAPartial, filteredStateBPartial) &&
+    isEqualFilters(stateAFilters, stateBFilters)
+  );
+}
+
+function excludeKeys(obj: DiscoverAppState, keys: string[]) {
+  return Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key)));
 }

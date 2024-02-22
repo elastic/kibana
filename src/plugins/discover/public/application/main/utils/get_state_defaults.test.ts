@@ -23,29 +23,19 @@ describe('getStateDefaults', () => {
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
         "filters": undefined,
-        "grid": undefined,
-        "headerRowHeight": undefined,
-        "hideAggregatedPreview": undefined,
-        "hideChart": undefined,
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
-        "rowHeight": undefined,
-        "rowsPerPage": undefined,
-        "sampleSize": undefined,
-        "savedQuery": undefined,
         "sort": Array [
           Array [
             "timestamp",
             "desc",
           ],
         ],
-        "viewMode": undefined,
       }
     `);
   });
@@ -59,24 +49,14 @@ describe('getStateDefaults', () => {
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
         "filters": undefined,
-        "grid": undefined,
-        "headerRowHeight": undefined,
-        "hideAggregatedPreview": undefined,
-        "hideChart": undefined,
         "index": "the-data-view-id",
         "interval": "auto",
         "query": undefined,
-        "rowHeight": undefined,
-        "rowsPerPage": undefined,
-        "sampleSize": undefined,
-        "savedQuery": undefined,
         "sort": Array [],
-        "viewMode": undefined,
       }
     `);
   });
