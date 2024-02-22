@@ -873,7 +873,7 @@ module.exports = {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -896,7 +896,7 @@ module.exports = {
       files: [
         'x-pack/plugins/apm/**/*.stories.*',
         'x-pack/plugins/observability/**/*.stories.*',
-        'x-pack/plugins/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
       ],
       rules: {
         'react/function-component-definition': [
@@ -912,7 +912,7 @@ module.exports = {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/apm/**/*.tsx',
-        'x-pack/plugins/exploratory_view/**/*.tsx',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.tsx',
         'x-pack/plugins/infra/**/*.tsx',
         'x-pack/plugins/observability/**/*.tsx',
         'x-pack/plugins/observability_shared/observability_ai_assistant/**/*.tsx',
@@ -930,7 +930,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
