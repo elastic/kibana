@@ -82,14 +82,23 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
-  const value = useMemo(
+  const value: CasesContextValue = useMemo(
     () => ({
       appId,
       appTitle,
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       owner,
-      permissions,
+      permissions: {
+        all: permissions.all,
+        connectors: permissions.connectors,
+        create: permissions.create,
+        delete: permissions.delete,
+        push: permissions.push,
+        read: permissions.read,
+        settings: permissions.settings,
+        update: permissions.update,
+      },
       basePath,
       /**
        * The empty object at the beginning avoids the mutation
@@ -103,16 +112,24 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
       releasePhase,
       dispatch,
     }),
+    /**
+     * We want to trigger a rerender only if the appId, the appTitle, or
+     * the permissions will change. The registries, the owner, and the rest
+     * of the values should not change during the lifecycle of the
+     * cases application.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       appId,
       appTitle,
-      basePath,
-      externalReferenceAttachmentTypeRegistry,
-      features,
-      owner,
-      permissions,
-      persistableStateAttachmentTypeRegistry,
-      releasePhase,
+      permissions.all,
+      permissions.connectors,
+      permissions.create,
+      permissions.delete,
+      permissions.push,
+      permissions.read,
+      permissions.settings,
+      permissions.update,
     ]
   );
 
