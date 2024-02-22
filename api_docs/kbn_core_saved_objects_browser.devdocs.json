@@ -24,9 +24,7 @@
         "parentPluginId": "@kbn/core-saved-objects-browser",
         "id": "def-common.SavedObjectsStart",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectsStart",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
@@ -71,11 +69,11 @@
           },
           {
             "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "transform",
@@ -105,9 +103,7 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [
-              "{@link SavedObjectsClientContract}"
-            ],
+            "description": ["{@link SavedObjectsClientContract}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
