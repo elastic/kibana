@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  injectedMetadataServiceMock,
-  executionContextServiceMock,
-  coreMock,
-  chromeServiceMock,
-} from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { of } from 'rxjs';
 import {

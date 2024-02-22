@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  of,
-  ReplaySubject,
-  takeUntil,
-} from 'rxjs';
+import { combineLatest, debounceTime, of, ReplaySubject, takeUntil } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
