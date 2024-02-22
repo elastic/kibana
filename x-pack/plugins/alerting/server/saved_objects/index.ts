@@ -57,6 +57,7 @@ export const RuleAttributesIncludedInAAD = [
   'throttle',
   'notifyWhen',
   'meta',
+  'alertDelay',
 ];
 
 // useful type for Omit<RuleAttributes, [...RuleAttributesToEncrypt, ...RuleAttributesIncludedInAAD]>
@@ -83,6 +84,7 @@ export type PartiallyUpdateableRuleAttributes = Partial<
     | 'throttle'
     | 'notifyWhen'
     | 'meta'
+    | 'alertDelay'
   >
 >;
 

@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       it(`successfully decrypts 'alert' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/ef277b05-595b-41b9-9674-d199753c40ca`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/5c892f54-c428-496b-b760-075c01b5fcdd`
           )
           .expect(200);
 

@@ -24,7 +24,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana_alerting_cases",
-    "id": "alert:ef277b05-595b-41b9-9674-d199753c40ca",
+    "id": "alert:5c892f54-c428-496b-b760-075c01b5fcdd",
     "source": {
       "alert": {
         "name": "test_rule",
@@ -35,6 +35,9 @@
         "legacyId": "some-legacy-id",
         "schedule": {
           "interval": "1m"
+        },
+        "alertDelay": {
+          "active": 1234
         },
         "actions": [
           {
@@ -70,7 +73,7 @@
         "updatedBy": "elastic",
         "createdAt": "2024-01-16T22:09:07.964Z",
         "updatedAt": "2024-01-16T22:09:07.964Z",
-        "apiKey": "wcMBDKjLBuKz3Dr2v9GhNRpBXEtJsfwrcwmGiQ3TjPVpfq/EnGtQINomNpjWQUZ9v7Ix+3fAY2mPfjb/F9IO44fYENUbzhsKs2np1F6qXL/bsrGhEkZfLbbuNeI3ybTDuiUzzZuWCOjdomuXUwLd+trkMQzDwJiVYIXf4gzhrwJ+qZ8v4YoYLXyZfY7P+nkTmxOFvUsNds6MZRRER+E=",
+        "apiKey": "RfC7Uqq/0mZ7iZou3FCKEtS697YRLrgx3RE/MH87s5RMYJf4KZXjDSsreTJfMIxq2LrStpx9DnYaNSQ4HTWholYqwwheYdnC9+lXWI42aKJat3AibhlpCIeMt1YHZrO+9pqjoAKJE9xtIPA1CPN+5oGTFsgcbe+lb3qCBjx1/jbeBhq7x6vRw0FnALBk58QUdWemYeBH1LRURk/yydk=",
         "apiKeyOwner": "elastic",
         "apiKeyCreatedByUser": false,
         "throttle": "some-throttle-value",
@@ -141,8 +144,8 @@
       ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "10.1.0",
-      "updated_at": "2024-01-18T22:05:08.546Z",
-      "created_at": "2024-01-18T22:05:08.546Z"
+      "updated_at": "2024-02-22T19:34:13.564Z",
+      "created_at": "2024-02-22T19:34:13.564Z"
     }
   }
 }
@@ -452,7 +455,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana_alerting_cases_8.13.0_001",
+    "index": ".kibana_alerting_cases",
     "id": "api_key_pending_invalidation:e67824d0-b428-47c7-be46-fd4e2021519f",
     "source": {
       "api_key_pending_invalidation": {
