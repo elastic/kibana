@@ -51,7 +51,7 @@ export const DeepContextVariables = {
   dateL: '2023-04-20T04:13:17.858Z',
 };
 
-function getAlwaysFiringAlertType() {
+function getAlwaysFiringRuleType() {
   const paramsSchema = schema.object({
     index: schema.string(),
     reference: schema.string(),
@@ -138,7 +138,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   };
 }
 
-function getCumulativeFiringAlertType() {
+function getCumulativeFiringRuleType() {
   interface State extends RuleTypeState {
     runCount?: number;
   }
@@ -183,7 +183,7 @@ function getCumulativeFiringAlertType() {
   return result;
 }
 
-function getNeverFiringAlertType() {
+function getNeverFiringRuleType() {
   const paramsSchema = schema.object({
     index: schema.string(),
     reference: schema.string(),
@@ -230,7 +230,7 @@ function getNeverFiringAlertType() {
   return result;
 }
 
-function getFailingAlertType() {
+function getFailingRuleType() {
   const paramsSchema = schema.object({
     index: schema.string(),
     reference: schema.string(),
@@ -327,7 +327,7 @@ function getExceedsAlertLimitRuleType() {
   return result;
 }
 
-function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
+function getAuthorizationRuleType(core: CoreSetup<FixtureStartDeps>) {
   const paramsSchema = schema.object({
     callClusterAuthorizationIndex: schema.string(),
     savedObjectsClientType: schema.string(),
@@ -422,7 +422,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
   return result;
 }
 
-function getValidationAlertType() {
+function getValidationRuleType() {
   const paramsSchema = schema.object({
     param1: schema.string(),
   });
@@ -451,7 +451,7 @@ function getValidationAlertType() {
   return result;
 }
 
-function getPatternFiringAlertType() {
+function getPatternFiringRuleType() {
   const paramsSchema = schema.object({
     pattern: schema.recordOf(
       schema.string(),
@@ -639,7 +639,7 @@ function getPatternFiringAlertsAsDataRuleType() {
   return result;
 }
 
-function getPatternSuccessOrFailureAlertType() {
+function getPatternSuccessOrFailureRuleType() {
   const paramsSchema = schema.object({
     pattern: schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()])),
   });
@@ -684,7 +684,7 @@ function getPatternSuccessOrFailureAlertType() {
   return result;
 }
 
-function getPatternFiringAutoRecoverFalseAlertType() {
+function getPatternFiringAutoRecoverFalseRuleType() {
   const paramsSchema = schema.object({
     pattern: schema.recordOf(
       schema.string(),
@@ -1087,12 +1087,12 @@ async function getSignalDocs(es: ElasticsearchClient, source: string, reference:
   return result?.body?.hits?.hits || [];
 }
 
-export function defineAlertTypes(
+export function defineRuleTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
   logger: Logger
 ) {
-  const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+  const noopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -1108,7 +1108,7 @@ export function defineAlertTypes(
       params: schema.any(),
     },
   };
-  const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+  const goldNoopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -1124,7 +1124,7 @@ export function defineAlertTypes(
       params: schema.any(),
     },
   };
-  const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+  const onlyContextVariablesRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -1143,7 +1143,7 @@ export function defineAlertTypes(
       params: schema.any(),
     },
   };
-  const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+  const onlyStateVariablesRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
     name: 'Test: Only State Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -1162,7 +1162,7 @@ export function defineAlertTypes(
       params: schema.any(),
     },
   };
-  const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+  const throwRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.throw',
     name: 'Test: Throw',
     actionGroups: [
@@ -1214,7 +1214,7 @@ export function defineAlertTypes(
     };
     return result;
   }
-  const exampleAlwaysFiringAlertType: RuleType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> = {
+  const exampleAlwaysFiringRuleType: RuleType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> = {
     id: 'example.always-firing',
     name: 'Always firing',
     actionGroups: [
@@ -1293,28 +1293,28 @@ export function defineAlertTypes(
     },
   };
 
-  alerting.registerType(getAlwaysFiringAlertType());
-  alerting.registerType(getCumulativeFiringAlertType());
-  alerting.registerType(getNeverFiringAlertType());
-  alerting.registerType(getFailingAlertType());
-  alerting.registerType(getValidationAlertType());
-  alerting.registerType(getAuthorizationAlertType(core));
-  alerting.registerType(noopAlertType);
-  alerting.registerType(onlyContextVariablesAlertType);
-  alerting.registerType(onlyStateVariablesAlertType);
-  alerting.registerType(getPatternFiringAlertType());
-  alerting.registerType(throwAlertType);
+  alerting.registerType(getAlwaysFiringRuleType());
+  alerting.registerType(getCumulativeFiringRuleType());
+  alerting.registerType(getNeverFiringRuleType());
+  alerting.registerType(getFailingRuleType());
+  alerting.registerType(getValidationRuleType());
+  alerting.registerType(getAuthorizationRuleType(core));
+  alerting.registerType(noopRuleType);
+  alerting.registerType(onlyContextVariablesRuleType);
+  alerting.registerType(onlyStateVariablesRuleType);
+  alerting.registerType(getPatternFiringRuleType());
+  alerting.registerType(throwRuleType);
   alerting.registerType(getLongRunningRuleType());
-  alerting.registerType(goldNoopAlertType);
-  alerting.registerType(exampleAlwaysFiringAlertType);
+  alerting.registerType(goldNoopRuleType);
+  alerting.registerType(exampleAlwaysFiringRuleType);
   alerting.registerType(multipleSearchesRuleType);
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());
-  alerting.registerType(getPatternSuccessOrFailureAlertType());
+  alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
-  alerting.registerType(getPatternFiringAutoRecoverFalseAlertType());
+  alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));
 }

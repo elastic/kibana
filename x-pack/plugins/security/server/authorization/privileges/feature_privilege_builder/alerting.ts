@@ -26,6 +26,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'find',
     'getRuleExecutionKPI',
     'runSoon',
+    'scheduleBackfill',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };

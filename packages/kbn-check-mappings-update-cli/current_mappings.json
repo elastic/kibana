@@ -19,6 +19,14 @@
     "dynamic": false,
     "properties": {}
   },
+  "ad_hoc_run_params": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {

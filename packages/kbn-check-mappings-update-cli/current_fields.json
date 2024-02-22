@@ -4,6 +4,9 @@
     "name"
   ],
   "action_task_params": [],
+  "ad_hoc_run_params": [
+    "createdAt"
+  ],
   "alert": [
     "actions",
     "actions.actionRef",

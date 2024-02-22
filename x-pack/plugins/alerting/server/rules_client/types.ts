@@ -35,6 +35,7 @@ import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
 import { GetAlertIndicesAlias } from '../lib';
 import { AlertsService } from '../alerts_service';
+import { BackfillClient } from '../backfill_client/backfill_client';
 
 export type {
   BulkEditOperation,
@@ -79,6 +80,7 @@ export interface RulesClientContext {
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly backfillClient: BackfillClient;
   readonly uiSettings: UiSettingsServiceStart;
 }
 
