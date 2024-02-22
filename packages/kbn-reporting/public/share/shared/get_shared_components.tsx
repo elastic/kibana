@@ -7,23 +7,24 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
+import { BaseParams } from '@kbn/reporting-common/types';
+import { CSV_JOB_TYPE, JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { JobAppParamsPDFV2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
-
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
-
-import { ReportingAPIClient } from '../../reporting_api_client';
+import { ReportingAPIClient } from '../..';
+import { CsvModalContent } from '../share_context_menu/csv_export_modal';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
+import { ReportingModalContent } from '../share_context_menu/reporting_panel_content_lazy';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
-
 /**
  * Properties for displaying a share menu with Reporting features.
  */
 export interface ApplicationProps {
   /**
    * A function that Reporting calls to get the sharing data from the application.
+   * Needed for CSV exports and Canvas PDF reports.
    */
-  getJobParams: ReportingPanelProps['getJobParams'];
+  getJobParams?: JobAppParamsPDFV2 | JobParamsCSV | ReportingPanelProps['getJobParams'];
 
   /**
    * Option to control how the screenshot(s) is/are placed in the PDF
@@ -39,27 +40,27 @@ export interface ApplicationProps {
    * A function to callback when the Reporting panel should be closed
    */
   onClose: () => void;
+  objectType: string;
+  downloadCsvFromLens: () => void;
 }
 
-/**
- * React components used to display share menus with Reporting features in an application.
- */
 export interface ReportingPublicComponents {
-  /**
-   * An element to display a form to export the page as PDF
-   * @deprecated
-   */
-  ReportingPanelPDF(props: ApplicationProps): JSX.Element;
-
+  /** Needed for Canvas PDF reports */
+  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | undefined;
   /**
    * An element to display a form to export the page as PDF
    */
-  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element;
+  ReportingModalPDFV2(props: ApplicationProps): JSX.Element;
 
   /**
    * An element to display a form to export the page as PNG
    */
-  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element;
+  ReportingModalPNGV2(props: ApplicationProps): JSX.Element;
+
+  /**
+   * An element to display a form to export the page as CSV
+   */
+  ReportingModalCSV(props: ApplicationProps): JSX.Element;
 }
 
 /**
@@ -72,42 +73,65 @@ export function getSharedComponents(
   apiClient: ReportingAPIClient
 ): ReportingPublicComponents {
   return {
-    ReportingPanelPDF(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
-    },
     ReportingPanelPDFV2(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
+    },
+    ReportingModalPDFV2(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as JobAppParamsPDFV2;
       return (
-        <ScreenCapturePanelContent
+        <ReportingModalContent
           requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE_V2}
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
           theme={core.theme}
           {...props}
+          getJobParams={getJobParams}
         />
       );
     },
-    ReportingPanelPNGV2(props: ApplicationProps) {
+    ReportingModalPNGV2(props: ApplicationProps) {
       return (
-        <ScreenCapturePanelContent
+        <ReportingModalContent
           requiresSavedState={false}
-          reportType={PNG_REPORT_TYPE_V2}
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
           theme={core.theme}
           {...props}
+          getJobParams={undefined}
+        />
+      );
+    },
+    ReportingModalCSV(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as (
+        forShareUrl?: boolean
+      ) => Omit<BaseParams, 'browserTimezone' | 'version'>;
+      return (
+        <CsvModalContent
+          requiresSavedState={false}
+          apiClient={apiClient}
+          toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
+          reportType={CSV_JOB_TYPE}
+          theme={core.theme}
+          {...props}
+          getJobParams={getJobParams}
         />
       );
     },

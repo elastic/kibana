@@ -12,12 +12,9 @@ import React, { Component } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
-export interface Props extends ReportingPanelProps {
-  layoutOption?: 'canvas' | 'print';
-}
+export type Props = ReportingPanelProps;
 
 interface State {
-  usePrintLayout: boolean;
   useCanvasLayout: boolean;
 }
 
@@ -26,7 +23,6 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     super(props);
 
     this.state = {
-      usePrintLayout: false,
       useCanvasLayout: false,
     };
   }
@@ -43,65 +39,32 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   }
 
   private renderOptions = () => {
-    if (this.props.layoutOption === 'print') {
-      return (
-        <EuiFormRow
-          helpText={
+    return (
+      <EuiFormRow
+        helpText={
+          <FormattedMessage
+            id="reporting.share.screenCapturePanelContent.canvasLayoutHelpText"
+            defaultMessage="Remove borders and footer logo"
+          />
+        }
+      >
+        <EuiSwitch
+          label={
             <FormattedMessage
-              id="reporting.share.screenCapturePanelContent.optimizeForPrintingHelpText"
-              defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
+              id="reporting.share.screenCapturePanelContent.canvasLayoutLabel"
+              defaultMessage="Full page layout"
             />
           }
-        >
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="reporting.share.screenCapturePanelContent.optimizeForPrintingLabel"
-                defaultMessage="Optimize for printing"
-              />
-            }
-            checked={this.state.usePrintLayout}
-            onChange={this.handlePrintLayoutChange}
-            data-test-subj="usePrintLayout"
-          />
-        </EuiFormRow>
-      );
-    }
-
-    if (this.props.layoutOption === 'canvas') {
-      return (
-        <EuiFormRow
-          helpText={
-            <FormattedMessage
-              id="reporting.share.screenCapturePanelContent.canvasLayoutHelpText"
-              defaultMessage="Remove borders and footer logo"
-            />
-          }
-        >
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="reporting.share.screenCapturePanelContent.canvasLayoutLabel"
-                defaultMessage="Full page layout"
-              />
-            }
-            checked={this.state.useCanvasLayout}
-            onChange={this.handleCanvasLayoutChange}
-            data-test-subj="reportModeToggle"
-          />
-        </EuiFormRow>
-      );
-    }
-
-    return null;
-  };
-
-  private handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
-    this.setState({ usePrintLayout: evt.target.checked, useCanvasLayout: false });
+          checked={this.state.useCanvasLayout}
+          onChange={this.handleCanvasLayoutChange}
+          data-test-subj="reportModeToggle"
+        />
+      </EuiFormRow>
+    );
   };
 
   private handleCanvasLayoutChange = (evt: EuiSwitchEvent) => {
-    this.setState({ useCanvasLayout: evt.target.checked, usePrintLayout: false });
+    this.setState({ useCanvasLayout: evt.target.checked });
   };
 
   private getLayout = (): LayoutParams => {
@@ -114,15 +77,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
       dimensions = { height, width };
     }
 
-    if (this.state.usePrintLayout) {
-      return { id: 'print', dimensions };
-    }
-
-    if (this.state.useCanvasLayout) {
-      return { id: 'canvas', dimensions };
-    }
-
-    return { id: 'preserve_layout', dimensions };
+    return { id: 'canvas', dimensions };
   };
 
   private getJobParams = () => {

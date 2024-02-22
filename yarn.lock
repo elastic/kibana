@@ -5610,6 +5610,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-csv-share-panel@link:packages/kbn-reporting/get_csv_panel_actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
   version "0.0.0"
   uid ""
@@ -6207,6 +6211,10 @@
   uid ""
 
 "@kbn/shared-ux-storybook-mock@link:packages/shared-ux/storybook/mock":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-tabbed-modal@link:packages/shared-ux/modal/tabbed":
   version "0.0.0"
   uid ""
 

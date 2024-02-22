@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { from } from 'rxjs';
+
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -63,6 +65,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -179,6 +182,7 @@ export interface LensPluginStartDependencies {
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface LensPublicSetup {
@@ -389,12 +393,19 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      share.register(
-        downloadCsvShareProvider({
-          uiSettings: core.uiSettings,
-          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-        })
-      );
+      const { getStartServices } = core;
+      const startServices$ = from(getStartServices());
+      startServices$.subscribe(([, { licensing }]) => {
+        licensing?.license$.subscribe((license) => {
+          return share.register(
+            downloadCsvShareProvider({
+              uiSettings: core.uiSettings,
+              formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+              license,
+            })
+          );
+        });
+      });
     }
 
     visualizations.registerAlias(getLensAliasConfig());

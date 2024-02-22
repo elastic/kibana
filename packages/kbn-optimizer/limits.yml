@@ -84,7 +84,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 57135
+  lens: 96692
   licenseManagement: 41817
   licensing: 29004
   links: 44490
@@ -115,7 +115,7 @@ pageLoadAssetSize:
   presentationUtil: 58834
   profiling: 36694
   remoteClusters: 51327
-  reporting: 57003
+  reporting: 78653
   rollup: 97204
   runtimeFields: 41752
   savedObjects: 108518

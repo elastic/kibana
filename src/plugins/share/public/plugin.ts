@@ -31,6 +31,7 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Utilities to work with URL locators and short URLs.
    */
   url: BrowserUrlService;
+  kibanaVersion: string;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
@@ -79,9 +80,11 @@ export class SharePlugin
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup): SharePublicSetup {
@@ -127,6 +130,7 @@ export class SharePlugin
 
     return {
       ...this.shareMenuRegistry.setup(),
+      kibanaVersion: this.kibanaVersion,
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {

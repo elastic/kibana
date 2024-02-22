@@ -28,9 +28,9 @@ import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-acti
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import type { ClientConfigType } from '../../types';
-import { checkLicense } from '../../license_check';
-import type { ReportingAPIClient } from '../../reporting_api_client';
+import type { ClientConfigType } from '@kbn/reporting-public/types';
+import { checkLicense } from '@kbn/reporting-public/license_check';
+import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { getI18nStrings } from './strings';
 
 function isSavedSearchEmbeddable(

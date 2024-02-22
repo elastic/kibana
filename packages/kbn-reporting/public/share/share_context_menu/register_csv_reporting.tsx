@@ -15,7 +15,7 @@ import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import type { ExportPanelShareOpts } from '.';
 import { checkLicense } from '../..';
-import { ReportingPanelContent } from './reporting_panel_content_lazy';
+import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
   apiClient,
@@ -85,33 +85,31 @@ export const reportingCsvShareProvider = ({
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('reporting.share.contextMenu.csvReportsButtonLabel', {
-        defaultMessage: 'CSV Reports',
+        defaultMessage: 'Export',
       });
 
       shareActions.push({
         shareMenuItem: {
           name: panelTitle,
-          icon: 'document',
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
           ['data-test-subj']: 'CSVReports',
-          sortOrder: 1,
         },
         panel: {
           id: 'csvReportingPanel',
           title: panelTitle,
           content: (
-            <ReportingPanelContent
+            <CsvModalContent
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
               reportType={reportType}
-              layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
               onClose={onClose}
               theme={theme}
+              objectType={objectType}
             />
           ),
         },

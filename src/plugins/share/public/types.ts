@@ -84,8 +84,10 @@ export interface ShareMenuItem {
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-
-  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
+  /**
+   * Null is set for cases where Lens has its less than gold licensing and csv is permitted
+   */
+  getShareMenuItems: (context: ShareContext) => Array<ShareMenuItem | null>;
 }
 
 interface UrlParamExtensionProps {

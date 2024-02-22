@@ -7,53 +7,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
-import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
-import { ReportingAPIClient, checkLicense } from '../..';
-import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
+import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { downloadCSVs } from '@kbn/lens-plugin/public';
+import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
+import { checkLicense } from '../../license_check';
+import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { ReportingModalContent } from './reporting_panel_content_lazy';
 
-const getJobParams =
-  (
-    apiClient: ReportingAPIClient,
-    opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
-  ) =>
-  () => {
-    const {
-      objectType,
-      sharingData: { title, layout, locatorParams },
-    } = opts;
-
-    const baseParams = {
-      objectType,
-      layout,
-      title,
-    };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams };
-    }
-
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
-
-    if (type === 'printablePdf') {
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] };
-    }
-
-    // single URL for PNG
-    return { ...baseParams, relativeUrl };
-  };
+export const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unknown> }): boolean =>
+  sharingData.locatorParams != null;
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
@@ -63,7 +26,8 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-}: ExportPanelShareOpts): ShareMenuProvider => {
+  formatFactoryFn,
+}: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -94,6 +58,7 @@ export const reportingScreenshotShareProvider = ({
     if (!licenseHasScreenshotReporting) {
       return [];
     }
+    // for lens png pdf and csv are combined into one modal
     const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
 
     if (!isSupportedType) {
@@ -115,93 +80,62 @@ export const reportingScreenshotShareProvider = ({
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
-    const pngPanelTitle = i18n.translate('reporting.share.contextMenu.pngReportsButtonLabel', {
-      defaultMessage: 'PNG Reports',
-    });
-
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
       objectType,
       sharingData,
     };
-    const isJobV2Params = ({
-      sharingData: _sharingData,
-    }: {
-      sharingData: Record<string, unknown>;
-    }) => _sharingData.locatorParams != null;
 
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
-
-    const pngReportType = isV2Job ? 'pngV2' : 'png';
-
-    const panelPng = {
-      shareMenuItem: {
-        name: pngPanelTitle,
-        icon: 'document',
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PNGReports',
-        sortOrder: 10,
-      },
-      panel: {
-        id: 'reportingPngPanel',
-        title: pngPanelTitle,
-        content: (
-          <ScreenCapturePanelContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            reportType={pngReportType}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
-            isDirty={isDirty}
-            onClose={onClose}
-            theme={theme}
-          />
-        ),
-      },
+    const { title, activeData, columnsSorting } = sharingData as unknown as {
+      title: string;
+      activeData: TableInspectorAdapter;
+      columnsSorting?: string[];
     };
 
-    const pdfPanelTitle = i18n.translate('reporting.share.contextMenu.pdfReportsButtonLabel', {
-      defaultMessage: 'PDF Reports',
-    });
-
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
-
-    const panelPdf = {
+    shareActions.push({
       shareMenuItem: {
-        name: pdfPanelTitle,
-        icon: 'document',
+        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
+          defaultMessage: 'Export',
+        }),
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PDFReports',
-        sortOrder: 10,
+        ['data-test-subj']: 'imageExports',
       },
       panel: {
-        id: 'reportingPdfPanel',
-        title: pdfPanelTitle,
+        id: 'reportingImageModal',
+        title: i18n.translate('reporting.shareContextMenu.ReportsButtonLabel', {
+          defaultMessage: 'Generate report',
+        }),
         content: (
-          <ScreenCapturePanelContent
+          <ReportingModalContent
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pdfReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
+            jobProviderOptions={jobProviderOptions}
             isDirty={isDirty}
-            onClose={onClose}
+            onClose={() => {
+              onClose();
+            }}
             theme={theme}
+            objectType={objectType}
+            downloadCsvFromLens={async () => {
+              return await downloadCSVs({
+                title,
+                formatFactory: formatFactoryFn(),
+                activeData,
+                uiSettings,
+                columnsSorting,
+              });
+            }}
           />
         ),
       },
-    };
-
-    shareActions.push(panelPng);
-    shareActions.push(panelPdf);
+    });
     return shareActions;
   };
 

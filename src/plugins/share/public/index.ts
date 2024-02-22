@@ -32,7 +32,6 @@ export type { RedirectOptions } from '../common/url_service';
 export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
 
 import { SharePlugin } from './plugin';
-
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
 
