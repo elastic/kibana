@@ -8,6 +8,9 @@ Object {
   "event.kind": Array [
     "signal",
   ],
+  "kibana.alert.consecutive_matches": Array [
+    1,
+  ],
   "kibana.alert.duration.us": Array [
     0,
   ],
