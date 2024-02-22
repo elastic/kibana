@@ -18,6 +18,7 @@ import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SLOCardItemInstanceBadge } from './slo_card_item_instance_badge';
 
 interface Props {
   hasGroupBy: boolean;
@@ -51,6 +52,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
         ) : (
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
+            <SLOCardItemInstanceBadge slo={slo} />
             <SloIndicatorTypeBadge slo={slo} color="default" />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
+import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 
 export interface Props {
@@ -31,19 +32,11 @@ export function HeaderTitle(props: Props) {
 
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="xs">
         {showTitle && (
           <>
             <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
-            <EuiFlexGroup>
-              {Object.entries(slo.groupings).map(([key, value]) => (
-                <EuiFlexItem grow={false} key={key}>
-                  <EuiText size="s">
-                    <strong>{key}</strong>: {value}
-                  </EuiText>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <SLOGroupings slo={slo} />
           </>
         )}
 
@@ -57,7 +50,7 @@ export function HeaderTitle(props: Props) {
           <SloStatusBadge slo={slo} />
         </EuiFlexGroup>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">

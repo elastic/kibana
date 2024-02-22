@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get } from 'lodash';
 import {
   DefaultItemAction,
   EuiBasicTable,
@@ -13,7 +12,6 @@ import {
   EuiText,
   EuiToolTip,
   EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -43,6 +41,7 @@ import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { SLOGroupings } from '../common/slo_groupings';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -271,26 +270,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => {
         const groups = [slo.groupBy].flat();
         return !groups.includes(ALL_VALUE) ? (
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            {groups.map((group) => (
-              <EuiFlexItem key={group}>
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate('xpack.observability.slo.groupByBadge', {
-                    defaultMessage: 'Group by {groupKey}',
-                    values: {
-                      groupKey: group,
-                    },
-                  })}
-                  display="block"
-                >
-                  <span>
-                    <strong>{group}</strong>: {get(slo.groupings, group)}
-                  </span>
-                </EuiToolTip>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <SLOGroupings slo={slo} direction="column" />
         ) : (
           <span>{NOT_AVAILABLE_LABEL}</span>
         );
