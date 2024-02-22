@@ -98,7 +98,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
     defaultValue: {
-      type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      type:
+        defaultTypeIsRollup || editData?.type === INDEX_PATTERN_TYPE.ROLLUP
+          ? INDEX_PATTERN_TYPE.ROLLUP
+          : INDEX_PATTERN_TYPE.DEFAULT,
       isAdHoc: false,
       ...(editData
         ? {
