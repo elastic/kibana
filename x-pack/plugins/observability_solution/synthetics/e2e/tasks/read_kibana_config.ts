@@ -8,11 +8,12 @@
 import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
 export const readKibanaConfig = () => {
-  const kibanaConfigDir = path.join(__filename, '../../../../../../config');
+  const kibanaConfigDir = `${REPO_ROOT}/config`;
   const kibanaDevConfig = path.join(kibanaConfigDir, 'kibana.dev.yml');
   const kibanaConfig = path.join(kibanaConfigDir, 'kibana.yml');
 
