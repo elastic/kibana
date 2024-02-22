@@ -18,18 +18,6 @@ const readline = require('readline');
 //           Setup
 // ==============================
 
-// Command line parameters handling
-const args = process.argv.slice(2);
-const params = {};
-args.forEach((arg) => {
-  if (arg === '--generateLogsFile') {
-    params['--generateLogsFile'] = true;
-  } else {
-    const [argName, argValue] = arg.split('=');
-    params[argName] = argValue;
-  }
-});
-
 // Directories to iterate over
 const FTR_SERVERLESS =
   'x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture';
@@ -47,9 +35,11 @@ const directoryPaths = [
 ];
 
 // Output directories and file paths
-const outputDir = params['--outputDir'] || __dirname;
-const MD_FILE_PATH = path.join(__dirname, 'csp_requirements_test_coverage.md');
-const CSP_TEST_LOGS_FILE_PATH = path.join(outputDir, 'csp_test_log.json');
+const MD_FILE_PATH = path.join(
+  'x-pack/plugins/cloud_security_posture/common/dev_docs',
+  '__auto_generated_csp_requirements_test_coverage.md'
+);
+const CSP_TEST_LOGS_FILE_PATH = path.join(__dirname, '__auto_generated_csp_test_log.json');
 
 // Test output data
 const testsLogOutput = [];
@@ -211,10 +201,6 @@ const processFile = (filePath) => {
 
       testsLogOutput.push(logData);
     }
-    // if (params['--generateLogsFile']) {
-    //   // Writes the output to a JSON file
-    //   fs.writeFileSync(CSP_TEST_LOGS_FILE_PATH, JSON.stringify(testsLogOutput, null, 2));
-    // }
   });
 };
 
@@ -301,58 +287,55 @@ const tagShieldsColors = {
 const generateMDFile = (testLogs) => {
   const groupedTests = groupTestsByDirectory(testLogs);
   let mdContent = '# Cloud Security Posture - Requirements Test Coverage\n\n';
+  mdContent += '<!-- This file is auto-generated. Any changes will be overwritten. -->';
   mdContent +=
     'This document provides a summary of the requirements test coverage for Cloud Security Posture.\n\n';
   mdContent +=
     'You can also check out the dedicated app view, which enables easier search and filter functionalities. This app needs to be updated manually, so it might not always be up to date.\n';
   mdContent += '[Requirement test coverage app](https://vxgs2c.csb.app/)\n\n';
 
-  Object.entries(groupedTests)
-    .sort()
-    .forEach(([directory, logs]) => {
-      logs.sort((a, b) => testLogs.indexOf(a) - testLogs.indexOf(b));
+  Object.entries(groupedTests).forEach(([directory, logs]) => {
+    const { totalTests, skippedTests, todoTests } = countNestedTests(
+      logs.flatMap((log) => log.tree)
+    );
 
-      const { totalTests, skippedTests, todoTests } = countNestedTests(
-        logs.flatMap((log) => log.tree)
+    const skippedPercentage = ((skippedTests / totalTests) * 100).toFixed(2);
+    const todoPercentage = ((todoTests / totalTests) * 100).toFixed(2);
+
+    const tagsBadges = logs
+      .flatMap((log) => log.tags || [])
+      .map(
+        (tag) =>
+          `![](https://img.shields.io/badge/${tag.replace(/\s+/g, '-')}-${tagShieldsColors[tag]})`
       );
+    const uniqueTags = [...new Set(tagsBadges)];
+    const tagsSection = uniqueTags.length > 0 ? `${uniqueTags.join(' ')}\n\n` : '';
 
-      const skippedPercentage = ((skippedTests / totalTests) * 100).toFixed(2);
-      const todoPercentage = ((todoTests / totalTests) * 100).toFixed(2);
+    mdContent += `## Directory: ${directory}\n\n`;
+    mdContent += `**Total Tests:** ${totalTests} | **Skipped:** ${skippedTests} (${skippedPercentage}%) | **Todo:** ${todoTests} (${todoPercentage}%)\n\n`;
+    mdContent += tagsSection;
+    mdContent += '<details>\n<summary>Test Details</summary>\n\n';
+    mdContent += '| Test Label | Type | Skipped | Todo |\n';
+    mdContent += '|------------|------|---------|------|\n';
 
-      const tagsBadges = logs
-        .flatMap((log) => log.tags || [])
-        .map(
-          (tag) =>
-            `![](https://img.shields.io/badge/${tag.replace(/\s+/g, '-')}-${tagShieldsColors[tag]})`
-        );
-      const uniqueTags = [...new Set(tagsBadges)];
-      const tagsSection = uniqueTags.length > 0 ? `${uniqueTags.join(' ')}\n\n` : '';
+    const generateTableFromTree = (tree, filePath) => {
+      tree.forEach((node) => {
+        mdContent += `| [${node.label}](${filePath}) | ${node.type} | ${
+          node.isSkipped ? '![](https://img.shields.io/badge/skipped-yellow)' : ''
+        } | ${node.isTodo ? '![](https://img.shields.io/badge/todo-green)' : ''} |\n`;
 
-      mdContent += `## Directory: ${directory}\n\n`;
-      mdContent += `**Total Tests:** ${totalTests} | **Skipped:** ${skippedTests} (${skippedPercentage}%) | **Todo:** ${todoTests} (${todoPercentage}%)\n\n`;
-      mdContent += tagsSection;
-      mdContent += '<details>\n<summary>Test Details</summary>\n\n';
-      mdContent += '| Test Label | Type | Skipped | Todo |\n';
-      mdContent += '|------------|------|---------|------|\n';
-
-      const generateTableFromTree = (tree, filePath) => {
-        tree.forEach((node) => {
-          mdContent += `| [${node.label}](${filePath}) | ${node.type} | ${
-            node.isSkipped ? '![](https://img.shields.io/badge/skipped-yellow)' : ''
-          } | ${node.isTodo ? '![](https://img.shields.io/badge/todo-green)' : ''} |\n`;
-
-          if (node.children) {
-            generateTableFromTree(node.children, filePath);
-          }
-        });
-      };
-
-      logs.forEach((log) => {
-        generateTableFromTree(log.tree, log.filePath);
+        if (node.children) {
+          generateTableFromTree(node.children, filePath);
+        }
       });
+    };
 
-      mdContent += '</details>\n\n';
+    logs.forEach((log) => {
+      generateTableFromTree(log.tree, log.filePath);
     });
+
+    mdContent += '</details>\n\n';
+  });
 
   fs.writeFileSync(MD_FILE_PATH, mdContent);
 };
@@ -367,24 +350,17 @@ init();
 // Handling process exit
 process.on('exit', () => {
   if (testsLogOutput.length) {
+    testsLogOutput.sort((a, b) => a.filePath.localeCompare(b.filePath));
+
     generateMDFile(testsLogOutput);
+    fs.writeFileSync(CSP_TEST_LOGS_FILE_PATH, JSON.stringify(testsLogOutput, null, 2));
 
     console.log('🌟 Cloud Security Posture tests were processed successfully! ✨');
-    console.log(
-      `ℳ  MD file: file://${path.resolve(outputDir, 'csp_requirements_test_coverage.md')}`
-    );
-    if (params['--generateLogsFile']) {
-      fs.writeFileSync(CSP_TEST_LOGS_FILE_PATH, JSON.stringify(testsLogOutput, null, 2));
-      console.log(`📄 Logs file: file://${path.resolve(CSP_TEST_LOGS_FILE_PATH)}`);
-      console.log(
-        '📊 Copy Logs file content to the dedicated app\'s "data.json" for visualization.'
-      );
-      console.log(`🚀 Dedicated app: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c`);
-    } else {
-      console.log(
-        `📄 Did not generate a logs file, in order to generate the file use: --generateLogsFile`
-      );
-    }
+    console.log(`ℳ  MD file: file://${path.resolve(MD_FILE_PATH)}`);
+    console.log(`📄 Logs file: file://${path.resolve(CSP_TEST_LOGS_FILE_PATH)}`);
+    console.log('📊 Copy Logs file content to the dedicated app\'s "data.json" for visualization.');
+    console.log('⬛️ Dedicated app sandbox: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c');
+    console.log('🚀 Dedicated app: https://vxgs2c.csb.app/');
   } else {
     console.error(`Logs generation has failed`);
   }
