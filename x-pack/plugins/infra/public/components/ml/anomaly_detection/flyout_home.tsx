@@ -252,6 +252,7 @@ const CreateJobTab = (props: CreateJobTab) => {
       <EuiFlexGroup gutterSize={'m'}>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="infraHostsJobCard"
             isDisabled={!props.hasSetupCapabilities}
             icon={<EuiIcon type={'storage'} size="xl" />}
             // title="Hosts"
@@ -298,6 +299,7 @@ const CreateJobTab = (props: CreateJobTab) => {
         {!props.isHostsPage && (
           <EuiFlexItem>
             <EuiCard
+              data-test-subj="infraK8sJobCard"
               isDisabled={!props.hasSetupCapabilities}
               icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
               title={
