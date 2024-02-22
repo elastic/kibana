@@ -4,7 +4,7 @@ A shared component for visualizing observability data types via lens embeddable.
 
 ## Unit testing
 
-Note: Run the following commands from `kibana/x-pack/plugins/exploratory_view`.
+Note: Run the following commands from `kibana/x-pack/plugins/observability_solution/exploratory_view`.
 
 ### Run unit tests
 
