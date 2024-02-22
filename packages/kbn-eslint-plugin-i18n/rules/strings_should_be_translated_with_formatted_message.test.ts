@@ -118,7 +118,8 @@ function AnotherComponent() {
   },
   {
     name: 'When no import of the translation module is present, the import line should be added',
-    filename: '/x-pack/plugins/observability_solution/observability/public/yet_another_component.tsx',
+    filename:
+      '/x-pack/plugins/observability_solution/observability/public/yet_another_component.tsx',
     code: `
 import React from 'react';
 
