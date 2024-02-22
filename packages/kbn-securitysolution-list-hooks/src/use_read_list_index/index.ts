@@ -38,7 +38,7 @@ export const useReadListIndex = ({
       retry: false,
       refetchOnWindowFocus: false,
       enabled: isEnabled,
-      staleTime: Infinity
+      staleTime: Infinity,
     }
   );
 
