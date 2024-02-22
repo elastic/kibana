@@ -199,7 +199,7 @@ export const navigationTree: NavigationTreeDefinition = {
           breadcrumbStatus: 'hidden',
           children: [
             {
-              title: i18n.translate('xpack.severlessObservability.nav.synthetics.overviewItem', {
+              title: i18n.translate('xpack.serverlessObservability.nav.synthetics.overviewItem', {
                 defaultMessage: 'Overview',
               }),
               id: 'synthetics-overview',
@@ -209,7 +209,7 @@ export const navigationTree: NavigationTreeDefinition = {
             {
               link: 'synthetics:certificates',
               title: i18n.translate(
-                'xpack.severlessObservability.nav.synthetics.certificatesItem',
+                'xpack.serverlessObservability.nav.synthetics.certificatesItem',
                 {
                   defaultMessage: 'TLS Certificates',
                 }
