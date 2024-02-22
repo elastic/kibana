@@ -33,9 +33,12 @@ export const additionalFieldGroups = [
       showInAccordion: true,
       hideDetails: false,
       hideIfEmpty: true,
-      title: i18n.translate('unifiedFieldList.useGroupedFields.smartFieldsLabel', {
-        defaultMessage: 'Smart fields',
-      }),
+      title: i18n.translate(
+        'xpack.logsExplorer.unifiedFieldList.useGroupedFields.smartFieldsLabel',
+        {
+          defaultMessage: 'Smart fields',
+        }
+      ),
     },
   },
 ];
