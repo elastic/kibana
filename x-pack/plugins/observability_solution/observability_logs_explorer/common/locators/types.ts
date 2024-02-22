@@ -7,3 +7,7 @@
 export interface ObsLogsExplorerLocatorDependencies {
   useHash: boolean;
 }
+
+export interface DatasetQualityLocatorDependencies {
+  useHash: boolean;
+}
