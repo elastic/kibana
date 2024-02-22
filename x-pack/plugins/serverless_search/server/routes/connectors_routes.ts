@@ -352,7 +352,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-   async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await updateConnectorScheduling(
         client.asCurrentUser,
