@@ -19,7 +19,7 @@ export const LOG_RATE_ANALYSIS_SETTINGS = {
    */
   FREQUENT_ITEMS_SETS_FIELD_VALUE_LIMIT: 50,
   /**
-   * The number of terms by field to fetch for the zero docs fallback analysis
+   * The number of terms by field to fetch for the zero docs fallback analysis.
    */
   TOP_TERMS_FALLBACK_SIZE: 100,
 } as const;
