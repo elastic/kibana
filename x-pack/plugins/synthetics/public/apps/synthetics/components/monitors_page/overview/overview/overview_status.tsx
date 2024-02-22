@@ -51,7 +51,7 @@ export function OverviewStatus() {
             pending: 0,
           });
           break;
-        case 'down': {
+        case 'down':
           setStatusConfig({
             up: 0,
             down: status?.down || 0,
@@ -59,8 +59,7 @@ export function OverviewStatus() {
             pending: 0,
           });
           break;
-        }
-        case 'disabled': {
+        case 'disabled':
           setStatusConfig({
             up: 0,
             down: 0,
@@ -68,7 +67,14 @@ export function OverviewStatus() {
             pending: 0,
           });
           break;
-        }
+        case 'pending':
+          setStatusConfig({
+            up: 0,
+            down: 0,
+            disabledCount: 0,
+            pending: status?.pending || 0,
+          });
+          break;
       }
     } else if (status) {
       setStatusConfig({
