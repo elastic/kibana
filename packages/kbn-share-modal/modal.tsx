@@ -17,6 +17,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiForm,
+  EuiCopy,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -25,13 +26,14 @@ export interface ModalProps {
   onClose: () => void;
   tabs: Array<{ id: string; name: string; content: ReactElement }>;
   modalBodyDescriptions: Array<{ id: string; description: any }>;
+  copyData: string;
 }
 
 /**
  * <ShareModal objectType={} />
  */
 
-export const ShareModal = ({ onClose, objectType, tabs, modalBodyDescriptions }: ModalProps) => {
+export const ShareModal = ({ onClose, objectType, tabs, copyData }: ModalProps) => {
   const [selectedTabId, setSelectedTabId] = useState('link');
 
   const onSelectedTabChanged = (id: string) => {
@@ -57,9 +59,13 @@ export const ShareModal = ({ onClose, objectType, tabs, modalBodyDescriptions }:
   const renderButtons = (id: string) => {
     if (id === 'link') {
       return (
-        <EuiButton fill data-test-subj="copyShareUrlButton">
-          <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
-        </EuiButton>
+        <EuiCopy textToCopy={copyData}>
+          {(copy) => (
+            <EuiButton fill data-test-subj="copyShareUrlButton" onClick={copy}>
+              <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
+            </EuiButton>
+          )}
+        </EuiCopy>
       );
     } else if (id === 'embed') {
       return (

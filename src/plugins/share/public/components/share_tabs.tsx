@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from '@kbn/core-capabilities-common';
-import React from 'react';
+import React, { useState } from 'react';
 import { ShareModal } from '@kbn/share-modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -53,6 +53,8 @@ export const ShareMenuTabs = ({
   isDirty,
   isEmbedded,
 }: ShareContextTabProps) => {
+  const [data, setData] = useState<string>('');
+
   const getTabs = () => {
     const tabs = [];
 
@@ -70,6 +72,8 @@ export const ShareMenuTabs = ({
           objectId={objectId}
           isDirty={isDirty}
           isEmbedded={isEmbedded}
+          onClose={onClose}
+          setCopyLinkData={setData}
         />
       ),
     });
@@ -122,6 +126,7 @@ export const ShareMenuTabs = ({
       modalBodyDescriptions={getModalBodyDescriptions()}
       onClose={onClose}
       tabs={getTabs()}
+      copyData={data}
     />
   );
 };
