@@ -7,8 +7,10 @@
 
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
+  apiHasParentApi,
   apiIsOfType,
   apiPublishesPartialLocalUnifiedSearch,
+  HasParentApi,
   PublishesLocalUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { KibanaLocation } from '@kbn/share-plugin/public';
@@ -20,7 +22,7 @@ import * as shared from './shared';
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
 export interface ExploreDataChartActionContext extends ApplyGlobalFilterActionContext {
-  embeddable: Partial<PublishesLocalUnifiedSearch>;
+  embeddable: PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>;
 }
 
 /**
@@ -43,7 +45,9 @@ export class ExploreDataChartAction
     if (apiIsOfType(embeddable, 'map')) {
       return false; // TODO: https://github.com/elastic/kibana/issues/73043
     }
-    return super.isCompatible(api);
+    return (
+      apiPublishesPartialLocalUnifiedSearch(api) && apiHasParentApi(api) && super.isCompatible(api)
+    );
   }
 
   protected readonly getLocation = async (
@@ -62,12 +66,13 @@ export class ExploreDataChartAction
       api.timeFieldName
     );
 
+    const { embeddable } = api;
     const params: DiscoverAppLocatorParams = {
-      filters,
-      timeRange,
+      filters: [...filters, ...(embeddable.parentApi.localFilters?.getValue() ?? [])],
+      timeRange: timeRange ?? embeddable.parentApi.localTimeRange?.getValue(),
+      query: embeddable.parentApi.localQuery?.getValue(),
     };
 
-    const { embeddable } = api;
     params.dataViewId = shared.getDataViews(embeddable)[0] || undefined;
     if (apiPublishesPartialLocalUnifiedSearch(embeddable)) {
       if (embeddable.localTimeRange && !params.timeRange)

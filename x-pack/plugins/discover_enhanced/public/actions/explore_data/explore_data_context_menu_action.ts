@@ -45,14 +45,22 @@ export class ExploreDataContextMenuAction
 
     const params: DiscoverAppLocatorParams = {};
     params.dataViewId = shared.getDataViews(embeddable)[0] || undefined;
-    if (apiHasParentApi(embeddable) && apiPublishesPartialLocalUnifiedSearch(embeddable)) {
-      if (embeddable.localTimeRange) params.timeRange = embeddable.localTimeRange.getValue();
-      if (embeddable.localQuery) params.query = embeddable.localQuery.getValue();
-      if (embeddable.localFilters) {
-        const filters = embeddable.localFilters.getValue() ?? [];
+
+    if (
+      apiHasParentApi(embeddable) &&
+      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
+    ) {
+      /** This action does not pass its own local state, it only passes the parent API state */
+      if (embeddable.parentApi.localTimeRange)
+        params.timeRange = embeddable.parentApi.localTimeRange.getValue();
+      if (embeddable.parentApi.localQuery)
+        params.query = embeddable.parentApi.localQuery.getValue();
+      if (embeddable.parentApi.localFilters) {
+        const filters = embeddable.parentApi.localFilters.getValue() ?? [];
         params.filters = [...filters, ...(params.filters || [])];
       }
     }
+
     const location = await locator.getLocation(params);
     return location;
   }
