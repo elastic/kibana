@@ -38,7 +38,11 @@ import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
+import {
+  infraCustomDashboardsSavedObjectType,
+  inventoryViewSavedObjectType,
+  metricsExplorerViewSavedObjectType,
+} from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { RulesService } from './services/rules';
@@ -199,6 +203,7 @@ export class InfraServerPlugin
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
+    core.savedObjects.registerType(infraCustomDashboardsSavedObjectType);
     if (this.config.featureFlags.metricsExplorerEnabled) {
       core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     }
@@ -259,21 +264,27 @@ export class InfraServerPlugin
       ]);
     }
 
-    initInfraServer(this.libs);
     registerRuleTypes(plugins.alerting, this.libs, this.config);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
       async (context, request) => {
-        const soClient = (await context.core).savedObjects.client;
-        const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const uiSettingsClient = coreContext.uiSettings.client;
+        const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
+          request,
+          savedObjectsClient
+        );
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
         return {
           mlAnomalyDetectors,
           mlSystem,
           spaceId,
+          savedObjectsClient,
+          uiSettingsClient,
         };
       }
     );
@@ -287,7 +298,7 @@ export class InfraServerPlugin
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, pluginsStart: InfraServerPluginStartDeps) {
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
@@ -297,6 +308,8 @@ export class InfraServerPlugin
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
     });
+
+    initInfraServer(this.libs, core, pluginsStart);
 
     return {
       inventoryViews,

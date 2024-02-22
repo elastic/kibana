@@ -736,13 +736,17 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts"
               },
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/usage/event_tracker.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
               },
@@ -892,11 +896,11 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/mock.tsx"
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/mock.tsx"
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/service/create_chat_service.test.ts"
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/create_chat_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1080,11 +1084,11 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/hooks/use_chat.test.ts"
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.test.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/service/create_mock_chat_service.ts"
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/create_mock_chat_service.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
