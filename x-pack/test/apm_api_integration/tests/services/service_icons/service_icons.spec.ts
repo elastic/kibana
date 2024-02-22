@@ -44,7 +44,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Service icons when data is generated', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177662
+  registry.when.skip('Service icons when data is generated', { config: 'basic', archives: [] }, () => {
     let body: ServiceIconMetadata;
     let status: number;
 
