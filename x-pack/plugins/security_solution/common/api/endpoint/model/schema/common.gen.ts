@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { AlertIds } from '../../../common_schemas/alert.gen';
+import { AlertIds } from '../../../model/alert.gen';
 
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();

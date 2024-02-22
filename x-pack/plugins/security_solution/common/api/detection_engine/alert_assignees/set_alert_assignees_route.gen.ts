@@ -16,8 +16,8 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { AlertIds } from '../../common_schemas/alert.gen';
-import { NonEmptyString } from '../../common_schemas/primitives.gen';
+import { AlertIds } from '../../model/alert.gen';
+import { NonEmptyString } from '../../model/primitives.gen';
 
 export type AlertAssignees = z.infer<typeof AlertAssignees>;
 export const AlertAssignees = z.object({

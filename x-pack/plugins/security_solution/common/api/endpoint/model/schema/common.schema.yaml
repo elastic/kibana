@@ -144,7 +144,7 @@ components:
         endpoint_ids:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
-          $ref: '../../../common_schemas/alert.schema.yaml#/components/schemas/AlertIds'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
         case_ids:
           $ref: '#/components/schemas/CaseIds'
         comment:

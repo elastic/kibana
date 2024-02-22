@@ -7,7 +7,7 @@ components:
   x-codegen-enabled: true
   schemas:
     RuleObjectId:
-      $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/UUID'
+      $ref: '../../../model/primitives.schema.yaml#/components/schemas/UUID'
 
     RuleSignatureId:
       type: string
@@ -278,9 +278,9 @@ components:
       type: object
       properties:
         name:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         type:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         ecs:
           type: boolean
       required:
@@ -321,11 +321,11 @@ components:
       type: object
       properties:
         package:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         version:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         integration:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       required:
         - package
         - version
@@ -343,7 +343,7 @@ components:
         field_names:
           type: array
           items:
-            $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           minItems: 1
       required:
         - field_names
@@ -415,7 +415,7 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
         uuid:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         alerts_filter:
           $ref: '#/components/schemas/RuleActionAlertsFilter'
         frequency:
@@ -442,10 +442,10 @@ components:
       type: object
       properties:
         id:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: ID of the exception container
         list_id:
-          $ref: '../../../common_schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: List ID of the exception container
         type:
           $ref: '#/components/schemas/ExceptionListType'
