@@ -352,6 +352,15 @@ export class Plugin
         };
         registerSloAlertsEmbeddableFactory();
 
+        const registerSloErrorBudgetEmbeddableFactory = async () => {
+          const { SloErrorBudgetEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/error_budget/slo_error_budget_embeddable_factory'
+          );
+          const factory = new SloErrorBudgetEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloErrorBudgetEmbeddableFactory();
+
         const registerAsyncSloAlertsUiActions = async () => {
           if (pluginsSetup.uiActions) {
             const { registerSloAlertsUiActions } = await import('./ui_actions');

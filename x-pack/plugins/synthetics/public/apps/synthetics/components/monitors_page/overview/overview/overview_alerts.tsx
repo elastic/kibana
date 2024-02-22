@@ -44,6 +44,11 @@ export const useMonitorQueryIds = () => {
       case 'disabled':
         monitorIds = status?.disabledMonitorQueryIds ?? [];
         break;
+      case 'pending':
+        monitorIds = status
+          ? Object.entries(status.pendingConfigs).map(([id, config]) => config.monitorQueryId)
+          : [];
+        break;
       default:
         break;
     }
