@@ -12,7 +12,7 @@ import { createBulkErrorObject } from '../../../routes/utils';
 
 /**
  * Helper to check if all the exception lists referenced on a
- * rule exist. Returns updated exception lists reference array.
+ * rule exist. Updates rule exception lists reference array.
  * This helper assumes that the search for existing exception lists
  * has been batched and is simply checking if it's within the param
  * that contains existing lists. This is to avoid doing one call per
@@ -21,20 +21,20 @@ import { createBulkErrorObject } from '../../../routes/utils';
  * @param existingLists {object} - a dictionary of sorts that uses list_id as key
  * @returns {array} tuple of updated exception references and reported errors
  */
-export const checkRuleExceptionReferences = ({
+export const sanitizeRuleExceptionReferences = ({
   rule,
   existingLists,
 }: {
   rule: RuleToImport;
   existingLists: Record<string, ExceptionListSchema>;
-}): [BulkError[], ListArray] => {
-  let ruleExceptions: ListArray = [];
-  let errors: BulkError[] = [];
+}): BulkError[] => {
+  const ruleExceptions: ListArray = [];
+  const errors: BulkError[] = [];
   const { rule_id: ruleId } = rule;
   const exceptionLists = rule.exceptions_list ?? [];
 
   if (!exceptionLists.length) {
-    return [[], []];
+    return [];
   }
 
   for (const exceptionList of exceptionLists) {
@@ -45,23 +45,21 @@ export const checkRuleExceptionReferences = ({
       matchingList.namespace_type === exceptionList.namespace_type &&
       matchingList.type === exceptionList.type
     ) {
-      ruleExceptions = [
-        ...ruleExceptions,
-        { ...exceptionList, id: existingLists[exceptionList.list_id].id },
-      ];
+      ruleExceptions.push({ ...exceptionList, id: existingLists[exceptionList.list_id].id });
     } else {
       // If exception is not found remove link. Also returns
       // this error to notify a user of the action taken.
-      errors = [
-        ...errors,
+      errors.push(
         createBulkErrorObject({
           ruleId,
           statusCode: 400,
           message: `Rule with rule_id: "${ruleId}" references a non existent exception list of list_id: "${exceptionList.list_id}". Reference has been removed.`,
-        }),
-      ];
+        })
+      );
     }
   }
 
-  return [errors, ruleExceptions];
+  rule.exceptions_list = ruleExceptions;
+
+  return errors;
 };

@@ -17,14 +17,9 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
-import { createBulkErrorObject } from '../../../routes/utils';
-import { createRules } from '../crud/create_rules';
-import { readRules } from '../crud/read_rules';
-import { updateRules } from '../crud/update_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../machine_learning/validation';
 import { wrapInMacrotask } from '../../utils/wrap_in_macrotask';
-import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import { importRulesChunk } from './import_rules_chunk';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -72,89 +67,26 @@ export const importRules = async ({
     return [...rulesResponseAcc];
   }
 
-  const importRuleResponses = [...rulesResponseAcc];
+  const result = [...rulesResponseAcc];
   const ruleChunks = chunk(IMPORT_RULES_CHUNK_SIZE, rules);
-  const importRule = async (ruleToImport: PromiseFromStreams): Promise<ImportRuleResponse> => {
-    if (ruleToImport instanceof Error) {
-      // If the JSON object had a validation or parse error then we return
-      // early with the error and an (unknown) for the ruleId
-      return createBulkErrorObject({
-        statusCode: 400,
-        message: ruleToImport.message,
-      });
-    }
-
-    try {
-      const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
-        rule: ruleToImport,
-        existingLists,
-      });
-
-      for (const exceptionError of exceptionErrors) {
-        importRuleResponses.push(exceptionError);
-      }
-
-      throwAuthzError(await mlAuthz.validateRuleType(ruleToImport.type));
-      const existingRule = await readRules({
-        rulesClient,
-        ruleId: ruleToImport.rule_id,
-        id: undefined,
-      });
-
-      if (existingRule != null && !overwriteRules) {
-        return createBulkErrorObject({
-          ruleId: ruleToImport.rule_id,
-          statusCode: 409,
-          message: `rule_id: "${ruleToImport.rule_id}" already exists`,
-        });
-      }
-
-      if (existingRule == null) {
-        await createRules({
-          rulesClient,
-          params: {
-            ...ruleToImport,
-            exceptions_list: [...exceptions],
-          },
-          allowMissingConnectorSecrets,
-        });
-
-        return {
-          rule_id: ruleToImport.rule_id,
-          status_code: 200,
-        };
-      }
-
-      await updateRules({
-        rulesClient,
-        existingRule,
-        ruleUpdate: {
-          ...ruleToImport,
-          exceptions_list: [...exceptions],
-        },
-        allowMissingConnectorSecrets,
-      });
-
-      return {
-        rule_id: ruleToImport.rule_id,
-        status_code: 200,
-      };
-    } catch (err) {
-      return createBulkErrorObject({
-        ruleId: ruleToImport.rule_id,
-        statusCode: err.statusCode ?? 400,
-        message: err.message,
-      });
-    }
-  };
 
   for (const rulesChunk of ruleChunks) {
-    const chunkImportRuleResponses = await Promise.all(rulesChunk.map(wrapInMacrotask(importRule)));
+    const importRulesChunkInMacrotask = wrapInMacrotask(() =>
+      importRulesChunk({
+        rulesToImport: rulesChunk,
+        mlAuthz,
+        overwriteExistingRules: overwriteRules,
+        rulesClient,
+        existingLists,
+        allowMissingConnectorSecrets,
+      })
+    );
+    const importRulesChunkResponses = await importRulesChunkInMacrotask();
 
-    for (const importRuleResponse of chunkImportRuleResponses) {
-      importRuleResponses.push(importRuleResponse);
+    for (const importResponse of importRulesChunkResponses) {
+      result.push(importResponse);
     }
   }
 
-  return importRuleResponses;
+  return result;
 };
