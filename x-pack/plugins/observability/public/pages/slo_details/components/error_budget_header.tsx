@@ -37,7 +37,7 @@ export function ErrorBudgetHeader({
         <EuiFlexGroup>
           {showTitle && (
             <EuiFlexItem>
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" data-test-subj="errorBudgetPanelTitle">
                 <h2>
                   {i18n.translate(
                     'xpack.observability.slo.sloDetails.errorBudgetChartPanel.title',

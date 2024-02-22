@@ -17,7 +17,8 @@ jest.mock('../../../utils/kibana_react');
 const useKibanaMock = useKibana as jest.Mock;
 
 describe('In Observability Context', () => {
-  it('renders Error Budget Actions button on mouse over', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         executionContext: {
@@ -27,15 +28,25 @@ describe('In Observability Context', () => {
         },
       },
     });
+  });
+  it('renders Error Budget Actions button on mouse over', async () => {
     const slo = buildSlo();
 
     render(<ErrorBudgetHeader isMouseOver={true} slo={slo} />);
     expect(screen.queryByTestId('o11yErrorBudgetActionsButton')).toBeTruthy();
   });
+
+  it('renders "Error budget burn down" title', () => {
+    const slo = buildSlo();
+    render(<ErrorBudgetHeader isMouseOver={true} slo={slo} />);
+    expect(screen.queryByTestId('errorBudgetPanelTitle')).toBeTruthy();
+  });
 });
 
 describe('In Dashboard Context', () => {
-  it('does not render Error budget Actions button on mouse over', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
     useKibanaMock.mockReturnValue({
       services: {
         executionContext: {
@@ -45,10 +56,16 @@ describe('In Dashboard Context', () => {
         },
       },
     });
+  });
+  it('does not render Error budget Actions button on mouse over', async () => {
     const slo = buildSlo();
-
     render(<ErrorBudgetHeader isMouseOver={true} slo={slo} />);
-
     expect(screen.queryByTestId('o11yErrorBudgetActionsButton')).toBeFalsy();
+  });
+
+  it('does not render the "Error budget burn down" title', () => {
+    const slo = buildSlo();
+    render(<ErrorBudgetHeader showTitle={false} isMouseOver={true} slo={slo} />);
+    expect(screen.queryByTestId('errorBudgetPanelTitle')).toBeFalsy();
   });
 });
