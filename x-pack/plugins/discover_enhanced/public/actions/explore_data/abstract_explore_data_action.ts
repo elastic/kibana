@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -13,9 +14,11 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
 import {
   apiCanAccessViewMode,
+  apiHasParentApi,
   apiHasType,
   apiIsOfType,
   apiPublishesDataViews,
+  apiPublishesPartialLocalUnifiedSearch,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
@@ -63,7 +66,48 @@ export abstract class AbstractExploreDataAction {
 
   constructor(protected readonly params: Params) {}
 
-  protected abstract getLocation(api: EmbeddableApiContext): Promise<KibanaLocation>;
+  protected async getLocation(
+    { embeddable }: EmbeddableApiContext,
+    eventParams?: DiscoverAppLocatorParams
+  ): Promise<KibanaLocation> {
+    const { plugins } = this.params.start();
+    const { locator } = plugins.discover;
+
+    if (!locator) {
+      throw new Error('Discover URL locator not available.');
+    }
+
+    const parentParams: DiscoverAppLocatorParams = {};
+    if (
+      apiHasParentApi(embeddable) &&
+      apiPublishesPartialLocalUnifiedSearch(embeddable.parentApi)
+    ) {
+      parentParams.filters = embeddable.parentApi.localFilters?.getValue() ?? [];
+      parentParams.query = embeddable.parentApi.localQuery?.getValue();
+      parentParams.timeRange = embeddable.parentApi.localTimeRange?.getValue();
+    }
+
+    const childParams: DiscoverAppLocatorParams = {};
+    if (apiPublishesPartialLocalUnifiedSearch(embeddable)) {
+      childParams.filters = embeddable.localFilters?.getValue() ?? [];
+      childParams.query = embeddable.localQuery?.getValue();
+      childParams.timeRange = embeddable.localTimeRange?.getValue();
+    }
+
+    const params: DiscoverAppLocatorParams = {
+      dataViewId: shared.getDataViews(embeddable)[0],
+      filters: [
+        ...(parentParams.filters ?? []),
+        ...(childParams.filters ?? []),
+        ...(eventParams?.filters ?? []),
+      ],
+      query: childParams.query ?? parentParams.query,
+      timeRange: eventParams?.timeRange ?? childParams.timeRange ?? parentParams.timeRange,
+    };
+
+    const location = await locator.getLocation(params);
+    return location;
+  }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
     if (!compatibilityCheck(embeddable)) return false;
