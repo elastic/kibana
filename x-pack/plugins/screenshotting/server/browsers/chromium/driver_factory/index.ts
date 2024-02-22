@@ -167,7 +167,7 @@ export class HeadlessChromiumDriverFactory {
             env: {
               TZ: browserTimezone,
             },
-            headless: 'new',
+            headless: true,
             protocolTimeout: 0,
           });
         } catch (err) {
@@ -312,7 +312,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
+    const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page as any, 'console').pipe(
       concatMap(async (line) => {
         if (line.type() === 'error') {
           logger
@@ -335,7 +335,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page as any, 'pageerror').pipe(
       map((err) => {
         logger.warn(
           `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
@@ -343,7 +343,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<HTTPRequest>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent<HTTPRequest>(page as any, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -378,7 +378,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
-    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
+    const pageError$ = Rx.fromEvent<Error>(page as any, 'error').pipe(
       map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
     );
 
