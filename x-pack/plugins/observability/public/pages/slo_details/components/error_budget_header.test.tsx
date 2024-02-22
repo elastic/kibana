@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { useKibana } from '../../../utils/kibana_react';
 import { render } from '../../../utils/test_helper';
 import { buildSlo } from '../../../data/slo/slo';
