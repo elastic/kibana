@@ -140,6 +140,7 @@ export async function createAgentPolicyWithPackages({
     user,
     id: agentPolicyId,
     authorizationHeader,
+    skipDeploy: true, // skip deploying the policy until package policies are added
   });
 
   // Create the fleet server package policy and add it to agent policy.
