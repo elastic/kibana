@@ -33,15 +33,20 @@ type ConnectorConfigurationStep = 'link' | 'configure' | 'connect' | 'connected'
 export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ connector }) => {
   const [currentStep, setCurrentStep] = useState<ConnectorConfigurationStep>('link');
   useEffect(() => {
-    const step =
-      connector.status === ConnectorStatus.CREATED
-        ? 'link'
-        : connector.status === ConnectorStatus.NEEDS_CONFIGURATION &&
-          Object.keys(connector.configuration || {}).length > 0
-        ? 'configure'
-        : connector.status === ConnectorStatus.CONFIGURED
-        ? 'connect'
-        : 'connected';
+    let step: ConnectorConfigurationStep = 'link';
+    switch (connector.status) {
+      case ConnectorStatus.CREATED:
+        step = 'link';
+        break;
+      case ConnectorStatus.NEEDS_CONFIGURATION:
+        step = Object.keys(connector.configuration || {}).length > 0 ? 'configure' : 'link';
+        break;
+      case ConnectorStatus.CONFIGURED:
+        step = 'connect';
+        break;
+      default:
+        step = 'connected';
+    }
     setCurrentStep(step);
   }, [connector.status, setCurrentStep, connector.configuration]);
   const steps: EuiStepsHorizontalProps['steps'] = [
