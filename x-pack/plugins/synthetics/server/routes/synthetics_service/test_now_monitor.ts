@@ -27,6 +27,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
     const { monitorId } = routeContext.request.params;
     return triggerTestNow(monitorId, routeContext);
   },
+  writeAccess: true,
 });
 
 export const triggerTestNow = async (
