@@ -48,16 +48,15 @@ const defaultFields: Fields = {
 const CorrelationIdField: React.FunctionComponent<
   Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables' | 'errors'> & {
     correlationId: string | null;
-    selectedActionGroupId?: string;
     editSubActionProperty: (key: string, value: any) => void;
-    isTestResolveAction?: boolean;
+    showOnlyCorrelationId?: boolean;
   }
 > = ({
   index,
   messageVariables,
   correlationId,
   editSubActionProperty,
-  selectedActionGroupId,
+  showOnlyCorrelationId,
   errors,
 }) => {
   const { docLinks } = useKibana().services;
@@ -70,7 +69,7 @@ const CorrelationIdField: React.FunctionComponent<
         errors['subActionParams.incident.correlation_id'] !== undefined &&
         errors['subActionParams.incident.correlation_id'].length > 0 &&
         !correlationId &&
-        selectedActionGroupId === ACTION_GROUP_RECOVERED
+        showOnlyCorrelationId
       }
       helpText={
         <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
@@ -80,18 +79,9 @@ const CorrelationIdField: React.FunctionComponent<
           />
         </EuiLink>
       }
-      error={errors['subActionParams.incident.correlation_id']}
-      isInvalid={
-        isTestResolveAction &&
-        errors['subActionParams.incident.correlation_id'] !== undefined &&
-        errors['subActionParams.incident.correlation_id'].length > 0 &&
-        correlationId !== undefined
-      }
       labelAppend={
         <EuiText size="xs" color="subdued">
-          {selectedActionGroupId !== ACTION_GROUP_RECOVERED
-            ? i18n.OPTIONAL_LABEL
-            : i18n.REQUIRED_LABEL}
+          {!showOnlyCorrelationId ? i18n.OPTIONAL_LABEL : i18n.REQUIRED_LABEL}
         </EuiText>
       }
     >
@@ -401,7 +391,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
                     messageVariables={messageVariables}
                     correlationId={incident.correlation_id}
                     editSubActionProperty={editSubActionProperty}
-                    selectedActionGroupId={selectedActionGroupId}
+                    showOnlyCorrelationId={showOnlyCorrelationId}
                     errors={errors}
                   />
                 </EuiFlexItem>
@@ -481,7 +471,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           messageVariables={messageVariables}
           correlationId={incident.correlation_id}
           editSubActionProperty={editSubActionProperty}
-          selectedActionGroupId={selectedActionGroupId}
+          showOnlyCorrelationId={showOnlyCorrelationId}
           errors={errors}
         />
       )}
