@@ -49,6 +49,11 @@ export interface CasesContextValue {
   dispatch: CasesContextValueDispatch;
 }
 
+export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {
+  appId?: string;
+  appTitle?: string;
+}
+
 export interface CasesContextProps
   extends Pick<
     CasesContextValue,
@@ -154,7 +159,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
     [getFilesClient, owner]
   );
 
-  return (
+  return isCasesContextValue(value) ? (
     <QueryClientProvider client={queryClient}>
       <CasesContext.Provider value={value}>
         {applyFilesContext(
@@ -165,10 +170,13 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
         )}
       </CasesContext.Provider>
     </QueryClientProvider>
-  );
+  ) : null;
 };
-
 CasesProvider.displayName = 'CasesProvider';
+
+function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
+  return value.appId != null && value.appTitle != null && value.permissions != null;
+}
 
 // eslint-disable-next-line import/no-default-export
 export default CasesProvider;
