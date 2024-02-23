@@ -185,6 +185,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
   const [isSpaceReduced, setIsSpaceReduced] = useState(false);
+  const [editorWidth, setEditorWidth] = useState(0);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
@@ -242,7 +244,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections),
-    Boolean(editorIsInline)
+    Boolean(editorIsInline),
+    isHistoryOpen
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -538,6 +541,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onResize = ({ width }: { width: number }) => {
     setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
     calculateVisibleCode(width);
+    setEditorWidth(width);
     if (editor1.current) {
       editor1.current.layout({ width, height: editorHeight });
     }
@@ -871,7 +875,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     {isCompactFocused && !isCodeEditorExpanded && (
                       <EditorFooter
                         lines={lines}
-                        containerCSS={styles.bottomContainer}
+                        styles={{
+                          bottomContainer: styles.bottomContainer,
+                          historyContainer: styles.historyContainer,
+                        }}
                         {...editorMessages}
                         onErrorClick={onErrorClick}
                         runQuery={() => {
@@ -887,6 +894,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         isLoading={isQueryLoading}
                         allowQueryCancellation={allowQueryCancellation}
                         hideTimeFilterInfo={hideTimeFilterInfo}
+                        isHistoryOpen={isHistoryOpen}
+                        setIsHistoryOpen={setIsHistoryOpen}
+                        containerWidth={editorWidth}
                       />
                     )}
                   </div>
@@ -971,7 +981,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       {isCodeEditorExpanded && (
         <EditorFooter
           lines={lines}
-          containerCSS={styles.bottomContainer}
+          styles={{
+            bottomContainer: styles.bottomContainer,
+            historyContainer: styles.historyContainer,
+          }}
           onErrorClick={onErrorClick}
           runQuery={() => {
             onQuerySubmit();
@@ -985,6 +998,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           allowQueryCancellation={allowQueryCancellation}
           hideTimeFilterInfo={hideTimeFilterInfo}
           {...editorMessages}
+          isHistoryOpen={isHistoryOpen}
+          setIsHistoryOpen={setIsHistoryOpen}
+          containerWidth={editorWidth}
         />
       )}
       {isCodeEditorExpanded && (

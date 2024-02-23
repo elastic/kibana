@@ -10,7 +10,7 @@ import React, { memo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EuiCode,
+  // EuiCode,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +22,7 @@ import {
 import { Interpolation, Theme, css } from '@emotion/react';
 import type { MonacoMessage } from './helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { QueryHistoryAction, QueryHistory } from './query_history';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -60,12 +61,18 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
 
 interface EditorFooterProps {
   lines: number;
-  containerCSS: Interpolation<Theme>;
+  styles: {
+    bottomContainer: Interpolation<Theme>;
+    historyContainer: Interpolation<Theme>;
+  };
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoMessage) => void;
   runQuery: () => void;
+  isHistoryOpen: boolean;
+  setIsHistoryOpen: (status: boolean) => void;
+  containerWidth: number;
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
   editorIsInline?: boolean;
@@ -77,7 +84,7 @@ interface EditorFooterProps {
 
 export const EditorFooter = memo(function EditorFooter({
   lines,
-  containerCSS,
+  styles,
   errors,
   warnings,
   detectTimestamp,
@@ -90,93 +97,111 @@ export const EditorFooter = memo(function EditorFooter({
   isLoading,
   allowQueryCancellation,
   hideTimeFilterInfo,
+  isHistoryOpen,
+  containerWidth,
+  setIsHistoryOpen,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
+
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="spaceBetween"
-      data-test-subj="TextBasedLangEditor-footer"
-      css={containerCSS}
-      responsive={false}
-    >
+    <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
-            <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
-              <p>
-                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
-                  defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                  values: { count: lines },
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          {/* If there is no space and no @timestamp detected hide the information */}
-          {(detectTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
-            <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
-              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
-                    <p>
-                      {isSpaceReduced
-                        ? '@timestamp'
-                        : detectTimestamp
-                        ? i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
-                            {
-                              defaultMessage: '@timestamp found',
-                            }
-                          )
-                        : i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
-                            {
-                              defaultMessage: '@timestamp not found',
-                            }
-                          )}
-                    </p>
-                  </EuiText>
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          data-test-subj="TextBasedLangEditor-footer"
+          css={styles.bottomContainer}
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="TextBasedLangEditor-footer-lines"
+                >
+                  <p>
+                    {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
+                      defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                      values: { count: lines },
+                    })}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              {/* If there is no space and no @timestamp detected hide the information */}
+              {(detectTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
+                <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+                  <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText
+                        size="xs"
+                        color="subdued"
+                        data-test-subj="TextBasedLangEditor-date-info"
+                      >
+                        <p>
+                          {isSpaceReduced
+                            ? '@timestamp'
+                            : detectTimestamp
+                            ? i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
+                                {
+                                  defaultMessage: '@timestamp found',
+                                }
+                              )
+                            : i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
+                                {
+                                  defaultMessage: '@timestamp not found',
+                                }
+                              )}
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {errors && errors.length > 0 && (
-            <ErrorsWarningsFooterPopover
-              isPopoverOpen={isErrorPopoverOpen}
-              items={errors}
-              type="error"
-              setIsPopoverOpen={(isOpen) => {
-                if (isOpen) {
-                  setIsWarningPopoverOpen(false);
-                }
-                setIsErrorPopoverOpen(isOpen);
-              }}
-              onErrorClick={onErrorClick}
-            />
-          )}
-          {warnings && warnings.length > 0 && (
-            <ErrorsWarningsFooterPopover
-              isPopoverOpen={isWarningPopoverOpen}
-              items={warnings}
-              type="warning"
-              setIsPopoverOpen={(isOpen) => {
-                if (isOpen) {
-                  setIsErrorPopoverOpen(false);
-                }
-                setIsWarningPopoverOpen(isOpen);
-              }}
-              onErrorClick={onErrorClick}
-            />
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {!hideRunQueryText && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-            <SubmitFeedbackComponent />
+              )}
+              {errors && errors.length > 0 && (
+                <ErrorsWarningsFooterPopover
+                  isPopoverOpen={isErrorPopoverOpen}
+                  items={errors}
+                  type="error"
+                  setIsPopoverOpen={(isOpen) => {
+                    if (isOpen) {
+                      setIsWarningPopoverOpen(false);
+                    }
+                    setIsErrorPopoverOpen(isOpen);
+                  }}
+                  onErrorClick={onErrorClick}
+                />
+              )}
+              {warnings && warnings.length > 0 && (
+                <ErrorsWarningsFooterPopover
+                  isPopoverOpen={isWarningPopoverOpen}
+                  items={warnings}
+                  type="warning"
+                  setIsPopoverOpen={(isOpen) => {
+                    if (isOpen) {
+                      setIsErrorPopoverOpen(false);
+                    }
+                    setIsWarningPopoverOpen(isOpen);
+                  }}
+                  onErrorClick={onErrorClick}
+                />
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {!hideRunQueryText && (
             <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                <SubmitFeedbackComponent />
+                <QueryHistoryAction
+                  toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+                  isHistoryOpen={isHistoryOpen}
+                />
+                {/* <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
                 <p>
                   {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
@@ -192,71 +217,85 @@ export const EditorFooter = memo(function EditorFooter({
                   font-size: 12px;
                 `}
               >{`${COMMAND_KEY} + Enter`}</EuiCode>
+            </EuiFlexItem> */}
+              </EuiFlexGroup>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
-      {Boolean(editorIsInline) && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-              <SubmitFeedbackComponent isSpaceReduced={isSpaceReduced} />
+          )}
+          {Boolean(editorIsInline) && (
+            <>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="text"
-                  size="s"
-                  fill
-                  onClick={runQuery}
-                  isLoading={isLoading && !allowQueryCancellation}
-                  isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                  data-test-subj="TextBasedLangEditor-run-query-button"
-                  minWidth={isSpaceReduced ? false : undefined}
-                >
-                  <EuiFlexGroup
-                    gutterSize="xs"
-                    responsive={false}
-                    alignItems="center"
-                    justifyContent="spaceBetween"
-                  >
-                    <EuiFlexItem grow={false}>
-                      {allowQueryCancellation && isLoading
-                        ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.cancel', {
-                            defaultMessage: 'Cancel',
-                          })
-                        : isSpaceReduced
-                        ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
-                            defaultMessage: 'Run',
-                          })
-                        : i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                            {
-                              defaultMessage: 'Run query',
-                            }
-                          )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="xs"
-                        css={css`
-                          border: 1px solid
-                            ${Boolean(disableSubmitAction && !allowQueryCancellation)
-                              ? euiTheme.colors.disabled
-                              : euiTheme.colors.emptyShade};
-                          padding: 0 ${euiTheme.size.xs};
-                          font-size: ${euiTheme.size.s};
-                          margin-left: ${euiTheme.size.xs};
-                          border-radius: ${euiTheme.size.xs};
-                        `}
+                <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                  <SubmitFeedbackComponent isSpaceReduced={isSpaceReduced} />
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="text"
+                      size="s"
+                      fill
+                      onClick={runQuery}
+                      isLoading={isLoading && !allowQueryCancellation}
+                      isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                      data-test-subj="TextBasedLangEditor-run-query-button"
+                      minWidth={isSpaceReduced ? false : undefined}
+                    >
+                      <EuiFlexGroup
+                        gutterSize="xs"
+                        responsive={false}
+                        alignItems="center"
+                        justifyContent="spaceBetween"
                       >
-                        {allowQueryCancellation && isLoading ? 'X' : `${COMMAND_KEY}⏎`}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiButton>
+                        <EuiFlexItem grow={false}>
+                          {allowQueryCancellation && isLoading
+                            ? i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.cancel',
+                                {
+                                  defaultMessage: 'Cancel',
+                                }
+                              )
+                            : isSpaceReduced
+                            ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
+                                defaultMessage: 'Run',
+                              })
+                            : i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
+                                {
+                                  defaultMessage: 'Run query',
+                                }
+                              )}
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText
+                            size="xs"
+                            css={css`
+                              border: 1px solid
+                                ${Boolean(disableSubmitAction && !allowQueryCancellation)
+                                  ? euiTheme.colors.disabled
+                                  : euiTheme.colors.emptyShade};
+                              padding: 0 ${euiTheme.size.xs};
+                              font-size: ${euiTheme.size.s};
+                              margin-left: ${euiTheme.size.xs};
+                              border-radius: ${euiTheme.size.xs};
+                            `}
+                          >
+                            {allowQueryCancellation && isLoading ? 'X' : `${COMMAND_KEY}⏎`}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </>
+            </>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {isHistoryOpen && (
+        <EuiFlexItem grow={false}>
+          <QueryHistory
+            containerCSS={styles.historyContainer}
+            runQuery={() => {}}
+            containerWidth={containerWidth}
+          />
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );

@@ -21,7 +21,8 @@ export const textBasedLanguagedEditorStyles = (
   hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
   hasReference: boolean,
-  editorIsInline: boolean
+  editorIsInline: boolean,
+  historyIsOpen: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -82,6 +83,19 @@ export const textBasedLanguagedEditorStyles = (
       paddingRight: euiTheme.size.base,
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      width: 'calc(100% + 2px)',
+      position: 'relative' as 'relative', // cast string to type 'relative',
+      marginTop: 0,
+      marginLeft: 0,
+      marginBottom: 0,
+      borderBottomLeftRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
+      borderBottomRightRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
+    },
+    historyContainer: {
+      border: euiTheme.border.thin,
+      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.lightestShade,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: 0,
