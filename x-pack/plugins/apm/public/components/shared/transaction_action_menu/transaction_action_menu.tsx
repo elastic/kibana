@@ -215,7 +215,6 @@ function ActionMenuSections({
                       label={action.label}
                       href={action.href}
                       onClick={action.onClick}
-                      showNewBadge={action.showNewBadge}
                     />
                   ))}
                 </SectionLinks>

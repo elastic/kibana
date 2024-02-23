@@ -64,7 +64,8 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Service alerts', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177512
+  registry.when.skip('Service alerts', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const synthServices = [
         apm
