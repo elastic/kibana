@@ -6,7 +6,7 @@
  */
 
 import type { PropsOf } from '@elastic/eui';
-import React, { useMemo, createElement, createContext } from 'react';
+import React, { useMemo, createElement, createContext, useContext } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import {
   createKibanaReactContext,
@@ -72,6 +72,10 @@ export const useKibanaEnvironmentContextProvider = (kibanaEnvironment?: KibanaEn
 
   return Provider;
 };
+
+export function useKibanaEnvironmentContext() {
+  return useContext(KibanaEnvironmentContext);
+}
 
 export const createLazyComponentWithKibanaContext = <T extends React.ComponentType<any>>(
   coreSetup: InfraClientCoreSetup,
