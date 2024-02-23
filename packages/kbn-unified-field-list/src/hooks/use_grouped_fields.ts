@@ -43,7 +43,9 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
-  additionalFieldGroups?: Array<FieldListGroups<T>>;
+  additionalFieldGroups?: {
+    smartFields: FieldsGroup<T>['fields'];
+  };
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -184,6 +186,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
+    const smartFields = additionalFieldGroups?.smartFields || [];
+
     let fieldGroupDefinitions: FieldListGroups<T> = {
       SpecialFields: {
         fields: groupedFields.specialFields,
@@ -307,14 +311,20 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           }
         ),
       },
+      SmartFields: {
+        fields: smartFields,
+        fieldCount: smartFields.length,
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        hideDetails: false,
+        hideIfEmpty: true,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.smartFieldsLabel', {
+          defaultMessage: 'Smart fields',
+        }),
+      },
     };
-
-    additionalFieldGroups?.forEach((group) => {
-      fieldGroupDefinitions = {
-        ...fieldGroupDefinitions,
-        ...group,
-      };
-    });
 
     // the fieldsExistenceInfoUnavailable check should happen only for dataview based
     const dataViewFieldsExistenceUnavailable = dataViewId && fieldsExistenceInfoUnavailable;

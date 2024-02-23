@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { FieldListGroups } from '@kbn/unified-field-list';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldsGroup } from '@kbn/unified-field-list/src/types';
 
 export interface FieldListCustomization {
   id: 'field_list';
-  additionalFieldGroups?: Array<FieldListGroups<DataViewField>>;
+  additionalFieldGroups?: {
+    smartFields: FieldsGroup<DataViewField>['fields'];
+  };
 }

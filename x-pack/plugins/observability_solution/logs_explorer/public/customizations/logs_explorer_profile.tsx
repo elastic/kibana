@@ -20,7 +20,7 @@ import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
-import { additionalFieldGroups } from './custom_field_list';
+import { smartFields } from './custom_field_list';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -94,7 +94,9 @@ export const createLogsExplorerProfileCustomizations =
 
     customizations.set({
       id: 'field_list',
-      additionalFieldGroups,
+      additionalFieldGroups: {
+        smartFields,
+      },
     });
 
     /**

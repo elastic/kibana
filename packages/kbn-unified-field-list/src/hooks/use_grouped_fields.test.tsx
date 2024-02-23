@@ -786,21 +786,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       } as DataViewField,
     ];
 
-    const additionalFieldGroups = [
-      {
-        SmartFields: {
-          fields: smartFields,
-          fieldCount: smartFields.length,
-          isAffectedByGlobalFilter: false,
-          isAffectedByTimeFilter: false,
-          isInitiallyOpen: true,
-          showInAccordion: true,
-          hideDetails: false,
-          hideIfEmpty: true,
-          title: 'Smart fields',
-        },
-      },
-    ];
+    const additionalFieldGroups = {
+      smartFields,
+    };
     const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
@@ -811,8 +799,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     });
 
     await waitForNextUpdate();
-
-    const { fieldListGroupedProps } = result.current;
+    const fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
     expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
     expect(

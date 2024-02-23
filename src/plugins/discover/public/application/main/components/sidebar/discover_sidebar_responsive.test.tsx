@@ -54,21 +54,9 @@ const smartFields = [
   } as DataViewField,
 ];
 
-const additionalFieldGroups = [
-  {
-    SmartFields: {
-      fields: smartFields,
-      fieldCount: smartFields.length,
-      isAffectedByGlobalFilter: false,
-      isAffectedByTimeFilter: false,
-      isInitiallyOpen: true,
-      showInAccordion: true,
-      hideDetails: false,
-      hideIfEmpty: true,
-      title: 'Smart fields',
-    },
-  },
-];
+const additionalFieldGroups = {
+  smartFields,
+};
 
 const mockFieldListCustomisation: FieldListCustomization = {
   id: 'field_list',
