@@ -118,16 +118,15 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
 
       if (
-        creationResp?.dataFrameAnalyticsJobsCreated.length &&
-        creationResp?.dataFrameAnalyticsJobsErrors.length === 0
+        creationResp.dataFrameAnalyticsJobsCreated.length &&
+        creationResp.dataFrameAnalyticsJobsErrors.length === 0
       ) {
         setIsJobCreated(true);
         refresh();
         return true;
-      } else if (creationResp?.dataFrameAnalyticsJobsErrors.length) {
+      } else if (creationResp.dataFrameAnalyticsJobsErrors.length) {
         addRequestMessage({
-          error: extractErrorProperties(creationResp?.dataFrameAnalyticsJobsErrors[0].error)
-            .message,
+          error: extractErrorProperties(creationResp.dataFrameAnalyticsJobsErrors[0].error).message,
           message: errorMessage,
         });
         return false;

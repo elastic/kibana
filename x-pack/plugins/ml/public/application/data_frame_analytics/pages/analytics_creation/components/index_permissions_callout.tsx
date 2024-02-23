@@ -48,7 +48,7 @@ export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' 
         <p>
           <FormattedMessage
             id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage"
-            defaultMessage="You don't have the required permissions on the {indexName} index. Refer to the {docLink} documentation for more information on requirements."
+            defaultMessage="You don't have the required permissions on the {indexName} index. Refer to the {docLink} for more information on requirements."
             values={{
               indexName,
               docLink: (
