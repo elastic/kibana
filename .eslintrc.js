@@ -915,7 +915,6 @@ module.exports = {
         'x-pack/plugins/infra/**/*.tsx',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.tsx',
         'x-pack/plugins/observability_solution/observability/**/*.tsx',
-        'x-pack/plugins/observability_solution/observability_onboarding/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_ai_assistant/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_onboarding/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_shared/**/*.tsx',
