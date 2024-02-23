@@ -39,8 +39,8 @@ export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' 
   return (
     <>
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
-          defaultMessage: 'Job cannot be created',
+        title={i18n.translate('xpack.ml.dataframe.analytics.create.permissionsCalloutTitle', {
+          defaultMessage: 'Indices permissions required',
         })}
         iconType="warning"
         color="warning"
