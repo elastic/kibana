@@ -10571,7 +10571,7 @@
               },
               {
                 "plugin": "apmDataAccess",
-                "path": "x-pack/plugins/apm_data_access/server/saved_objects/apm_indices.ts"
+                "path": "x-pack/plugins/observability_solution/apm_data_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "ml",
@@ -10611,7 +10611,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/saved_objects/apm_service_groups.ts"
+                "path": "x-pack/plugins/observability_solution/apm/server/saved_objects/apm_service_groups.ts"
               },
               {
                 "plugin": "savedSearch",

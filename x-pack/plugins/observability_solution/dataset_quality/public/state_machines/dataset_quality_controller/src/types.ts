@@ -6,6 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -30,14 +31,9 @@ interface TableCriteria {
   };
 }
 
-export interface TimeRangeConfig {
-  from: string;
-  to: string;
-  refresh: {
-    isPaused: boolean;
-    interval: number;
-  };
-}
+export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
+  refresh: RefreshInterval;
+};
 
 interface FiltersCriteria {
   inactive: boolean;
