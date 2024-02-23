@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from "react";
+import React from "react";
 
 import {
   EuiButtonEmpty,
@@ -19,8 +19,10 @@ import {
 } from "@elastic/eui";
 
 import { i18n } from "@kbn/i18n";
+import { SummarizationModelName } from "@kbn/ai-playground/types";
 
 import { OpenAIIcon } from "./open_ai_icon";
+
 
 const renderSelectOptions = (label: string) => (
   <EuiFlexGroup alignItems="center">
@@ -33,16 +35,7 @@ const renderSelectOptions = (label: string) => (
   </EuiFlexGroup>
 );
 
-
-enum SummarizationModelName {
-  gpt3_5 = 'gpt-3.5-turbo',
-  gpt3_5_turbo_1106 = 'gpt-3.5-turbo-1106',
-  gpt3_5_turbo_16k = 'gpt-3.5-turbo-16k',
-  gpt3_5_turbo_16k_0613 = 'gpt-3.5-turbo-16k-0613',
-  gpt3_5_turbo = 'gpt-3.5-turbo-instruct',
-}
-
-const Summarization_Model: EuiSuperSelectOption<string>[] = [
+const SummarizationModel: EuiSuperSelectOption<string>[] = [
   {
     value: SummarizationModelName.gpt3_5,
     inputDisplay: renderSelectOptions(SummarizationModelName.gpt3_5),
@@ -72,12 +65,9 @@ interface OpenAISummarizationModelProps {
   onSelect: (key: string) => void;
 }
 
-export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> = ({ model, onSelect, openAIFlyOutOpen }) => {
-
-  const [selectedModel, setSelectedModel] = useState(model ?? SummarizationModelName.gpt3_5_turbo_1106);
+export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> = ({ model = SummarizationModelName.gpt3_5_turbo_1106, onSelect, openAIFlyOutOpen }) => {
 
   const onChange = (value: string) => {
-    setSelectedModel(value);
     onSelect(value);
   };
 
@@ -109,9 +99,9 @@ export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> =
       }
     >
       <EuiSuperSelect
-        options={Summarization_Model}
-        valueOfSelected={selectedModel}
-        onChange={(value) => onChange(value)}
+        options={SummarizationModel}
+        valueOfSelected={model}
+        onChange={onChange}
       />
     </EuiFormRow>
   );
