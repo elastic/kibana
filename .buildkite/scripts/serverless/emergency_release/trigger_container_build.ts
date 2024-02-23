@@ -9,11 +9,23 @@
 import { execSync } from 'child_process';
 import { BuildkiteClient, BuildkiteTriggerStep } from '#pipeline-utils';
 
+const DRY_RUN = !!process.env.DRY_RUN?.match(/^(true|1)$/i);
 const buildkite = new BuildkiteClient();
 
 async function main() {
   if (!isCurrentHeadInMain()) {
-    uploadTriggerBuildStep();
+    if (DRY_RUN) {
+      console.log('Triggering build step :green_heart:');
+      uploadTriggerBuildStep();
+    } else {
+      console.log('DRY_RUN: Trigger would have fired :green_heart:');
+    }
+  } else {
+    if (DRY_RUN) {
+      console.log('No trigger necessary :yellow_heart:');
+    } else {
+      console.log('DRY_RUN: No trigger necessary :yellow_heart:');
+    }
   }
 }
 
