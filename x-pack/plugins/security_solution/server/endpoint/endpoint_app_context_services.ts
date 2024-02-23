@@ -23,6 +23,9 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
+import { EndpointError } from '../../common/endpoint/errors';
+import type { ResponseActionsClient } from './services';
+import { EndpointActionsClient } from './services';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -51,6 +54,7 @@ import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services/actions/create/types';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
+import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -271,6 +275,41 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
+  public getInternalResponseActionsClient({
+    agentType = 'endpoint',
+    username = 'elastic',
+  }: {
+    agentType?: ResponseActionAgentType;
+    username?: string;
+  }): ResponseActionsClient {
+    if (!this.startDependencies?.esClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (agentType !== `endpoint`) {
+      throw new EndpointError(
+        `Agent type [${agentType}] does not support usage of response actions via non-HTTP requests!`
+      );
+    }
+
+    // TODO:PT switch to using `getResponseActionsClient()` instead once we support getting internal versions of connectorsActions
+    // return getResponseActionsClient(agentType, {
+    //   endpointService: this,
+    //   esClient: this.startDependencies.esClient,
+    //   username: 'elastic',
+    //   isAutomated: true,
+    //   connectorActions: undefined, // FIXME:PT get internal client here
+    // });
+
+    return new EndpointActionsClient({
+      username,
+      esClient: this.startDependencies.esClient,
+      endpointService: this,
+      isAutomated: true,
+    });
+  }
+
+  /** @deprecated use `getInternalResponseActionsClient()` */
   public getActionCreateService(): ActionCreateService {
     if (!this.startDependencies?.actionCreateService) {
       throw new EndpointAppContentServicesNotStartedError();
