@@ -76,7 +76,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases-connector-mappings": "f9d1ac57e484e69506c36a8051e4d61f4a8cfd25",
         "cases-telemetry": "f219eb7e26772884342487fc9602cfea07b3cedc",
         "cases-user-actions": "483f10db9b3bd1617948d7032a98b7791bf87414",
-        "cloud-security-posture-settings": "675e47dd958fbce6c70a20baac12af3145e7c0ef",
+        "cloud-security-posture-settings": "e0f61c68bbb5e4cfa46ce8994fa001e417df51ca",
         "config": "179b3e2bc672626aafce3cf92093a113f456af38",
         "config-global": "8e8a134a2952df700d7d4ec51abb794bbd4cf6da",
         "connector_token": "5a9ac29fe9c740eb114e9c40517245c71706b005",
