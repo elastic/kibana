@@ -177,22 +177,27 @@ export class SettingsPageObject extends FtrService {
     return wrapperElement.findByTestSubject('comboBoxSearchInput');
   }
 
-  async selectTimeFieldOption(selection: string) {
-    // open dropdown
-    const timefield = await this.getTimeFieldNameField();
-    const prevValue = await timefield.getAttribute('value');
-    const enabled = await timefield.isEnabled();
+  noTimeFieldOption = "--- I don't want to use the time filter ---";
 
-    if (prevValue === selection || !enabled) {
+  async selectTimeFieldOption(selection: string) {
+    const testSubj = 'timestampField';
+    const timefield = await this.testSubjects.find(testSubj);
+
+    await this.retry.waitFor('loading the timefield options should be finished', async () => {
+      const isLoading = await timefield.getAttribute('data-is-loading');
+      return isLoading === '0';
+    });
+    const isEnabled = await (await timefield.findByTestSubject('comboBoxSearchInput')).isEnabled();
+    if (!isEnabled) {
+      return;
+    }
+    const isSelected = await this.comboBox.isOptionSelected(timefield, selection);
+    if (isSelected) {
       return;
     }
     await this.retry.waitFor('time field dropdown have the right value', async () => {
-      await timefield.click();
-      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
-      await this.browser.pressKeys(selection);
-      await this.browser.pressKeys(this.browser.keys.TAB);
-      const value = await timefield.getAttribute('value');
-      return value === selection;
+      await this.comboBox.set(testSubj, selection);
+      return await this.comboBox.isOptionSelected(timefield, selection);
     });
   }
 
