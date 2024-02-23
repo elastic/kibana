@@ -198,8 +198,8 @@ export async function initEndpointIndices(esClient: ElasticsearchClient) {
   };
 
   await esClient.indices.create({ index: endpointMetricsIndex, mappings }).catch(() => {});
-  await esClient.indices.create({ index: endpointMetricsMetadataIndex, mappings }).catch(() => {});
   await esClient.indices.create({ index: endpointMetricsPolicyIndex, mappings }).catch(() => {});
+  await esClient.indices.create({ index: endpointMetricsMetadataIndex, mappings }).catch(() => {});
 }
 
 export async function dropEndpointIndices(esClient: ElasticsearchClient) {

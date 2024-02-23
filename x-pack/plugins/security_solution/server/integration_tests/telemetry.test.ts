@@ -46,6 +46,7 @@ import {
 import type { SecurityTelemetryTask } from '../lib/telemetry/task';
 import { TelemetryChannel } from '../lib/telemetry/types';
 import type { AsyncTelemetryEventsSender } from '../lib/telemetry/async_sender';
+import endpointMetaTelemetryRequest from './__mocks__/endpoint-meta-telemetry-request.json';
 
 jest.mock('axios');
 
@@ -269,9 +270,9 @@ describe('telemetry tasks', () => {
         return JSON.parse((found ? found[1] : '{}') as string);
       });
 
-      expect(body).not.toBeFalsy();
-      expect(body.endpoint_metrics).not.toBeFalsy();
-      expect(body.endpoint_meta).not.toBeFalsy();
+      // save body in a file for debugging
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
     });
   });
 
