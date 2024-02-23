@@ -13,13 +13,14 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server';
-import { TypeOf } from '@kbn/config-schema';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { CustomMetricExpressionParams } from '../../../../common/custom_threshold_rule/types';
+import {
+  CustomMetricExpressionParams,
+  Group,
+  SearchConfigurationWithExtractedReferenceType,
+} from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { AdditionalContext } from './utils';
-import { searchConfigurationSchema } from './register_custom_threshold_rule_type';
 
 export enum AlertStates {
   OK,
@@ -29,13 +30,11 @@ export enum AlertStates {
 }
 
 // Executor types
-export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
 export type RuleTypeParams = Record<string, unknown>;
 
 export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   criteria: CustomMetricExpressionParams[];
-  // Index will be a data view spec after extracting references
-  searchConfiguration: Omit<SearchConfigurationType, 'index'> & { index: DataViewSpec };
+  searchConfiguration: SearchConfigurationWithExtractedReferenceType;
   groupBy?: string | string[];
   alertOnNoData: boolean;
   alertOnGroupDisappear?: boolean;
@@ -45,7 +44,7 @@ export type CustomThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
   missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
-  searchConfiguration?: Omit<SearchConfigurationType, 'index'> & { index: DataViewSpec };
+  searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
 };
 export type CustomThresholdAlertState = AlertState; // no specific instance state used
 export type CustomThresholdAlertContext = AlertContext & {
@@ -64,11 +63,6 @@ export type CustomThresholdActionGroup =
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
 
-export type Group = Array<{
-  field: string;
-  value: string;
-}>;
-
 export type CustomThresholdAlertFactory = (
   id: string,
   reason: string,
@@ -76,7 +70,7 @@ export type CustomThresholdAlertFactory = (
   additionalContext?: AdditionalContext | null,
   evaluationValues?: Array<number | null>,
   threshold?: Array<number | null>,
-  group?: Group
+  group?: Group[]
 ) => CustomThresholdAlert;
 
 type CustomThresholdAlert = Alert<

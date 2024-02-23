@@ -202,7 +202,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
@@ -4585,7 +4585,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -5079,7 +5079,7 @@
               "\nDescribes the visualization stage"
             ],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\" | undefined"
+              "\"beta\" | \"experimental\" | \"production\" | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
@@ -5964,7 +5964,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -6707,7 +6707,7 @@
         "label": "VisualizationStage",
         "description": [],
         "signature": [
-          "\"experimental\" | \"beta\" | \"production\""
+          "\"beta\" | \"experimental\" | \"production\""
         ],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
@@ -16051,7 +16051,7 @@
         "label": "TimeScaleUnit",
         "description": [],
         "signature": [
-          "\"m\" | \"d\" | \"h\" | \"s\""
+          "\"m\" | \"s\" | \"d\" | \"h\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,
