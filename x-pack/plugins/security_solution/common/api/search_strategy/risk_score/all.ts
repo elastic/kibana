@@ -59,9 +59,14 @@ export const usersRiskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSch
   factoryQueryType: z.literal(RiskQueries.usersRiskScore),
 });
 
+export const entityStoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
+  factoryQueryType: z.literal(RiskQueries.entityStore),
+});
+
 export const riskScoreRequestOptionsSchema = z.union([
   hostsRiskScoreRequestOptionsSchema,
   usersRiskScoreRequestOptionsSchema,
+  entityStoreRequestOptionsSchema,
 ]);
 
 export type RiskScoreRequestOptionsInput = z.input<typeof riskScoreRequestOptionsSchema>;

@@ -49,6 +49,7 @@ export enum RiskQueries {
   hostsRiskScore = 'hostsRiskScore',
   usersRiskScore = 'usersRiskScore',
   kpiRiskScore = 'kpiRiskScore',
+  entityStore = 'entityStore',
 }
 
 export enum CtiQueries {

@@ -13,8 +13,13 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 
-import { ENTITY_ANALYTICS_MANAGEMENT_PATH, SecurityPageName } from '../../common/constants';
+import {
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
+  ENTITY_STORE_PATH,
+  SecurityPageName,
+} from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
+import { EntityStorePage } from './pages/entity_store_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const EntityAnalyticsTelemetry = () => (
@@ -43,5 +48,14 @@ export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
     render: renderEntityAnalyticsRoutes,
+  },
+  {
+    path: ENTITY_STORE_PATH,
+    render: () => (
+      <Switch>
+        <Route path={ENTITY_STORE_PATH} exact component={EntityStorePage} />
+        <Route component={NotFoundPage} />
+      </Switch>
+    ),
   },
 ];
