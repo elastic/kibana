@@ -76,13 +76,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
-          expect(objects).to.eql([
-            'logstash-*',
-            'A Pie',
-            'A Dashboard',
-            `Global Settings [${version}]`,
-            `Advanced Settings [${version}]`,
-          ]);
+          expect(objects.sort()).to.eql(
+            [
+              'logstash-*',
+              'A Pie',
+              'A Dashboard',
+              `Global Settings [${version}]`,
+              `Advanced Settings [${version}]`,
+            ].sort()
+          );
         });
 
         it('can view all saved objects in applications', async () => {
@@ -200,13 +202,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
-          expect(objects).to.eql([
-            'logstash-*',
-            'A Pie',
-            'A Dashboard',
-            `Global Settings [${version}]`,
-            `Advanced Settings [${version}]`,
-          ]);
+          expect(objects.sort()).to.eql(
+            [
+              'logstash-*',
+              'A Pie',
+              'A Dashboard',
+              `Global Settings [${version}]`,
+              `Advanced Settings [${version}]`,
+            ].sort()
+          );
         });
 
         it('cannot view any saved objects in applications', async () => {
