@@ -85,7 +85,7 @@ elasticsearch.password: changeme
 APM behaves differently depending on which role and permissions a logged in user has. To create APM users run:
 
 ```sh
-node x-pack/plugins/apm/scripts/create_apm_users.js --username admin --password changeme --kibana-url http://localhost:5601
+node x-pack/plugins/observability_solution/apm/scripts/create_apm_users.js --username admin --password changeme --kibana-url http://localhost:5601
 ```
 
 This will create:

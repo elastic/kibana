@@ -4618,7 +4618,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
+                "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
                 "plugin": "console",

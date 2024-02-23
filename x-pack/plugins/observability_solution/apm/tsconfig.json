@@ -1,10 +1,10 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": [
-    "../../../typings/**/*",
+    "../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
@@ -111,7 +111,7 @@
     "@kbn/shared-svg",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
-    "@kbn/shared-ux-markdown",
+    "@kbn/shared-ux-markdown"
   ],
   "exclude": ["target/**/*"]
 }
