@@ -58,15 +58,13 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
 };
 
 export const getSubTitle = (slo: SLOWithSummaryResponse) => {
-  return getGroupings(slo);
+  return getFirstGroupBy(slo);
 };
 
-const getGroupings = (slo: SLOWithSummaryResponse) => {
-  const groupByFields = Object.entries(slo.groupings)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join('\n');
+const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
+  const firstGroupBy = Object.entries(slo.groupings).map(([key, value]) => `${key}: ${value}`)[0];
 
-  return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? groupByFields : '';
+  return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
