@@ -41,10 +41,13 @@ jest.mock('react-redux', () => {
 });
 
 const timelineId = 'timeline-1';
+const mockRef = {
+  current: null,
+};
 const renderTimelineModalHeader = () =>
   render(
     <TestProviders>
-      <TimelineModalHeader timelineId={timelineId} />
+      <TimelineModalHeader timelineId={timelineId} openToggleRef={mockRef} />
     </TestProviders>
   );
 

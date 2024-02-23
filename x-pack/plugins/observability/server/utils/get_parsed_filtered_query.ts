@@ -12,7 +12,7 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { SearchConfigurationType } from '../lib/rules/custom_threshold/types';
+import { SearchConfigurationType } from '../../common/custom_threshold_rule/types';
 
 export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<string, any>> = (
   filter
