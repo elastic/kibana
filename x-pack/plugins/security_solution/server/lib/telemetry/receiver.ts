@@ -61,6 +61,7 @@ import type { SafeEndpointEvent, ResolverSchema } from '../../../common/endpoint
 import type {
   TelemetryEvent,
   EnhancedAlertEvent,
+  EndpointMetricDocument,
   ESLicense,
   ESClusterInfo,
   GetEndpointListResponse,
@@ -73,6 +74,10 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
   Nullable,
   FleetAgentResponse,
+  EndpointMetricsAggregation,
+  EndpointMetricsAbstract,
+  EndpointPolicyResponseDocument,
+  EndpointPolicyResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
@@ -101,19 +106,26 @@ export interface ITelemetryReceiver {
 
   fetchFleetAgents(): Promise<Nullable<FleetAgentResponse>>;
 
+  /**
+   * Reads Endpoint Agent policy responses out of the `.ds-metrics-endpoint.policy*` data
+   * stream and creates a local K/V structure that stores the policy response (V) with
+   * the Endpoint Agent Id (K). A value will only exist if there has been a endpoint
+   * enrolled in the last 24 hours OR a policy change has occurred. We only send
+   * non-successful responses. If the field is null, we assume no responses in
+   * the last 24h or no failures/warnings in the policy applied.
+   *
+   */
   fetchEndpointPolicyResponses(
     executeFrom: string,
     executeTo: string
-  ): Promise<
-    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
-  >;
+  ): Promise<Map<string, EndpointPolicyResponseDocument>>;
 
-  fetchEndpointMetrics(
+  fetchEndpointMetricsAbstract(
     executeFrom: string,
     executeTo: string
-  ): Promise<
-    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
-  >;
+  ): Promise<EndpointMetricsAbstract>;
+
+  fetchEndpointMetricsById(ids: string[]): AsyncGenerator<EndpointMetricDocument[], void, unknown>;
 
   fetchEndpointMetadata(
     executeFrom: string,
@@ -303,6 +315,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               latest_response: {
                 top_hits: {
                   size: 1,
+                  _source: {
+                    includes: [
+                      'agent',
+                      'event',
+                      'Endpoint.policy.applied.status',
+                      'Endpoint.policy.applied.actions',
+                      'Endpoint.policy.applied.artifacts.global',
+                      'Endpoint.configuration',
+                      'Endpoint.state',
+                    ],
+                  },
                   sort: [
                     {
                       '@timestamp': {
@@ -318,10 +341,24 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient().search(query, { meta: true });
+    const response = await this.esClient().search(query, { meta: true });
+    const { body: failedPolicyResponses } = response as unknown as {
+      body: EndpointPolicyResponseAggregation;
+    };
+
+    if (!failedPolicyResponses) {
+      return new Map();
+    }
+
+    // If there is no policy responses in the 24h > now then we will continue
+    return failedPolicyResponses.aggregations?.policy_responses?.buckets.reduce(
+      (cache, endpointAgentId) =>
+        cache.set(endpointAgentId.key, endpointAgentId.latest_response.hits.hits[0]._source),
+      new Map<string, EndpointPolicyResponseDocument>()
+    );
   }
 
-  public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
+  public async fetchEndpointMetricsAbstract(executeFrom: string, executeTo: string) {
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: ENDPOINT_METRICS_INDEX,
@@ -346,6 +383,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               latest_metrics: {
                 top_hits: {
                   size: 1,
+                  _source: {
+                    excludes: ['*'],
+                  },
                   sort: [
                     {
                       '@timestamp': {
@@ -366,7 +406,36 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient().search(query, { meta: true });
+    return this.esClient()
+      .search(query, { meta: true })
+      .then((response) => {
+        const { body: endpointMetricsResponse } = response as unknown as {
+          body: EndpointMetricsAggregation;
+        };
+
+        return {
+          endpointMetricIds: endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
+            (epMetrics) => epMetrics.latest_metrics.hits.hits[0]._id
+          ),
+          totalEndpoints: endpointMetricsResponse.aggregations.endpoint_count.value,
+        };
+      });
+  }
+
+  fetchEndpointMetricsById(ids: string[]): AsyncGenerator<EndpointMetricDocument[], void, unknown> {
+    const query: ESSearchRequest = {
+      sort: [{ '@timestamp': { order: 'desc' as const } }],
+      query: {
+        ids: {
+          values: ids,
+        },
+      },
+      _source: {
+        includes: ['agent', 'Endpoint.metrics', 'elastic.agent', 'host', 'event'],
+      },
+    };
+
+    return this.paginate<EndpointMetricDocument>(ENDPOINT_METRICS_INDEX, query);
   }
 
   public async fetchEndpointMetadata(executeFrom: string, executeTo: string) {
@@ -1125,7 +1194,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const esQuery = {
       ...cloneDeep(query),
       pit,
-      size,
+      size: Math.min(size, 10_000),
     };
     try {
       do {

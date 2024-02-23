@@ -104,6 +104,7 @@ export enum TelemetryCounter {
   FATAL_ERROR = 'fatal_error',
   TELEMETRY_OPTED_OUT = 'telemetry_opted_out',
   TELEMETRY_NOT_REACHABLE = 'telemetry_not_reachable',
+  NUM_ENDPOINT = 'num_endpoint',
 }
 
 // EP Policy Response
@@ -126,7 +127,7 @@ export interface EndpointPolicyResponseAggregation {
 interface EndpointPolicyResponseHits {
   hits: {
     total: { value: number };
-    hits: EndpointPolicyResponseDocument[];
+    hits: Array<{ _source: EndpointPolicyResponseDocument }>;
   };
 }
 
@@ -135,33 +136,30 @@ interface NonPolicyConfiguration {
 }
 
 export interface EndpointPolicyResponseDocument {
-  _source: {
-    '@timestamp': string;
-    agent: {
-      id: string;
-    };
-    event: {
-      agent_id_status: string;
-    };
-    Endpoint: {
-      policy: {
-        applied: {
-          actions: Array<{
-            name: string;
-            message: string;
-            status: string;
-          }>;
-          artifacts: {
-            global: {
-              version: string;
-            };
-          };
+  agent: {
+    id: string;
+  };
+  event: {
+    agent_id_status: string;
+  };
+  Endpoint: {
+    policy: {
+      applied: {
+        actions: Array<{
+          name: string;
+          message: string;
           status: string;
+        }>;
+        artifacts: {
+          global: {
+            version: string;
+          };
         };
+        status: string;
       };
-      configuration: NonPolicyConfiguration;
-      state: NonPolicyConfiguration;
     };
+    configuration: NonPolicyConfiguration;
+    state: NonPolicyConfiguration;
   };
 }
 
@@ -182,32 +180,35 @@ export interface EndpointMetricsAggregation {
 interface EndpointMetricHits {
   hits: {
     total: { value: number };
-    hits: EndpointMetricDocument[];
+    hits: Array<{ _id: string; _source: EndpointMetricDocument }>;
   };
 }
 
-interface EndpointMetricDocument {
-  _source: {
-    '@timestamp': string;
+export interface EndpointMetricDocument {
+  '@timestamp': string;
+  agent: {
+    id: string;
+    version: string;
+  };
+  Endpoint: {
+    metrics: EndpointMetrics;
+  };
+  elastic: {
     agent: {
       id: string;
-      version: string;
-    };
-    Endpoint: {
-      metrics: EndpointMetrics;
-    };
-    elastic: {
-      agent: {
-        id: string;
-      };
-    };
-    host: {
-      os: EndpointMetricOS;
-    };
-    event: {
-      agent_id_status: string;
     };
   };
+  host: {
+    os: EndpointMetricOS;
+  };
+  event: {
+    agent_id_status: string;
+  };
+}
+
+export interface EndpointMetricsAbstract {
+  endpointMetricIds: string[];
+  totalEndpoints: number;
 }
 
 interface DocumentsVolumeMetrics {

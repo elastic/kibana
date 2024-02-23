@@ -80,7 +80,7 @@ describe('ITelemetryReceiver', () => {
 
     it('should paginate queries', async () => {
       const docs = mockedDocs(numOfDocs);
-      await bulkInsert(TEST_INDEX, docs, esClient);
+      await bulkInsert(esClient, TEST_INDEX, docs);
 
       const results = telemetryReceiver.paginate(TEST_INDEX, testQuery());
 
@@ -100,8 +100,8 @@ describe('ITelemetryReceiver', () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const batchTwo = mockedDocs(numOfDocs, 'batchTwo');
 
-      await bulkInsert(TEST_INDEX, batchOne, esClient);
-      await bulkInsert(TEST_INDEX, batchTwo, esClient);
+      await bulkInsert(esClient, TEST_INDEX, batchTwo);
+      await bulkInsert(esClient, TEST_INDEX, batchOne);
 
       const results = telemetryReceiver.paginate(TEST_INDEX, testQuery(from, to));
 
@@ -113,7 +113,7 @@ describe('ITelemetryReceiver', () => {
     });
 
     it('should manage empty response', async () => {
-      await bulkInsert(TEST_INDEX, mockedDocs(numOfDocs), esClient);
+      await bulkInsert(esClient, TEST_INDEX, mockedDocs(numOfDocs));
 
       const results = telemetryReceiver.paginate(TEST_INDEX, testQuery('now-2d', 'now-1d'));
 

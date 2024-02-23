@@ -9,16 +9,14 @@ import type { Logger } from '@kbn/core/server';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { ITelemetryEventsSender } from '../sender';
-import type {
-  EndpointMetricsAggregation,
-  EndpointPolicyResponseAggregation,
-  EndpointPolicyResponseDocument,
-  EndpointMetadataAggregation,
-  EndpointMetadataDocument,
-  ESClusterInfo,
-  ESLicense,
-  Nullable,
-  FleetAgentResponse,
+import {
+  type EndpointMetadataAggregation,
+  type EndpointMetadataDocument,
+  type Nullable,
+  type FleetAgentResponse,
+  TelemetryCounter,
+  TelemetryChannel,
+  type EndpointPolicyResponseDocument,
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -31,6 +29,7 @@ import {
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
   newTelemetryLogger,
+  safeValue,
 } from '../helpers';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
@@ -48,11 +47,10 @@ const EmptyFleetAgentResponse: FleetAgentResponse = {
 const usageLabelPrefix: string[] = ['security_telemetry', 'endpoint_task'];
 
 export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
-  const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
   const taskType = 'security:endpoint-meta-telemetry';
   return {
     type: taskType,
-    title: taskName,
+    title: 'Security Solution Telemetry Endpoint Metrics and Info task',
     interval: '24h',
     timeout: '5m',
     version: '1.0.0',
@@ -65,10 +63,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('endpoint')).l;
+      const log = newTelemetryLogger(logger.get('endpoint'));
       const trace = taskMetricsService.start(taskType);
 
-      log(
+      log.l(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -76,19 +74,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
         }
-        const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-          receiver.fetchClusterInfo(),
-          receiver.fetchLicenseInfo(),
-        ]);
 
-        const clusterInfo =
-          clusterInfoPromise.status === 'fulfilled'
-            ? clusterInfoPromise.value
-            : ({} as ESClusterInfo);
-        const licenseInfo =
-          licenseInfoPromise.status === 'fulfilled'
-            ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
+        const clusterData = await fetchClusterData(receiver);
 
         const endpointData = await fetchEndpointData(
           receiver,
@@ -103,18 +90,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * report its metrics once per day OR every time a policy change has occured. If
          * a metric document(s) exists for an EP agent we map to fleet agent and policy
          */
-        if (endpointData.endpointMetrics === undefined) {
-          log('no endpoint metrics to report');
-          taskMetricsService.end(trace);
-          return 0;
-        }
-
-        const { body: endpointMetricsResponse } = endpointData.endpointMetrics as unknown as {
-          body: EndpointMetricsAggregation;
-        };
-
-        if (endpointMetricsResponse.aggregations === undefined) {
-          log(`no endpoint metrics response to report`);
+        if (endpointData.endpointMetrics.totalEndpoints === 0) {
+          log.l('no endpoint metrics to report');
           taskMetricsService.end(trace);
           return 0;
         }
@@ -122,21 +99,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         const telemetryUsageCounter = sender.getTelemetryUsageCluster();
         telemetryUsageCounter?.incrementCounter({
           counterName: createUsageCounterLabel(
-            usageLabelPrefix.concat(['payloads', TELEMETRY_CHANNEL_ENDPOINT_META])
+            usageLabelPrefix.concat(['payloads', TelemetryChannel.ENDPOINT_META])
           ),
-          counterType: 'num_endpoint',
-          incrementBy: endpointMetricsResponse.aggregations.endpoint_count.value,
+          counterType: TelemetryCounter.NUM_ENDPOINT,
+          incrementBy: endpointData.endpointMetrics.totalEndpoints,
         });
-
-        const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
-          (epMetrics) => {
-            return {
-              endpoint_agent: epMetrics.latest_metrics.hits.hits[0]._source.agent.id,
-              endpoint_version: epMetrics.latest_metrics.hits.hits[0]._source.agent.version,
-              endpoint_metrics: epMetrics.latest_metrics.hits.hits[0]._source,
-            };
-          }
-        );
 
         /** STAGE 2 - Fetch Fleet Agent Config
          *
@@ -148,12 +115,12 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         const agentsResponse = endpointData.fleetAgentsResponse;
 
         if (agentsResponse === undefined || agentsResponse === null) {
-          log('no fleet agent information available');
+          log.l('no fleet agent information available');
           taskMetricsService.end(trace);
           return 0;
         }
 
-        const fleetAgents = agentsResponse.agents.reduce((cache, agent) => {
+        const policyInfoByAgent = agentsResponse.agents.reduce((cache, agent) => {
           if (agent.id === DefaultEndpointPolicyIdToIgnore) {
             return cache;
           }
@@ -165,69 +132,12 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           return cache;
         }, new Map<string, string>());
 
-        const endpointPolicyCache = new Map<string, PolicyData>();
-        for (const policyInfo of fleetAgents.values()) {
-          if (
-            policyInfo !== null &&
-            policyInfo !== undefined &&
-            !endpointPolicyCache.has(policyInfo)
-          ) {
-            let agentPolicy: Nullable<AgentPolicy>;
-            try {
-              agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
-            } catch (err) {
-              log(`error fetching policy config due to ${err?.message}`);
-            }
-            const packagePolicies = agentPolicy?.package_policies;
+        const endpointPolicyById = await endpointPolicies(policyInfoByAgent.values(), receiver);
 
-            if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
-              packagePolicies
-                .map((pPolicy) => pPolicy as PolicyData)
-                .forEach((pPolicy) => {
-                  if (
-                    pPolicy.inputs[0]?.config !== undefined &&
-                    pPolicy.inputs[0]?.config !== null
-                  ) {
-                    pPolicy.inputs.forEach((input) => {
-                      if (
-                        input.type === FLEET_ENDPOINT_PACKAGE &&
-                        input?.config !== undefined &&
-                        policyInfo !== undefined
-                      ) {
-                        endpointPolicyCache.set(policyInfo, pPolicy);
-                      }
-                    });
-                  }
-                });
-            }
-          }
-        }
-
-        /** STAGE 3 - Fetch Endpoint Policy Responses
-         *
-         * Reads Endpoint Agent policy responses out of the `.ds-metrics-endpoint.policy*` data
-         * stream and creates a local K/V structure that stores the policy response (V) with
-         * the Endpoint Agent Id (K). A value will only exist if there has been a endpoint
-         * enrolled in the last 24 hours OR a policy change has occurred. We only send
-         * non-successful responses. If the field is null, we assume no responses in
-         * the last 24h or no failures/warnings in the policy applied.
-         *
+        /**
+         * STAGE 3 - Fetch Endpoint Policy Responses
          */
-        const { body: failedPolicyResponses } = endpointData.epPolicyResponse as unknown as {
-          body: EndpointPolicyResponseAggregation;
-        };
-
-        // If there is no policy responses in the 24h > now then we will continue
-        const policyResponses = failedPolicyResponses.aggregations
-          ? failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
-              (cache, endpointAgentId) => {
-                const doc = endpointAgentId.latest_response.hits.hits[0];
-                cache.set(endpointAgentId.key, doc);
-                return cache;
-              },
-              new Map<string, EndpointPolicyResponseDocument>()
-            )
-          : new Map<string, EndpointPolicyResponseDocument>();
+        const policyResponses = endpointData.epPolicyResponse;
 
         /** STAGE 4 - Fetch Endpoint Agent Metadata
          *
@@ -237,7 +147,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * a metadata document(s) exists for an EP agent we map to fleet agent and policy
          */
         if (endpointData.endpointMetadata === undefined) {
-          log(`no endpoint metadata to report`);
+          log.l(`no endpoint metadata to report`);
         }
 
         const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
@@ -245,7 +155,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         };
 
         if (endpointMetadataResponse.aggregations === undefined) {
-          log(`no endpoint metadata to report`);
+          log.l(`no endpoint metadata to report`);
         }
 
         const endpointMetadata =
@@ -257,6 +167,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             },
             new Map<string, EndpointMetadataDocument>()
           );
+
         /** STAGE 5 - Create the telemetry log records
          *
          * Iterates through the endpoint metrics documents at STAGE 1 and joins them together
@@ -265,17 +176,24 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          *
          */
         try {
-          const telemetryPayloads = endpointMetrics.map((endpoint) => {
+          const endpointMetrics = [];
+          for await (const metrics of receiver.fetchEndpointMetricsById(
+            endpointData.endpointMetrics.endpointMetricIds
+          )) {
+            endpointMetrics.push(...metrics);
+          }
+
+          const telemetryPayloads = endpointMetrics.map((endpointMetric) => {
             let policyConfig = null;
-            let failedPolicy = null;
+            let failedPolicy: Nullable<EndpointPolicyResponseDocument> = null;
             let endpointMetadataById = null;
 
-            const fleetAgentId = endpoint.endpoint_metrics.elastic.agent.id;
-            const endpointAgentId = endpoint.endpoint_agent;
+            const fleetAgentId = endpointMetric.elastic.agent.id;
+            const endpointAgentId = endpointMetric.agent.id;
 
-            const policyInformation = fleetAgents.get(fleetAgentId);
+            const policyInformation = policyInfoByAgent.get(fleetAgentId);
             if (policyInformation) {
-              policyConfig = endpointPolicyCache.get(policyInformation) || null;
+              policyConfig = endpointPolicyById.get(policyInformation) || null;
 
               if (policyConfig) {
                 failedPolicy = policyResponses.get(endpointAgentId);
@@ -295,7 +213,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               system_impact: systemImpact,
               threads,
               event_filter: eventFilter,
-            } = endpoint.endpoint_metrics.Endpoint.metrics;
+            } = endpointMetric.Endpoint.metrics;
             const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
             if (endpointPolicyDetail) {
               endpointPolicyDetail.value = addDefaultAdvancedPolicyConfigSettings(
@@ -304,11 +222,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             }
             return {
               '@timestamp': taskExecutionPeriod.current,
-              cluster_uuid: clusterInfo.cluster_uuid,
-              cluster_name: clusterInfo.cluster_name,
-              license_id: licenseInfo?.uid,
+              cluster_uuid: clusterData.clusterInfo.cluster_uuid,
+              cluster_name: clusterData.clusterInfo.cluster_name,
+              license_id: clusterData.licenseInfo?.uid,
               endpoint_id: endpointAgentId,
-              endpoint_version: endpoint.endpoint_version,
+              endpoint_version: endpointMetric.agent.version,
               endpoint_package_version: policyConfig?.package?.version || null,
               endpoint_metrics: {
                 cpu: cpu.endpoint,
@@ -321,7 +239,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
                 eventFilter,
               },
               endpoint_meta: {
-                os: endpoint.endpoint_metrics.host.os,
+                os: endpointMetric.host.os,
                 capabilities:
                   endpointMetadataById !== null && endpointMetadataById !== undefined
                     ? endpointMetadataById._source.Endpoint.capabilities
@@ -331,24 +249,24 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               policy_response:
                 failedPolicy !== null && failedPolicy !== undefined
                   ? {
-                      agent_policy_status: failedPolicy._source.event.agent_id_status,
+                      agent_policy_status: failedPolicy.event.agent_id_status,
                       manifest_version:
-                        failedPolicy._source.Endpoint.policy.applied.artifacts.global.version,
-                      status: failedPolicy._source.Endpoint.policy.applied.status,
-                      actions: failedPolicy._source.Endpoint.policy.applied.actions
+                        failedPolicy.Endpoint.policy.applied.artifacts.global.version,
+                      status: failedPolicy.Endpoint.policy.applied.status,
+                      actions: failedPolicy.Endpoint.policy.applied.actions
                         .map((action) => (action.status !== 'success' ? action : null))
                         .filter((action) => action !== null),
-                      configuration: failedPolicy._source.Endpoint.configuration,
-                      state: failedPolicy._source.Endpoint.state,
+                      configuration: failedPolicy.Endpoint.configuration,
+                      state: failedPolicy.Endpoint.state,
                     }
                   : {},
               telemetry_meta: {
-                metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
+                metrics_timestamp: endpointMetric['@timestamp'],
               },
             };
           });
 
-          log(`sending ${telemetryPayloads.length} endpoint telemetry records`);
+          log.l(`sending ${telemetryPayloads.length} endpoint telemetry records`);
 
           /**
            * STAGE 6 - Send the documents
@@ -362,7 +280,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           taskMetricsService.end(trace);
           return telemetryPayloads.length;
         } catch (err) {
-          logger.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`);
+          log.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`, err);
           taskMetricsService.end(trace, err);
           return 0;
         }
@@ -379,21 +297,64 @@ async function fetchEndpointData(
   executeFrom: string,
   executeTo: string
 ) {
-  const [fleetAgentsResponse, epMetricsResponse, policyResponse, endpointMetadata] =
+  const [fleetAgentsResponse, epMetricsAbstractResponse, policyResponse, endpointMetadata] =
     await Promise.allSettled([
       receiver.fetchFleetAgents(),
-      receiver.fetchEndpointMetrics(executeFrom, executeTo),
+      receiver.fetchEndpointMetricsAbstract(executeFrom, executeTo),
       receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
       receiver.fetchEndpointMetadata(executeFrom, executeTo),
     ]);
 
   return {
-    fleetAgentsResponse:
-      fleetAgentsResponse.status === 'fulfilled'
-        ? fleetAgentsResponse.value
-        : EmptyFleetAgentResponse,
-    endpointMetrics: epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
-    epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
-    endpointMetadata: endpointMetadata.status === 'fulfilled' ? endpointMetadata.value : undefined,
+    fleetAgentsResponse: safeValue(fleetAgentsResponse, EmptyFleetAgentResponse),
+    endpointMetrics: safeValue(epMetricsAbstractResponse),
+    epPolicyResponse: safeValue(policyResponse),
+    endpointMetadata: safeValue(endpointMetadata),
   };
+}
+
+async function fetchClusterData(receiver: ITelemetryReceiver) {
+  const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+    receiver.fetchClusterInfo(),
+    receiver.fetchLicenseInfo(),
+  ]);
+
+  const clusterInfo = safeValue(clusterInfoPromise);
+  const licenseInfo = safeValue(licenseInfoPromise);
+
+  return { clusterInfo, licenseInfo };
+}
+
+async function endpointPolicies(policies: IterableIterator<string>, receiver: ITelemetryReceiver) {
+  const endpointPolicyCache = new Map<string, PolicyData>();
+  for (const policyInfo of policies) {
+    if (policyInfo !== null && policyInfo !== undefined && !endpointPolicyCache.has(policyInfo)) {
+      let agentPolicy: Nullable<AgentPolicy>;
+      try {
+        agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
+      } catch (err) {
+        // log.error(`error fetching policy config due to ${err?.message}`, err);
+      }
+      const packagePolicies = agentPolicy?.package_policies;
+
+      if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
+        packagePolicies
+          .map((pPolicy) => pPolicy as PolicyData)
+          .forEach((pPolicy) => {
+            if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
+              pPolicy.inputs.forEach((input) => {
+                if (
+                  input.type === FLEET_ENDPOINT_PACKAGE &&
+                  input?.config !== undefined &&
+                  policyInfo !== undefined
+                ) {
+                  endpointPolicyCache.set(policyInfo, pPolicy);
+                }
+              });
+            }
+          });
+      }
+    }
+  }
+  return endpointPolicyCache;
 }

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidGen } from 'uuid';
 import Fs from 'fs';
 import Util from 'util';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -107,14 +108,22 @@ export async function removeFile(path: string) {
 }
 
 export async function bulkInsert(
+  esClient: ElasticsearchClient,
   index: string,
   data: unknown[],
-  esClient: ElasticsearchClient
+  ids: string[] = []
 ): Promise<void> {
-  const bulk = data.flatMap((d) => [{ index: { _index: index } }, d]);
+  const bulk = data.flatMap((d, i) => {
+    const _id = ids[i] ?? uuidGen();
+    return [{ create: { _index: index, _id } }, d];
+  });
   await esClient.bulk({ body: bulk, refresh: 'wait_for' }).catch(() => {});
 }
 
 export function updateTimestamps(data: object[]): object[] {
-  return data.map((d) => ({ ...d, '@timestamp': new Date().toISOString() }));
+  const currentTimeMillis = new Date().getTime();
+  return data.map((d, i) => {
+    // wait a couple of millisecs to not make timestamps overlap
+    return { ...d, '@timestamp': new Date(currentTimeMillis + i * 50) };
+  });
 }

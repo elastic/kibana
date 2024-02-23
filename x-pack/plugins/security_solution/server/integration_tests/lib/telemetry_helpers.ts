@@ -23,8 +23,10 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
-import { createAgentPolicyWithPackages } from '@kbn/fleet-plugin/server/services/agent_policy_create';
+import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
+
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
 import { bulkInsert, updateTimestamps } from './helpers';
@@ -174,10 +176,10 @@ export async function mockEndpointData(
   so: SavedObjectsServiceStart
 ) {
   await createAgentPolicy('policy-elastic-agent-on-cloud', esClient, so);
-  await bulkInsert(fleetIndex, fleetAgents, esClient);
-  await bulkInsert(endpointMetricsIndex, updateTimestamps(endpointMetrics), esClient);
-  await bulkInsert(endpointMetricsMetadataIndex, updateTimestamps(endpointMetadata), esClient);
-  await bulkInsert(endpointMetricsPolicyIndex, updateTimestamps(endpointPolicy), esClient);
+  await bulkInsert(esClient, fleetIndex, fleetAgents, ['123', '456']);
+  await bulkInsert(esClient, endpointMetricsIndex, updateTimestamps(endpointMetrics));
+  await bulkInsert(esClient, endpointMetricsMetadataIndex, updateTimestamps(endpointMetadata));
+  await bulkInsert(esClient, endpointMetricsPolicyIndex, updateTimestamps(endpointPolicy));
 }
 
 export async function initEndpointIndices(esClient: ElasticsearchClient) {
@@ -244,13 +246,43 @@ export async function createAgentPolicy(
   so: SavedObjectsServiceStart
 ) {
   const soClient = so.getScopedClient(fakeKibanaRequest);
-  await createAgentPolicyWithPackages({
-    esClient,
-    soClient,
-    newPolicy: { id, name: 'Agent policy 1', namespace: 'default' },
-    withSysMonitoring: true,
-    spaceId: 'default',
-  });
+  const packagePolicy = {
+    name: 'Endpoint Policy 1',
+    description: 'Endpoint policy 1',
+    namespace: 'default',
+    enabled: true,
+    policy_id: 'policy-elastic-agent-on-cloud',
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.11.1' },
+    inputs: [
+      {
+        config: {
+          policy: {
+            value: {
+              linux: {
+                advanced: {
+                  agent: {
+                    connection_delay: 60,
+                  },
+                },
+              },
+            },
+          },
+        },
+        enabled: true,
+        type: 'endpoint',
+        streams: [],
+      },
+    ],
+  };
+
+  await soClient.create<unknown>(AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
+  await packagePolicyService
+    .create(soClient, esClient, packagePolicy, {
+      id,
+      spaceId: 'default',
+      bumpRevision: false,
+    })
+    .catch(() => {});
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {

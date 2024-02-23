@@ -270,9 +270,10 @@ describe('telemetry tasks', () => {
         return JSON.parse((found ? found[1] : '{}') as string);
       });
 
-      // save body in a file for debugging
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
     });
   });
 

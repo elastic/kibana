@@ -46,15 +46,10 @@
       },
       "host": {
         "hostname": "123",
-        "ip": [
-          "127.0.0.1/8",
-          "172.17.0.85/16"
-        ],
+        "ip": ["127.0.0.1/8", "172.17.0.85/16"],
         "name": "123",
         "id": "",
-        "mac": [
-          "02:42:ac:11:00:55"
-        ],
+        "mac": ["02:42:ac:11:00:55"],
         "architecture": "x86_64"
       }
     },
@@ -67,9 +62,7 @@
     "updated_at": "2022-06-07T20:09:32Z",
     "policy_revision_idx": 3,
     "policy_output_permissions_hash": null,
-    "action_seq_no": [
-      -1
-    ]
+    "action_seq_no": [-1]
   },
   {
     "policy_coordinator_idx": 1,
@@ -118,15 +111,10 @@
       },
       "host": {
         "hostname": "123",
-        "ip": [
-          "127.0.0.1/8",
-          "172.17.0.69/16"
-        ],
+        "ip": ["127.0.0.1/8", "172.17.0.69/16"],
         "name": "123",
         "id": "",
-        "mac": [
-          "02:42:ac:11:00:45"
-        ],
+        "mac": ["02:42:ac:11:00:45"],
         "architecture": "x86_64"
       }
     },
@@ -139,8 +127,6 @@
     "updated_at": "2022-06-15T18:38:08Z",
     "policy_revision_idx": 4,
     "policy_output_permissions_hash": null,
-    "action_seq_no": [
-      -1
-    ]
+    "action_seq_no": [-1]
   }
 ]
