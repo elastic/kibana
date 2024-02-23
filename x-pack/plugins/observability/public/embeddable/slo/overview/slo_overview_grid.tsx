@@ -104,8 +104,6 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
     ],
   });
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
   const { colors } = useSloCardColor();
   const chartsData: MetricDatum[][] = [[]];
   sloList?.results.forEach((slo) => {
@@ -160,7 +158,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   return (
     <>
-      <div ref={containerRef} style={{ width: '100%' }}>
+      <div style={{ width: '100%' }}>
         <Chart>
           <Settings
             baseTheme={DARK_THEME}
