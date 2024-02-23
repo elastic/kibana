@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
@@ -24,15 +26,35 @@ import { getIntegrationsAvailable } from '../utils';
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
-  const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
+  const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
   const { actionMenuHeight } = useKibanaHeader();
   const trackOnlyOnce = React.useRef(false);
 
   const { activeTabId } = useTabSwitcherContext();
   const {
-    services: { telemetry },
+    services: {
+      telemetry,
+      observabilityShared: {
+        navigation: { PageTemplate },
+      },
+    },
   } = useKibanaContextForPlugin();
+
+  const parentBreadcrumbResolver = useParentBreadcrumbResolver();
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(asset.type);
+  useMetricsBreadcrumbs(
+    [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: asset.name,
+      },
+    ],
+    { deeperContextServerless: true }
+  );
 
   useEffect(() => {
     if (trackOnlyOnce.current) {
@@ -63,44 +85,35 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     [actionMenuHeight]
   );
 
-  return loading ? (
-    <EuiFlexGroup
-      direction="column"
-      css={css`
-        height: ${heightWithOffset};
-      `}
-    >
-      <InfraLoadingPanel
-        height="100%"
-        width="auto"
-        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-          defaultMessage: 'Loading data',
-        })}
-      />
-    </EuiFlexGroup>
-  ) : (
-    <EuiPageTemplate
-      panelled
-      contentBorder={false}
-      offset={0}
-      restrictWidth={false}
-      style={{
-        minBlockSize: heightWithOffset,
+  return (
+    <PageTemplate
+      pageHeader={{
+        pageTitle: asset.name,
+        tabs: tabEntries,
+        rightSideItems,
+        breadcrumbs: headerBreadcrumbs,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={asset.type}
     >
-      <EuiPageTemplate.Section paddingSize="none">
-        <EuiPageTemplate.Header
-          pageTitle={asset.name}
-          tabs={tabEntries}
-          rightSideItems={rightSideItems}
-          breadcrumbs={breadcrumbs}
-        />
-        <EuiPageTemplate.Section grow>
-          <Content />
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+      {loading ? (
+        <EuiFlexGroup
+          direction="column"
+          css={css`
+            height: ${heightWithOffset};
+          `}
+        >
+          <InfraLoadingPanel
+            height="100%"
+            width="auto"
+            text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+              defaultMessage: 'Loading data',
+            })}
+          />
+        </EuiFlexGroup>
+      ) : (
+        <Content />
+      )}
+    </PageTemplate>
   );
 };
