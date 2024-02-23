@@ -12,7 +12,7 @@ import type { DiscoverAppLocatorParams } from '../../common';
 import { HasSavedSearch } from './types';
 
 export const getDiscoverLocatorParams = (
-  api: HasSavedSearch & Partial<PublishesSavedObjectId> & Partial<PublishesLocalUnifiedSearch>
+  api: HasSavedSearch & Partial<PublishesSavedObjectId & PublishesLocalUnifiedSearch>
 ) => {
   const savedSearch = api.getSavedSearch();
 

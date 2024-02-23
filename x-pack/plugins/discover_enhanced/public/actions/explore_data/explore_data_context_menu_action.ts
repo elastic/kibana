@@ -25,11 +25,11 @@ export class ExploreDataContextMenuAction
 
   public readonly order = 200;
 
-  public async isCompatible(api: EmbeddableApiContext): Promise<boolean> {
-    return await super.isCompatible(api);
+  public async isCompatible(context: EmbeddableApiContext): Promise<boolean> {
+    return await super.isCompatible(context);
   }
 
-  public async getLocation(api: EmbeddableApiContext): Promise<KibanaLocation> {
-    return super.getLocation(api);
+  public async getLocation(context: EmbeddableApiContext): Promise<KibanaLocation> {
+    return super.getLocation(context);
   }
 }

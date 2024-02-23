@@ -38,23 +38,23 @@ export class ExploreDataChartAction
 
   public readonly order = 200;
 
-  public async isCompatible(api: ExploreDataChartActionContext): Promise<boolean> {
-    const { embeddable } = api;
+  public async isCompatible(context: ExploreDataChartActionContext): Promise<boolean> {
+    const { embeddable } = context;
     if (apiIsOfType(embeddable, 'map')) {
       return false; // TODO: https://github.com/elastic/kibana/issues/73043
     }
-    return apiPublishesPartialLocalUnifiedSearch(embeddable) && super.isCompatible(api);
+    return apiPublishesPartialLocalUnifiedSearch(embeddable) && super.isCompatible(context);
   }
 
   protected readonly getLocation = async (
-    api: ExploreDataChartActionContext
+    context: ExploreDataChartActionContext
   ): Promise<KibanaLocation> => {
     const { extractTimeRange } = await import('@kbn/es-query');
     const { restOfFilters: filters, timeRange } = extractTimeRange(
-      api.filters ?? [],
-      api.timeFieldName
+      context.filters ?? [],
+      context.timeFieldName
     );
 
-    return super.getLocation(api, { filters, timeRange });
+    return super.getLocation(context, { filters, timeRange });
   };
 }

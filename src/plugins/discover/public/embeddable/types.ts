@@ -44,7 +44,7 @@ export const apiHasSavedSearch = (
   api: EmbeddableApiContext['embeddable']
 ): api is HasSavedSearch => {
   const embeddable = api as HasSavedSearch;
-  return Boolean(embeddable.getSavedSearch);
+  return Boolean(embeddable.getSavedSearch) && typeof embeddable.getSavedSearch === 'function';
 };
 
 export interface HasTimeRange {
