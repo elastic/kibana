@@ -828,7 +828,7 @@
             },
             {
               "plugin": "profiling",
-              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
+              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
             },
             {
               "plugin": "apm",

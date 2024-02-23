@@ -20,9 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
-
-import { ConnectorIndex } from '../../../../../common/types/indices';
+import { Connector, ConnectorIndex } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';

@@ -3749,34 +3749,6 @@
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/public/jobs.ts"
-              },
-              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
               },
@@ -4357,36 +4329,32 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/jobs.ts"
               },
               {
                 "plugin": "reporting",
@@ -4497,10 +4465,6 @@
                 "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
               },
@@ -4557,10 +4521,6 @@
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/node_disk_space.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/server/routes/api/settings/register_load_route.ts"
               },
@@ -4599,6 +4559,46 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/flamechart.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/functions.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/storage_explorer/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/topn.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "spaces",
@@ -6275,22 +6275,6 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
-              },
-              {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_delete_route.ts"
               },
@@ -6815,8 +6799,20 @@
                 "path": "x-pack/plugins/painless_lab/server/routes/api/execute.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
               },
               {
                 "plugin": "reporting",
@@ -6907,10 +6903,6 @@
                 "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
               },
@@ -6939,10 +6931,6 @@
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/cluster_settings.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/server/routes/api/indices/register_get_route.ts"
               },
@@ -6961,6 +6949,18 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "console",
@@ -8061,10 +8061,6 @@
                 "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
-              },
-              {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_put_route.ts"
               },
@@ -8306,6 +8302,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
@@ -8329,16 +8329,8 @@
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/deprecation_logging.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -8363,6 +8355,14 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -9073,14 +9073,6 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/public/jobs.ts"
-              },
-              {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
@@ -9246,6 +9238,14 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
@@ -9261,10 +9261,6 @@
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/deprecation_logging.ts"
               },
@@ -9273,16 +9269,20 @@
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/ml_snapshots.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/server/routes/api/watch/register_delete_route.ts"
               },
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -13939,10 +13939,6 @@
                 "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/audit_messages/register_route.ts"
               },
@@ -13967,8 +13963,12 @@
                 "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_single/register_route.ts"
               },
               {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "controls",
@@ -14338,16 +14338,16 @@
                 "path": "x-pack/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms_create/register_route.ts"
               },
               {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -15229,10 +15229,6 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/field_histograms/register_route.ts"
               },
@@ -15267,6 +15263,10 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/schedule_now_transforms/register_route.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "controls",
@@ -15684,7 +15684,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",

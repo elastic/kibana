@@ -466,7 +466,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings('row var = 1 in ', ['SyntaxError: expected {LP} but found "<EOF>"']);
     testErrorsAndWarnings('row var = 1 in (', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
-      'Error building [in]: expects exactly 2 arguments, passed 1 instead.',
+      'Error: [in] function expects exactly 2 arguments, got 1.',
     ]);
     testErrorsAndWarnings('row var = 1 not in ', ['SyntaxError: expected {LP} but found "<EOF>"']);
     testErrorsAndWarnings('row var = 1 in (1, 2, 3)', []);
@@ -1028,7 +1028,7 @@ describe('validation logic', () => {
     }
 
     testErrorsAndWarnings(`from a_index | where cidr_match(ipField)`, [
-      `Error building [cidr_match]: expects at least 2 arguments, passed 1 instead.`,
+      `Error: [cidr_match] function expects at least 2 arguments, got 1.`,
     ]);
     testErrorsAndWarnings(
       `from a_index | eval cidr = "172.0.0.1/30" | where cidr_match(ipField, "172.0.0.1/30", cidr)`,
@@ -1330,13 +1330,13 @@ describe('validation logic', () => {
                 )[0].declaration
               }`,
               [
-                `Error building [${name}]: expects ${messageQuantifier}${
+                `Error: [${name}] function expects ${messageQuantifier}${
                   fullNumberOfArgs === 1
                     ? 'one argument'
                     : fullNumberOfArgs === 0
                     ? '0 arguments'
                     : `${fullNumberOfArgs} arguments`
-                }, passed ${fieldMappingWithOneExtraArg.length} instead.`,
+                }, got ${fieldMappingWithOneExtraArg.length}.`,
               ]
             );
           }
@@ -1476,7 +1476,7 @@ describe('validation logic', () => {
     );
     testErrorsAndWarnings('from a_index | eval not', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
-      'Error building [not]: expects exactly one argument, passed 0 instead.',
+      'Error: [not] function expects exactly one argument, got 0.',
     ]);
     testErrorsAndWarnings('from a_index | eval in', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "in"',
@@ -1489,7 +1489,7 @@ describe('validation logic', () => {
 
     testErrorsAndWarnings('from a_index | eval stringField in stringField)', [
       "SyntaxError: missing '(' at 'stringField'",
-      'Error building [in]: expects exactly 2 arguments, passed 1 instead.',
+      'Error: [in] function expects exactly 2 arguments, got 1.',
     ]);
     testErrorsAndWarnings('from a_index | eval stringField not in stringField', [
       "SyntaxError: missing '(' at 'stringField'",
