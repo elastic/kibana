@@ -77,7 +77,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Throughput when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177510
+  registry.when.skip('Throughput when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Throughput chart api', () => {
       const GO_PROD_RATE = 50;
       const GO_DEV_RATE = 5;

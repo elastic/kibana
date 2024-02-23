@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-import { NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString } from '../../../../model/primitives.gen';
 
 export type NewTermsFields = z.infer<typeof NewTermsFields>;
 export const NewTermsFields = z.array(z.string()).min(1).max(3);

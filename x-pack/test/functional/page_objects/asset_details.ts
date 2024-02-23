@@ -6,6 +6,7 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
@@ -257,6 +258,19 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     // APM Tab link
     async clickApmTabLink() {
       return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
+    },
+
+    setAlertStatusFilter(alertStatus?: AlertStatus) {
+      const buttons: Record<AlertStatus | 'all', string> = {
+        active: 'hostsView-alert-status-filter-active-button',
+        recovered: 'hostsView-alert-status-filter-recovered-button',
+        untracked: 'hostsView-alert-status-filter-untracked-button',
+        all: 'hostsView-alert-status-filter-show-all-button',
+      };
+
+      const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
+
+      return testSubjects.click(buttonSubject);
     },
   };
 }
