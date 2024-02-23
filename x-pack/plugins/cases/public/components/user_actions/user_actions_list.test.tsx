@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
@@ -31,9 +31,7 @@ const defaultProps = {
 
 jest.mock('../../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/176524
-// FLAKY: https://github.com/elastic/kibana/issues/176525
-describe.skip(`UserActionsList`, () => {
+describe(`UserActionsList`, () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -46,27 +44,21 @@ describe.skip(`UserActionsList`, () => {
   it('renders list correctly with isExpandable option', async () => {
     appMockRender.render(<UserActionsList {...defaultProps} isExpandable />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders list correctly with isExpandable=false option', async () => {
     appMockRender.render(<UserActionsList {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders user actions correctly', async () => {
     appMockRender.render(<UserActionsList {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId(`description-create-action-${caseUserActions[0].id}`));
-      expect(screen.getByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
-      expect(screen.getByTestId(`description-update-action-${caseUserActions[2].id}`));
-    });
+    expect(await screen.findByTestId(`description-create-action-${caseUserActions[0].id}`));
+    expect(await screen.findByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
+    expect(await screen.findByTestId(`description-update-action-${caseUserActions[2].id}`));
   });
 
   it('renders bottom actions correctly', async () => {
@@ -82,12 +74,11 @@ describe.skip(`UserActionsList`, () => {
         children: <span>{sample}</span>,
       },
     ];
+
     appMockRender.render(<UserActionsList {...defaultProps} bottomActions={bottomActions} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-      expect(screen.getByTestId('add-comment')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('add-comment')).toBeInTheDocument();
   });
 
   it('Outlines comment when url param is provided', async () => {
@@ -121,18 +112,18 @@ describe.skip(`UserActionsList`, () => {
 
     appMockRender.render(<UserActionsList {...props} />);
     expect(
-      screen
-        .queryAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[0]
-        ?.classList.contains('outlined')
+      (
+        await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
+      )[0]?.classList.contains('outlined')
     ).toBe(false);
 
     expect(
-      screen
-        .queryAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[0]
-        ?.classList.contains('outlined')
+      (
+        await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
+      )[0]?.classList.contains('outlined')
     ).toBe(false);
 
-    userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
+    userEvent.click(await screen.findByTestId(`comment-update-action-${ourActions[1].id}`));
 
     expect(
       await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)

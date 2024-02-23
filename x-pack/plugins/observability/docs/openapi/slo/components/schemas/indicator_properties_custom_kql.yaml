@@ -21,15 +21,14 @@ properties:
         example: my-service-*
       filter:
         description: the KQL query to filter the documents with.
-        type: string
-        example: 'field.environment : "production" and service.name : "my-service"'
+        $ref: "kql_with_filters.yaml"
       good:
         description: the KQL query used to define the good events.
-        type: string
+        $ref: "kql_with_filters.yaml"
         example: 'request.latency <= 150 and request.status_code : "2xx"'
       total:
         description: the KQL query used to define all events.
-        type: string
+        $ref: "kql_with_filters.yaml"
         example: ''
       timestampField:
         description: >

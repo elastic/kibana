@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   getLatencyAggregationType,
@@ -33,6 +33,7 @@ import { ManagedTable, TableSearchBar } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -162,6 +163,26 @@ export function TransactionsTable({
         ),
       };
     }, [mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
+
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
+
+  useEffect(() => {
+    return setScreenContext({
+      data: [
+        {
+          name: 'top_transactions',
+          description: 'The visible transaction groups',
+          value: mainStatistics.transactionGroups.map((group) => {
+            return {
+              name: group.name,
+              alertsCount: group.alertsCount,
+            };
+          }),
+        },
+      ],
+    });
+  }, [setScreenContext, mainStatistics]);
 
   return (
     <EuiFlexGroup

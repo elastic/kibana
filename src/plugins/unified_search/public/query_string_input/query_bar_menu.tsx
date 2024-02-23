@@ -26,9 +26,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
-  QueryBarMenuPanel,
   useQueryBarMenuPanels,
   QueryBarMenuPanelsProps,
+  QueryBarMenuPanel,
+  AdditionalQueryBarMenuItems,
 } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import {
@@ -66,6 +67,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   hiddenPanelOptions?: QueryBarMenuPanelsProps['hiddenPanelOptions'];
   onFiltersUpdated?: (filters: Filter[]) => void;
   filters?: Filter[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItems;
   query?: Query;
   savedQuery?: SavedQuery;
   onClearSavedQuery?: () => void;
@@ -100,6 +102,7 @@ function QueryBarMenuComponent({
   toggleFilterBarMenuPopover,
   onFiltersUpdated,
   filters,
+  additionalQueryBarMenuItems,
   query,
   savedQuery,
   onClearSavedQuery,
@@ -164,6 +167,7 @@ function QueryBarMenuComponent({
 
   const panels = useQueryBarMenuPanels({
     filters,
+    additionalQueryBarMenuItems,
     savedQuery,
     language,
     dateRangeFrom,

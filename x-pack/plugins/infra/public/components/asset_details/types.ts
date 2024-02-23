@@ -63,7 +63,7 @@ export interface Tab {
   append?: JSX.Element;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
+export type LinkOptions = 'alertRule' | 'nodeDetails';
 
 export interface AssetDetailsProps {
   assetId: string;

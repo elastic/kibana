@@ -55,7 +55,7 @@ interface VisualizationSelection {
   sameDatasources?: boolean;
 }
 
-interface Props {
+export interface ChartSwitchProps {
   framePublicAPI: FramePublicAPI;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -126,7 +126,7 @@ function getCurrentVisualizationId(
   );
 }
 
-export const ChartSwitch = memo(function ChartSwitch(props: Props) {
+export const ChartSwitch = memo(function ChartSwitch(props: ChartSwitchProps) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -494,7 +494,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 });
 
 function getTopSuggestion(
-  props: Props,
+  props: ChartSwitchProps,
   visualizationId: string,
   datasourceStates: DatasourceStates,
   visualization: VisualizationState,

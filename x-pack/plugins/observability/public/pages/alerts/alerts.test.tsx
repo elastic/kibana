@@ -70,7 +70,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         apm: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
-        observability: { enabled: false },
       },
     },
     aiAssistant: {

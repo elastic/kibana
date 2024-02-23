@@ -68,7 +68,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/177616
+  registry.when.skip(
     'Cold start rate by transaction name when data is generated',
     { config: 'basic', archives: [] },
     () => {

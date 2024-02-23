@@ -3,6 +3,16 @@
 exports[`AlertDetailsAppSection should render annotations 1`] = `
 Array [
   Object {
+    "additionalFilters": Array [
+      Object {
+        "meta": Object {},
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "host-1",
+          },
+        },
+      },
+    ],
     "annotations": Array [
       Object {
         "color": "#BD271E",
@@ -27,6 +37,9 @@ Array [
         "type": "manual",
       },
     ],
+    "chartOptions": Object {
+      "seriesType": "bar_stacked",
+    },
     "dataView": undefined,
     "groupBy": Array [
       "host.hostname",
@@ -52,7 +65,6 @@ Array [
         "query": "host.hostname: Users-System.local and service.type: system",
       },
     },
-    "seriesType": "bar_stacked",
     "timeRange": Object {
       "from": "2023-03-28T10:43:13.802Z",
       "to": "2023-03-29T13:14:09.581Z",

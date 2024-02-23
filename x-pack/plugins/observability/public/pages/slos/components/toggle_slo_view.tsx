@@ -46,7 +46,14 @@ const toggleButtonsIcons = [
   },
 ];
 
-export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, state }: Props) {
+export function ToggleSLOView({
+  sloView,
+  onChangeView,
+  onStateChange,
+  sloList,
+  state,
+  loading,
+}: Props) {
   const total = sloList?.total ?? 0;
   const pageSize = sloList?.perPage ?? 0;
   const pageIndex = sloList?.page ?? 1;
@@ -57,7 +64,7 @@ export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, s
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
-        {!state.groupBy && (
+        {(!state.groupBy || state.groupBy === 'ungrouped') && (
           <EuiText size="s">
             <FormattedMessage
               id="xpack.observability.overview.pagination.description"
@@ -79,10 +86,10 @@ export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, s
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SLOSortBy state={state} onStateChange={onStateChange} />
+        <SLOSortBy state={state} onStateChange={onStateChange} loading={loading} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SloGroupBy state={state} onStateChange={onStateChange} />
+        <SloGroupBy state={state} onStateChange={onStateChange} loading={loading} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
@@ -94,6 +101,7 @@ export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, s
           idSelected={sloView}
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
+          isDisabled={loading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
