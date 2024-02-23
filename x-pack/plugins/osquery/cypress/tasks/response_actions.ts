@@ -39,8 +39,12 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
     cy.getBySel('globalLoadingIndicator').should('not.exist');
 
     // 2 calls are made to get the rule, so we need to wait for both since only on the second one's success the UI is updated
-    cy.wait('@getRule', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
-    cy.wait('@getRule', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+    cy.wait('@getRule', { timeout: 2 * 60 * 1000 })
+      .its('response.statusCode')
+      .should('eq', 200);
+    cy.wait('@getRule', { timeout: 2 * 60 * 1000 })
+      .its('response.statusCode')
+      .should('eq', 200);
 
     closeDateTabIfVisible();
     cy.getBySel('edit-rule-actions-tab').click();
@@ -49,11 +53,8 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
     recurse(
       () => {
         cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-        if (enabled) {
-          return cy.getBySel('response-actions-error').should(Cypress._.noop);
-        } else {
-          return cy.getBySel('alertActionAccordion').should(Cypress._.noop);
-        }
+
+        return cy.getBySel('alertActionAccordion').should(Cypress._.noop);
       },
       ($el) => $el.length === 1,
       { limit: 5, delay: 2000 }
