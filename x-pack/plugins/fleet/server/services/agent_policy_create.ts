@@ -54,6 +54,7 @@ async function createPackagePolicy(
     spaceId: string;
     user: AuthenticatedUser | undefined;
     authorizationHeader?: HTTPAuthorizationHeader | null;
+    force?: boolean;
   }
 ) {
   const newPackagePolicy = await packagePolicyService
@@ -78,6 +79,7 @@ async function createPackagePolicy(
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
+    force: options.force,
   });
 }
 
@@ -149,6 +151,7 @@ export async function createAgentPolicyWithPackages({
       spaceId,
       user,
       authorizationHeader,
+      force,
     });
   }
 
@@ -158,6 +161,7 @@ export async function createAgentPolicyWithPackages({
       spaceId,
       user,
       authorizationHeader,
+      force,
     });
   }
 
