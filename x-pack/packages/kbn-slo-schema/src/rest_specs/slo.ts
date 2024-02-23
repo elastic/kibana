@@ -75,11 +75,19 @@ const getPreviewDataParamsSchema = t.type({
       objective: objectiveSchema,
       instanceId: t.string,
       groupBy: t.string,
+      groupBySampleSize: t.number,
     }),
   ]),
 });
 
 const getPreviewDataResponseSchema = t.array(previewDataSchema);
+
+export const getPreviewDataByGroupResponseSchema = t.array(
+  t.type({
+    group: t.string,
+    data: t.array(previewDataSchema),
+  })
+);
 
 const deleteSLOParamsSchema = t.type({
   path: t.type({
@@ -319,6 +327,7 @@ type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSc
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
+type GetPreviewDataByGroupResponse = t.OutputOf<typeof getPreviewDataByGroupResponseSchema>;
 
 type GetSLOInstancesResponse = t.OutputOf<typeof getSLOInstancesResponseSchema>;
 
@@ -417,4 +426,5 @@ export type {
   GroupSummary,
   KqlWithFiltersSchema,
   QuerySchema,
+  GetPreviewDataByGroupResponse,
 };

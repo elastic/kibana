@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { GetPreviewDataResponse, Indicator, Objective } from '@kbn/slo-schema';
+import {
+  GetPreviewDataByGroupResponse,
+  GetPreviewDataResponse,
+  Indicator,
+  Objective,
+} from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 export interface UseGetPreviewData {
-  data: GetPreviewDataResponse | undefined;
+  data: GetPreviewDataResponse | GetPreviewDataByGroupResponse | undefined;
   isInitialLoading: boolean;
   isLoading: boolean;
   isSuccess: boolean;
@@ -25,6 +30,7 @@ export function useGetPreviewData({
   objective,
   groupBy,
   instanceId,
+  groupBySampleSize,
 }: {
   isValid: boolean;
   groupBy?: string;
@@ -32,11 +38,12 @@ export function useGetPreviewData({
   objective?: Objective;
   indicator: Indicator;
   range: { start: number; end: number };
+  groupBySampleSize?: number;
 }): UseGetPreviewData {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: sloKeys.preview(indicator, range),
+    queryKey: sloKeys.preview(indicator, range, groupBy, groupBySampleSize),
     queryFn: async ({ signal }) => {
       const response = await http.post<GetPreviewDataResponse>(
         '/internal/observability/slos/_preview',
@@ -45,6 +52,7 @@ export function useGetPreviewData({
             indicator,
             range,
             groupBy,
+            groupBySampleSize,
             instanceId,
             ...(objective ? { objective } : null),
           }),

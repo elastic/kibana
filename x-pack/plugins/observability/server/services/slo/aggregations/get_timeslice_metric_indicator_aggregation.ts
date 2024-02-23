@@ -121,7 +121,7 @@ export class GetTimesliceMetricIndicatorAggregation {
     };
   }
 
-  public execute(aggregationKey: string) {
+  public execute<T extends string>(aggregationKey: T) {
     return {
       ...this.buildMetricAggregations(this.indicator.params.metric),
       [aggregationKey]: this.buildMetricEquation(this.indicator.params.metric),

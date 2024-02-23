@@ -32,7 +32,7 @@ import {
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
@@ -57,13 +57,14 @@ export function EventsChartPanel({ slo, range }: Props) {
     isDateHistogram: true,
   });
 
-  const { isLoading, data } = useGetPreviewData({
+  const { isLoading, data: previewData } = useGetPreviewData({
     range,
     isValid: true,
     indicator: slo.indicator,
     groupBy: slo.groupBy,
     instanceId: slo.instanceId,
   });
+  const data = previewData as GetPreviewDataResponse;
 
   const dateFormat = uiSettings.get('dateFormat');
 
@@ -251,7 +252,7 @@ export function EventsChartPanel({ slo, range }: Props) {
                   yAccessors={['value']}
                   data={(data ?? []).map((datum) => ({
                     date: new Date(datum.date).getTime(),
-                    value: datum.sliValue >= 0 ? datum.sliValue : null,
+                    value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
                   }))}
                 />
               )}
