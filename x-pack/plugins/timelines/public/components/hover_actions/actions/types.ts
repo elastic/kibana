@@ -11,11 +11,11 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 export interface FilterValueFnArgs {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  dataViewId: string | null;
   field: string;
   value: string[] | string | null | undefined;
   filterManager: FilterManager | undefined;
   onFilterAdded: (() => void) | undefined;
+  dataViewId?: string;
 }
 
 export interface HoverActionComponentProps {

@@ -59,7 +59,6 @@ const renderWithRouter = (
   return mockedContext.render(
     <MemoryRouter initialEntries={initialEntries}>
       <KubernetesSecurityRoutes
-        dataViewId={dataViewId}
         filter={<div>{'Mock filters'}</div>}
         globalFilter={{
           filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
@@ -67,6 +66,7 @@ const renderWithRouter = (
           endDate: '2022-06-09T17:52:15.532Z',
         }}
         renderSessionsView={jest.fn()}
+        dataViewId={dataViewId}
       />
     </MemoryRouter>
   );

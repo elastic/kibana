@@ -24,7 +24,6 @@ export type FilterForValueProps = HoverActionComponentProps & FilterValueFnArgs;
 const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
   ({
     Component,
-    dataViewId,
     defaultFocusedButtonRef,
     field,
     filterManager,
@@ -35,12 +34,13 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     size,
     showTooltip = false,
     value,
+    dataViewId,
   }) => {
     const filterForValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
         currentVal?.length === 0
-          ? createFilter(dataViewId, field, undefined)
-          : createFilter(dataViewId, field, currentVal);
+          ? createFilter(field, undefined, false, dataViewId)
+          : createFilter(field, currentVal, false, dataViewId);
       const filters = Array.isArray(value)
         ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
         : makeFilter(value);

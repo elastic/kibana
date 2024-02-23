@@ -22,13 +22,12 @@ export const getAdditionalScreenReaderOnlyContext = ({
 };
 
 export const createFilter = (
-  dataViewId: string | null,
   key: string,
   value: string[] | string | null | undefined,
-  negate: boolean = false
+  negate: boolean = false,
+  index?: string
 ): Filter => {
   const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;
-  const index = dataViewId ?? undefined;
   return queryValue != null
     ? {
         meta: {

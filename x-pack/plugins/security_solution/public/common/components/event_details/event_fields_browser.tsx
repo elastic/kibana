@@ -239,10 +239,10 @@ export const EventFieldsBrowser = React.memo<Props>(
           isReadOnly,
         }),
       [
-        columnsProvider,
         browserFields,
         eventId,
         scopeId,
+        columnsProvider,
         timelineTabType,
         getLinkValue,
         isDraggable,

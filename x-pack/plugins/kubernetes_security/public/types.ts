@@ -34,11 +34,11 @@ export interface GlobalFilter {
 }
 
 export interface KubernetesSecurityDeps {
-  dataViewId: string | null;
   filter: React.ReactNode;
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
+  dataViewId?: string;
 }
 
 export interface KubernetesSecurityStart {

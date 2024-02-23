@@ -27,13 +27,13 @@ export interface PercenWidgetDataValueMap {
 export interface PercentWidgetDeps {
   title: ReactNode;
   dataValueMap: Record<string, PercenWidgetDataValueMap>;
-  dataViewId: string | null;
   widgetKey: string;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
   groupedBy: string;
   countBy?: string;
   onReduce: (result: AggregateResult) => Record<string, number>;
+  dataViewId?: string;
 }
 
 interface FilterButtons {
@@ -44,13 +44,13 @@ interface FilterButtons {
 export const PercentWidget = ({
   title,
   dataValueMap,
-  dataViewId,
   widgetKey,
   indexPattern,
   globalFilter,
   groupedBy,
   countBy,
   onReduce,
+  dataViewId,
 }: PercentWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
@@ -86,7 +86,6 @@ export const PercentWidget = ({
       if (!dataValueMap[groupedByValue].shouldHideFilter) {
         result.filterForButtons.push(
           getFilterForValueButton({
-            dataViewId,
             field: dataValueMap[groupedByValue].fieldName,
             filterManager,
             size: 'xs',
@@ -95,11 +94,11 @@ export const PercentWidget = ({
             ownFocus: false,
             showTooltip: true,
             value: [groupedByValue],
+            dataViewId,
           })
         );
         result.filterOutButtons.push(
           getFilterOutValueButton({
-            dataViewId,
             field: dataValueMap[groupedByValue].fieldName,
             filterManager,
             size: 'xs',
@@ -108,6 +107,7 @@ export const PercentWidget = ({
             ownFocus: false,
             showTooltip: true,
             value: [groupedByValue],
+            dataViewId,
           })
         );
       }

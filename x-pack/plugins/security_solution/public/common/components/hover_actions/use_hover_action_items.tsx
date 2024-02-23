@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
-import { isActiveTimeline } from '../../../helpers';
+import { getSourcererScopeId, isActiveTimeline } from '../../../helpers';
 import { timelineSelectors } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
@@ -22,9 +22,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/actions';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { useDataViewId } from '../../hooks/use_data_view_id';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
@@ -88,12 +86,7 @@ export const useHoverActionItems = ({
   const kibana = useKibana();
   const dispatch = useDispatch();
   const { timelines, uiSettings } = kibana.services;
-  const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
-    ? SourcererScopeName.timeline
-    : scopeId != null && isDetectionsAlertsTable(scopeId)
-    ? SourcererScopeName.detections
-    : SourcererScopeName.default;
-  const { dataViewId } = useSourcererDataView(activeScope);
+  const dataViewId = useDataViewId(getSourcererScopeId(scopeId ?? ''));
 
   // Common actions used by the alert table and alert flyout
   const {
@@ -279,34 +272,34 @@ export const useHoverActionItems = ({
         return item != null;
       }),
     [
-      showFilters,
-      getFilterForValueButton,
-      defaultFocusedButtonRef,
-      field,
-      filterManager,
-      stKeyboardEvent,
-      handleHoverActionClicked,
-      onFilterAdded,
-      ownFocus,
-      enableOverflowButton,
-      values,
-      dataViewId,
-      getFilterOutValueButton,
-      toggleColumn,
-      shouldDisableColumnToggle,
-      getColumnToggleButton,
-      isObjectArray,
-      dataType,
-      draggableId,
       dataProvider,
-      hideAddToTimeline,
-      getAddToTimelineButton,
-      onAddToTimelineClicked,
+      dataType,
+      defaultFocusedButtonRef,
+      draggableId,
+      enableOverflowButton,
+      field,
       fieldType,
       isAggregatable,
-      hideTopN,
-      showTopNBtn,
+      filterManager,
+      getAddToTimelineButton,
+      getColumnToggleButton,
       getCopyButton,
+      getFilterForValueButton,
+      getFilterOutValueButton,
+      handleHoverActionClicked,
+      onAddToTimelineClicked,
+      hideAddToTimeline,
+      hideTopN,
+      isObjectArray,
+      onFilterAdded,
+      ownFocus,
+      shouldDisableColumnToggle,
+      showFilters,
+      showTopNBtn,
+      stKeyboardEvent,
+      toggleColumn,
+      values,
+      dataViewId,
     ]
   ) as JSX.Element[];
 

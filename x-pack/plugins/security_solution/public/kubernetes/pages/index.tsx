@@ -79,7 +79,6 @@ export const KubernetesContainer = React.memo(() => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
-        dataViewId,
         filter: (
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
             <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
@@ -92,6 +91,7 @@ export const KubernetesContainer = React.memo(() => {
           endDate: to,
         },
         renderSessionsView,
+        dataViewId: dataViewId ?? undefined,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

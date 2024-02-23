@@ -49,7 +49,7 @@ export const createFilterOutActionFactory = createCellActionFactory(
     execute: async ({ data, metadata }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
-      const dataViewId = typeof metadata?.dataViewId === 'string' ? metadata.dataViewId : null;
+      const dataViewId = typeof metadata?.dataViewId === 'string' ? metadata.dataViewId : undefined;
 
       const value = filterOutNullableValues(valueToArray(rawValue));
 
@@ -78,7 +78,7 @@ export const addFilterOut = ({
   filterManager: FilterManager | undefined;
   fieldName: string;
   value: DefaultActionsSupportedValue;
-  dataViewId: string | null;
+  dataViewId?: string;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({

@@ -25,9 +25,9 @@ const createExistsFilter = ({
 }: {
   key: string;
   negate: boolean;
-  dataViewId: string | null;
+  dataViewId?: string;
 }): ExistsFilter => ({
-  meta: { key, negate, type: FILTERS.EXISTS, value: 'exists', index: dataViewId ?? undefined },
+  meta: { key, negate, type: FILTERS.EXISTS, value: 'exists', index: dataViewId },
   query: { exists: { field: key } },
 });
 
@@ -40,10 +40,10 @@ const createPhraseFilter = ({
   value: string | number | boolean;
   key: string;
   negate?: boolean;
-  dataViewId: string | null;
+  dataViewId?: string;
 }): PhraseFilter => ({
   meta: {
-    index: dataViewId ?? undefined,
+    index: dataViewId,
     key,
     negate,
     type: FILTERS.PHRASE,
@@ -61,10 +61,10 @@ const createCombinedFilter = ({
   values: DefaultActionsSupportedValue;
   key: string;
   negate: boolean;
-  dataViewId: string | null;
+  dataViewId?: string;
 }): CombinedFilter => ({
   meta: {
-    index: dataViewId ?? undefined,
+    index: dataViewId,
     key,
     negate,
     type: FILTERS.COMBINED,
@@ -82,7 +82,7 @@ export const createFilter = ({
   key: string;
   value: DefaultActionsSupportedValue;
   negate: boolean;
-  dataViewId: string | null;
+  dataViewId?: string;
 }): Filter => {
   if (value.length === 0) {
     return createExistsFilter({ key, negate, dataViewId });
