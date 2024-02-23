@@ -62,16 +62,20 @@ export function getStateDefaults({
         )
       : sort,
     columns,
+    index: isTextBasedQueryMode ? undefined : dataView?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
+    hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
+    viewMode: undefined,
+    hideAggregatedPreview: undefined,
+    savedQuery: undefined,
+    rowHeight: undefined,
+    headerRowHeight: undefined,
+    rowsPerPage: undefined,
+    sampleSize: undefined,
+    grid: undefined,
+    breakdownField: undefined,
   };
-  if (!isTextBasedQueryMode) {
-    defaultState.index = dataView?.id;
-  }
-
-  if (typeof chartHidden === 'boolean') {
-    defaultState.hideChart = chartHidden;
-  }
 
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;

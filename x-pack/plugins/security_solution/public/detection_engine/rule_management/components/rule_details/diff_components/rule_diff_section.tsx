@@ -13,19 +13,21 @@ import { FieldGroupDiffComponent } from './field_diff';
 interface RuleDiffSectionProps {
   title: string;
   fieldGroups: FieldsGroupDiff[];
+  dataTestSubj?: string;
 }
 
-export const RuleDiffSection = ({ title, fieldGroups }: RuleDiffSectionProps) => (
+export const RuleDiffSection = ({ title, fieldGroups, dataTestSubj }: RuleDiffSectionProps) => (
   <>
     <EuiSpacer size="m" />
     <EuiAccordion
+      data-test-subj={dataTestSubj}
       initialIsOpen={true}
       id={title}
       css={css`
         padding-top: 1px; // Fixes border disappearing bug
       `}
       buttonContent={
-        <EuiTitle size="s">
+        <EuiTitle data-test-subj="ruleUpgradePerFieldDiffSectionHeader" size="s">
           <h3>{title}</h3>
         </EuiTitle>
       }

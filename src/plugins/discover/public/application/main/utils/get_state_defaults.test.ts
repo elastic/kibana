@@ -23,19 +23,29 @@ describe('getStateDefaults', () => {
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
         "filters": undefined,
+        "grid": undefined,
+        "headerRowHeight": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
+        "savedQuery": undefined,
         "sort": Array [
           Array [
             "timestamp",
             "desc",
           ],
         ],
+        "viewMode": undefined,
       }
     `);
   });
@@ -49,14 +59,24 @@ describe('getStateDefaults', () => {
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
         "filters": undefined,
+        "grid": undefined,
+        "headerRowHeight": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
         "index": "the-data-view-id",
         "interval": "auto",
         "query": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
+        "savedQuery": undefined,
         "sort": Array [],
+        "viewMode": undefined,
       }
     `);
   });
@@ -88,6 +108,7 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForTextBasedWithValidViewMode.index).toBe(undefined);
 
     const actualForWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -97,5 +118,8 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+    expect(actualForWithValidViewMode.index).toBe(
+      savedSearchMock.searchSource.getField('index')?.id
+    );
   });
 });

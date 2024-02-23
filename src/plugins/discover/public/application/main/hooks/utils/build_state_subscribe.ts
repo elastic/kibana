@@ -57,7 +57,7 @@ export const buildStateSubscribe =
       !queryChanged
     ) {
       // this is just used to unset the index/viewmode when switching to a text based query, nothing to do here
-      addLog('[appstate] subscribe update ignored for text base ql', {
+      addLog('[appstate] subscribe update ignored for es|ql', {
         prevState,
         nextState,
       });
