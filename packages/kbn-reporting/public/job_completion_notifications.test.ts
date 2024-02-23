@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  getPendingJobIds,
-  addPendingJobId,
-  setPendingJobIds,
-} from './job_completion_notifications';
+import { jobCompletionNotifications } from './job_completion_notifications';
 
 describe('Job completion notifications', () => {
+  const { setPendingJobIds, getPendingJobIds, addPendingJobId } = jobCompletionNotifications();
+
   afterEach(async () => {
     await setPendingJobIds([]);
   });

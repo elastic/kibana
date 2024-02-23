@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
 
-import { Job, ReportingAPIClient, getPendingJobIds, setPendingJobIds } from '@kbn/reporting-public';
+import { Job, ReportingAPIClient, jobCompletionNotifications } from '@kbn/reporting-public';
 import {
   getFailureToast,
   getGeneralErrorToast,
@@ -61,6 +61,8 @@ function handleError(
 }
 
 export class ReportingNotifierStreamHandler {
+  private jobCompletionNotifications = jobCompletionNotifications();
+
   constructor(
     private notifications: NotificationsSetup,
     private apiClient: ReportingAPIClient,
@@ -72,7 +74,7 @@ export class ReportingNotifierStreamHandler {
     Rx.timer(0, interval)
       .pipe(
         takeUntil(stop$), // stop the interval when stop method is called
-        mergeMap(getPendingJobIds), // read all pending job IDs from session storage
+        mergeMap(this.jobCompletionNotifications.getPendingJobIds), // read all pending job IDs from session storage
         filter((previousPending) => previousPending.length > 0), // stop the pipeline here if there are none pending
         mergeMap((previousPending) => this.findChangedStatusJobs(previousPending)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => this.showNotifications({ completed, failed })),
@@ -174,7 +176,7 @@ export class ReportingNotifierStreamHandler {
 
         // refresh the storage of pending job IDs, minus
         // the newly completed and failed jobs
-        await setPendingJobIds(newPending);
+        await this.jobCompletionNotifications.setPendingJobIds(newPending);
 
         return { completed: newCompleted, failed: newFailed };
       }),

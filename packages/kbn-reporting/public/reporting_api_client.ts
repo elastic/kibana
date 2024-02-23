@@ -22,7 +22,7 @@ import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import { Job } from '.';
-import { addPendingJobId } from './job_completion_notifications';
+import { jobCompletionNotifications } from './job_completion_notifications';
 
 /*
  * For convenience, apps do not have to provide the browserTimezone and Kibana version.
@@ -67,6 +67,7 @@ interface IReportingAPI {
  */
 export class ReportingAPIClient implements IReportingAPI {
   private http: HttpSetup;
+  private addPendingJobId = jobCompletionNotifications().addPendingJobId;
 
   constructor(
     http: HttpSetup,
@@ -183,7 +184,7 @@ export class ReportingAPIClient implements IReportingAPI {
         body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-    await addPendingJobId(resp.job.id);
+    await this.addPendingJobId(resp.job.id);
     return new Job(resp.job);
   }
 
