@@ -86,6 +86,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-api-server",
     "@kbn/securitysolution-io-ts-utils",
+    "@kbn/core-lifecycle-server",
     "@kbn/elastic-agent-utils"
   ],
   "exclude": ["target/**/*"]

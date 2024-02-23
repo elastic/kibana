@@ -23,6 +23,9 @@ import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { SurveySection } from './components/survey_section';
 import { NoRemoteCluster } from '../../../components/empty_states';
+import { WaffleOptionsProvider } from './hooks/use_waffle_options';
+import { WaffleTimeProvider } from './hooks/use_waffle_time';
+import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 
 export const SnapshotPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
@@ -55,32 +58,43 @@ export const SnapshotPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <div className={APP_WRAPPER_CLASS}>
-        <MetricsPageTemplate
-          hasData={metricIndicesExist}
-          pageHeader={{
-            pageTitle: inventoryTitle,
-            rightSideItems: [<SavedViews />, <SurveySection />],
-          }}
-          pageSectionProps={{
-            contentProps: {
-              css: css`
-                ${fullHeightContentStyles};
-                padding-bottom: 0;
-              `,
-            },
-          }}
-        >
-          <SnapshotContainer
-            render={({ loading, nodes, reload, interval }) => (
-              <>
-                <FilterBar interval={interval} />
-                <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
-              </>
-            )}
-          />
-        </MetricsPageTemplate>
-      </div>
+      <WaffleOptionsProvider>
+        <WaffleTimeProvider>
+          <WaffleFiltersProvider>
+            <div className={APP_WRAPPER_CLASS}>
+              <MetricsPageTemplate
+                hasData={metricIndicesExist}
+                pageHeader={{
+                  pageTitle: inventoryTitle,
+                  rightSideItems: [<SavedViews />, <SurveySection />],
+                }}
+                pageSectionProps={{
+                  contentProps: {
+                    css: css`
+                      ${fullHeightContentStyles};
+                      padding-bottom: 0;
+                    `,
+                  },
+                }}
+              >
+                <SnapshotContainer
+                  render={({ loading, nodes, reload, interval }) => (
+                    <>
+                      <FilterBar interval={interval} />
+                      <LayoutView
+                        loading={loading}
+                        nodes={nodes}
+                        reload={reload}
+                        interval={interval}
+                      />
+                    </>
+                  )}
+                />
+              </MetricsPageTemplate>
+            </div>
+          </WaffleFiltersProvider>
+        </WaffleTimeProvider>
+      </WaffleOptionsProvider>
     </EuiErrorBoundary>
   );
 };
