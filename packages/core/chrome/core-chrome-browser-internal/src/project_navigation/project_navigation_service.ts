@@ -347,12 +347,15 @@ export class ProjectNavigationService {
     SolutionNavigationDefinitions,
     string | null
   ]) {
+    // We don't want to change to "classic" if `id` is `null` when we haven't received
+    // any definitions yet. Serverless Kibana could be impacted by this.
+    // When we do have definitions, then passing `null` does mean we should change to "classic".
+    if (Object.keys(definitions).length === 0) return;
+
     if (id === null) {
       this.setChromeStyle('classic');
       this.navigationTree$.next(undefined);
     } else {
-      if (Object.keys(definitions).length === 0) return;
-
       const definition = definitions[id];
       if (!definition) {
         throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
