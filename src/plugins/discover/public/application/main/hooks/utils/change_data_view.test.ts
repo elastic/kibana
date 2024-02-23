@@ -47,7 +47,8 @@ describe('changeDataView', () => {
       index: 'data-view-with-user-default-column-id',
       sort: [['@timestamp', 'desc']],
     });
-    expect(params.internalState.transitions.setDataViewLoading).toBeCalledTimes(2);
+    expect(params.internalState.transitions.setDataViewLoading).toHaveBeenNthCalledWith(1, true);
+    expect(params.internalState.transitions.setDataViewLoading).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should set the right app state when a valid data view to switch to is given', async () => {
