@@ -18,8 +18,6 @@ import { duplicateIdentifier } from './duplicate_identifier';
 import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
-import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
-import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 import { getMissingSignificantItems } from './get_missing_significant_items';
 import { transformSignificantItemToGroup } from './transform_significant_item_to_group';
 import type { ItemSet } from '../../../../common/types';
@@ -38,15 +36,22 @@ export function getSignificantItemGroups(
     const itemNames = itemSet.set.map((d) => `${d.fieldName}:${d.fieldValue}`);
     for (const source of itemNames) {
       for (const target of itemNames) {
-        edgeData.push({ source, target, weight: itemSet.size });
+        const sourceTargetExists = edgeData.some(
+          (d) =>
+            (d.source === source && d.target === target) ||
+            (d.source === target && d.target === source)
+        );
+        if (source !== target && !sourceTargetExists) {
+          edgeData.push({ source, target, weight: itemSet.doc_count });
+        }
       }
     }
   }
-  console.log('edgeData', edgeData);
+  console.log('edgeData', edgeData.length);
 
   const community = jLouvain().nodes(nodeData).edges(edgeData);
   const result = community();
-  console.log('result', result);
+  // console.log('result', result);
 
   const resultReverseRecord = Object.entries(result).reduce<
     Record<string, SignificantItemGroupItem[]>
@@ -71,7 +76,7 @@ export function getSignificantItemGroups(
     }
     return p;
   }, {});
-  console.log('resultReverseRecord', resultReverseRecord);
+  // console.log('resultReverseRecord', resultReverseRecord);
 
   const grouped = Object.entries(resultReverseRecord).map(([id, group]) => {
     const docCount = Math.min(...group.map((d) => d.docCount));
@@ -120,7 +125,7 @@ export function getSignificantItemGroups(
     )
   );
 
-  console.log('significantItemGroups', significantItemGroups[0]);
+  // console.log('significantItemGroups', significantItemGroups[0]);
 
   return uniqBy(significantItemGroups, 'id');
 }
