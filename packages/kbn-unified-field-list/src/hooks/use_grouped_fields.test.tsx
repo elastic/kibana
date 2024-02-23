@@ -776,4 +776,58 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       3
     );
   });
+
+  it('should include additional fields when additionalFieldGroups are provided', async () => {
+    const smartFields = [
+      {
+        name: 'mock_field',
+        displayName: 'mock_field',
+        type: 'smart_field',
+      } as DataViewField,
+    ];
+
+    const additionalFieldGroups = [
+      {
+        SmartFields: {
+          fields: smartFields,
+          fieldCount: smartFields.length,
+          isAffectedByGlobalFilter: false,
+          isAffectedByTimeFilter: false,
+          isInitiallyOpen: true,
+          showInAccordion: true,
+          hideDetails: false,
+          hideIfEmpty: true,
+          title: 'Smart fields',
+        },
+      },
+    ];
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+        additionalFieldGroups,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const { fieldListGroupedProps } = result.current;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+    expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-25',
+      'UnmappedFields-0',
+      'EmptyFields-0',
+      'MetaFields-3',
+      'SmartFields-1',
+    ]);
+  });
 });
