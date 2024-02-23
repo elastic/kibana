@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  createSecuritySolutionStorageMock,
-  kibanaMock,
-} from '../../../common/mock';
-
-import type { State } from '../../../common/store/types';
-import { createStore } from '../../../common/store';
+import { createMockStore } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -30,16 +22,14 @@ jest.mock('../actions', () => {
 const setChangedMock = setChanged as unknown as jest.Mock;
 
 describe('Timeline changed middleware', () => {
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
+  let store = createMockStore();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
+    store = createMockStore();
     setChangedMock.mockClear();
   });
 
-  it('should mark a timeline as changed for some actions', async () => {
+  it('should mark a timeline as changed for some actions', () => {
     expect(selectTimelineById(store.getState(), TimelineId.test).kqlMode).toEqual('filter');
 
     store.dispatch(updateKqlMode({ id: TimelineId.test, kqlMode: 'search' }));
@@ -48,7 +38,7 @@ describe('Timeline changed middleware', () => {
     expect(selectTimelineById(store.getState(), TimelineId.test).kqlMode).toEqual('search');
   });
 
-  it('should not mark a timeline as changed for some actions', async () => {
+  it('should not mark a timeline as changed for some actions', () => {
     store.dispatch(showTimeline({ id: TimelineId.test, show: true }));
     expect(setChangedMock).not.toHaveBeenCalled();
   });
