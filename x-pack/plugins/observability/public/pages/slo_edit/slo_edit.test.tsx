@@ -22,6 +22,7 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useCreateRule } from '../../hooks/use_create_rule';
 import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -37,6 +38,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_fetch_data_views');
+jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
@@ -53,6 +55,7 @@ jest.mock('../../utils/kibana_react', () => ({
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
+const useCreateDataViewsMock = useCreateDataView as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
@@ -156,6 +159,11 @@ describe('SLO Edit Page', () => {
       isLoading: false,
       data: [{ getName: () => 'dataview', getIndexPattern: () => '.dataview-index' }],
     });
+
+    useCreateDataViewsMock.mockReturnValue({
+      dataView: { getName: () => 'dataview', getIndexPattern: () => '.dataview-index' },
+    });
+
     useFetchIndicesMock.mockReturnValue({
       isLoading: false,
       data: ['some-index', 'index-2'],
