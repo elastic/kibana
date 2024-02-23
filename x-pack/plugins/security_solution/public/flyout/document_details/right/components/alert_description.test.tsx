@@ -9,11 +9,11 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
-  DESCRIPTION_TITLE_TEST_ID,
+  ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
-  DESCRIPTION_DETAILS_TEST_ID,
+  ALERT_DESCRIPTION_DETAILS_TEST_ID,
 } from './test_ids';
-import { Description } from './description';
+import { AlertDescription } from './alert_description';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
@@ -65,14 +65,14 @@ const renderDescription = (panelContext: RightPanelContext) =>
   render(
     <IntlProvider locale="en">
       <RightPanelContext.Provider value={panelContext}>
-        <Description />
+        <AlertDescription />
       </RightPanelContext.Provider>
     </IntlProvider>
   );
 
 const NO_DATA_MESSAGE = "There's no description for this rule.";
 
-describe('<Description />', () => {
+describe('<AlertDescription />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
@@ -82,24 +82,26 @@ describe('<Description />', () => {
       panelContextValue([ruleUuid, ruleDescription, ruleName])
     );
 
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
-    expect(getByTestId(DESCRIPTION_DETAILS_TEST_ID)).toHaveTextContent(ruleDescription.values[0]);
+    expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
+    expect(getByTestId(ALERT_DESCRIPTION_DETAILS_TEST_ID)).toHaveTextContent(
+      ruleDescription.values[0]
+    );
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render no data message if rule description is not available', () => {
     const { getByTestId, getByText } = renderDescription(panelContextValue([ruleUuid]));
 
-    expect(getByTestId(DESCRIPTION_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ALERT_DESCRIPTION_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render document title if document is not an alert', () => {
     const { getByTestId } = renderDescription(panelContextValue([ruleDescription]));
 
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Document description');
+    expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Document description');
   });
 
   describe('rule preview', () => {

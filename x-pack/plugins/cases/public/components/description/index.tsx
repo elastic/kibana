@@ -73,7 +73,7 @@ const getDraftDescription = (
   caseId: string,
   commentId: string
 ): string | null => {
-  const draftStorageKey = getMarkdownEditorStorageKey({ appId: applicationId, caseId, commentId });
+  const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
 
   return sessionStorage.getItem(draftStorageKey);
 };
