@@ -9,9 +9,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+// import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
@@ -48,13 +48,13 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
     const isDarkTheme = useIsDarkTheme();
 
     return (
-      <StyledComponentsThemeProvider darkMode={isDarkTheme}>
+      <EuiThemeProvider colorMode={isDarkTheme ? 'dark' : 'light'}>
         <CasesApp
           externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
           persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
           getFilesClient={getFilesClient}
         />
-      </StyledComponentsThemeProvider>
+      </EuiThemeProvider>
     );
   }
 );

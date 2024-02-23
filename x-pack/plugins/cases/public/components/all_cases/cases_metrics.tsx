@@ -12,8 +12,10 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../common/types/domain';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
@@ -21,14 +23,14 @@ import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
-const MetricsFlexGroup = styled.div`
-  ${({ theme }) => css`
-    border: ${theme.eui.euiBorderThin};
-    border-radius: ${theme.eui.euiBorderRadius};
-    padding: ${theme.eui.euiSizeM};
-    margin-bottom: ${theme.eui.euiSizeL};
-  `}
-`;
+// const MetricsFlexGroup = styled.div`
+//   ${({ theme }) => css`
+//     border: ${theme.eui.euiBorderThin};
+//     border-radius: ${theme.eui.euiBorderRadius};
+//     padding: ${theme.eui.euiSizeM};
+//     margin-bottom: ${theme.eui.euiSizeL};
+//   `}
+// `;
 
 export const CasesMetrics: React.FC = () => {
   const {
@@ -39,6 +41,7 @@ export const CasesMetrics: React.FC = () => {
     },
     isLoading: isCasesStatusLoading,
   } = useGetCasesStatus();
+  const { euiTheme } = useEuiTheme();
 
   const { data: { mttr } = { mttr: 0 }, isLoading: isCasesMetricsLoading } = useGetCasesMetrics();
 
@@ -48,7 +51,14 @@ export const CasesMetrics: React.FC = () => {
   );
 
   return (
-    <MetricsFlexGroup>
+    <div
+      css={css`
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius};
+        padding: ${euiTheme.size.m};
+        margin-bottom: ${euiTheme.size.l};
+      `}
+    >
       <EuiFlexGroup responsive={true} data-test-subj="cases-metrics-stats">
         <EuiFlexItem grow={true}>
           <StatusStats
@@ -95,7 +105,7 @@ export const CasesMetrics: React.FC = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </MetricsFlexGroup>
+    </div>
   );
 };
 CasesMetrics.displayName = 'CasesMetrics';

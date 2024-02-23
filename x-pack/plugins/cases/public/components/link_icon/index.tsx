@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { IconSize, IconType } from '@elastic/eui';
+import { EuiThemeComputed, IconSize, IconType, useEuiTheme } from '@elastic/eui';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import type { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 interface LinkProps {
   ariaLabel?: string;
@@ -21,33 +21,56 @@ interface LinkProps {
   onClick?: Function;
 }
 
-export const Link = styled(({ iconSide, children, ...rest }) => (
-  <EuiLink {...rest}>{children}</EuiLink>
-))<LinkProps>`
-  ${({ iconSide, theme }) => css`
+export const getLinkCss = ({
+  euiTheme,
+  iconSide,
+}: {
+  euiTheme: EuiThemeComputed<{}>;
+  iconSide?: 'left' | 'right';
+}) =>
+  css`
     align-items: center;
     display: inline-flex;
     vertical-align: top;
     white-space: nowrap;
-
     ${iconSide === 'left' &&
     css`
       .euiIcon {
-        margin-right: ${theme.eui.euiSizeXS};
+        margin-right: ${euiTheme.size.xs};
       }
     `}
-
     ${iconSide === 'right' &&
     css`
       flex-direction: row-reverse;
 
       .euiIcon {
-        margin-left: ${theme.eui.euiSizeXS};
+        margin-left: ${euiTheme.size.xs};
       }
     `}
-  `}
-`;
-Link.displayName = 'Link';
+  `;
+//   ${({ iconSide, theme }) => css`
+//     align-items: center;
+//     display: inline-flex;
+//     vertical-align: top;
+//     white-space: nowrap;
+
+//     ${iconSide === 'left' &&
+//     css`
+//       .euiIcon {
+//         margin-right: ${theme.eui.euiSizeXS};
+//       }
+//     `}
+
+//     ${iconSide === 'right' &&
+//     css`
+//       flex-direction: row-reverse;
+
+//       .euiIcon {
+//         margin-left: ${theme.eui.euiSizeXS};
+//       }
+//     `}
+//   `}
+// `;
 
 export interface LinkIconProps extends LinkProps {
   children: string | ReactNode;
@@ -69,6 +92,7 @@ export const LinkIcon = React.memo<LinkIconProps>(
     iconType,
     onClick,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const getChildrenString = useCallback((theChild: string | ReactNode): string => {
       if (
         typeof theChild === 'object' &&
@@ -90,19 +114,20 @@ export const LinkIcon = React.memo<LinkIconProps>(
     }, [ariaLabel, children, getChildrenString]);
 
     return (
-      <Link
+      <EuiLink
         className="casesLinkIcon"
         color={color}
         data-test-subj={dataTestSubj}
         disabled={disabled}
         href={href}
+        css={getLinkCss({ euiTheme, iconSide })}
         iconSide={iconSide}
         onClick={onClick}
         aria-label={aria}
       >
         <EuiIcon size={iconSize} type={iconType} />
         <span className="casesLinkIcon__label">{children}</span>
-      </Link>
+      </EuiLink>
     );
   }
 );

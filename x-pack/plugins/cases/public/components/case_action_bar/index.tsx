@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
@@ -31,18 +32,18 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 
-const MyDescriptionList = styled(EuiDescriptionList)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeL};
-      border-right: ${theme.eui.euiBorderThin};
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-        padding-right: 0;
-        border-right: 0;
-      }
-    }
-  `}
-`;
+// const MyDescriptionList = styled(EuiDescriptionList)`
+//   ${({ theme }) => css`
+//     & {
+//       padding-right: ${theme.eui.euiSizeL};
+//       border-right: ${theme.eui.euiBorderThin};
+//       @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
+//         padding-right: 0;
+//         border-right: 0;
+//       }
+//     }
+//   `}
+// `;
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -56,6 +57,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
+  const { euiTheme } = useEuiTheme();
 
   const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
 
@@ -88,7 +90,19 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
       <EuiFlexItem grow={false}>
-        <MyDescriptionList compressed>
+        <EuiDescriptionList
+          css={css`
+            & {
+              padding-right: ${euiTheme.size.l};
+              border-right: ${euiTheme.border.thin};
+              @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
+                padding-right: 0;
+                border-right: 0;
+              }
+            }
+          `}
+          compressed
+        >
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
             <EuiFlexItem grow={false} data-test-subj="case-view-status">
               <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
@@ -113,7 +127,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </MyDescriptionList>
+        </EuiDescriptionList>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>

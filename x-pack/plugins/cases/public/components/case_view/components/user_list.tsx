@@ -16,9 +16,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCaseViewNavigation } from '../../../common/navigation';
@@ -38,18 +39,26 @@ interface UserListProps {
   dataTestSubj?: string;
 }
 
-const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    margin-top: ${theme.eui.euiSizeM};
-  `}
-`;
+// const MyFlexGroup = styled(EuiFlexGroup)`
+//   ${({ theme }) => css`
+//     margin-top: ${theme.eui.euiSizeM};
+//   `}
+// `;
 
 const renderUsers = (
   users: UserInfoWithAvatar[],
   handleSendEmail: (emailAddress: string | undefined | null) => void
-) =>
-  users.map((userInfo, key) => (
-    <MyFlexGroup key={key} justifyContent="spaceBetween" responsive={false}>
+) => {
+  const { euiTheme } = useEuiTheme();
+  return users.map((userInfo, key) => (
+    <EuiFlexGroup
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+      key={key}
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <HoverableUserWithAvatar userInfo={userInfo} />
       </EuiFlexItem>
@@ -64,8 +73,9 @@ const renderUsers = (
           isDisabled={isEmpty(userInfo.user?.email)}
         />
       </EuiFlexItem>
-    </MyFlexGroup>
+    </EuiFlexGroup>
   ));
+};
 
 const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: string }) => ({
   subject: i18n.EMAIL_SUBJECT(caseTitle),

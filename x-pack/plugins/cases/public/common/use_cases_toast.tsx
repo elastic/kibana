@@ -6,9 +6,9 @@
  */
 
 import type { ErrorToastOptions } from '@kbn/core/public';
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
@@ -26,7 +26,7 @@ import { OWNER_INFO } from '../../common/constants';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 const LINE_CLAMP = 3;
-const Title = styled.span`
+const titleCss = css`
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: ${LINE_CLAMP};
@@ -34,11 +34,11 @@ const Title = styled.span`
   overflow: hidden;
   word-break: break-word;
 `;
-const EuiTextStyled = styled(EuiText)`
-  ${({ theme }) => `
-    margin-bottom: ${theme.eui?.paddingSizes?.s ?? 8}px;
-  `}
-`;
+// const EuiTextStyled = styled(EuiText)`
+//   ${({ theme }) => `
+//     margin-bottom: ${theme.eui?.paddingSizes?.s ?? 8}px;
+//   `}
+// `;
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -155,7 +155,7 @@ export const useCasesToast = () => {
       return toasts.addSuccess({
         color: 'success',
         iconType: 'check',
-        title: toMountPoint(<Title>{renderTitle}</Title>),
+        title: toMountPoint(<span css={titleCss}>{renderTitle}</span>),
         text: toMountPoint(
           <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
         ),
@@ -189,12 +189,19 @@ export const CaseToastSuccessContent = ({
   onViewCaseClick: () => void;
   content?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {content !== undefined ? (
-        <EuiTextStyled size="s" data-test-subj="toaster-content-sync-text">
+        <EuiText
+          size="s"
+          css={css`
+            margin-bottom: ${euiTheme.size.s ?? 8}px;
+          `}
+          data-test-subj="toaster-content-sync-text"
+        >
           {content}
-        </EuiTextStyled>
+        </EuiText>
       ) : null}
       <EuiButtonEmpty
         size="xs"
