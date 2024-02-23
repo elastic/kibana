@@ -7,7 +7,7 @@
 
 import { HistogramIndicator } from '@kbn/slo-schema';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getElastichsearchQueryOrThrow } from '../transform_generators/common';
+import { getElasticsearchQueryOrThrow } from '../transform_generators/common';
 
 type HistogramIndicatorDef =
   | HistogramIndicator['params']['good']
@@ -18,7 +18,7 @@ export class GetHistogramIndicatorAggregation {
 
   private buildAggregation(indicator: HistogramIndicatorDef): AggregationsAggregationContainer {
     const filter = indicator.filter
-      ? getElastichsearchQueryOrThrow(indicator.filter)
+      ? getElasticsearchQueryOrThrow(indicator.filter)
       : { match_all: {} };
     if (indicator.aggregation === 'value_count') {
       return {

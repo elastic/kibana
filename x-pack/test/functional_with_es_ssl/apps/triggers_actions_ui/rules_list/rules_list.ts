@@ -27,6 +27,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const retry = getService('retry');
   const header = getPageObject('header');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
     const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
@@ -346,7 +347,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
@@ -369,7 +370,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Disabled 1 rule');
       });
 
@@ -468,7 +469,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 

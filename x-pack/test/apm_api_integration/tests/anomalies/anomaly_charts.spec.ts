@@ -169,7 +169,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('with ml jobs', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/176966
+      describe.skip('with ml jobs', () => {
         beforeEach(async () => {
           await createAndRunApmMlJobs({
             es,

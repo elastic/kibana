@@ -98,11 +98,6 @@ export class ReportingPageObject extends FtrService {
     await this.share.openShareMenuItem('PNG Reports');
   }
 
-  async clearToastNotifications() {
-    const toasts = await this.testSubjects.findAll('toastCloseButton');
-    await Promise.all(toasts.map(async (t) => await t.click()));
-  }
-
   async getQueueReportError() {
     return await this.testSubjects.exists('errorToastMessage');
   }

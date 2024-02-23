@@ -410,13 +410,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         !isProfilingIntegrationEnabled ||
         isRumOrMobileAgentName(agentName) ||
         isAWSLambdaAgentName(serverlessType),
-      append: (
-        <EuiBadge color="accent">
-          {i18n.translate('xpack.apm.universalProfiling.newLabel', {
-            defaultMessage: 'New',
-          })}
-        </EuiBadge>
-      ),
     },
     {
       key: 'dashboards',

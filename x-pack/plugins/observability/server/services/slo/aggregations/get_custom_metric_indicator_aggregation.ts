@@ -6,7 +6,7 @@
  */
 
 import { metricCustomDocCountMetric, MetricCustomIndicator } from '@kbn/slo-schema';
-import { getElastichsearchQueryOrThrow } from '../transform_generators';
+import { getElasticsearchQueryOrThrow } from '../transform_generators';
 
 type MetricCustomMetricDef =
   | MetricCustomIndicator['params']['good']
@@ -18,7 +18,7 @@ export class GetCustomMetricIndicatorAggregation {
   private buildMetricAggregations(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
     return metricDef.metrics.reduce((acc, metric) => {
       const filter = metric.filter
-        ? getElastichsearchQueryOrThrow(metric.filter)
+        ? getElasticsearchQueryOrThrow(metric.filter)
         : { match_all: {} };
 
       if (metricCustomDocCountMetric.is(metric)) {

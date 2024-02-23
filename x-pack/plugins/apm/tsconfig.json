@@ -111,6 +111,7 @@
     "@kbn/shared-svg",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": ["target/**/*"]
 }

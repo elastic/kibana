@@ -38,6 +38,7 @@ import {
   DEFAULT_ALERT_TAGS_VALUE,
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -179,6 +180,23 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableExpandableFlyoutDescription',
         {
           defaultMessage: '<p>Enables the expandable flyout</p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_ASSET_CRITICALITY_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetCriticalityTitle', {
+        defaultMessage: 'Asset Criticality',
+      }),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetCriticalityDescription',
+        {
+          defaultMessage:
+            '<p>Enables asset criticality assignment workflows and its contributions to entity risk </p>',
         }
       ),
       type: 'boolean',

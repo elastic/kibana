@@ -35,6 +35,7 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
       cors,
       payload: {
         maxBytes: config.maxPayload.getValueInBytes(),
+        timeout: config.payloadTimeout,
       },
       validate: {
         failAction: defaultValidationErrorHandler,

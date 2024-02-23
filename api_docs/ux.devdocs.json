@@ -17,7 +17,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/ux/public/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/ux/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

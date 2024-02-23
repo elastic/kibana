@@ -7,7 +7,7 @@
 
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { DatasetSelectionChange } from '../../common/dataset_selection';
+import { SelectionChange } from '../../common/dataset_selection';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 export const useDatasetSelection = (
@@ -17,7 +17,7 @@ export const useDatasetSelection = (
     return state.context.datasetSelection;
   });
 
-  const handleDatasetSelectionChange: DatasetSelectionChange = useCallback(
+  const handleDatasetSelectionChange: SelectionChange = useCallback(
     (data) => {
       logsExplorerControllerStateService.send({ type: 'UPDATE_DATASET_SELECTION', data });
     },

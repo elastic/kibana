@@ -1251,10 +1251,16 @@ describe('The custom threshold alert type', () => {
       const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
-        filter: mockQuery,
         logsExplorerLocator: undefined,
         metrics: customThresholdCountCriterion.metrics,
         startedAt: expect.stringMatching(ISO_DATE_REGEX),
+        searchConfiguration: {
+          index: {},
+          query: {
+            query: mockQuery,
+            language: 'kuery',
+          },
+        },
       });
     });
   });
@@ -1400,7 +1406,7 @@ describe('The custom threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: '',
+        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
         reason: 'Average test.metric.3 reported no data in the last 1m',
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],
