@@ -146,7 +146,7 @@ export class OptionsListEmbeddable
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
     if (initialSelectedOptions) {
-      const filters = await this.buildFilter();
+      const { filters } = await this.buildFilter();
       this.dispatch.publishFilters(filters);
     }
     this.setInitializationFinished();

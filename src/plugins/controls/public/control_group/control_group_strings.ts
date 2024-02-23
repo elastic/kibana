@@ -300,8 +300,8 @@ export const ControlGroupStrings = {
           i18n.translate('controls.controlGroup.management.validate.title', {
             defaultMessage: 'Validate user selections',
           }),
-        getValidateSelectionsSubTitle: () =>
-          i18n.translate('controls.controlGroup.management.validate.subtitle', {
+        getValidateSelectionsTooltip: () =>
+          i18n.translate('controls.controlGroup.management.validate.tooltip', {
             defaultMessage: 'Highlight control selections that result in no data.',
           }),
       },

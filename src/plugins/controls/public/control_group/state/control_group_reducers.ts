@@ -13,17 +13,11 @@ import { ControlWidth } from '../../types';
 import { ControlGroupComponentState, ControlGroupInput, ControlGroupReduxState } from '../types';
 
 export const controlGroupReducers = {
-  setControlStyle: (
+  setControlWithInvalidSelectionsId: (
     state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupInput['controlStyle']>
+    action: PayloadAction<ControlGroupComponentState['controlWithInvalidSelectionsId']>
   ) => {
-    state.explicitInput.controlStyle = action.payload;
-  },
-  setChainingSystem: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupInput['chainingSystem']>
-  ) => {
-    state.explicitInput.chainingSystem = action.payload;
+    state.componentState.controlWithInvalidSelectionsId = action.payload;
   },
   setLastSavedInput: (
     state: WritableDraft<ControlGroupReduxState>,
@@ -42,6 +36,18 @@ export const controlGroupReducers = {
     action: PayloadAction<ControlGroupComponentState['unpublishedFilters']>
   ) => {
     state.componentState.unpublishedFilters = action.payload;
+  },
+  setControlStyle: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['controlStyle']>
+  ) => {
+    state.explicitInput.controlStyle = action.payload;
+  },
+  setChainingSystem: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['chainingSystem']>
+  ) => {
+    state.explicitInput.chainingSystem = action.payload;
   },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
