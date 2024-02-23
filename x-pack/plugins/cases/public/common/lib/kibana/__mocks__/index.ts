@@ -25,6 +25,7 @@ export const useKibana = jest.fn().mockReturnValue({
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn();
+export const useBasePath = jest.fn(() => '/test/base/path');
 export const useToasts = jest
   .fn()
   .mockReturnValue(notificationServiceMock.createStartContract().toasts);

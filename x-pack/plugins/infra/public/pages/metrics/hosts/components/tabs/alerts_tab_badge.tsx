@@ -8,8 +8,8 @@ import React from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
-import { infraAlertFeatureIds } from './config';
 import { useAlertsQuery } from '../../hooks/use_alerts_query';
+import { infraAlertFeatureIds } from '../../../../../components/shared/alerts/constants';
 
 export const AlertsTabBadge = () => {
   const { alertsEsQuery } = useAlertsQuery();
