@@ -20700,6 +20700,11 @@ jest@^29.6.1:
     import-local "^3.0.2"
     jest-cli "^29.6.1"
 
+jlouvain@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/jlouvain/-/jlouvain-2.0.0.tgz#2718f0e58911cb337ae981b9e65253c3c0606019"
+  integrity sha512-5ASHvZ7ZgZJW39jhTu1vn/d0a5bhVAc4dRGnKBQd922YF8JeE5/gc2wqI78ZnfgDbqmqag21HO1xEgiK7q8Xgg==
+
 joi@^17.3.0, joi@^17.7.1:
   version "17.7.1"
   resolved "https://registry.yarnpkg.com/joi/-/joi-17.7.1.tgz#854fc85c7fa3cfc47c91124d30bffdbb58e06cec"
