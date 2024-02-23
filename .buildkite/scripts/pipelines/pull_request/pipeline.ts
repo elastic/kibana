@@ -305,7 +305,12 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
+      ((await doAnyChangesMatch([
+        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/test\/osquery_cypress/,
+        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/plugins\/cases/,
+      ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
