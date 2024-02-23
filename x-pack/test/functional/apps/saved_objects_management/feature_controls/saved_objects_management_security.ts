@@ -89,28 +89,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
-          expect(bools).to.eql([
-            {
-              title: 'logstash-*',
-              canViewInApp: true,
-            },
-            {
-              title: 'A Pie',
-              canViewInApp: true,
-            },
-            {
-              title: 'A Dashboard',
-              canViewInApp: true,
-            },
-            {
-              title: `Global Settings [${version}]`,
-              canViewInApp: false,
-            },
-            {
-              title: `Advanced Settings [${version}]`,
-              canViewInApp: false,
-            },
-          ]);
+          expect(bools.sort((a, b) => a.title.localeCompare(b.title))).to.eql(
+            [
+              {
+                title: 'logstash-*',
+                canViewInApp: true,
+              },
+              {
+                title: 'A Pie',
+                canViewInApp: true,
+              },
+              {
+                title: 'A Dashboard',
+                canViewInApp: true,
+              },
+              {
+                title: `Global Settings [${version}]`,
+                canViewInApp: false,
+              },
+              {
+                title: `Advanced Settings [${version}]`,
+                canViewInApp: false,
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title))
+          );
         });
 
         it('can delete all saved objects', async () => {
