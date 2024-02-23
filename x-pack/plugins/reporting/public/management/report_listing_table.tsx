@@ -21,11 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '@kbn/reporting-common';
 
+import { checkLicense, Job } from '@kbn/reporting-public';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
-import { Job } from '../lib/job';
-import { checkLicense } from '../lib/license_check';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
 import { ListingPropsInternal } from '.';

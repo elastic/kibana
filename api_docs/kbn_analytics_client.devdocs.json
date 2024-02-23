@@ -743,80 +743,80 @@
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
+              },
+              {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/usage/event_tracker.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
               },
               {
                 "plugin": "securitySolution",
