@@ -10,9 +10,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useCallback } from 'react';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { ContentTabIds } from '../types';
 import { useUrlState } from '../../../utils/use_url_state';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
+import { ALERT_STATUS_ALL } from '../../shared/alerts/constants';
 
 export const DEFAULT_STATE: AssetDetailsUrlState = {
   tabId: ContentTabIds.OVERVIEW,
@@ -55,6 +61,13 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.OSQUERY),
 ]);
 
+const AlertStatusRT = rt.union([
+  rt.literal(ALERT_STATUS_ALL),
+  rt.literal(ALERT_STATUS_ACTIVE),
+  rt.literal(ALERT_STATUS_RECOVERED),
+  rt.literal(ALERT_STATUS_UNTRACKED),
+]);
+
 const AssetDetailsUrlStateRT = rt.partial({
   autoRefresh: rt.partial({
     isPaused: rt.boolean,
@@ -70,6 +83,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   metadataSearch: rt.string,
   logsSearch: rt.string,
   profilingSearch: rt.string,
+  alertStatus: AlertStatusRT,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
