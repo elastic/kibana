@@ -9,7 +9,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/slo/constants';
 import type { SortField, SortDirection } from '../components/slo_list_search_bar';
 import type { GroupByField } from '../components/slo_list_group_by';
@@ -46,7 +46,7 @@ export const DEFAULT_STATE = {
 
 export function useUrlSearchState(): {
   state: SearchState;
-  onStateChange: (state: Partial<SearchState>) => Promise<string | undefined>;
+  onStateChange: (state: Partial<SearchState>) => void;
 } {
   const [state, setState] = useState<SearchState>(DEFAULT_STATE);
   const history = useHistory();
@@ -75,15 +75,20 @@ export function useUrlSearchState(): {
       sub?.unsubscribe();
     };
   }, [urlStateStorage]);
+
+  const onStateChange = useCallback(
+    (newState: Partial<SearchState>) => {
+      const updatedState = { ...state, page: 0, ...newState };
+      setState((stateN) => updatedState);
+      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
+        replace: true,
+      });
+    },
+    [state]
+  );
+
   return {
     state: deepmerge(DEFAULT_STATE, state),
-    onStateChange: (newState: Partial<SearchState>) =>
-      urlStateStorage.current?.set(
-        SLO_LIST_SEARCH_URL_STORAGE_KEY,
-        { ...state, ...newState },
-        {
-          replace: true,
-        }
-      ),
+    onStateChange,
   };
 }

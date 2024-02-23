@@ -19,8 +19,8 @@ export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
 export const enableInfrastructureProfilingIntegration =
   'observability:enableInfrastructureProfilingIntegration';
-export const enableInfrastructureHostsCustomDashboards =
-  'observability:enableInfrastructureHostsCustomDashboards';
+export const enableInfrastructureAssetCustomDashboards =
+  'observability:enableInfrastructureAssetCustomDashboards';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
@@ -39,3 +39,5 @@ export const profilingCo2PerKWH = 'observability:profilingCo2PerKWH';
 export const profilingDatacenterPUE = 'observability:profilingDatacenterPUE';
 export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDiscountRate';
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
+export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
+export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';

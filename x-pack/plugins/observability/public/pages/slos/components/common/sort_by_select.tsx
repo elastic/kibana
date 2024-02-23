@@ -17,6 +17,7 @@ import type { SortField } from '../slo_list_search_bar';
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;
+  loading: boolean;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -25,7 +26,7 @@ export type Item<T> = EuiSelectableOption & {
   checked?: EuiSelectableOptionCheckedType;
 };
 
-export function SLOSortBy({ state, onStateChange }: Props) {
+export function SLOSortBy({ state, onStateChange, loading }: Props) {
   const [isSortByPopoverOpen, setIsSortByPopoverOpen] = useState(false);
   const sortBy = state.sort.by;
 
@@ -125,6 +126,7 @@ export function SLOSortBy({ state, onStateChange }: Props) {
       isPopoverOpen={isSortByPopoverOpen}
       setIsPopoverOpen={setIsSortByPopoverOpen}
       label={SORT_BY_LABEL}
+      loading={loading}
     />
   );
 }

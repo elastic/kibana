@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
@@ -19,26 +19,33 @@ export function HeaderMenu(): React.ReactElement | null {
     observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useKibana().services;
 
-  const {
-    appMountParameters: { setHeaderActionMenu },
-  } = usePluginContext();
+  const { appMountParameters } = usePluginContext();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
-      <EuiHeaderLinks>
-        <EuiHeaderLink
-          color="primary"
-          href={http.basePath.prepend('/app/integrations/browse')}
-          iconType="indexOpen"
-        >
-          {addDataLinkText}
-        </EuiHeaderLink>
-        {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
-      </EuiHeaderLinks>
+    <HeaderMenuPortal
+      setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
+      theme$={theme.theme$}
+    >
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        {ObservabilityAIAssistantActionMenuItem && (
+          <EuiFlexItem>
+            <ObservabilityAIAssistantActionMenuItem />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiHeaderLinks>
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/integrations/browse')}
+              iconType="indexOpen"
+            >
+              {i18n.translate('xpack.observability.home.addData', {
+                defaultMessage: 'Add integrations',
+              })}
+            </EuiHeaderLink>
+          </EuiHeaderLinks>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </HeaderMenuPortal>
   );
 }
-
-const addDataLinkText = i18n.translate('xpack.observability.home.addData', {
-  defaultMessage: 'Add integrations',
-});

@@ -88,7 +88,7 @@ const buildResponseMock = (
         '@timestamp': '2021-08-19T20:55:59.000Z',
         id_field: 'host.name',
         id_value: 'hostname',
-        criticality_level: 'important',
+        criticality_level: 'high_impact',
         criticality_modifier: 1.5,
         calculated_level: RiskLevels.unknown,
         calculated_score: 20,

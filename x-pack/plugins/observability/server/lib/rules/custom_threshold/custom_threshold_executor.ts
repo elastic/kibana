@@ -18,8 +18,9 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
+import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
-import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
@@ -177,16 +178,16 @@ export const createCustomThresholdExecutor = ({
     }
 
     const groupByKeysObjectMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
-    const groups = [...resultGroupSet];
+    const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
-    const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
+    const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
     const alertLimit = baseAlertFactory.alertLimit.getValue();
     let hasReachedLimit = false;
 
-    // The key of `groups` is the alert instance ID.
-    for (const group of groups) {
+    // The key of `groupArray` is the alert instance ID.
+    for (const group of groupArray) {
       if (scheduledActionsCount >= alertLimit) {
         // need to set this so that warning is displayed in the UI and in the logs
         hasReachedLimit = true;
@@ -264,6 +265,7 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
+        const groups: Group[] = groupByKeysObjectMapping[group];
         const alert = alertFactory(
           `${group}`,
           reason,
@@ -271,20 +273,14 @@ export const createCustomThresholdExecutor = ({
           additionalContext,
           evaluationValues,
           threshold,
-          groupByKeysObjectMapping[group]
+          groups
         );
         const alertUuid = getAlertUuid(group);
         const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
           group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
@@ -297,9 +293,10 @@ export const createCustomThresholdExecutor = ({
           }),
           viewInAppUrl: getViewInAppUrl({
             dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
-            filter: params.searchConfiguration.query.query,
+            groups,
             logsExplorerLocator,
             metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            searchConfiguration: params.searchConfiguration,
             startedAt: indexedStartedAt,
           }),
           ...additionalContext,
@@ -327,20 +324,15 @@ export const createCustomThresholdExecutor = ({
       const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       alert.setContext({
-        alertDetailsUrl: await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        ),
+        alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         group,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
-          dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
-          filter: params.searchConfiguration.query.query,
+          dataViewId,
+          groups: group,
           logsExplorerLocator,
           metrics: params.criteria[0]?.metrics,
+          searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
         }),
         ...additionalContext,

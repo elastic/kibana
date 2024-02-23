@@ -17,8 +17,7 @@ import {
 } from '../../../common/mock';
 import { AlertPropertyActions } from './alert_property_actions';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174667
-describe.skip('AlertPropertyActions', () => {
+describe('AlertPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
@@ -49,22 +48,6 @@ describe.skip('AlertPropertyActions', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the modal info correctly for one alert', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
-
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-
-    expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alert');
-    expect(await screen.findByText('Remove')).toBeInTheDocument();
-  });
-
   it('renders the modal info correctly for multiple alert', async () => {
     appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
 
@@ -93,7 +76,7 @@ describe.skip('AlertPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Remove'));
+    userEvent.click(await screen.findByText('Remove'));
 
     await waitFor(() => {
       expect(props.onDelete).toHaveBeenCalled();

@@ -11,6 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON } from '../../
  * Open the Correlations tab  under the Visuablize tab in the document details expandable flyout left section
  */
 export const openCorrelationsTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).click();
 };

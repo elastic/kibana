@@ -10,7 +10,7 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithB
 export const DefaultSort: SortCombinations[] = [
   {
     '@timestamp': {
-      order: 'asc',
+      order: 'desc',
     },
   },
 ];

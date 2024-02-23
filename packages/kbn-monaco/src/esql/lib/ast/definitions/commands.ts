@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import {
   getFunctionDefinition,
   isAssignment,
-  isAssignmentComplete,
   isColumnItem,
   isFunctionItem,
+  isLiteralItem,
 } from '../shared/helpers';
-import type { ESQLColumn, ESQLCommand, ESQLAstItem, ESQLMessage } from '../types';
+import type { ESQLColumn, ESQLCommand, ESQLAstItem, ESQLMessage, ESQLFunction } from '../types';
 import { enrichModes } from './settings';
 import {
   appendSeparatorOption,
@@ -99,57 +99,85 @@ export const commandDefinitions: CommandDefinition[] = [
       // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
       // until an agg function is detected
       // in the long run this might be integrated into the validation function
-      const fnArg = command.args.filter(isFunctionItem);
-      if (fnArg.length) {
-        function isAggFunction(arg: ESQLAstItem) {
+      const statsArg = command.args
+        .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
+        .filter(isFunctionItem);
+
+      if (statsArg.length) {
+        function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
         }
-        function isOtherFunction(arg: ESQLAstItem) {
+        function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
         }
-        function isOtherFunctionWithAggInside(arg: ESQLAstItem) {
-          return (
-            isFunctionItem(arg) &&
-            isOtherFunction(arg) &&
-            arg.args.filter(isFunctionItem).some(
-              // this is recursive as builtin fns can be wrapped one withins another
-              (subArg): boolean =>
-                isAggFunction(subArg) ||
-                (isOtherFunction(subArg) ? isOtherFunctionWithAggInside(subArg) : false)
-            )
-          );
+
+        function checkAggExistence(arg: ESQLFunction): boolean {
+          if (isAggFunction(arg)) {
+            return true;
+          }
+          if (isOtherFunction(arg)) {
+            return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
+          }
+          return false;
         }
-        // which is the presence of at least one agg type function at root level
-        const hasAggFunction = fnArg.some(isAggFunction);
-        // or as builtin function arg with an agg function as sub arg
-        const hasAggFunctionWithinBuiltin = fnArg
-          .filter((arg) => !isAssignment(arg))
-          .some(isOtherFunctionWithAggInside);
+        // first check: is there an agg function somewhere?
+        const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
 
-        // assignment requires a special handling
-        const hasAggFunctionWithinAssignment = fnArg
-          .filter((arg) => isAssignment(arg) && isAssignmentComplete(arg))
-          // extract the right hand side of the assignments
-          .flatMap((arg) => arg.args[1])
-          .filter(isFunctionItem)
-          // now check that they are either agg functions
-          // or builtin functions with an agg function as sub arg
-          .some((arg) => isAggFunction(arg) || isOtherFunctionWithAggInside(arg));
+        if (noAggsExpressions.length) {
+          messages.push(
+            ...noAggsExpressions.map((fn) => ({
+              location: fn.location,
+              text: i18n.translate('monaco.esql.validation.statsNoAggFunction', {
+                defaultMessage:
+                  'At least one aggregation function required in [STATS], found [{expression}]',
+                values: {
+                  expression: fn.text,
+                },
+              }),
+              type: 'error' as const,
+              code: 'statsNoAggFunction',
+            }))
+          );
+        } else {
+          function isConstantOrAggFn(arg: ESQLAstItem): boolean {
+            return isLiteralItem(arg) || isAggFunction(arg);
+          }
+          // now check that:
+          // * the agg function is at root level
+          // * or if it's a builtin function, then all operands are agg functions or literals
+          // * or if it's a eval function then all arguments are agg functions or literals
+          function checkFunctionContent(arg: ESQLFunction) {
+            if (isAggFunction(arg)) {
+              return true;
+            }
+            return (arg as ESQLFunction).args.every(
+              (subArg): boolean =>
+                isConstantOrAggFn(subArg) ||
+                (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
+            );
+          }
+          // @TODO: improve here the check to get the last instance of the invalidExpression
+          // to provide a better location for the error message
+          // i.e. STATS round(round(round( a + sum(b) )))
+          // should return the location of the + node, just before the agg one
+          const invalidExpressions = statsArg.filter((arg) => !checkFunctionContent(arg));
 
-        if (!hasAggFunction && !hasAggFunctionWithinBuiltin && !hasAggFunctionWithinAssignment) {
-          messages.push({
-            location: command.location,
-            text: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
-              defaultMessage:
-                "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
-              values: {
-                name: fnArg[0].name,
-                argType: getFunctionDefinition(fnArg[0].name)?.signatures[0].returnType,
-              },
-            }),
-            type: 'error',
-            code: 'noNestedArgumentSupport',
-          });
+          if (invalidExpressions.length) {
+            messages.push(
+              ...invalidExpressions.map((fn) => ({
+                location: fn.location,
+                text: i18n.translate('monaco.esql.validation.noCombinationOfAggAndNonAggValues', {
+                  defaultMessage:
+                    'Cannot combine aggregation and non-aggregation values in [STATS], found [{expression}]',
+                  values: {
+                    expression: fn.text,
+                  },
+                }),
+                type: 'error' as const,
+                code: 'statsNoCombinationOfAggAndNonAggValues',
+              }))
+            );
+          }
         }
       }
       return messages;
