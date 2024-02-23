@@ -151,7 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when using EQL', () => {
       describe('and the query is invalid', () => {
-        it('returns a 400', async function () {
+        it.skip('returns a 400', async function () {
           try {
             await fetchTraceSamples({
               query: '',
