@@ -15,7 +15,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { SO_SEARCH_LIMIT, AgentStatuses } from '../../../common/constants';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import {
@@ -34,17 +34,6 @@ import { getLatestAvailableVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
-const AGENT_STATUS = [
-  'offline',
-  'error',
-  'online',
-  'inactive',
-  'enrolling',
-  'unenrolling',
-  'unenrolled',
-  'updating',
-  'degraded',
-];
 
 function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
   try {
@@ -364,9 +353,9 @@ export async function getAgentsByKuery(
     if (showUpgradeable) {
       // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
       // the bucket count doesn't take in account the upgradeable agents
-      AGENT_STATUS.forEach((agentStatus) => {
-        const count = getFilteredAgentsCount(agents, agentStatus as AgentStatus);
-        statusSummary[agentStatus as AgentStatus] = count;
+      AgentStatuses.forEach((agentStatus: AgentStatus) => {
+        const count = getFilteredAgentsCount(agents, agentStatus);
+        statusSummary[agentStatus] = count;
       });
     } else {
       res.aggregations?.status.buckets.forEach((bucket) => {
