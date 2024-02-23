@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERTS_DOC_HREF } from '../../../common/alerts/constants';
 import { LinkToAlertsHomePage } from '../links/link_to_alerts_page';
+import { ALERTS_DOC_HREF } from '../../shared/alerts/constants';
 
 export const AlertsTooltipContent = React.memo(() => {
   const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

@@ -16,8 +16,9 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { Group } from '../../../../common/custom_threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
-import { AlertExecutionDetails, Group } from './types';
+import { AlertExecutionDetails } from './types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
@@ -228,13 +229,13 @@ export const flattenObject = (obj: AdditionalContext, prefix: string = ''): Addi
 export const getFormattedGroupBy = (
   groupBy: string | string[] | undefined,
   groupSet: Set<string>
-): Record<string, Group> => {
-  const groupByKeysObjectMapping: Record<string, Group> = {};
+): Record<string, Group[]> => {
+  const groupByKeysObjectMapping: Record<string, Group[]> = {};
   if (groupBy) {
     groupSet.forEach((group) => {
       const groupSetKeys = group.split(',');
       groupByKeysObjectMapping[group] = Array.isArray(groupBy)
-        ? groupBy.reduce((result: Group, groupByItem, index) => {
+        ? groupBy.reduce((result: Group[], groupByItem, index) => {
             result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
             return result;
           }, [])

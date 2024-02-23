@@ -49,7 +49,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Serverless overview', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177650
+  registry.when.skip('Serverless overview', { config: 'basic', archives: [] }, () => {
     const { billedDurationMs, pythonServerlessFunctionNames, faasDuration, serverlessId } = config;
     const { expectedMemoryUsedRate } = expectedValues;
 
