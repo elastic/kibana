@@ -29,7 +29,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { apiPublishesLocalUnifiedSearch, getInheritedViewMode } from '@kbn/presentation-publishing';
+import {
+  apiPublishesLocalUnifiedSearch,
+  getInheritedViewMode,
+  getPanelTitle,
+} from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
 import { CustomizePanelActionApi } from './customize_panel_action';
@@ -59,9 +63,7 @@ export const CustomizePanelEditor = ({
   const [panelDescription, setPanelDescription] = useState(
     api.panelDescription?.value ?? api.defaultPanelDescription?.value
   );
-  const [panelTitle, setPanelTitle] = useState(
-    api.panelTitle?.value ?? api.defaultPanelTitle?.value
-  );
+  const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
   const [localTimeRange, setLocalTimeRange] = useState(
     api.localTimeRange?.value ?? api?.getFallbackTimeRange?.()
   );
