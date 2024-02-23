@@ -29,7 +29,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
   discoverState.appState.update = jest.fn();
   discoverState.internalState.transitions = {
-    setDataViewLoading: jest.fn(),
+    setIsDataViewLoading: jest.fn(),
   } as unknown as Readonly<PureTransitionsToTransitions<InternalStateTransitions>>;
   return {
     services,
@@ -47,8 +47,8 @@ describe('changeDataView', () => {
       index: 'data-view-with-user-default-column-id',
       sort: [['@timestamp', 'desc']],
     });
-    expect(params.internalState.transitions.setDataViewLoading).toHaveBeenNthCalledWith(1, true);
-    expect(params.internalState.transitions.setDataViewLoading).toHaveBeenNthCalledWith(2, false);
+    expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
+    expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should set the right app state when a valid data view to switch to is given', async () => {
@@ -59,13 +59,15 @@ describe('changeDataView', () => {
       index: 'data-view-with-various-field-types-id',
       sort: [['data', 'desc']],
     });
-    expect(params.internalState.transitions.setDataViewLoading).toBeCalledTimes(2);
+    expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
+    expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should not set the app state when an invalid data view to switch to is given', async () => {
     const params = setupTestParams(undefined);
     await changeDataView('data-view-with-various-field-types', params);
     expect(params.appState.update).not.toHaveBeenCalled();
-    expect(params.internalState.transitions.setDataViewLoading).toBeCalledTimes(2);
+    expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
+    expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(2, false);
   });
 });

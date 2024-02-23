@@ -90,7 +90,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
     state.dataView!,
-    state.dataViewLoading,
+    state.isDataViewLoading,
   ]);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();

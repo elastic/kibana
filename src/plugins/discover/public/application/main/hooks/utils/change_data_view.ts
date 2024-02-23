@@ -39,7 +39,7 @@ export async function changeDataView(
   const dataView = internalState.getState().dataView;
   const state = appState.getState();
   let nextDataView: DataView | null = null;
-  internalState.transitions.setDataViewLoading(true);
+  internalState.transitions.setIsDataViewLoading(true);
 
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
@@ -64,5 +64,5 @@ export async function changeDataView(
       internalState.transitions.setExpandedDoc(undefined);
     }
   }
-  internalState.transitions.setDataViewLoading(false);
+  internalState.transitions.setIsDataViewLoading(false);
 }
