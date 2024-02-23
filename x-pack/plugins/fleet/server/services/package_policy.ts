@@ -949,6 +949,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     return newPolicy;
   }
 
+  start: Record<string, number> = {};
+  avg: Record<string, number> = {};
+
+  setAvg(id: string, num: number) {
+    const a = 0.7;
+    this.avg[id] = a * num + (1 - a) * (this.avg[id] ?? num);
+  }
+
   public async bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -961,6 +969,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       error: Error | SavedObjectError;
     }>;
   }> {
+    console.time('🥭 A');
     for (const packagePolicy of packagePolicyUpdates) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
@@ -969,6 +978,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
     const oldPackagePolicies = await this.getByIDs(
+      // SO read
       soClient,
       packagePolicyUpdates.map((p) => p.id)
     );
@@ -991,12 +1001,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }> = [];
+    console.timeEnd('🥭 A');
+    console.time('🥭 B');
 
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
         const id = packagePolicyUpdate.id;
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
-        const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
+        const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id); // todo
         if (!oldPackagePolicy) {
           throw new PackagePolicyNotFoundError('Package policy not found');
         }
@@ -1071,19 +1083,30 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         failedPolicies.push({ packagePolicy: packagePolicyUpdate, error });
       }
     });
+    console.timeEnd('🥭 B');
+    console.log('🧀 package_policy.ts:1087 🥭 ', policiesToUpdate.length);
+
+    console.time('🥭 C'); // todo SECOND SLOWEST, ~0.7 sec
 
     const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
       policiesToUpdate
     );
 
-    const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
+    const agentPolicyIds = [...new Set(packagePolicyUpdates.map((p) => p.policy_id))];
+    console.timeEnd('🥭 C');
+    console.time('🥭 D'); // todo SLOWEST PART, ~2 sec
+    // await pMap(agentPolicyIds, async (agentPolicyId) => {
+    //   // Bump revision of associated agent policy
+    //   await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+    //     user: options?.user,
+    //   });
+    // });
 
-    const bumpPromise = pMap(agentPolicyIds, async (agentPolicyId) => {
-      // Bump revision of associated agent policy
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-        user: options?.user,
-      });
+    await agentPolicyService.bumpRevisionForIds(soClient, esClient, agentPolicyIds, {
+      user: options?.user,
     });
+    console.timeEnd('🥭 D');
+    console.time('🥭 E');
 
     const pkgVersions: Record<string, { name: string; version: string }> = {};
     packagePolicyUpdates.forEach(({ package: pkg }) => {
@@ -1095,7 +1118,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const removeAssetPromise = pMap(Object.keys(pkgVersions), async (pkgVersion) => {
+    await pMap(Object.keys(pkgVersions), async (pkgVersion) => {
       const { name, version } = pkgVersions[pkgVersion];
       await removeOldAssets({
         soClient,
@@ -1103,12 +1126,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         currentVersion: version,
       });
     });
+    console.timeEnd('🥭 E');
+    console.time('🥭 F');
+    if (allSecretsToDelete.length) {
+      await deleteSecrets({ esClient, soClient, ids: allSecretsToDelete.map((s) => s.id) });
+    }
 
-    const deleteSecretsPromise = allSecretsToDelete.length
-      ? deleteSecrets({ esClient, soClient, ids: allSecretsToDelete.map((s) => s.id) })
-      : Promise.resolve();
-
-    await Promise.all([bumpPromise, removeAssetPromise, deleteSecretsPromise]);
+    console.timeEnd('🥭 F');
+    console.time('🥭 G');
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
 
@@ -1136,6 +1161,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ...soPolicy.attributes,
           } as PackagePolicy)
       );
+    console.timeEnd('🥭 G');
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }

@@ -632,11 +632,13 @@ export class ManifestManager {
       logger: this.logger,
       key: `tryDispatch.${execId}`,
       batchHandler: async ({ data: currentBatch }) => {
+        console.time('🥭 currentBatch');
         const response = await this.packagePolicyService.bulkUpdate(
           this.savedObjectsClient,
           this.esClient,
           currentBatch
         );
+        console.timeEnd('🥭 currentBatch');
 
         if (!isEmpty(response.failedPolicies)) {
           errors.push(

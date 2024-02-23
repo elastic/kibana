@@ -13,6 +13,7 @@ import { lt } from 'semver';
 import type {
   ElasticsearchClient,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
@@ -123,6 +124,120 @@ class AgentPolicyService {
     return agentPolicyUpdateEventHandler(soClient, esClient, action, agentPolicyId, options);
   };
 
+  private async _bulkUpdate(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    agentPolicy: Partial<AgentPolicySOAttributes>,
+    user?: AuthenticatedUser,
+    options: { bumpRevision: boolean; removeProtection: boolean; skipValidation: boolean } = {
+      bumpRevision: true,
+      removeProtection: false,
+      skipValidation: false,
+    }
+  ): Promise<AgentPolicy[]> {
+    const timerId = ids.reduce((prev, current) => prev + current.slice(2, 4));
+    console.time(`🦡 A ${timerId}`);
+    ids.forEach((id) => {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'update',
+        id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+    const logger = appContextService.getLogger();
+    logger.debug(`Starting update of agent policy ${timerId}`);
+
+    const existingAgentPolicies = await this.getByIDs(soClient, ids, {
+      withPackagePolicies: true,
+      ignoreMissing: false,
+    });
+    // const existingAgentPolicy = await this.get(soClient, id, true);
+    console.timeEnd(`🦡 A ${timerId}`);
+    console.time(`🦡 B ${timerId}`);
+
+    // no need, ignoreMissing: false does this
+    // if (!existingAgentPolicy) {
+    //   throw new AgentPolicyNotFoundError('Agent policy not found');
+    // }
+
+    for (const existingAgentPolicy of existingAgentPolicies) {
+      if (
+        existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
+        agentPolicy.status !== agentPolicyStatuses.Active
+      ) {
+        throw new FleetError(
+          `Agent policy ${existingAgentPolicy.id} cannot be updated because it is ${existingAgentPolicy.status}`
+        );
+      }
+
+      if (options.removeProtection) {
+        logger.warn(
+          `Setting tamper protection for Agent Policy ${existingAgentPolicy.id} to false`
+        );
+      }
+
+      if (!options.skipValidation) {
+        await validateOutputForPolicy(
+          soClient,
+          agentPolicy,
+          existingAgentPolicy,
+          getAllowedOutputTypeForPolicy(existingAgentPolicy)
+        );
+      }
+    }
+    console.timeEnd(`🦡 B ${timerId}`);
+
+    console.time(`🦡 C ${timerId}`); // todo 1 sec
+
+    const SOs: Array<SavedObjectsBulkUpdateObject<AgentPolicySOAttributes>> =
+      existingAgentPolicies.map((existingAgentPolicy) => {
+        return {
+          id: existingAgentPolicy.id,
+          type: SAVED_OBJECT_TYPE,
+          attributes: {
+            // ...agentPolicy,
+            ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+            ...(options.removeProtection
+              ? { is_protected: false }
+              : { is_protected: agentPolicy.is_protected }),
+            updated_at: new Date().toISOString(),
+            updated_by: user ? user.username : 'system',
+          },
+        };
+      });
+
+    await soClient.bulkUpdate<AgentPolicySOAttributes>(SOs);
+
+    // await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
+    //   ...agentPolicy,
+    //   ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+    //   ...(options.removeProtection
+    //     ? { is_protected: false }
+    //     : { is_protected: agentPolicy.is_protected }),
+    //   updated_at: new Date().toISOString(),
+    //   updated_by: user ? user.username : 'system',
+    // });
+
+    console.timeEnd(`🦡 C ${timerId}`);
+    console.time(`🦡 D ${timerId}`); // todo 1.5 sec
+
+    if (options.bumpRevision || options.removeProtection) {
+      await this.deployPolicies(soClient, ids);
+      // for (const id of ids) {
+      //   await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id); // todo: bulk?
+      // }
+    }
+    console.timeEnd(`🦡 D ${timerId}`);
+    console.time(`🦡 E ${timerId}`);
+    // logger.debug(`Agent policy ${id} update completed`);
+    const res = await this.getByIDs(soClient, ids);
+
+    console.timeEnd(`🦡 E ${timerId}`);
+
+    return res;
+  }
+
   private async _update(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -135,6 +250,7 @@ class AgentPolicyService {
       skipValidation: false,
     }
   ): Promise<AgentPolicy> {
+    console.time(`🦡 A ${id}`);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
@@ -144,6 +260,8 @@ class AgentPolicyService {
     logger.debug(`Starting update of agent policy ${id}`);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
+    console.timeEnd(`🦡 A ${id}`);
+    console.time(`🦡 B ${id}`);
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
@@ -170,6 +288,8 @@ class AgentPolicyService {
         getAllowedOutputTypeForPolicy(existingAgentPolicy)
       );
     }
+    console.timeEnd(`🦡 B ${id}`);
+    console.time(`🦡 C ${id}`); // todo 1 sec
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
@@ -180,11 +300,20 @@ class AgentPolicyService {
       updated_by: user ? user.username : 'system',
     });
 
+    console.timeEnd(`🦡 C ${id}`);
+    console.time(`🦡 D ${id}`); // todo 1.5 sec
+
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
+    console.timeEnd(`🦡 D ${id}`);
+    console.time(`🦡 E ${id}`);
     logger.debug(`Agent policy ${id} update completed`);
-    return (await this.get(soClient, id)) as AgentPolicy;
+    const res = (await this.get(soClient, id)) as AgentPolicy;
+
+    console.timeEnd(`🦡 E ${id}`);
+
+    return res;
   }
 
   public async ensurePreconfiguredAgentPolicy(
@@ -713,6 +842,21 @@ class AgentPolicyService {
     await this.deployPolicy(soClient, newAgentPolicy.id);
     logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
+  }
+
+  public async bumpRevisionForIds(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser; removeProtection?: boolean }
+  ): Promise<AgentPolicy[]> {
+    const res = await this._bulkUpdate(soClient, esClient, ids, {}, options?.user, {
+      bumpRevision: true,
+      removeProtection: options?.removeProtection ?? false,
+      skipValidation: false,
+    });
+
+    return res; // todo could be removed
   }
 
   public async bumpRevision(
