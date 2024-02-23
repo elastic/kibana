@@ -25,6 +25,7 @@ export const ConfigurationStep: FC<ConfigurationStepProps> = ({
   step,
   stepActivated,
   isClone,
+  sourceDataViewTitle,
 }) => {
   const showForm = step === ANALYTICS_STEPS.CONFIGURATION;
   const showDetails = step !== ANALYTICS_STEPS.CONFIGURATION && stepActivated === true;
@@ -41,6 +42,7 @@ export const ConfigurationStep: FC<ConfigurationStepProps> = ({
           isClone={isClone}
           state={state}
           setCurrentStep={setCurrentStep}
+          sourceDataViewTitle={sourceDataViewTitle}
         />
       )}
       {showDetails && <ConfigurationStepDetails setCurrentStep={setCurrentStep} state={state} />}
