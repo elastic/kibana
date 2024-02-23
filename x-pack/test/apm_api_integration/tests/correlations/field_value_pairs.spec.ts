@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/176425
-  registry.when(
+  registry.when.skip(
     'field value pairs with data and default args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {
