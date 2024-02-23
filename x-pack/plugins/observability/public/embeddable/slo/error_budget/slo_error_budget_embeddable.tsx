@@ -7,14 +7,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-
+import { Router } from '@kbn/shared-ux-router';
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   type CoreStart,
@@ -23,6 +22,7 @@ import {
   NotificationsStart,
 } from '@kbn/core/public';
 import { Subject } from 'rxjs';
+import { createBrowserHistory } from 'history';
 import type { SloErrorBudgetEmbeddableInput } from './types';
 import { SloErrorBudget } from './slo_error_budget_burn_down';
 export const SLO_ERROR_BUDGET_EMBEDDABLE = 'SLO_ERROR_BUDGET_EMBEDDABLE';
@@ -79,11 +79,13 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
     const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={this.deps}>
-          <QueryClientProvider client={queryClient}>
-            <SloErrorBudget sloId={sloId} sloInstanceId={sloInstanceId} />
-          </QueryClientProvider>
-        </KibanaContextProvider>
+        <Router history={createBrowserHistory()}>
+          <KibanaContextProvider services={this.deps}>
+            <QueryClientProvider client={queryClient}>
+              <SloErrorBudget sloId={sloId} sloInstanceId={sloInstanceId} />
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </Router>
       </I18nContext>,
       node
     );
