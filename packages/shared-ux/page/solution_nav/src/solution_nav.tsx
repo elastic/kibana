@@ -103,7 +103,6 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   canBeCollapsed = true,
   ...rest
 }) => {
-  const euiThemeContext = useEuiTheme();
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
@@ -179,7 +178,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
   const navWidth = useMemo(() => {
     if (isLargerBreakpoint) {
       return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
