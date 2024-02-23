@@ -9,8 +9,11 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useChatContext } from '../../hooks/useChatContext';
 
 export const CreateIndexCallout: React.FC = () => {
+  const { navigateToIndexPage } = useChatContext();
+
   return (
     <EuiCallOut
       title={i18n.translate('aiPlayground.sources.createIndexCallout.headerText', {
@@ -28,7 +31,13 @@ export const CreateIndexCallout: React.FC = () => {
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiButton color="primary" iconType="plusInCircle" fill size="s" onClick={() => {}}>
+      <EuiButton
+        color="primary"
+        iconType="plusInCircle"
+        fill
+        size="s"
+        onClick={navigateToIndexPage}
+      >
         <FormattedMessage
           id="aiPlayground.sources.createIndexCallout."
           defaultMessage="Create an index"

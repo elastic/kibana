@@ -22,14 +22,12 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-import { IndicesLogic } from '../search_indices/indices_logic';
-
 export const AIPlayground: React.FC = () => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
 
   return (
-    <AIPlaygroundProvider>
+    <AIPlaygroundProvider navigateToIndexPage={handleNavigateToIndex}>
       <EnterpriseSearchContentPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.aiPlayground.breadcrumb', {
@@ -47,7 +45,6 @@ export const AIPlayground: React.FC = () => {
         }}
         pageViewTelemetry="AI Playground"
         restrictWidth={false}
-        isLoading={isLoading}
         customPageSections
         bottomBorder="extended"
       >

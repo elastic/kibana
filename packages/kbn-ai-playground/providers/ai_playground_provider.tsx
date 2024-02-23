@@ -10,21 +10,26 @@ import React, { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm } from '../types';
+import { ChatProvider } from '@kbn/ai-playground/providers/chat_provider';
 
 interface AIPlaygroundProviderProps {
+  navigateToIndexPage: () => void;
   children: ReactNode;
 }
 
 const queryClient = new QueryClient({});
 
-export const AIPlaygroundProvider: React.FC<AIPlaygroundProviderProps> = ({ children }) => {
+export const AIPlaygroundProvider: React.FC<AIPlaygroundProviderProps> = ({
+  navigateToIndexPage,
+  children,
+}) => {
   const form = useForm<ChatForm>();
 
   return (
-    <>
+    <ChatProvider navigateToIndexPage={navigateToIndexPage}>
       <QueryClientProvider client={queryClient}>
         <FormProvider {...form}>{children}</FormProvider>
       </QueryClientProvider>
-    </>
+    </ChatProvider>
   );
 };
