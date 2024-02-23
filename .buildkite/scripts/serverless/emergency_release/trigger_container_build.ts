@@ -30,7 +30,7 @@ async function main() {
 }
 
 function isCurrentHeadInMain() {
-  const currentCommit = process.env.BUILDKITE_COMMIT;
+  const currentCommit = process.env.OVERRIDE_COMMIT || process.env.BUILDKITE_COMMIT;
 
   const containmentTest = execSync(
     `git branch -r --contains ${currentCommit} | grep -E "(upstream|origin)/main" | wc -l`
