@@ -47,7 +47,7 @@ import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
 import type { AuthenticatedUser } from '../../../../common';
-import type { ApiKey, RestApiKey } from '../../../../common/model';
+import type { ApiKey, ApiKeyAggregations, RestApiKey } from '../../../../common/model';
 import type { QueryApiKeyResult } from '../../../../server/routes/api_keys';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
@@ -165,13 +165,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
     if (!args.error) {
-      // try {
-      //   console.log(EuiSearchBar.Query.parse(args.queryText));
-      // } catch (e) {
-      //   console.log(e);
-      //   throw e;
-      // }
       const queryContainer = EuiSearchBar.Query.toESQuery(args.query);
+
       setQuery(queryContainer);
     }
   };
@@ -968,19 +963,8 @@ export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
   expired: boolean;
 };
 
-interface AggregationResponse<V> {
-  buckets: Array<{ key: V; doc_count: number }>;
-  doc_count_error_upper_bound: number;
-  sum_other_doc_count: number;
-}
-export interface ApiKeyAggregations {
-  usernames: AggregationResponse<string>;
-  types: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
-  expired: { doc_count: number };
-}
-
 export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) => {
-  const { usernames, types, expired } = aggregationResponse;
+  const { usernames, types, expired, managedMetadata, alertingKeys } = aggregationResponse;
   const typeFilters: Set<CategorizedApiKey['type']> = new Set();
   const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
 
@@ -990,6 +974,9 @@ export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) 
   usernames.buckets.forEach((username) => {
     usernameFilters.add(username.key);
   });
+  if (alertingKeys.doc_count > 0 || managedMetadata.doc_count > 0) {
+    typeFilters.add('managed');
+  }
   return {
     typeFilters,
     usernameFilters,

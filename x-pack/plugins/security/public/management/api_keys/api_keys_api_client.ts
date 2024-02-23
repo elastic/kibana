@@ -8,7 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 
-import type { ApiKeyToInvalidate } from '../../../common/model';
+import type { ApiKeyAggregationsResponse, ApiKeyToInvalidate } from '../../../common/model';
 import type {
   GetAPIKeysResult,
   QueryApiKeyResult,
@@ -39,7 +39,7 @@ export class APIKeysAPIClient {
   }
 
   public async queryApiKeyAggregations() {
-    return await this.http.post<any>(`${apiKeysUrl}/_query_aggs`, {});
+    return await this.http.post<ApiKeyAggregationsResponse>(`${apiKeysUrl}/_query_aggs`, {});
   }
 
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityQueryApiKeysRequest } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
@@ -72,8 +74,14 @@ export function defineQueryApiKeysRoute({
             },
           });
         }
+        const { query, size, from, sort } = request.body as SecurityQueryApiKeysRequest;
 
-        const queryResponse = await esClient.asCurrentUser.security.queryApiKeys(request.body);
+        const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
+          query,
+          size,
+          from,
+          sort,
+        });
 
         const validKeys = queryResponse.api_keys.filter(({ invalidated }) => !invalidated);
 

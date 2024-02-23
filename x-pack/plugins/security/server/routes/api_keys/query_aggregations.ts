@@ -16,21 +16,23 @@ export interface EsBucket {
 export interface ApiKeyAggregationResult {
   aggregations: {
     usernames: {
-      doc_count_error_upper_bound: 0;
-      sum_other_doc_count: 0;
+      doc_count_error_upper_bound: number;
+      sum_other_doc_count: number;
       buckets: EsBucket[];
     };
     types: {
-      doc_count_error_upper_bound: 0;
-      sum_other_doc_count: 0;
+      doc_count_error_upper_bound: number;
+      sum_other_doc_count: number;
       buckets: EsBucket[];
     };
     invalidated: {
-      doc_count_error_upper_bound: 0;
-      sum_other_doc_count: 0;
+      doc_count_error_upper_bound: number;
+      sum_other_doc_count: number;
       buckets: EsBucket[];
     };
-    expired: { doc_count: 0 };
+    expired: { doc_count: number };
+    alertingKeys: { doc_count: number };
+    managedMetadata: { doc_count: number };
   };
 }
 
@@ -87,6 +89,22 @@ export function defineQueryApiKeysAggregationsRoute({
                 expired: {
                   filter: {
                     range: { expiration: { lte: 'now/m' } },
+                  },
+                },
+                alertingKeys: {
+                  filter: {
+                    prefix: {
+                      name: {
+                        value: 'Alerting',
+                      },
+                    },
+                  },
+                },
+                managedMetadata: {
+                  filter: {
+                    term: {
+                      'metadata.managed': true,
+                    },
                   },
                 },
               },

@@ -12,6 +12,8 @@ export type {
   ApiKeyToInvalidate,
   ApiKeyRoleDescriptors,
   CrossClusterApiKeyAccess,
+  ApiKeyAggregationsResponse,
+  ApiKeyAggregations,
 } from './api_key';
 export type { EditUser, GetUserDisplayNameParams } from './user';
 export type { GetUserProfileResponse } from './user_profile';
