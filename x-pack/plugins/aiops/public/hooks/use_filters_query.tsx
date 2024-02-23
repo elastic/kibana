@@ -97,7 +97,7 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
   const bounds = useMemo(() => {
     return timefilter.timefilter.calculateBounds(resultTimeRange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resultTimeRange, timefilter, reload]);
+  }, [resultTimeRange, timefilter, reload.refreshTimestamp]);
 
   const timeBucketsInterval = useMemo(() => {
     timeBuckets.setInterval('auto');
