@@ -23,6 +23,7 @@ interface AutocompleteFieldProps {
   fieldType: 'string';
   placeholder?: string;
   esqlQuery: string | undefined;
+  singleSelection: boolean | undefined;
 }
 
 /**
@@ -38,6 +39,7 @@ export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
   fieldType,
   placeholder,
   esqlQuery,
+  singleSelection,
 }): JSX.Element => {
   const handleValuesChange = useCallback(
     ([newOption]: EuiComboBoxOptionOption[]): void => {
@@ -70,7 +72,7 @@ export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
         isLoading={isLoading}
         isDisabled={isDisabled || isLoading}
         isClearable={false}
-        singleSelection={AS_PLAIN_TEXT}
+        singleSelection={singleSelection ? AS_PLAIN_TEXT : false}
         data-test-subj="esqlAutocompleteComboBox"
         style={{ width: `${COMPONENT_WIDTH}px` }}
         fullWidth

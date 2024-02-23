@@ -38,8 +38,8 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
-import { EsqlFieldsSelect } from '../esql_fields_select';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
+import { useInvestigationFields } from '../../hooks/use_investigation_fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -128,6 +128,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     },
     [getFields]
   );
+
+  const { investigationFields, isLoading: isInvestigationFieldsLoading } = useInvestigationFields({
+    esqlQuery,
+    isEsqlRule: isEsqlRuleValue,
+    indexPatternsFields: indexPattern.fields,
+  });
 
   return (
     <>
@@ -241,8 +247,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="investigationFields"
               component={MultiSelectFieldsAutocomplete}
               componentProps={{
-                browserFields: indexPattern.fields,
-                isDisabled: isLoading || indexPatternLoading,
+                browserFields: investigationFields,
+                isDisabled: isLoading || indexPatternLoading || isInvestigationFieldsLoading,
                 fullWidth: true,
                 dataTestSubj: 'detectionEngineStepAboutRuleInvestigationFields',
               }}
