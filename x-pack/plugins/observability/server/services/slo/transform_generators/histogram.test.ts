@@ -11,6 +11,7 @@ import {
   createSLOWithTimeslicesBudgetingMethod,
 } from '../fixtures/slo';
 import { HistogramTransformGenerator } from './histogram';
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
 const generator = new HistogramTransformGenerator();
 
@@ -28,7 +29,9 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
-      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
+      expect(generator.getTransformParams(anSLO, dataViewsService)).rejects.toThrow(
+        /Invalid KQL: foo:/
+      );
     });
 
     it('throws when the total filter is invalid', () => {
@@ -41,20 +44,22 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
-      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
+      expect(generator.getTransformParams(anSLO, dataViewsService)).rejects.toThrow(
+        /Invalid KQL: foo:/
+      );
     });
 
     it('throws when the query_filter is invalid', () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({ filter: '{ kql.query: invalid' }),
       });
-      expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
+      expect(generator.getTransformParams(anSLO, dataViewsService)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ id: 'irrelevant', indicator: createHistogramIndicator() });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform).toMatchSnapshot();
   });
@@ -64,7 +69,7 @@ describe('Histogram Transform Generator', () => {
       id: 'irrelevant',
       indicator: createHistogramIndicator(),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform).toMatchSnapshot();
   });
@@ -73,7 +78,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator({ filter: 'labels.groupId: group-4' }),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -82,7 +87,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator({ index: 'my-own-index*' }),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -93,7 +98,7 @@ describe('Histogram Transform Generator', () => {
         timestampField: 'my-date-field',
       }),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -104,7 +109,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator(),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -121,7 +126,7 @@ describe('Histogram Transform Generator', () => {
         },
       }),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -130,7 +135,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator(),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
@@ -145,7 +150,7 @@ describe('Histogram Transform Generator', () => {
         },
       }),
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, dataViewsService);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });

@@ -8,7 +8,7 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
@@ -48,15 +48,10 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     indicator: KQLCustomIndicator,
     dataViewService: DataViewsService
   ) {
-    let dataView: DataView | undefined;
-
-    if (indicator.params.dataViewId) {
-      try {
-        dataView = await dataViewService.get(indicator.params.dataViewId);
-      } catch (e) {
-        // If the data view is not found, we will continue without it
-      }
-    }
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.index,
+    });
     return {
       index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),

@@ -44,7 +44,7 @@ export abstract class TransformGenerator {
           },
         },
       }),
-      ...(dataView?.getRuntimeMappings() ?? {}),
+      ...(dataView?.getRuntimeMappings?.() ?? {}),
     };
   }
 
@@ -92,6 +92,24 @@ export abstract class TransformGenerator {
         },
       },
     };
+  }
+
+  public async getIndicatorDataView({
+    dataViewService,
+    dataViewId,
+  }: {
+    dataViewService: DataViewsService;
+    dataViewId?: string;
+  }): Promise<DataView | undefined> {
+    let dataView: DataView | undefined;
+    if (dataViewId) {
+      try {
+        dataView = await dataViewService.get(dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
+    }
+    return dataView;
   }
 
   public buildSettings(

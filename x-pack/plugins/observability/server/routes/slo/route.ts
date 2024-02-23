@@ -107,8 +107,7 @@ const createSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const createSLO = new CreateSLO(
@@ -155,8 +154,7 @@ const inspectSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const createSLO = new CreateSLO(
@@ -200,8 +198,7 @@ const updateSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const updateSLO = new UpdateSLO(
@@ -250,8 +247,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const deleteSLO = new DeleteSLO(
@@ -314,8 +310,7 @@ const enableSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
@@ -352,8 +347,7 @@ const disableSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
@@ -392,8 +386,7 @@ const resetSLORoute = createObservabilityServerRoute({
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
       esClient,
-      logger,
-      dataViewsService
+      logger
     );
 
     const resetSLO = new ResetSLO(

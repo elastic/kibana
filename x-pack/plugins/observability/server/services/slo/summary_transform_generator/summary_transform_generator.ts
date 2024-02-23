@@ -6,14 +6,13 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { SLO } from '../../../domain/models';
 import { generateSummaryTransformForOccurrences } from './generators/occurrences';
 import { generateSummaryTransformForTimeslicesAndRolling } from './generators/timeslices_rolling';
 import { generateSummaryTransformForTimeslicesAndCalendarAligned } from './generators/timeslices_calendar_aligned';
 
 export interface SummaryTransformGenerator {
-  generate(slo: SLO, dataViewService: DataViewsService): TransformPutTransformRequest;
+  generate(slo: SLO): TransformPutTransformRequest;
 }
 
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {

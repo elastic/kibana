@@ -13,6 +13,7 @@ import {
 } from '@kbn/slo-schema';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { estypes } from '@elastic/elasticsearch';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
@@ -25,7 +26,10 @@ import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  public async getTransformParams(slo: SLO): Promise<TransformPutTransformRequest> {
+  public async getTransformParams(
+    slo: SLO,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -33,7 +37,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
+      await this.buildSource(slo, slo.indicator, dataViewService),
       this.buildDestination(),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
@@ -68,7 +72,11 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
+  private async buildSource(
+    slo: SLO,
+    indicator: APMTransactionDurationIndicator,
+    dataViewService: DataViewsService
+  ) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       {
         range: {
@@ -110,14 +118,18 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
         },
       });
     }
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.index,
+    });
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
       query: {
         bool: {
           filter: [

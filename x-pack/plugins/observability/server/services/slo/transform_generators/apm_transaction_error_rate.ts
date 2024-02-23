@@ -12,7 +12,7 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { estypes } from '@elastic/elasticsearch';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
@@ -118,15 +118,11 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       });
     }
 
-    let dataView: DataView | undefined;
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.index,
+    });
 
-    if (indicator.params.dataViewId) {
-      try {
-        dataView = await dataViewService.get(indicator.params.dataViewId);
-      } catch (e) {
-        // If the data view is not found, we will continue without it
-      }
-    }
     if (indicator.params.filter) {
       queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
