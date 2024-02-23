@@ -7,7 +7,14 @@
  */
 import './discover_layout.scss';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPanel,
+  EuiProgress,
+  useEuiBackgroundColor,
+  EuiDelayRender,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -226,13 +233,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           onDropFieldToTable={onDropFieldToTable}
           panelsToggle={panelsToggle}
         />
-        {(resultState === 'loading' || dataViewLoading) && <LoadingSpinner />}
+        {resultState === 'loading' && <LoadingSpinner />}
       </>
     );
   }, [
     currentColumns,
     dataView,
-    dataViewLoading,
     docLinks,
     isPlainRecord,
     mainContainer,
@@ -247,8 +253,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const isLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
-    documentState.fetchStatus === FetchStatus.PARTIAL ||
-    dataViewLoading;
+    documentState.fetchStatus === FetchStatus.PARTIAL;
+
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
     sendErrorMsg(stateContainer.dataState.data$.documents$);
@@ -297,6 +303,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             height: 100%;
           `}
         >
+          {dataViewLoading && (
+            <EuiDelayRender delay={300}>
+              <EuiProgress size="xs" color="accent" position="absolute" />
+            </EuiDelayRender>
+          )}
           <SavedSearchURLConflictCallout
             savedSearch={savedSearch}
             spaces={spaces}
