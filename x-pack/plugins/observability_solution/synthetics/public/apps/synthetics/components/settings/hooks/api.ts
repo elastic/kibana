@@ -14,6 +14,20 @@ export const getIlmPolicies = async (): Promise<PolicyFromES[]> => {
   return await apiService.get('/api/index_lifecycle_management/policies');
 };
 
+export const getDslPolicies = async (): Promise<any> => {
+  return apiService.get(
+    '/api/index_management/data_streams',
+    {
+      includeStats: true,
+    },
+    undefined,
+    undefined,
+    {
+      'X-Elastic-Internal-Origin': 'Kibana',
+    }
+  );
+};
+
 export const getIndicesData = async (): Promise<{ data: CatIndicesResponse }> => {
   return await apiService.get(SYNTHETICS_API_URLS.INDEX_SIZE);
 };
