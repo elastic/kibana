@@ -20,7 +20,7 @@
     "patterns": [
       "_eql/search/{id}"
     ],
-    "documentation": " https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-eql-search-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-eql-search-api.html",
     "availability": {
       "stack": true,
       "serverless": true

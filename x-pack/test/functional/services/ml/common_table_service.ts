@@ -147,7 +147,11 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       });
     }
 
-    public async invokeAction(rowIndex: number, actionSubject: string) {
+    public async invokeAction(
+      rowIndex: number,
+      actionSubject: string,
+      postActionCallback: () => Promise<void>
+    ) {
       const rows = await testSubjects.findAll(
         `${this.parentSubj ? `${this.parentSubj} > ` : ''}~${this.tableTestSubj} > ~${
           this.tableRowSubj
@@ -159,6 +163,9 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
 
       await retry.tryForTime(5000, async () => {
         await actionButton.click();
+        if (postActionCallback) {
+          await postActionCallback();
+        }
         await this.waitForTableToLoad();
       });
     }

@@ -28,6 +28,7 @@ const executionMetrics = {
   numberOfActiveAlerts: 2,
   numberOfNewAlerts: 3,
   numberOfRecoveredAlerts: 13,
+  numberOfDelayedAlerts: 7,
   hasReachedAlertLimit: false,
   triggeredActionsStatus: ActionsCompletion.COMPLETE,
   hasReachedQueuedActionsLimit: false,

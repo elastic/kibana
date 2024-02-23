@@ -11,8 +11,8 @@ import { SentinelOneActionsClient } from './sentinel_one_actions_client';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import type { SentinelOneActionsClientOptionsMock } from './mock';
-import { sentinelOneMock } from './mock';
+import type { SentinelOneActionsClientOptionsMock } from './mocks';
+import { sentinelOneMock } from './mocks';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
@@ -34,8 +34,12 @@ describe('SentinelOneActionsClient class', () => {
   let s1ActionsClient: ResponseActionsClient;
   let connectorActionsMock: ActionsClientMock;
 
-  const createS1IsolationOptions = () =>
-    responseActionsClientMock.createIsolateOptions({ agent_type: 'sentinel_one' });
+  const createS1IsolationOptions = (
+    overrides: Omit<
+      Parameters<typeof responseActionsClientMock.createIsolateOptions>[0],
+      'agent_type'
+    > = {}
+  ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'sentinel_one' });
 
   beforeEach(() => {
     classConstructorOptions = sentinelOneMock.createConstructorOptions();
@@ -185,6 +189,16 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
     });
+
+    it('should update cases', async () => {
+      await s1ActionsClient.isolate(
+        createS1IsolationOptions({
+          case_ids: ['case-1'],
+        })
+      );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
   });
 
   describe('#release()', () => {
@@ -257,6 +271,16 @@ describe('SentinelOneActionsClient class', () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should update cases', async () => {
+      await s1ActionsClient.release(
+        createS1IsolationOptions({
+          case_ids: ['case-1'],
+        })
+      );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
   });
 });

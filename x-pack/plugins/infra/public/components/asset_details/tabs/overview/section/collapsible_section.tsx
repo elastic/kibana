@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -12,7 +14,6 @@ import {
   useGeneratedHtmlId,
   type EuiAccordionProps,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 
 export const CollapsibleSection = ({
   title,
@@ -22,6 +23,7 @@ export const CollapsibleSection = ({
   collapsible,
   ['data-test-subj']: dataTestSubj,
   id,
+  initialTriggerValue,
 }: {
   title: React.FunctionComponent;
   closedSectionContent?: React.ReactNode;
@@ -31,13 +33,18 @@ export const CollapsibleSection = ({
   collapsible: boolean;
   ['data-test-subj']: string;
   id: string;
+  initialTriggerValue?: EuiAccordionProps['forceState'];
 }) => {
   const [trigger, setTrigger] = useState<EuiAccordionProps['forceState']>('open');
+
+  useEffect(() => {
+    setTrigger(initialTriggerValue ?? 'open');
+  }, [initialTriggerValue]);
 
   const Title = title;
   const ButtonContent = () =>
     closedSectionContent && trigger === 'closed' ? (
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <Title />
         </EuiFlexItem>

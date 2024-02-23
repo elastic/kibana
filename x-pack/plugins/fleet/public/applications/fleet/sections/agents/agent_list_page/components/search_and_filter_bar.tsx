@@ -22,6 +22,8 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 
+import { useStartServices } from '../../../../hooks';
+
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
@@ -91,6 +93,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
 }) => {
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
+  const { cloud } = useStartServices();
 
   return (
     <>
@@ -107,23 +110,25 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
-                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
-                  />
-                }
-              >
-                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton"
-                    defaultMessage="Add Fleet Server"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
+            {!cloud?.isServerlessEnabled && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                      defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                    />
+                  }
+                >
+                  <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton"
+                      defaultMessage="Add Fleet Server"
+                    />
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={

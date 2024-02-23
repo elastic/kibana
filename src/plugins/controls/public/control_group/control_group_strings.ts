@@ -10,6 +10,42 @@ import { i18n } from '@kbn/i18n';
 import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
+  invalidControlWarning: {
+    getTourTitle: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.tourStepTitle.default', {
+        defaultMessage: 'Invalid selections are no longer ignored',
+      }),
+    getTourContent: (controlType: string) => {
+      switch (controlType) {
+        case RANGE_SLIDER_CONTROL: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepContent.rangeSlider',
+            {
+              defaultMessage: 'The selected range is returning no results. Try changing the range.',
+            }
+          );
+        }
+        default: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepContent.default',
+            {
+              defaultMessage:
+                'Some selections are returning no results. Try changing the selections.',
+            }
+          );
+        }
+      }
+    },
+
+    getDismissButton: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.dismissButtonLabel', {
+        defaultMessage: 'Dismiss',
+      }),
+    getSuppressTourLabel: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.suppressTourLabel', {
+        defaultMessage: "Don't show again",
+      }),
+  },
   manageControl: {
     getFlyoutCreateTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
@@ -264,10 +300,9 @@ export const ControlGroupStrings = {
           i18n.translate('controls.controlGroup.management.validate.title', {
             defaultMessage: 'Validate user selections',
           }),
-        getValidateSelectionsTooltip: () =>
-          i18n.translate('controls.controlGroup.management.validate.tooltip', {
-            defaultMessage:
-              'Automatically ignore any control selection that would result in no data.',
+        getValidateSelectionsSubTitle: () =>
+          i18n.translate('controls.controlGroup.management.validate.subtitle', {
+            defaultMessage: 'Highlight control selections that result in no data.',
           }),
       },
       controlChaining: {

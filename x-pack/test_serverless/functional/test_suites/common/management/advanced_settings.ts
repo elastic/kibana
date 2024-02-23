@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
       });
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('settings');
     });
 
@@ -55,7 +55,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE,
       });
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page', async () => {

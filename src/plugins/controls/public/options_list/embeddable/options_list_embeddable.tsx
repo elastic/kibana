@@ -29,6 +29,7 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
+  ControlGroupContainer,
   ControlInput,
   ControlOutput,
   OptionsListEmbeddableInput,
@@ -84,6 +85,7 @@ export class OptionsListEmbeddable
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
+  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -114,6 +116,7 @@ export class OptionsListEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent);
+    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
     ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
@@ -131,7 +134,6 @@ export class OptionsListEmbeddable
       reducers: optionsListReducers,
       initialComponentState: getDefaultComponentState(),
     });
-
     this.select = reduxEmbeddableTools.select;
     this.getState = reduxEmbeddableTools.getState;
     this.dispatch = reduxEmbeddableTools.dispatch;
@@ -143,17 +145,17 @@ export class OptionsListEmbeddable
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
-    if (!initialSelectedOptions) this.setInitializationFinished();
+    if (initialSelectedOptions) {
+      const filters = await this.buildFilter();
+      this.dispatch.publishFilters(filters);
+    }
+    this.setInitializationFinished();
 
     this.dispatch.setAllowExpensiveQueries(
       await this.optionsListService.getAllowExpensiveQueries()
     );
 
     this.runOptionsListQuery().then(async () => {
-      if (initialSelectedOptions) {
-        await this.buildFilter();
-        this.setInitializationFinished();
-      }
       this.setupSubscriptions();
     });
   };
@@ -325,6 +327,7 @@ export class OptionsListEmbeddable
         },
         this.abortController.signal
       );
+
       if (this.optionsListService.optionsListResponseWasFailure(response)) {
         if (response.error === 'aborted') {
           // This prevents an aborted request (which can happen, for example, when a user types a search string too quickly)
@@ -348,6 +351,7 @@ export class OptionsListEmbeddable
           validSelections: selectedOptions,
           totalCardinality,
         });
+        this.reportInvalidSelections(false);
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
@@ -361,14 +365,12 @@ export class OptionsListEmbeddable
           validSelections: valid,
           totalCardinality,
         });
+        this.reportInvalidSelections(true);
       }
 
-      // publish filter
-      const { filters: newFilters } = await this.buildFilter();
       batch(() => {
         this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
-        this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
@@ -379,6 +381,13 @@ export class OptionsListEmbeddable
         this.dispatch.setLoading(false);
       });
     }
+  };
+
+  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.parent?.reportInvalidSelections({
+      id: this.id,
+      hasInvalidSelections,
+    });
   };
 
   public selectionsToFilters = async (
@@ -425,6 +434,7 @@ export class OptionsListEmbeddable
 
   public clearSelections() {
     this.dispatch.clearSelections({});
+    this.reportInvalidSelections(false);
   }
 
   reload = () => {

@@ -46,6 +46,8 @@ import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -79,6 +81,7 @@ export interface InfraClientSetupDeps {
   fieldFormats: FieldFormatsSetup;
   licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -98,6 +101,7 @@ export interface InfraClientStartDeps {
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;
+  serverless?: ServerlessPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -105,6 +109,7 @@ export interface InfraClientStartDeps {
   telemetry?: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

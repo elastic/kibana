@@ -23,6 +23,8 @@ const Template: ComponentStory<typeof Component> = (props: Props) => <Component 
 const defaultProps: Props = {
   slo: buildSlo(),
   isAutoRefreshing: false,
+  selectedTabId: 'overview',
+  handleSelectedTab: () => {},
 };
 
 export const SloDetails = Template.bind({});

@@ -115,7 +115,7 @@ export function sendLoadingMoreFinishedMsg(
 /**
  * Send ERROR message
  */
-export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error: Error) {
+export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error?: Error) {
   const recordRawType = data$.getValue().recordRawType;
   data$.next({
     fetchStatus: FetchStatus.ERROR,

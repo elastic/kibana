@@ -16,7 +16,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rule_event_log_list'));
     loadTestFile(require.resolve('./global_rule_event_log_list'));
     loadTestFile(require.resolve('./rules_list'));
-    loadTestFile(require.resolve('./alerts_table'));
     loadTestFile(require.resolve('./rules_settings_link'));
   });
 };

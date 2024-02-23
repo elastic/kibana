@@ -11,7 +11,6 @@ import React from 'react';
 import {
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
-  EuiColorPickerSwatch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -110,39 +109,24 @@ export function UnassignedTermsConfig({
         </EuiFlexItem>
 
         <EuiFlexItem grow={0}>
-          {data.type === 'categories' && otherAssignment.color.type !== 'loop' ? (
-            <SpecialAssignment
-              index={0}
-              palette={palette}
-              isDarkMode={isDarkMode}
-              getPaletteFn={getPaletteFn}
-              assignmentColor={otherAssignment.color}
-              total={specialAssignments.length}
-            />
-          ) : (
-            <EuiColorPickerSwatch
-              color={'gray'}
-              disabled
-              style={{
-                // the color swatch can't pickup colors written in rgb/css standard
-                backgroundColor: '#EFF2F6',
-                cursor: 'not-allowed',
-                width: 32,
-                height: 32,
-              }}
-              css={css`
-                &::after {
-                  content: '';
-                  width: 43px;
-                  height: 43px;
-                  border-bottom: 1px solid #d9ddea;
-                  transform: rotate(-45deg) translateY(-51.5px) translateX(0px);
-                  margin: 0;
-                  position: absolute;
-                }
-              `}
-            />
-          )}
+          <div
+            css={css`
+              visibility: ${otherAssignment.color.type === 'loop' ? 'hidden' : 'visible'};
+              width: 32px;
+              height: 32px;
+            `}
+          >
+            {data.type === 'categories' && otherAssignment.color.type !== 'loop' && (
+              <SpecialAssignment
+                index={0}
+                palette={palette}
+                isDarkMode={isDarkMode}
+                getPaletteFn={getPaletteFn}
+                assignmentColor={otherAssignment.color}
+                total={specialAssignments.length}
+              />
+            )}
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>

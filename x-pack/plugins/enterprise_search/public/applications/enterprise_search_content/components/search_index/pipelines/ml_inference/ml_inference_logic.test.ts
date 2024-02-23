@@ -11,7 +11,6 @@ import { HttpResponse } from '@kbn/core/public';
 
 import { ErrorResponse, Status } from '../../../../../../../common/types/api';
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
-import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
@@ -41,7 +40,6 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   },
   createErrors: [],
   existingPipeline: undefined,
-  existingInferencePipelines: [],
   formErrors: {
     fieldMappings: 'Field is required.',
     modelID: 'Field is required.',
@@ -210,158 +208,6 @@ describe('MlInferenceLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('existingInferencePipelines', () => {
-      beforeEach(() => {
-        CachedFetchModelsApiLogic.actions.apiSuccess(MODELS);
-        MappingsApiLogic.actions.apiSuccess({
-          mappings: {
-            properties: {
-              body: {
-                type: 'text',
-              },
-            },
-          },
-        });
-      });
-      it('returns empty list when there is not existing pipelines available', () => {
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([]);
-      });
-      it('returns existing pipeline option', () => {
-        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          'unit-test': {
-            processors: [
-              {
-                inference: {
-                  field_map: {
-                    body: 'text_field',
-                  },
-                  model_id: MODELS[0].modelId,
-                  target_field: 'ml.inference.test-field',
-                },
-              },
-            ],
-            version: 1,
-          },
-        });
-
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
-          {
-            disabled: false,
-            modelId: MODELS[0].modelId,
-            modelType: 'ner',
-            pipelineName: 'unit-test',
-            sourceFields: ['body'],
-            indexFields: ['body'],
-          },
-        ]);
-      });
-      it('returns disabled pipeline option if missing source fields', () => {
-        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          'unit-test': {
-            processors: [
-              {
-                inference: {
-                  field_map: {
-                    title: 'text_field', // Does not exist in index
-                  },
-                  model_id: MODELS[0].modelId,
-                  target_field: 'ml.inference.title',
-                },
-              },
-              {
-                inference: {
-                  field_map: {
-                    body: 'text_field', // Exists in index
-                  },
-                  model_id: MODELS[0].modelId,
-                  target_field: 'ml.inference.body',
-                },
-              },
-              {
-                inference: {
-                  field_map: {
-                    body_content: 'text_field', // Does not exist in index
-                  },
-                  model_id: MODELS[0].modelId,
-                  target_field: 'ml.inference.body_content',
-                },
-              },
-            ],
-            version: 1,
-          },
-        });
-
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
-          {
-            disabled: true,
-            disabledReason: expect.stringContaining('title, body_content'),
-            modelId: MODELS[0].modelId,
-            modelType: 'ner',
-            pipelineName: 'unit-test',
-            sourceFields: ['title', 'body', 'body_content'],
-            indexFields: ['body'],
-          },
-        ]);
-      });
-      it('returns enabled pipeline option if model is redacted', () => {
-        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          'unit-test': {
-            processors: [
-              {
-                inference: {
-                  field_map: {
-                    body: 'text_field',
-                  },
-                  model_id: '',
-                  target_field: 'ml.inference.test-field',
-                },
-              },
-            ],
-            version: 1,
-          },
-        });
-
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
-          {
-            disabled: false,
-            pipelineName: 'unit-test',
-            modelType: '',
-            modelId: '',
-            sourceFields: ['body'],
-            indexFields: ['body'],
-          },
-        ]);
-      });
-      it('filters pipeline if pipeline already attached', () => {
-        FetchMlInferencePipelineProcessorsApiLogic.actions.apiSuccess([
-          {
-            modelId: MODELS[0].modelId,
-            modelState: TrainedModelState.Started,
-            pipelineName: 'unit-test',
-            pipelineReferences: ['test@ml-inference'],
-            types: ['ner', 'pytorch'],
-          },
-        ]);
-        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          'unit-test': {
-            processors: [
-              {
-                inference: {
-                  field_map: {
-                    body: 'text_field',
-                  },
-                  model_id: MODELS[0].modelId,
-                  target_field: 'ml.inference.test-field',
-                },
-              },
-            ],
-            version: 1,
-          },
-        });
-
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([]);
-      });
-    });
     describe('formErrors', () => {
       it('has errors when configuration is empty', () => {
         expect(MLInferenceLogic.values.formErrors).toEqual({

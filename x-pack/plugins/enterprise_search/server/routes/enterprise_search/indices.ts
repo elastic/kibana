@@ -278,6 +278,9 @@ export function registerIndexRoutes({
     {
       path: '/internal/enterprise_search/indices/{indexName}/api_key',
       validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
         params: schema.object({
           indexName: schema.string(),
         }),
@@ -285,9 +288,11 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
+      const { is_native: isNative } = request.body;
+
       const { client } = (await context.core).elasticsearch;
 
-      const apiKey = await generateApiKey(client, indexName);
+      const apiKey = await generateApiKey(client, indexName, isNative);
 
       return response.ok({
         body: apiKey,

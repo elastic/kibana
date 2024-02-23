@@ -67,8 +67,8 @@ export const ServicesAPIQueryAggregationRT = rt.type({
 export type ServicesAPIQueryAggregation = rt.TypeOf<typeof ServicesAPIQueryAggregationRT>;
 
 export const ServiceRT = rt.type({
-  'service.name': rt.string,
-  'agent.name': AgentNameRT,
+  serviceName: rt.string,
+  agentName: AgentNameRT,
 });
 
 export type Service = rt.TypeOf<typeof ServiceRT>;
@@ -76,3 +76,5 @@ export type Service = rt.TypeOf<typeof ServiceRT>;
 export const ServicesAPIResponseRT = rt.type({
   services: rt.array(ServiceRT),
 });
+
+export type ServicesAPIResponse = rt.TypeOf<typeof ServicesAPIResponseRT>;

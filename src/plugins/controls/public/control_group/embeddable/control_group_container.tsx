@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
@@ -25,6 +26,7 @@ import {
 } from '../../../common';
 import { TimeSlice } from '../../../common/types';
 import { pluginServices } from '../../services';
+import { ControlsStorageService } from '../../services/storage/types';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
@@ -88,11 +90,15 @@ export class ControlGroupContainer extends Container<
 
   private initialized$ = new BehaviorSubject(false);
 
+  private storageService: ControlsStorageService;
+
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+  private invalidSelectionsState: { [childId: string]: boolean };
+
   public diffingSubscription: Subscription = new Subscription();
 
   // state management
@@ -128,6 +134,8 @@ export class ControlGroupContainer extends Container<
       ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
+    ({ storage: this.storageService } = pluginServices.getServices());
+
     this.recalculateFilters$ = new Subject();
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
@@ -155,7 +163,11 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
-    // when all children are ready setup subscriptions + publish current filters
+    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+      return { ...prev, [id]: false };
+    }, {});
+
+    // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.setupSubscriptions();
@@ -166,6 +178,32 @@ export class ControlGroupContainer extends Container<
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
+
+  public canShowInvalidSelectionsWarning = () =>
+    this.storageService.getShowInvalidSelectionWarning() ?? true;
+
+  public suppressInvalidSelectionsWarning = () => {
+    this.storageService.setShowInvalidSelectionWarning(false);
+  };
+
+  public reportInvalidSelections = ({
+    id,
+    hasInvalidSelections,
+  }: {
+    id: string;
+    hasInvalidSelections: boolean;
+  }) => {
+    this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
+
+    const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+      this.getInput().panels
+    ).idsInOrder.filter((childId) => {
+      return this.invalidSelectionsState[childId];
+    });
+    this.dispatch.setControlWithInvalidSelectionsId(
+      childrenWithInvalidSelections.length > 0 ? childrenWithInvalidSelections[0] : undefined
+    );
+  };
 
   private setupSubscriptions = () => {
     /**
@@ -268,7 +306,12 @@ export class ControlGroupContainer extends Container<
           this.publishFilters(filterOutput);
         });
       }
+      this.reload(); // this forces the children to update their inputs + perform validation as necessary
     }
+  }
+
+  public reload() {
+    super.reload();
   }
 
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
@@ -343,7 +386,7 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters = (): ControlGroupFilterOutput => {
     const allFilters: Filter[] = [];
     let timeslice;
-    Object.values(this.children).map((child) => {
+    Object.values(this.children).map((child: ControlEmbeddable) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
       if (childOutput.timeslice) {
@@ -388,6 +431,7 @@ export class ControlGroupContainer extends Container<
     filters?: Filter[];
     timeslice?: TimeSlice;
   }) => {
+    // if filters are different, try publishing them
     if (
       !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
       !isEqual(this.output.timeslice, timeslice)

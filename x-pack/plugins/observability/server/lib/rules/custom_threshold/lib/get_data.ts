@@ -9,7 +9,10 @@ import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/li
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import {
+  CustomMetricExpressionParams,
+  SearchConfigurationType,
+} from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
 import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
@@ -100,7 +103,7 @@ export const getData = async (
   index: string,
   timeFieldName: string,
   groupBy: string | undefined | string[],
-  filterQuery: string | undefined,
+  searchConfiguration: SearchConfigurationType,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   timeframe: { start: number; end: number },
@@ -159,7 +162,7 @@ export const getData = async (
           index,
           timeFieldName,
           groupBy,
-          filterQuery,
+          searchConfiguration,
           compositeSize,
           alertOnGroupDisappear,
           timeframe,
@@ -202,9 +205,9 @@ export const getData = async (
       timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
+      searchConfiguration,
       lastPeriodEnd,
       groupBy,
-      filterQuery,
       afterKey,
       fieldsExisted
     ),

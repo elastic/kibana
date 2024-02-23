@@ -33,7 +33,7 @@ export {
   apmLabsButton,
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
-  enableInfrastructureHostsCustomDashboards,
+  enableInfrastructureAssetCustomDashboards,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
@@ -44,12 +44,15 @@ export {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
+  profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingAzureCostDiscountRate,
+  apmEnableTransactionProfiling,
 } from './ui_settings_keys';
 
 export {

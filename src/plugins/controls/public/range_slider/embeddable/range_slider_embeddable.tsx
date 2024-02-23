@@ -28,6 +28,7 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
+  ControlGroupContainer,
   ControlInput,
   ControlOutput,
   RangeSliderEmbeddableInput,
@@ -82,6 +83,7 @@ export class RangeSliderEmbeddable
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
+  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -109,6 +111,7 @@ export class RangeSliderEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent); // get filters for initial output...
+    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
@@ -126,6 +129,7 @@ export class RangeSliderEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
+
     this.initialize();
   }
 
@@ -163,14 +167,15 @@ export class RangeSliderEmbeddable
       distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', '']))
     );
 
-    // run validations when input changes or value changes
     this.subscriptions.add(
       merge(dataFetchPipe, valueChangePipe)
         .pipe(
           switchMap(async () => {
             try {
+              this.dispatch.setLoading(true);
               await this.runRangeSliderQuery();
               await this.runValidations();
+              this.dispatch.setLoading(false);
             } catch (e) {
               this.onLoadingError(e.message);
             }
@@ -231,7 +236,6 @@ export class RangeSliderEmbeddable
     if (!dataView || !field) return;
 
     this.dispatch.setLoading(true);
-
     const { min, max } = await this.fetchMinMax({
       dataView,
       field,
@@ -392,8 +396,22 @@ export class RangeSliderEmbeddable
       const total = resp?.rawResponse?.hits?.total;
 
       const docCount = typeof total === 'number' ? total : total?.value;
-      this.dispatch.setIsInvalid(!docCount);
+
+      const {
+        explicitInput: { value },
+      } = this.getState();
+      this.reportInvalidSelections(
+        !value || (value[0] === '' && value[1] === '') ? false : !docCount // don't set the range slider invalid if it has no selections
+      );
     }
+  };
+
+  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.dispatch.setIsInvalid(hasInvalidSelections);
+    this.parent?.reportInvalidSelections({
+      id: this.id,
+      hasInvalidSelections,
+    });
   };
 
   public clearSelections() {
@@ -401,9 +419,10 @@ export class RangeSliderEmbeddable
   }
 
   public reload = async () => {
+    this.dispatch.setLoading(true);
     try {
       await this.runRangeSliderQuery();
-      // await this.buildFilter();
+      this.dispatch.setLoading(false);
     } catch (e) {
       this.onLoadingError(e.message);
     }

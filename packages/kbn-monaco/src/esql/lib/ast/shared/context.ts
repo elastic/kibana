@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { enrichModes } from '../definitions/settings';
 import type {
   ESQLAstItem,
   ESQLSingleAstItem,
@@ -152,8 +153,9 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
       // command ... by <here>
       return { type: 'option' as const, command, node, option, setting };
     }
-    if (node.type === 'mode' || option) {
-      // command [<here>
+    // for now it's only an enrich thing
+    if (node.type === 'source' && node.text === enrichModes.prefix) {
+      // command _<here>
       return { type: 'setting' as const, command, node, option, setting };
     }
   }
@@ -183,9 +185,6 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
   if (command && command.args.length) {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
-    }
-    if (setting?.incomplete) {
-      return { type: 'setting' as const, command, node, option, setting };
     }
   }
 

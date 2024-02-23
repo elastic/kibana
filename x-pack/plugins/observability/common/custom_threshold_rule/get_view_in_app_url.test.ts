@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Aggregators } from './types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';
 
 describe('getViewInAppUrl', () => {
   const logsExplorerLocator = {
     getRedirectUrl: jest.fn(() => 'mockedGetRedirectUrl'),
-  } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
+  } as unknown as LocatorPublic<LogsExplorerLocatorParams>;
   const startedAt = '2023-12-07T16:30:15.403Z';
   const endedAt = '2023-12-07T20:30:15.403Z';
   const returnedTimeRange = {
@@ -48,7 +48,13 @@ describe('getViewInAppUrl', () => {
       logsExplorerLocator,
       startedAt,
       endedAt,
-      filter: 'mockedFilter',
+      searchConfiguration: {
+        index: {},
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+      },
       dataViewId: 'mockedDataViewId',
     };
 
@@ -56,6 +62,7 @@ describe('getViewInAppUrl', () => {
     expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
       dataset: args.dataViewId,
       timeRange: returnedTimeRange,
+      filters: [],
       query: {
         query: 'mockedFilter and mockedCountFilter',
         language: 'kuery',
@@ -81,6 +88,7 @@ describe('getViewInAppUrl', () => {
     expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
       dataset: undefined,
       timeRange: returnedTimeRange,
+      filters: [],
       query: {
         query: 'mockedCountFilter',
         language: 'kuery',
@@ -93,13 +101,20 @@ describe('getViewInAppUrl', () => {
       logsExplorerLocator,
       startedAt,
       endedAt,
-      filter: 'mockedFilter',
+      searchConfiguration: {
+        index: {},
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+      },
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
     expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
       dataset: undefined,
       timeRange: returnedTimeRange,
+      filters: [],
       query: {
         query: 'mockedFilter',
         language: 'kuery',
@@ -118,6 +133,7 @@ describe('getViewInAppUrl', () => {
     expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
       dataset: undefined,
       timeRange: returnedTimeRange,
+      filters: [],
       query: {
         query: '',
         language: 'kuery',
@@ -148,8 +164,84 @@ describe('getViewInAppUrl', () => {
     expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
       dataset: undefined,
       timeRange: returnedTimeRange,
+      filters: [],
       query: {
         query: '',
+        language: 'kuery',
+      },
+    });
+  });
+
+  it('should call getRedirectUrl with filters if group and searchConfiguration filter are provided', () => {
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'mockedCountFilter',
+        },
+        {
+          name: 'A',
+          aggType: Aggregators.AVERAGE,
+          field: 'mockedAvgField',
+        },
+      ],
+      logsExplorerLocator,
+      startedAt,
+      endedAt,
+      searchConfiguration: {
+        index: {},
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+        filter: [
+          {
+            meta: {},
+            query: {
+              term: {
+                field: {
+                  value: 'justTesting',
+                },
+              },
+            },
+          },
+        ],
+      },
+      groups: [
+        {
+          field: 'host.name',
+          value: 'host-1',
+        },
+      ],
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
+      dataset: undefined,
+      timeRange: returnedTimeRange,
+      filters: [
+        {
+          meta: {},
+          query: {
+            term: {
+              field: {
+                value: 'justTesting',
+              },
+            },
+          },
+        },
+        {
+          meta: {},
+          query: {
+            match_phrase: {
+              'host.name': 'host-1',
+            },
+          },
+        },
+      ],
+      query: {
+        query: 'mockedFilter',
         language: 'kuery',
       },
     });
