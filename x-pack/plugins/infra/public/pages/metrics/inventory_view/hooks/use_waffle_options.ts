@@ -131,10 +131,14 @@ export const useWaffleOptions = () => {
 
   const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
-    const { setNodeType, setMetric, setCustomMetrics } = inventoryPrefill;
+    const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
     setNodeType(state.nodeType);
     setMetric(state.metric);
     setCustomMetrics(state.customMetrics);
+    // only shows for AWS when there are accounts info
+    setAccountId(state.accountId);
+    // only shows for AWS when there are regions info
+    setRegion(state.region);
   }, [state, inventoryPrefill]);
 
   const changeTimelineOpen = useCallback(
