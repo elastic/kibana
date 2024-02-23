@@ -23,9 +23,9 @@ describe('reduceStream', () => {
       }, 0),
     ]);
     expect(stub).toHaveBeenCalledTimes(3);
-    expect(stub.mock.calls[0]).toEqual([0, 1, 'utf8']);
-    expect(stub.mock.calls[1]).toEqual([1, 2, 'utf8']);
-    expect(stub.mock.calls[2]).toEqual([2, 3, 'utf8']);
+    expect(stub.mock.calls[0]).toEqual([0, 1]);
+    expect(stub.mock.calls[1]).toEqual([1, 2]);
+    expect(stub.mock.calls[2]).toEqual([2, 3]);
   });
 
   test('provides the return value of the last iteration of the reducer', async () => {

@@ -16,10 +16,11 @@ import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
   isLoading: boolean;
+  showTitle?: boolean;
 }
 
 export function HeaderTitle(props: Props) {
-  const { isLoading, slo } = props;
+  const { isLoading, slo, showTitle = true } = props;
 
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loadingTitle" />;
@@ -33,7 +34,7 @@ export function HeaderTitle(props: Props) {
     <>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
+          {showTitle && <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>}
           <EuiFlexGroup
             direction="row"
             gutterSize="s"

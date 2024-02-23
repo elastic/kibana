@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useEffect, useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
@@ -29,14 +28,9 @@ import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 
-export interface Props {
-  slo: SLOWithSummaryResponse;
-  isAutoRefreshing: boolean;
-}
-
-const TAB_ID_URL_PARAM = 'tabId';
-const OVERVIEW_TAB_ID = 'overview';
-const ALERTS_TAB_ID = 'alerts';
+export const TAB_ID_URL_PARAM = 'tabId';
+export const OVERVIEW_TAB_ID = 'overview';
+export const ALERTS_TAB_ID = 'alerts';
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 const BURN_RATE_OPTIONS: BurnRateOption[] = [
@@ -82,10 +76,15 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
 ];
 
-type TabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
+export type SloTabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
 
-export function SloDetails({ slo, isAutoRefreshing }: Props) {
-  const { search } = useLocation();
+export interface Props {
+  slo: SLOWithSummaryResponse;
+  isAutoRefreshing: boolean;
+  selectedTabId: SloTabId;
+  handleSelectedTab: (tabId: SloTabId) => void;
+}
+export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelectedTab }: Props) {
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
     shouldRefetch: isAutoRefreshing,
@@ -183,24 +182,12 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
     },
   ];
 
-  const [selectedTabId, setSelectedTabId] = useState(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(TAB_ID_URL_PARAM);
-    return urlTabId && [OVERVIEW_TAB_ID, ALERTS_TAB_ID].includes(urlTabId)
-      ? (urlTabId as TabId)
-      : OVERVIEW_TAB_ID;
-  });
-
-  const handleSelectedTab = (newTabId: TabId) => {
-    setSelectedTabId(newTabId);
-  };
-
   return (
     <EuiTabbedContent
       data-test-subj="sloDetailsTabbedContent"
       tabs={tabs}
       selectedTab={tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]}
-      onTabClick={(tab) => handleSelectedTab(tab.id as TabId)}
+      onTabClick={(tab) => handleSelectedTab(tab.id as SloTabId)}
     />
   );
 }

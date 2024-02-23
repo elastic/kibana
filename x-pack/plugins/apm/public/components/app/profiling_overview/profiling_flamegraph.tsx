@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
-import { isEmpty } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -23,12 +14,9 @@ import {
   mergeKueries,
   toKueryFilterFormat,
 } from '../../../../common/utils/kuery_utils';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../hooks/use_fetcher';
-import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { ProfilingFlamegraphChart } from '../../shared/profiling/flamegraph';
+import { ProfilingFlamegraphLink } from '../../shared/profiling/flamegraph/flamegraph_link';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
 
 interface Props {
@@ -54,8 +42,6 @@ export function ProfilingFlamegraph({
   rangeFrom,
   rangeTo,
 }: Props) {
-  const { profilingLocators } = useProfilingPlugin();
-
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (dataSource) {
@@ -92,41 +78,16 @@ export function ProfilingFlamegraph({
           <HostnamesFilterWarning hostNames={data?.hostNames} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <EuiLink
-              data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
-              href={profilingLocators?.flamegraphLocator.getRedirectUrl({
-                kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
-                rangeFrom,
-                rangeTo,
-              })}
-            >
-              {i18n.translate('xpack.apm.profiling.flamegraph.link', {
-                defaultMessage: 'Go to Universal Profiling Flamegraph',
-              })}
-            </EuiLink>
-          </div>
+          <ProfilingFlamegraphLink
+            kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            justifyContent="flexEnd"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {status === FETCH_STATUS.SUCCESS && isEmpty(data) ? (
-        <EuiEmptyPrompt
-          titleSize="s"
-          title={
-            <div>
-              {i18n.translate('xpack.apm.profiling.flamegraph.noDataFound', {
-                defaultMessage: 'No data found',
-              })}
-            </div>
-          }
-        />
-      ) : (
-        <EmbeddableFlamegraph
-          data={data?.flamegraph}
-          isLoading={isPending(status)}
-          height="60vh"
-        />
-      )}
+      <ProfilingFlamegraphChart data={data?.flamegraph} status={status} />
     </>
   );
 }

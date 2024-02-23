@@ -19,7 +19,8 @@ import {
 } from '../../mocks/custom_threshold_rule';
 import { CustomThresholdAlertFields } from '../../types';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import AlertDetailsAppSection, { CustomThresholdAlert } from './alert_details_app_section';
+import { CustomThresholdAlert } from '../types';
+import AlertDetailsAppSection from './alert_details_app_section';
 import { Groups } from './groups';
 import { Tags } from './tags';
 
@@ -28,6 +29,17 @@ const mockedChartStartContract = chartPluginMock.createStartContract();
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertActiveTimeRangeAnnotation: () => {},
+  useAlertsHistory: () => ({
+    data: {
+      histogramTriggeredAlerts: [
+        { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 2 },
+      ],
+      avgTimeToRecoverUS: 0,
+      totalTriggeredAlerts: 2,
+    },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({

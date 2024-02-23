@@ -342,4 +342,8 @@ export class APMEventClient {
       cb: (opts) => this.esClient.termsEnum(requestParams, opts),
     });
   }
+
+  getIndicesFromProcessorEvent(processorEvent: ProcessorEvent) {
+    return processorEventsToIndex([processorEvent], this.indices);
+  }
 }

@@ -141,8 +141,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        infiniteParams: true,
-        minParams: 1,
+        minParams: 2,
         returnType: 'string',
         examples: ['from index | eval concatenated = concat(field1, "-", field2)'],
       },
@@ -561,8 +560,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [
           { name: 'field', type: 'date' },
           { name: 'buckets', type: 'number' },
-          { name: 'startDate', type: 'string' },
-          { name: 'endDate', type: 'string' },
+          { name: 'startDate', type: 'string', literalOnly: true },
+          { name: 'endDate', type: 'string', literalOnly: true },
         ],
         returnType: 'date',
         examples: [
@@ -573,8 +572,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [
           { name: 'field', type: 'date' },
           { name: 'buckets', type: 'number' },
-          { name: 'startValue', type: 'number' },
-          { name: 'endValue', type: 'number' },
+          { name: 'startValue', type: 'number', literalOnly: true },
+          { name: 'endValue', type: 'number', literalOnly: true },
         ],
         returnType: 'number',
         examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],
@@ -730,9 +729,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'field', type: 'number' }],
+        params: [{ name: 'field', type: 'any' }],
         infiniteParams: true,
-        returnType: 'number',
+        returnType: 'any',
         examples: [`ROW a = 10, b = 20 | EVAL g = GREATEST(a, b)`],
       },
     ],
@@ -744,11 +743,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [
-          { name: 'first', type: 'number' },
-          { name: 'rest', type: 'number' },
-        ],
-        returnType: 'number',
+        params: [{ name: 'first', type: 'any' }],
+        infiniteParams: true,
+        returnType: 'any',
         examples: ['from index | eval l = least(a, b)'],
       },
     ],
@@ -1006,8 +1003,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number' }],
-        returnType: 'number',
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
         examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
       },
     ],
@@ -1020,8 +1017,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number' }],
-        returnType: 'number',
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
         examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
       },
     ],

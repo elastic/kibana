@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 

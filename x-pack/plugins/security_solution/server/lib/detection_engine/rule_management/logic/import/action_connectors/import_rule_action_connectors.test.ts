@@ -13,8 +13,7 @@ import { importRuleActionConnectors } from './import_rule_action_connectors';
 import { coreMock } from '@kbn/core/server/mocks';
 
 const rules = [
-  {
-    ...getImportRulesSchemaMock(),
+  getImportRulesSchemaMock({
     actions: [
       {
         group: 'default',
@@ -23,14 +22,9 @@ const rules = [
         params: {},
       },
     ],
-  },
+  }),
 ];
-const rulesWithoutActions = [
-  {
-    ...getImportRulesSchemaMock(),
-    actions: [],
-  },
-];
+const rulesWithoutActions = [getImportRulesSchemaMock({ actions: [] })];
 const actionConnectors = [webHookConnector];
 const actionsClient = actionsClientMock.create();
 actionsClient.getAll.mockResolvedValue([]);
@@ -115,8 +109,7 @@ describe('importRuleActionConnectors', () => {
     const actionsImporter = core.savedObjects.getImporter;
 
     const ruleWith2Connectors = [
-      {
-        ...getImportRulesSchemaMock(),
+      getImportRulesSchemaMock({
         actions: [
           {
             group: 'default',
@@ -135,7 +128,7 @@ describe('importRuleActionConnectors', () => {
             action_type_id: '.slack',
           },
         ],
-      },
+      }),
     ];
     const res = await importRuleActionConnectors({
       actionConnectors,
@@ -189,8 +182,7 @@ describe('importRuleActionConnectors', () => {
       actionsClient,
       actionsImporter: actionsImporter(),
       rules: [
-        {
-          ...getImportRulesSchemaMock(),
+        getImportRulesSchemaMock({
           actions: [
             {
               group: 'default',
@@ -205,7 +197,7 @@ describe('importRuleActionConnectors', () => {
               params: {},
             },
           ],
-        },
+        }),
       ],
       overwrite: false,
     });
@@ -235,8 +227,8 @@ describe('importRuleActionConnectors', () => {
       actionsClient,
       actionsImporter: actionsImporter(),
       rules: [
-        {
-          ...getImportRulesSchemaMock(),
+        getImportRulesSchemaMock({
+          rule_id: 'rule-1',
           actions: [
             {
               group: 'default',
@@ -245,9 +237,9 @@ describe('importRuleActionConnectors', () => {
               params: {},
             },
           ],
-        },
-        {
-          ...getImportRulesSchemaMock('rule-2'),
+        }),
+        getImportRulesSchemaMock({
+          rule_id: 'rule-2',
           actions: [
             {
               group: 'default',
@@ -256,7 +248,7 @@ describe('importRuleActionConnectors', () => {
               params: {},
             },
           ],
-        },
+        }),
       ],
       overwrite: false,
     });
@@ -340,45 +332,6 @@ describe('importRuleActionConnectors', () => {
     expect(actionsImporter2Importer.import).not.toBeCalled();
   });
 
-  it('should not skip importing the action-connectors if all connectors have been imported/created before when overwrite is true', async () => {
-    core.savedObjects.getImporter = jest.fn().mockReturnValueOnce({
-      import: jest.fn().mockResolvedValue({
-        success: true,
-        successCount: 1,
-        errors: [],
-        warnings: [],
-      }),
-    });
-    const actionsImporter = core.savedObjects.getImporter;
-
-    actionsClient.getAll.mockResolvedValue([
-      {
-        actionTypeId: '.webhook',
-        name: 'webhook',
-        isPreconfigured: true,
-        id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
-        referencedByCount: 1,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-    ]);
-
-    const res = await importRuleActionConnectors({
-      actionConnectors,
-      actionsClient,
-      actionsImporter: actionsImporter(),
-      rules,
-      overwrite: true,
-    });
-
-    expect(res).toEqual({
-      success: true,
-      successCount: 1,
-      errors: [],
-      warnings: [],
-    });
-  });
-
   it('should import one rule with connector successfully even if it was exported from different namespaces by generating destinationId and replace the old actionId with it', async () => {
     const successResults = [
       {
@@ -441,8 +394,8 @@ describe('importRuleActionConnectors', () => {
 
   it('should import multiple rules with connectors successfully even if they were exported from different namespaces by generating destinationIds and replace the old actionIds with them', async () => {
     const multipleRules = [
-      {
-        ...getImportRulesSchemaMock(),
+      getImportRulesSchemaMock({
+        rule_id: 'rule_1',
         actions: [
           {
             group: 'default',
@@ -451,9 +404,8 @@ describe('importRuleActionConnectors', () => {
             params: {},
           },
         ],
-      },
-      {
-        ...getImportRulesSchemaMock(),
+      }),
+      getImportRulesSchemaMock({
         rule_id: 'rule_2',
         id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',
         actions: [
@@ -464,7 +416,7 @@ describe('importRuleActionConnectors', () => {
             params: {},
           },
         ],
-      },
+      }),
     ];
     const successResults = [
       {
@@ -535,7 +487,7 @@ describe('importRuleActionConnectors', () => {
         name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
         risk_score: 55,
-        rule_id: 'rule-1',
+        rule_id: 'rule_1',
         severity: 'high',
         type: 'query',
       },
@@ -567,6 +519,144 @@ describe('importRuleActionConnectors', () => {
       errors: [],
       warnings: [],
       rulesWithMigratedActions,
+    });
+  });
+
+  describe('overwrite is set to "true"', () => {
+    it('should return an error when action connectors are missing in ndjson import file', async () => {
+      const rulesToImport = [
+        getImportRulesSchemaMock({
+          rule_id: 'rule-with-missed-action-connector',
+          actions: [
+            {
+              group: 'default',
+              id: 'some-connector-id',
+              params: {},
+              action_type_id: '.webhook',
+            },
+          ],
+        }),
+      ];
+
+      actionsClient.getAll.mockResolvedValue([]);
+
+      const res = await importRuleActionConnectors({
+        actionConnectors: [],
+        actionsClient,
+        actionsImporter: core.savedObjects.getImporter(),
+        rules: rulesToImport,
+        overwrite: true,
+      });
+
+      expect(res).toEqual({
+        success: false,
+        successCount: 0,
+        errors: [
+          {
+            error: {
+              message: '1 connector is missing. Connector id missing is: some-connector-id',
+              status_code: 404,
+            },
+            id: 'some-connector-id',
+            rule_id: 'rule-with-missed-action-connector',
+          },
+        ],
+        warnings: [],
+      });
+    });
+
+    it('should NOT return an error when a missing action connector in ndjson import file is a preconfigured one', async () => {
+      const rulesToImport = [
+        getImportRulesSchemaMock({
+          rule_id: 'rule-with-missed-action-connector',
+          actions: [
+            {
+              group: 'default',
+              id: 'prebuilt-connector-id',
+              params: {},
+              action_type_id: '.webhook',
+            },
+          ],
+        }),
+      ];
+
+      actionsClient.getAll.mockResolvedValue([
+        {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          isPreconfigured: true,
+          id: 'prebuilt-connector-id',
+          referencedByCount: 1,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+      ]);
+
+      const res = await importRuleActionConnectors({
+        actionConnectors: [],
+        actionsClient,
+        actionsImporter: core.savedObjects.getImporter(),
+        rules: rulesToImport,
+        overwrite: true,
+      });
+
+      expect(res).toEqual({
+        success: true,
+        successCount: 0,
+        errors: [],
+        warnings: [],
+      });
+    });
+
+    it('should not skip importing the action-connectors if all connectors have been imported/created before', async () => {
+      const rulesToImport = [
+        getImportRulesSchemaMock({
+          actions: [
+            {
+              group: 'default',
+              id: 'connector-id',
+              action_type_id: '.webhook',
+              params: {},
+            },
+          ],
+        }),
+      ];
+
+      core.savedObjects.getImporter = jest.fn().mockReturnValueOnce({
+        import: jest.fn().mockResolvedValue({
+          success: true,
+          successCount: 1,
+          errors: [],
+          warnings: [],
+        }),
+      });
+
+      actionsClient.getAll.mockResolvedValue([
+        {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          isPreconfigured: true,
+          id: 'connector-id',
+          referencedByCount: 1,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+      ]);
+
+      const res = await importRuleActionConnectors({
+        actionConnectors,
+        actionsClient,
+        actionsImporter: core.savedObjects.getImporter(),
+        rules: rulesToImport,
+        overwrite: true,
+      });
+
+      expect(res).toEqual({
+        success: true,
+        successCount: 0,
+        errors: [],
+        warnings: [],
+      });
     });
   });
 });
