@@ -34,9 +34,9 @@ type StateNames =
   | 'wait_for_confirmation'
   | 'create_deploy_tag'
   | 'tag_created'
+  | 'trigger_gpctl'
   | 'end'
-  | 'error_generic'
-  | string;
+  | 'error_generic';
 
 interface StateShape {
   name: string;
@@ -176,32 +176,6 @@ const states: Record<StateNames, StateShape> = {
   },
 };
 
-Object.keys(states).forEach((stateName) => {
-  if (!states[stateName].pre) {
-    states[stateName].pre = async () => {
-      console.log('Entering state:', stateName);
-    };
-  } else {
-    const originalPre = states[stateName].pre;
-    states[stateName].pre = async (state: StateShape) => {
-      console.log('Entering state:', stateName);
-      return originalPre!(state);
-    };
-  }
-
-  if (!states[stateName].post) {
-    states[stateName].post = async () => {
-      console.log('Exiting state:', stateName);
-    };
-  } else {
-    const originalPost = states[stateName].post;
-    states[stateName].post = async (state: StateShape) => {
-      console.log('Exiting state:', stateName);
-      return originalPost!(state);
-    };
-  }
-});
-
 /**
  * This module is a central interface for updating the messaging interface for the wizard.
  * It's implemented as a state machine that updates the wizard state as we transition between states.
@@ -211,7 +185,7 @@ export async function main(args: string[]) {
   if (!args.includes('--state')) {
     throw new Error('Missing --state argument');
   }
-  const targetState = args.slice(args.indexOf('--state') + 1)[0];
+  const targetState = args.slice(args.indexOf('--state') + 1)[0] as StateNames;
 
   let data: any;
   if (args.includes('--data')) {
@@ -219,7 +193,7 @@ export async function main(args: string[]) {
   }
 
   const resultingTargetState = await transition(targetState, data);
-  if (resultingTargetState === 'tag_created') {
+  if (resultingTargetState === 'trigger_gpctl') {
     return await transition('end');
   } else {
     return resultingTargetState;
@@ -228,7 +202,7 @@ export async function main(args: string[]) {
 
 export async function transition(targetStateName: StateNames, data?: any) {
   // use the buildkite agent to find what state we are in:
-  const currentStateName = buildkite.getMetadata('release_state') || 'start';
+  const currentStateName = (buildkite.getMetadata('release_state') || 'start') as StateNames;
   const stateData = JSON.parse(buildkite.getMetadata('state_data') || '{}');
 
   if (!currentStateName) {
@@ -284,10 +258,10 @@ function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | 
     : `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
 
   const wizardSteps = Object.keys(states)
-    .filter((stateName) => states[stateName].display)
-    .filter((stateName) => !(IS_AUTOMATED_RUN && states[stateName].skipWhenAutomated))
+    .filter((stateName) => states[stateName as StateNames].display)
+    .filter((stateName) => !(IS_AUTOMATED_RUN && states[stateName as StateNames].skipWhenAutomated))
     .map((stateName) => {
-      const stateInfo = states[stateName];
+      const stateInfo = states[stateName as StateNames];
       const stateStatus = stateData[stateName];
       const stateEmoji = {
         ok: ':white_check_mark:',
@@ -312,7 +286,7 @@ ${wizardSteps.join('\n')}
 }
 
 function updateWizardInstruction(targetState: string, stateData: any) {
-  const { instructionStyle, instruction } = states[targetState];
+  const { instructionStyle, instruction } = states[targetState as StateNames];
 
   if (IS_AUTOMATED_RUN) {
     buildkite.setAnnotation(
