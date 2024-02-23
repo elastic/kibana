@@ -15,7 +15,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { SO_SEARCH_LIMIT, AgentStatuses } from '../../../common/constants';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import {
@@ -353,9 +353,10 @@ export async function getAgentsByKuery(
     if (showUpgradeable) {
       // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
       // the bucket count doesn't take in account the upgradeable agents
-      AgentStatuses.forEach((agentStatus: AgentStatus) => {
-        const count = getFilteredAgentsCount(agents, agentStatus);
-        statusSummary[agentStatus] = count;
+      agents.forEach((agent) => {
+        if (!agent?.status) return;
+        if (!statusSummary[agent.status]) statusSummary[agent.status] = 0;
+        statusSummary[agent.status]++;
       });
     } else {
       res.aggregations?.status.buckets.forEach((bucket) => {
@@ -373,11 +374,6 @@ export async function getAgentsByKuery(
     ...(getStatusSummary ? { statusSummary } : {}),
   };
 }
-
-const getFilteredAgentsCount = (agents: Agent[], status: AgentStatus) => {
-  const filtered = agents.filter((agent) => agent?.status === status);
-  return filtered.length;
-};
 
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
