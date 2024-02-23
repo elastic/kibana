@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
-      it.skip('returns correct stats for processor events', async () => {
+      it('returns correct stats for processor events', async () => {
         const { status, body } = await callApi();
         expect(status).to.be(200);
         expect(body.processorEventStats).to.have.length(4);

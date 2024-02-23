@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   // FLAKY: https://github.com/elastic/kibana/pull/177039
-  registry.when.skip('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
+  registry.when('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
       it('returns empty response`', async () => {
         const { status, body } = await apmApiClient.adminUser({
@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('When data is ingested', () => {
+    describe('When data is ingested', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('When data is ingested without the necessary index templates', () => {
+    describe('When data is ingested without the necessary index templates', () => {
       before(async () => {
         await es.indices.deleteDataStream({ name: 'traces-apm-*' });
         await es.indices.deleteIndexTemplate({ name: ['traces-apm'] });
@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await synthtraceEsClient.clean();
       });
 
-      describe.skip('an ingest pipeline is removed', () => {
+      describe('an ingest pipeline is removed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',
@@ -171,7 +171,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe.skip('an ingest pipeline is changed', () => {
+      describe('an ingest pipeline is changed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',
