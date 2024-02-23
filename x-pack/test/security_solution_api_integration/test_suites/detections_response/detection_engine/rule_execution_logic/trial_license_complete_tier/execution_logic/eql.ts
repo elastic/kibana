@@ -658,6 +658,69 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe.only('using data with a @timestamp field', () => {
+      it('specifying only timestamp_field results in a warning, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_field: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([
+          'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.',
+        ]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+
+      it('specifying only timestamp_override results in an error, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_override: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([
+          'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.',
+        ]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+
+      it('specifying both timestamp_override and timestamp_field behaves as expected', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_field: 'event.created',
+          timestamp_override: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([
+          'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.',
+        ]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+    });
+
     describe.only('using data without a @timestamp field', () => {
       before(async () => {
         await esArchiver.load(
