@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, Plugin, AppNavLinkStatus } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { AppPluginDependencies } from './with_data_services/types';
 import image from './state_sync.png';
@@ -37,7 +37,7 @@ export class StateContainersExamplesPlugin implements Plugin {
     core.application.register({
       id: 'stateContainersExampleBrowserHistory',
       title: examples.stateContainersExampleBrowserHistory.title,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./todo/app');
         const [coreStart] = await core.getStartServices();
@@ -54,7 +54,7 @@ export class StateContainersExamplesPlugin implements Plugin {
     core.application.register({
       id: 'stateContainersExampleHashHistory',
       title: examples.stateContainersExampleHashHistory.title,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./todo/app');
         const [coreStart] = await core.getStartServices();
@@ -72,7 +72,7 @@ export class StateContainersExamplesPlugin implements Plugin {
     core.application.register({
       id: 'stateContainersExampleWithDataServices',
       title: examples.stateContainersExampleWithDataServices.title,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./with_data_services/application');
         const [coreStart, depsStart] = await core.getStartServices();

@@ -1028,6 +1028,22 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.isoToEpochSecsRt",
+        "type": "Object",
+        "tags": [],
+        "label": "isoToEpochSecsRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<number, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_secs_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.jsonRt",
         "type": "Object",
         "tags": [],

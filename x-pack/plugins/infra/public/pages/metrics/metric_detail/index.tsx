@@ -16,7 +16,7 @@ import { MetricsTimeProvider } from './hooks/use_metrics_time';
 export const NodeDetail = () => {
   const {
     params: { type: nodeType },
-  } = useRouteMatch<{ type: InventoryItemType }>();
+  } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
   return (
     <EuiErrorBoundary>

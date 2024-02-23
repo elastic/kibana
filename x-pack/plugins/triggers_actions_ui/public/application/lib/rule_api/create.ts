@@ -6,7 +6,6 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract, RewriteResponseCase } from '@kbn/actions-plugin/common';
-import { SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
 import { Rule, RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformRule } from './common_transformations';
@@ -24,13 +23,13 @@ type RuleCreateBody = Omit<
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
   actions,
+  alertDelay,
   ...res
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
   actions: actions.map((action) => {
-    const { group, id, params, frequency, alertsFilter, useAlertDataForTemplate } =
-      action as SanitizedDefaultRuleAction;
+    const { group, id, params, frequency, alertsFilter, useAlertDataForTemplate } = action;
     return {
       group,
       id,
@@ -48,6 +47,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         : {}),
     };
   }),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export async function createRule({

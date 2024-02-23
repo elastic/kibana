@@ -20,10 +20,12 @@ import {
   HostsMetricsSearchValueRT,
 } from './types';
 import { METADATA_AGGREGATION_NAME } from './constants';
+import { HostAlertsResponse } from './host/get_hosts_alerts_count';
 
 export const mapToApiResponse = (
   params: GetInfraMetricsRequestBodyPayload,
-  buckets?: HostsMetricsSearchBucket[] | undefined
+  buckets?: HostsMetricsSearchBucket[] | undefined,
+  alertsCountResponse?: HostAlertsResponse
 ): GetInfraMetricsResponsePayload => {
   if (!buckets) {
     return {
@@ -32,12 +34,20 @@ export const mapToApiResponse = (
     };
   }
 
-  const hosts = buckets.map((bucket) => {
-    const metrics = convertMetricBucket(params, bucket);
-    const metadata = convertMetadataBucket(bucket);
+  const hosts = buckets
+    .map((bucket) => {
+      const metrics = convertMetricBucket(params, bucket);
+      const metadata = convertMetadataBucket(bucket);
 
-    return { name: bucket.key as string, metrics, metadata };
-  });
+      const cpuValue = metrics.find((metric) => metric.name === 'cpu')?.value ?? 0;
+      const alerts = alertsCountResponse?.find((item) => item.name === bucket.key);
+
+      return { name: bucket.key as string, metrics, metadata, cpuValue, ...alerts };
+    })
+    .sort((a, b) => {
+      return b.cpuValue - a.cpuValue;
+    })
+    .map(({ cpuValue, ...rest }) => rest);
 
   return {
     type: params.type,

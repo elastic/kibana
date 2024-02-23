@@ -59,13 +59,18 @@ const bodySchema = schema.object({
       )
     )
   ),
+  alert_delay: schema.maybe(
+    schema.object({
+      active: schema.number(),
+    })
+  ),
 });
 
 const rewriteBodyReq = (
   result: RuleUpdateOptionsResult,
   isSystemAction: (connectorId: string) => boolean
 ): UpdateOptions<RuleTypeParams> => {
-  const { notify_when: notifyWhen, actions, ...rest } = result.data;
+  const { notify_when: notifyWhen, alert_delay: alertDelay, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
@@ -73,6 +78,7 @@ const rewriteBodyReq = (
       notifyWhen,
       actions: rewriteActionsReq(actions.filter((action) => !isSystemAction(action.id))),
       systemActions: rewriteSystemActionsReq(actions.filter((action) => isSystemAction(action.id))),
+      alertDelay,
     },
   };
 };
@@ -96,6 +102,7 @@ const rewriteBodyRes = ({
   isSnoozedUntil,
   lastRun,
   nextRun,
+  alertDelay,
   ...rest
 }: PartialRule<RuleTypeParams>): Omit<
   AsApiContract<PartialRule<RuleTypeParams> & { actions?: RuleResponse['actions'] }>,
@@ -131,6 +138,7 @@ const rewriteBodyRes = ({
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export const updateRuleRoute = (

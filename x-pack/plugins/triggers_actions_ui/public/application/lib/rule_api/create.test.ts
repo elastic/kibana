@@ -53,6 +53,9 @@ describe('createRule', () => {
       execution_status: { status: 'pending', last_execution_date: '2021-04-01T21:33:13.250Z' },
       create_at: '2021-04-01T21:33:13.247Z',
       updated_at: '2021-04-01T21:33:13.247Z',
+      alert_delay: {
+        active: 10,
+      },
     };
     const ruleToCreate: Omit<
       RuleUpdates,
@@ -98,6 +101,9 @@ describe('createRule', () => {
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
       revision: 0,
+      alertDelay: {
+        active: 10,
+      },
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 
@@ -151,6 +157,9 @@ describe('createRule', () => {
       tags: [],
       updatedAt: '2021-04-01T21:33:13.247Z',
       updatedBy: undefined,
+      alertDelay: {
+        active: 10,
+      },
     });
   });
 });
