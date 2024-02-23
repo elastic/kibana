@@ -56,11 +56,12 @@ export const TextBasedLanguagesTransitionModal = (
   </React.Suspense>
 );
 
-const mapAdHocDataView = (adHocDataView: DataView) => {
+const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => {
   return {
     title: adHocDataView.title,
     name: adHocDataView.name,
     id: adHocDataView.id!,
+    type: adHocDataView.type,
     isAdhoc: true,
   };
 };
@@ -79,6 +80,7 @@ export function ChangeDataView({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  shouldShowTextBasedLanguageTransitionModal = true,
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
@@ -112,9 +114,8 @@ export function ChangeDataView({
       const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      // not propagate the adHoc dataviews on the list for text based languages
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        (!isTextBasedLangSelected && adHocDataViews?.map(mapAdHocDataView)) || [];
+        adHocDataViews?.map(mapAdHocDataView) ?? [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
@@ -239,7 +240,7 @@ export function ChangeDataView({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {Boolean(isTextBasedLangSelected) ? (
+                  {isTextBasedLangSelected && shouldShowTextBasedLanguageTransitionModal ? (
                     <EuiToolTip
                       position="top"
                       content={i18n.translate(
@@ -310,17 +311,23 @@ export function ChangeDataView({
           onChangeDataView={async (newId) => {
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
-            if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
-              setIsTextLangTransitionModalVisible(true);
-            } else if (isTextBasedLangSelected && isTextLangTransitionModalDismissed) {
-              setIsTextBasedLangSelected(false);
-              // clean up the Text based language query
-              onTextLangQuerySubmit?.({
-                language: 'kuery',
-                query: '',
-              });
-              onChangeDataView(newId);
-              setTriggerLabel(trigger.label);
+
+            if (isTextBasedLangSelected) {
+              const showTransitionModal =
+                !isTextLangTransitionModalDismissed && shouldShowTextBasedLanguageTransitionModal;
+
+              if (showTransitionModal) {
+                setIsTextLangTransitionModalVisible(true);
+              } else {
+                setIsTextBasedLangSelected(false);
+                // clean up the Text based language query
+                onTextLangQuerySubmit?.({
+                  language: 'kuery',
+                  query: '',
+                });
+                onChangeDataView(newId);
+                setTriggerLabel(trigger.label);
+              }
             } else {
               onChangeDataView(newId);
             }
