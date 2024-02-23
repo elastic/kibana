@@ -9,13 +9,13 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getUpdatedTypes } from '../core/build_active_mappings';
+import { getUpdatedRootFields, getUpdatedTypes } from '../core/build_active_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
   actualMappings?: IndexMapping;
   expectedMappings: IndexMapping;
-  hashToVersionMap: Record<string, string>;
+  hashToVersionMap?: Record<string, string>;
 }
 
 /** @internal */
@@ -27,8 +27,13 @@ export interface ActualMappingsIncomplete {
   type: 'actual_mappings_incomplete';
 }
 
-export interface ComparedMappingsChanged {
-  type: 'compared_mappings_changed';
+export interface RootFieldsChanged {
+  type: 'root_fields_changed';
+  updatedFields: string[];
+}
+
+export interface TypesChanged {
+  type: 'types_changed';
   updatedTypes: string[];
 }
 
@@ -36,9 +41,9 @@ export const checkTargetMappings =
   ({
     actualMappings,
     expectedMappings,
-    hashToVersionMap,
+    hashToVersionMap = {},
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
-    ActualMappingsIncomplete | ComparedMappingsChanged,
+    ActualMappingsIncomplete | RootFieldsChanged | TypesChanged,
     ComparedMappingsMatch
   > =>
   async () => {
@@ -49,6 +54,15 @@ export const checkTargetMappings =
       return Either.left({ type: 'actual_mappings_incomplete' as const });
     }
 
+    const updatedFields = getUpdatedRootFields(actualMappings);
+
+    if (updatedFields.length) {
+      return Either.left({
+        type: 'root_fields_changed',
+        updatedFields,
+      });
+    }
+
     const updatedTypes = getUpdatedTypes({
       actual: actualMappings,
       expected: expectedMappings,
@@ -57,7 +71,7 @@ export const checkTargetMappings =
 
     if (updatedTypes.length) {
       return Either.left({
-        type: 'compared_mappings_changed' as const,
+        type: 'types_changed' as const,
         updatedTypes,
       });
     } else {

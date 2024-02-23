@@ -40,7 +40,7 @@ export const updateSourceMappingsProperties = ({
   'update_mappings_succeeded'
 > => {
   return pipe(
-    diffMappings(sourceMappings, targetMappings, hashToVersionMap),
+    diffMappings({ actual: sourceMappings, expected: targetMappings, hashToVersionMap }),
     TaskEither.fromPredicate(
       (changes) => !!changes,
       () => 'update_mappings_succeeded' as const

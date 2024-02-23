@@ -10,6 +10,7 @@
  * This file contains logic to build and diff the index mappings for a migration.
  */
 
+import equals from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import type {
@@ -44,40 +45,46 @@ export function buildActiveMappings(
  * match our expectations, we don't require a migration. This allows ES to tack on additional mappings that Kibana
  * doesn't know about or expect, without triggering continual migrations.
  */
-export function diffMappings(
-  actual: IndexMapping,
-  expected: IndexMapping,
-  hashToVersionMap: Record<string, string>
-) {
+export function diffMappings({
+  actual,
+  expected,
+  hashToVersionMap = {},
+}: {
+  actual: IndexMapping;
+  expected: IndexMapping;
+  hashToVersionMap?: Record<string, string>;
+}) {
   if (actual.dynamic !== expected.dynamic) {
     return { changedProp: 'dynamic' };
-  }
-
-  if (!actual._meta?.migrationMappingPropertyHashes) {
+  } else if (!actual._meta?.migrationMappingPropertyHashes) {
     return { changedProp: '_meta' };
+  } else {
+    const changedProp = findChangedProp({ actual, expected, hashToVersionMap });
+    return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
   }
-
-  const changedProp = findChangedProp(
-    actual._meta.migrationMappingPropertyHashes,
-    expected._meta!.migrationMappingPropertyHashes,
-    hashToVersionMap
-  );
-
-  return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
 }
 
+export const getUpdatedRootFields = (actual: IndexMapping): string[] => {
+  const baseMappings = getBaseMappings();
+  return Object.entries(baseMappings.properties)
+    .filter(
+      ([propertyName, propertyValue]) => !equals(propertyValue, actual.properties[propertyName])
+    )
+    .map(([propertyName]) => propertyName);
+};
+
 /**
- * Compares the actual vs expected mappings' hashes.
+ * Compares the actual vs expected mappings' hashes or modelVersions.
  * Returns a list with all the types that have been updated.
  */
 export const getUpdatedTypes = ({
   actual,
   expected,
-  hashToVersionMap,
+  hashToVersionMap = {},
 }: {
   actual: IndexMapping;
   expected: IndexMapping;
-  hashToVersionMap: Record<string, string>;
+  hashToVersionMap?: Record<string, string>;
 }): string[] => {
   if (!actual._meta?.migrationMappingPropertyHashes) {
     return Object.keys(expected._meta!.migrationMappingPropertyHashes!);
@@ -94,13 +101,6 @@ export const getUpdatedTypes = ({
   return updatedTypes;
 };
 
-interface HashToVersionMapParams {
-  type: string;
-  indexHashOrVersion: string;
-  appVersion: string;
-  hashToVersionMap: Record<string, string>;
-}
-
 /**
  *
  * @param type The saved object type to check
@@ -113,7 +113,12 @@ function isTypeUpdated({
   indexHashOrVersion,
   appVersion,
   hashToVersionMap,
-}: HashToVersionMapParams): boolean {
+}: {
+  type: string;
+  indexHashOrVersion: string;
+  appVersion: string;
+  hashToVersionMap: Record<string, string>;
+}): boolean {
   const indexEquivalentVersion = hashToVersionMap[`${type}|${indexHashOrVersion}`];
   return indexHashOrVersion !== appVersion && indexEquivalentVersion !== appVersion;
 }
@@ -121,15 +126,26 @@ function isTypeUpdated({
 // If something exists in actual, but is missing in expected, we don't
 // care, as it could be a disabled plugin, etc, and keeping stale stuff
 // around is better than migrating unecessesarily.
-function findChangedProp(actual: any, expected: any, hashToVersionMap: Record<string, string>) {
-  return Object.keys(expected).find((type) =>
-    isTypeUpdated({
-      type,
-      indexHashOrVersion: actual[type],
-      appVersion: expected[type],
-      hashToVersionMap,
-    })
-  );
+function findChangedProp({
+  actual,
+  expected,
+  hashToVersionMap,
+}: {
+  actual: IndexMapping;
+  expected: IndexMapping;
+  hashToVersionMap: Record<string, string>;
+}) {
+  const updatedFields = getUpdatedRootFields(actual);
+  if (updatedFields.length) {
+    return updatedFields[0];
+  }
+
+  const updatedTypes = getUpdatedTypes({ actual, expected, hashToVersionMap });
+  if (updatedTypes.length) {
+    return updatedTypes[0];
+  }
+
+  return undefined;
 }
 
 /**
