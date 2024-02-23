@@ -109,6 +109,7 @@ export const GaugeShapes = {
   HORIZONTAL_BULLET: 'horizontalBullet',
   VERTICAL_BULLET: 'verticalBullet',
   ARC: 'arc',
+  TWO_THIRDS_CIRCLE: 'twoThirdsCircle',
   CIRCLE: 'circle',
 } as const;
 

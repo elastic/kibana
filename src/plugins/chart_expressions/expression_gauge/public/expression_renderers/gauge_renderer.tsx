@@ -51,6 +51,15 @@ export const gaugeRenderer: (
         case GaugeShapes.VERTICAL_BULLET:
           type = `${EXPRESSION_GAUGE_NAME}_vertical`;
           break;
+        case GaugeShapes.ARC:
+          type = `${EXPRESSION_GAUGE_NAME}_arc`;
+          break;
+        case GaugeShapes.CIRCLE:
+          type = `${EXPRESSION_GAUGE_NAME}_circle`;
+          break;
+        case GaugeShapes.TWO_THIRDS_CIRCLE:
+          type = `${EXPRESSION_GAUGE_NAME}_twoThirdsCircle`;
+          break;
         default:
           type = EXPRESSION_GAUGE_NAME;
       }

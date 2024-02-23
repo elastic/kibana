@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { GaugeState as GaugeStateOriginal } from '@kbn/expression-gauge-plugin/common';
+import {
+  GaugeShape,
+  GaugeShapes,
+  GaugeState as GaugeStateOriginal,
+} from '@kbn/expression-gauge-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { LayerType } from '../../../common/types';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
@@ -32,4 +37,22 @@ export type GaugeVisualizationState = GaugeState & {
 export type GaugeExpressionState = GaugeStateOriginal & {
   layerId: string;
   layerType: LayerType;
+};
+
+export const gaugeTitlesByType: Record<GaugeShape, string> = {
+  [GaugeShapes.HORIZONTAL_BULLET]: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
+    defaultMessage: 'Bullet horizontal',
+  }),
+  [GaugeShapes.VERTICAL_BULLET]: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
+    defaultMessage: 'Bullet vertical',
+  }),
+  [GaugeShapes.ARC]: i18n.translate('xpack.lens.gaugeArc.gaugeLabel', {
+    defaultMessage: 'Gauge arc',
+  }),
+  [GaugeShapes.TWO_THIRDS_CIRCLE]: i18n.translate('xpack.lens.gaugeTwoThirdsCircle.gaugeLabel', {
+    defaultMessage: 'Gauge 2/3 Circle',
+  }),
+  [GaugeShapes.CIRCLE]: i18n.translate('xpack.lens.gaugeCircle.gaugeLabel', {
+    defaultMessage: 'Gauge circle',
+  }),
 };
