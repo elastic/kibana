@@ -30,6 +30,7 @@ export interface RuleUpgradeInfoForReview {
   rule_id: RuleSignatureId;
   current_rule: RuleResponse;
   target_rule: RuleResponse;
+  merged_rule: RuleResponse; // ADDED in POC
   diff: PartialRuleDiff;
   revision: number;
 }

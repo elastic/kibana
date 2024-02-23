@@ -99,10 +99,6 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
 
     const targetRule: RuleResponse = {
       ...convertPrebuiltRuleAssetToRuleResponse(targetVersion),
-      prebuilt: {
-        isCustomized: installedCurrentVersion.prebuilt?.isCustomized ?? false,
-        elasticUpdateDate: targetVersion.elasticUpdateDate,
-      },
       id: installedCurrentVersion.id,
       revision: installedCurrentVersion.revision + 1,
       created_at: installedCurrentVersion.created_at,
@@ -117,6 +113,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       revision: installedCurrentVersion.revision,
       current_rule: installedCurrentVersion,
       target_rule: targetRule,
+      merged_rule: ruleVersions.mergedVersion,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
