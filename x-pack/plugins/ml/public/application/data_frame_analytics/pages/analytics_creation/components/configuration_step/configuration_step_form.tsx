@@ -60,7 +60,7 @@ import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
 import { fetchExplainData } from '../shared';
-import { useIndexData, useHasRequiredIndicesPermissions } from '../../hooks';
+import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
@@ -143,7 +143,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { cloneJob, estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
-  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions(sourceDataViewTitle);
   const {
     dependentVariable,
     includes,
@@ -586,12 +585,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       <Fragment>
         <Messages messages={requestMessages} />
         <SupportedFieldsMessage jobType={jobType} />
-        {hasRequiredIndicesPermissions === false ? (
-          <>
-            <IndexPermissionsCallout indexName={sourceDataViewTitle} docsType="create" />
-            <EuiSpacer />
-          </>
-        ) : null}
+        <IndexPermissionsCallout indexName={sourceDataViewTitle} docsType="create" />
         <JobType type={jobType} setFormState={setFormState} />
         {savedSearchQuery === null && (
           <EuiFormRow

@@ -9,8 +9,11 @@ import { useState, useEffect } from 'react';
 
 import { useMlKibana } from '../../../../contexts/kibana';
 
-export const useHasRequiredIndicesPermissions = (indexName: string) => {
-  const [hasIndexPermissions, setHasIndexPermissions] = useState<boolean>(false);
+export const useHasRequiredIndicesPermissions = (
+  indexName: string,
+  isDestIndex: boolean = false
+) => {
+  const [hasIndexPermissions, setHasIndexPermissions] = useState<boolean>(true);
   const {
     services: {
       mlServices: {
@@ -22,25 +25,25 @@ export const useHasRequiredIndicesPermissions = (indexName: string) => {
   useEffect(
     function checkRequiredIndexPermissions() {
       async function checkPrivileges() {
+        const sourceIndexPriv = ['view_index_metadata'];
+        const destIndexPriv = ['create_index', 'manage', 'index'];
+
         const privileges = await hasPrivileges({
           index: [
             {
               names: [indexName],
-              privileges: ['create_index', 'manage', 'index', 'read'],
+              privileges: ['read', ...(isDestIndex ? destIndexPriv : sourceIndexPriv)],
             },
           ],
         });
 
-        setHasIndexPermissions(
-          privileges.hasPrivileges === undefined ||
-            privileges.hasPrivileges.has_all_requested === true
-        );
+        setHasIndexPermissions(privileges.hasPrivileges?.has_all_requested === true);
       }
       if (hasPrivileges !== undefined) {
         checkPrivileges();
       }
     },
-    [hasPrivileges, indexName]
+    [hasPrivileges, indexName, isDestIndex]
   );
 
   if (typeof indexName === 'string' && indexName === '') {

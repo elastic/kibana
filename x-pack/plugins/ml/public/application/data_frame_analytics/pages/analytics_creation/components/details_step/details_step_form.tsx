@@ -21,7 +21,6 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
 import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
-import { useHasRequiredIndicesPermissions } from '../../hooks';
 import { AdditionalSection } from './additional_section';
 import { IndexPermissionsCallout } from '../index_permissions_callout';
 
@@ -158,16 +157,9 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destIndexSameAsId, jobId]);
 
-  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions(destinationIndex);
-
   return (
     <Fragment>
-      {hasRequiredIndicesPermissions === false ? (
-        <>
-          <IndexPermissionsCallout indexName={destinationIndex} docsType="start" />
-          <EuiSpacer />
-        </>
-      ) : null}
+      <IndexPermissionsCallout indexName={destinationIndex} docsType="start" />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {

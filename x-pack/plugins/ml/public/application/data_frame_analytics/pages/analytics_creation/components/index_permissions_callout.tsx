@@ -6,10 +6,11 @@
  */
 
 import React, { FC } from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
+import { useHasRequiredIndicesPermissions } from '../hooks';
 
 export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' | 'create' }> = ({
   indexName,
@@ -26,32 +27,43 @@ export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' 
   } = useMlKibana();
 
   const docsLink = docsType === 'start' ? dFAStartJob : dFACreateJob;
+  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions(
+    indexName,
+    docsType === 'start'
+  );
+  // If 'hasRequiredIndicesPermissions' is undefined - the index passed to the check is an empty string
+  if (hasRequiredIndicesPermissions === undefined || hasRequiredIndicesPermissions === true) {
+    return null;
+  }
 
   return (
-    <EuiCallOut
-      title={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
-        defaultMessage: 'Job cannot be created',
-      })}
-      iconType="warning"
-      color="warning"
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage"
-          defaultMessage="You don't have the required permissions on the {indexName} index. Refer to the {docLink} documentation for more information on requirements."
-          values={{
-            indexName,
-            docLink: (
-              <EuiLink href={docsLink} target="_blank">
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage.docsLink"
-                  defaultMessage="documentation"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-    </EuiCallOut>
+    <>
+      <EuiCallOut
+        title={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
+          defaultMessage: 'Job cannot be created',
+        })}
+        iconType="warning"
+        color="warning"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage"
+            defaultMessage="You don't have the required permissions on the {indexName} index. Refer to the {docLink} documentation for more information on requirements."
+            values={{
+              indexName,
+              docLink: (
+                <EuiLink href={docsLink} target="_blank">
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage.docsLink"
+                    defaultMessage="documentation"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
   );
 };
