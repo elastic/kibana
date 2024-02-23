@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  removeDropCommandsFromESQLQuery,
-  getIndexForESQLQuery,
-  getInitialESQLQuery,
-  TextBasedLanguages,
-} from './src';
+/**
+ * Builds an ES|QL query for the provided index or index pattern
+ * @param indexOrIndexPattern
+ */
+export function getInitialESQLQuery(indexOrIndexPattern: string): string {
+  return `from ${indexOrIndexPattern} | limit 10`;
+}
