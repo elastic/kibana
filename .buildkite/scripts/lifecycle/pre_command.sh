@@ -158,7 +158,7 @@ export GCS_SA_CDN_URL
 ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
 export ELASTIC_APM_SERVER_URL
 
-ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_api_key)
+ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
 export ELASTIC_APM_API_KEY
 
 # Setup Failed Test Reporter Elasticsearch credentials
