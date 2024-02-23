@@ -7,7 +7,6 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
 
@@ -69,11 +68,9 @@ describe('retryCallCluster', () => {
 
 describe('migrationRetryCallCluster', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticsearchClient();
-    logger = loggingSystemMock.createLogger();
   });
 
   const mockClientPingWithErrorBeforeSuccess = (error: any) => {
