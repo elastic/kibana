@@ -34,9 +34,26 @@ describe('buildEsQuery', () => {
       timeRange: defaultTimeRange,
       kuery: 'kibana.alert.status: "recovered" and kibana.alert.duration.us >= 120',
     },
+    {
+      timeRange: defaultTimeRange,
+      kuery: 'kibana.alert.status: "recovered" and kibana.alert.duration.us >= 120',
+      filters: [
+        {
+          meta: {},
+          query: {
+            'service.name': {
+              value: 'synth-node-0',
+            },
+          },
+        },
+      ],
+    },
   ];
 
-  test.each(testData)('should generate correct es query for %j', ({ kuery, timeRange }) => {
-    expect(buildEsQuery({ timeRange, kuery })).toMatchSnapshot();
-  });
+  test.each(testData)(
+    'should generate correct es query for %j',
+    ({ kuery, timeRange, filters }) => {
+      expect(buildEsQuery({ timeRange, kuery, filters })).toMatchSnapshot();
+    }
+  );
 });

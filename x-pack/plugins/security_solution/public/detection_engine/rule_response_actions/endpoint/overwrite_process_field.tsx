@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface OverwriteFieldProps {
   path: string;
@@ -23,9 +23,16 @@ const OverwriteFieldComponent = ({
   const CONFIG = useMemo(() => {
     return {
       defaultValue: true,
-      label: i18n.translate('xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel', {
-        defaultMessage: 'Use process.pid as process identifier',
-      }),
+      label: (
+        <FormattedMessage
+          id="xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel"
+          defaultMessage="Use the alert's {pid} value to identify the process to terminate."
+          values={{
+            // eslint-disable-next-line react/jsx-no-literals
+            pid: <strong>process.pid</strong>,
+          }}
+        />
+      ) as unknown as string, // in order to add a <strong> tag to the label, we need to cast element to string
     };
   }, []);
 

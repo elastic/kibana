@@ -9,6 +9,13 @@ import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  fifteenMinutesInMilliseconds,
+  HOST_FIELD,
+  LINK_TO_INVENTORY,
+  METRICS_EXPLORER_URL,
+} from '../../constants';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
   return Object.entries(params).reduce((acc, [key, field]) => {
@@ -46,37 +53,68 @@ export const getInventoryViewInAppUrl = (
   }
 
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
-  const nodeType = inventoryFields[nodeTypeField];
-  let inventoryViewInAppUrl = '/app/metrics/link-to/inventory?';
+  const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
+  const hostName = inventoryFields[HOST_FIELD];
 
   if (nodeType) {
-    const linkToParams: Record<string, any> = {
-      nodeType: inventoryFields[nodeTypeField][0],
-      timestamp: Date.parse(inventoryFields[TIMESTAMP]),
-      customMetric: '',
-    };
-    // We always pick the first criteria metric for the URL
-    const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
-    if (criteriaMetric === 'custom') {
-      const criteriaCustomMetricId =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
-      const criteriaCustomMetricAggregation =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
-      const criteriaCustomMetricField =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
-
-      const customMetric = encode({
-        id: criteriaCustomMetricId,
-        type: 'custom',
-        field: criteriaCustomMetricField,
-        aggregation: criteriaCustomMetricAggregation,
-      });
-      linkToParams.customMetric = customMetric;
-      linkToParams.metric = customMetric;
+    if (hostName) {
+      return getLinkToHostDetails({ hostName, timestamp: inventoryFields[TIMESTAMP] });
     } else {
-      linkToParams.metric = encode({ type: criteriaMetric });
+      const linkToParams = {
+        nodeType: inventoryFields[nodeTypeField][0],
+        timestamp: Date.parse(inventoryFields[TIMESTAMP]),
+        customMetric: '',
+        metric: '',
+      };
+
+      // We always pick the first criteria metric for the URL
+      const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
+      if (criteriaMetric === 'custom') {
+        const criteriaCustomMetricId =
+          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
+        const criteriaCustomMetricAggregation =
+          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
+        const criteriaCustomMetricField =
+          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
+
+        const customMetric = encode({
+          id: criteriaCustomMetricId,
+          type: 'custom',
+          field: criteriaCustomMetricField,
+          aggregation: criteriaCustomMetricAggregation,
+        });
+        linkToParams.customMetric = customMetric;
+        linkToParams.metric = customMetric;
+      } else {
+        linkToParams.metric = encode({ type: criteriaMetric });
+      }
+      return `${LINK_TO_INVENTORY}?${stringify(linkToParams)}`;
     }
-    inventoryViewInAppUrl += stringify(linkToParams);
   }
-  return inventoryViewInAppUrl;
+
+  return LINK_TO_INVENTORY;
 };
+
+export const getMetricsViewInAppUrl = (fields: ParsedTechnicalFields & Record<string, any>) => {
+  const hostName = fields[HOST_FIELD];
+  const timestamp = fields[TIMESTAMP];
+
+  return hostName ? getLinkToHostDetails({ hostName, timestamp }) : METRICS_EXPLORER_URL;
+};
+
+export function getLinkToHostDetails({
+  hostName,
+  timestamp,
+}: {
+  hostName: string;
+  timestamp: string;
+}): string {
+  const queryParams = {
+    from: Date.parse(timestamp),
+    to: Date.parse(timestamp) + fifteenMinutesInMilliseconds,
+  };
+
+  const encodedParams = encode(stringify(queryParams));
+
+  return `/app/metrics/link-to/host-detail/${hostName}?${encodedParams}`;
+}

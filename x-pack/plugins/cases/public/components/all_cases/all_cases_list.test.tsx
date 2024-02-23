@@ -39,7 +39,11 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCases } from '../../containers/use_get_cases';
-import { DEFAULT_QUERY_PARAMS, DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
+import {
+  DEFAULT_QUERY_PARAMS,
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_CASES_TABLE_STATE,
+} from '../../containers/constants';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -202,7 +206,9 @@ describe('AllCasesListGeneric', () => {
       expect(screen.getByTestId('case-table-case-count')).toHaveTextContent(
         `Showing 10 of ${useGetCasesMockState.data.total} cases`
       );
+
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
     });
   });
 
@@ -641,6 +647,22 @@ describe('AllCasesListGeneric', () => {
     const alertCounts = await findAllByTestId('case-table-column-alertsCount');
 
     expect(alertCounts.length).toBeGreaterThan(0);
+  });
+
+  it('should clear the filters correctly', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+    appMockRenderer.render(<AllCasesList />);
+
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
+
+    userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
+    });
   });
 
   describe('Solutions', () => {

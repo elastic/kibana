@@ -7,7 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, FeatureName, IngestPipelineParams } from '@kbn/search-connectors';
+import {
+  Connector,
+  FeatureName,
+  IngestPipelineParams,
+  IngestionMethod,
+  IngestionStatus,
+} from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -17,20 +23,21 @@ import {
 } from '../../api/connector/fetch_connector_by_id_logic';
 
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
+import { ElasticsearchViewIndex } from '../../types';
 import { IndexNameActions, IndexNameLogic } from '../search_index/index_name_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
   fetchConnectorApiError: FetchConnectorByIdApiLogicActions['apiError'];
+  fetchConnectorApiReset: FetchConnectorByIdApiLogicActions['apiReset'];
   fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
+  fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
   setIndexName: IndexNameActions['setIndexName'];
 }
 
-// TODO UPDATE
 export interface ConnectorViewValues {
   connector: Connector | undefined;
   connectorData: typeof FetchConnectorByIdApiLogic.values.data;
@@ -72,12 +79,14 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'makeRequest as fetchConnector',
         'apiSuccess as fetchConnectorApiSuccess',
         'apiError as fetchConnectorApiError',
+        'apiReset as fetchConnectorApiReset',
       ],
       FetchIndexApiLogic,
       [
         'makeRequest as fetchIndex',
         'apiSuccess as fetchIndexApiSuccess',
         'apiError as fetchIndexApiError',
+        'apiReset as fetchIndexApiReset',
       ],
     ],
     values: [
@@ -87,6 +96,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['data as index', 'status as fetchIndexApiStatus'],
     ],
   },
+  events: ({ actions }) => ({
+    beforeMount: () => {
+      actions.fetchConnectorApiReset();
+      actions.fetchIndexApiReset();
+    },
+    beforeUnmount: () => {
+      actions.fetchConnectorApiReset();
+      actions.fetchIndexApiReset();
+    },
+  }),
   listeners: ({ actions, values }) => ({
     fetchConnectorApiSuccess: () => {
       if (values.indexName) {
@@ -96,15 +115,6 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   path: ['enterprise_search', 'content', 'connector_view_logic'],
-  reducers: {
-    syncTriggeredLocally: [
-      false,
-      {
-        fetchIndexApiSuccess: () => false,
-        startSyncApiSuccess: () => true,
-      },
-    ],
-  },
   selectors: ({ selectors }) => ({
     connector: [
       () => [selectors.connectorData],
@@ -112,26 +122,20 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         return connectorData?.connector;
       },
     ],
+    connectorError: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.error,
+    ],
+    connectorId: [() => [selectors.connector], (connector) => connector?.id],
+    error: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
+    ],
     indexName: [
       () => [selectors.connector],
       (connector: Connector | undefined) => {
         return connector?.index_name || undefined;
       },
-    ],
-    isLoading: [
-      () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus],
-      (fetchConnectorApiStatus: Status, fetchIndexApiStatus: Status) =>
-        [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
-        [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus),
-    ],
-    connectorId: [() => [selectors.connector], (connector) => connector?.id],
-    connectorError: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error,
-    ],
-    error: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
@@ -167,6 +171,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       () => [selectors.connector],
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
+    isLoading: [
+      () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus, selectors.index],
+      (
+        fetchConnectorApiStatus: Status,
+        fetchIndexApiStatus: Status,
+        index: ConnectorViewValues['index']
+      ) =>
+        [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
+        (index && [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus)),
     ],
     pipelineData: [
       () => [selectors.connector],

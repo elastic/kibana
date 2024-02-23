@@ -20,6 +20,7 @@ import {
 } from '../definitions/types';
 import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
 
@@ -29,7 +30,9 @@ export const TRIGGER_SUGGESTION_COMMAND = {
 };
 
 function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
-  return shouldBeQuotedText(text, options) ? `\`${text}\`` : text;
+  return shouldBeQuotedText(text, options)
+    ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
+    : text;
 }
 
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
@@ -43,7 +46,8 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
     documentation: {
       value: buildFunctionDocumentation(fullSignatures),
     },
-    sortText: 'C',
+    // agg functgions have priority over everything else
+    sortText: fn.type === 'agg' ? '1A' : 'C',
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };
@@ -139,7 +143,7 @@ export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandD
     insertText: getSafeInsertText(label, { dashSupported: true }),
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.sourceDefinition', {
-      defaultMessage: `Input table`,
+      defaultMessage: `Index`,
     }),
     sortText: 'A',
   }));
@@ -155,7 +159,7 @@ export const buildConstantsDefinitions = (
     detail:
       detail ??
       i18n.translate('monaco.esql.autocomplete.constantDefinition', {
-        defaultMessage: `User defined variable`,
+        defaultMessage: `Constant`,
       }),
     sortText: 'A',
   }));
@@ -215,14 +219,10 @@ export const buildOptionDefinition = (
     insertText: option.name,
     kind: 21,
     detail: option.description,
-    sortText: 'D',
+    sortText: '1',
   };
-  if (option.wrapped) {
-    completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
-    completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-  }
-  if (isAssignType) {
-    completeItem.insertText = `${option.name} = $0`;
+  if (isAssignType || option.signature.params.length) {
+    completeItem.insertText = isAssignType ? `${option.name} = $0` : `${option.name} $0`;
     completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
     completeItem.command = TRIGGER_SUGGESTION_COMMAND;
   }
@@ -233,38 +233,15 @@ export const buildSettingDefinitions = (
   setting: CommandModeDefinition
 ): AutocompleteCommandDefinition[] => {
   // for now there's just a single setting with one argument
-  return setting.signature.params.flatMap(({ values, valueDescriptions }) => {
-    return values!.map((value, i) => {
-      const completeItem: AutocompleteCommandDefinition = {
-        label: `${setting.name}:${value}`,
-        insertText: `${setting.name}:${value}`,
-        kind: 21,
-        detail: valueDescriptions
-          ? `${setting.description} - ${valueDescriptions[i]}`
-          : setting.description,
-        sortText: 'D',
-      };
-      return completeItem;
-    });
-  });
-};
-
-export const buildSettingValueDefinitions = (
-  setting: CommandModeDefinition
-): AutocompleteCommandDefinition[] => {
-  // for now there's just a single setting with one argument
-  return setting.signature.params.flatMap(({ values, valueDescriptions }) => {
-    return values!.map((value, i) => {
-      const completeItem: AutocompleteCommandDefinition = {
-        label: value,
-        insertText: value,
-        kind: 21,
-        detail: valueDescriptions ? valueDescriptions[i] : setting.description,
-        sortText: 'D',
-      };
-      return completeItem;
-    });
-  });
+  return setting.values.map(({ name, description }) => ({
+    label: `${setting.prefix || ''}${name}`,
+    insertText: `${setting.prefix || ''}${name}:$0`,
+    insertTextRules: 4, // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    kind: 21,
+    detail: description ? `${setting.description} - ${description}` : setting.description,
+    sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  }));
 };
 
 export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinition => ({

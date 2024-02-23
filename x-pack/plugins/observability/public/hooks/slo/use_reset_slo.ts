@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMutation } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -16,6 +17,8 @@ export function useResetSlo() {
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const queryClient = useQueryClient();
+
   return useMutation<string, ServerError, { id: string; name: string }>(
     ['resetSlo'],
     ({ id, name }) => {
@@ -40,6 +43,7 @@ export function useResetSlo() {
         });
       },
       onSuccess: (_data, { name }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.slo.reset.successNotification', {
             defaultMessage: '{name} reset successfully',

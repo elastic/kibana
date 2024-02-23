@@ -7778,6 +7778,25 @@
                   }
                 }
               },
+              "posture_management_stats_enabled_rules": {
+                "properties": {
+                  "posture_score": {
+                    "type": "long"
+                  },
+                  "benchmark_name": {
+                    "type": "keyword"
+                  },
+                  "benchmark_version": {
+                    "type": "keyword"
+                  },
+                  "passed_findings_count": {
+                    "type": "long"
+                  },
+                  "failed_findings_count": {
+                    "type": "long"
+                  }
+                }
+              },
               "kspm_stats": {
                 "properties": {
                   "kubernetes_version": {
@@ -7793,6 +7812,9 @@
                     "type": "short"
                   }
                 }
+              },
+              "has_muted_rules": {
+                "type": "boolean"
               }
             }
           }

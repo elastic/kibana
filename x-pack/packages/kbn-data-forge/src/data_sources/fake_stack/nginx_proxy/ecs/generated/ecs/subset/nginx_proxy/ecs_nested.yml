@@ -109,6 +109,38 @@ host:
   short: Fields describing the relevant computing instance.
   title: Host
   type: group
+http:
+  description: Fields related to HTTP activity. Use the `url` field set to store the
+    url of the request.
+  fields:
+    http.response.bytes:
+      dashed_name: http-response-bytes
+      description: Total size in bytes of the response (body and headers).
+      example: 1437
+      flat_name: http.response.bytes
+      format: bytes
+      level: extended
+      name: response.bytes
+      normalize: []
+      short: Total size in bytes of the response (body and headers).
+      type: long
+    http.response.status_code:
+      dashed_name: http-response-status-code
+      description: HTTP response status code.
+      example: 404
+      flat_name: http.response.status_code
+      format: string
+      level: extended
+      name: response.status_code
+      normalize: []
+      short: HTTP response status code.
+      type: long
+  group: 2
+  name: http
+  prefix: http.
+  short: Fields describing an HTTP request.
+  title: HTTP
+  type: group
 log:
   description: 'Details about the event''s logging mechanism or logging transport.
 

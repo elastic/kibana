@@ -76,7 +76,10 @@ export const getCategoryRequest = (
     timeFieldName,
     undefined,
     query,
-    wrap
+    wrap,
+    undefined,
+    undefined,
+    false
   );
 
   // In this case we're only interested in the aggregation which

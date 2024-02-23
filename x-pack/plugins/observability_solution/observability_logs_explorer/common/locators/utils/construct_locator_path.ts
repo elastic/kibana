@@ -15,6 +15,7 @@ import {
   AvailableControlPanels,
   availableControlsPanels,
   DatasetSelectionPlain,
+  SMART_FALLBACK_FIELDS,
 } from '@kbn/logs-explorer-plugin/common';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
@@ -46,7 +47,9 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
       query,
       refreshInterval,
       time: timeRange,
-      columns: columns?.map((field) => ({ field })),
+      columns: columns?.map((column) => {
+        return column.type === 'smart-field' ? SMART_FALLBACK_FIELDS[column.smartField] : column;
+      }),
       controls: getControlsPageStateFromFilterControlsParams(filterControls ?? {}),
     })
   );
