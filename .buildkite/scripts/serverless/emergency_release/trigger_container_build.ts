@@ -13,27 +13,29 @@ const DRY_RUN = !!process.env.DRY_RUN?.match(/^(true|1)$/i);
 const buildkite = new BuildkiteClient();
 
 async function main() {
-  if (!isCurrentHeadInMain()) {
+  const commitSha = process.env.OVERRIDE_COMMIT || process.env.BUILDKITE_COMMIT;
+
+  if (!isCurrentHeadInMain(commitSha!)) {
     if (!DRY_RUN) {
-      console.log('DRY_RUN: Trigger would have fired :green_heart:');
+      console.log(
+        `DRY_RUN: Commit ${commitSha} isn't in main, triggering container build :green_heart:`
+      );
     } else {
-      console.log('Triggering build step :green_heart:');
+      console.log(`Commit ${commitSha} isn't in main, triggering container build :green_heart:`);
       uploadTriggerBuildStep();
     }
   } else {
     if (!DRY_RUN) {
-      console.log('DRY_RUN: No trigger necessary :yellow_heart:');
+      console.log(`DRY_RUN: Commit ${commitSha} is in main, no build necessary :yellow_heart:`);
     } else {
-      console.log('No trigger necessary :yellow_heart:');
+      console.log(`Commit ${commitSha} is in main, no trigger necessary :yellow_heart:`);
     }
   }
 }
 
-function isCurrentHeadInMain() {
-  const currentCommit = process.env.OVERRIDE_COMMIT || process.env.BUILDKITE_COMMIT;
-
+function isCurrentHeadInMain(commitSha: string) {
   const containmentTest = execSync(
-    `git branch -r --contains ${currentCommit} | grep -E "(upstream|origin)/main" | wc -l`
+    `git branch -r --contains ${commitSha} | grep -E "(upstream|origin)/main" | wc -l`
   ).toString();
 
   return parseInt(containmentTest, 10) >= 1;
