@@ -1388,6 +1388,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/plugins/stack_connectors/common/sentinelone @elastic/security-defend-workflows
 
+## Security Solution shared OAS schemas
+/x-pack/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
+
 ## Security Solution sub teams - Detection Rule Management
 /x-pack/plugins/security_solution/common/api/detection_engine/fleet_integrations @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
