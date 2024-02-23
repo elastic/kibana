@@ -83,7 +83,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
         .map((id) => `"${id}"`)
         .join(' or ')})`;
-      return `${currentQuery} AND NOT (${excludedKuery})`;
+      return `(${currentQuery}) AND NOT (${excludedKuery})`;
     } else {
       return currentQuery;
     }
