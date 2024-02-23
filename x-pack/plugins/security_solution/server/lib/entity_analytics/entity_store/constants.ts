@@ -10,7 +10,7 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 export const FIELD_HISTORY_MAX_SIZE = 10;
 
 export const COMPOSITES_INDEX_PATTERN = '.entities.entity-composites.*';
-export const MAX_COMPOSITE_SIZE = 500;
+export const MAX_COMPOSITE_SIZE = 1000;
 export const MAX_CRITICALITY_SIZE = 500;
 
 export const entityStoreFieldMap: FieldMap = {
