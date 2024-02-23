@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { KibanaEnvironmentContext } from '../../../../hooks/use_kibana';
+import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { SurveyKubernetes } from './survey_kubernetes';
@@ -16,7 +16,7 @@ const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_ur
 
 export const SurveySection = () => {
   const { nodeType } = useWaffleOptionsContext();
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
 
   return (
     <>
