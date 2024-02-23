@@ -348,10 +348,12 @@ async function getNextAssetCriticalities({
   if (!fromTimestamp) {
     return [];
   }
-  const criticalities = await assetCriticalityService.getCriticalitiesFromTimestamp(
-    fromTimestamp,
-    MAX_CRITICALITY_SIZE
-  );
+
+  const criticalities = await assetCriticalityService.getCriticalitiesFromTimestamp({
+    from: fromTimestamp,
+    entityTypes: ['host'],
+    size: MAX_CRITICALITY_SIZE,
+  });
 
   if (!lastProcessedId || !criticalities.length) {
     return criticalities;
@@ -392,6 +394,7 @@ async function getNextRiskScores({
     riskScores = await riskScoreDataClient.getRiskScoresFromTimestamp({
       from: fromTimestamp,
       size: MAX_CRITICALITY_SIZE,
+      entityTypes: ['host'],
       namespace: 'default',
     });
   } catch (e) {

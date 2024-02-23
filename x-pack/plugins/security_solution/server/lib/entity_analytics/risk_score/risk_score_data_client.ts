@@ -9,14 +9,17 @@ import type {
   MappingDynamicMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ClusterPutComponentTemplateRequest,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-
+import type { EntityType } from '../../../../common/entity_analytics';
 import {
   getIndexPatternDataStream,
   getTransformOptions,
@@ -210,21 +213,42 @@ export class RiskScoreDataClient {
     from,
     size,
     namespace,
+    entityTypes,
   }: {
     from: string;
     size: number;
     namespace: string;
+    entityTypes?: EntityType[];
   }): Promise<EcsRiskScore[]> {
     const esClient = this.options.esClient;
     const index = getRiskScoreLatestIndex(namespace);
+
+    const filters: QueryDslQueryContainer[] = [
+      {
+        range: {
+          '@timestamp': {
+            gte: from,
+          },
+        },
+      },
+    ];
+
+    if (entityTypes) {
+      const entityFilters = entityTypes.map((entityType) => ({
+        exists: {
+          field: `${entityType}.name`,
+        },
+      }));
+
+      filters.push(...entityFilters);
+    }
+
     const response = await esClient.search<EcsRiskScore>({
       index,
       body: {
         query: {
-          range: {
-            '@timestamp': {
-              gte: from,
-            },
+          bool: {
+            filter: filters,
           },
         },
       },
