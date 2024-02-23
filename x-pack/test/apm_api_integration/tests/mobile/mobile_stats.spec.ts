@@ -184,7 +184,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Mobile stats', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177392
+  registry.when.skip('Mobile stats', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
         synthtraceEsClient,

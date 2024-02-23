@@ -45,7 +45,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177655
+  registry.when.skip('Service group counts', { config: 'basic', archives: [] }, () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     before(async () => {

@@ -29,7 +29,9 @@
         "tags": [],
         "label": "UPTIME_RULE_TYPES",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/plugins/observability_solution/uptime/common/constants/uptime_alerts.ts",
         "deprecated": false,
         "trackAdoption": false,

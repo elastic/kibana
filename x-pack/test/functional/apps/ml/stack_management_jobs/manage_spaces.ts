@@ -195,7 +195,8 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('should edit job space assignment', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/146722
+        it.skip('should edit job space assignment', async () => {
           // AD
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
           await ml.stackManagementJobs.openJobSpacesFlyout('anomaly-detector', testData.adJobId);
