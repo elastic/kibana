@@ -50,7 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Storage Explorer timeseries chart', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177539
+  registry.when.skip('Storage Explorer timeseries chart', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       let body: StorageTimeSeries;
       let status: number;

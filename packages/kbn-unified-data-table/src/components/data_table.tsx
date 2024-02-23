@@ -40,7 +40,7 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -63,7 +63,7 @@ import {
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
-  hasSourceTimeFieldValue,
+  canPrependTimeFieldColumn,
 } from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
@@ -630,15 +630,23 @@ export const UnifiedDataTable = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
-  const shouldShowTimeField = useMemo(
-    () =>
-      hasSourceTimeFieldValue(displayedColumns, dataView, columnTypes, showTimeCol, isPlainRecord),
-    [dataView, displayedColumns, isPlainRecord, showTimeCol, columnTypes]
+  const timeFieldName = dataView.timeFieldName;
+  const shouldPrependTimeFieldColumn = useCallback(
+    (activeColumns: string[]) =>
+      canPrependTimeFieldColumn(
+        activeColumns,
+        timeFieldName,
+        columnTypes,
+        showTimeCol,
+        isPlainRecord
+      ),
+    [timeFieldName, isPlainRecord, showTimeCol, columnTypes]
   );
 
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, shouldShowTimeField),
-    [dataView, displayedColumns, shouldShowTimeField]
+    () =>
+      getVisibleColumns(displayedColumns, dataView, shouldPrependTimeFieldColumn(displayedColumns)),
+    [dataView, displayedColumns, shouldPrependTimeFieldColumn]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
@@ -741,19 +749,16 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const hideTimeColumn = useMemo(
-    () => services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    [services.uiSettings]
-  );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
       visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
-        onSetColumns(newColumns, hideTimeColumn);
+        const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
+        onSetColumns(newColumns, dontModifyColumns);
       },
     }),
-    [visibleColumns, hideTimeColumn, onSetColumns]
+    [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
   );
 
   /**

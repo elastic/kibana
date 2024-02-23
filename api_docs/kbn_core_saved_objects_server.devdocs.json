@@ -10679,11 +10679,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/saved_objects/synthetics_monitor.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
               },
               {
                 "plugin": "dashboard",
@@ -11153,6 +11153,18 @@
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
@@ -11251,6 +11263,22 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",

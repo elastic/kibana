@@ -72,7 +72,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/177596
+  registry.when.skip(
     'Latency with a basic license when data is loaded',
     { config: 'basic', archives: [] },
     () => {

@@ -31,7 +31,6 @@ export const createFilters = ({
       ? extrafilterClause
       : [extrafilterClause]
     : [];
-
   const hostNamesFilter =
     hostNamesShortList.length > 0
       ? [
@@ -84,6 +83,27 @@ export const runQuery = <T>(
         throw error;
       })
     );
+};
+
+export const systemMetricsFilter = {
+  must: [
+    {
+      bool: {
+        should: [
+          {
+            term: {
+              'event.module': 'system',
+            },
+          },
+          {
+            term: {
+              'metricset.module': 'system', // Needed for hosts where metricbeat version < 8
+            },
+          },
+        ],
+      },
+    },
+  ],
 };
 
 export const getInventoryModelAggregations = (

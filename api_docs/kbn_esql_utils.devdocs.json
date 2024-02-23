@@ -287,7 +287,20 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.TextBasedLanguages",
+        "type": "string",
+        "tags": [],
+        "label": "TextBasedLanguages",
+        "description": [],
+        "path": "packages/kbn-esql-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
