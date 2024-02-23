@@ -10,7 +10,13 @@ import React, { useCallback, useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { Chat, EmptyIndex, AIPlaygroundProvider, ViewQueryAction } from '@kbn/ai-playground';
+import {
+  Chat,
+  EmptyIndex,
+  AIPlaygroundProvider,
+  ViewQueryAction,
+  ViewCodeAction,
+} from '@kbn/ai-playground';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
@@ -46,7 +52,10 @@ export const AIPlayground: React.FC = () => {
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.aiPlayground.headerTitle', {
             defaultMessage: 'AI Playground',
           }),
-          rightSideItems: [<ViewQueryAction key="viewQueryAction" />],
+          rightSideItems: [
+            <ViewCodeAction key="viewCodeAction" />,
+            <ViewQueryAction key="viewQueryAction" />,
+          ],
         }}
         pageViewTelemetry="AI Playground"
         restrictWidth={false}

@@ -16,8 +16,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
-  EuiLink,
   EuiButton,
+  EuiFlyoutFooter,
+  EuiSpacer,
+  EuiText,
+  EuiPanel,
+  EuiAccordion,
+  EuiBasicTable,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../../types';
@@ -70,66 +76,110 @@ export const ViewQueryAction: React.FC<ViewQueryActionProps> = () => {
     setShowFlyout(false);
   };
 
+  const closeFlyout = () => setShowFlyout(false);
+
   let flyout;
 
   if (showFlyout) {
     flyout = (
-      <EuiFlyout ownFocus onClose={() => setShowFlyout(false)}>
+      <EuiFlyout ownFocus onClose={() => setShowFlyout(false)} size="l">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>View Query</h2>
+            <h2>Customise your Elasticsearch Query</h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued">
+            <p>
+              The query that will be used to search your data. You can customise it by choosing
+              which fields to search on.
+            </p>
+          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiFlexGroup>
-            <EuiFlexItem grow={3}>
-              <EuiCodeBlock language="json" fontSize="m" paddingSize="m">
+            <EuiFlexItem grow={6}>
+              <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
                 {JSON.stringify(createQuery(queryFields, fields), null, 2)}
               </EuiCodeBlock>
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              {Object.keys(fields).map((index: string) => {
-                const group = fields[index];
-                return (
-                  <>
-                    <h2>{index}</h2>
-                    <br />
-                    {[...group.elser_query_fields, ...group.dense_vector_query_fields].map(
-                      (field) => {
-                        return (
-                          <EuiLink
-                            onClick={() => toggleQueryField(index, field.field)}
-                            color={isQueryFieldSelected(index, field.field) ? 'primary' : 'text'}
-                          >
-                            {field.field} ({field.model_id})
-                          </EuiLink>
-                        );
-                      }
-                    )}
-                    {group.bm25_query_fields.map((field) => {
-                      return (
-                        <EuiLink
-                          onClick={() => toggleQueryField(index, field)}
-                          color={isQueryFieldSelected(index, field) ? 'primary' : 'text'}
+            <EuiFlexItem grow={3}>
+              <EuiFlexGroup direction="column">
+                <EuiText>
+                  <h5>Selected Fields</h5>
+                </EuiText>
+                {Object.keys(fields).map((index: string) => {
+                  const group = fields[index];
+                  return (
+                    <EuiFlexItem grow={false}>
+                      <EuiPanel grow={false} hasShadow={false} hasBorder>
+                        <EuiAccordion
+                          id={index}
+                          buttonContent={
+                            <EuiText>
+                              <h5>{index}</h5>
+                            </EuiText>
+                          }
                         >
-                          {field}
-                        </EuiLink>
-                      );
-                    })}
-                  </>
-                );
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiButtonEmpty onClick={() => setShowFlyout(false)}>Close</EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton onClick={saveQuery}>Save</EuiButton>
+                          <EuiSpacer size="s" />
+                          <EuiBasicTable
+                            items={[
+                              ...group.elser_query_fields,
+                              ...group.dense_vector_query_fields,
+                              ...group.bm25_query_fields,
+                            ].map((field) => ({
+                              field: typeof field === 'string' ? field : field.field,
+                            }))}
+                            columns={[
+                              {
+                                field: 'field',
+                                name: 'Field',
+                                truncateText: false,
+                                render: (field) => field,
+                              },
+                              {
+                                actions: [
+                                  {
+                                    name: 'toggle',
+                                    description: 'Toggle field',
+                                    isPrimary: true,
+                                    render: ({ field }: { field: string }) => (
+                                      <EuiSwitch
+                                        showLabel={false}
+                                        label="toggle"
+                                        checked={isQueryFieldSelected(index, field)}
+                                        onChange={(e) => toggleQueryField(index, field)}
+                                        compressed
+                                      />
+                                    ),
+                                  },
+                                ],
+                              },
+                            ]}
+                            hasActions
+                          />
+                        </EuiAccordion>
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                Close
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={saveQuery} fill>
+                Save changes
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }
@@ -137,9 +187,9 @@ export const ViewQueryAction: React.FC<ViewQueryActionProps> = () => {
   return (
     <>
       {flyout}
-      {selectedIndices?.length > 0 && (
-        <EuiButtonEmpty onClick={() => setShowFlyout(true)}>View Query</EuiButtonEmpty>
-      )}
+      <EuiButtonEmpty onClick={() => setShowFlyout(true)} disabled={selectedIndices?.length === 0}>
+        View Query
+      </EuiButtonEmpty>
     </>
   );
 };
