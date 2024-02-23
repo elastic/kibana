@@ -12,6 +12,6 @@ import { FieldsGroup } from '@kbn/unified-field-list/src/types';
 export interface FieldListCustomization {
   id: 'field_list';
   additionalFieldGroups?: {
-    smartFields: FieldsGroup<DataViewField>['fields'];
+    smartFields?: FieldsGroup<DataViewField>['fields'];
   };
 }

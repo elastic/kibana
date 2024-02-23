@@ -44,7 +44,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
   additionalFieldGroups?: {
-    smartFields: FieldsGroup<T>['fields'];
+    smartFields?: FieldsGroup<T>['fields'];
   };
 }
 

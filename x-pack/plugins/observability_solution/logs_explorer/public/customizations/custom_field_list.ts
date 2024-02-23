@@ -9,14 +9,16 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import * as constants from '../../common/constants';
 
 export const smartFields = [
-  {
+  new DataViewField({
     name: constants.RESOURCE_FIELD,
-    displayName: constants.RESOURCE_FIELD,
     type: 'smart_field',
-  } as DataViewField,
-  {
+    searchable: false,
+    aggregatable: false,
+  }),
+  new DataViewField({
     name: constants.CONTENT_FIELD,
-    displayName: constants.CONTENT_FIELD,
     type: 'smart_field',
-  } as DataViewField,
+    searchable: false,
+    aggregatable: false,
+  }),
 ];

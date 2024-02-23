@@ -47,11 +47,12 @@ const mockSearchBarCustomization: SearchBarCustomization = {
 };
 
 const smartFields = [
-  {
+  new DataViewField({
     name: 'mock_field',
-    displayName: 'mock_field',
-    type: 'smart_field',
-  } as DataViewField,
+    type: 'mock_field',
+    searchable: false,
+    aggregatable: false,
+  }),
 ];
 
 const additionalFieldGroups = {

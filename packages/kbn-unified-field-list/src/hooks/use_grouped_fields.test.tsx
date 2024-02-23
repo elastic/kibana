@@ -779,11 +779,12 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
   it('should include additional fields when additionalFieldGroups are provided', async () => {
     const smartFields = [
-      {
+      new DataViewField({
         name: 'mock_field',
-        displayName: 'mock_field',
-        type: 'smart_field',
-      } as DataViewField,
+        type: 'mock_field',
+        searchable: false,
+        aggregatable: false,
+      }),
     ];
 
     const additionalFieldGroups = {
