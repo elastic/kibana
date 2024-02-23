@@ -8,7 +8,6 @@
 import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
@@ -27,7 +26,6 @@ import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart
 import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
 import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { useTimeBuckets } from '../hooks/use_time_buckets';
 import { createMergedEsQuery } from '../application/utils/search_utils';
 import { useChangePointResults } from '../components/change_point_detection/use_change_point_agg_request';
 import { ChartsGrid } from '../components/change_point_detection/charts_grid';
@@ -139,7 +137,7 @@ export const ChartGridEmbeddableWrapper: FC<
   onChange,
   emptyState,
 }) => {
-  const { filters, query, timeRange, searchBounds, interval } = useFilerQueryUpdates();
+  const { filters, query, searchBounds, interval } = useFilerQueryUpdates();
 
   const fieldConfig = useMemo(() => {
     return { fn, metricField, splitField };
@@ -147,8 +145,6 @@ export const ChartGridEmbeddableWrapper: FC<
 
   const { dataView } = useDataSource();
   const { uiSettings } = useAiopsAppContext();
-  const timeBuckets = useTimeBuckets();
-  const timefilter = useTimefilter();
 
   const combinedQuery = useMemo(() => {
     const mergedQuery = createMergedEsQuery(query, filters, dataView, uiSettings);

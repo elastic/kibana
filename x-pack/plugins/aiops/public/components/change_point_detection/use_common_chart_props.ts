@@ -30,12 +30,7 @@ export const useCommonChartProps = ({
 }): Partial<TypedLensByValueInput> => {
   const { dataView } = useDataSource();
 
-  const {
-    filters: resultFilters,
-    query: resultQuery,
-    timeRange,
-    searchBounds,
-  } = useFilerQueryUpdates();
+  const { filters: resultFilters, query: resultQuery, searchBounds } = useFilerQueryUpdates();
 
   const filters = useMemo(() => {
     return [
@@ -221,8 +216,8 @@ export const useCommonChartProps = ({
   ]);
 
   const boundsTimeRange = {
-    from: searchBounds.min?.toISOString(),
-    to: searchBounds.max?.toISOString(),
+    from: searchBounds.min?.toISOString()!,
+    to: searchBounds.max?.toISOString()!,
   };
 
   return {

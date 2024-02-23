@@ -18,7 +18,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
@@ -162,8 +162,6 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     Record<number, SelectedChangePoint[]>
   >({});
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
-
-  const timeRange = useTimeRangeUpdates(true);
 
   useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter
