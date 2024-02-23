@@ -30,6 +30,8 @@ import {
 } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { ENTITY_STORE_PATH } from '../../../common/constants';
+import { APP_PATH } from '../../../common';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
@@ -349,6 +351,10 @@ export const RiskScoreEnableSection: React.FC<{
               {i18n.EA_DOCS_ENTITY_RISK_SCORE}
             </EuiLink>
             {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
+            <EuiSpacer size="s" />
+          </li>
+          <li>
+            <EuiLink href={`${APP_PATH}${ENTITY_STORE_PATH}`}>{'Entity Store'}</EuiLink>
             <EuiSpacer size="s" />
           </li>
         </ul>

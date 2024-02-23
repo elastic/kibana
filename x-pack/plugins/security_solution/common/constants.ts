@@ -119,6 +119,7 @@ export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
+export const ENTITY_STORE_PATH = `/entity_store` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;

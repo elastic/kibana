@@ -35,6 +35,7 @@ import {
 } from './related_entities/related_entities';
 
 import {
+  entityStoreRequestOptionsSchema,
   hostsRiskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
   usersRiskScoreRequestOptionsSchema,
@@ -80,6 +81,7 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   hostsRiskScoreRequestOptionsSchema,
   usersRiskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
+  entityStoreRequestOptionsSchema,
   relatedHostsRequestOptionsSchema,
   relatedUsersRequestOptionsSchema,
   networkDetailsSchema,

@@ -97,6 +97,10 @@ import type {
   UsersRequestOptions,
   UsersRequestOptionsInput,
 } from '../../api/search_strategy';
+import type {
+  EntityStoreRequestOptions,
+  EntityStoreRequestOptionsInput,
+} from '../../api/search_strategy/risk_score/entity_store';
 
 export * from './cti';
 export * from './hosts';
@@ -209,6 +213,8 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? ThreatIntelSourceRequestOptionsInput
   : T extends RiskQueries.hostsRiskScore
   ? RiskScoreRequestOptionsInput
+  : T extends RiskQueries.entityStore
+  ? EntityStoreRequestOptionsInput
   : T extends RiskQueries.usersRiskScore
   ? RiskScoreRequestOptionsInput
   : T extends RiskQueries.kpiRiskScore
@@ -261,6 +267,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? ThreatIntelSourceRequestOptions
   : T extends RiskQueries.hostsRiskScore
   ? RiskScoreRequestOptions
+  : T extends RiskQueries.entityStore
+  ? EntityStoreRequestOptions
   : T extends RiskQueries.usersRiskScore
   ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore

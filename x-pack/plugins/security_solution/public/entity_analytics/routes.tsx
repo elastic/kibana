@@ -16,9 +16,11 @@ import { NotFoundPage } from '../app/404';
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
+  ENTITY_STORE_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
+import { EntityStorePage } from './pages/entity_store_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { AssetCriticalityUploadPage } from './pages/asset_criticality_upload_page';
 
@@ -78,5 +80,14 @@ export const routes = [
   {
     path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
     component: EntityAnalyticsAssetClassificationContainer,
+  },
+  {
+    path: ENTITY_STORE_PATH,
+    render: () => (
+      <Switch>
+        <Route path={ENTITY_STORE_PATH} exact component={EntityStorePage} />
+        <Route component={NotFoundPage} />
+      </Switch>
+    ),
   },
 ];
