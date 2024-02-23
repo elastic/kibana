@@ -25,7 +25,6 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { IndicesLogic } from '../search_indices/indices_logic';
 
 export const AIPlayground: React.FC = () => {
-  const { isLoading } = useValues(IndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
 

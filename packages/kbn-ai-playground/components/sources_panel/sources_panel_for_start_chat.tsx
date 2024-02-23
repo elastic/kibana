@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesTable } from './indices_table';
 import { StartChatPanel } from '../start_chat_panel';
-import { i18n } from '@kbn/i18n';
 import { useSourceIndicesField } from '../../hooks/useSourceIndicesField';
+import { useQueryIndices } from '../../hooks/useQueryIndices';
+import { i18n } from '@kbn/i18n';
+import { CreateIndexCallout } from '@kbn/ai-playground/components/sources_panel/create_index_callout';
 
 export const SourcesPanelForStartChat: React.FC = () => {
   const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
+  const { indices, isLoading } = useQueryIndices();
 
   return (
     <StartChatPanel
@@ -32,9 +35,19 @@ export const SourcesPanelForStartChat: React.FC = () => {
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
-        <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
-      </EuiFlexItem>
+      {isLoading && (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexGroup>
+      )}
+
+      {!isLoading && !!indices?.length && (
+        <EuiFlexItem>
+          <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
+        </EuiFlexItem>
+      )}
+
+      {!isLoading && !indices?.length && <CreateIndexCallout />}
     </StartChatPanel>
   );
 };
