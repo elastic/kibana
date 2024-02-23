@@ -27,6 +27,7 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
 };
 
 const getMLJobType = (mlJobType: NodeType) => mlJobType === 'pod' ? 'Pod Anomalies' : 'Host Anomalies';
+
 const getSurveyFeedbackURL = ({
   formUrl,
   formConfig,

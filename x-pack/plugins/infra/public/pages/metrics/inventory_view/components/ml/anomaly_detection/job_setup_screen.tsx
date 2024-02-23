@@ -52,8 +52,8 @@ export const JobSetupScreen = (props: Props) => {
   const { goHome } = props;
   const [startDate, setStartDate] = useState<Moment>(now.clone().subtract(4, 'weeks'));
   const [partitionField, setPartitionField] = useState<string[] | null>(null);
-  const h = useMetricHostsModuleContext();
-  const k = useMetricK8sModuleContext();
+  const host = useMetricHostsModuleContext();
+  const kubernetes = useMetricK8sModuleContext();
   const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
@@ -61,39 +61,39 @@ export const JobSetupScreen = (props: Props) => {
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
   const { euiTheme } = useEuiTheme();
 
-  const indices = h.sourceConfiguration.indices;
+  const indices = host.sourceConfiguration.indices;
 
   const setupStatus = useMemo(() => {
     if (props.jobType === 'kubernetes') {
-      return k.setupStatus;
+      return kubernetes.setupStatus;
     } else {
-      return h.setupStatus;
+      return host.setupStatus;
     }
-  }, [props.jobType, k.setupStatus, h.setupStatus]);
+  }, [props.jobType, kubernetes.setupStatus, host.setupStatus]);
 
   const cleanUpAndSetUpModule = useMemo(() => {
     if (props.jobType === 'kubernetes') {
-      return k.cleanUpAndSetUpModule;
+      return kubernetes.cleanUpAndSetUpModule;
     } else {
-      return h.cleanUpAndSetUpModule;
+      return host.cleanUpAndSetUpModule;
     }
-  }, [props.jobType, k.cleanUpAndSetUpModule, h.cleanUpAndSetUpModule]);
+  }, [props.jobType, kubernetes.cleanUpAndSetUpModule, host.cleanUpAndSetUpModule]);
 
   const setUpModule = useMemo(() => {
     if (props.jobType === 'kubernetes') {
-      return k.setUpModule;
+      return kubernetes.setUpModule;
     } else {
-      return h.setUpModule;
+      return host.setUpModule;
     }
-  }, [props.jobType, k.setUpModule, h.setUpModule]);
+  }, [props.jobType, kubernetes.setUpModule, host.setUpModule]);
 
   const hasSummaries = useMemo(() => {
     if (props.jobType === 'kubernetes') {
-      return k.jobSummaries.length > 0;
+      return kubernetes.jobSummaries.length > 0;
     } else {
-      return h.jobSummaries.length > 0;
+      return host.jobSummaries.length > 0;
     }
-  }, [props.jobType, k.jobSummaries, h.jobSummaries]);
+  }, [props.jobType, kubernetes.jobSummaries, host.jobSummaries]);
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
