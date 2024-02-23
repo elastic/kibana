@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsCoreService } from './types';
+import { ControlsStorageService } from './types';
 
-export type CoreServiceFactory = PluginServiceFactory<ControlsCoreService>;
+type StorageServiceFactory = PluginServiceFactory<ControlsStorageService>;
 
-export const coreServiceFactory: CoreServiceFactory = () => {
-  const corePluginMock = coreMock.createStart();
+export const storageServiceFactory: StorageServiceFactory = () => {
   return {
-    theme: themeServiceMock.createSetupContract(),
-    i18n: corePluginMock.i18n,
-    notifications: corePluginMock.notifications,
+    getShowInvalidSelectionWarning: () => false,
+    setShowInvalidSelectionWarning: (value: boolean) => null,
   };
 };
