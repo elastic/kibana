@@ -36,10 +36,10 @@ export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
  * Main purpose is to add `self` value to some directives when the configuration specifies other values
  */
 export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'connect-src': [`'self'`],
+  'connect-src': [`'self' *.elastic.co`], // We allow scripts to connect to all Elastic domains by default
   'default-src': [`'self'`],
   'font-src': [`'self'`],
-  'img-src': [`'self'`],
+  'img-src': [`'self' data:`],
   'frame-ancestors': [`'self'`],
   'frame-src': [`'self'`],
 };
