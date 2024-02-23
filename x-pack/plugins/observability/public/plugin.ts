@@ -490,6 +490,15 @@ export class Plugin
       );
     });
 
+    pluginsStart.observabilityAIAssistant.service.register(async ({ registerRenderFunction }) => {
+      const mod = await import('./assistant_functions');
+
+      mod.registerAssistantFunctions({
+        registerRenderFunction,
+        embeddablePlugin: pluginsStart.embeddable,
+      });
+    });
+
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
