@@ -63,7 +63,7 @@ describe('Import rules route', () => {
       expect.objectContaining({
         options: expect.objectContaining({
           timeout: {
-            idleSocket: 30 * 60 * 1000,
+            idleSocket: 3600 * 1000,
           },
         }),
       })
