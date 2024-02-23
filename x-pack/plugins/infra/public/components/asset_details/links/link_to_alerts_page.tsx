@@ -33,21 +33,19 @@ export const LinkToAlertsPage = ({ assetName, queryField, dateRange }: LinkToAle
   );
 
   return (
-    <RedirectAppLinks coreStart={services}>
-      <EuiButtonEmpty
-        data-test-subj="infraAssetDetailsAlertsShowAllButton"
-        size="xs"
-        iconSide="right"
-        iconType="sortRight"
-        flush="both"
-        href={linkToAlertsPage}
-      >
-        <FormattedMessage
-          id="xpack.infra.assetDetails.flyout.AlertsPageLinkLabel"
-          defaultMessage="Show all"
-        />
-      </EuiButtonEmpty>
-    </RedirectAppLinks>
+    <EuiButtonEmpty
+      data-test-subj="infraAssetDetailsAlertsShowAllButton"
+      size="xs"
+      iconSide="right"
+      iconType="sortRight"
+      flush="both"
+      href={linkToAlertsPage}
+    >
+      <FormattedMessage
+        id="xpack.infra.assetDetails.flyout.AlertsPageLinkLabel"
+        defaultMessage="Show all"
+      />
+    </EuiButtonEmpty>
   );
 };
 
@@ -58,13 +56,15 @@ export const LinkToAlertsHomePage = () => {
   const linkToAlertsPage = http.basePath.prepend(ALERTS_PATH);
 
   return (
-    <RedirectAppLinks coreStart={services} style={{ display: 'inline-block' }}>
-      <EuiLink data-test-subj="assetDetailsTooltipDocumentationLink" href={linkToAlertsPage}>
-        <FormattedMessage
-          id="xpack.infra.assetDetails.table.tooltip.alertsLink"
-          defaultMessage="alerts."
-        />
-      </EuiLink>
-    </RedirectAppLinks>
+    <EuiLink
+      style={{ display: 'inline-block' }}
+      data-test-subj="assetDetailsTooltipDocumentationLink"
+      href={linkToAlertsPage}
+    >
+      <FormattedMessage
+        id="xpack.infra.assetDetails.table.tooltip.alertsLink"
+        defaultMessage="alerts."
+      />
+    </EuiLink>
   );
 };
