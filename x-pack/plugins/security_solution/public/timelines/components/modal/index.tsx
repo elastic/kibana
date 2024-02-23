@@ -33,43 +33,51 @@ interface TimelineModalProps {
    * If true the timeline modal will be visible
    */
   visible?: boolean;
+  openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
 /**
  * Renders the timeline modal. Internally this is using an EuiPortal.
  */
-export const TimelineModal = React.memo<TimelineModalProps>(({ timelineId, visible = true }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
+export const TimelineModal = React.memo<TimelineModalProps>(
+  ({ timelineId, openToggleRef, visible = true }) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const isFullScreen =
+      useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
-  const styles = usePaneStyles();
-  const wrapperClassName = classNames('timeline-portal-overlay-mask', styles, {
-    'timeline-portal-overlay-mask--full-screen': isFullScreen,
-    'timeline-portal-overlay-mask--hidden': !visible,
-  });
+    const styles = usePaneStyles();
+    const wrapperClassName = classNames('timeline-portal-overlay-mask', styles, {
+      'timeline-portal-overlay-mask--full-screen': isFullScreen,
+      'timeline-portal-overlay-mask--hidden': !visible,
+    });
 
-  const sibling: HTMLDivElement | null = useMemo(() => (!visible ? ref?.current : null), [visible]);
+    const sibling: HTMLDivElement | null = useMemo(
+      () => (!visible ? ref?.current : null),
+      [visible]
+    );
 
-  return (
-    <div data-test-subj="timeline-portal-ref" ref={ref}>
-      <CustomEuiPortal sibling={sibling}>
-        <div data-test-subj="timeline-portal-overlay-mask" className={wrapperClassName}>
-          <div
-            aria-label={TIMELINE_DESCRIPTION}
-            data-test-subj="timeline-container"
-            className="timeline-container"
-          >
-            <StatefulTimeline
-              renderCellValue={DefaultCellRenderer}
-              rowRenderers={defaultRowRenderers}
-              timelineId={timelineId}
-            />
+    return (
+      <div data-test-subj="timeline-portal-ref" ref={ref}>
+        <CustomEuiPortal sibling={sibling}>
+          <div data-test-subj="timeline-portal-overlay-mask" className={wrapperClassName}>
+            <div
+              aria-label={TIMELINE_DESCRIPTION}
+              data-test-subj="timeline-container"
+              className="timeline-container"
+            >
+              <StatefulTimeline
+                renderCellValue={DefaultCellRenderer}
+                rowRenderers={defaultRowRenderers}
+                timelineId={timelineId}
+                openToggleRef={openToggleRef}
+              />
+            </div>
           </div>
-        </div>
-      </CustomEuiPortal>
-      {visible && <OverflowHiddenGlobalStyles />}
-    </div>
-  );
-});
+        </CustomEuiPortal>
+        {visible && <OverflowHiddenGlobalStyles />}
+      </div>
+    );
+  }
+);
 
 TimelineModal.displayName = 'TimelineModal';

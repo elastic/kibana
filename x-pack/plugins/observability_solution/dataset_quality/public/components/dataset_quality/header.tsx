@@ -34,7 +34,6 @@ export default function Header() {
           tooltipContent={betaBadgeDescription}
         />
       </EuiPageHeaderSection>
-      <EuiPageHeaderSection>Page abilities</EuiPageHeaderSection>
     </EuiPageHeader>
   );
 }
