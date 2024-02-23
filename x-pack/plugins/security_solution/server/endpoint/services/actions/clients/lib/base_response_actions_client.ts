@@ -11,12 +11,13 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
-
+import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { HOST_NOT_ENROLLED, LICENSE_TOO_LOW } from '../../create/validate';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
-  ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
@@ -29,12 +30,16 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { ResponseActionsClient } from './types';
+import type { CommonResponseActionMethodOptions, ResponseActionsClient } from './types';
 import type {
   ActionDetails,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
   KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
@@ -43,18 +48,15 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  LogsEndpointAction,
-  EndpointActionDataParameterTypes,
-  LogsEndpointActionResponse,
-  EndpointActionResponseDataOutput,
+  WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
+  IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../create/types';
 import { stringify } from '../../../../utils/stringify';
@@ -67,6 +69,12 @@ export interface ResponseActionsClientOptions {
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
+  /**
+   * Is the instance of the client being used for automated response actions.
+   * When set to `true`, additional checks will be performed and the Endpoint response action
+   * request will (almost) always be created, even if there certain errors occur along the way
+   */
+  isAutomated?: boolean;
 }
 
 export interface ResponseActionsClientUpdateCasesOptions {
@@ -88,7 +96,9 @@ export interface ResponseActionsClientUpdateCasesOptions {
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
   ResponseActionsRequestBody &
-    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
+    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name' | 'error'> & {
+      actionId?: string;
+    };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
@@ -97,6 +107,16 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   actionId: string;
 } & Pick<LogsEndpointActionResponse, 'error'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
+
+export type ResponseActionsClientValidateRequestResponse =
+  | {
+      isValid: true;
+      error: undefined;
+    }
+  | {
+      isValid: false;
+      error: ResponseActionsClientError;
+    };
 
 /**
  * Base class for a Response Actions client
@@ -127,12 +147,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     actionId,
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
-      this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
+      this.log.debug(`No updates to Cases needed. 'caseIds' and 'alertIds' are empty`);
       return;
     }
 
     if (hosts.length === 0) {
-      this.log.debug(`Nothing to do. 'hosts' is empty`);
+      this.log.debug(`No updates to Cases needed. 'hosts' is empty`);
       return;
     }
 
@@ -166,7 +186,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const allCases = [...new Set([...caseIds, ...casesFromAlertIds])];
 
     if (allCases.length === 0) {
-      this.log.debug(`Nothing to do. Alert IDs are not tied to Cases`);
+      this.log.debug(`No updates to Cases needed. Alert IDs are not tied to Cases`);
       return;
     }
 
@@ -214,6 +234,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
+  protected getMethodOptions<
+    T extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+  >(options: Partial<T> = {}): WithAllKeys<CommonResponseActionMethodOptions> {
+    return {
+      hosts: undefined,
+      ruleId: undefined,
+      ruleName: undefined,
+      error: undefined,
+      ...options,
+    };
+  }
+
   /**
    * Returns the action details for a given response action id
    * @param actionId
@@ -230,12 +262,70 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Provides validations against a response action request and returns the result.
+   * Checks made should be generic to all response actions and not specific to any one action.
+   *
+   * @param actionRequest
+   * @protected
+   */
+  protected async validateRequest(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Validation for Automated Response actions
+    if (this.options.isAutomated) {
+      // Automated response actions is an Enterprise level feature
+      if (!this.options.endpointService.getLicenseService().isEnterprise()) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(LICENSE_TOO_LOW, 403),
+        };
+      }
+    }
+
+    if (actionRequest.endpoint_ids.length === 0) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(HOST_NOT_ENROLLED, 400),
+      };
+    }
+
+    if (
+      !isActionSupportedByAgentType(
+        this.agentType,
+        actionRequest.command,
+        this.options.isAutomated ? 'automated' : 'manual'
+      )
+    ) {
+      return {
+        isValid: false,
+        error: new ResponseActionsNotSupportedError(actionRequest.command),
+      };
+    }
+
+    return { isValid: true, error: undefined };
+  }
+
+  /**
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
   protected async writeActionRequestToEndpointIndex(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
+    let errorMsg = String(actionRequest.error ?? '').trim();
+
+    if (!errorMsg) {
+      const validation = await this.validateRequest(actionRequest);
+
+      if (!validation.isValid) {
+        if (this.options.isAutomated) {
+          errorMsg = validation.error.message;
+        } else {
+          throw validation.error;
+        }
+      }
+    }
+
     this.notifyUsage(actionRequest.command);
 
     const doc: LogsEndpointAction = {
@@ -244,7 +334,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         id: actionRequest.endpoint_ids,
       },
       EndpointActions: {
-        action_id: uuidv4(),
+        action_id: actionRequest.actionId || uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,
@@ -259,6 +349,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
+      ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...addRuleInfoToAction(actionRequest),
     };
 
@@ -359,16 +450,23 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
-  public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('isolate');
   }
 
-  public async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async release(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   public async killProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
@@ -376,7 +474,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async suspendProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
@@ -384,25 +483,29 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async runningProcesses(
-    options: GetProcessesRequestBody
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
     throw new ResponseActionsNotSupportedError('running-processes');
   }
 
   public async getFile(
-    options: ResponseActionGetFileRequestBody
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
     throw new ResponseActionsNotSupportedError('get-file');
   }
 
   public async execute(
-    options: ExecuteActionRequestBody
+    actionRequest: ExecuteActionRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
     throw new ResponseActionsNotSupportedError('execute');
   }
 
   public async upload(
-    options: UploadActionApiRequestBody
+    actionRequest: UploadActionApiRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
   }
