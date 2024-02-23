@@ -13,7 +13,11 @@ import type { DataViewField } from '@kbn/data-plugin/common';
 import { flattenHit } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
-import { UnifiedDataTable, useColumns, DataLoadingState } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTable,
+  useColumns as useUnifiedTableColumns,
+  DataLoadingState,
+} from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -280,12 +284,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId, columns]
     );
 
-    // Columns management
-    const { onSetColumns } = useColumns({
-      capabilities,
-      dataView,
-      dataViews,
-      setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
+    const setAppState = useCallback(
+      (newState: { columns: string[]; sort?: string[][] }) => {
         if (newState.sort) {
           onSort(newState.sort);
         } else {
@@ -295,6 +295,15 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
         }
       },
+      [dispatch, onSort, timelineId]
+    );
+
+    // Columns management
+    const { onSetColumns } = useUnifiedTableColumns({
+      capabilities,
+      dataView,
+      dataViews,
+      setAppState,
       useNewFieldsApi: true,
       columns: defaultColumnIds,
       sort: sortingColumns,

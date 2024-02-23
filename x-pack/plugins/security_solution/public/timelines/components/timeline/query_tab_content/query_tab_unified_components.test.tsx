@@ -1,0 +1,436 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ComponentProps } from 'react';
+import React, { useEffect } from 'react';
+import QueryTabContent from '.';
+import { defaultRowRenderers } from '../body/renderers';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { useTimelineEvents } from '../../../containers';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { mockTimelineData, TestProviders } from '../../../../common/mock';
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
+import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import type { StartServices } from '../../../../types';
+import { queryServiceMock } from '@kbn/data-plugin/public/query/mocks';
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
+import { useKibana } from '../../../../common/lib/kibana';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { calculateBounds } from '@kbn/data-plugin/common';
+import { useDispatch } from 'react-redux';
+import { timelineActions } from '../../../store';
+
+jest.mock('../../../containers', () => ({
+  useTimelineEvents: jest.fn(),
+}));
+
+jest.mock('../../../containers/details');
+
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
+
+jest.mock('../body/events', () => ({
+  Events: () => <></>,
+}));
+
+jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
+
+jest.mock('../../../../common/lib/kuery');
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => {
+  return {
+    useIsExperimentalFeatureEnabled: jest.fn((x: string) => {
+      if (x === 'unifiedComponentsInTimelineEnabled') {
+        return true;
+      }
+      return false;
+    }),
+  };
+});
+
+// unified-field-list is is reporiting multiple analytics events
+jest.mock('../../../../common/lib/kibana');
+jest.mock(`@kbn/analytics-client`);
+
+const startDate = '2011-03-23T18:49:23.132Z';
+const endDate = '2024-03-24T03:33:52.253Z';
+
+const TestComponentWrapper = () => {
+  return <TestProviders>{children}</TestProviders>;
+};
+
+const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
+  const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
+    timelineId: TimelineId.test,
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
+  };
+
+  const dispatch = useDispatch();
+
+  // populating timeline so that it is not blank
+  useEffect(() => {
+    dispatch(
+      timelineActions.applyKqlFilterQuery({
+        id: TimelineId.test,
+        filterQuery: {
+          kuery: {
+            kind: 'kuery',
+            expression: '*',
+          },
+          serializedQuery: '*',
+        },
+      })
+    );
+  }, [dispatch]);
+
+  return <QueryTabContent {...testComponentDefaultProps} {...props} />;
+};
+
+const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponent>>) => {
+  return render(<TestComponent {...props} />, {
+    wrapper: TestProviders,
+  });
+};
+
+const loadPageMock = jest.fn();
+
+const useTimelineEventsMock = jest.fn(() => [
+  false,
+  {
+    events: mockTimelineData,
+    pageInfo: {
+      activePage: 0,
+      totalPages: 10,
+    },
+    totalCount: 70,
+    loadPage: loadPageMock,
+  },
+]);
+
+describe('query tab with unified timeline', () => {
+  const kibanaServiceMock: StartServices = {
+    ...createStartServicesMock(),
+    data: {
+      ...dataPluginMock.createStartContract(),
+      query: {
+        ...queryServiceMock.createStartContract(),
+        timefilter: {
+          ...timefilterServiceMock.createStartContract(),
+          timefilter: {
+            ...timefilterServiceMock.createStartContract().timefilter,
+            getAbsoluteTime: jest.fn(() => ({
+              from: '2021-08-31T22:00:00.000Z',
+              to: '2022-09-01T09:16:29.553Z',
+            })),
+            getTime: jest.fn(() => {
+              return { from: 'now-15m', to: 'now' };
+            }),
+            getRefreshInterval: jest.fn(() => {
+              return { pause: true, value: 1000 };
+            }),
+            calculateBounds: jest.fn(calculateBounds),
+          },
+        },
+      },
+    },
+  };
+
+  afterEach(() => {
+    cleanup();
+    jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      } as DOMRect;
+    });
+
+    (useKibana as jest.Mock).mockImplementation(() => {
+      return {
+        services: kibanaServiceMock,
+      };
+    });
+
+    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
+
+    (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
+
+    (useSourcererDataView as jest.Mock).mockImplementation(() => ({
+      ...mockSourcererScope,
+    }));
+  });
+
+  it('should render unifiedDataTable in timeline', async () => {
+    renderTestComponents();
+    await waitFor(() => {
+      expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+    });
+  });
+
+  it('should render unified-field-list in timeline', async () => {
+    renderTestComponents();
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
+    });
+  });
+
+  describe('pagination', () => {
+    it('should paginate correctly', async () => {
+      renderTestComponents();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+          'Rows per page: 5'
+        );
+      });
+
+      expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+      expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('pagination-button-6'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('pagination-button-6')).toHaveAttribute('aria-current', 'true');
+      });
+    });
+
+    it('should load more records according to sample size correctly', async () => {
+      renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+        expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+      });
+      // Go to last page
+      fireEvent.click(screen.getByTestId('pagination-button-6'));
+      await waitFor(() => {
+        // screen.debug(undefined, 10000000);
+        expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
+      });
+      fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
+      expect(loadPageMock).toHaveBeenNthCalledWith(1, 1);
+    });
+  });
+
+  describe('columns', () => {
+    it('should move column left/right correctly ', async () => {
+      const { container } = renderTestComponents();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+      expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
+        'data-gridcell-column-index',
+        '12'
+      );
+
+      expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
+        ) as HTMLElement
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTitle('Move left')).toBeEnabled();
+      });
+
+      fireEvent.click(screen.getByTitle('Move left'));
+
+      await waitFor(() => {
+        expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
+          'data-gridcell-column-index',
+          '11'
+        );
+      });
+    });
+
+    it('should remove column left/right ', async () => {
+      const { container } = renderTestComponents();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+
+      expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
+        ) as HTMLElement
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTitle('Remove column')).toBeVisible();
+      });
+
+      fireEvent.click(screen.getByTitle('Remove column'));
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-gridcell-column-id="message"]')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('should sort date column', async () => {
+      const { container } = renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+
+      expect(container.querySelector('[data-gridcell-column-id="@timestamp"]')).toBeInTheDocument();
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
+        ) as HTMLElement
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTitle('Sort Old-New')).toBeVisible();
+        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
+      });
+
+      useTimelineEventsMock.mockClear();
+
+      fireEvent.click(screen.getByTitle('Sort Old-New'));
+
+      await waitFor(() => {
+        expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            sort: [
+              {
+                direction: 'asc',
+                esTypes: [],
+                field: '@timestamp',
+                type: 'date',
+              },
+            ],
+          })
+        );
+      });
+    });
+
+    it('should sort string column correctly', async () => {
+      const { container } = renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+
+      expect(container.querySelector('[data-gridcell-column-id="host.name"]')).toBeInTheDocument();
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
+        ) as HTMLElement
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
+      });
+
+      expect(screen.getByTitle('Sort A-Z')).toBeVisible();
+      expect(screen.getByTitle('Sort Z-A')).toBeVisible();
+
+      useTimelineEventsMock.mockClear();
+
+      fireEvent.click(screen.getByTitle('Sort A-Z'));
+
+      await waitFor(() => {
+        expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            sort: [
+              {
+                direction: 'desc',
+                esTypes: [],
+                field: '@timestamp',
+                type: 'date',
+              },
+              {
+                direction: 'asc',
+                esTypes: [],
+                field: 'host.name',
+                type: 'string',
+              },
+            ],
+          })
+        );
+      });
+    });
+
+    it('should sort number column', async () => {
+      const field = {
+        name: 'event.severity',
+        type: 'number',
+      };
+
+      const { container } = renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+
+      expect(
+        container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
+      ).toBeInTheDocument();
+
+      fireEvent.click(
+        container.querySelector(
+          `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
+        ) as HTMLElement
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
+      });
+
+      expect(screen.getByTitle('Sort Low-High')).toBeVisible();
+      expect(screen.getByTitle('Sort High-Low')).toBeVisible();
+
+      useTimelineEventsMock.mockClear();
+
+      fireEvent.click(screen.getByTitle('Sort Low-High'));
+
+      await waitFor(() => {
+        expect(useTimelineEventsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            sort: [
+              {
+                direction: 'desc',
+                esTypes: [],
+                field: '@timestamp',
+                type: 'date',
+              },
+              {
+                direction: 'asc',
+                esTypes: [],
+                field: field.name,
+                type: field.type,
+              },
+            ],
+          })
+        );
+      });
+    });
+  });
+});

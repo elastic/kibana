@@ -23,8 +23,8 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
-import type { CoreStart } from '@kbn/core/public';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -151,6 +151,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       uiActions,
       charts,
       docLinks,
+      analytics,
     },
   } = useKibana();
 
@@ -163,6 +164,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       uiActions,
       charts,
       core: {
+        analytics,
         uiSettings,
         docLinks,
       } as CoreStart,
@@ -176,6 +178,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       charts,
       uiSettings,
       docLinks,
+      analytics,
     ]
   );
 
@@ -326,13 +329,13 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   }
 
   return (
-    <TimelineBodyContainer ref={setSidebarContainer}>
+    <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
         container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
         sidebarPanel={
           <SidebarPanelFlexGroup gutterSize="none">
-            <EuiFlexItem>
+            <EuiFlexItem className="sidebarContainer">
               {dataView ? (
                 <UnifiedFieldListSidebarContainer
                   ref={unifiedFieldListContainerRef}

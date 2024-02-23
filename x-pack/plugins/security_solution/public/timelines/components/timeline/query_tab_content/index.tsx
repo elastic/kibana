@@ -518,6 +518,7 @@ const makeMapStateToProps = () => {
       status,
       timelineType,
     } = timeline;
+
     const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId);
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 

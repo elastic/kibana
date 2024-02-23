@@ -63,7 +63,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
       <StyledTableFlexItem grow={false}>{header}</StyledTableFlexItem>
-      <StyledTableFlexItem>
+      <StyledTableFlexItem className="unifiedTimelineBody">
         <RootDragDropProvider>
           <UnifiedTimelineComponent
             columns={columnsHeader}

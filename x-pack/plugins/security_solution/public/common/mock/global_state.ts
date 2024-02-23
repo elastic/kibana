@@ -51,6 +51,10 @@ const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
 );
 
+const mockFieldMap2 = Object.values(mockBrowserFields).map(
+  (browserFieldEntry) => browserFieldEntry.fields
+);
+
 export const mockSourcererState: SourcererState = {
   ...initialSourcererState,
   signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,

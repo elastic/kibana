@@ -53,6 +53,8 @@ import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contractStartServicesMock } from '../../../mocks';
 import { getDefaultConfigSettings } from '../../../../common/config_settings';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -135,14 +137,7 @@ export const createStartServicesMock = (
     dataViews: dataViewServiceMock,
     data: {
       ...data,
-      dataViews: {
-        create: jest.fn(),
-        getIdsWithTitle: jest.fn(),
-        get: jest.fn(),
-        getIndexPattern: jest.fn(),
-        getFieldsForWildcard: jest.fn(),
-        getRuntimeMappings: jest.fn(),
-      },
+      dataViews: dataViewServiceMock,
       query: {
         ...data.query,
         savedQueries: {
@@ -221,6 +216,8 @@ export const createStartServicesMock = (
     savedSearch: savedSearchPluginMock.createStartContract(),
     setHeaderActionMenu: mockSetHeaderActionMenu,
     fieldFormats: fieldFormatsMock,
+    dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+    upselling: new UpsellingService(),
   } as unknown as StartServices;
 };
 
