@@ -13,7 +13,7 @@ import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import {
@@ -34,11 +34,6 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics } from './metrics';
-
-interface EventEmitter<T> {
-  on(eventName: string, handler: (t: T, ...args: any[]) => any): void;
-  off(eventName: string, handler: (t: T, ...args: any[]) => any): void;
-}
 
 interface CreatePageOptions {
   browserTimezone?: string;
@@ -268,7 +263,7 @@ export class HeadlessChromiumDriverFactory {
         );
 
         const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
-          mergeMap((err) => Rx.throwError(err))
+          mergeMap((err) => Rx.throwError(() => err))
         );
 
         const close = () => Rx.from(childProcess.kill());
@@ -317,9 +312,9 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent(
-      page as EventEmitter<PageEvents['console']>,
-      'console'
+    const consoleMessages$ = Rx.fromEventPattern<ConsoleMessage>(
+      (handler) => page.on('console', handler),
+      (handler) => page.off('console', handler)
     ).pipe(
       concatMap(async (line) => {
         if (line.type() === 'error') {
@@ -343,9 +338,9 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent(
-      page as EventEmitter<PageEvents['pageerror']>,
-      'pageerror'
+    const uncaughtExceptionPageError$ = Rx.fromEventPattern<ErrorEvent>(
+      (handler) => page.on('pageerror', handler),
+      (handler) => page.off('pageerror', handler)
     ).pipe(
       map((err) => {
         logger.warn(
@@ -354,9 +349,9 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent(
-      page as EventEmitter<PageEvents['requestfailed']>,
-      'requestfailed'
+    const pageRequestFailed$ = Rx.fromEventPattern<HTTPRequest>(
+      (handler) => page.on('requestfailed', handler),
+      (handler) => page.off('requestfailed', handler)
     ).pipe(
       map((req) => {
         const failure = req.failure && req.failure();
@@ -382,7 +377,10 @@ export class HeadlessChromiumDriverFactory {
     }
 
     // just log closing of the process
-    const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(
+    const processClose$ = Rx.fromEventPattern<void>(
+      (handler) => childProcess.on('close', handler),
+      (handler) => childProcess.off('close', handler)
+    ).pipe(
       tap(() => {
         logger.get('headless-browser-process').debug('child process closed');
       })
@@ -392,9 +390,10 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
-    const pageError$ = Rx.fromEvent(page as EventEmitter<PageEvents['error']>, 'error').pipe(
-      map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
-    );
+    const pageError$ = Rx.fromEventPattern<ErrorEvent>(
+      (handler) => page.on('error', handler),
+      (handler) => page.off('error', handler)
+    ).pipe(map((err) => new Error(`Reporting encountered an error: ${err.toString()}`)));
 
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
       map(() => getChromiumDisconnectedError())
