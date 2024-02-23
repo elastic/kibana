@@ -4299,7 +4299,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -6699,7 +6699,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -8111,7 +8111,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -9023,7 +9023,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -13481,7 +13481,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -13878,7 +13878,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -14767,7 +14767,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -15217,7 +15217,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/server.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
