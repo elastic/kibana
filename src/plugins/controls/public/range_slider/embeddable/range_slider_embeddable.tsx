@@ -11,7 +11,7 @@ import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { lastValueFrom, merge, Subscription, switchMap } from 'rxjs';
+import { lastValueFrom, Subscription, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -168,7 +168,7 @@ export class RangeSliderEmbeddable
     );
 
     this.subscriptions.add(
-      merge(dataFetchPipe, valueChangePipe)
+      dataFetchPipe
         .pipe(
           switchMap(async () => {
             try {
@@ -184,13 +184,20 @@ export class RangeSliderEmbeddable
         .subscribe()
     );
 
-    // publish filters when input changes
+    // publish filters when value changes
     this.subscriptions.add(
       valueChangePipe
         .pipe(
           switchMap(async () => {
-            const { filters: rangeFilter } = await this.buildFilter();
-            this.dispatch.publishFilters(rangeFilter);
+            try {
+              this.dispatch.setLoading(true);
+              const { filters: rangeFilter } = await this.buildFilter();
+              this.dispatch.publishFilters(rangeFilter);
+              await this.runValidations();
+              this.dispatch.setLoading(false);
+            } catch (e) {
+              this.onLoadingError(e.message);
+            }
           })
         )
         .subscribe()

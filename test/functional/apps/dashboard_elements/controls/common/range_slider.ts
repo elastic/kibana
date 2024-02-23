@@ -89,6 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetLowerBound(firstId, '50');
         await dashboardControls.rangeSliderSetUpperBound(firstId, '100');
         await dashboardControls.validateRange('value', firstId, '50', '100');
+
         await dashboard.clearUnsavedChanges();
       });
 
