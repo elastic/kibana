@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
-import { Evaluation } from './evaluate_rule';
-
-export const getEvaluationValues = (
-  alertResults: Array<Record<string, Evaluation>>,
+export const getEvaluationValues = <T extends { currentValue: number | null }>(
+  alertResults: Array<Record<string, T>>,
   group: string
 ): Array<number | null> => {
   return alertResults.reduce((acc: Array<number | null>, result) => {
@@ -20,7 +17,9 @@ export const getEvaluationValues = (
   }, []);
 };
 
-export const getThreshold = (criteria: CustomMetricExpressionParams[]): number[] | undefined => {
+export const getThresholds = <T extends { threshold: number[] }>(
+  criteria: T[]
+): number[] | undefined => {
   let hasMultipleThresholdComparator = false;
   const thresholds = criteria
     .map((c) => c.threshold)
