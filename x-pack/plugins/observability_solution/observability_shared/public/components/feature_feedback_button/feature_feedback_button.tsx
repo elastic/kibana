@@ -26,13 +26,7 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed (you manage)';
 };
 
-const getMLJobType = (mlJobType: NodeType): string | undefined => {
-  if (mlJobType === 'pod') {
-    return 'Pod Anomalies';
-  }
-  return 'Host Anomalies';
-};
-
+const getMLJobType = (mlJobType: NodeType) => mlJobType === 'pod' ? 'Pod Anomalies' : 'Host Anomalies';
 const getSurveyFeedbackURL = ({
   formUrl,
   formConfig,
