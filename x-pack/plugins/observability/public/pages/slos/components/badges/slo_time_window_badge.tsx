@@ -34,7 +34,7 @@ export function SloTimeWindowBadge({ slo, color }: Props) {
     return (
       <EuiFlexItem grow={false}>
         <EuiBadge
-          onClick={() => onBadgeClick()}
+          onClick={onBadgeClick}
           onClickAriaLabel={i18n.translate(
             'xpack.observability.slo.timeWindowBadge.clickToFilter',
             {
