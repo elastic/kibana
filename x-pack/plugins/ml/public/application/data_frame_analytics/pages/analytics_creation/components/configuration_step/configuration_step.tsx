@@ -15,6 +15,7 @@ import { ANALYTICS_STEPS } from '../../page';
 
 export interface ConfigurationStepProps extends CreateAnalyticsStepProps {
   isClone: boolean;
+  sourceDataViewTitle: string;
 }
 
 export const ConfigurationStep: FC<ConfigurationStepProps> = ({

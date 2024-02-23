@@ -60,7 +60,7 @@ import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
 import { fetchExplainData } from '../shared';
-import { useIndexData } from '../../hooks';
+import { useIndexData, useHasRequiredIndicesPermissions } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
@@ -68,6 +68,7 @@ import { ExplorationQueryBarProps } from '../../../analytics_exploration/compone
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
 import { ConfigurationStepProps } from './configuration_step';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const runtimeMappingKey = 'runtime_mapping';
 const notIncludedReason = 'field not in includes list';
@@ -119,6 +120,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   isClone,
   state,
   setCurrentStep,
+  sourceDataViewTitle,
 }) => {
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
@@ -141,6 +143,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { cloneJob, estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
+  const hasRequiredIndicesPermissions = useHasRequiredIndicesPermissions(sourceDataViewTitle);
   const {
     dependentVariable,
     includes,
@@ -583,6 +586,12 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       <Fragment>
         <Messages messages={requestMessages} />
         <SupportedFieldsMessage jobType={jobType} />
+        {hasRequiredIndicesPermissions === false ? (
+          <>
+            <IndexPermissionsCallout indexName={sourceDataViewTitle} docsType="create" />
+            <EuiSpacer />
+          </>
+        ) : null}
         <JobType type={jobType} setFormState={setFormState} />
         {savedSearchQuery === null && (
           <EuiFormRow
