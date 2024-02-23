@@ -16,6 +16,7 @@ import {
   endTimelineSaving,
   updateIsFavorite,
   showCallOutUnauthorizedMsg,
+  updateTimeline,
 } from '../actions';
 
 jest.mock('../actions', () => {
@@ -50,7 +51,7 @@ describe('Timeline favorite middleware', () => {
     jest.clearAllMocks();
   });
 
-  it('persist a timeline favorite when a favorite action is dispatched', async () => {
+  it('should persist a timeline favorite when a favorite action is dispatched', async () => {
     (persistFavorite as jest.Mock).mockResolvedValue({
       data: {
         persistFavorite: {
@@ -70,6 +71,41 @@ describe('Timeline favorite middleware', () => {
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
       expect.objectContaining({
         isFavorite: true,
+        savedObjectId: newSavedObjectId,
+        version: newVersion,
+      })
+    );
+  });
+
+  it('should persist a timeline un-favorite when a favorite action is dispatched for a favorited timeline', async () => {
+    store.dispatch(
+      updateTimeline({
+        id: TimelineId.test,
+        timeline: {
+          ...selectTimelineById(store.getState(), TimelineId.test),
+          isFavorite: true,
+        },
+      })
+    );
+    (persistFavorite as jest.Mock).mockResolvedValue({
+      data: {
+        persistFavorite: {
+          code: 200,
+          favorite: [],
+          savedObjectId: newSavedObjectId,
+          version: newVersion,
+        },
+      },
+    });
+    expect(selectTimelineById(store.getState(), TimelineId.test).isFavorite).toEqual(true);
+    await store.dispatch(updateIsFavorite({ id: TimelineId.test, isFavorite: false }));
+
+    expect(startTimelineSavingMock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(endTimelineSavingMock).toHaveBeenCalled();
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        isFavorite: false,
         savedObjectId: newSavedObjectId,
         version: newVersion,
       })
