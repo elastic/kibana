@@ -39,9 +39,8 @@ export const useHasRequiredIndicesPermissions = (
 
         setHasIndexPermissions(privileges.hasPrivileges?.has_all_requested === true);
       }
-      if (hasPrivileges !== undefined) {
-        checkPrivileges();
-      }
+
+      checkPrivileges();
     },
     [hasPrivileges, indexName, isDestIndex]
   );
