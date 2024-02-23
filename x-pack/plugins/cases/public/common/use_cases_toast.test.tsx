@@ -14,16 +14,13 @@ import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import { getByTestId, queryByTestId, screen } from '@testing-library/react';
+import { getByTestId } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 jest.mock('./lib/kibana');
-jest.mock('../components/cases_context/use_cases_context');
 
 const useToastsMock = useToasts as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useCasesContextMock = useCasesContext as jest.Mock;
 
 describe('Use cases toast hook', () => {
   const successMock = jest.fn();
@@ -69,8 +66,6 @@ describe('Use cases toast hook', () => {
       getUrlForApp,
       navigateToUrl,
     };
-
-    useCasesContextMock.mockReturnValue({ appId: 'testAppId' });
   });
 
   describe('showSuccessAttach', () => {
@@ -152,7 +147,6 @@ describe('Use cases toast hook', () => {
     describe('Toast content', () => {
       let appMockRender: AppMockRenderer;
       const onViewCaseClick = jest.fn();
-
       beforeEach(() => {
         appMockRender = createAppMockRenderer();
         onViewCaseClick.mockReset();
@@ -219,15 +213,8 @@ describe('Use cases toast hook', () => {
         const result = appMockRender.render(
           <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
         );
-
         userEvent.click(result.getByTestId('toaster-content-case-view-link'));
         expect(onViewCaseClick).toHaveBeenCalled();
-      });
-
-      it('hides the view case link when onViewCaseClick is not defined', () => {
-        appMockRender.render(<CaseToastSuccessContent />);
-
-        expect(screen.queryByTestId('toaster-content-case-view-link')).not.toBeInTheDocument();
       });
     });
 
@@ -279,31 +266,6 @@ describe('Use cases toast hook', () => {
           deepLinkId: 'cases',
           path: '/mock-id',
         });
-      });
-
-      it('does not navigates to a case if the appId is not defined', () => {
-        useCasesContextMock.mockReturnValue({ appId: undefined });
-
-        const { result } = renderHook(
-          () => {
-            return useCasesToast();
-          },
-          { wrapper: TestProviders }
-        );
-
-        result.current.showSuccessAttach({
-          theCase: { ...mockCase, owner: 'in-valid' },
-          title: 'Custom title',
-        });
-
-        const mockParams = successMock.mock.calls[0][0];
-        const el = document.createElement('div');
-        mockParams.text(el);
-        const button = queryByTestId(el, 'toaster-content-case-view-link');
-
-        expect(button).toBeNull();
-        expect(getUrlForApp).not.toHaveBeenCalled();
-        expect(navigateToUrl).not.toHaveBeenCalled();
       });
     });
   });

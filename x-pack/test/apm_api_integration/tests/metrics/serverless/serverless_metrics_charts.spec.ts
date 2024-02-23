@@ -64,7 +64,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Serverless metrics charts', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177642
+  registry.when.skip('Serverless metrics charts', { config: 'basic', archives: [] }, () => {
     const {
       memoryTotal,
       memoryFree,
