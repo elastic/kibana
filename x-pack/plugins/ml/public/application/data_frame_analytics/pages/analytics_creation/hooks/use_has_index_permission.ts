@@ -45,7 +45,7 @@ export const useHasRequiredIndicesPermissions = (
     [hasPrivileges, indexName, isDestIndex]
   );
 
-  if (typeof indexName === 'string' && indexName === '') {
+  if (indexName === '') {
     return;
   }
 
