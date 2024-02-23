@@ -25,7 +25,7 @@ export interface FetchConnectorExecuteAction {
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
-  replacements?: Record<string, string>;
+  replacements: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
 }

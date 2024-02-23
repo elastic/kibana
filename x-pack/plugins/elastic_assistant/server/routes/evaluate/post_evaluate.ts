@@ -201,6 +201,7 @@ export const postEvaluateRoute = (
                       ],
                       tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                     },
+                    replacements: {},
                   }),
                 metadata: {
                   connectorName,

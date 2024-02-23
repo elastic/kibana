@@ -75,7 +75,7 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      let replacements: Record<string, string> | undefined;
+      let replacements: Record<string, string> = {};
       const onNewReplacements = (newReplacements: Record<string, string>) => {
         replacements = { ...(currentConversation.replacements ?? {}), ...newReplacements };
         setCurrentConversation({
@@ -168,6 +168,7 @@ export const useChatSend = ({
       // do not send any new messages, the previous conversation is already stored
       messages: [],
       conversationId: currentConversation.id,
+      replacements: {},
     });
 
     const responseMessage: Message = getMessageFromRawResponse(rawResponse);

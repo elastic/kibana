@@ -110,9 +110,7 @@ export const postActionsConnectorExecuteRoute = (
                     messages: request.body.params.subActionParams.messages.map((m) => ({
                       content: getMessageContentWithoutReplacements({
                         messageContent: userMessage.content,
-                        replacements: request.body.replacements as
-                          | Record<string, string>
-                          | undefined,
+                        replacements: (request.body.replacements ?? {}) as Record<string, string>,
                       }),
                       role: m.role,
                       timestamp: dateTimeString,
@@ -141,7 +139,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            onMessageSent = (content: string, traceData?: Message['traceData'] = {}) => {
+            onMessageSent = (content: string, traceData: Message['traceData'] = {}) => {
               if (updatedConversation) {
                 dataClient?.appendConversationMessages({
                   existingConversation: updatedConversation,
@@ -149,9 +147,7 @@ export const postActionsConnectorExecuteRoute = (
                     getMessageFromRawResponse({
                       rawContent: getMessageContentWithoutReplacements({
                         messageContent: content,
-                        replacements: request.body.replacements as
-                          | Record<string, string>
-                          | undefined,
+                        replacements: (request.body.replacements ?? {}) as Record<string, string>,
                       }),
                       traceData,
                     }),
@@ -238,7 +234,7 @@ export const postActionsConnectorExecuteRoute = (
             logger,
             onNewReplacements,
             request,
-            replacements: request.body.replacements as Record<string, string>,
+            replacements: (request.body.replacements as Record<string, string>) ?? {},
             size: request.body.size,
             telemetry,
           });

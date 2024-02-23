@@ -27,7 +27,7 @@ export const getMessageContentWithoutReplacements = ({
   replacements,
 }: {
   messageContent: string;
-  replacements: Record<string, string> | undefined;
+  replacements: Record<string, string>;
 }): string =>
   replacements != null
     ? Object.keys(replacements).reduce(
