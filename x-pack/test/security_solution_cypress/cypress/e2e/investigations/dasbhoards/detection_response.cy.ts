@@ -43,7 +43,8 @@ import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../..
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/177761
+describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
