@@ -818,6 +818,34 @@ export const registerEnterpriseSearchIntegrations = (
       isBeta: false,
     });
     customIntegrations.registerCustomIntegration({
+      id: 'confluence_data_center',
+      title: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.confluenceDataCenterTitle',
+        {
+          defaultMessage: 'Confluence Data Center',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.confluenceDataCenterDescription',
+        {
+          defaultMessage: 'Search over your content on Confluence Data Center.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=confluence',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/confluence_cloud.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+    customIntegrations.registerCustomIntegration({
       id: 'jira_cloud',
       title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.jiraCloudTitle', {
         defaultMessage: 'Jira Cloud',
@@ -835,6 +863,41 @@ export const registerEnterpriseSearchIntegrations = (
         'connector',
         'connector_client',
         'jira',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=jira',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/jira_cloud.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+    customIntegrations.registerCustomIntegration({
+      id: 'jira_data_center',
+      title: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.jiraDataCenterCloudTitle',
+        {
+          defaultMessage: 'Jira Data Center',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.jiraDataCenterDescription',
+        {
+          defaultMessage: 'Search over your content on Jira Data Center.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
         ...nativeSearchTag,
       ],
       uiInternalPath:
@@ -1004,6 +1067,54 @@ export const registerEnterpriseSearchIntegrations = (
         {
           type: 'svg',
           src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/box.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'notion',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.notionTitle', {
+        defaultMessage: 'Notion',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.notionDescription',
+        {
+          defaultMessage: 'Search over your content on Notion.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=notion',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/notion.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: true,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'redis',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.redisTitle', {
+        defaultMessage: 'Redis',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.redisDescription',
+        {
+          defaultMessage: 'Search over your content on Redis.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=redis',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/redis.svg'),
         },
       ],
       shipper: 'enterprise_search',

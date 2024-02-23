@@ -87,11 +87,11 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return a 400 when given an invalid "kuery" value', async () => {
+    it('with enableStrictKQLValidation should return a 400 when given an invalid "kuery" value', async () => {
       await supertest.get(`/api/fleet/agents?kuery='test%3A'`).expect(400);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
