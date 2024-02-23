@@ -1133,7 +1133,7 @@ class OutputService {
       appContextService
         .getLogger()
         .debug(
-          `Error getting output ${id} SO updated_at: ${outputSO.error.message}, returning undefined`
+          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
         );
       return undefined;
     }
