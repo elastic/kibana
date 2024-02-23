@@ -14,17 +14,17 @@ const buildkite = new BuildkiteClient();
 
 async function main() {
   if (!isCurrentHeadInMain()) {
-    if (DRY_RUN) {
+    if (!DRY_RUN) {
+      console.log('DRY_RUN: Trigger would have fired :green_heart:');
+    } else {
       console.log('Triggering build step :green_heart:');
       uploadTriggerBuildStep();
-    } else {
-      console.log('DRY_RUN: Trigger would have fired :green_heart:');
     }
   } else {
-    if (DRY_RUN) {
-      console.log('No trigger necessary :yellow_heart:');
-    } else {
+    if (!DRY_RUN) {
       console.log('DRY_RUN: No trigger necessary :yellow_heart:');
+    } else {
+      console.log('No trigger necessary :yellow_heart:');
     }
   }
 }
