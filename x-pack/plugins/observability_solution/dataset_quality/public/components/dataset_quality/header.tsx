@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { datasetQualityAppTitle } from '../../../common/translations';
@@ -30,21 +23,18 @@ export const betaBadgeDescription = i18n.translate('xpack.datasetQuality.betaBad
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
   return (
-    <>
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
-        <EuiFlexItem grow={false}>
-          <EuiPageHeader pageTitle={datasetQualityAppTitle} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={betaBadgeLabel}
-            title={betaBadgeLabel}
-            tooltipContent={betaBadgeDescription}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiHorizontalRule margin="none" />
-    </>
+    <EuiPageHeader bottomBorder>
+      <EuiPageHeaderSection>
+        <EuiTitle size="m">
+          <h2>{datasetQualityAppTitle}</h2>
+        </EuiTitle>
+        <EuiBetaBadge
+          label={betaBadgeLabel}
+          title={betaBadgeLabel}
+          tooltipContent={betaBadgeDescription}
+        />
+      </EuiPageHeaderSection>
+      <EuiPageHeaderSection>Page abilities</EuiPageHeaderSection>
+    </EuiPageHeader>
   );
 }
