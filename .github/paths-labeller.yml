@@ -14,9 +14,9 @@
     - 'packages/kbn-apm-synthtrace/**/*.*'
     - 'packages/kbn-apm-synthtrace-client/**/*.*'
     - 'packages/kbn-apm-utils/**/*.*'
-    - 'x-pack/plugins/synthetics/**/*.*'
+    - 'x-pack/plugins/observability_solution/synthetics/**/*.*'
     - 'x-pack/plugins/observability_solution/ux/**/*.*'
-    - 'x-pack/plugins/observability/public/components/shared/exploratory_view/**/*.*'
+    - 'x-pack/plugins/observability_solution/exploratory_view/**/*.*'
 - 'Team:Fleet':
     - 'x-pack/plugins/fleet/**/*.*'
     - 'x-pack/test/fleet_api_integration/**/*.*'
