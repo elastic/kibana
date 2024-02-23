@@ -203,7 +203,7 @@ interface Props {
   hideDatePicker?: boolean;
   // subject to watch the completition of the request
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
-  isHostsPage?: boolean;
+  hideSelectGroup?: boolean;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -217,7 +217,7 @@ export const AnomaliesTable = ({
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
   request$,
-  isHostsPage,
+  hideSelectGroup,
 }: Props) => {
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
@@ -506,7 +506,7 @@ export const AnomaliesTable = ({
                 isClearable={true}
               />
             </EuiFlexItem>
-            {!isHostsPage && (
+            {!hideSelectGroup && (
               <EuiFlexItem grow={1}>
                 <EuiComboBox
                   placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {

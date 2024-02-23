@@ -16,7 +16,13 @@ import { MetricHostsModuleProvider } from '../../../containers/ml/modules/metric
 import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_k8s/module';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
-export const AnomalyDetectionFlyout = ({ isHostsPage }: { isHostsPage: boolean }) => {
+export const AnomalyDetectionFlyout = ({
+  hideJobType,
+  hideSelectGroup,
+}: {
+  hideJobType?: boolean;
+  hideSelectGroup?: boolean;
+}) => {
   const { hasInfraMLSetupCapabilities } = useInfraMLCapabilities();
   const [showFlyout, setShowFlyout] = useState(false);
   const [screenName, setScreenName] = useState<'home' | 'setup'>('home');
@@ -77,7 +83,8 @@ export const AnomalyDetectionFlyout = ({ isHostsPage }: { isHostsPage: boolean }
                   hasSetupCapabilities={hasInfraMLSetupCapabilities}
                   goToSetup={openJobSetup}
                   closeFlyout={closeFlyout}
-                  isHostsPage={isHostsPage}
+                  hideJobType={hideJobType}
+                  hideSelectGroup={hideSelectGroup}
                 />
               )}
               {screenName === 'setup' && (

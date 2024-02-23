@@ -33,7 +33,8 @@ interface Props {
   hasSetupCapabilities: boolean;
   goToSetup(type: 'hosts' | 'kubernetes'): void;
   closeFlyout(): void;
-  isHostsPage: boolean;
+  hideJobType?: boolean;
+  hideSelectGroup?: boolean;
 }
 
 type Tab = 'jobs' | 'anomalies';
@@ -181,13 +182,13 @@ export const FlyoutHome = (props: Props) => {
                 hasSetupCapabilities={props.hasSetupCapabilities}
                 createHosts={createHosts}
                 createK8s={createK8s}
-                isHostsPage={props.isHostsPage}
+                hideJobType={props.hideJobType}
               />
             </>
           )}
 
           {tab === 'anomalies' && (
-            <AnomaliesTable closeFlyout={closeFlyout} isHostsPage={props.isHostsPage} />
+            <AnomaliesTable closeFlyout={closeFlyout} hideSelectGroup={props.hideSelectGroup} />
           )}
         </EuiFlyoutBody>
       </>
@@ -242,20 +243,18 @@ interface CreateJobTab {
   hasK8sJobs: boolean;
   createHosts(): void;
   createK8s(): void;
-  isHostsPage: boolean;
+  hideJobType?: boolean;
 }
 
 const CreateJobTab = (props: CreateJobTab) => {
   return (
     <>
-      {/* <EuiSpacer size="l" /> */}
       <EuiFlexGroup gutterSize={'m'}>
         <EuiFlexItem>
           <EuiCard
             data-test-subj="infraHostsJobCard"
             isDisabled={!props.hasSetupCapabilities}
             icon={<EuiIcon type={'storage'} size="xl" />}
-            // title="Hosts"
             title={
               <FormattedMessage
                 defaultMessage="Hosts"
@@ -296,7 +295,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
           />
         </EuiFlexItem>
-        {!props.isHostsPage && (
+        {!props.hideJobType && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="infraK8sJobCard"

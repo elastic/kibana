@@ -22645,7 +22645,7 @@
             "label": "release",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"ga\" | undefined"
+              "\"beta\" | \"experimental\" | \"ga\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -23057,7 +23057,7 @@
             "label": "[RegistryDataStreamKeys.release]",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"ga\""
+              "\"beta\" | \"experimental\" | \"ga\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -25727,7 +25727,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; version: string; description: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; version: string; description: string; download: string; path: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -25751,7 +25751,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
+          " | undefined)[] | undefined; release?: \"beta\" | \"experimental\" | \"ga\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
