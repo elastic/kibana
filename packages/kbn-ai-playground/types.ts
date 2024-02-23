@@ -47,6 +47,7 @@ export enum ChatFormFields {
   openAIKey = 'api_key',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
+  summarizationModel = 'summarization_model'
 }
 
 export interface ChatForm {
@@ -55,6 +56,7 @@ export interface ChatForm {
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.openAIKey]: string;
   [ChatFormFields.indices]: string[];
+  [ChatFormFields.summarizationModel]: string;
   [ChatFormFields.elasticsearchQuery]: QueryDslQueryContainer;
 }
 

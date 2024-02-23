@@ -5,23 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { OpenAIKeyField } from './open_ai_key_field';
 import { ChatFormFields } from '../../types';
+import { OpenAIKeyFlyOut } from './open_ai_key_flyout';
+import { OpenAISummarizationModel } from './open_ai_summarization_model';
 
 export const SummarizationPanel: React.FC = () => {
   const { control } = useFormContext();
+  const [isOpenAIFlyOutOpen, setIsOpenAIFlyOutOpen] = useState<boolean>(false);
+
+  const onCloseOpenAIFlyOut = () => {
+    setIsOpenAIFlyOutOpen(!isOpenAIFlyOutOpen);
+  };
+  const handleOpenAIFlyOut = () => {
+    setIsOpenAIFlyOutOpen(true);
+  };
 
   return (
     <>
+      {isOpenAIFlyOutOpen && (
+        <Controller
+          name={ChatFormFields.openAIKey}
+          control={control}
+          defaultValue=""
+          render={({ field }) => <OpenAIKeyFlyOut openAPIKey={field.value} onSave={field.onChange} onClose={onCloseOpenAIFlyOut} />}
+        />
+      )}
+
       <Controller
-        name={ChatFormFields.openAIKey}
+        name={ChatFormFields.summarizationModel}
         control={control}
-        defaultValue=""
-        render={({ field }) => <OpenAIKeyField apiKey={field.value} onSave={field.onChange} />}
+        render={({ field }) => (
+          <OpenAISummarizationModel model={field.value} onSelect={field.onChange} openAIFlyOutOpen={handleOpenAIFlyOut} />
+        )}
       />
 
       <Controller
@@ -30,6 +50,7 @@ export const SummarizationPanel: React.FC = () => {
         defaultValue=""
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
       />
+
 
       <Controller
         name={ChatFormFields.citations}

@@ -56,6 +56,7 @@ export const Chat = () => {
           api_key: data[ChatFormFields.openAIKey],
           citations: data[ChatFormFields.citations].toString(),
           elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
+          summarization_model: data[ChatFormFields.summarizationModel],
         },
       }
     );
