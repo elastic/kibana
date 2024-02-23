@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useSelector } from 'react-redux';
 

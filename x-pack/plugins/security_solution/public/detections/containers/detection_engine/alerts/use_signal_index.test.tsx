@@ -11,20 +11,12 @@ import { useSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { sourcererSelectors } from '../../../../common/store';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../../../../timelines/components/timeline/esql_tab_content');
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: jest.fn().mockReturnValue({
-    signalIndexMappingOutdated: null,
-    signalIndexName: null,
-  }),
-}));
-
-const useDeepEqualSelectorMock = useDeepEqualSelector as jest.Mock;
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -33,6 +25,8 @@ describe('useSignalIndex', () => {
     jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
+    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
 
   test('init', async () => {
@@ -175,11 +169,10 @@ describe('useSignalIndex', () => {
 
   test('should not make API calls when signal index already stored in sourcerer', async () => {
     const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex');
-
-    useDeepEqualSelectorMock.mockReturnValue({
-      signalIndexMappingOutdated: false,
-      signalIndexName: 'mock-signal-index-from-sourcerer',
-    });
+    jest
+      .spyOn(sourcererSelectors, 'signalIndexName')
+      .mockReturnValue('mock-signal-index-from-sourcerer');
+    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
