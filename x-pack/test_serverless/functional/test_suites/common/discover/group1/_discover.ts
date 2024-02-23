@@ -176,24 +176,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show matches when time range is expanded', async () => {
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await retry.waitForWithTimeout('view all matches to load', 60000, async () => {
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          if (!(await testSubjects.exists('discoverNoResultsViewAllMatches'))) {
-            return true;
-          }
-          try {
-            // If the button still exists, the click didn't work, so try again.
-            // We need to manually click the button since testSubjects.click will
-            // use a retry, but we want this to throw if the click fails since it
-            // means the button dissapeared before we could click it.
-            const button = await testSubjects.find('discoverNoResultsViewAllMatches', 1000);
-            await button.click();
-          } catch {
-            // we could get an exception here if the button isn't found or isn't in
-            // the DOM by the time we try to click it, so just ignore it and move on
-          }
-          return false;
-        });
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);
           expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);
