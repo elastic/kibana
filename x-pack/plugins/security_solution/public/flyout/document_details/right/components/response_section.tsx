@@ -11,7 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ResponseButton } from './response_button';
 import { ExpandableSection } from './expandable_section';
 import { useRightPanelContext } from '../context';
+import { getField } from '../../shared/utils';
+import { EventKind } from '../../shared/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
+
 export interface ResponseSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
@@ -23,7 +26,12 @@ export interface ResponseSectionProps {
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection: VFC<ResponseSectionProps> = ({ expanded = false }) => {
-  const { isPreview } = useRightPanelContext();
+  const { isPreview, getFieldsData } = useRightPanelContext();
+  const eventKind = getField(getFieldsData('event.kind'));
+  if (eventKind !== EventKind.signal) {
+    return null;
+  }
+
   return (
     <ExpandableSection
       expanded={expanded}

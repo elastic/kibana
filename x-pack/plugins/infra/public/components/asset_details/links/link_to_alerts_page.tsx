@@ -10,8 +10,8 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { ALERTS_PATH } from '../../../common/alerts/constants';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { ALERTS_PATH } from '../../shared/alerts/constants';
 
 export interface LinkToAlertsPageProps {
   assetName: string;

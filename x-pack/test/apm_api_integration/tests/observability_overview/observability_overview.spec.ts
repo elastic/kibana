@@ -88,7 +88,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177497
+  registry.when.skip('data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Observability overview api ', () => {
       const GO_PROD_RATE = 50;
       const GO_DEV_RATE = 5;

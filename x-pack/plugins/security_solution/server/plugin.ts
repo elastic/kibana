@@ -308,7 +308,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery.createActionService,
-        experimentalFeatures: config.experimentalFeatures,
       }),
     };
 
@@ -633,6 +632,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
+      // TODO:PT remove this and use new method of EndpointAppServices
       actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
