@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiSpacer,
+  EuiTabs,
+  EuiTab,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
-import { EuiTabs } from '@elastic/eui';
-import { EuiTab } from '@elastic/eui';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { css } from '@emotion/react';
+import { KibanaEnvironmentContext } from '../../../../../../hooks/use_kibana';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
@@ -36,6 +48,10 @@ interface Props {
 }
 
 type Tab = 'jobs' | 'anomalies';
+
+export const INFRA_ML_FLYOUT_FEEDBACK_LINK =
+  'https://docs.google.com/forms/d/e/1FAIpQLSfBixH_1HTuqeMCy38iK9w1mB8vl_eVvcLUlSPAPiWKBHeHiQ/viewform';
+
 export const FlyoutHome = (props: Props) => {
   const [tab, setTab] = useState<Tab>('jobs');
   const { goToSetup, closeFlyout } = props;
@@ -51,6 +67,8 @@ export const FlyoutHome = (props: Props) => {
   } = useMetricK8sModuleContext();
   const { hasInfraMLCapabilities, hasInfraMLReadCapabilities, hasInfraMLSetupCapabilities } =
     useInfraMLCapabilitiesContext();
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
+  const { euiTheme } = useEuiTheme();
 
   const createHosts = useCallback(() => {
     goToSetup('hosts');
@@ -78,6 +96,14 @@ export const FlyoutHome = (props: Props) => {
     pathname: '/jobs',
   });
 
+  // Used for prefilling the feedback form (if both types are enabled do not prefill)
+  const mlJobTypeByNode =
+    hostJobSummaries.length > 0 && k8sJobSummaries.length === 0
+      ? 'host'
+      : hostJobSummaries.length === 0 && k8sJobSummaries.length > 0
+      ? 'pod'
+      : undefined;
+
   if (!hasInfraMLCapabilities) {
     return <SubscriptionSplashPrompt />;
   } else if (!hasInfraMLReadCapabilities) {
@@ -95,33 +121,62 @@ export const FlyoutHome = (props: Props) => {
   } else {
     return (
       <>
-        <EuiFlyoutHeader>
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                defaultMessage="Machine Learning anomaly detection"
-                id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Machine Learning anomaly detection"
+                    id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                margin-right: ${euiTheme.size.l};
+              `}
+            >
+              <FeatureFeedbackButton
+                data-test-subj={
+                  mlJobTypeByNode
+                    ? `infraML${mlJobTypeByNode}FlyoutFeedbackLink`
+                    : 'infraMLFlyoutFeedbackLink'
+                }
+                formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+                kibanaVersion={kibanaVersion}
+                isCloudEnv={isCloudEnv}
+                isServerlessEnv={isServerlessEnv}
+                nodeType={mlJobTypeByNode}
               />
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-
-        <EuiTabs>
-          <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
-            {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
-              defaultMessage: 'Jobs',
-            })}
-          </EuiTab>
-          <EuiTab
-            isSelected={tab === 'anomalies'}
-            onClick={() => setTab('anomalies')}
-            data-test-subj="anomalyFlyoutAnomaliesTab"
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiTabs
+            bottomBorder
+            css={css`
+              margin-bottom: calc(-1 * (${euiTheme.size.l} + 1px));
+            `}
+            size="s"
           >
-            {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
-              defaultMessage: 'Anomalies',
-            })}
-          </EuiTab>
-        </EuiTabs>
+            <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
+              {i18n.translate('xpack.infra.ml.anomalyFlyout.jobsTabLabel', {
+                defaultMessage: 'Jobs',
+              })}
+            </EuiTab>
+            <EuiTab
+              isSelected={tab === 'anomalies'}
+              onClick={() => setTab('anomalies')}
+              data-test-subj="anomalyFlyoutAnomaliesTab"
+            >
+              {i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesTabLabel', {
+                defaultMessage: 'Anomalies',
+              })}
+            </EuiTab>
+          </EuiTabs>
+        </EuiFlyoutHeader>
 
         <EuiFlyoutBody
           banner={
