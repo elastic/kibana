@@ -176,6 +176,32 @@ const states: Record<StateNames, StateShape> = {
   },
 };
 
+Object.keys(states).forEach((stateName) => {
+  if (!states[stateName].pre) {
+    states[stateName].pre = async () => {
+      console.log('Entering state:', stateName);
+    };
+  } else {
+    const originalPre = states[stateName].pre;
+    states[stateName].pre = async (state: StateShape) => {
+      console.log('Entering state:', stateName);
+      return originalPre!(state);
+    };
+  }
+
+  if (!states[stateName].post) {
+    states[stateName].post = async () => {
+      console.log('Exiting state:', stateName);
+    };
+  } else {
+    const originalPost = states[stateName].post;
+    states[stateName].post = async (state: StateShape) => {
+      console.log('Exiting state:', stateName);
+      return originalPost!(state);
+    };
+  }
+});
+
 /**
  * This module is a central interface for updating the messaging interface for the wizard.
  * It's implemented as a state machine that updates the wizard state as we transition between states.
@@ -213,6 +239,11 @@ export async function transition(targetStateName: StateNames, data?: any) {
   const currentStateIndex = Object.keys(states).indexOf(currentStateName);
   const targetStateIndex = Object.keys(states).indexOf(targetStateName);
 
+  console.log(
+    `Transitioning from ${currentStateName} (${currentStateIndex}) to ${targetStateName} (${targetStateIndex}) with data:`,
+    data
+  );
+
   if (currentStateIndex === -1) {
     throw new Error(`Could not find current state '${currentStateName}' in core flow`);
   }
@@ -225,9 +256,13 @@ export async function transition(targetStateName: StateNames, data?: any) {
 
   if (currentStateIndex + 1 !== targetStateIndex) {
     await tryCall(currentState.post, stateData);
+    console.warn("Target state isn't the next state in the flow, marking as NOK.");
     stateData[currentStateName] = 'nok';
   } else {
     const result = await tryCall(currentState.post, stateData);
+    if (!result) {
+      console.warn("Post Call wasn't successful, marking as NOK.");
+    }
     stateData[currentStateName] = result ? 'ok' : 'nok';
   }
   stateData[targetStateName] = 'pending';
