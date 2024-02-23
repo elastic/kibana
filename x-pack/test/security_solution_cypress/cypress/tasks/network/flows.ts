@@ -26,7 +26,7 @@ export const openHoverActions = () => {
 };
 
 export const mouseoverOnToOverflowItem = () => {
-  cy.get(OVERFLOW_ITEM).first().realHover();
+  cy.get(OVERFLOW_ITEM).first().trigger('mouseover');
 };
 
 export const clickOnFilterIn = () => {
