@@ -89,10 +89,8 @@ export class ReportingNotifierStreamHandler {
 
   /*
    * Use Kibana Toast API to show our messages
-   *
-   * Public for purposes of testing
    */
-  public showNotifications({
+  protected showNotifications({
     completed: completedJobs,
     failed: failedJobs,
   }: JobSummarySet): Rx.Observable<JobSummarySet> {
@@ -147,10 +145,8 @@ export class ReportingNotifierStreamHandler {
   /*
    * An observable that finds jobs that are known to be "processing" (stored in
    * session storage) but have non-processing job status on the server
-   *
-   * Public for purposes of testing
    */
-  public findChangedStatusJobs(previousPending: JobId[]): Rx.Observable<JobSummarySet> {
+  protected findChangedStatusJobs(previousPending: JobId[]): Rx.Observable<JobSummarySet> {
     return Rx.from(this.apiClient.findForJobIds(previousPending)).pipe(
       mergeMap(async (jobs) => {
         const newCompleted: JobSummary[] = [];
