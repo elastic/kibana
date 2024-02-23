@@ -27,7 +27,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -59,11 +58,11 @@ import { APIKeysAPIClient } from '../api_keys_api_client';
 interface UseAsyncTableResult {
   state: QueryApiKeyResult;
   isLoading: boolean;
-  query: QueryContainer;
+  query: Query;
   from: number;
   pageSize: number;
   totalKeys: number;
-  setQuery: React.Dispatch<React.SetStateAction<QueryContainer>>;
+  setQuery: React.Dispatch<React.SetStateAction<Query>>;
   setFrom: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
   fetchApiKeys: () => Promise<void>;
@@ -73,7 +72,7 @@ const useAsyncTable = (): UseAsyncTableResult => {
   const [state, setState] = useState<QueryApiKeyResult>({} as QueryApiKeyResult);
   const [totalKeys, setTotalKeys] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [query, setQuery] = useState<QueryContainer>({});
+  const [query, setQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(25);
   const { services } = useKibana<CoreStart>();
@@ -85,9 +84,37 @@ const useAsyncTable = (): UseAsyncTableResult => {
 
   const fetchApiKeys = async () => {
     setIsLoading(true);
+    let queryContainer;
+
+    if (query?.text === 'type:managed') {
+      queryContainer = {
+        bool: {
+          should: [
+            {
+              term: {
+                'metadata.managed': {
+                  value: true,
+                },
+              },
+            },
+            {
+              prefix: {
+                name: {
+                  value: 'Alerting:',
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      };
+    } else {
+      queryContainer = EuiSearchBar.Query.toESQuery(query);
+    }
 
     const requestBody = {
-      query: Object.keys(query).length === 0 ? undefined : query,
+      query:
+        queryContainer && Object.keys(queryContainer).length === 0 ? undefined : queryContainer,
       from,
       size: pageSize,
     };
@@ -165,9 +192,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
     if (!args.error) {
-      const queryContainer = EuiSearchBar.Query.toESQuery(args.query);
-
-      setQuery(queryContainer);
+      setQuery(args.query);
     }
   };
 
@@ -452,7 +477,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
-  const initialQuery = EuiSearchBar.Query.MATCH_ALL;
+  const initialQuery = EuiSearchBar.Query.parse('');
 
   const { typeFilters, usernameFilters, expired } = categorizeAggregations(aggregations);
 
