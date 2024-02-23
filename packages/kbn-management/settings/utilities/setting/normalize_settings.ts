@@ -71,7 +71,7 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
     case 'string':
       return value as string;
     case 'number':
-      return value ? Number(value) : undefined;
+      return value != null ? Number(value) : undefined;
     case 'boolean':
       return Boolean(value);
     case 'array':
