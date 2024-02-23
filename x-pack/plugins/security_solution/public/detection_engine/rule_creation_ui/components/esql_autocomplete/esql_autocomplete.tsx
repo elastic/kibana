@@ -11,7 +11,7 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { useEsqlFieldOptions } from './use_esql_fields_options';
+import { useEsqlFieldOptions } from '../../hooks/use_esql_fields_options';
 const AS_PLAIN_TEXT = { asPlainText: true };
 const COMPONENT_WIDTH = 500;
 
