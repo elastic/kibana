@@ -18,7 +18,11 @@ export const StartNewChat: React.FC = () => {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexGroup
-        css={{ padding: euiTheme.size.xxl, maxWidth: maxWidthPage }}
+        css={{
+          padding: `${euiTheme.size.xxl} ${euiTheme.size.l}`,
+          maxWidth: maxWidthPage,
+          boxSizing: 'content-box',
+        }}
         direction="column"
         gutterSize="xl"
       >
