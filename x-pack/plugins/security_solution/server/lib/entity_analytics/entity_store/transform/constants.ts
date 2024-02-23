@@ -173,7 +173,7 @@ export const getEntityStoreTransform = (opts: {
         '@timestamp': {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: '1m',
+            fixed_interval: '15m',
           },
         },
         'host.name': {
@@ -273,7 +273,7 @@ export const getEntityStoreTransform = (opts: {
     retention_policy: {
       time: {
         field: '@timestamp.max',
-        max_age: '10m',
+        max_age: '1d',
       },
     },
   };
