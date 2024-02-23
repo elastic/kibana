@@ -19,7 +19,7 @@ import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
@@ -108,9 +108,10 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
                 permissions,
                 getFilesClient,
               }}
-              queryClient={queryClient}
             >
-              <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
+              <QueryClientProvider client={queryClient}>
+                <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
+              </QueryClientProvider>
             </CasesProvider>
           </MemoryRouter>
         </ThemeProvider>
@@ -190,9 +191,8 @@ export const createAppMockRenderer = ({
                 releasePhase,
                 getFilesClient,
               }}
-              queryClient={queryClient}
             >
-              {children}
+              <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
             </CasesProvider>
           </MemoryRouter>
         </ThemeProvider>

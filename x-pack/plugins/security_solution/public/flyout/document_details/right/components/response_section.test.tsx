@@ -10,18 +10,17 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { RESPONSE_SECTION_CONTENT_TEST_ID, RESPONSE_SECTION_HEADER_TEST_ID } from './test_ids';
 import { RightPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
 import { ResponseSection } from './response_section';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 
-const panelContextValue = {} as unknown as RightPanelContext;
-
 const renderResponseSection = () =>
   render(
     <IntlProvider locale="en">
       <TestProvider>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <RightPanelContext.Provider value={mockContextValue}>
           <ResponseSection />
         </RightPanelContext.Provider>
       </TestProvider>
@@ -53,7 +52,7 @@ describe('<ResponseSection />', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider value={{ ...panelContextValue, isPreview: true }}>
+          <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
             <ResponseSection />
           </RightPanelContext.Provider>
         </TestProvider>
@@ -61,5 +60,29 @@ describe('<ResponseSection />', () => {
     );
     getByTestId(RESPONSE_SECTION_HEADER_TEST_ID).click();
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+  });
+
+  it('should render empty component if document is not signal', () => {
+    const mockGetFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'event';
+      }
+    };
+    const { container } = render(
+      <IntlProvider locale="en">
+        <TestProvider>
+          <RightPanelContext.Provider
+            value={{
+              ...mockContextValue,
+              getFieldsData: mockGetFieldsData,
+            }}
+          >
+            <ResponseSection />
+          </RightPanelContext.Provider>
+        </TestProvider>
+      </IntlProvider>
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 });
