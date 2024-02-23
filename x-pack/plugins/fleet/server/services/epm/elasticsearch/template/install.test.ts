@@ -13,7 +13,7 @@ import { prepareTemplate, prepareToInstallTemplates } from './install';
 
 jest.mock('../../fields/field', () => ({
   ...jest.requireActual('../../fields/field'),
-  loadFieldsFromYaml: jest.fn(),
+  loadDatastreamsFieldsFromYaml: jest.fn(),
 }));
 
 const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as jest.MockedFunction<
