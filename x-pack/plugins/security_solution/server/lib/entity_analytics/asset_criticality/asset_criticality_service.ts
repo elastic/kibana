@@ -7,8 +7,10 @@
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty } from 'lodash/fp';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import type { EntityType } from '../../../../common/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
 interface CriticalityIdentifier {
@@ -19,12 +21,15 @@ interface CriticalityIdentifier {
 interface IdentifierValuesByField {
   [idField: string]: string[];
 }
-
 export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
-  getCriticalitiesFromTimestamp: (from: string, size?: number) => Promise<AssetCriticalityRecord[]>;
+  getCriticalitiesFromTimestamp: (opts: {
+    from: string;
+    size?: number;
+    entityTypes?: EntityType[];
+  }) => Promise<AssetCriticalityRecord[]>;
   isEnabled: () => Promise<boolean>;
 }
 
@@ -90,19 +95,36 @@ const getCriticalitiesByIdentifiers = async ({
 
 const getCriticalitiesFromTimestamp = async ({
   assetCriticalityDataClient,
+  entityTypes,
   from,
   size,
 }: {
   assetCriticalityDataClient: AssetCriticalityDataClient;
   from: string;
+  entityTypes?: Array<'host' | 'user'>;
   size?: number;
 }): Promise<AssetCriticalityRecord[]> => {
-  const criticalitySearchResponse = await assetCriticalityDataClient.search({
-    query: {
+  const filters: QueryDslQueryContainer[] = [
+    {
       range: {
         '@timestamp': {
           gte: from,
         },
+      },
+    },
+  ];
+
+  if (entityTypes) {
+    filters.push({
+      terms: {
+        id_field: entityTypes.map((entityType) => (entityType === 'host' ? 'host.id' : 'user.id')),
+      },
+    });
+  }
+  const criticalitySearchResponse = await assetCriticalityDataClient.search({
+    query: {
+      bool: {
+        filter: filters,
       },
     },
     sort: [{ '@timestamp': 'asc' }],
@@ -125,8 +147,11 @@ export const assetCriticalityServiceFactory = ({
 }: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
-  getCriticalitiesFromTimestamp: (from: string, size?: number) =>
-    getCriticalitiesFromTimestamp({ assetCriticalityDataClient, from, size }),
+  getCriticalitiesFromTimestamp: (opts: {
+    from: string;
+    size?: number;
+    entityTypes?: EntityType[];
+  }) => getCriticalitiesFromTimestamp({ assetCriticalityDataClient, ...opts }),
   isEnabled: () => uiSettingsClient.get<boolean>(ENABLE_ASSET_CRITICALITY_SETTING),
   
 });
