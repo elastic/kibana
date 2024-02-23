@@ -17,7 +17,6 @@ import {
   Rule,
   RuleAction,
   RuleAlertData,
-  RuleActionTypes,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -1597,7 +1596,6 @@ describe('Task Runner', () => {
               foo: true,
             },
             uuid: '111-111',
-            type: RuleActionTypes.DEFAULT,
           },
           {
             group: recoveryActionGroup.id,
@@ -1607,7 +1605,6 @@ describe('Task Runner', () => {
               isResolved: true,
             },
             uuid: '222-222',
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -1696,7 +1693,6 @@ describe('Task Runner', () => {
               foo: true,
             },
             uuid: '111-111',
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -1760,7 +1756,6 @@ describe('Task Runner', () => {
               foo: true,
             },
             uuid: '111-111',
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -2885,37 +2880,32 @@ describe('Task Runner', () => {
         group: 'default',
         id: '1',
         actionTypeId: 'action',
-        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '2',
         actionTypeId: 'action',
-        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '3',
         actionTypeId: 'action',
-        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '4',
         actionTypeId: 'action',
-        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '5',
         actionTypeId: 'action',
-        type: RuleActionTypes.DEFAULT,
       },
     ];
 
     rulesClient.getAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
-      actions: mockActions as Array<RuleAction<'withSystemAction'>>,
+      actions: mockActions as RuleAction[],
     });
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);
@@ -3064,33 +3054,28 @@ describe('Task Runner', () => {
           group: 'default',
           id: '1',
           actionTypeId: '.server-log',
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '2',
           actionTypeId: '.server-log',
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '3',
           actionTypeId: '.server-log',
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '4',
           actionTypeId: 'any-action',
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '5',
           actionTypeId: 'any-action',
-          type: RuleActionTypes.DEFAULT,
         },
-      ] as Array<RuleAction<'withSystemAction'>>,
+      ] as RuleAction[],
     });
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);

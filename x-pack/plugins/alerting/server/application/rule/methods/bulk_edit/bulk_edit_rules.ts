@@ -16,8 +16,7 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
-import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../../../common';
-import { isSystemAction } from '../../../../../common/system_actions/is_system_action';
+import { RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
@@ -659,31 +658,37 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
-        const systemActions = operation.value.filter(
-          (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+        const systemActions = operation.value.filter((action): action is RuleSystemAction =>
+          actionsClient.isSystemAction(action.id)
+        );
+        const defaultActions = operation.value.filter(
+          (action): action is RuleAction => !actionsClient.isSystemAction(action.id)
         );
 
+        const { actions: genActions, systemActions: genSystemActions } =
+          await addGeneratedActionValues(defaultActions, systemActions, context);
         const updatedOperation = {
           ...operation,
-          value: await addGeneratedActionValues(operation.value, context),
+          value: [...genActions, ...genSystemActions],
         };
 
         await validateSystemActions({
           actionsClient,
           connectorAdapterRegistry: context.connectorAdapterRegistry,
-          systemActions,
+          systemActions: genSystemActions,
         });
 
         try {
           await validateActions(context, ruleType, {
             ...updatedRule,
-            actions: updatedOperation.value,
+            actions: genActions,
           });
         } catch (e) {
           // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
           updatedRule = await attemptToMigrateLegacyFrequency(
             context,
-            updatedOperation,
+            operation.field,
+            defaultActions,
             updatedRule,
             ruleType
           );
@@ -752,7 +757,10 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
 
       default: {
         if (operation.field === 'schedule') {
-          validateScheduleOperation(operation.value, updatedRule.actions, rule.id);
+          const defaultActions = updatedRule.actions.filter(
+            (action) => !actionsClient.isSystemAction(action.id)
+          );
+          validateScheduleOperation(operation.value, defaultActions, rule.id);
         }
 
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
@@ -819,11 +827,8 @@ function validateScheduleOperation(
 ): void {
   const scheduleInterval = parseDuration(schedule.interval);
   const actionsWithInvalidThrottles = [];
-  const actionsWithoutSystemActions = actions.filter(
-    (action): action is RuleDefaultAction => !isSystemAction(action)
-  );
 
-  for (const action of actionsWithoutSystemActions) {
+  for (const action of actions) {
     // check for actions throttled shorter than the rule schedule
     if (
       action.frequency?.notifyWhen === ruleNotifyWhen.THROTTLE &&
@@ -967,18 +972,19 @@ async function saveBulkUpdatedRules({
 
 async function attemptToMigrateLegacyFrequency<Params extends RuleParams>(
   context: RulesClientContext,
-  operation: BulkEditOperation,
+  operationField: BulkEditOperation['field'],
+  actions: RuleAction[],
   rule: RuleDomain<Params>,
   ruleType: RuleType
 ) {
-  if (operation.field !== 'actions')
+  if (operationField !== 'actions')
     throw new Error('Can only perform frequency migration on an action operation');
   // Try to remove the rule-level frequency params, and then validate actions
   if (typeof rule.notifyWhen !== 'undefined') rule.notifyWhen = undefined;
   if (rule.throttle) rule.throttle = undefined;
   await validateActions(context, ruleType, {
     ...rule,
-    actions: operation.value,
+    actions,
   });
   return rule;
 }

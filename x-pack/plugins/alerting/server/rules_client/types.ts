@@ -26,13 +26,12 @@ import { DistributiveOmit } from '@elastic/eui';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
-  RuleAction,
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
   RawRuleAlertsFilter,
   RuleSystemAction,
-  RuleDefaultAction,
+  RuleAction,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -88,14 +87,11 @@ export interface RulesClientContext {
   readonly uiSettings: UiSettingsServiceStart;
 }
 
-export type NormalizedAlertAction = DistributiveOmit<
-  RuleAction<'withSystemAction'>,
-  'actionTypeId'
->;
+export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
 export type NormalizedSystemAction = Omit<RuleSystemAction, 'actionTypeId'>;
 
 export type NormalizedAlertDefaultActionWithGeneratedValues = Omit<
-  RuleDefaultAction,
+  RuleAction,
   'uuid' | 'alertsFilter' | 'actionTypeId'
 > & {
   uuid: string;

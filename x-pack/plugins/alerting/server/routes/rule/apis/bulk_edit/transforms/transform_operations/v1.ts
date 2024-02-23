@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RuleActionTypes } from '../../../../../../../common';
 import { BulkEditOperation } from '../../../../../../application/rule/methods/bulk_edit';
 import { BulkEditRulesRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_edit';
 
@@ -31,7 +30,6 @@ export const transformOperations = ({
           id: action.id,
           params: action.params,
           ...(action.uuid && { uuid: action.uuid }),
-          type: RuleActionTypes.SYSTEM,
         };
       }
 
@@ -43,7 +41,6 @@ export const transformOperations = ({
         ...(action.frequency && { frequency: action.frequency }),
         ...(action.uuid && { uuid: action.uuid }),
         frequency: action.frequency,
-        type: RuleActionTypes.DEFAULT,
       };
     });
 

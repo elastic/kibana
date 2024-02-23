@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Rule, RuleActionTypes } from '../../../common';
+import { Rule } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -48,7 +48,6 @@ describe('getAlertRoute', () => {
         params: {
           foo: true,
         },
-        type: RuleActionTypes.DEFAULT,
       },
     ],
     consumer: 'bar',

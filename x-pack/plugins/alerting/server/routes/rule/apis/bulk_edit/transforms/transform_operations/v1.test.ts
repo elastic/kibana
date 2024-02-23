@@ -38,9 +38,8 @@ describe('transformOperations', () => {
               group: 'default',
               id: 'default-action',
               params: {},
-              type: 'default',
             },
-            { id: 'my-system-action-id', params: {}, type: 'system' },
+            { id: 'my-system-action-id', params: {} },
           ],
         },
       ]);

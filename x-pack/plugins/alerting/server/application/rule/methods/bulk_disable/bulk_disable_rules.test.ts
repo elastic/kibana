@@ -234,6 +234,7 @@ describe('bulkDisableRules', () => {
       rules: [returnedRuleForBulkDisableWithActions1, returnedRuleForBulkDisableWithActions2],
       total: 2,
     });
+  });
 
   test('should call untrack alert if untrack is true', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({

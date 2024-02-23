@@ -12,17 +12,14 @@ import {
   RuleLastRun,
   RuleAction,
   RuleType,
-  RuleDefaultAction,
 } from '../../common';
 
-function transformAction(
-  input: AsApiContract<RuleAction<'withSystemAction'>>
-): RuleAction<'withSystemAction'> {
+function transformAction(input: AsApiContract<RuleAction>): RuleAction {
   const {
     connector_type_id: actionTypeId,
     frequency,
     ...rest
-  } = input as AsApiContract<RuleDefaultAction>;
+  } = input as AsApiContract<RuleAction>;
   return {
     actionTypeId,
     ...(frequency
@@ -98,7 +95,7 @@ export type ApiRule = Omit<
   | 'next_run'
 > & {
   execution_status: ApiRuleExecutionStatus;
-  actions: Array<AsApiContract<RuleAction<'withSystemAction'>>>;
+  actions: Array<AsApiContract<RuleAction>>;
   created_at: string;
   updated_at: string;
   rule_type_id: string;

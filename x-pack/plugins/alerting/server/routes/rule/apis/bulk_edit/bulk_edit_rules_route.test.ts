@@ -13,14 +13,8 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import {
-  RuleActionTypes,
-  RuleDefaultAction,
-  RuleSystemAction,
-  SanitizedRule,
-} from '../../../../types';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -49,7 +43,6 @@ describe('bulkEditRulesRoute', () => {
           foo: true,
         },
         uuid: '123-456',
-        type: RuleActionTypes.DEFAULT,
       },
     ],
     consumer: 'bar',
@@ -199,7 +192,7 @@ describe('bulkEditRulesRoute', () => {
   });
 
   describe('actions', () => {
-    const action: RuleDefaultAction = {
+    const action: RuleAction = {
       actionTypeId: 'test',
       group: 'default',
       id: '2',
@@ -207,7 +200,6 @@ describe('bulkEditRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     };
 
     const systemAction: RuleSystemAction = {
@@ -217,11 +209,10 @@ describe('bulkEditRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.SYSTEM,
     };
 
     const mockedActionAlerts: Array<SanitizedRule<{}>> = [
-      { ...mockedAlert, actions: [action, systemAction] },
+      { ...mockedAlert, actions: [action], systemActions: [systemAction] },
     ];
 
     const bulkEditActionsRequest = {
@@ -230,7 +221,7 @@ describe('bulkEditRulesRoute', () => {
         {
           operation: 'add',
           field: 'actions',
-          value: [omit(action, 'type'), omit(systemAction, 'type')],
+          value: [action, systemAction],
         },
       ],
     };
@@ -345,7 +336,6 @@ describe('bulkEditRulesRoute', () => {
           foo: true,
         },
         uuid: '123-456',
-        type: RuleActionTypes.DEFAULT,
       };
 
       const licenseState = licenseStateMock.create();

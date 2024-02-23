@@ -13,7 +13,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../lib/license_api_access';
-import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../types';
+import { RuleAction, RuleSystemAction } from '../types';
 import { Rule } from '../application/rule/types';
 
 const rulesClient = rulesClientMock.create();
@@ -145,7 +145,6 @@ describe('bulkEnableRulesRoute', () => {
             foo: true,
           },
           uuid: '123-456',
-          type: RuleActionTypes.DEFAULT,
         },
       ],
       consumer: 'bar',
@@ -166,7 +165,7 @@ describe('bulkEnableRulesRoute', () => {
       revision: 0,
     };
 
-    const action: RuleDefaultAction = {
+    const action: RuleAction = {
       actionTypeId: 'test',
       group: 'default',
       id: '2',
@@ -174,9 +173,7 @@ describe('bulkEnableRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     };
-
     const systemAction: RuleSystemAction = {
       actionTypeId: 'test-2',
       id: 'system_action-id',
@@ -184,13 +181,12 @@ describe('bulkEnableRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.SYSTEM,
     };
-    const actions = [action, systemAction];
     const mockedRules: Array<Rule<{}>> = [
       {
         ...mockedRule,
-        actions,
+        actions: [action],
+        systemActions: [systemAction],
       },
     ];
 

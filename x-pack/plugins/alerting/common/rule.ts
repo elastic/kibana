@@ -111,20 +111,7 @@ export interface AlertsFilter extends SavedObjectAttributes {
 
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
-/**
- * The RuleActionTypes is being used in versioned
- * routes and rule client's schemas. Renaming
- * or removing a type will introduce a
- * breaking change
- */
-export const RuleActionTypes = {
-  DEFAULT: 'default' as const,
-  SYSTEM: 'system' as const,
-} as const;
-
-export type RuleActionTypes = typeof RuleActionTypes[keyof typeof RuleActionTypes];
-
-export interface RuleDefaultAction {
+export interface RuleAction {
   uuid?: string;
   group: string;
   id: string;
@@ -132,7 +119,6 @@ export interface RuleDefaultAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
-  type: typeof RuleActionTypes.DEFAULT;
   useAlertDataForTemplate?: boolean;
 }
 
@@ -141,18 +127,12 @@ export interface RuleSystemAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
-  type: typeof RuleActionTypes.SYSTEM;
   useAlertDataForTemplate?: boolean;
 }
 
-export type RuleActionKey = keyof RuleDefaultAction | keyof RuleSystemAction;
+export type RuleActionKey = keyof RuleAction;
+export type RuleSystemActionKey = keyof RuleSystemAction;
 
-export type RuleAction<T extends 'withSystemAction' | 'defaultAction' = 'defaultAction'> =
-  T extends 'withSystemAction'
-    ? RuleDefaultAction | RuleSystemAction
-    : Omit<RuleDefaultAction, 'type'>;
-
-// export type RuleAction = Omit<RuleDefaultAction, 'type'>;
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;
@@ -185,7 +165,8 @@ export interface Rule<Params extends RuleTypeParams = never> {
   alertTypeId: string; // this is persisted in the Rule saved object so we would need a migration to change this to ruleTypeId
   consumer: string;
   schedule: IntervalSchedule;
-  actions: Array<RuleAction<'withSystemAction'>>;
+  actions: RuleAction[];
+  systemActions?: RuleSystemAction[];
   params: Params;
   mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
@@ -221,11 +202,9 @@ export interface SanitizedAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export type SanitizedDefaultRuleAction = Omit<RuleDefaultAction, 'alertsFilter'> & {
+export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
   alertsFilter?: SanitizedAlertsFilter;
 };
-
-export type SanitizedRuleAction = RuleDefaultAction | RuleSystemAction;
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,

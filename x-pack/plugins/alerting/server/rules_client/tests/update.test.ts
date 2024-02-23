@@ -132,7 +132,6 @@ describe('update()', () => {
           params: {
             foo: true,
           },
-          type: 'default' as const,
           frequency: {
             summary: false,
             notifyWhen: RuleNotifyWhen.CHANGE,
@@ -323,7 +322,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
           {
             group: 'default',
@@ -331,7 +329,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
           {
             group: 'default',
@@ -339,7 +336,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -626,7 +622,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
           {
             group: 'default',
@@ -634,7 +629,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
           {
             group: 'custom',
@@ -642,7 +636,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -886,17 +879,16 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system_action:id',
+            params: {},
           },
           {
             id: 'system_action:id',
             params: {},
-            type: 'system',
-          },
-          {
-            id: 'system_action:id',
-            params: {},
-            type: 'system',
           },
         ],
       },
@@ -1110,7 +1102,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -1255,7 +1246,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -1418,7 +1408,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -1537,7 +1526,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
               },
               {
                 group: 'default',
@@ -1545,7 +1533,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
               },
               {
                 group: 'default',
@@ -1553,7 +1540,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
               },
             ],
           },
@@ -1603,7 +1589,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
           ],
         },
@@ -1715,7 +1700,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+
             frequency: {
               summary: false,
               notifyWhen: 'onActionGroupChange',
@@ -1861,7 +1846,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+
             frequency: {
               summary: false,
               notifyWhen: 'onThrottleInterval',
@@ -1874,7 +1859,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+
             frequency: {
               summary: false,
               notifyWhen: 'onThrottleInterval',
@@ -1887,7 +1872,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+
             frequency: {
               summary: false,
               notifyWhen: 'onThrottleInterval',
@@ -1926,7 +1911,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
+
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2060,7 +2045,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
+
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2096,7 +2081,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
+
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2134,7 +2119,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
+
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2147,7 +2132,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
+
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2182,7 +2167,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
+
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2195,7 +2180,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
               },
             ],
           },
@@ -2232,7 +2216,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
               },
             ],
           },
@@ -2269,7 +2252,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
+
                 frequency: {
                   summary: false,
                   notifyWhen: 'onActionGroupChange',
@@ -2282,7 +2265,6 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
-                type: 'default',
               },
             ],
           },
@@ -2319,7 +2301,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
+
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',
@@ -2397,7 +2379,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
             {
               group: 'default',
@@ -2405,7 +2386,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
             {
               group: 'default',
@@ -2413,7 +2393,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
           ],
         },
@@ -2497,7 +2476,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -2699,7 +2677,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
           {
             group: 'default',
@@ -2707,7 +2684,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
           {
             group: 'default',
@@ -2715,7 +2691,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -2750,7 +2725,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
             {
               group: 'default',
@@ -2758,7 +2732,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
             {
               group: 'default',
@@ -2766,7 +2739,6 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
             },
           ],
         },
@@ -3039,7 +3011,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+
             frequency: {
               notifyWhen: 'onActiveAlert',
               throttle: null,
@@ -3053,7 +3025,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
+
             frequency: {
               notifyWhen: 'onActiveAlert',
               throttle: null,
@@ -3237,7 +3209,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            type: 'default',
           },
         ],
       },
@@ -3358,7 +3329,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              type: 'default',
+
               frequency: {
                 summary: false,
                 notifyWhen: 'onActionGroupChange',

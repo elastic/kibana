@@ -22,7 +22,6 @@ import { alertingAuthorizationMock } from '../../authorization/alerting_authoriz
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { NormalizedAlertDefaultActionWithGeneratedValues } from '../types';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
@@ -68,10 +67,9 @@ describe('addGeneratedActionValues()', () => {
     isSystemAction: jest.fn(),
   };
 
-  const mockAction: RuleAction<'withSystemAction'> = {
+  const mockAction: RuleAction = {
     id: '1',
     group: 'default',
-    type: 'default',
     actionTypeId: 'slack',
     params: {},
     frequency: {
@@ -98,21 +96,21 @@ describe('addGeneratedActionValues()', () => {
   };
 
   test('adds uuid', async () => {
-    const actionWithGeneratedValues = await addGeneratedActionValues([mockAction], {
+    const actionWithGeneratedValues = await addGeneratedActionValues([mockAction], [], {
       ...rulesClientParams,
       fieldsToExcludeFromPublicApi: [],
       minimumScheduleIntervalInMs: 0,
     });
-    expect(actionWithGeneratedValues[0].uuid).toBe('111-222');
+    expect(actionWithGeneratedValues.actions[0].uuid).toBe('111-222');
   });
 
   test('adds DSL', async () => {
-    const actionWithGeneratedValues = (await addGeneratedActionValues([mockAction], {
+    const actionWithGeneratedValues = await addGeneratedActionValues([mockAction], [], {
       ...rulesClientParams,
       fieldsToExcludeFromPublicApi: [],
       minimumScheduleIntervalInMs: 0,
-    })) as NormalizedAlertDefaultActionWithGeneratedValues[];
-    expect(actionWithGeneratedValues[0].alertsFilter?.query?.dsl).toBe(
+    });
+    expect(actionWithGeneratedValues.actions[0].alertsFilter?.query?.dsl).toBe(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"testValue"}}],"minimum_should_match":1}},{"match_phrase":{"foo":"bar "}}],"should":[],"must_not":[]}}'
     );
   });
@@ -126,6 +124,7 @@ describe('addGeneratedActionValues()', () => {
             alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
           },
         ],
+        [],
         {
           ...rulesClientParams,
           fieldsToExcludeFromPublicApi: [],

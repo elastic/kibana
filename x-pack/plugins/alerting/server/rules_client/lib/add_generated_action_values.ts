@@ -9,17 +9,22 @@ import { v4 } from 'uuid';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { RuleActionTypes } from '../../../common';
 import {
   NormalizedAlertAction,
-  NormalizedAlertActionWithGeneratedValues,
+  NormalizedAlertDefaultActionWithGeneratedValues,
+  NormalizedAlertSystemActionWithGeneratedValues,
+  NormalizedSystemAction,
   RulesClientContext,
 } from '..';
 
 export async function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = [],
+  systemActions: NormalizedSystemAction[] = [],
   context: RulesClientContext
-): Promise<NormalizedAlertActionWithGeneratedValues[]> {
+): Promise<{
+  actions: NormalizedAlertDefaultActionWithGeneratedValues[];
+  systemActions: NormalizedAlertSystemActionWithGeneratedValues[];
+}> {
   const uiSettingClient = context.uiSettings.asScopedToClient(context.unsecuredSavedObjectsClient);
   const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] =
     await Promise.all([
@@ -32,7 +37,7 @@ export async function addGeneratedActionValues(
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
   };
-  const generateDSL = (kql: string, filters: Filter[]) => {
+  const generateDSL = (kql: string, filters: Filter[]): string => {
     try {
       return JSON.stringify(
         buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters, esQueryConfig)
@@ -41,30 +46,31 @@ export async function addGeneratedActionValues(
       throw Boom.badRequest(`Error creating DSL query: invalid KQL`);
     }
   };
-  return actions.map((action) => {
-    if (action.type === RuleActionTypes.SYSTEM) {
+
+  return {
+    actions: actions.map((action) => {
+      const { alertsFilter, uuid, ...restAction } = action;
       return {
-        ...action,
-        uuid: action.uuid || v4(),
+        ...restAction,
+        uuid: uuid || v4(),
+        ...(alertsFilter
+          ? {
+              alertsFilter: {
+                ...alertsFilter,
+                query: alertsFilter.query
+                  ? {
+                      ...alertsFilter.query,
+                      dsl: generateDSL(alertsFilter.query.kql, alertsFilter.query.filters) ?? '',
+                    }
+                  : undefined,
+              },
+            }
+          : {}),
       };
-    }
-    const { alertsFilter, uuid } = action;
-    return {
-      ...action,
-      uuid: uuid || v4(),
-      ...(alertsFilter
-        ? {
-            alertsFilter: {
-              ...alertsFilter,
-              query: alertsFilter.query
-                ? {
-                    ...alertsFilter.query,
-                    dsl: generateDSL(alertsFilter.query.kql, alertsFilter.query.filters),
-                  }
-                : undefined,
-            },
-          }
-        : {}),
-    } as NormalizedAlertActionWithGeneratedValues;
-  });
+    }),
+    systemActions: systemActions.map((systemAction) => ({
+      ...systemAction,
+      uuid: systemAction.uuid || v4(),
+    })),
+  };
 }

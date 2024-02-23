@@ -14,12 +14,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/apis/create';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
-import {
-  RuleActionTypes,
-  RuleDefaultAction,
-  RuleSystemAction,
-  SanitizedRule,
-} from '../../../../types';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -37,7 +32,7 @@ beforeEach(() => {
 describe('createRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
-  const action: RuleDefaultAction = {
+  const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
     id: '2',
@@ -57,7 +52,6 @@ describe('createRuleRoute', () => {
         timezone: 'UTC',
       },
     },
-    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: RuleSystemAction = {
@@ -67,7 +61,6 @@ describe('createRuleRoute', () => {
       foo: true,
     },
     uuid: '123-456',
-    type: RuleActionTypes.SYSTEM,
   };
 
   const mockedAlert: SanitizedRule<{ bar: boolean }> = {
@@ -684,7 +677,11 @@ describe('createRuleRoute', () => {
 
       const [_, handler] = router.post.mock.calls[0];
 
-      rulesClient.create.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+      rulesClient.create.mockResolvedValueOnce({
+        ...mockedAlert,
+        actions: [action],
+        systemActions: [systemAction],
+      });
 
       const [context, req, res] = mockHandlerArguments(
         { rulesClient, actionsClient },
@@ -761,7 +758,11 @@ describe('createRuleRoute', () => {
 
       const [_, handler] = router.post.mock.calls[0];
 
-      rulesClient.create.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+      rulesClient.create.mockResolvedValueOnce({
+        ...mockedAlert,
+        actions: [action],
+        systemActions: [systemAction],
+      });
 
       const [context, req, res] = mockHandlerArguments(
         { rulesClient, actionsClient },
@@ -796,7 +797,7 @@ describe('createRuleRoute', () => {
     });
 
     it('fails if the action contains a type in the request', async () => {
-      const actionToValidate: RuleDefaultAction = {
+      const actionToValidate: RuleAction = {
         actionTypeId: 'test',
         group: 'default',
         id: '2',
@@ -804,7 +805,6 @@ describe('createRuleRoute', () => {
           foo: true,
         },
         uuid: '123-456',
-        type: RuleActionTypes.DEFAULT,
       };
 
       const licenseState = licenseStateMock.create();

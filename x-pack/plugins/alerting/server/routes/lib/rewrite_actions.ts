@@ -6,13 +6,11 @@
  */
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
-import { NormalizedAlertAction } from '../../rules_client';
-import { actionsSchema } from './actions_schema';
-import { RuleActionTypes } from '../../../common';
+import { NormalizedAlertAction, NormalizedSystemAction } from '../../rules_client';
+import { actionsSchema, systemActionsSchema } from './actions_schema';
 
 export const rewriteActionsReq = (
-  actions: TypeOf<typeof actionsSchema>,
-  isSystemAction: (connectorId: string) => boolean
+  actions: TypeOf<typeof actionsSchema>
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
@@ -23,16 +21,6 @@ export const rewriteActionsReq = (
       use_alert_data_for_template: useAlertDataForTemplate,
       ...action
     }) => {
-      if (isSystemAction(action.id)) {
-        return {
-          id: action.id,
-          params: action.params,
-          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-          ...(action.uuid ? { uuid: action.uuid } : {}),
-          type: RuleActionTypes.SYSTEM,
-        };
-      }
-
       return {
         group: action.group ?? 'default',
         id: action.id,
@@ -50,8 +38,22 @@ export const rewriteActionsReq = (
             }
           : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
-        type: RuleActionTypes.DEFAULT,
       };
     }
   );
+};
+
+export const rewriteSystemActionsReq = (
+  actions: TypeOf<typeof systemActionsSchema>
+): NormalizedSystemAction[] => {
+  if (!actions) return [];
+
+  return actions.map(({ use_alert_data_for_template: useAlertDataForTemplate, ...action }) => {
+    return {
+      id: action.id,
+      params: action.params,
+      ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+      ...(action.uuid ? { uuid: action.uuid } : {}),
+    };
+  });
 };

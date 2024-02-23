@@ -41,8 +41,6 @@ export * from './rule_circuit_breaker_error_message';
 export * from './maintenance_window_scoped_query_error_message';
 export * from './action_ref_prefix';
 
-export { isSystemAction } from './system_actions/is_system_action';
-
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,

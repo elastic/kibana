@@ -5,46 +5,41 @@
  * 2.0.
  */
 
-import { RuleActionTypes } from '../../../common';
 import { rewriteActionsReq } from './rewrite_actions';
 
 describe('rewriteActionsReq', () => {
   it('should rewrite actions correctly', () => {
     expect(
-      rewriteActionsReq(
-        [
-          {
-            uuid: '111',
-            group: 'default',
-            id: '1',
-            params: { foo: 'bar' },
-            frequency: {
-              summary: true,
-              notify_when: 'onThrottleInterval',
-              throttle: '1h',
+      rewriteActionsReq([
+        {
+          uuid: '111',
+          group: 'default',
+          id: '1',
+          params: { foo: 'bar' },
+          frequency: {
+            summary: true,
+            notify_when: 'onThrottleInterval',
+            throttle: '1h',
+          },
+          alerts_filter: {
+            query: {
+              kql: 'test:1s',
+              dsl: '{test:1}',
+              filters: [],
             },
-            alerts_filter: {
-              query: {
-                kql: 'test:1s',
-                dsl: '{test:1}',
-                filters: [],
-              },
-              timeframe: {
-                days: [1, 2, 3],
-                timezone: 'UTC',
-                hours: {
-                  start: '00:00',
-                  end: '15:00',
-                },
+            timeframe: {
+              days: [1, 2, 3],
+              timezone: 'UTC',
+              hours: {
+                start: '00:00',
+                end: '15:00',
               },
             },
           },
-        ],
-        () => false
-      )
+        },
+      ])
     ).toEqual([
       {
-        type: RuleActionTypes.DEFAULT,
         uuid: '111',
         group: 'default',
         id: '1',
@@ -72,50 +67,26 @@ describe('rewriteActionsReq', () => {
       },
     ]);
   });
+});
+
+describe('rewriteSystemActionsReq', () => {
   it('should rewrite system actions correctly', () => {
     expect(
-      rewriteActionsReq(
-        [
-          {
-            uuid: '111',
-            group: 'default',
-            id: '1',
-            params: { foo: 'bar' },
-            frequency: {
-              summary: true,
-              notify_when: 'onThrottleInterval',
-              throttle: '1h',
-            },
+      rewriteActionsReq([
+        {
+          uuid: '111',
+          group: 'default',
+          id: 'system-1',
+          params: { foo: 'bar' },
+          frequency: {
+            summary: true,
+            notify_when: 'onThrottleInterval',
+            throttle: '1h',
           },
-          {
-            uuid: '111',
-            group: 'default',
-            id: 'system-1',
-            params: { foo: 'bar' },
-            frequency: {
-              summary: true,
-              notify_when: 'onThrottleInterval',
-              throttle: '1h',
-            },
-          },
-        ],
-        (id) => id.startsWith('system')
-      )
+        },
+      ])
     ).toEqual([
       {
-        type: RuleActionTypes.DEFAULT,
-        uuid: '111',
-        group: 'default',
-        id: '1',
-        params: { foo: 'bar' },
-        frequency: {
-          summary: true,
-          notifyWhen: 'onThrottleInterval',
-          throttle: '1h',
-        },
-      },
-      {
-        type: RuleActionTypes.SYSTEM,
         uuid: '111',
         id: 'system-1',
         params: { foo: 'bar' },

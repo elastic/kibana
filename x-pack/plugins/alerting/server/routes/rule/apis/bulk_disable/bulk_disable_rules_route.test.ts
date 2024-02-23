@@ -14,12 +14,7 @@ import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  RuleActionTypes,
-  RuleDefaultAction,
-  RuleSystemAction,
-  SanitizedRule,
-} from '../../../../types';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -150,7 +145,6 @@ describe('bulkDisableRulesRoute', () => {
             foo: true,
           },
           uuid: '123-456',
-          type: RuleActionTypes.DEFAULT,
         },
       ],
       consumer: 'bar',
@@ -171,7 +165,7 @@ describe('bulkDisableRulesRoute', () => {
       revision: 0,
     };
 
-    const action: RuleDefaultAction = {
+    const action: RuleAction = {
       actionTypeId: 'test',
       group: 'default',
       id: '2',
@@ -179,7 +173,6 @@ describe('bulkDisableRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     };
 
     const systemAction: RuleSystemAction = {
@@ -189,11 +182,10 @@ describe('bulkDisableRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.SYSTEM,
     };
 
     const mockedRules: Array<SanitizedRule<{}>> = [
-      { ...mockedRule, actions: [action, systemAction] },
+      { ...mockedRule, actions: [action], systemActions: [systemAction] },
     ];
 
     const bulkDisableActionsResult = {

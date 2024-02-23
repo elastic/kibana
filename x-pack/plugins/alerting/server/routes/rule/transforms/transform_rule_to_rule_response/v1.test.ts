@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../../../common';
+import { RuleAction, RuleSystemAction } from '../../../../../common';
 import { transformRuleToRuleResponse } from './v1';
 
 describe('transformRuleToRuleResponse', () => {
-  const defaultAction: RuleDefaultAction = {
+  const defaultAction: RuleAction = {
     id: '1',
     uuid: '111',
     params: { foo: 'bar' },
@@ -24,7 +24,6 @@ describe('transformRuleToRuleResponse', () => {
         timezone: 'UTC',
       },
     },
-    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: RuleSystemAction = {
@@ -32,7 +31,6 @@ describe('transformRuleToRuleResponse', () => {
     uuid: '111',
     params: { foo: 'bar' },
     actionTypeId: '.test',
-    type: RuleActionTypes.SYSTEM,
   };
 
   const rule = {
@@ -90,7 +88,7 @@ describe('transformRuleToRuleResponse', () => {
     });
 
     it('transforms a system action correctly', () => {
-      const res = transformRuleToRuleResponse({ ...rule, actions: [systemAction] });
+      const res = transformRuleToRuleResponse({ ...rule, systemActions: [systemAction] });
       expect(res.actions).toEqual([
         {
           id: '1',

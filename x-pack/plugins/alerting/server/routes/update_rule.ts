@@ -17,6 +17,7 @@ import {
   actionsSchema,
   rewriteRuleLastRun,
   rewriteActionsReq,
+  rewriteSystemActionsReq,
 } from './lib';
 import {
   RuleTypeParams,
@@ -70,13 +71,15 @@ const rewriteBodyReq = (
     data: {
       ...rest,
       notifyWhen,
-      actions: rewriteActionsReq(actions, isSystemAction),
+      actions: rewriteActionsReq(actions.filter((action) => !isSystemAction(action.id))),
+      systemActions: rewriteSystemActionsReq(actions.filter((action) => isSystemAction(action.id))),
     },
   };
 };
 
 const rewriteBodyRes = ({
   actions,
+  systemActions,
   alertTypeId,
   scheduledTaskId,
   createdBy,
@@ -122,7 +125,7 @@ const rewriteBodyRes = ({
     : {}),
   ...(actions
     ? {
-        actions: transformRuleActions(actions),
+        actions: transformRuleActions(actions, systemActions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),

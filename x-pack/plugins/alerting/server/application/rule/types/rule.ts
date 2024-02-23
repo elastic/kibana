@@ -19,7 +19,6 @@ import {
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
-  actionSchema,
   ruleSchema,
   ruleDomainSchema,
 } from '../schemas';
@@ -38,7 +37,6 @@ export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
-export type Action = TypeOf<typeof actionSchema>;
 type RuleSchemaType = TypeOf<typeof ruleSchema>;
 type RuleDomainSchemaType = TypeOf<typeof ruleDomainSchema>;
 
@@ -60,6 +58,7 @@ export interface Rule<Params extends RuleParams = never> {
   consumer: RuleSchemaType['consumer'];
   schedule: RuleSchemaType['schedule'];
   actions: RuleSchemaType['actions'];
+  systemActions?: RuleSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleSchemaType['mapped_params'];
   scheduledTaskId?: RuleSchemaType['scheduledTaskId'];
@@ -95,6 +94,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   consumer: RuleDomainSchemaType['consumer'];
   schedule: RuleDomainSchemaType['schedule'];
   actions: RuleDomainSchemaType['actions'];
+  systemActions: RuleDomainSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleDomainSchemaType['mapped_params'];
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];

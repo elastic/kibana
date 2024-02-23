@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RuleActionTypes } from '../../../../common';
 import { notifyWhenSchema } from './notify_when_schema';
 import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
 
@@ -53,8 +52,7 @@ export const defaultActionDomainSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionDomainAlertsFilterSchema),
-  type: schema.literal(RuleActionTypes.DEFAULT),
-  useAlertDataAsTemplate: schema.maybe(schema.boolean()),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const systemActionDomainSchema = schema.object({
@@ -62,14 +60,8 @@ export const systemActionDomainSchema = schema.object({
   actionTypeId: schema.string(),
   params: actionParamsSchema,
   uuid: schema.maybe(schema.string()),
-  type: schema.literal(RuleActionTypes.SYSTEM),
-  useAlertDataAsTemplate: schema.maybe(schema.boolean()),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
-
-export const actionDomainSchema = schema.oneOf([
-  defaultActionDomainSchema,
-  systemActionDomainSchema,
-]);
 
 export const actionAlertsFilterSchema = schema.object({
   query: schema.maybe(alertsFilterQuerySchema),
@@ -84,7 +76,6 @@ export const defaultActionSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
-  type: schema.literal(RuleActionTypes.DEFAULT),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
@@ -93,8 +84,5 @@ export const systemActionSchema = schema.object({
   actionTypeId: schema.string(),
   params: actionParamsSchema,
   uuid: schema.maybe(schema.string()),
-  type: schema.literal(RuleActionTypes.SYSTEM),
   useAlertDataAsTemplate: schema.maybe(schema.boolean()),
 });
-
-export const actionSchema = schema.oneOf([defaultActionSchema, systemActionSchema]);

@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RuleActionTypes } from '../../../../../../common';
 import { validateDuration } from '../../../validation';
 import { notifyWhenSchema, actionAlertsFilterSchema, alertDelaySchema } from '../../../schemas';
 
-const defaultActionSchema = schema.object({
+export const defaultActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   actionTypeId: schema.maybe(schema.string()),
@@ -24,7 +23,6 @@ const defaultActionSchema = schema.object({
   ),
   uuid: schema.maybe(schema.string()),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
-  type: schema.literal(RuleActionTypes.DEFAULT),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
@@ -33,7 +31,6 @@ export const systemActionSchema = schema.object({
   actionTypeId: schema.maybe(schema.string()),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),
-  type: schema.literal(RuleActionTypes.SYSTEM),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { createRuleDataSchema } from './create_rule_data_schema';
+export {
+  createRuleDataSchema,
+  defaultActionSchema,
+  systemActionSchema,
+} from './create_rule_data_schema';

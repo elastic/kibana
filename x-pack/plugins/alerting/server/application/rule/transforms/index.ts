@@ -8,5 +8,4 @@
 export { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
 export { transformRuleDomainToRuleAttributes } from './transform_rule_domain_to_rule_attributes';
 export { transformRuleDomainToRule } from './transform_rule_domain_to_rule';
-export { transformDomainActionsToRawActions } from './transform_domain_actions_to_raw_actions';
 export { transformRawActionsToDomainActions } from './transform_raw_actions_to_domain_actions';

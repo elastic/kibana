@@ -45,14 +45,13 @@ import {
   SanitizedRule,
   RuleAlertData,
   RuleNotifyWhen,
-  isSystemAction,
-  RuleDefaultAction,
   RuleSystemAction,
 } from '../../common';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
   getSummaryActionTimeBounds,
+  getSummarySystemActionTimeBounds,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
@@ -80,7 +79,7 @@ interface LogAction {
 }
 
 interface RunSummarizedActionArgs {
-  action: RuleDefaultAction;
+  action: RuleAction;
   summarizedAlerts: CombinedSummarizedAlerts;
   spaceId: string;
   bulkActions: EnqueueExecutionOptions[];
@@ -101,7 +100,7 @@ interface RunActionArgs<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  action: RuleDefaultAction;
+  action: RuleAction;
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
   ruleId: string;
   spaceId: string;
@@ -285,18 +284,19 @@ export class ExecutionHandler<
       ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-      if (summarizedAlerts && !isSystemAction(action)) {
+      if (!this.isSystemAction(action) && summarizedAlerts) {
+        const defaultAction = action as RuleAction;
         if (isActionOnInterval(action)) {
-          throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
+          throttledSummaryActions[defaultAction.uuid!] = { date: new Date().toISOString() };
         }
 
-        logActions[action.id] = await this.runSummarizedAction({
+        logActions[defaultAction.id] = await this.runSummarizedAction({
           action,
           summarizedAlerts,
           spaceId,
           bulkActions,
         });
-      } else if (summarizedAlerts && isSystemAction(action)) {
+      } else if (summarizedAlerts && this.isSystemAction(action)) {
         const hasConnectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.has(
           action.actionTypeId
         );
@@ -325,8 +325,9 @@ export class ExecutionHandler<
           spaceId,
           bulkActions,
         });
-      } else if (!isSystemAction(action) && alert) {
-        logActions[action.id] = await this.runAction({
+      } else if (!this.isSystemAction(action) && alert) {
+        const defaultAction = action as RuleAction;
+        logActions[defaultAction.id] = await this.runAction({
           action,
           spaceId,
           alert,
@@ -334,16 +335,16 @@ export class ExecutionHandler<
           bulkActions,
         });
 
-        const actionGroup = action.group;
+        const actionGroup = defaultAction.group;
         if (!this.isRecoveredAlert(actionGroup)) {
           if (isActionOnInterval(action)) {
             alert.updateLastScheduledActions(
-              action.group as ActionGroupIds,
+              defaultAction.group as ActionGroupIds,
               generateActionHash(action),
-              action.uuid
+              defaultAction.uuid
             );
           } else {
-            alert.updateLastScheduledActions(action.group as ActionGroupIds);
+            alert.updateLastScheduledActions(defaultAction.group as ActionGroupIds);
           }
           alert.unscheduleActions();
         }
@@ -458,7 +459,7 @@ export class ExecutionHandler<
     rule,
     bulkActions,
   }: RunSystemActionArgs<Params>): Promise<LogAction> {
-    const { start, end } = getSummaryActionTimeBounds(
+    const { start, end } = getSummarySystemActionTimeBounds(
       action,
       this.rule.schedule,
       this.previousStartedAt
@@ -557,7 +558,7 @@ export class ExecutionHandler<
   }: {
     numberOfAlerts: number;
     numberOfSummarizedAlerts: number;
-    action: RuleAction<'withSystemAction'>;
+    action: RuleAction | RuleSystemAction;
   }) {
     const count = numberOfAlerts - numberOfSummarizedAlerts;
     if (count > 0) {
@@ -586,10 +587,14 @@ export class ExecutionHandler<
     return false;
   }
 
-  private isExecutableAction(action: RuleAction<'withSystemAction'>) {
+  private isExecutableAction(action: RuleAction | RuleSystemAction) {
     return this.taskRunnerContext.actionsPlugin.isActionExecutable(action.id, action.actionTypeId, {
       notifyUsage: true,
     });
+  }
+
+  private isSystemAction(action?: RuleAction | RuleSystemAction): action is RuleSystemAction {
+    return this.taskRunnerContext.actionsPlugin.isSystemActionConnector(action?.actionTypeId ?? '');
   }
 
   private isRecoveredAlert(actionGroup: string) {
@@ -601,7 +606,7 @@ export class ExecutionHandler<
     action,
   }: {
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
-    action: RuleDefaultAction;
+    action: RuleAction;
   }) {
     const alertId = alert.getId();
     const { rule, ruleLabel, logger } = this;
@@ -685,7 +690,7 @@ export class ExecutionHandler<
     }
   }
 
-  private getEnqueueOptions(action: RuleAction<'withSystemAction'>): EnqueueExecutionOptions {
+  private getEnqueueOptions(action: RuleAction | RuleSystemAction): EnqueueExecutionOptions {
     const {
       apiKey,
       ruleConsumer,
@@ -726,7 +731,6 @@ export class ExecutionHandler<
     const executables = [];
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
-
       let summarizedAlerts = null;
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
         summarizedAlerts = await this.getSummarizedAlerts({
@@ -734,11 +738,7 @@ export class ExecutionHandler<
           spaceId: this.taskInstance.params.spaceId,
           ruleId: this.taskInstance.params.alertId,
         });
-
-        /**
-         * System actions cannot be throttled
-         */
-        if (!isSummaryActionOnInterval(action) || isSystemAction(action)) {
+        if (!isSummaryActionOnInterval(action)) {
           this.logNumberOfFilteredAlerts({
             numberOfAlerts: alertsArray.length,
             numberOfSummarizedAlerts: summarizedAlerts.all.count,
@@ -747,7 +747,7 @@ export class ExecutionHandler<
         }
       }
 
-      if (isSummaryAction(action) || isSystemAction(action)) {
+      if (isSummaryAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
@@ -782,7 +782,7 @@ export class ExecutionHandler<
         // notifications for flapping pending recovered alerts
         if (
           alert.getPendingRecoveredCount() > 0 &&
-          action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+          action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
         ) {
           continue;
         }
@@ -807,6 +807,46 @@ export class ExecutionHandler<
       }
     }
 
+    for (const systemAction of this.rule?.systemActions ?? []) {
+      const alertsArray = Object.entries(alerts);
+      const summarizedAlerts = await this.getSummarizedAlerts({
+        action: systemAction,
+        spaceId: this.taskInstance.params.spaceId,
+        ruleId: this.taskInstance.params.alertId,
+      });
+
+      if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
+        executables.push({ action: systemAction, summarizedAlerts });
+      }
+
+      for (const [alertId, alert] of alertsArray) {
+        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+        if (alertMaintenanceWindowIds.length !== 0) {
+          this.logger.debug(
+            `no scheduling of summary actions "${systemAction.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+          );
+          continue;
+        }
+
+        if (alert.isFilteredOut(summarizedAlerts)) {
+          continue;
+        }
+
+        const alertAsData = summarizedAlerts.all.data.find(
+          (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+        );
+        if (alertAsData) {
+          alert.setAlertAsData(alertAsData);
+        }
+
+        if (!this.isAlertMuted(alertId) && alert.hasScheduledActions()) {
+          executables.push({ action: systemAction, alert });
+        }
+      }
+    }
+
     return executables;
   }
 
@@ -818,11 +858,11 @@ export class ExecutionHandler<
     action,
     throttledSummaryActions,
   }: {
-    action: RuleAction<'withSystemAction'>;
+    action: RuleAction;
     throttledSummaryActions: ThrottledActions;
   }) {
     if (!this.canGetSummarizedAlerts()) {
-      if (isSystemAction(action) || action.frequency?.summary) {
+      if (action.frequency?.summary) {
         this.logger.error(
           `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
         );
@@ -830,14 +870,6 @@ export class ExecutionHandler<
       return false;
     }
 
-    /**
-     * System action should always get summarized alerts.
-     * The above check ensures that the rule supports
-     * alerts-as-data which are needed by system actions.
-     */
-    if (isSystemAction(action)) {
-      return true;
-    }
     if (action.useAlertDataForTemplate) {
       return true;
     }
@@ -864,7 +896,7 @@ export class ExecutionHandler<
     ruleId,
     spaceId,
   }: {
-    action: RuleAction<'withSystemAction'>;
+    action: RuleAction | RuleSystemAction;
     ruleId: string;
     spaceId: string;
   }): Promise<CombinedSummarizedAlerts> {
@@ -872,13 +904,13 @@ export class ExecutionHandler<
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
-      alertsFilter: isSystemAction(action) ? undefined : action.alertsFilter,
+      alertsFilter: this.isSystemAction(action) ? undefined : (action as RuleAction).alertsFilter,
     };
 
     let options: GetSummarizedAlertsParams;
 
-    if (isActionOnInterval(action) && !isSystemAction(action)) {
-      const throttleMills = parseDuration(action.frequency!.throttle!);
+    if (!this.isSystemAction(action) && isActionOnInterval(action)) {
+      const throttleMills = parseDuration((action as RuleAction).frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
       options = {

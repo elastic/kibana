@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import { ResolvedSanitizedRule, RuleDefaultAction } from '../../../../../common';
+import { ResolvedSanitizedRule, RuleAction } from '../../../../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -39,7 +39,6 @@ describe('resolveRuleRoute', () => {
     actions: [
       {
         group: 'default',
-        type: 'default',
         id: '2',
         actionTypeId: 'test',
         params: {
@@ -98,13 +97,12 @@ describe('resolveRuleRoute', () => {
     },
     actions: [
       {
-        group: (mockedRule.actions[0] as RuleDefaultAction).group,
+        group: (mockedRule.actions[0] as RuleAction).group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
         uuid: mockedRule.actions[0].uuid,
-        use_alert_data_for_template: (mockedRule.actions[0] as RuleDefaultAction)
-          .useAlertDataForTemplate,
+        use_alert_data_for_template: (mockedRule.actions[0] as RuleAction).useAlertDataForTemplate,
       },
     ],
     outcome: 'aliasMatch',

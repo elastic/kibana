@@ -54,7 +54,6 @@ import {
   RuleAlertData,
   RuleLastRunOutcomeOrderMap,
   RuleNotifyWhen,
-  RuleActionTypes,
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
@@ -587,12 +586,7 @@ export class TaskRunner<
         flappingSettings,
         notifyOnActionGroupChange:
           notifyWhen === RuleNotifyWhen.CHANGE ||
-          some(
-            actions,
-            (action) =>
-              action.type !== RuleActionTypes.SYSTEM &&
-              action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE
-          ),
+          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
         alertDelay: alertDelay?.active ?? 0,
         ruleRunMetricsStore,

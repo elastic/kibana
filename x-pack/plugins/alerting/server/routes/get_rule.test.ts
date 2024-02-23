@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { RuleActionTypes, SanitizedDefaultRuleAction, SanitizedRule } from '../types';
+import { SanitizedRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -56,7 +56,6 @@ describe('getRuleRoute', () => {
             timezone: 'UTC',
           },
         },
-        type: RuleActionTypes.DEFAULT,
       },
     ],
     consumer: 'bar',
@@ -77,7 +76,7 @@ describe('getRuleRoute', () => {
     revision: 0,
   };
 
-  const mockedAction0 = mockedAlert.actions[0] as SanitizedDefaultRuleAction;
+  const mockedAction0 = mockedAlert.actions[0];
   const getResult = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,

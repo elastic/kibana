@@ -16,7 +16,6 @@ import {
   RuleLastRunOutcomes,
   SanitizedRule,
   SanitizedRuleAction,
-  RuleActionTypes,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -46,7 +45,6 @@ export const RULE_ACTIONS = [
       foo: true,
     },
     uuid: '111-111',
-    type: RuleActionTypes.DEFAULT,
   },
   {
     actionTypeId: 'action',
@@ -56,7 +54,6 @@ export const RULE_ACTIONS = [
       isResolved: true,
     },
     uuid: '222-222',
-    type: RuleActionTypes.DEFAULT,
   },
 ];
 
@@ -197,7 +194,6 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
         foo: true,
       },
       uuid: '111-111',
-      type: RuleActionTypes.DEFAULT,
     },
     {
       group: RecoveredActionGroup.id,
@@ -207,7 +203,6 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
         isResolved: true,
       },
       uuid: '222-222',
-      type: RuleActionTypes.DEFAULT,
     },
   ],
   executionStatus: {
@@ -290,7 +285,6 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     return {
       ...action,
       id: action.uuid,
-      type: RuleActionTypes.DEFAULT,
     } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,

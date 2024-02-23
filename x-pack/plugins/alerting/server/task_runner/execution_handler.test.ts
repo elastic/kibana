@@ -29,12 +29,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
-import {
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleActionTypes,
-  RuleNotifyWhen,
-} from '../../common';
+import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
@@ -2415,12 +2410,11 @@ describe('Execution Handler', () => {
       const executorParams = generateExecutionParams({
         rule: {
           ...defaultExecutionParams.rule,
-          actions: [
+          systemActions: [
             {
               id: '1',
               actionTypeId: '.test-system-action',
               params: actionsParams,
-              type: RuleActionTypes.SYSTEM,
               uui: 'test',
             },
           ],
@@ -2540,12 +2534,11 @@ describe('Execution Handler', () => {
       const executorParams = generateExecutionParams({
         rule: {
           ...defaultExecutionParams.rule,
-          actions: [
+          systemActions: [
             {
               id: 'action-id',
               actionTypeId: '.connector-adapter-not-exists',
               params: actionsParams,
-              type: RuleActionTypes.SYSTEM,
               uui: 'test',
             },
           ],
@@ -2597,12 +2590,11 @@ describe('Execution Handler', () => {
         },
         rule: {
           ...defaultExecutionParams.rule,
-          actions: [
+          systemActions: [
             {
               id: 'action-id',
               actionTypeId: '.test-system-action',
               params: actionsParams,
-              type: RuleActionTypes.SYSTEM,
               uui: 'test',
             },
           ],

@@ -25,7 +25,7 @@ import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { RecoveredActionGroup, RuleActionTypes } from '../../../../../common';
+import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
@@ -127,7 +127,6 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateRuleParams
         params: {
           foo: true,
         },
-        type: RuleActionTypes.DEFAULT,
       },
     ],
     ...overwrites,
@@ -768,7 +767,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
@@ -776,7 +774,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
@@ -784,7 +781,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -961,7 +957,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
@@ -969,7 +964,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
@@ -977,7 +971,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -1240,12 +1233,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
-        },
-        {
-          id: 'system_action-id',
-          params: {},
-          type: RuleActionTypes.SYSTEM,
         },
         {
           group: 'default',
@@ -1253,7 +1240,12 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
+        },
+      ],
+      systemActions: [
+        {
+          id: 'system_action-id',
+          params: {},
         },
       ],
     });
@@ -3248,7 +3240,6 @@ describe('create()', () => {
             notifyWhen: 'onActionGroupChange',
             throttle: null,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group2',
@@ -3261,7 +3252,6 @@ describe('create()', () => {
             notifyWhen: 'onActionGroupChange',
             throttle: null,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3285,7 +3275,6 @@ describe('create()', () => {
             notifyWhen: 'onActionGroupChange',
             throttle: null,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group2',
@@ -3293,7 +3282,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3342,7 +3330,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3399,7 +3386,6 @@ describe('create()', () => {
             notifyWhen: 'onActionGroupChange',
             throttle: null,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group2',
@@ -3407,7 +3393,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3466,7 +3451,6 @@ describe('create()', () => {
             notifyWhen: 'onThrottleInterval',
             throttle: '1h',
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group2',
@@ -3479,7 +3463,6 @@ describe('create()', () => {
             notifyWhen: 'onThrottleInterval',
             throttle: '3m',
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group3',
@@ -3492,7 +3475,6 @@ describe('create()', () => {
             notifyWhen: 'onThrottleInterval',
             throttle: '240m',
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3551,7 +3533,6 @@ describe('create()', () => {
             notifyWhen: 'onThrottleInterval',
             throttle: '1h',
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group2',
@@ -3564,7 +3545,6 @@ describe('create()', () => {
             notifyWhen: 'onThrottleInterval',
             throttle: '3m',
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'group3',
@@ -3572,7 +3552,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3593,7 +3572,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
@@ -3601,7 +3579,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
@@ -3609,7 +3586,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3766,7 +3742,6 @@ describe('create()', () => {
             throttle: '10h',
           },
           alertsFilter: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -3823,7 +3798,6 @@ describe('create()', () => {
           alertsFilter: {
             query: { kql: 'test:1', filters: [] },
           },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -4061,14 +4035,14 @@ describe('create()', () => {
             params: {
               foo: true,
             },
-            type: RuleActionTypes.DEFAULT,
           },
+        ],
+        systemActions: [
           {
             id: 'system_action-id',
             params: {
               foo: 'test',
             },
-            type: RuleActionTypes.SYSTEM,
           },
         ],
       });
@@ -4183,14 +4157,14 @@ describe('create()', () => {
             params: {
               foo: true,
             },
-            type: RuleActionTypes.DEFAULT,
           },
+        ],
+        systemActions: [
           {
             id: 'system_action-id',
             params: {
               foo: 'test',
             },
-            type: RuleActionTypes.SYSTEM,
           },
         ],
       });
@@ -4227,14 +4201,14 @@ describe('create()', () => {
             params: {
               foo: true,
             },
-            type: RuleActionTypes.DEFAULT,
           },
+        ],
+        systemActions: [
           {
             id: 'system_action-id',
             params: {
               foo: 'test',
             },
-            type: RuleActionTypes.SYSTEM,
           },
         ],
       });
@@ -4267,15 +4241,14 @@ describe('create()', () => {
     });
 
     test('should throw an error if the system action does not exist', async () => {
-      const action: RuleSystemAction = {
+      const systemAction: RuleSystemAction = {
         id: 'fake-system-action',
         uuid: '123',
         params: {},
         actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
       };
 
-      const data = getMockData({ actions: [action] });
+      const data = getMockData({ actions: [], systemAction: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
         `[Error: Action fake-system-action is not a system action]`
       );
@@ -4287,7 +4260,7 @@ describe('create()', () => {
     });
 
     test('should throw an error if the system action contains the frequency', async () => {
-      const action = {
+      const systemAction = {
         id: 'system_action-id',
         uuid: '123',
         params: {},
@@ -4297,10 +4270,9 @@ describe('create()', () => {
           notifyWhen: 'onActionGroupChange',
           throttle: null,
         },
-        type: RuleActionTypes.SYSTEM,
       };
 
-      const data = getMockData({ actions: [action] });
+      const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(`
         [Error: Error validating create data - [actions.0]: types that failed validation:
         - [actions.0.0.group]: expected value of type [string] but got [undefined]
@@ -4309,7 +4281,7 @@ describe('create()', () => {
     });
 
     test('should throw an error if the system action contains the alertsFilter', async () => {
-      const action = {
+      const systemAction = {
         id: 'system_action-id',
         uuid: '123',
         params: {},
@@ -4317,10 +4289,9 @@ describe('create()', () => {
         alertsFilter: {
           query: { kql: 'test:1', filters: [] },
         },
-        type: RuleActionTypes.SYSTEM,
       };
 
-      const data = getMockData({ actions: [action] });
+      const data = getMockData({ systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(`
         [Error: Error validating create data - [actions.0]: types that failed validation:
         - [actions.0.0.group]: expected value of type [string] but got [undefined]
@@ -4333,7 +4304,6 @@ describe('create()', () => {
         id: 'action-id-1',
         params: {},
         actionTypeId: '.test',
-        type: RuleActionTypes.DEFAULT,
       };
 
       const data = getMockData({ actions: [action] });

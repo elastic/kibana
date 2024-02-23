@@ -16,45 +16,69 @@ const transformCreateBodyActions = (
   actions: CreateRuleActionV1[],
   isSystemAction: (connectorId: string) => boolean
 ): CreateRuleData['actions'] => {
-  if (!actions) return [];
+  const defaultActions: CreateRuleData['actions'] = [];
+  if (!actions) return defaultActions;
 
-  return actions.map(
-    ({
-      frequency,
-      alerts_filter: alertsFilter,
-      use_alert_data_for_template: useAlertDataForTemplate,
-      ...action
-    }) => {
-      if (isSystemAction(action.id)) {
-        return {
+  actions
+    .filter((action) => !isSystemAction(action.id))
+    .forEach(
+      ({
+        frequency,
+        alerts_filter: alertsFilter,
+        use_alert_data_for_template: useAlertDataForTemplate,
+        ...action
+      }) => {
+        defaultActions.push({
+          group: action.group ?? 'default',
           id: action.id,
           params: action.params,
           actionTypeId: action.actionTypeId,
           ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
           ...(action.uuid ? { uuid: action.uuid } : {}),
-        };
+          ...(frequency
+            ? {
+                frequency: {
+                  summary: frequency.summary,
+                  throttle: frequency.throttle,
+                  notifyWhen: frequency.notify_when,
+                },
+              }
+            : {}),
+          ...(alertsFilter ? { alertsFilter } : {}),
+        });
       }
+    );
 
-      return {
-        group: action.group ?? 'default',
-        id: action.id,
-        params: action.params,
-        actionTypeId: action.actionTypeId,
-        ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-        ...(action.uuid ? { uuid: action.uuid } : {}),
-        ...(frequency
-          ? {
-              frequency: {
-                summary: frequency.summary,
-                throttle: frequency.throttle,
-                notifyWhen: frequency.notify_when,
-              },
-            }
-          : {}),
-        ...(alertsFilter ? { alertsFilter } : {}),
-      };
-    }
-  ) as CreateRuleData['actions'];
+  return defaultActions;
+};
+
+const transformCreateBodySystemActions = (
+  actions: CreateRuleActionV1[],
+  isSystemAction: (connectorId: string) => boolean
+): CreateRuleData['systemActions'] => {
+  const defaultActions: CreateRuleData['systemActions'] = [];
+  if (!actions) return defaultActions;
+
+  actions
+    .filter((action) => isSystemAction(action.id))
+    .forEach(
+      ({
+        frequency,
+        alerts_filter: alertsFilter,
+        use_alert_data_for_template: useAlertDataForTemplate,
+        ...action
+      }) => {
+        defaultActions.push({
+          id: action.id,
+          params: action.params,
+          actionTypeId: action.actionTypeId,
+          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+          ...(action.uuid ? { uuid: action.uuid } : {}),
+        });
+      }
+    );
+
+  return defaultActions;
 };
 
 export const transformCreateBody = <Params extends RuleParams = never>(
@@ -71,6 +95,7 @@ export const transformCreateBody = <Params extends RuleParams = never>(
     params: createBody.params,
     schedule: createBody.schedule,
     actions: transformCreateBodyActions(createBody.actions, isSystemAction),
+    systemActions: transformCreateBodySystemActions(createBody.actions, isSystemAction),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
     ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
   };

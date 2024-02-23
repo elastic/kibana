@@ -13,7 +13,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
-import { SanitizedDefaultRuleAction, SanitizedRule } from '../types';
+import { SanitizedRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -47,7 +47,6 @@ describe('cloneRuleRoute', () => {
           foo: true,
         },
         uuid: '123-456',
-        type: 'default',
       },
     ],
     enabled: true,
@@ -73,10 +72,9 @@ describe('cloneRuleRoute', () => {
     notify_when: mockedRule.notifyWhen,
     actions: [
       {
-        group: (mockedRule.actions[0] as SanitizedDefaultRuleAction).group,
+        group: mockedRule.actions[0].group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
-        type: mockedRule.actions[0].type,
       },
     ],
   };

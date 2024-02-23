@@ -23,6 +23,7 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RuleSystemAction,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
@@ -96,7 +97,7 @@ export type Executable<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = {
-  action: RuleAction<'withSystemAction'>;
+  action: RuleAction | RuleSystemAction;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;

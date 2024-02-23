@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter } from '../connector_adapters/types';
 import { NormalizedSystemAction } from '../rules_client';
-import { RuleActionTypes, RuleSystemAction } from '../types';
+import { RuleSystemAction } from '../types';
 import { validateSystemActions } from './validate_system_actions';
 
 describe('validateSystemActionsWithoutRuleTypeId', () => {
@@ -60,7 +60,6 @@ describe('validateSystemActionsWithoutRuleTypeId', () => {
         uuid: '123',
         params: { foo: 'test' },
         actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
       },
     ];
 
@@ -84,7 +83,6 @@ describe('validateSystemActionsWithoutRuleTypeId', () => {
         uuid: '123',
         params: { foo: 'test' },
         actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
       },
     ];
 
@@ -108,7 +106,6 @@ describe('validateSystemActionsWithoutRuleTypeId', () => {
         uuid: '123',
         params: { 'not-exist': 'test' },
         actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
       },
     ];
 
@@ -133,14 +130,12 @@ describe('validateSystemActionsWithoutRuleTypeId', () => {
         id: 'system_action-id',
         uuid: '123',
         params: { foo: 'test' },
-        type: RuleActionTypes.SYSTEM,
       },
       {
         id: 'system_action-id-2',
         uuid: '123',
         params: { foo: 'test' },
         actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
       },
     ];
 

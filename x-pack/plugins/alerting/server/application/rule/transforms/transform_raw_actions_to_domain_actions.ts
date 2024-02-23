@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { SavedObjectReference } from '@kbn/core/server';
 import { injectReferencesIntoActions } from '../../../rules_client/common';
 import { RuleAttributes } from '../../../data/rule/types';
-import { RawRule, RuleActionTypes } from '../../../types';
+import { RawRule } from '../../../types';
 import { RuleDomain } from '../types';
 
 interface Args {
@@ -31,40 +31,56 @@ export const transformRawActionsToDomainActions = ({
     ? injectReferencesIntoActions(ruleId, actions, references || [])
     : [];
 
-  const ruleDomainActions = actionsWithInjectedRefs.map((action) => {
-    if (isSystemAction(action.id)) {
+  const ruleDomainActions = actionsWithInjectedRefs
+    .filter((action) => !isSystemAction(action.id))
+    .map((action) => {
+      const defaultAction = {
+        group: action.group ?? 'default',
+        id: action.id,
+        params: action.params,
+        actionTypeId: action.actionTypeId,
+        uuid: action.uuid,
+        ...(action.frequency ? { frequency: action.frequency } : {}),
+        ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
+        ...(action.useAlertDataAsTemplate
+          ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
+          : {}),
+      };
+
+      if (omitGeneratedValues) {
+        return omit(defaultAction, 'alertsFilter.query.dsl');
+      }
+
+      return defaultAction;
+    });
+
+  return ruleDomainActions;
+};
+
+export const transformRawActionsToDomainSystemActions = ({
+  actions,
+  ruleId,
+  references,
+  omitGeneratedValues = true,
+  isSystemAction,
+}: Args): RuleDomain['systemActions'] => {
+  const actionsWithInjectedRefs = actions
+    ? injectReferencesIntoActions(ruleId, actions, references || [])
+    : [];
+
+  const ruleDomainSystemActions = actionsWithInjectedRefs
+    .filter((action) => isSystemAction(action.id))
+    .map((action) => {
       return {
         id: action.id,
         params: action.params,
         actionTypeId: action.actionTypeId,
         uuid: action.uuid,
-        type: RuleActionTypes.SYSTEM,
         ...(action.useAlertDataAsTemplate
           ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
           : {}),
       };
-    }
+    });
 
-    const defaultAction = {
-      group: action.group ?? 'default',
-      id: action.id,
-      params: action.params,
-      actionTypeId: action.actionTypeId,
-      uuid: action.uuid,
-      ...(action.frequency ? { frequency: action.frequency } : {}),
-      ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
-      ...(action.useAlertDataAsTemplate
-        ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
-        : {}),
-      type: RuleActionTypes.DEFAULT,
-    };
-
-    if (omitGeneratedValues) {
-      return omit(defaultAction, 'alertsFilter.query.dsl');
-    }
-
-    return defaultAction;
-  });
-
-  return ruleDomainActions;
+  return ruleDomainSystemActions;
 };

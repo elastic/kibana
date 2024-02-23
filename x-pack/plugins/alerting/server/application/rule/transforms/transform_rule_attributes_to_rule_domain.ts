@@ -15,7 +15,10 @@ import { PartialRule } from '../../../types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
-import { transformRawActionsToDomainActions } from './transform_raw_actions_to_domain_actions';
+import {
+  transformRawActionsToDomainActions,
+  transformRawActionsToDomainSystemActions,
+} from './transform_raw_actions_to_domain_actions';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -156,6 +159,14 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     isSystemAction,
     omitGeneratedValues,
   });
+  const ruleDomainSystemActions: RuleDomain['systemActions'] =
+    transformRawActionsToDomainSystemActions({
+      ruleId: id,
+      actions: esRule.actions,
+      references,
+      isSystemAction,
+      omitGeneratedValues,
+    });
 
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
@@ -178,6 +189,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     consumer: esRule.consumer,
     schedule: esRule.schedule,
     actions: ruleDomainActions,
+    systemActions: ruleDomainSystemActions,
     params,
     mapped_params: esRule.mapped_params,
     ...(scheduledTaskId ? { scheduledTaskId } : {}),

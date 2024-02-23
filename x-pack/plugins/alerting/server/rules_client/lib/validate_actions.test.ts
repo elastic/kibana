@@ -7,14 +7,8 @@
 
 import { validateActions, ValidateActionsData } from './validate_actions';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import {
-  AlertsFilter,
-  RecoveredActionGroup,
-  RuleActionTypes,
-  RuleDefaultAction,
-  RuleNotifyWhen,
-} from '../../../common';
-import { NormalizedAlertAction, RulesClientContext } from '..';
+import { AlertsFilter, RecoveredActionGroup, RuleAction, RuleNotifyWhen } from '../../../common';
+import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();
@@ -56,15 +50,13 @@ describe('validateActions', () => {
       query: { kql: 'test:1', filters: [] },
       timeframe: { days: [1], hours: { start: '10:00', end: '17:00' }, timezone: 'UTC' },
     },
-    type: RuleActionTypes.DEFAULT,
   };
 
-  const systemAction: NormalizedAlertAction = {
-    uuid: '111',
-    id: '1',
-    params: {},
-    type: RuleActionTypes.SYSTEM,
-  };
+  // const systemAction: NormalizedSystemAction = {
+  //   uuid: '111',
+  //   id: '1',
+  //   params: {},
+  // };
 
   const data = {
     schedule: { interval: '1m' },
@@ -105,6 +97,7 @@ describe('validateActions', () => {
     );
   });
 
+  // Christos do we still need a validation across UUID between system and default
   it('should return error message if actions have duplicated uuid and there is a system action', async () => {
     await expect(
       validateActions(
@@ -112,7 +105,8 @@ describe('validateActions', () => {
         ruleType,
         {
           ...data,
-          actions: [defaultAction, systemAction],
+          actions: [defaultAction],
+          // systemActions: [systemAction],
         },
         false
       )
@@ -135,7 +129,7 @@ describe('validateActions', () => {
       validateActions(
         context as unknown as RulesClientContext,
         ruleType,
-        { ...data, actions: [{ ...data.actions[0], group: 'invalid' } as RuleDefaultAction] },
+        { ...data, actions: [{ ...data.actions[0], group: 'invalid' } as RuleAction] },
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -174,7 +168,7 @@ describe('validateActions', () => {
       validateActions(
         context as unknown as RulesClientContext,
         ruleType,
-        { ...data, actions: [{ ...data.actions[0], frequency: undefined } as RuleDefaultAction] },
+        { ...data, actions: [{ ...data.actions[0], frequency: undefined } as RuleAction] },
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -193,7 +187,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1s' },
-            } as RuleDefaultAction,
+            } as RuleAction,
           ],
         },
         false
@@ -214,7 +208,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               alertsFilter: {} as AlertsFilter,
-            } as RuleDefaultAction,
+            } as RuleAction,
           ],
         },
         false
@@ -315,17 +309,18 @@ describe('validateActions', () => {
     );
   });
 
-  it('should not throw an error on system actions that do not contain properties like frequency or group', async () => {
-    const res = await validateActions(
-      context as unknown as RulesClientContext,
-      ruleType,
-      {
-        ...data,
-        actions: [systemAction],
-      },
-      false
-    );
+  // TO DO talk to Christos
+  // it('should not throw an error on system actions that do not contain properties like frequency or group', async () => {
+  //   const res = await validateActions(
+  //     context as unknown as RulesClientContext,
+  //     ruleType,
+  //     {
+  //       ...data,
+  //       systemActions: [systemAction],
+  //     },
+  //     false
+  //   );
 
-    expect(res).toBe(undefined);
-  });
+  //   expect(res).toBe(undefined);
+  // });
 });

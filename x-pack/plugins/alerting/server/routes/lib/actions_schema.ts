@@ -80,3 +80,15 @@ export const actionsSchema = schema.arrayOf(
   }),
   { defaultValue: [] }
 );
+
+export const systemActionsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      uuid: schema.maybe(schema.string()),
+      use_alert_data_for_template: schema.maybe(schema.boolean()),
+    }),
+    { defaultValue: [] }
+  )
+);

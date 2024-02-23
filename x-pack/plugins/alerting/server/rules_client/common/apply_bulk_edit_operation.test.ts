@@ -6,7 +6,7 @@
  */
 
 import { applyBulkEditOperation } from './apply_bulk_edit_operation';
-import { Rule, RuleActionTypes } from '../../types';
+import { Rule } from '../../types';
 
 describe('applyBulkEditOperation', () => {
   describe('tags operations', () => {
@@ -180,9 +180,7 @@ describe('applyBulkEditOperation', () => {
   describe('actions operations', () => {
     test('should add actions', () => {
       const ruleMock = {
-        actions: [
-          { id: 'mock-action-id', group: 'default', params: {}, type: RuleActionTypes.DEFAULT },
-        ],
+        actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
 
       const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
@@ -193,13 +191,11 @@ describe('applyBulkEditOperation', () => {
               id: 'mock-add-action-id-1',
               group: 'default',
               params: {},
-              type: RuleActionTypes.DEFAULT,
             },
             {
               id: 'mock-add-action-id-2',
               group: 'default',
               params: {},
-              type: RuleActionTypes.DEFAULT,
             },
           ],
           operation: 'add',
@@ -208,9 +204,9 @@ describe('applyBulkEditOperation', () => {
       );
 
       expect(modifiedAttributes).toHaveProperty('actions', [
-        { id: 'mock-action-id', group: 'default', params: {}, type: RuleActionTypes.DEFAULT },
-        { id: 'mock-add-action-id-1', group: 'default', params: {}, type: RuleActionTypes.DEFAULT },
-        { id: 'mock-add-action-id-2', group: 'default', params: {}, type: RuleActionTypes.DEFAULT },
+        { id: 'mock-action-id', group: 'default', params: {} },
+        { id: 'mock-add-action-id-1', group: 'default', params: {} },
+        { id: 'mock-add-action-id-2', group: 'default', params: {} },
       ]);
 
       expect(isAttributeModified).toBe(true);
@@ -223,7 +219,6 @@ describe('applyBulkEditOperation', () => {
             id: 'mock-action-id',
             group: 'default',
             params: { test: 1 },
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       };
@@ -236,7 +231,6 @@ describe('applyBulkEditOperation', () => {
               id: 'mock-action-id',
               group: 'default',
               params: { test: 2 },
-              type: RuleActionTypes.DEFAULT,
             },
           ],
           operation: 'add',
@@ -249,13 +243,11 @@ describe('applyBulkEditOperation', () => {
           id: 'mock-action-id',
           group: 'default',
           params: { test: 1 },
-          type: RuleActionTypes.DEFAULT,
         },
         {
           id: 'mock-action-id',
           group: 'default',
           params: { test: 2 },
-          type: RuleActionTypes.DEFAULT,
         },
       ]);
 
@@ -264,9 +256,7 @@ describe('applyBulkEditOperation', () => {
 
     test('should rewrite actions', () => {
       const ruleMock = {
-        actions: [
-          { id: 'mock-action-id', group: 'default', params: {}, type: RuleActionTypes.DEFAULT },
-        ],
+        actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
 
       const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
@@ -277,7 +267,6 @@ describe('applyBulkEditOperation', () => {
               id: 'mock-rewrite-action-id-1',
               group: 'default',
               params: {},
-              type: RuleActionTypes.DEFAULT,
             },
           ],
           operation: 'set',
@@ -290,7 +279,6 @@ describe('applyBulkEditOperation', () => {
           id: 'mock-rewrite-action-id-1',
           group: 'default',
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ]);
 

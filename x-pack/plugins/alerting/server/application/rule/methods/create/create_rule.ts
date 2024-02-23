@@ -10,11 +10,7 @@ import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import {
-  parseDuration,
-  getRuleCircuitBreakerErrorMessage,
-  RuleDefaultAction,
-} from '../../../../../common';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
@@ -31,7 +27,7 @@ import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../ru
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
-import { RuleActionTypes, RuleSystemAction, SanitizedRule } from '../../../../types';
+import { SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
@@ -63,22 +59,16 @@ export async function createRule<Params extends RuleParams = never>(
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
   const actionsClient = await context.getActionsClient();
 
-  const actionsWithTypes = initialData.actions.map((action) =>
-    !!action.actionTypeId && actionsClient.isSystemAction(action.actionTypeId)
-      ? ({
-          ...action,
-          type: RuleActionTypes.SYSTEM,
-        } as RuleSystemAction)
-      : ({ ...action, type: RuleActionTypes.DEFAULT } as RuleDefaultAction)
+  const { actions: genAction, systemActions: genSystemActions } = await addGeneratedActionValues(
+    initialData.actions,
+    initialData.systemActions,
+    context
   );
-
-  const systemActions = actionsWithTypes.filter(
-    (action) => action.type === RuleActionTypes.SYSTEM
-  ) as RuleSystemAction[];
 
   const data = {
     ...initialData,
-    actions: await addGeneratedActionValues(actionsWithTypes, context),
+    actions: genAction,
+    systemActions: genSystemActions,
   };
 
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -88,12 +78,6 @@ export async function createRule<Params extends RuleParams = never>(
   } catch (error) {
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }
-
-  await validateSystemActions({
-    actionsClient,
-    connectorAdapterRegistry: context.connectorAdapterRegistry,
-    systemActions,
-  });
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (data.enabled) {
@@ -166,6 +150,14 @@ export async function createRule<Params extends RuleParams = never>(
     validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
 
+  await withSpan({ name: 'validateSystemActions', type: 'rules' }, () =>
+    validateSystemActions({
+      actionsClient,
+      connectorAdapterRegistry: context.connectorAdapterRegistry,
+      systemActions: data.systemActions,
+    })
+  );
+
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
   if (
@@ -189,13 +181,15 @@ export async function createRule<Params extends RuleParams = never>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
   const throttle = data.throttle ?? null;
 
-  const { actions: actionsWithRefs } = await denormalizeActions(context, data.actions);
+  const allActions = [...data.actions, ...(data.systemActions ?? [])];
+  const { actions: actionsWithRefs } = await denormalizeActions(context, allActions);
 
+  const { systemActions, actions, ...restData } = data;
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
     rule: {
-      ...data,
+      ...restData,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
       ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),

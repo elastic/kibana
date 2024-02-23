@@ -10,39 +10,26 @@ import {
   IntervalSchedule,
   parseDuration,
   RuleAction,
-  RuleDefaultAction,
   RuleNotifyWhenTypeValues,
+  RuleSystemAction,
   ThrottledActions,
 } from '../../common';
-import { isSystemAction } from '../../common/system_actions/is_system_action';
 
-export const isSummaryAction = (action?: RuleAction<'withSystemAction'>) => {
-  if (action != null && isSystemAction(action)) {
-    return false;
-  }
-
-  return action?.frequency?.summary || false;
+export const isSummaryAction = (action?: RuleAction) => {
+  return action?.frequency?.summary ?? false;
 };
 
-export const isActionOnInterval = (action?: RuleAction<'withSystemAction'>) => {
-  if (action != null && isSystemAction(action)) {
-    return false;
-  }
-
-  if (!action?.frequency) {
+export const isActionOnInterval = (action?: RuleAction) => {
+  if (action?.frequency == null) {
     return false;
   }
   return (
-    action.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
-    typeof action.frequency.throttle === 'string'
+    action?.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
+    typeof action?.frequency.throttle === 'string'
   );
 };
 
-export const isSummaryActionOnInterval = (action: RuleAction<'withSystemAction'>) => {
-  if (action != null && isSystemAction(action)) {
-    return false;
-  }
-
+export const isSummaryActionOnInterval = (action: RuleAction) => {
   return isActionOnInterval(action) && action.frequency?.summary;
 };
 
@@ -51,14 +38,10 @@ export const isSummaryActionThrottled = ({
   throttledSummaryActions,
   logger,
 }: {
-  action?: RuleAction<'withSystemAction'>;
+  action?: RuleAction;
   throttledSummaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
-  if (action != null && isSystemAction(action)) {
-    return false;
-  }
-
   if (!isActionOnInterval(action)) {
     return false;
   }
@@ -91,8 +74,11 @@ export const isSummaryActionThrottled = ({
   return throttled;
 };
 
-export const generateActionHash = (action?: RuleAction<'withSystemAction'>) => {
-  if (action != null && isSystemAction(action)) {
+export const generateActionHash = (
+  action?: RuleAction,
+  isSystemAction?: (action?: RuleAction) => boolean
+) => {
+  if (action != null && isSystemAction && isSystemAction(action)) {
     return `system-action:${action?.actionTypeId || 'no-action-type-id'}:summary`;
   }
 
@@ -105,15 +91,11 @@ export const getSummaryActionsFromTaskState = ({
   actions,
   summaryActions = {},
 }: {
-  actions: Array<RuleAction<'withSystemAction'>>;
+  actions: RuleAction[];
   summaryActions?: ThrottledActions;
 }) => {
-  const actionsWithoutSystemActions = actions.filter(
-    (action): action is RuleDefaultAction => !isSystemAction(action)
-  );
-
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
-    const actionExists = actionsWithoutSystemActions.find(
+    const actionExists = actions.find(
       (action) =>
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
@@ -127,7 +109,7 @@ export const getSummaryActionsFromTaskState = ({
 };
 
 export const getSummaryActionTimeBounds = (
-  action: RuleAction<'withSystemAction'>,
+  action: RuleAction,
   ruleSchedule: IntervalSchedule,
   previousStartedAt: Date | null
 ): { start?: number; end?: number } => {
@@ -138,7 +120,7 @@ export const getSummaryActionTimeBounds = (
   let startDate: Date;
   const now = Date.now();
 
-  if (isActionOnInterval(action) && !isSystemAction(action)) {
+  if (isActionOnInterval(action)) {
     // If action is throttled, set time bounds using throttle interval
     const throttleMills = parseDuration(action.frequency!.throttle!);
     startDate = new Date(now - throttleMills);
@@ -151,6 +133,26 @@ export const getSummaryActionTimeBounds = (
       const scheduleMillis = parseDuration(ruleSchedule.interval);
       startDate = new Date(now - scheduleMillis);
     }
+  }
+
+  return { start: startDate.valueOf(), end: now.valueOf() };
+};
+
+export const getSummarySystemActionTimeBounds = (
+  action: RuleSystemAction,
+  ruleSchedule: IntervalSchedule,
+  previousStartedAt: Date | null
+): { start?: number; end?: number } => {
+  let startDate: Date;
+  const now = Date.now();
+
+  // If action is not throttled, set time bounds to previousStartedAt - now
+  // If previousStartedAt is null, use the rule schedule interval
+  if (previousStartedAt) {
+    startDate = previousStartedAt;
+  } else {
+    const scheduleMillis = parseDuration(ruleSchedule.interval);
+    startDate = new Date(now - scheduleMillis);
   }
 
   return { start: startDate.valueOf(), end: now.valueOf() };

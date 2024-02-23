@@ -7,7 +7,6 @@
 import { RuleDomain } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
 import { getMappedParams } from '../../../rules_client/common';
-import { transformDomainActionsToRawActions } from './transform_domain_actions_to_raw_actions';
 import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
@@ -22,15 +21,11 @@ export const transformRuleDomainToRuleAttributes = ({
   params,
 }: {
   actionsWithRefs: DenormalizedAction[];
-  rule: Omit<RuleDomain, 'actions' | 'params'>;
+  rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
   params: TransformRuleToEsParams;
 }): RuleAttributes => {
   const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
-
-  const transformedActionsWithRefs = transformDomainActionsToRawActions({
-    actions: actionsWithRefs,
-  });
 
   return {
     name: rule.name,
@@ -40,7 +35,7 @@ export const transformRuleDomainToRuleAttributes = ({
     consumer: rule.consumer,
     legacyId,
     schedule: rule.schedule,
-    actions: transformedActionsWithRefs,
+    actions: actionsWithRefs,
     params: paramsWithRefs,
     ...(Object.keys(mappedParams).length ? { mapped_params: mappedParams } : {}),
     ...(rule.scheduledTaskId !== undefined ? { scheduledTaskId: rule.scheduledTaskId } : {}),

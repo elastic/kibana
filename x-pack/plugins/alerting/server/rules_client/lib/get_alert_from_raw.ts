@@ -15,7 +15,6 @@ import {
   RuleTypeParams,
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
-  isSystemAction,
 } from '../../types';
 import {
   ruleExecutionStatusFromRaw,
@@ -26,7 +25,10 @@ import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import { injectReferencesIntoParams } from '../common';
 import { RulesClientContext } from '../types';
-import { transformRawActionsToDomainActions } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
+import {
+  transformRawActionsToDomainActions,
+  transformRawActionsToDomainSystemActions,
+} from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -129,14 +131,22 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     // we currently only support the Interval Schedule type
     // Once we support additional types, this type signature will likely change
     schedule: schedule as IntervalSchedule,
-    actions: (actions
+    actions: actions
       ? transformRawActionsToDomainActions({
           ruleId: id,
           actions,
           references: references || [],
           isSystemAction: context.isSystemAction,
         })
-      : []) as unknown as PartialRule['actions'],
+      : [],
+    systemActions: actions
+      ? transformRawActionsToDomainSystemActions({
+          ruleId: id,
+          actions,
+          references: references || [],
+          isSystemAction: context.isSystemAction,
+        })
+      : [],
     params: injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
     ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
     ...(includeSnoozeData && !excludeFromPublicApi
@@ -173,10 +183,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   if (omitGeneratedValues) {
     if (rule.actions) {
       rule.actions = rule.actions.map((ruleAction) => {
-        if (!isSystemAction(ruleAction)) {
-          return omit(ruleAction, 'alertsFilter.query.dsl');
-        }
-        return ruleAction;
+        return omit(ruleAction, 'alertsFilter.query.dsl');
       });
     }
   }

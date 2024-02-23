@@ -19,7 +19,7 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { RecoveredActionGroup, RuleActionTypes, RuleTypeParams } from '../../../../../common';
+import { RecoveredActionGroup, RuleTypeParams } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
@@ -571,7 +571,6 @@ describe('bulkEdit()', () => {
         id: '1',
         params: {},
         uuid: '111',
-        type: RuleActionTypes.DEFAULT,
       };
 
       const newAction = {
@@ -583,7 +582,6 @@ describe('bulkEdit()', () => {
         group: 'default',
         id: '2',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       };
 
       const newAction2 = {
@@ -595,7 +593,6 @@ describe('bulkEdit()', () => {
         group: 'default',
         id: '3',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -703,8 +700,8 @@ describe('bulkEdit()', () => {
           lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
         },
         actions: [
-          { ...existingAction, type: RuleActionTypes.DEFAULT, actionTypeId: 'test-0' },
-          { ...newAction, uuid: '222', type: RuleActionTypes.DEFAULT, actionTypeId: 'test-1' },
+          { ...existingAction, actionTypeId: 'test-0' },
+          { ...newAction, uuid: '222', actionTypeId: 'test-1' },
         ],
         id: existingRule.id,
         snoozeSchedule: [],
@@ -736,7 +733,6 @@ describe('bulkEdit()', () => {
                 params: {
                   message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
-                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -806,7 +802,6 @@ describe('bulkEdit()', () => {
             timezone: 'UTC',
           },
         },
-        type: RuleActionTypes.DEFAULT,
       };
       const newAction = {
         frequency: {
@@ -819,7 +814,6 @@ describe('bulkEdit()', () => {
         params: {},
         uuid: '222',
         alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] } },
-        type: RuleActionTypes.DEFAULT,
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -954,13 +948,11 @@ describe('bulkEdit()', () => {
         group: 'default',
         id: '1',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       };
 
       const systemAction = {
         id: 'system_action-id',
         params: {},
-        type: RuleActionTypes.SYSTEM,
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -1103,13 +1095,11 @@ describe('bulkEdit()', () => {
         group: 'default',
         id: '1',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       };
 
       const systemAction = {
         id: 'system_action-id',
         params: {},
-        type: RuleActionTypes.SYSTEM,
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -1218,13 +1208,11 @@ describe('bulkEdit()', () => {
         group: 'default',
         id: '1',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       };
 
       const systemAction = {
         id: 'system_action-id',
         params: {},
-        type: RuleActionTypes.SYSTEM,
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -1312,7 +1300,6 @@ describe('bulkEdit()', () => {
         id: 'system_action-id',
         uuid: '123',
         params: {},
-        type: RuleActionTypes.SYSTEM,
       };
 
       actionsClient.isSystemAction.mockReturnValue(false);
@@ -1373,7 +1360,6 @@ describe('bulkEdit()', () => {
           summary: false,
           throttle: null,
         },
-        type: RuleActionTypes.SYSTEM,
       };
 
       actionsClient.isSystemAction.mockReturnValue(true);
@@ -1424,7 +1410,6 @@ describe('bulkEdit()', () => {
         alertsFilter: {
           query: { kql: 'test:1', filters: [] },
         },
-        type: RuleActionTypes.SYSTEM,
       };
 
       actionsClient.isSystemAction.mockReturnValue(true);
@@ -1471,7 +1456,6 @@ describe('bulkEdit()', () => {
       const action = {
         id: '1',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       };
 
       actionsClient.isSystemAction.mockReturnValue(false);
@@ -1483,7 +1467,6 @@ describe('bulkEdit()', () => {
             {
               field: 'actions',
               operation: 'add',
-              // @ts-expect-error: group is missing
               value: [action],
             },
           ],
@@ -3173,7 +3156,6 @@ describe('bulkEdit()', () => {
                   actionTypeId: 'test',
                   params: {},
                   uuid: '111',
-                  type: RuleActionTypes.SYSTEM,
                 },
               ],
               // eslint-disable-next-line @typescript-eslint/no-explicit-any

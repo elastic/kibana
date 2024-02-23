@@ -508,14 +508,13 @@ export const returnedRuleForBulkDisable2 = {
 
 export const returnedRuleForBulkDisableWithActions1 = {
   ...returnedRuleForBulkDisable1,
-  actions: [
+  sytemActions: [
     {
       actionTypeId: '1',
       id: 'system_action:id',
       params: {
         foo: true,
       },
-      type: 'system',
       uuid: '1',
     },
   ],
@@ -531,7 +530,6 @@ export const returnedRuleForBulkDisableWithActions2 = {
       params: {
         foo: true,
       },
-      type: 'default',
       uuid: '2',
     },
   ],
@@ -539,14 +537,13 @@ export const returnedRuleForBulkDisableWithActions2 = {
 
 export const returnedRuleForBulkEnableWithActions1 = {
   ...returnedRuleForBulkOps1,
-  actions: [
+  systemActions: [
     {
       actionTypeId: '1',
       id: 'system_action:id',
       params: {
         foo: true,
       },
-      type: 'system',
       uuid: '1',
     },
   ],
@@ -562,7 +559,6 @@ export const returnedRuleForBulkEnableWithActions2 = {
       params: {
         foo: true,
       },
-      type: 'default',
       uuid: '2',
     },
   ],

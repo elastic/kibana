@@ -14,8 +14,6 @@ import {
   RuleTypeParams,
   RuleNotifyWhenType,
   IntervalSchedule,
-  RuleSystemAction,
-  RuleActionTypes,
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -24,7 +22,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { NormalizedAlertAction, RulesClientContext } from '../types';
+import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '../types';
 import {
   validateActions,
   extractReferences,
@@ -41,11 +39,9 @@ import {
 } from '../../application/rule/methods/get_schedule_frequency';
 import { validateSystemActions } from '../../lib/validate_system_actions';
 import { denormalizeActions } from '../lib/denormalize_actions';
-import {
-  transformDomainActionsToRawActions,
-  transformRawActionsToDomainActions,
-} from '../../application/rule/transforms';
+import { transformRawActionsToDomainActions } from '../../application/rule/transforms';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { transformRawActionsToDomainSystemActions } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -56,6 +52,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     tags: string[];
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
+    systemActions?: NormalizedSystemAction[];
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
@@ -226,16 +223,17 @@ async function updateAlert<Params extends RuleTypeParams>(
   currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
+  const { actions: genAction, systemActions: genSystemActions } = await addGeneratedActionValues(
+    initialData.actions,
+    initialData.systemActions,
+    context
+  );
   const data = {
     ...initialData,
-    actions: await addGeneratedActionValues(initialData.actions, context),
+    actions: genAction,
+    systemActions: genSystemActions,
   };
   const actionsClient = await context.getActionsClient();
-
-  const systemActions = initialData.actions.filter(
-    (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
-  );
-
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // Validate
@@ -244,7 +242,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   await validateSystemActions({
     actionsClient,
     connectorAdapterRegistry: context.connectorAdapterRegistry,
-    systemActions,
+    systemActions: data.systemActions,
   });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -258,15 +256,16 @@ async function updateAlert<Params extends RuleTypeParams>(
     );
   }
 
+  const allActions = [...data.actions, ...(data.systemActions ?? [])];
   // Extract saved object references for this rule
   const { references, params: updatedParams } = await extractReferences(
     context,
     ruleType,
-    data.actions,
+    allActions,
     validatedAlertTypeParams
   );
 
-  const { actions: actionsWithRefs } = await denormalizeActions(context, data.actions);
+  const { actions: actionsWithRefs } = await denormalizeActions(context, allActions);
 
   const username = await context.getUserName();
 
@@ -289,9 +288,10 @@ async function updateAlert<Params extends RuleTypeParams>(
     : currentRule.attributes.revision;
 
   let updatedObject: SavedObject<RawRule>;
+  const { systemActions, ...restData } = data;
   const createAttributes = updateMeta(context, {
     ...attributes,
-    ...data,
+    ...restData,
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
@@ -310,10 +310,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   try {
     updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
       RULE_SAVED_OBJECT_TYPE,
-      {
-        ...createAttributes,
-        actions: transformDomainActionsToRawActions(createAttributes) as RawRule['actions'],
-      },
+      createAttributes,
       {
         id,
         overwrite: true,
@@ -364,6 +361,13 @@ async function updateAlert<Params extends RuleTypeParams>(
       actions: updatedObject.attributes.actions,
       omitGeneratedValues: false,
       isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
-    }) as PartialRule['actions'],
+    }),
+    systemActions: transformRawActionsToDomainSystemActions({
+      ruleId: id,
+      references: updatedObject.references,
+      actions: updatedObject.attributes.actions,
+      omitGeneratedValues: false,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    }),
   };
 }

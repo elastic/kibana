@@ -283,7 +283,6 @@ function getApiRule() {
         params: {
           message: 'alert 37: {{context.message}}',
         },
-        type: 'default',
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
         uuid: '123-456',
@@ -329,7 +328,6 @@ function getRule(): Rule<{ x: number }> {
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
         uuid: '123-456',
-        type: 'default',
       },
     ],
     params: { x: 42 },

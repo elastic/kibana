@@ -13,12 +13,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
-import {
-  RuleActionTypes,
-  RuleDefaultAction,
-  RuleSystemAction,
-  SanitizedRule,
-} from '../../../../types';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -149,7 +144,6 @@ describe('bulkDeleteRulesRoute', () => {
             foo: true,
           },
           uuid: '123-456',
-          type: RuleActionTypes.DEFAULT,
         },
       ],
       consumer: 'bar',
@@ -170,7 +164,7 @@ describe('bulkDeleteRulesRoute', () => {
       revision: 0,
     };
 
-    const action: RuleDefaultAction = {
+    const action: RuleAction = {
       actionTypeId: 'test',
       group: 'default',
       id: '2',
@@ -178,7 +172,6 @@ describe('bulkDeleteRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     };
 
     const systemAction: RuleSystemAction = {
@@ -188,11 +181,10 @@ describe('bulkDeleteRulesRoute', () => {
         foo: true,
       },
       uuid: '123-456',
-      type: RuleActionTypes.SYSTEM,
     };
 
     const mockedRules: Array<SanitizedRule<{}>> = [
-      { ...mockedRule, actions: [action, systemAction] },
+      { ...mockedRule, actions: [action], systemActions: [systemAction] },
     ];
 
     const bulkDeleteActionsResult = {

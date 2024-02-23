@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { RuleAction, RuleActionTypes, RuleSystemAction } from '../types';
+import { RuleAction, RuleSystemAction } from '../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
@@ -15,21 +15,21 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
   getSummaryActionTimeBounds,
+  getSummarySystemActionTimeBounds,
 } from './rule_action_helper';
 
 const now = '2021-05-13T12:33:37.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));
 
-const mockOldAction: RuleAction<'withSystemAction'> = {
+const mockOldAction: RuleAction = {
   id: '1',
   group: 'default',
   actionTypeId: 'slack',
   params: {},
   uuid: '123-456',
-  type: RuleActionTypes.DEFAULT,
 };
 
-const mockAction: RuleAction<'withSystemAction'> = {
+const mockAction: RuleAction = {
   id: '1',
   group: 'default',
   actionTypeId: 'slack',
@@ -40,10 +40,9 @@ const mockAction: RuleAction<'withSystemAction'> = {
     throttle: null,
   },
   uuid: '123-456',
-  type: RuleActionTypes.DEFAULT,
 };
 
-const mockSummaryAction: RuleAction<'withSystemAction'> = {
+const mockSummaryAction: RuleAction = {
   id: '1',
   group: 'default',
   actionTypeId: 'slack',
@@ -54,7 +53,6 @@ const mockSummaryAction: RuleAction<'withSystemAction'> = {
     throttle: '1d',
   },
   uuid: '111-111',
-  type: RuleActionTypes.DEFAULT,
 };
 
 const mockSystemAction: RuleSystemAction = {
@@ -62,18 +60,12 @@ const mockSystemAction: RuleSystemAction = {
   actionTypeId: '.test',
   params: {},
   uuid: '123-456',
-  type: RuleActionTypes.SYSTEM,
 };
 
 describe('rule_action_helper', () => {
   describe('isSummaryAction', () => {
     test('should return false if the action is not a summary action', () => {
       const result = isSummaryAction(mockAction);
-      expect(result).toBe(false);
-    });
-
-    test('should return false if the action is a system action', () => {
-      const result = isSummaryAction(mockSystemAction);
       expect(result).toBe(false);
     });
 
@@ -93,7 +85,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is not a proper RuleAction', () => {
-      const result = isSummaryAction({} as RuleAction<'withSystemAction'>);
+      const result = isSummaryAction({} as RuleAction);
       expect(result).toBe(false);
     });
   });
@@ -104,16 +96,11 @@ describe('rule_action_helper', () => {
       expect(result).toBe(false);
     });
 
-    test('should return false if the action is a system action', () => {
-      const result = isActionOnInterval(mockSystemAction);
-      expect(result).toBe(false);
-    });
-
     test('should return false if notifyWhen is not onThrottleInterval', () => {
       const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, notifyWhen: 'onActiveAlert' },
-      } as RuleAction<'withSystemAction'>);
+      } as RuleAction);
       expect(result).toBe(false);
     });
 
@@ -121,7 +108,7 @@ describe('rule_action_helper', () => {
       const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, throttle: null },
-      } as RuleAction<'withSystemAction'>);
+      } as RuleAction);
       expect(result).toBe(false);
     });
 
@@ -136,7 +123,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is not a proper RuleAction', () => {
-      const result = isActionOnInterval({} as RuleAction<'withSystemAction'>);
+      const result = isActionOnInterval({} as RuleAction);
       expect(result).toBe(false);
     });
   });
@@ -145,11 +132,6 @@ describe('rule_action_helper', () => {
     test('should return a hash for non-throttling action', () => {
       const result = generateActionHash(mockAction);
       expect(result).toBe('slack:default:no-throttling');
-    });
-
-    test('should return a hash for system actions action', () => {
-      const result = generateActionHash(mockSystemAction);
-      expect(result).toBe('system-action:.test:summary');
     });
 
     test('should return a hash for an old action type', () => {
@@ -182,7 +164,7 @@ describe('rule_action_helper', () => {
 
     test('should filtered out system actions', () => {
       const result = getSummaryActionsFromTaskState({
-        actions: [mockSummaryAction, mockSystemAction],
+        actions: [mockSummaryAction],
         summaryActions: {
           '111-111': { date: new Date('01.01.2020').toISOString() },
           '222-222': { date: new Date('01.01.2020').toISOString() },
@@ -229,11 +211,6 @@ describe('rule_action_helper', () => {
       expect(result).toBe(false);
     });
 
-    test('should return false if the action is a system action', () => {
-      const result = isSummaryActionThrottled({ action: mockSystemAction, logger });
-      expect(result).toBe(false);
-    });
-
     test('should return false if the action does not have frequency field', () => {
       const result = isSummaryActionThrottled({
         action: mockOldAction,
@@ -248,7 +225,7 @@ describe('rule_action_helper', () => {
         action: {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, notifyWhen: 'onActiveAlert' },
-        } as RuleAction<'withSystemAction'>,
+        } as RuleAction,
         throttledSummaryActions,
         logger,
       });
@@ -260,7 +237,7 @@ describe('rule_action_helper', () => {
         action: {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, throttle: null },
-        } as RuleAction<'withSystemAction'>,
+        } as RuleAction,
         throttledSummaryActions,
         logger,
       });
@@ -338,11 +315,6 @@ describe('rule_action_helper', () => {
       expect(isSummaryActionOnInterval(mockSummaryAction)).toBe(true);
     });
 
-    test('should return false if the action is a system action', () => {
-      const result = isSummaryActionOnInterval(mockSystemAction);
-      expect(result).toBe(false);
-    });
-
     test('returns false for a non-summary ', () => {
       expect(
         isSummaryActionOnInterval({
@@ -362,16 +334,19 @@ describe('rule_action_helper', () => {
     });
   });
 
-  describe('getSummaryActionTimeBounds', () => {
-    test('returns undefined start and end action is not summary action', () => {
-      expect(getSummaryActionTimeBounds(mockAction, { interval: '1m' }, null)).toEqual({
+  // Christos, I need to understand something here
+  describe('getSummarySystemActionTimeBounds', () => {
+    test('returns undefined start and end action is a system action', () => {
+      expect(getSummarySystemActionTimeBounds(mockSystemAction, { interval: '1m' }, null)).toEqual({
         start: undefined,
         end: undefined,
       });
     });
+  });
 
-    test('returns undefined start and end action is a system action', () => {
-      expect(getSummaryActionTimeBounds(mockSystemAction, { interval: '1m' }, null)).toEqual({
+  describe('getSummaryActionTimeBounds', () => {
+    test('returns undefined start and end action is not summary action', () => {
+      expect(getSummaryActionTimeBounds(mockAction, { interval: '1m' }, null)).toEqual({
         start: undefined,
         end: undefined,
       });
