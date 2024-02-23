@@ -120,7 +120,7 @@ function Entries({
                       copy();
                     }}
                   >
-                    {value}
+                    {`${value}`}
                   </EuiLink>
                 )}
               </EuiCopy>
