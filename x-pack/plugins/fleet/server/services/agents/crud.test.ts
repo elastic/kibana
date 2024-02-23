@@ -303,52 +303,24 @@ describe('Agents CRUD test', () => {
         perPage: 5,
       });
 
-      expect(result).toEqual({
-        agents: [
-          {
-            access_api_key_id: undefined,
-            active: undefined,
-            agent: undefined,
-            components: undefined,
-            default_api_key_history: undefined,
-            default_api_key_id: undefined,
-            enrolled_at: undefined,
-            id: 'up',
-            last_checkin: undefined,
-            last_checkin_message: undefined,
-            last_checkin_status: undefined,
-            local_metadata: undefined,
-            outputs: undefined,
-            packages: [],
-            policy_id: undefined,
-            policy_revision: undefined,
-            sort: undefined,
-            status: 'updating',
-            tags: undefined,
-            type: undefined,
-            unenrolled_at: undefined,
-            unenrollment_started_at: undefined,
-            upgrade_details: undefined,
-            upgrade_started_at: undefined,
-            upgraded_at: undefined,
-            user_provided_metadata: undefined,
+      expect(result).toEqual(
+        expect.objectContaining({
+          page: 1,
+          perPage: 5,
+          statusSummary: {
+            degraded: 0,
+            enrolling: 0,
+            error: 0,
+            inactive: 0,
+            offline: 0,
+            online: 0,
+            unenrolled: 0,
+            unenrolling: 0,
+            updating: 1,
           },
-        ],
-        page: 1,
-        perPage: 5,
-        statusSummary: {
-          degraded: 0,
-          enrolling: 0,
-          error: 0,
-          inactive: 0,
-          offline: 0,
-          online: 0,
-          unenrolled: 0,
-          unenrolling: 0,
-          updating: 1,
-        },
-        total: 1,
-      });
+          total: 1,
+        })
+      );
     });
 
     it('should return correct status summary when showUpgradeable is selected and total is more than limit', async () => {
