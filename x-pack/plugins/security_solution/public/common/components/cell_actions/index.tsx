@@ -61,7 +61,6 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
   // It is necessary because the data object is an array or an object and useMemo would always re-render
   const dependencyKey = JSON.stringify(data);
-
   const fieldData: CellActionsData[] = useMemo(
     () =>
       (Array.isArray(data) ? data : [data])

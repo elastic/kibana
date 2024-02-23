@@ -29,6 +29,8 @@ jest.mock('../container_name_widget', () => ({
   ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
 }));
 
+const dataViewId = 'dataViewId';
+
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/kubernetes']
 ) => {
@@ -57,6 +59,7 @@ const renderWithRouter = (
   return mockedContext.render(
     <MemoryRouter initialEntries={initialEntries}>
       <KubernetesSecurityRoutes
+        dataViewId={dataViewId}
         filter={<div>{'Mock filters'}</div>}
         globalFilter={{
           filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',

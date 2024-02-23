@@ -23,6 +23,7 @@ export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
 const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnArgs> = React.memo(
   ({
     Component,
+    dataViewId,
     defaultFocusedButtonRef,
     field,
     filterManager,
@@ -37,8 +38,8 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
     const filterOutValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
         currentVal == null || currentVal?.length === 0
-          ? createFilter(field, null, false)
-          : createFilter(field, currentVal, true);
+          ? createFilter(dataViewId, field, null, false)
+          : createFilter(dataViewId, field, currentVal, true);
       const filters = Array.isArray(value)
         ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
         : makeFilter(value);
@@ -54,7 +55,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
       if (onClick != null) {
         onClick();
       }
-    }, [field, filterManager, onClick, onFilterAdded, value]);
+    }, [dataViewId, field, filterManager, onClick, onFilterAdded, value]);
 
     useEffect(() => {
       if (!ownFocus) {
