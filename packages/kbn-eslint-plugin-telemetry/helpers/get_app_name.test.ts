@@ -16,6 +16,7 @@ const testMap = [
     'x-pack/plugins/observability_solution/apm/public/components/app/correlations/correlations_table.tsx',
     'apm',
   ],
+  ['x-pack/plugins/observability_solution/apm/baz/header_actions.tsx', 'apm'],
   ['x-pack/plugins/cases/public/components/foo.tsx', 'cases'],
   ['packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx', 'kbnAlertsUiShared'],
 ];
