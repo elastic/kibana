@@ -1743,10 +1743,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.1.1":
-  version "93.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.1.1.tgz#03c9667456664978c3477abef52afd6aceb48ebf"
-  integrity sha512-YnmNST8PmgAyeahDFTUTpToiBAc6gOyK/RSSqx6NTxCmUCwXnV7Oog9TUHlQ8tYGLjfFXrAja6Msy0X2VuxHOA==
+"@elastic/eui@93.2.0":
+  version "93.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.2.0.tgz#ebe74c4aefcf78cd72a8db7332666a7aa0681954"
+  integrity sha512-YPJM+hs1Ouv7Fc04JZiEOT5nCNBMFKsQwKmmGqzEwpMDsXpx6NKT0s0AlRO43JabTWBHL9yIRE4aORhAzH6pBQ==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -3216,11 +3216,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/apm_data_access":
+"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/apm":
+"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
   version "0.0.0"
   uid ""
 
@@ -4364,7 +4364,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -4628,7 +4628,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/exploratory-view-plugin@link:x-pack/plugins/exploratory_view":
+"@kbn/exploratory-view-plugin@link:x-pack/plugins/observability_solution/exploratory_view":
   version "0.0.0"
   uid ""
 
@@ -5332,7 +5332,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -5356,7 +5356,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
   version "0.0.0"
   uid ""
 
@@ -5364,7 +5364,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_shared":
+"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
   version "0.0.0"
   uid ""
 
@@ -5468,11 +5468,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/profiling_data_access":
+"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/profiling":
+"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
   version "0.0.0"
   uid ""
 
@@ -6216,7 +6216,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
   version "0.0.0"
   uid ""
 
@@ -6432,7 +6432,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/uptime":
+"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
   version "0.0.0"
   uid ""
 
@@ -6480,7 +6480,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ux-plugin@link:x-pack/plugins/ux":
+"@kbn/ux-plugin@link:x-pack/plugins/observability_solution/ux":
   version "0.0.0"
   uid ""
 
@@ -27613,10 +27613,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.17.0:
-  version "4.17.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.17.0.tgz#f6c93a9df3e0543df7dc2329d81968af42845a7f"
-  integrity sha512-e2E+2XBlGepzwgFbyQfSwo9Cbj6G5fFfs9MzAS00nC99EewmcS2rwn2MwtgfP7I5p1e7DYv4HQJXtWedsu6DvA==
+selenium-webdriver@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.18.1.tgz#bcd19048b4aba5411edb7b5266d9390578fc7fed"
+  integrity sha512-uP4OJ5wR4+VjdTi5oi/k8oieV2fIhVdVuaOPrklKghgS59w7Zz3nGa5gcG73VcU9EBRv5IZEBRhPr7qFJAj5mQ==
   dependencies:
     jszip "^3.10.1"
     tmp "^0.2.1"
