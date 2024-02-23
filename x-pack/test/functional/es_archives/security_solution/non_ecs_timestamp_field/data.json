@@ -1,0 +1,41 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "non_ecs_timestamp_field",
+    "source": {
+      "timestamp": 1608131778,
+      "locale": "pt",
+      "created_at": 1622676795,
+      "event.category": "configuration"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "non_ecs_timestamp_field",
+    "source": {
+      "timestamp": 1608131778,
+      "locale": "es",
+      "created_at": 1622676790,
+      "event.category": "configuration"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "non_ecs_timestamp_field",
+    "source": {
+      "timestamp": 1608131779,
+      "locale": "ua",
+      "created_at": 1622676785,
+      "event.category": "configuration"
+    },
+    "type": "_doc"
+  }
+}

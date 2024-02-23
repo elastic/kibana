@@ -657,5 +657,77 @@ export default ({ getService }: FtrProviderContext) => {
         expect(fullAlert?.['host.asset.criticality']).to.eql('high_impact');
       });
     });
+
+    describe.only('using data without a @timestamp field', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/non_ecs_timestamp_field'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/non_ecs_timestamp_field'
+        );
+      });
+
+      it('specifying only timestamp_field results in a warning, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['non_ecs_timestamp_field']),
+          timestamp_field: 'timestamp',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.contain(
+          'The following indices are missing the timestamp field "@timestamp": ["non_ecs_timestamp_field"]'
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).to.be.empty();
+      });
+
+      it('specifying only timestamp_override results in an error, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['non_ecs_timestamp_field']),
+          timestamp_override: 'timestamp',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.contain(
+          'An error occurred during rule execution: message: "verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown column [@timestamp]"'
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).to.be.empty();
+      });
+
+      it('specifying both timestamp_override and timestamp_field behaves as expected', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['non_ecs_timestamp_field']),
+          timestamp_field: 'timestamp',
+          timestamp_override: 'timestamp',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.be.empty();
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts).to.have.length(3);
+      });
+    });
   });
 };

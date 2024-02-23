@@ -1,0 +1,36 @@
+{
+  "type": "index",
+  "value": {
+    "index": "non_ecs_timestamp_field",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "timestamp": {
+          "type": "date",
+          "format": "epoch_second"
+        },
+        "locale": {
+          "type": "keyword"
+        },
+        "created_at": {
+          "type": "date",
+          "format": "epoch_second"
+        },
+        "event": {
+          "properties": {
+            "category": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
