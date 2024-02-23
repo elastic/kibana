@@ -17,15 +17,23 @@ export const useInventoryAlertPrefill = () => {
   const [filterQuery, setFilterQuery] = useState<string | undefined>();
   const [metric, setMetric] = useState<SnapshotMetricInput>({ type: 'cpu' });
   const [customMetrics, setCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
+  // only shows for AWS when there are regions info
+  const [region, setRegion] = useState('');
+  // only shows for AWS when there are accounts info
+  const [accountId, setAccountId] = useState('');
 
   return {
     nodeType,
     filterQuery,
     metric,
     customMetrics,
+    accountId,
+    region,
+    setAccountId,
     setNodeType,
     setFilterQuery,
     setMetric,
     setCustomMetrics,
+    setRegion,
   };
 };
