@@ -1921,11 +1921,7 @@ This means that **no changes will be needed in this page.**
 2. Custom Query field overflows the viewport and cannot be completely visualized/edited when the query is too long, i.e. occupies too many lines. This is often the case from Prebuilt Rules. The editable field also does not allow scrolling. See example:
    ![](2023-12-01-14-13-07.png)
 
-### Rule fields
 
-- What rule fields will be customizable and for what fields we will disable customization?
-- How are we going to handle various fields in the rule upgrade workflow?
-- What concrete diff algorithms for what rule fields we will need to write?
 
 ## Upgrading Prebuilt Rules
 
@@ -2775,6 +2771,36 @@ The `threat` field has a specific [schema](https://github.com/elastic/kibana/blo
 
 #### Changes to `/upgrade/_review` endpoint contract
 
+The endpoint currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
+
+---
+**QUESTION:** is the following change needed? 
+
+Do we need a `merged_rule` in the respose, since `diff` already contains a `merged_version` for each field which has a conflict?
+
+But what about fields that don't have conflicts, and the algorithm decides which version to return? Don't we need that information back at the client, to form the payload for the /_perform endpoint?
+
+The POC says for the /_perform endpoint:
+
+```ts
+export interface SingleRuleUpgradeRequest {
+  id: RuleObjectId;
+  pick_version?: 'BASE' | 'CURRENT' | 'TARGET' | 'MERGED';
+  fields?: {
+    name?: FieldUpgradeRequest<RuleName>;
+    description?: FieldUpgradeRequest<RuleDescription>;
+    // etc
+    // Every non-specified field will default to pick_version: 'MERGED'.
+    // If pick_version is MERGED and there's a merge conflict the endpoint will throw.
+  };
+  rule_content_version: SemanticVersion;
+  rule_revision: number;
+}
+```
+But the _perform endpoint does not know what the /_review endpoint calculated for each field for all other fields not specified in the payload. It would have to do the diff again.
+
+---
+
 The current response body of the `/upgrade/_review` endpoint looks as follows:
 
 _Source: [x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.ts](x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.ts)_
@@ -2861,166 +2887,9 @@ This `merge_rule` will contain all fields updated to the version that the differ
 
 #### Changes to `/upgrade/_perform` endpoint contract
 
-The endpoint current's request payload contract looks so:
-
-_Source: [x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules/perform_rule_upgrade/perform_rule_upgrade_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules/perform_rule_upgrade/perform_rule_upgrade_route.ts)_
-```ts
-export enum PickVersionValues {
-  BASE = 'BASE',
-  CURRENT = 'CURRENT',
-  TARGET = 'TARGET',
-}
-
-export const TPickVersionValues = enumeration('PickVersionValues', PickVersionValues);
-
-export const RuleUpgradeSpecifier = t.exact(
-  t.intersection([
-    t.type({
-      rule_id: t.string,
-      revision: t.number,
-      /**
-       * The target version to upgrade to.
-       */
-      version: t.number,
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-
-    }),
-  ])
-);
-
-export const UpgradeSpecificRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`SPECIFIC_RULES`),
-      rules: t.array(RuleUpgradeSpecifier),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
-
-export const UpgradeAllRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`ALL_RULES`),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
-
-export const PerformRuleUpgradeRequestBody = t.union([
-  UpgradeAllRulesRequest,
-  UpgradeSpecificRulesRequest,
-]);
-```
-
-The endpoint offers two modes of updating rules: updating all rules to a specified version (`BASE`, `CURRENT` or `TARGET`) or updating individual rules (sent in the payload) to any of those 3 specific versions.
-
-We need to expand this contract as follows:
-
-- The `PickVersionValues` enum now includes the `MERGE` version as an option:
-```ts
-export enum PickVersionValues {
-  BASE = 'BASE',
-  CURRENT = 'CURRENT',
-  TARGET = 'TARGET',
-  MERGE = 'MERGE',
-}
-```
+The endpoint currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
 
 
-- The `ALL_RULES` mode of the endpoint stays unchanged, except that it can only take the values `BASE`, `CURRENT` or `TARGET`: since this mode upgrades all upgradable rules, without passing a list of `rule_id`s, we cannot pass in a `merged_version` to each, which would be required to solve upgrade conflicts.
-```ts
-export const UpgradeAllRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`ALL_RULES`),
-    }),
-    t.partial({
-      pick_version: TPickVersionValuesWithoutMerge, // BASE, CURRENT or TARGET
-    }),
-  ])
-);
-```
-- The `SPECIFIC_RULES` mode should change so that:
-
-1. The `UpgradeSpecificRulesRequest` payload can now take a `pick_version` of value `MERGE`.
-```ts
-export const UpgradeSpecificRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`SPECIFIC_RULES`),
-      rules: t.array(RuleUpgradeSpecifier),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,  // BASE, CURRENT, TARGET or MERGE
-    }),
-  ])
-);
-```
-
-2. The `RuleUpgradeSpecifier` payload:
-  - can also take a `pick_version` of value `MERGE`.
-  - includes an optional `merged_version` property that is only valid and used by the endpoint handler when `pick_version` is `MERGE`.
-```ts
-export const RuleUpgradeSpecifier = t.exact(
-  t.intersection([
-    t.type({
-      rule_id: t.string,
-      revision: t.number,
-      version: t.number,
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,  // BASE, CURRENT, TARGET or MERGE
-      merged_version: RuleResponse,
-    }),
-  ])
-);
-```
-
-#### Changes to `/upgrade/_perform` endpoint logic
-
-Since the `PickVersionValues` enum only currently allows for the values `BASE`, `CURRENT` or `TARGET`, the logic to handle the `MERGE` case needs to be handled.
-
-Currently, if `PickVersionValues` is:
-
-- `BASE`: the rule set for upgrade is the `base` version as pulled from the corresponding `security-asset`, of type `PrebuiltRuleAsset`, but with its `version` updated to the next version of the rule.
-- `CURRENT`: the rule set for upgrade is the `current` version as pulled from Elasticsearch, corresponding to the existing `alert`, of type `RuleResponse`, but with its `version` updated to the next version of the rule.
-- `TARGET`: the rule set for upgrade is the `base` version as pulled from the corresponding `security-asset`, which already includes the updated `version`.
-
-Now, the case of `PickVersionValues` being `MERGE` should handled as follows:
-
-1. Perform an additional check that asserts that, if `PickVersionValues: MERGE`, then the `RuleUpgradeSpecifier` payload should contain a `merged_version`. If absent, return the particular rule in the `failed` property of `PerformRuleUpgradeResponseBody`  
-// TODO: Is this better handled via io-ts/Zod? We don't want to make the whole request fail if `merged_version` is missing for only one rule.
-
-
-2. set the rule upgrade to be the `merged_version` passed in the payload, but overwrite the `rule_id`, `revision` and `version` to what's defined in the `RuleUpgradeSpecifier` iin the request body:
-```ts
-[PSEUDOCODE]
-
-const body: PerformRuleUpgradeRequestBody = request.body;
-
-const ruleToUpgrade = rules[0];
-
-const { rule_id, version, revision, merged_version } = ruleToUpgrade;
-
-const upgradedRulePayload = {
-  ...merged_version,
-  rule_id,
-  version,
-  revision
-}
-
-await upgradePrebuiltRules(
-  rulesClient,
-  upgradedRulePayload
-);
-```
 
 ### Changes to Rule Upgrade UX/UI flow
 
@@ -3066,7 +2935,11 @@ const performUpgradeResponse: PerformRuleUpgradeResponseBody = await fetch(
 
 #### Upgrading rules with conflicts
 
-Rules whose upgrade
+Rules whose diffing algorithm resulted in a `CONFLICT` need to be manually resolved or confirmed by the user via the UI before making the API request to upgrade the rule.
+
+> See [Three-Way-Diff Component ticket](https://github.com/elastic/kibana/issues/171520) that details UI for solving conflicts.
+
+> See [designs](https://www.figma.com/file/gLHm8LpTtSkAUQHrkG3RHU/%5B8.7%5D-%5BRules%5D-Rule-Immutability%2FCustomization?type=design&mode=design&t=LkauhLzUKUatF6cL-0#712870904).
 
 
 
