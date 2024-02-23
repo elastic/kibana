@@ -15,7 +15,7 @@ import {
   SERVICE_LANGUAGE_NAME,
 } from './es_fields/apm';
 
-const LABELS = 'labels'; // implies labels.* wildcard
+export const LABELS = 'labels'; // implies labels.* wildcard
 
 export const APM_SERVICE_GROUP_SAVED_OBJECT_TYPE = 'apm-service-group';
 export const SERVICE_GROUP_COLOR_DEFAULT = '#D1DAE7';

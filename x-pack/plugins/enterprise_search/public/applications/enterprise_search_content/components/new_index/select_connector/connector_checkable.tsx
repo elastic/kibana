@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiSpacer,
   EuiText,
   EuiThemeComputed,
   EuiTitle,
@@ -32,6 +33,8 @@ import { BETA_LABEL, NATIVE_LABEL, CONNECTOR_CLIENT_LABEL } from '../../../../sh
 
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
+import { NativePopover } from './native_popover';
+
 export interface ConnectorCheckableProps {
   documentationUrl: string | undefined;
   iconType: string;
@@ -41,12 +44,14 @@ export interface ConnectorCheckableProps {
   name: string;
   onConnectorSelect: (isNative?: boolean) => void;
   serviceType: string;
+  showLicensePopover?: boolean;
   showNativeBadge: boolean;
+  showNativePopover?: boolean;
 }
 
 const getCss = (
   euiTheme: EuiThemeComputed,
-  isDisabled: ConnectorCheckableProps['isDisabled'],
+  isDisabled: boolean,
   showNativeBadge: ConnectorCheckableProps['showNativeBadge']
 ) => {
   return css`
@@ -70,9 +75,12 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   onConnectorSelect,
   serviceType,
   showNativeBadge,
+  showLicensePopover = false,
+  showNativePopover = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
+  const [isNativeInfoPopoverOpen, setIsNativeInfoPopoverOpen] = useState(false);
   const [isNativePopoverOpen, setIsNativePopoverOpen] = useState(false);
   return (
     <EuiPanel
@@ -81,7 +89,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
         onConnectorSelect(showNativeBadge);
       }}
       id={`checkableCard-${serviceType}`}
-      css={getCss(euiTheme, isDisabled, showNativeBadge)}
+      css={getCss(euiTheme, isDisabled || showLicensePopover, showNativeBadge)}
       hasBorder
       data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
     >
@@ -106,7 +114,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         </EuiTitle>
                       )}
                     </EuiFlexItem>
-                    {isDisabled && (
+                    {!showNativePopover && showLicensePopover && (
                       <EuiFlexItem grow={false}>
                         <PlatinumLicensePopover
                           button={
@@ -130,6 +138,30 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         />
                       </EuiFlexItem>
                     )}
+                    {showNativePopover && (
+                      <EuiFlexItem grow={false}>
+                        <NativePopover
+                          button={
+                            <EuiButtonIcon
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.content.newIndex.selectConnector.openNativePopoverLabel',
+                                {
+                                  defaultMessage: 'Open native connector popover',
+                                }
+                              )}
+                              iconType="questionInCircle"
+                              onClick={(event: MouseEvent) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                setIsNativeInfoPopoverOpen(!isNativeInfoPopoverOpen);
+                              }}
+                            />
+                          }
+                          closePopover={() => setIsNativeInfoPopoverOpen(false)}
+                          isPopoverOpen={isNativeInfoPopoverOpen}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 {showNativeBadge && (
@@ -138,7 +170,6 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                       button={
                         <EuiButtonIcon
                           display="base"
-                          isDisabled={isDisabled}
                           color="primary"
                           iconType="boxesHorizontal"
                           onClick={(e: MouseEvent) => {
@@ -158,6 +189,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         items={[
                           <EuiContextMenuItem
                             key="native"
+                            disabled={isDisabled}
                             onClick={(e) => {
                               e.stopPropagation();
                               onConnectorSelect(true);
@@ -168,6 +200,8 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                               { defaultMessage: 'Setup a Native Connector' }
                             )}
                           </EuiContextMenuItem>,
+                          <EuiSpacer size="s" />,
+
                           <EuiContextMenuItem
                             key="client"
                             onClick={(e) => {
