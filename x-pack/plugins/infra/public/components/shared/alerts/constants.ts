@@ -11,10 +11,19 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
-import type { AlertStatusFilter } from './types';
+import type { Filter } from '@kbn/es-query';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const ALERT_STATUS_ALL = 'all';
+
+interface AlertStatusFilter {
+  status: AlertStatus;
+  query?: Filter['query'];
+  label: string;
+}
 
 export const ALL_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ALL,
@@ -75,3 +84,9 @@ export const ALERTS_DOC_HREF =
   'https://www.elastic.co/guide/en/observability/current/create-alerts.html';
 
 export const ALERTS_PATH = '/app/observability/alerts';
+
+export const ALERTS_PER_PAGE = 10;
+export const ALERTS_TABLE_ID = 'xpack.infra.hosts.alerts.table';
+
+export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
+export const infraAlertFeatureIds: ValidFeatureId[] = [AlertConsumers.INFRASTRUCTURE];
