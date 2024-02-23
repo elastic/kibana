@@ -123,6 +123,7 @@ describe('callAgentExecutor', () => {
       connector_id: 'mock-connector-id',
       data: mockActionResponse.message,
       status: 'ok',
+      replacements: {},
     });
   });
 });
