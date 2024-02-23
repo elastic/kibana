@@ -532,7 +532,12 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('the button before pressing it', async () => {
       return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
     });
-    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+    await this.testSubjects.click('discoverNoResultsViewAllMatches');
+    await this.retry.waitFor('the button to disappear', async () => {
+      return !(await this.testSubjects.exists('discoverNoResultsViewAllMatches'));
+    });
+    await this.waitUntilSearchingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
