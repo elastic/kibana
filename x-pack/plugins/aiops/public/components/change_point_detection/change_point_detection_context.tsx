@@ -21,7 +21,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
@@ -155,7 +155,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
 
-  const { searchBounds } = useFilerQueryUpdates();
+  const { searchBounds } = useFilterQueryUpdates();
 
   const [resultFilters, setResultFilter] = useState<Filter[]>([]);
   const [selectedChangePoints, setSelectedChangePoints] = useState<

@@ -23,7 +23,7 @@ import type {
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
+import { FilterQueryContextProvider, useFilterQueryUpdates } from '../hooks/use_filters_query';
 import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
 import { createMergedEsQuery } from '../application/utils/search_utils';
@@ -137,7 +137,7 @@ export const ChartGridEmbeddableWrapper: FC<
   onChange,
   emptyState,
 }) => {
-  const { filters, query, searchBounds, interval } = useFilerQueryUpdates();
+  const { filters, query, searchBounds, interval } = useFilterQueryUpdates();
 
   const fieldConfig = useMemo(() => {
     return { fn, metricField, splitField };

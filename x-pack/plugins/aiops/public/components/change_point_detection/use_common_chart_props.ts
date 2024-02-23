@@ -8,7 +8,7 @@
 import { FilterStateStore } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
-import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
 import { useDataSource } from '../../hooks/use_data_source';
 import { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
@@ -30,7 +30,7 @@ export const useCommonChartProps = ({
 }): Partial<TypedLensByValueInput> => {
   const { dataView } = useDataSource();
 
-  const { filters: resultFilters, query: resultQuery, searchBounds } = useFilerQueryUpdates();
+  const { filters: resultFilters, query: resultQuery, searchBounds } = useFilterQueryUpdates();
 
   const filters = useMemo(() => {
     return [

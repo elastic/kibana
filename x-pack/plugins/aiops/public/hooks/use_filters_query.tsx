@@ -127,6 +127,6 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
   );
 };
 
-export const useFilerQueryUpdates = () => {
+export const useFilterQueryUpdates = () => {
   return useContext(FilterQueryContext);
 };
