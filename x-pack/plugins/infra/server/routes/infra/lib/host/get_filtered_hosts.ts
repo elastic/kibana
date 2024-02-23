@@ -18,7 +18,7 @@ import {
 } from '../types';
 import { BUCKET_KEY, MAX_SIZE } from '../constants';
 import { assertQueryStructure } from '../utils';
-import { createFilters, runQuery } from '../helpers/query';
+import { createFilters, runQuery, systemMetricsFilter } from '../helpers/query';
 
 export const getFilteredHosts = async ({
   searchClient,
@@ -46,6 +46,7 @@ const createQuery = (
       query: {
         bool: {
           ...params.query.bool,
+          ...systemMetricsFilter,
           filter: createFilters({ params, extraFilter: params.query }),
         },
       },

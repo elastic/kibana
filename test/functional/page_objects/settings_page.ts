@@ -152,6 +152,13 @@ export class SettingsPageObject extends FtrService {
     return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
+  async getTimeFieldNameField() {
+    const wrapperElement = await this.testSubjects.find('timestampField');
+    return wrapperElement.findByTestSubject('comboBoxSearchInput');
+  }
+
+  noTimeFieldOption = "--- I don't want to use the time filter ---";
+
   async selectTimeFieldOption(selection: string) {
     const testSubj = 'timestampField';
     const timefield = await this.testSubjects.find(testSubj);
