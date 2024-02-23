@@ -47,6 +47,7 @@ import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugi
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -100,6 +101,7 @@ export interface InfraClientStartDeps {
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;
+  serverless?: ServerlessPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

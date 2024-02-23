@@ -111,7 +111,7 @@ const StickyContainer = ({ children }: { children: React.ReactNode }) => {
         top: calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0));
         z-index: ${euiTheme.levels.navigation};
         background: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.m} ${euiTheme.size.l} 0px;
+        padding: ${euiTheme.size.l} ${euiTheme.size.l} 0px;
         margin: -${euiTheme.size.l} -${euiTheme.size.l} 0px;
         min-height: calc(${euiTheme.size.xxxl} * 2);
       `}
