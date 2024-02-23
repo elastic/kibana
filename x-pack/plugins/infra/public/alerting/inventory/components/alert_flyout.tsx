@@ -23,10 +23,10 @@ interface Props {
 
 export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-
-  const { inventoryPrefill } = useAlertPrefillContext();
-  const { customMetrics = [] } = inventoryPrefill ?? {};
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const { customMetrics = [], accountId, region } = inventoryPrefill;
+
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
@@ -36,10 +36,12 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
         canChangeTrigger: false,
         ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
         metadata: {
+          accountId,
           options,
           nodeType,
           filter,
           customMetrics,
+          region,
         },
         useRuleProducer: true,
       }),

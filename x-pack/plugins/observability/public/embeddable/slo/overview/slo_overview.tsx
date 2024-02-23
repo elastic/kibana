@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { SloOverviewDetails } from './slo_overview_details';
+import { SloOverviewDetails } from '../common/slo_overview_details';
 import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';

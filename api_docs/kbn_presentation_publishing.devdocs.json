@@ -1028,6 +1028,55 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getPanelTitle",
+        "type": "Function",
+        "tags": [],
+        "label": "getPanelTitle",
+        "description": [],
+        "signature": [
+          "(api: Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          ">) => string | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getPanelTitle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesPanelTitle",
+                "text": "PublishesPanelTitle"
+              },
+              ">"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.getViewModeSubject",
         "type": "Function",
         "tags": [],
