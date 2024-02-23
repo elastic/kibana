@@ -13,7 +13,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { SloTagsList } from '../common/slo_tags_list';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { LoadingBadges } from '../badges/slo_badges';
-import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
