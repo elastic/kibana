@@ -44,7 +44,7 @@ export const frequentItemSets: ItemSet[] = [
   {
     set: [
       { fieldName: 'user', fieldValue: 'Peter' },
-      { fieldName: 'url', fieldValue: 'home.php' },
+      { fieldName: 'url', fieldValue: 'login.php' },
     ],
     size: 2,
     maxPValue: 0.012783309213417932,

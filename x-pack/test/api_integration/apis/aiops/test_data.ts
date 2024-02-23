@@ -38,7 +38,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       deviationMin: 1561986810992,
       end: 2147483647000,
       index: 'ft_ecommerce',
-      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
+      searchQuery: '{"match_all":{}}',
       start: 0,
       timeFieldName: 'order_date',
       grouping: true,
