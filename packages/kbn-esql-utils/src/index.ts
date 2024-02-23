@@ -8,6 +8,7 @@
 
 export { TextBasedLanguages } from './types';
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
