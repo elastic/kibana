@@ -60,7 +60,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -99,7 +101,10 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": ["DataTableRecord", "[] | undefined"],
+            "signature": [
+              "DataTableRecord",
+              "[] | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -132,7 +137,9 @@
             "tags": [],
             "label": "textBasedHeaderWarning",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -144,7 +151,10 @@
             "tags": [],
             "label": "interceptedWarnings",
             "description": [],
-            "signature": ["SearchResponseIncompleteWarning", "[] | undefined"],
+            "signature": [
+              "SearchResponseIncompleteWarning",
+              "[] | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,8 +179,12 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": ["\nColumns displayed in the table"],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nColumns displayed in the table"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -181,7 +195,9 @@
             "type": "Array",
             "tags": [],
             "label": "filters",
-            "description": ["\nArray of applied filters"],
+            "description": [
+              "\nArray of applied filters"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -202,7 +218,9 @@
             "type": "Object",
             "tags": [],
             "label": "grid",
-            "description": ["\nData Grid related state"],
+            "description": [
+              "\nData Grid related state"
+            ],
             "signature": [
               {
                 "pluginId": "savedSearch",
@@ -223,8 +241,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideChart",
-            "description": ["\nHide chart"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nHide chart"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -235,8 +257,12 @@
             "type": "string",
             "tags": [],
             "label": "index",
-            "description": ["\nid of the used data view"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nid of the used data view"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -247,8 +273,12 @@
             "type": "string",
             "tags": [],
             "label": "interval",
-            "description": ["\nUsed interval of the histogram"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nUsed interval of the histogram"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -259,7 +289,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "query",
-            "description": ["\nLucence or KQL query"],
+            "description": [
+              "\nLucence or KQL query"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -288,8 +320,12 @@
             "type": "Array",
             "tags": [],
             "label": "sort",
-            "description": ["\nArray of the used sorting [[field,direction],...]"],
-            "signature": ["string[][] | undefined"],
+            "description": [
+              "\nArray of the used sorting [[field,direction],...]"
+            ],
+            "signature": [
+              "string[][] | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -300,8 +336,12 @@
             "type": "string",
             "tags": [],
             "label": "savedQuery",
-            "description": ["\nid of the used saved query"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nid of the used saved query"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -312,7 +352,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "viewMode",
-            "description": ["\nTable view: Documents vs Field Statistics"],
+            "description": [
+              "\nTable view: Documents vs Field Statistics"
+            ],
             "signature": [
               {
                 "pluginId": "savedSearch",
@@ -336,7 +378,9 @@
             "description": [
               "\nHide mini distribution/preview charts when in Field Statistics mode"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -347,8 +391,12 @@
             "type": "number",
             "tags": [],
             "label": "rowHeight",
-            "description": ["\nDocument explorer row height option"],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nDocument explorer row height option"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -359,8 +407,12 @@
             "type": "number",
             "tags": [],
             "label": "headerRowHeight",
-            "description": ["\nDocument explorer header row height option"],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nDocument explorer header row height option"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -371,8 +423,12 @@
             "type": "number",
             "tags": [],
             "label": "rowsPerPage",
-            "description": ["\nNumber of rows in the grid per page"],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nNumber of rows in the grid per page"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -383,8 +439,12 @@
             "type": "number",
             "tags": [],
             "label": "sampleSize",
-            "description": ["\nCustom sample size"],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nCustom sample size"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -395,8 +455,12 @@
             "type": "string",
             "tags": [],
             "label": "breakdownField",
-            "description": ["\nBreakdown field of chart"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nBreakdown field of chart"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -518,7 +582,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["TCustomizationId"],
+                "signature": [
+                  "TCustomizationId"
+                ],
                 "path": "src/plugins/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -629,7 +695,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["CustomizationCallbackContext"],
+                "signature": [
+                  "CustomizationCallbackContext"
+                ],
                 "path": "src/plugins/discover/public/customizations/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -677,8 +745,12 @@
             "type": "Object",
             "tags": [],
             "label": "globalState",
-            "description": ["\nGlobal State, the _g part of the URL"],
-            "signature": ["DiscoverGlobalStateContainer"],
+            "description": [
+              "\nGlobal State, the _g part of the URL"
+            ],
+            "signature": [
+              "DiscoverGlobalStateContainer"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -689,8 +761,12 @@
             "type": "Object",
             "tags": [],
             "label": "appState",
-            "description": ["\nApp state, the _a part of the URL"],
-            "signature": ["DiscoverAppStateContainer"],
+            "description": [
+              "\nApp state, the _a part of the URL"
+            ],
+            "signature": [
+              "DiscoverAppStateContainer"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -701,8 +777,12 @@
             "type": "Object",
             "tags": [],
             "label": "dataState",
-            "description": ["\nData fetching related state"],
-            "signature": ["DiscoverDataStateContainer"],
+            "description": [
+              "\nData fetching related state"
+            ],
+            "signature": [
+              "DiscoverDataStateContainer"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -713,7 +793,9 @@
             "type": "Object",
             "tags": [],
             "label": "internalState",
-            "description": ["\nInternal shared state that's used at several places in the UI"],
+            "description": [
+              "\nInternal shared state that's used at several places in the UI"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -736,8 +818,12 @@
             "type": "Object",
             "tags": [],
             "label": "savedSearchState",
-            "description": ["\nState of saved search, the saved object of Discover"],
-            "signature": ["DiscoverSavedSearchContainer"],
+            "description": [
+              "\nState of saved search, the saved object of Discover"
+            ],
+            "signature": [
+              "DiscoverSavedSearchContainer"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -748,7 +834,9 @@
             "type": "Object",
             "tags": [],
             "label": "stateStorage",
-            "description": ["\nState of url, allows updating and subscribing to url changes"],
+            "description": [
+              "\nState of url, allows updating and subscribing to url changes"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -768,8 +856,12 @@
             "type": "Object",
             "tags": [],
             "label": "searchSessionManager",
-            "description": ["\nService for handling search sessions"],
-            "signature": ["DiscoverSearchSessionManager"],
+            "description": [
+              "\nService for handling search sessions"
+            ],
+            "signature": [
+              "DiscoverSearchSessionManager"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -780,8 +872,12 @@
             "type": "Object",
             "tags": [],
             "label": "customizationContext",
-            "description": ["\nContext object for customization related properties"],
-            "signature": ["DiscoverCustomizationContext"],
+            "description": [
+              "\nContext object for customization related properties"
+            ],
+            "signature": [
+              "DiscoverCustomizationContext"
+            ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -792,7 +888,9 @@
             "type": "Object",
             "tags": [],
             "label": "actions",
-            "description": ["\nComplex functions to update multiple containers from UI"],
+            "description": [
+              "\nComplex functions to update multiple containers from UI"
+            ],
             "signature": [
               "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => () => void; loadDataViewList: () => Promise<void>; loadSavedSearch: (param?: ",
               "LoadParams",
@@ -935,7 +1033,9 @@
             "tags": [],
             "label": "doc",
             "description": [],
-            "signature": ["DataTableRecord"],
+            "signature": [
+              "DataTableRecord"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -947,7 +1047,9 @@
             "tags": [],
             "label": "renderDefaultContent",
             "description": [],
-            "signature": ["() => React.ReactNode"],
+            "signature": [
+              "() => React.ReactNode"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -975,7 +1077,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"flyout\""],
+            "signature": [
+              "\"flyout\""
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -987,7 +1091,10 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": ["Property", ".Width<string | number> | undefined"],
+            "signature": [
+              "Property",
+              ".Width<string | number> | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -999,7 +1106,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1154,7 +1263,9 @@
             "tags": [],
             "label": "hasTimeRange",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1204,7 +1315,9 @@
             "tags": [],
             "label": "selectedTab",
             "description": [],
-            "signature": ["\"discover\" | \"logs-explorer\""],
+            "signature": [
+              "\"discover\" | \"logs-explorer\""
+            ],
             "path": "src/plugins/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1230,7 +1343,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"search_bar\""],
+            "signature": [
+              "\"search_bar\""
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1242,7 +1357,9 @@
             "tags": [],
             "label": "CustomDataViewPicker",
             "description": [],
-            "signature": ["React.ComponentType<{}> | undefined"],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1254,7 +1371,9 @@
             "tags": [],
             "label": "PrependFilterBar",
             "description": [],
-            "signature": ["React.ComponentType<{}> | undefined"],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1296,7 +1415,9 @@
             "tags": [],
             "label": "hideDataViewPicker",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1322,7 +1443,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"top_nav\""],
+            "signature": [
+              "\"top_nav\""
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1334,7 +1457,10 @@
             "tags": [],
             "label": "defaultMenu",
             "description": [],
-            "signature": ["TopNavDefaultMenu", " | undefined"],
+            "signature": [
+              "TopNavDefaultMenu",
+              " | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1346,7 +1472,11 @@
             "tags": [],
             "label": "getMenuItems",
             "description": [],
-            "signature": ["(() => ", "TopNavMenuItem", "[]) | undefined"],
+            "signature": [
+              "(() => ",
+              "TopNavMenuItem",
+              "[]) | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1360,7 +1490,10 @@
             "tags": [],
             "label": "defaultBadges",
             "description": [],
-            "signature": ["TopNavDefaultBadges", " | undefined"],
+            "signature": [
+              "TopNavDefaultBadges",
+              " | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1372,7 +1505,11 @@
             "tags": [],
             "label": "getBadges",
             "description": [],
-            "signature": ["(() => ", "TopNavBadge", "[]) | undefined"],
+            "signature": [
+              "(() => ",
+              "TopNavBadge",
+              "[]) | undefined"
+            ],
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1409,7 +1546,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["CustomizationCallbackContext"],
+            "signature": [
+              "CustomizationCallbackContext"
+            ],
             "path": "src/plugins/discover/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1512,7 +1651,9 @@
         "tags": [],
         "label": "DiscoverProfileId",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "src/plugins/discover/public/customizations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1582,7 +1723,9 @@
         "tags": [],
         "label": "SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
         "description": [],
-        "signature": ["\"SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID\""],
+        "signature": [
+          "\"SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID\""
+        ],
         "path": "src/plugins/discover/public/embeddable/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1595,7 +1738,9 @@
         "tags": [],
         "label": "SEARCH_EMBEDDABLE_TYPE",
         "description": [],
-        "signature": ["\"search\""],
+        "signature": [
+          "\"search\""
+        ],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1696,7 +1841,9 @@
           "tags": [],
           "label": "showLogsExplorerTabs",
           "description": [],
-          "signature": ["() => void"],
+          "signature": [
+            "() => void"
+          ],
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
@@ -2296,7 +2443,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"DISCOVER_APP_LOCATOR\""],
+            "signature": [
+              "\"DISCOVER_APP_LOCATOR\""
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2308,7 +2457,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2320,7 +2471,9 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": ["DiscoverAppLocatorDependencies"],
+                "signature": [
+                  "DiscoverAppLocatorDependencies"
+                ],
                 "path": "src/plugins/discover/common/app_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2430,7 +2583,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"DISCOVER_ESQL_LOCATOR\""],
+            "signature": [
+              "\"DISCOVER_ESQL_LOCATOR\""
+            ],
             "path": "src/plugins/discover/common/esql_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2442,7 +2597,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/discover/common/esql_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2454,7 +2611,9 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": ["DiscoverESQLLocatorDependencies"],
+                "signature": [
+                  "DiscoverESQLLocatorDependencies"
+                ],
                 "path": "src/plugins/discover/common/esql_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2470,7 +2629,11 @@
             "tags": [],
             "label": "getLocation",
             "description": [],
-            "signature": ["() => Promise<", "KibanaLocation", "<object>>"],
+            "signature": [
+              "() => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
             "path": "src/plugins/discover/common/esql_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2517,8 +2680,12 @@
             "type": "string",
             "tags": [],
             "label": "savedSearchId",
-            "description": ["\nOptionally set saved search ID."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptionally set saved search ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2529,8 +2696,12 @@
             "type": "string",
             "tags": [],
             "label": "dataViewId",
-            "description": ["\nOptionally set index pattern / data view ID."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptionally set index pattern / data view ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2539,10 +2710,16 @@
             "parentPluginId": "discover",
             "id": "def-common.DiscoverAppLocatorParams.indexPatternId",
             "type": "string",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "indexPatternId",
-            "description": ["\nDuplication of dataViewId"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nDuplication of dataViewId"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -2620,7 +2797,9 @@
             "type": "Object",
             "tags": [],
             "label": "timeRange",
-            "description": ["\nOptionally set the time range in the time picker."],
+            "description": [
+              "\nOptionally set the time range in the time picker."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -2641,7 +2820,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refreshInterval",
-            "description": ["\nOptionally set the refresh interval."],
+            "description": [
+              "\nOptionally set the refresh interval."
+            ],
             "signature": [
               "(",
               {
@@ -2671,7 +2852,9 @@
             "type": "Array",
             "tags": [],
             "label": "filters",
-            "description": ["\nOptionally apply filters."],
+            "description": [
+              "\nOptionally apply filters."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -2692,7 +2875,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "query",
-            "description": ["\nOptionally set a query."],
+            "description": [
+              "\nOptionally set a query."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -2724,7 +2909,9 @@
             "description": [
               "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2735,8 +2922,12 @@
             "type": "string",
             "tags": [],
             "label": "searchSessionId",
-            "description": ["\nBackground search session id"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nBackground search session id"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2747,8 +2938,12 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": ["\nColumns displayed in the table"],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nColumns displayed in the table"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2759,7 +2954,9 @@
             "type": "Object",
             "tags": [],
             "label": "grid",
-            "description": ["\nData Grid related state"],
+            "description": [
+              "\nData Grid related state"
+            ],
             "signature": [
               {
                 "pluginId": "savedSearch",
@@ -2780,8 +2977,12 @@
             "type": "string",
             "tags": [],
             "label": "interval",
-            "description": ["\nUsed interval of the histogram"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nUsed interval of the histogram"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2792,8 +2993,12 @@
             "type": "Array",
             "tags": [],
             "label": "sort",
-            "description": ["\nArray of the used sorting [[field,direction],...]"],
-            "signature": ["string[][] | undefined"],
+            "description": [
+              "\nArray of the used sorting [[field,direction],...]"
+            ],
+            "signature": [
+              "string[][] | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2804,8 +3009,12 @@
             "type": "string",
             "tags": [],
             "label": "savedQuery",
-            "description": ["\nid of the used saved query"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nid of the used saved query"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2816,8 +3025,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "viewMode",
-            "description": ["\nTable view: Documents vs Field Statistics"],
-            "signature": ["VIEW_MODE", " | undefined"],
+            "description": [
+              "\nTable view: Documents vs Field Statistics"
+            ],
+            "signature": [
+              "VIEW_MODE",
+              " | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2831,7 +3045,9 @@
             "description": [
               "\nHide mini distribution/preview charts when in Field Statistics mode"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2842,8 +3058,12 @@
             "type": "string",
             "tags": [],
             "label": "breakdownField",
-            "description": ["\nBreakdown field"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nBreakdown field"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2854,8 +3074,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isAlertResults",
-            "description": ["\nUsed when navigating to particular alert results"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nUsed when navigating to particular alert results"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2866,8 +3090,12 @@
             "type": "string",
             "tags": [],
             "label": "profile",
-            "description": ["\nThe Discover profile to use"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe Discover profile to use"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2916,7 +3144,9 @@
             "tags": [],
             "label": "isAlertResults",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2934,7 +3164,9 @@
         "tags": [],
         "label": "APP_ICON",
         "description": [],
-        "signature": ["\"discoverApp\""],
+        "signature": [
+          "\"discoverApp\""
+        ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2947,7 +3179,9 @@
         "tags": [],
         "label": "DISCOVER_APP_LOCATOR",
         "description": [],
-        "signature": ["\"DISCOVER_APP_LOCATOR\""],
+        "signature": [
+          "\"DISCOVER_APP_LOCATOR\""
+        ],
         "path": "src/plugins/discover/common/app_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3041,7 +3275,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"discover\""],
+        "signature": [
+          "\"discover\""
+        ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
