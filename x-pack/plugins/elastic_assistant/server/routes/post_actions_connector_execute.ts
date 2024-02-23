@@ -256,7 +256,7 @@ export const postActionsConnectorExecuteRoute = (
             );
 
             if (Object.keys(latestReplacements).length > 0) {
-              // TODO, I think if this request happens before append message is done, it could interrupt append message
+              // TODO, @yul I think if this request happens before append message is done, it could interrupt append message
               await dataClient?.updateConversation({
                 conversationUpdateProps: {
                   id: conversationId,

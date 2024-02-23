@@ -138,12 +138,6 @@ export const updateConversation = async ({
       return null;
     }
 
-    if (!response.updated && response.updated === 0) {
-      // TODO
-      // @ yul I do not think we should throw here if the conversation was not updated, could be because identical data was sent
-      // throw Error('No conversation has been updated');
-    }
-
     const updatedConversation = await getConversation({
       esClient,
       conversationIndex,

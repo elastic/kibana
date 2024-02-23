@@ -114,22 +114,4 @@ describe('updateConversation', () => {
     });
     expect(updatedList).toEqual(null);
   });
-
-  // TODO @yul sure this is the right behavior?
-  test.skip('throw error if no conversation was updated', async () => {
-    const existingConversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
-    const conversation = getUpdateConversationOptionsMock();
-    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.updateByQuery.mockResolvedValue({ updated: 0 });
-    await expect(
-      updateConversation({
-        esClient,
-        logger: loggerMock.create(),
-        conversationIndex: 'index-1',
-        conversationUpdateProps: conversation,
-        user: mockUser1,
-      })
-    ).rejects.toThrow('No conversation has been updated');
-  });
 });
