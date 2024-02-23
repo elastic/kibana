@@ -39,7 +39,6 @@ export async function changeDataView(
   const dataView = internalState.getState().dataView;
   const state = appState.getState();
   let nextDataView: DataView | null = null;
-  // switch to the loading state of Discover Data, to make sure loading indication is displayed when loading the new data view
   internalState.transitions.setDataViewLoading(true);
 
   try {

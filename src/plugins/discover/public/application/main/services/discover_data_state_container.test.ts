@@ -95,7 +95,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    dataState.reset();
+    dataState.reset(stateContainer.savedSearchState.getState());
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     });
