@@ -30,7 +30,7 @@ export const ControlGroupStrings = {
             'controls.controlGroup.invalidControlWarning.tourStepContent.default',
             {
               defaultMessage:
-                'Some selections are returning no results. For full results, try changing the selections.',
+                'Some selections are returning no results. Try changing the selections.',
             }
           );
         }
