@@ -6,7 +6,6 @@ source .buildkite/scripts/common/util.sh
 
 export BAZEL_CACHE_MODE=populate-local-gcs
 export DISABLE_BOOTSTRAP_VALIDATION=true
-export PUPPETEER_SKIP_CHROME_DOWNLOAD=true
 
 # Because we're manually deleting node_modules and bazel directories in-between runs, we need to --force-install
 export BOOTSTRAP_ALWAYS_FORCE_INSTALL=true
