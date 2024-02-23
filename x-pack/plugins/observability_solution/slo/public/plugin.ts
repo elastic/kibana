@@ -13,14 +13,14 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { SlosPluginSetupDeps, SlosPluginStartDeps } from './types'; // TODO move later to type
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 import type { SlosPluginSetup, SlosPluginStart } from './types';
 
 export class SlosPlugin implements Plugin<SlosPluginSetup, SlosPluginStart> {
   public setup(core: CoreSetup, plugins: SlosPluginSetupDeps) /* : SlosPluginSetup*/ {
     // Register an application into the side navigation menu
     core.application.register({
-      id: 'slos',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts
       euiIconType: 'logoObservability',

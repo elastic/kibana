@@ -1,14 +1,14 @@
 {
   "type": "plugin",
-  "id": "@kbn/slos-plugin",
+  "id": "@kbn/slo-plugin",
   "owner": "@elastic/obs-ux-management-team",
   "plugin": {
-    "id": "slos",
+    "id": "slo",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "slos"
+      "slo"
     ],
     "requiredPlugins": [
       "observability",

@@ -6148,7 +6148,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slos-plugin@link:x-pack/plugins/observability_solution/slos":
+"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
   version "0.0.0"
   uid ""
 
