@@ -70,15 +70,12 @@ describe(
     });
 
     context('Basic rendering', () => {
-      it('alert with some assignees in alerts table', () => {
+      it('alert with some assignees in alerts table & details flyout', () => {
         const users = [ROLES.detections_admin, ROLES.t1_analyst];
         updateAssigneesForFirstAlert(users);
-        alertsTableShowsAssigneesForAlert(users);
-      });
 
-      it(`alert with some assignees in alert's details flyout`, () => {
-        const users = [ROLES.detections_admin, ROLES.t1_analyst];
-        updateAssigneesForFirstAlert(users);
+        alertsTableShowsAssigneesForAlert(users);
+
         expandFirstAlert();
         alertDetailsFlyoutShowsAssignees(users);
       });

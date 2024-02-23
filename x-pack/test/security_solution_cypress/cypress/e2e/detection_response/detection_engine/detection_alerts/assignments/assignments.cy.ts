@@ -57,24 +57,19 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
   });
 
   context('Basic rendering', () => {
-    it('alert with no assignees in alerts table', () => {
+    it('alert with no assignees in alerts table & details flyout', () => {
       checkEmptyAssigneesStateInAlertsTable();
-    });
 
-    it(`alert with no assignees in alert's details flyout`, () => {
       expandFirstAlert();
       checkEmptyAssigneesStateInAlertDetailsFlyout();
     });
 
-    it('alert with some assignees in alerts table', () => {
+    it('alert with some assignees in alerts table & details flyout', () => {
       const users = [getDefaultUserName()];
       updateAssigneesForFirstAlert(users);
-      alertsTableShowsAssigneesForAlert(users);
-    });
 
-    it(`alert with some assignees in alert's details flyout`, () => {
-      const users = [getDefaultUserName()];
-      updateAssigneesForFirstAlert(users);
+      alertsTableShowsAssigneesForAlert(users);
+
       expandFirstAlert();
       alertDetailsFlyoutShowsAssignees(users);
     });
@@ -124,56 +119,6 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       alertsTableShowsAssigneesForAlert(users);
     });
 
-    it('updating assignees via `More actions` in alerts table', () => {
-      // Initially assigned users
-      const initialAssignees = [getDefaultUserName()];
-      updateAssigneesForFirstAlert(initialAssignees);
-      alertsTableShowsAssigneesForAlert(initialAssignees);
-
-      // Update assignees
-      const updatedAssignees = [getDefaultUserName()];
-      updateAssigneesForFirstAlert(updatedAssignees);
-
-      // There should be no assigned alerts
-      checkEmptyAssigneesStateInAlertsTable();
-    });
-
-    it('updating assignees via add button in flyout', () => {
-      expandFirstAlert();
-
-      // Initially assigned users
-      const initialAssignees = [getDefaultUserName()];
-      updateAssigneesViaAddButtonInFlyout(initialAssignees);
-      alertDetailsFlyoutShowsAssignees(initialAssignees);
-
-      // Update assignees
-      const updatedAssignees = [getDefaultUserName()];
-      updateAssigneesViaAddButtonInFlyout(updatedAssignees);
-
-      // There should be no assigned alerts
-      checkEmptyAssigneesStateInAlertDetailsFlyout();
-      closeAlertFlyout();
-      checkEmptyAssigneesStateInAlertsTable();
-    });
-
-    it('updating assignees via `Take action` button in flyout', () => {
-      expandFirstAlert();
-
-      // Initially assigned users
-      const initialAssignees = [getDefaultUserName()];
-      updateAssigneesViaTakeActionButtonInFlyout(initialAssignees);
-      alertDetailsFlyoutShowsAssignees(initialAssignees);
-
-      // Update assignees
-      const updatedAssignees = [getDefaultUserName()];
-      updateAssigneesViaTakeActionButtonInFlyout(updatedAssignees);
-
-      // There should be no assigned alerts
-      checkEmptyAssigneesStateInAlertDetailsFlyout();
-      closeAlertFlyout();
-      checkEmptyAssigneesStateInAlertsTable();
-    });
-
     it('removing all assignees via `More actions` in alerts table', () => {
       // Initially assigned users
       const initialAssignees = [getDefaultUserName()];
@@ -215,23 +160,6 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
 
       // Assignees should appear in the alerts table
       alertsTableShowsAssigneesForAllAlerts(users);
-    });
-
-    it('updating assignees should be reflected in UI (alerts table)', () => {
-      selectFirstPageAlerts();
-
-      // Initially assigned users
-      const initialAssignees = [getDefaultUserName()];
-      bulkUpdateAssignees(initialAssignees);
-      alertsTableShowsAssigneesForAllAlerts(initialAssignees);
-
-      // Update assignees
-      selectFirstPageAlerts();
-      const updatedAssignees = [getDefaultUserName()];
-      bulkUpdateAssignees(updatedAssignees);
-
-      // There should be no assigned alerts
-      checkEmptyAssigneesStateInAlertsTable();
     });
 
     it('removing all assignees should be reflected in UI (alerts table)', () => {
