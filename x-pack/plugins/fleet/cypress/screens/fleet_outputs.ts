@@ -31,7 +31,6 @@ export const selectKafkaOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
-  cy.getBySel(SETTINGS_OUTPUTS.WARNING_KAFKA_CALLOUT);
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
 };
 
