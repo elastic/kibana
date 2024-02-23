@@ -11,6 +11,8 @@ import { rollingTimeWindowTypeSchema, SLOResponse, SLOWithSummaryResponse } from
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import React, { MouseEvent, useCallback } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';
 import { toDurationLabel } from '../../../../utils/slo/labels';
@@ -22,12 +24,14 @@ export interface Props {
 
 export function SloTimeWindowBadge({ slo, color }: Props) {
   const { onStateChange } = useUrlSearchState();
+  const isSloPage = useRouteMatch(SLOS_PATH)?.isExact ?? false;
 
   const onBadgeClick = useCallback(() => {
-    onStateChange({
-      kqlQuery: `slo.timeWindow.duration: "${slo.timeWindow.duration}"`,
-    });
-  }, [onStateChange, slo.timeWindow.duration]);
+    if (isSloPage)
+      onStateChange({
+        kqlQuery: `slo.timeWindow.duration: "${slo.timeWindow.duration}"`,
+      });
+  }, [isSloPage, onStateChange, slo.timeWindow.duration]);
 
   const unit = slo.timeWindow.duration.slice(-1);
   if (rollingTimeWindowTypeSchema.is(slo.timeWindow.type)) {
@@ -46,7 +50,7 @@ export function SloTimeWindowBadge({ slo, color }: Props) {
           iconType="editorItemAlignRight"
           iconSide="left"
           onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation(); // stops propagation of metric onElementClick
+            if (isSloPage) e.stopPropagation(); // stops propagation of metric onElementClick
           }}
         >
           {toDurationLabel(slo.timeWindow.duration)}
