@@ -8,50 +8,68 @@
 import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useState } from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import React from 'react';
 import { DslData, useGetDslStatus } from '../hooks/use_get_dsl_status';
+import { useManagementLocator } from './useManagementLocator';
 
-const ErrorEmptyPrompt = ({ error }: { error?: string }) => (
-  <EuiEmptyPrompt
-    iconType="error"
-    body={
-      <p>
-        {error ??
-          i18n.translate('xpack.synthetics.dslRetention.emptyErrorPrompt', {
-            defaultMessage: 'No further error information available',
-          })}
-      </p>
-    }
-    color="danger"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.synthetics.dslRetention.noData.heading"
-          defaultMessage="No data retention information found"
-        />
-      </h2>
-    }
-  />
-);
+export const DslRetentionTab = () => {
+  const { dslData, loading, error } = useGetDslStatus();
+  if (loading === false && dslData === undefined)
+    return <ErrorEmptyPrompt error={error?.message} />;
 
-function useManagementLocator(extraPath?: string) {
-  const [templatePath, setTemplatePath] = useState<string | null>(null);
-  const { basePath } = useSyntheticsSettingsContext();
-  const { share, application } = useKibana<ClientPluginsStart>().services;
-  const canManageIndices = !!application.capabilities.management?.data?.index_management;
-  useEffect(() => {
-    if (!canManageIndices) return;
-    const managementLocator = share.url.locators.get('MANAGEMENT_APP_LOCATOR');
-    managementLocator
-      ?.getLocation({ sectionId: 'data', appId: 'index_management' })
-      .then(({ app, path }) => setTemplatePath(`${basePath}/app/${app}${path}${extraPath}`));
-  }, [share.url.locators, basePath, setTemplatePath, canManageIndices, extraPath]);
-  return templatePath;
-}
+  return (
+    <EuiBasicTable
+      items={dslData ?? []}
+      loading={loading === true && dslData === undefined}
+      noItemsMessage={
+        loading === false && dslData === [] ? (
+          <FormattedMessage
+            id="xpack.synthetics.dslRetention.noData"
+            defaultMessage="No retention data found"
+          />
+        ) : undefined
+      }
+      columns={DSL_RETENTION_COLUMNS}
+      tableLayout="auto"
+    />
+  );
+};
 
+const DSL_RETENTION_COLUMNS: Array<EuiBasicTableColumn<DslData>> = [
+  {
+    field: 'name',
+    name: i18n.translate('xpack.synthetics.dslRetention.columns.name', {
+      defaultMessage: 'Dataset',
+    }),
+    render: (name: string, { dataStreamName }: DslData) => {
+      if (!dataStreamName) {
+        return name;
+      }
+      return <DataStreamLink dataStream={dataStreamName} name={name} />;
+    },
+  },
+  {
+    field: 'storageSize',
+    name: i18n.translate('xpack.synthetics.dslRetention.columns.currentSize', {
+      defaultMessage: 'Current size',
+    }),
+  },
+  {
+    field: 'lifecycle.data_retention',
+    name: i18n.translate('xpack.synthetics.dslRetention.columns.retentionPeriod', {
+      defaultMessage: 'Retention period',
+    }),
+  },
+  {
+    field: 'indexTemplateName',
+    name: i18n.translate('xpack.synthetics.dslRetention.columns.indexTemplateName', {
+      defaultMessage: 'Index template',
+    }),
+    render: (indexTemplateName: string) => (
+      <IndexTemplateLabel indexTemplateName={indexTemplateName} />
+    ),
+  },
+];
 function DataStreamLink({ dataStream, name }: { dataStream: string; name: string }) {
   const templatePath = useManagementLocator(`/data_streams/${dataStream}`);
 
@@ -82,61 +100,25 @@ function IndexTemplateLabel({ indexTemplateName }: { indexTemplateName: string }
   );
 }
 
-export const DslRetentionTab = () => {
-  const { dslData, loading, error } = useGetDslStatus();
-  if (loading === false && dslData === undefined)
-    return <ErrorEmptyPrompt error={error?.message} />;
-
-  const columns: Array<EuiBasicTableColumn<DslData>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.synthetics.dslRetention.columns.name', {
-        defaultMessage: 'Dataset',
-      }),
-      render: (name: string, { dataStreamName }: DslData) => {
-        if (!dataStreamName) {
-          return name;
-        }
-        return <DataStreamLink dataStream={dataStreamName} name={name} />;
-      },
-    },
-    {
-      field: 'storageSize',
-      name: i18n.translate('xpack.synthetics.dslRetention.columns.currentSize', {
-        defaultMessage: 'Current size',
-      }),
-    },
-    {
-      field: 'lifecycle.data_retention',
-      name: i18n.translate('xpack.synthetics.dslRetention.columns.retentionPeriod', {
-        defaultMessage: 'Retention period',
-      }),
-    },
-    {
-      field: 'indexTemplateName',
-      name: i18n.translate('xpack.synthetics.dslRetention.columns.indexTemplateName', {
-        defaultMessage: 'Index template',
-      }),
-      render: (indexTemplateName: string) => (
-        <IndexTemplateLabel indexTemplateName={indexTemplateName} />
-      ),
-    },
-  ];
-
-  return (
-    <EuiBasicTable
-      items={dslData ?? []}
-      loading={loading === true && dslData === undefined}
-      noItemsMessage={
-        loading === false && dslData === [] ? (
-          <FormattedMessage
-            id="xpack.synthetics.dslRetention.noData"
-            defaultMessage="No retention data found"
-          />
-        ) : undefined
-      }
-      columns={columns}
-      tableLayout="auto"
-    />
-  );
-};
+const ErrorEmptyPrompt = ({ error }: { error?: string }) => (
+  <EuiEmptyPrompt
+    iconType="error"
+    body={
+      <p>
+        {error ??
+          i18n.translate('xpack.synthetics.dslRetention.emptyErrorPrompt', {
+            defaultMessage: 'No further error information available',
+          })}
+      </p>
+    }
+    color="danger"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.synthetics.dslRetention.noData.heading"
+          defaultMessage="No data retention information found"
+        />
+      </h2>
+    }
+  />
+);
