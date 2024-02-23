@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  removeDropCommandsFromESQLQuery,
-  getIndexForESQLQuery,
-  getInitialESQLQuery,
-  TextBasedLanguages,
-} from './src';
+import { getInitialESQLQuery } from './get_initial_esql_query';
+
+describe('getInitialESQLQuery', () => {
+  it('should work correctly', () => {
+    expect(getInitialESQLQuery('logs*')).toBe('from logs* | limit 10');
+  });
+});
