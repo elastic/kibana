@@ -13,7 +13,7 @@ Unit testing is a good approach if you have a very specific piece of code with l
 ## Unit Tests (Jest)
 
 ```
-node x-pack/plugins/apm/scripts/test/jest [--watch] [--updateSnapshot]
+node x-pack/plugins/observability_solution/apm/scripts/test/jest [--watch] [--updateSnapshot]
 ```
 
 #### Coverage
@@ -44,7 +44,7 @@ The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/a
 #### Start server and run test (single process)
 
 ```
-node x-pack/plugins/apm/scripts/test/api [--trial/--basic] [--help]
+node x-pack/plugins/observability_solution/apm/scripts/test/api [--trial/--basic] [--help]
 ```
 
 The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
@@ -55,10 +55,10 @@ Once the tests finish, the instances will be terminated.
 ```sh
 
 # start server
-node x-pack/plugins/apm/scripts/test/api --server --basic
+node x-pack/plugins/observability_solution/apm/scripts/test/api --server --basic
 
 # run tests
-node x-pack/plugins/apm/scripts/test/api --runner --basic --grep-files=error_group_list
+node x-pack/plugins/observability_solution/apm/scripts/test/api --runner --basic --grep-files=error_group_list
 ```
 
 ### Update snapshots (from Kibana root)
@@ -66,7 +66,7 @@ node x-pack/plugins/apm/scripts/test/api --runner --basic --grep-files=error_gro
 To update snapshots append `--updateSnapshots` to the `--runner` command:
 
 ```
-node x-pack/plugins/apm/scripts/test/api --runner --basic --updateSnapshots
+node x-pack/plugins/observability_solution/apm/scripts/test/api --runner --basic --updateSnapshots
 ```
 
 (The test server needs to be running)
@@ -80,7 +80,7 @@ node x-pack/plugins/apm/scripts/test/api --runner --basic --updateSnapshots
 
 ## E2E Tests (Cypress)
 
-The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e).
+The E2E tests are located in [`x-pack/plugins/observability_solution/apm/ftr_e2e`](../ftr_e2e).
 
 When PR is labeled with `apm:cypress-record`, test runs are recorded to the [Cypress Dashboard](https://dashboard.cypress.io).
 
@@ -98,19 +98,19 @@ Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are or
 #### Start test server
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e --server
+node x-pack/plugins/observability_solution/apm/scripts/test/e2e --server
 ```
 
 #### Run tests
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e --runner --open
+node x-pack/plugins/observability_solution/apm/scripts/test/e2e --runner --open
 ```
 
 ### Run tests multiple times to check for flakiness
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e --runner --times <NUMBER> [--spec <FILE_NAME>]
+node x-pack/plugins/observability_solution/apm/scripts/test/e2e --runner --times <NUMBER> [--spec <FILE_NAME>]
 ```
 
 ### A11y checks
@@ -131,7 +131,7 @@ node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/con
 
 APM tests are located in `x-pack/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
-diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scripts/test/README.md
+diff --git a/x-pack/plugins/observability_solution/apm/scripts/test/README.md b/x-pack/plugins/observability_solution/apm/scripts/test/README.md
 
 ## Serverless API tests
 

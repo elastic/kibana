@@ -1,6 +1,6 @@
 # APM E2E
 
-APM uses [FTR](../../../../packages/kbn-test/README.md) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/plugins/apm/ftr_e2e/cypress/integration`.
+APM uses [FTR](../../../../../packages/kbn-test/README.md) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/integration`.
 
 ## Tips and best practices
 
@@ -71,7 +71,7 @@ it('calls the dependencies API', () => {
 
 ### Prefer `cy.visitKibana` instead of `cy.visit`
 
-In most cases we should use [`cy.visitKibana`](https://github.com/elastic/kibana/blob/50821db39c07d5d35d510c8082d5c608c4e2fd4e/x-pack/plugins/apm/ftr_e2e/cypress/support/commands.ts#L51-L56) instead of `cy.visit`.
+In most cases we should use [`cy.visitKibana`](https://github.com/elastic/kibana/blob/50821db39c07d5d35d510c8082d5c608c4e2fd4e/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/support/commands.ts#L51-L56) instead of `cy.visit`.
 `cy.visitKibana` will wait for Kibana to have successfully loaded before moving on. This will reduce the risk of timing out later in the test because we split up the wait time in two parts: Kibana load time, and APM load time thus a time budget for each (by default 40 seconds).
 
 ### Clean data before and after each test

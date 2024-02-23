@@ -9,13 +9,16 @@ const path = require('path');
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../..'),
-  roots: ['<rootDir>/x-pack/plugins/apm'],
-  setupFiles: ['<rootDir>/x-pack/plugins/apm/.storybook/jest_setup.js'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/apm',
+  rootDir: path.resolve(__dirname, '../../../..'),
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/apm'],
+  setupFiles: [
+    '<rootDir>/x-pack/plugins/observability_solution/apm/.storybook/jest_setup.js',
+  ],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/apm',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/apm/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/observability_solution/apm/{common,public,server}/**/*.{js,ts,tsx}',
     '!<rootDir>/**/*.stories.*',
   ],
 };
