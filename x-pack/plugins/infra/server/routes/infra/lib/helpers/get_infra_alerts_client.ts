@@ -29,7 +29,7 @@ export async function getInfraAlertsClient({
   const infraAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(['infrastructure']);
 
   if (!infraAlertsIndices || isEmpty(infraAlertsIndices)) {
-    throw Error('No alert indices exist for "infrastrucuture"');
+    throw Error('No alert indices exist for "infrastructure"');
   }
 
   return {

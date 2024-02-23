@@ -45,6 +45,7 @@
     "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
     "@kbn/react-kibana-context-render",
+    "@kbn/data-view-utils",
     "@kbn/esql-utils"
   ],
   "exclude": [
