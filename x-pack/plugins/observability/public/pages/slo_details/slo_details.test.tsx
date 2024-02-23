@@ -102,6 +102,11 @@ const mockKibana = () => {
           return '';
         },
       },
+      executionContext: {
+        get: () => ({
+          name: 'observability-overview',
+        }),
+      },
     },
   });
 };

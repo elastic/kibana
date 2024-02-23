@@ -9,7 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect, useState } from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   ProcessListAPIChartResponse,
   ProcessListAPIChartResponseRT,
@@ -20,7 +20,7 @@ import { useProcessListContext } from './use_process_list';
 
 export function useProcessListRowChart(
   command: string,
-  request$?: Subject<() => Promise<unknown>>
+  request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>
 ) {
   const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {

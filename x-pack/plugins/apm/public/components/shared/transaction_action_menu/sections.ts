@@ -194,7 +194,6 @@ export const getSections = ({
         kuery: `${HOST_NAME}: "${hostName}"`,
       }),
       condition: !!hostName && !!profilingLocators,
-      showNewBadge: true,
     },
     {
       key: 'hostProfilingTopNFunctions',
@@ -206,7 +205,6 @@ export const getSections = ({
         kuery: `${HOST_NAME}: "${hostName}"`,
       }),
       condition: !!hostName && !!profilingLocators,
-      showNewBadge: true,
     },
     {
       key: 'hostProfilingStacktraces',
@@ -218,7 +216,6 @@ export const getSections = ({
         kuery: `${HOST_NAME}: "${hostName}"`,
       }),
       condition: !!hostName && !!profilingLocators,
-      showNewBadge: true,
     },
   ];
 
