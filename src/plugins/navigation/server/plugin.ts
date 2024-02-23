@@ -41,7 +41,7 @@ export class NavigationServerPlugin
   start(core: CoreStart, plugins: NavigationServerStartDependencies) {
     const config = this.initializerContext.config.get<NavigationConfig>();
 
-    if (!config.solutionNavigation.featureOn) {
+    if (!Boolean(config.solutionNavigation.featureOn)) {
       this.removeUiSettings(core, getUiSettings(config));
     }
 

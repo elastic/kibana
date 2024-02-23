@@ -46,8 +46,6 @@ import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } fr
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 
-const SOLUTION_NAV_KEY = 'core.chrome.solutionNavId';
-
 interface StartDeps {
   application: InternalApplicationStart;
   navLinksService: ChromeNavLinks;
@@ -81,9 +79,7 @@ export class ProjectNavigationService {
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
-  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(
-    localStorage.getItem(SOLUTION_NAV_KEY) ?? null
-  );
+  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
   private application?: InternalApplicationStart;
   private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
@@ -351,24 +347,20 @@ export class ProjectNavigationService {
     SolutionNavigationDefinitions,
     string | null
   ]) {
-    if (Object.keys(definitions).length === 0) {
-      return; // no solution navs
-    }
-
     if (id === null) {
       this.setChromeStyle('classic');
-      localStorage.removeItem(SOLUTION_NAV_KEY);
       this.navigationTree$.next(undefined);
     } else {
       if (Object.keys(definitions).length === 0) return;
+
       const definition = definitions[id];
       if (!definition) {
         throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
       }
 
       this.setChromeStyle('project');
-      localStorage.setItem(SOLUTION_NAV_KEY, id);
       const { sideNavComponentGetter } = definition;
+
       if (sideNavComponentGetter) {
         this.setSideNavComponent(sideNavComponentGetter());
       }
