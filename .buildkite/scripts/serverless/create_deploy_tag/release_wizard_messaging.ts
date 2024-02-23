@@ -213,11 +213,6 @@ export async function transition(targetStateName: StateNames, data?: any) {
   const currentStateIndex = Object.keys(states).indexOf(currentStateName);
   const targetStateIndex = Object.keys(states).indexOf(targetStateName);
 
-  console.log(
-    `Transitioning from ${currentStateName} (${currentStateIndex}) to ${targetStateName} (${targetStateIndex}) with data:`,
-    data
-  );
-
   if (currentStateIndex === -1) {
     throw new Error(`Could not find current state '${currentStateName}' in core flow`);
   }
@@ -230,13 +225,9 @@ export async function transition(targetStateName: StateNames, data?: any) {
 
   if (currentStateIndex + 1 !== targetStateIndex) {
     await tryCall(currentState.post, stateData);
-    console.warn("Target state isn't the next state in the flow, marking as NOK.");
     stateData[currentStateName] = 'nok';
   } else {
     const result = await tryCall(currentState.post, stateData);
-    if (!result) {
-      console.warn("Post Call wasn't successful, marking as NOK.");
-    }
     stateData[currentStateName] = result ? 'ok' : 'nok';
   }
   stateData[targetStateName] = 'pending';
