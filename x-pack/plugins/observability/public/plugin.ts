@@ -14,7 +14,6 @@ import {
   App,
   AppDeepLink,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -69,6 +68,7 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -197,7 +197,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'rules',
@@ -205,7 +205,7 @@ export class Plugin
             defaultMessage: 'Rules',
           }),
           path: RULES_PATH,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
       ],
     },
@@ -214,7 +214,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.slosLinkTitle', {
         defaultMessage: 'SLOs',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       order: 8002,
       path: SLOS_PATH,
     },
@@ -223,15 +223,13 @@ export class Plugin
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesCreate]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesConfigure]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
+          visibleIn: [],
         },
       },
     }),
@@ -316,7 +314,9 @@ export class Plugin
         'user',
         'experience',
       ],
-      searchable: !Boolean(pluginsSetup.serverless),
+      visibleIn: Boolean(pluginsSetup.serverless)
+        ? ['home', 'kibanaOverview']
+        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
     };
 
     coreSetup.application.register(app);
@@ -352,6 +352,15 @@ export class Plugin
           pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
         };
         registerSloAlertsEmbeddableFactory();
+
+        const registerSloErrorBudgetEmbeddableFactory = async () => {
+          const { SloErrorBudgetEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/error_budget/slo_error_budget_embeddable_factory'
+          );
+          const factory = new SloErrorBudgetEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloErrorBudgetEmbeddableFactory();
 
         const registerAsyncSloAlertsUiActions = async () => {
           if (pluginsSetup.uiActions) {
@@ -437,7 +446,7 @@ export class Plugin
               //
               // See https://github.com/elastic/kibana/issues/103325.
               const otherLinks: NavigationEntry[] = deepLinks
-                .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+                .filter((link) => (link.visibleIn ?? []).length > 0)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,
@@ -486,10 +495,22 @@ export class Plugin
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
+        config,
+        core: coreStart,
+        isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        isServerless: !!pluginsStart.serverless,
+      }),
     };
   }
 }
