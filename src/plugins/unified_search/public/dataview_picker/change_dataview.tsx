@@ -55,11 +55,12 @@ export const TextBasedLanguagesTransitionModal = (
   </React.Suspense>
 );
 
-const mapAdHocDataView = (adHocDataView: DataView) => {
+const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => {
   return {
     title: adHocDataView.title,
     name: adHocDataView.name,
     id: adHocDataView.id!,
+    type: adHocDataView.type,
     isAdhoc: true,
   };
 };
@@ -112,9 +113,8 @@ export function ChangeDataView({
       const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      // not propagate the adHoc dataviews on the list for text based languages
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        (!isTextBasedLangSelected && adHocDataViews?.map(mapAdHocDataView)) || [];
+        adHocDataViews?.map(mapAdHocDataView) ?? [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };

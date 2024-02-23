@@ -7,13 +7,14 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
+import { useSelector } from 'react-redux';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../../../common/store';
+import type { State } from '../../../../common/store';
 
 type Func = () => Promise<void>;
 
@@ -41,13 +42,13 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { signalIndexMappingOutdated, signalIndexName } = useDeepEqualSelector((state) =>
-    getDataViewsSelector(state)
-  );
+  const signalIndexMappingOutdated = useSelector((state: State) => {
+    return sourcererSelectors.signalIndexMappingOutdated(state);
+  });
+
+  const signalIndexName = useSelector((state: State) => {
+    return sourcererSelectors.signalIndexName(state);
+  });
 
   useEffect(() => {
     let isSubscribed = true;
