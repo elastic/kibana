@@ -108,7 +108,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; connect-src 'self' *.elastic.co connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' data: img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -119,6 +119,29 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
         `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
+      );
+    });
+
+    it('merges additional CSP configs as expected', () => {
+      const config = cspConfig.schema.validate({
+        connect_src: ['*.foo.bar'], // should de-dupe these
+      });
+      const additionalConfig1 = {
+        connect_src: ['*.foo.bar'],
+        img_src: ['*.foo.bar'],
+      };
+      const additionalConfig2 = {
+        connect_src: [`cdn.host.test`],
+        font_src: [`cdn.host.test`],
+        frame_src: [`cdn.host.test`],
+        img_src: [`cdn.host.test`],
+        worker_src: [`cdn.host.test`],
+        script_src: [`cdn.host.test`],
+        style_src: [`cdn.host.test`],
+      };
+      const directives = CspDirectives.fromConfig(config, additionalConfig1, additionalConfig2);
+      expect(directives.getCspHeader()).toEqual(
+        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; connect-src 'self' *.elastic.co *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' data: *.foo.bar cdn.host.test`
       );
     });
   });
