@@ -107,7 +107,9 @@
             "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueRegistry.get",
             "type": "Function",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "get",
             "description": [],
             "signature": [
@@ -217,7 +219,9 @@
             "tags": [],
             "label": "removeFeature",
             "description": [],
-            "signature": ["(appId: string) => void"],
+            "signature": [
+              "(appId: string) => void"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -229,7 +233,9 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -247,9 +253,14 @@
         "parentPluginId": "home",
         "id": "def-public.getDisplayText",
         "type": "Function",
-        "tags": ["params", "return"],
+        "tags": [
+          "params",
+          "return"
+        ],
         "label": "getDisplayText",
-        "description": ["\nConvert instruction variant id into display text.\n"],
+        "description": [
+          "\nConvert instruction variant id into display text.\n"
+        ],
         "signature": [
           "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
         ],
@@ -273,7 +284,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["display name"],
+        "returnComment": [
+          "display name"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -318,7 +331,9 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": ["React.FunctionComponent<{}>"],
+            "signature": [
+              "React.FunctionComponent<{}>"
+            ],
             "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -331,7 +346,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P & { children?: React.ReactNode; }"],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -343,7 +360,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -370,7 +389,9 @@
             "type": "boolean",
             "tags": [],
             "label": "cloud",
-            "description": ["\nFlag whether the home app should advertise cloud features"],
+            "description": [
+              "\nFlag whether the home app should advertise cloud features"
+            ],
             "path": "src/plugins/home/public/services/environment/environment.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -381,7 +402,9 @@
             "type": "boolean",
             "tags": [],
             "label": "apmUi",
-            "description": ["\nFlag whether the home app should advertise apm features"],
+            "description": [
+              "\nFlag whether the home app should advertise apm features"
+            ],
             "path": "src/plugins/home/public/services/environment/environment.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -392,7 +415,9 @@
             "type": "boolean",
             "tags": [],
             "label": "ml",
-            "description": ["\nFlag whether the home app should advertise ml features"],
+            "description": [
+              "\nFlag whether the home app should advertise ml features"
+            ],
             "path": "src/plugins/home/public/services/environment/environment.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -417,7 +442,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["Unique string identifier for this feature."],
+            "description": [
+              "Unique string identifier for this feature."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -428,7 +455,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["Title of feature displayed to the user."],
+            "description": [
+              "Title of feature displayed to the user."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -439,8 +468,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "category",
-            "description": ["{@link FeatureCatalogueCategory} to display this feature in."],
-            "signature": ["\"data\" | \"other\" | \"admin\""],
+            "description": [
+              "{@link FeatureCatalogueCategory} to display this feature in."
+            ],
+            "signature": [
+              "\"data\" | \"other\" | \"admin\""
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -451,8 +484,12 @@
             "type": "string",
             "tags": [],
             "label": "subtitle",
-            "description": ["A tagline of feature displayed to the user."],
-            "signature": ["string | undefined"],
+            "description": [
+              "A tagline of feature displayed to the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -463,7 +500,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["One-line description of feature displayed to the user."],
+            "description": [
+              "One-line description of feature displayed to the user."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -477,7 +516,9 @@
             "description": [
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
-            "signature": ["string | React.ComponentType<{}>"],
+            "signature": [
+              "string | React.ComponentType<{}>"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -488,7 +529,9 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": ["URL path to link to this future. Should not include the basePath."],
+            "description": [
+              "URL path to link to this future. Should not include the basePath."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -515,7 +558,9 @@
             "description": [
               "An ordinal used to sort features relative to one another for display on the home page"
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -526,8 +571,12 @@
             "type": "Function",
             "tags": [],
             "label": "visible",
-            "description": ["Optional function to control visibility of this feature."],
-            "signature": ["(() => boolean) | undefined"],
+            "description": [
+              "Optional function to control visibility of this feature."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -540,8 +589,12 @@
             "type": "string",
             "tags": [],
             "label": "solutionId",
-            "description": ["Unique string identifier of the solution this feature belongs to"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Unique string identifier of the solution this feature belongs to"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -566,7 +619,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["Unique string identifier for this solution."],
+            "description": [
+              "Unique string identifier for this solution."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -577,7 +632,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["Title of solution displayed to the user."],
+            "description": [
+              "Title of solution displayed to the user."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -588,7 +645,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["One-line description of the solution displayed to the user."],
+            "description": [
+              "One-line description of the solution displayed to the user."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -602,7 +661,9 @@
             "description": [
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
-            "signature": ["string | React.ComponentType<{}>"],
+            "signature": [
+              "string | React.ComponentType<{}>"
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -613,7 +674,9 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": ["URL path to link to this future. Should not include the basePath."],
+            "description": [
+              "URL path to link to this future. Should not include the basePath."
+            ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -637,7 +700,9 @@
             "type": "Function",
             "tags": [],
             "label": "isVisible",
-            "description": ["Optional function to control visibility of this solution."],
+            "description": [
+              "Optional function to control visibility of this solution."
+            ],
             "signature": [
               "((capabilities: ",
               {
@@ -700,7 +765,9 @@
             "description": [
               "\nRegister listeners to be called when the Welcome component is mounted.\nIt can be called multiple times to register multiple listeners."
             ],
-            "signature": ["(onRendered: () => void) => void"],
+            "signature": [
+              "(onRendered: () => void) => void"
+            ],
             "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -712,7 +779,9 @@
                 "tags": [],
                 "label": "onRendered",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -805,7 +874,9 @@
         "tags": [],
         "label": "FeatureCatalogueCategory",
         "description": [],
-        "signature": ["\"data\" | \"other\" | \"admin\""],
+        "signature": [
+          "\"data\" | \"other\" | \"admin\""
+        ],
         "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -849,7 +920,9 @@
         "tags": [],
         "label": "TutorialDirectoryHeaderLinkComponent",
         "description": [],
-        "signature": ["React.FunctionComponent<{}>"],
+        "signature": [
+          "React.FunctionComponent<{}>"
+        ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -862,7 +935,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -874,7 +949,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -889,7 +966,9 @@
         "tags": [],
         "label": "TutorialModuleNoticeComponent",
         "description": [],
-        "signature": ["React.FunctionComponent<{ moduleName: string; }>"],
+        "signature": [
+          "React.FunctionComponent<{ moduleName: string; }>"
+        ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -902,7 +981,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -914,7 +995,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -960,7 +1043,9 @@
         "tags": [],
         "label": "TutorialVariables",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -973,7 +1058,9 @@
         "tags": [],
         "label": "WelcomeRenderTelemetryNotice",
         "description": [],
-        "signature": ["() => JSX.Element | null"],
+        "signature": [
+          "() => JSX.Element | null"
+        ],
         "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1335,7 +1422,9 @@
           "parentPluginId": "home",
           "id": "def-public.HomePublicPluginSetup.environment",
           "type": "Object",
-          "tags": ["deprecated"],
+          "tags": [
+            "deprecated"
+          ],
           "label": "environment",
           "description": [
             "\nThe environment service is only available for a transition period and will\nbe replaced by display specific extension points."
@@ -1451,7 +1540,9 @@
             "description": [
               "\nFunction that returns the path for this app link. Note that the `objectId` can be different than the given `sampleObject.id`, depending\non how the sample data was installed. If the `sampleObject` is null, the `objectId` argument will be an empty string."
             ],
-            "signature": ["(objectId: string) => string"],
+            "signature": [
+              "(objectId: string) => string"
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1463,7 +1554,9 @@
                 "tags": [],
                 "label": "objectId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1478,7 +1571,9 @@
             "type": "string",
             "tags": [],
             "label": "label",
-            "description": ["\nThe label for this app link."],
+            "description": [
+              "\nThe label for this app link."
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1489,7 +1584,9 @@
             "type": "string",
             "tags": [],
             "label": "icon",
-            "description": ["\nThe icon for this app link."],
+            "description": [
+              "\nThe icon for this app link."
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1503,7 +1600,9 @@
             "description": [
               "\nIndex of the links (ascending order, smallest will be displayed first).\nUsed for ordering in the dropdown.\n"
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1593,7 +1692,9 @@
             "tags": [],
             "label": "embeddableConfig",
             "description": [],
-            "signature": ["object"],
+            "signature": [
+              "object"
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1607,7 +1708,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SampleObject",
-        "description": ["This type is used to identify an object in a sample dataset."],
+        "description": [
+          "This type is used to identify an object in a sample dataset."
+        ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1618,7 +1721,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["The type of the sample object."],
+            "description": [
+              "The type of the sample object."
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1629,7 +1734,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["The ID of the sample object."],
+            "description": [
+              "The ID of the sample object."
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1686,7 +1793,9 @@
             "tags": [],
             "label": "[key: string]: unknown",
             "description": [],
-            "signature": ["[key: string]:  unknown"],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1846,7 +1955,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["SampleDatasetProviderContext"],
+            "signature": [
+              "SampleDatasetProviderContext"
+            ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1861,7 +1972,9 @@
         "tags": [],
         "label": "ScopedTutorialContextFactory",
         "description": [],
-        "signature": ["(...args: any[]) => any"],
+        "signature": [
+          "(...args: any[]) => any"
+        ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1874,7 +1987,9 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": ["any[]"],
+            "signature": [
+              "any[]"
+            ],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2297,7 +2412,9 @@
           "tags": [],
           "label": "tutorials",
           "description": [],
-          "signature": ["{}"],
+          "signature": [
+            "{}"
+          ],
           "path": "src/plugins/home/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -2309,7 +2426,9 @@
           "tags": [],
           "label": "sampleData",
           "description": [],
-          "signature": ["{}"],
+          "signature": [
+            "{}"
+          ],
           "path": "src/plugins/home/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
