@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*"
+    "../../../../typings/**/*",
+    "../../observability/public/embeddable/slo/common"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -108,9 +109,7 @@
     "@kbn/aiops-utils",
     "@kbn/event-annotation-common",
     "@kbn/controls-plugin",
-    "@kbn/core-lifecycle-browser",
+    "@kbn/core-lifecycle-browser"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

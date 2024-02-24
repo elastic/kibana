@@ -684,7 +684,7 @@ Elastic.
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 

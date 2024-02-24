@@ -872,7 +872,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
       ],
@@ -895,7 +895,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
-        'x-pack/plugins/observability/**/*.stories.*',
+        'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
       ],
       rules: {
@@ -912,10 +912,10 @@ module.exports = {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/infra/**/*.tsx',
-        'x-pack/plugins/observability/**/*.tsx',
         'x-pack/plugins/observability_solution/apm/**/*.tsx',
         'x-pack/plugins/observability_solution/dataset_quality/**/*.tsx',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.tsx',
+        'x-pack/plugins/observability_solution/observability/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_ai_assistant/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_onboarding/**/*.tsx',
         'x-pack/plugins/observability_solution/observability_shared/**/*.tsx',
@@ -932,7 +932,8 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/observability/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/observability_solution/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
