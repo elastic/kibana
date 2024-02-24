@@ -66,7 +66,7 @@
       "plugins/ml"
     ],
     "xpack.monitoring": ["plugins/monitoring"],
-    "xpack.observability": "plugins/observability",
+    "xpack.observability": "plugins/observability_solution/observability",
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
