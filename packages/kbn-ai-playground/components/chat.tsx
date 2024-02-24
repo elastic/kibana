@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Controller, useFormContext } from 'react-hook-form';
 import {
@@ -37,6 +37,7 @@ import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transformToMessages';
 
 export const Chat = () => {
+  const [showStartPage, setShowStartPage] = useState(true);
   const { euiTheme } = useEuiTheme();
   const {
     control,
@@ -77,6 +78,10 @@ export const Chat = () => {
     ],
     [messages]
   );
+
+  if (showStartPage) {
+    return <StartNewChat onStartClick={() => setShowStartPage(false)} />;
+  }
 
   return (
     <EuiForm

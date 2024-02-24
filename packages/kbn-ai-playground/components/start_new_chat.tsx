@@ -15,7 +15,11 @@ import { ChatFormFields } from '@kbn/ai-playground/types';
 
 const maxWidthPage = 640;
 
-export const StartNewChat: React.FC = () => {
+interface StartNewChatProps {
+  onStartClick: () => void;
+}
+
+export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const { euiTheme } = useEuiTheme();
   const { watch } = useFormContext();
 
@@ -59,6 +63,7 @@ export const StartNewChat: React.FC = () => {
             iconType="arrowRight"
             iconSide="right"
             disabled={!watch(ChatFormFields.openAIKey) || !watch(ChatFormFields.indices, []).length}
+            onClick={onStartClick}
           >
             <FormattedMessage id="aiPlayground.startNewChat.startBtn" defaultMessage="Start" />
           </EuiButton>
