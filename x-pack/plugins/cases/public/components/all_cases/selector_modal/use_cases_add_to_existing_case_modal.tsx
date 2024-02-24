@@ -30,16 +30,25 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
   onSuccess?: (theCase: CaseUI) => void;
 };
 
-export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProps = {}) => {
-  const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
-    onClose: props.onClose,
-    onSuccess: (theCase?: CaseUI) => {
-      if (props.onSuccess && theCase) {
-        return props.onSuccess(theCase);
+export const useCasesAddToExistingCaseModal = ({
+  successToaster,
+  noAttachmentsToaster,
+  onSuccess,
+  onClose,
+}: AddToExistingCaseModalProps = {}) => {
+  const handleSuccess = useCallback(
+    (theCase?: CaseUI) => {
+      if (onSuccess && theCase) {
+        return onSuccess(theCase);
       }
     },
-    toastTitle: props.successToaster?.title,
-    toastContent: props.successToaster?.content,
+    [onSuccess]
+  );
+  const { open: openCreateNewCaseFlyout } = useCasesAddToNewCaseFlyout({
+    onClose,
+    onSuccess: handleSuccess,
+    toastTitle: successToaster?.title,
+    toastContent: successToaster?.content,
   });
 
   const { dispatch, appId } = useCasesContext();
@@ -69,15 +78,15 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open({ attachments });
+        openCreateNewCaseFlyout({ attachments });
         return;
       }
 
       try {
         // add attachments to the case
         if (attachments === undefined || attachments.length === 0) {
-          const title = props.noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
-          const content = props.noAttachmentsToaster?.content;
+          const title = noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
+          const content = noAttachmentsToaster?.content;
           casesToasts.showInfoToast(title, content);
 
           return;
@@ -91,15 +100,13 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           attachments,
         });
 
-        if (props.onSuccess) {
-          props.onSuccess(theCase);
-        }
+        onSuccess?.(theCase);
 
         casesToasts.showSuccessAttach({
           theCase,
           attachments,
-          title: props.successToaster?.title,
-          content: props.successToaster?.content,
+          title: successToaster?.title,
+          content: successToaster?.content,
         });
       } catch (error) {
         // error toast is handled
@@ -111,8 +118,12 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       casesToasts,
       closeModal,
       createAttachments,
-      createNewCaseFlyout,
-      props,
+      openCreateNewCaseFlyout,
+      successToaster?.title,
+      successToaster?.content,
+      noAttachmentsToaster?.title,
+      noAttachmentsToaster?.content,
+      onSuccess,
       startTransaction,
     ]
   );
@@ -126,7 +137,6 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
-          ...props,
           hiddenStatuses: [CaseStatuses.closed],
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
@@ -134,14 +144,14 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
 
-            if (props.onClose) {
-              return props.onClose(theCase, isCreateCase);
+            if (onClose) {
+              return onClose(theCase, isCreateCase);
             }
           },
         },
       });
     },
-    [closeModal, dispatch, handleOnRowClick, props]
+    [closeModal, dispatch, handleOnRowClick, onClose]
   );
 
   return {
