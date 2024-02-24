@@ -74,8 +74,8 @@ class Profiler {
 
 export default function (program) {
   program
-    .option('--profiler-signal <signal>', 'Start/stop CPU profiling on <signal>')
-    .on('option:profiler-signal', function (signal) {
+    .option('--profiler.signal <signal>', 'Start/stop CPU profiling on <signal>')
+    .on('option:profiler.signal', function (signal) {
       if (!signal) {
         return;
       }
