@@ -9,7 +9,7 @@
     - 'src/plugins/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
-    - 'x-pack/plugins/apm/**/*.*'
+    - 'x-pack/plugins/observability_solution/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'packages/kbn-apm-synthtrace/**/*.*'
     - 'packages/kbn-apm-synthtrace-client/**/*.*'
