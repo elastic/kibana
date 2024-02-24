@@ -5360,7 +5360,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-plugin@link:x-pack/plugins/observability":
+"@kbn/observability-plugin@link:x-pack/plugins/observability_solution/observability":
   version "0.0.0"
   uid ""
 
