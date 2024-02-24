@@ -1353,15 +1353,15 @@
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
+            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
+            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
+            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
           },
           {
             "plugin": "expressionImage",

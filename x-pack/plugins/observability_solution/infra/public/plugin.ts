@@ -290,6 +290,12 @@ export class Plugin implements InfraClientPluginClass {
           }),
           path: '/settings',
         },
+        {
+          id: 'assetDetails',
+          title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
+          path: '/detail',
+          visibleIn: [],
+        },
       ];
     };
 
