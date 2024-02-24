@@ -5814,7 +5814,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; created_at: string; metadata: Record<string, unknown>; job_type: ",
+          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -5822,7 +5822,7 @@
             "section": "def-common.SyncJobType",
             "text": "SyncJobType"
           },
-          "; last_seen: string | null; cancelation_requested_at: string | null; canceled_at: string | null; completed_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; started_at: string | null; total_document_count: number | null; trigger_method: ",
+          "; started_at: string | null; completed_at: string | null; last_seen: string | null; cancelation_requested_at: string | null; canceled_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; total_document_count: number | null; trigger_method: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

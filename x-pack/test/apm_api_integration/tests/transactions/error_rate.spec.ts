@@ -82,7 +82,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Error rate when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177598
+  registry.when.skip('Error rate when data is loaded', { config: 'basic', archives: [] }, () => {
     const config = {
       firstTransaction: {
         name: 'GET /apple 🍎 ',

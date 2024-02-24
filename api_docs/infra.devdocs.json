@@ -366,28 +366,119 @@
           }
         ],
         "initialIsOpen": false
-      }
-    ],
-    "enums": [],
-    "misc": [
+      },
       {
         "parentPluginId": "infra",
         "id": "def-server.InfraRequestHandlerContext",
-        "type": "Type",
+        "type": "Interface",
         "tags": [],
         "label": "InfraRequestHandlerContext",
         "description": [],
-        "signature": [
-          "InfraMlRequestHandlerContext",
-          " & ",
-          "InfraSpacesRequestHandlerContext"
-        ],
         "path": "x-pack/plugins/infra/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.mlAnomalyDetectors",
+            "type": "Object",
+            "tags": [],
+            "label": "mlAnomalyDetectors",
+            "description": [],
+            "signature": [
+              "{ jobs(jobId?: string | undefined): Promise<{ count: number; jobs: ",
+              "MlJob",
+              "[]; }>; jobStats(jobId?: string | undefined): Promise<{ count: number; jobs: ",
+              "MlJobStats",
+              "[]; }>; datafeeds(datafeedId?: string | undefined): Promise<{ count: number; datafeeds: ",
+              "MlDatafeed",
+              "[]; }>; datafeedStats(datafeedId?: string | undefined): Promise<{ count: number; datafeeds: ",
+              "MlDatafeedStats",
+              "[]; }>; } | undefined"
+            ],
+            "path": "x-pack/plugins/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.mlSystem",
+            "type": "Object",
+            "tags": [],
+            "label": "mlSystem",
+            "description": [],
+            "signature": [
+              "{ mlCapabilities(): Promise<",
+              "MlCapabilitiesResponse",
+              ">; mlInfo(): Promise<",
+              "MlInfoResponse",
+              ">; mlAnomalySearch<T>(searchParams: any, jobIds: string[]): Promise<",
+              "SearchResponse",
+              "<T, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; } | undefined"
+            ],
+            "path": "x-pack/plugins/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/plugins/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
+            ],
+            "path": "x-pack/plugins/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.uiSettingsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettingsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "x-pack/plugins/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "infra",

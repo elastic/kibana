@@ -9744,11 +9744,11 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/saved_objects/slo.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "apmDataAccess",
-                "path": "x-pack/plugins/apm_data_access/server/saved_objects/apm_indices.ts"
+                "path": "x-pack/plugins/observability_solution/apm_data_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "ml",
@@ -9788,7 +9788,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/saved_objects/apm_service_groups.ts"
+                "path": "x-pack/plugins/observability_solution/apm/server/saved_objects/apm_service_groups.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -10328,6 +10328,18 @@
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
@@ -10426,6 +10438,22 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
