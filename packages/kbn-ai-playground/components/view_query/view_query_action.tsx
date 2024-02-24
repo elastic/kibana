@@ -107,61 +107,58 @@ export const ViewQueryAction: React.FC<ViewQueryActionProps> = () => {
                 <EuiText>
                   <h5>Selected Fields</h5>
                 </EuiText>
-                {Object.keys(fields).map((index: string) => {
-                  const group = fields[index];
-                  return (
-                    <EuiFlexItem grow={false}>
-                      <EuiPanel grow={false} hasShadow={false} hasBorder>
-                        <EuiAccordion
-                          id={index}
-                          buttonContent={
-                            <EuiText>
-                              <h5>{index}</h5>
-                            </EuiText>
-                          }
-                        >
-                          <EuiSpacer size="s" />
-                          <EuiBasicTable
-                            items={[
-                              ...group.elser_query_fields,
-                              ...group.dense_vector_query_fields,
-                              ...group.bm25_query_fields,
-                            ].map((field) => ({
-                              field: typeof field === 'string' ? field : field.field,
-                            }))}
-                            columns={[
-                              {
-                                field: 'field',
-                                name: 'Field',
-                                truncateText: false,
-                                render: (field) => field,
-                              },
-                              {
-                                actions: [
-                                  {
-                                    name: 'toggle',
-                                    description: 'Toggle field',
-                                    isPrimary: true,
-                                    render: ({ field }: { field: string }) => (
-                                      <EuiSwitch
-                                        showLabel={false}
-                                        label="toggle"
-                                        checked={isQueryFieldSelected(index, field)}
-                                        onChange={(e) => toggleQueryField(index, field)}
-                                        compressed
-                                      />
-                                    ),
-                                  },
-                                ],
-                              },
-                            ]}
-                            hasActions
-                          />
-                        </EuiAccordion>
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  );
-                })}
+                {Object.entries(fields).map(([index, group]) => (
+                  <EuiFlexItem grow={false} key={index}>
+                    <EuiPanel grow={false} hasShadow={false} hasBorder>
+                      <EuiAccordion
+                        id={index}
+                        buttonContent={
+                          <EuiText>
+                            <h5>{index}</h5>
+                          </EuiText>
+                        }
+                      >
+                        <EuiSpacer size="s" />
+                        <EuiBasicTable
+                          items={[
+                            ...group.elser_query_fields,
+                            ...group.dense_vector_query_fields,
+                            ...group.bm25_query_fields,
+                          ].map((field) => ({
+                            field: typeof field === 'string' ? field : field.field,
+                          }))}
+                          columns={[
+                            {
+                              field: 'field',
+                              name: 'Field',
+                              truncateText: false,
+                              render: (field: string) => field,
+                            },
+                            {
+                              actions: [
+                                {
+                                  name: 'toggle',
+                                  description: 'Toggle field',
+                                  isPrimary: true,
+                                  render: ({ field }: { field: string }) => (
+                                    <EuiSwitch
+                                      showLabel={false}
+                                      label="toggle"
+                                      checked={isQueryFieldSelected(index, field)}
+                                      onChange={(e) => toggleQueryField(index, field)}
+                                      compressed
+                                    />
+                                  ),
+                                },
+                              ],
+                            },
+                          ]}
+                          hasActions
+                        />
+                      </EuiAccordion>
+                    </EuiPanel>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
