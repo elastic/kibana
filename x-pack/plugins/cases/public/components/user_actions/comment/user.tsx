@@ -52,7 +52,7 @@ const hasDraftComment = (
   commentId: string,
   comment: string
 ): boolean => {
-  const draftStorageKey = getMarkdownEditorStorageKey({ appId: applicationId, caseId, commentId });
+  const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
 
   const sessionValue = sessionStorage.getItem(draftStorageKey);
 

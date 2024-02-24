@@ -55,7 +55,7 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 interface ConnectorContentSchedulingProps {
   children?: React.ReactNode;
   connector: Connector;
-  configurationPathOnClick: () => void;
+  configurationPathOnClick?: () => void;
   dataTelemetryIdPrefix: string;
   hasPlatinumLicense: boolean;
   hasChanges: boolean;

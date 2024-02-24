@@ -140,18 +140,13 @@ export const useCasesToast = () => {
         ? OWNER_INFO[theCase.owner].appId
         : appId;
 
-      const url =
-        appIdToNavigateTo != null
-          ? getUrlForApp(appIdToNavigateTo, {
-              deepLinkId: 'cases',
-              path: generateCaseViewPath({ detailName: theCase.id }),
-            })
-          : null;
+      const url = getUrlForApp(appIdToNavigateTo, {
+        deepLinkId: 'cases',
+        path: generateCaseViewPath({ detailName: theCase.id }),
+      });
 
       const onViewCaseClick = () => {
-        if (url) {
-          navigateToUrl(url);
-        }
+        navigateToUrl(url);
       };
 
       const renderTitle = getToastTitle({ theCase, title, attachments });
@@ -162,10 +157,7 @@ export const useCasesToast = () => {
         iconType: 'check',
         title: toMountPoint(<Title>{renderTitle}</Title>),
         text: toMountPoint(
-          <CaseToastSuccessContent
-            content={renderContent}
-            onViewCaseClick={url != null ? onViewCaseClick : undefined}
-          />
+          <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
         ),
       });
     },
@@ -194,7 +186,7 @@ export const CaseToastSuccessContent = ({
   onViewCaseClick,
   content,
 }: {
-  onViewCaseClick?: () => void;
+  onViewCaseClick: () => void;
   content?: string;
 }) => {
   return (
@@ -204,16 +196,14 @@ export const CaseToastSuccessContent = ({
           {content}
         </EuiTextStyled>
       ) : null}
-      {onViewCaseClick !== undefined ? (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={onViewCaseClick}
-          data-test-subj="toaster-content-case-view-link"
-        >
-          {VIEW_CASE}
-        </EuiButtonEmpty>
-      ) : null}
+      <EuiButtonEmpty
+        size="xs"
+        flush="left"
+        onClick={onViewCaseClick}
+        data-test-subj="toaster-content-case-view-link"
+      >
+        {VIEW_CASE}
+      </EuiButtonEmpty>
     </>
   );
 };

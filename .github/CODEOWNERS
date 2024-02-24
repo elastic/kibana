@@ -40,8 +40,8 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
-x-pack/plugins/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
-x-pack/plugins/apm @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
@@ -844,7 +844,7 @@ src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
-x-pack/plugins/uptime @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
@@ -1388,6 +1388,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/plugins/stack_connectors/common/sentinelone @elastic/security-defend-workflows
 
+## Security Solution shared OAS schemas
+/x-pack/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
+
 ## Security Solution sub teams - Detection Rule Management
 /x-pack/plugins/security_solution/common/api/detection_engine/fleet_integrations @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
@@ -1539,7 +1542,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/apm/**/*.scss @elastic/observability-design
+/x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
