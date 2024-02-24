@@ -3674,7 +3674,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -4618,7 +4618,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
+                "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
                 "plugin": "console",
@@ -6228,7 +6228,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -9058,7 +9058,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "savedObjectsTagging",

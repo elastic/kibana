@@ -144,6 +144,7 @@ export const getDatasetQualityTableColumns = ({
 
         return (
           <EuiButtonIcon
+            data-test-subj="datasetQualityGetDatasetQualityTableColumnsButton"
             size="m"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
@@ -264,5 +265,9 @@ const LogsExplorerLink = ({
 }) => {
   const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
 
-  return <EuiLink {...logsExplorerLinkProps}>{title}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...logsExplorerLinkProps}>
+      {title}
+    </EuiLink>
+  );
 };
