@@ -189,7 +189,7 @@
                 "section": "def-common.PersistableControlGroupInput",
                 "text": "PersistableControlGroupInput"
               },
-              ") => void; setControlStyle: (payload: ",
+              ") => void; setControlWithInvalidSelectionsId: (payload: string | undefined) => void; setControlStyle: (payload: ",
               "ControlStyle",
               ") => void; setChainingSystem: (payload: ",
               "ControlGroupChainingSystem",
@@ -458,10 +458,110 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.canShowInvalidSelectionsWarning",
+            "type": "Function",
+            "tags": [],
+            "label": "canShowInvalidSelectionsWarning",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.suppressInvalidSelectionsWarning",
+            "type": "Function",
+            "tags": [],
+            "label": "suppressInvalidSelectionsWarning",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.reportInvalidSelections",
+            "type": "Function",
+            "tags": [],
+            "label": "reportInvalidSelections",
+            "description": [],
+            "signature": [
+              "({ id, hasInvalidSelections, }: { id: string; hasInvalidSelections: boolean; }) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.reportInvalidSelections.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    id,\n    hasInvalidSelections,\n  }",
+                "description": [],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "controls",
+                    "id": "def-public.ControlGroupContainer.reportInvalidSelections.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "controls",
+                    "id": "def-public.ControlGroupContainer.reportInvalidSelections.$1.hasInvalidSelections",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "hasInvalidSelections",
+                    "description": [],
+                    "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.resetToLastSavedState",
             "type": "Function",
             "tags": [],
             "label": "resetToLastSavedState",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.reload",
+            "type": "Function",
+            "tags": [],
+            "label": "reload",
             "description": [],
             "signature": [
               "() => void"
@@ -1935,6 +2035,26 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddable.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              }
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddable.select",
             "type": "Function",
             "tags": [],
@@ -2022,7 +2142,7 @@
             "label": "dispatch",
             "description": [],
             "signature": [
-              "{ deselectOption: (payload: string) => void; setSearchString: (payload: string) => void; setAllowExpensiveQueries: (payload: boolean) => void; setPopoverOpen: (payload: boolean) => void; setSort: (payload: Partial<",
+              "{ deselectOption: (payload: string) => void; setSearchString: (payload: string) => void; setAllowExpensiveQueries: (payload: boolean) => void; setInvalidSelectionWarningOpen: (payload: boolean) => void; setPopoverOpen: (payload: boolean) => void; setSort: (payload: Partial<",
               "OptionsListSortingType",
               ">) => void; selectExists: (payload: boolean) => void; selectOption: (payload: string) => void; replaceSelection: (payload: string) => void; clearSelections: (payload: unknown) => void; setExclude: (payload: boolean) => void; clearValidAndInvalidSelections: (payload: unknown) => void; setValidAndInvalidSelections: (payload: { validSelections: string[]; invalidSelections: string[]; }) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setField: (payload: ",
               {
@@ -3033,6 +3153,26 @@
             "tags": [],
             "label": "deferEmbeddableLoad",
             "description": [],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddable.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              }
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false

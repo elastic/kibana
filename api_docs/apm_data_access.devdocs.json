@@ -149,7 +149,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"apmDataAccess\""],
+        "signature": [
+          "\"apmDataAccess\""
+        ],
         "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -162,7 +164,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"apmDataAccess\""],
+        "signature": [
+          "\"apmDataAccess\""
+        ],
         "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

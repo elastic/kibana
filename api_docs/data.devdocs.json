@@ -12211,6 +12211,10 @@
           "trackAdoption": false,
           "references": [
             {
+              "plugin": "graph",
+              "path": "x-pack/plugins/graph/public/plugin.ts"
+            },
+            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
@@ -12229,10 +12233,6 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/public/plugin.ts"
             },
             {
               "plugin": "inputControlVis",

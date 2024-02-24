@@ -7040,7 +7040,7 @@
             "section": "def-common.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getPersistableInput: () => ",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; reload: () => Promise<void>; getPersistableInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7048,7 +7048,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; readonly isContainer: boolean; reload: () => Promise<void>; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
+          "; readonly isContainer: boolean; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",

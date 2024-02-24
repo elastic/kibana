@@ -1209,7 +1209,9 @@
           "section": "def-common.DataFrameAnalyticsConfig",
           "text": "DataFrameAnalyticsConfig"
         },
-        ">, createDataView?: boolean, timeFieldName?: string | undefined): Promise<any>; updateDataFrameAnalytics(analyticsId: string, updateConfig: ",
+        ">, createDataView?: boolean, timeFieldName?: string | undefined): Promise<",
+        "PutDataFrameAnalyticsResponseSchema",
+        ">; updateDataFrameAnalytics(analyticsId: string, updateConfig: ",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
           "scope": "common",
