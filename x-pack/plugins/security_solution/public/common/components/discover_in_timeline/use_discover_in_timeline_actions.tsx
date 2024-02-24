@@ -15,6 +15,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDiscoverState } from '../../../timelines/components/timeline/esql_tab_content/use_discover_state';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../timelines/store';
@@ -36,6 +37,7 @@ export const defaultDiscoverTimeRange: TimeRange = {
 export const useDiscoverInTimelineActions = (
   discoverStateContainer: RefObject<DiscoverStateContainer | undefined>
 ) => {
+  const { setDiscoverAppState } = useDiscoverState();
   const { addError } = useAppToasts();
 
   const {
@@ -78,7 +80,7 @@ export const useDiscoverInTimelineActions = (
     mutationKey: [version],
   });
 
-  const getDefaultDiscoverAppState: () => Promise<DiscoverAppState> = useCallback(async () => {
+  const getDefaultDiscoverAppState: () => DiscoverAppState = useCallback(() => {
     return {
       query: {
         esql: '',
@@ -133,14 +135,16 @@ export const useDiscoverInTimelineActions = (
    * resets discover state to a default value
    *
    * */
-  const resetDiscoverAppState = useCallback(async () => {
-    const defaultDiscoverAppState = await getDefaultDiscoverAppState();
+  const resetDiscoverAppState = useCallback(() => {
+    const defaultDiscoverAppState = getDefaultDiscoverAppState();
+    setDiscoverAppState(defaultDiscoverAppState);
+    discoverStateContainer.current?.appState.set(defaultDiscoverAppState);
     discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
     discoverStateContainer.current?.globalState.set({
       ...discoverStateContainer.current?.globalState.get(),
       time: defaultDiscoverTimeRange,
     });
-  }, [getDefaultDiscoverAppState, discoverStateContainer]);
+  }, [getDefaultDiscoverAppState, setDiscoverAppState, discoverStateContainer]);
 
   const persistSavedSearch = useCallback(
     async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {

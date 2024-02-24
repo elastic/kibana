@@ -128,9 +128,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
       if (status === 'draft') {
-        resetDiscoverAppState().then(() => {
-          setSavedSearchLoaded(true);
-        });
+        resetDiscoverAppState();
+        setSavedSearchLoaded(true);
       } else {
         dispatch(
           endTimelineSaving({
@@ -238,7 +237,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
-      const defaultDiscoverAppState = await getDefaultDiscoverAppState();
+      const defaultDiscoverAppState = getDefaultDiscoverAppState();
 
       const finalAppState =
         savedSearchAppState?.appState ?? discoverAppState ?? defaultDiscoverAppState;
@@ -254,11 +253,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
        * */
       const shouldApplyESQLUrlState = !savedSearchAppState?.appState && hasESQLURlState;
 
-      if (!shouldApplyESQLUrlState) {
+      if (shouldApplyESQLUrlState) {
         /*
          * If url state applies, it should be a no-op and there is no need to update the state container.
          * Discover should automatically pick up url state
          * */
+        setDiscoverAppState(finalAppState);
         stateContainer.appState.set(finalAppState);
         await stateContainer.appState.replaceUrlState(finalAppState);
       }

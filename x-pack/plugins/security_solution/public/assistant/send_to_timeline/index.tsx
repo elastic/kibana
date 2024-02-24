@@ -36,6 +36,7 @@ import {
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDiscoverState } from '../../timelines/components/timeline/esql_tab_content/use_discover_state';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -58,7 +59,8 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const dispatch = useDispatch();
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();
-  const { discoverStateContainer } = useDiscoverInTimelineContext();
+  const { discoverStateContainer, getDefaultDiscoverAppState } = useDiscoverInTimelineContext();
+  const { setDiscoverAppState } = useDiscoverState();
 
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
@@ -81,6 +83,19 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
       // If esql, don't reset filters or mess with dataview & time range
       if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
         discoverStateContainer.current?.appState.update({
+          query: {
+            esql: dataProviders[0].kqlQuery,
+          },
+        });
+
+        discoverStateContainer.current?.appState.replaceUrlState({
+          query: {
+            esql: dataProviders[0].kqlQuery,
+          },
+        });
+
+        setDiscoverAppState({
+          ...getDefaultDiscoverAppState(),
           query: {
             esql: dataProviders[0].kqlQuery,
           },
@@ -215,6 +230,8 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     discoverStateContainer,
     defaultDataView.id,
     signalIndexName,
+    setDiscoverAppState,
+    getDefaultDiscoverAppState,
   ]);
 
   // As we work around timeline visibility issues, we will disable the button if timeline isn't available
