@@ -47,6 +47,7 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 // FLAKY: https://github.com/elastic/kibana/issues/168768
 // FLAKY: https://github.com/elastic/kibana/issues/168769
 // FLAKY: https://github.com/elastic/kibana/issues/168770
+// FLAKY: https://github.com/elastic/kibana/issues/168771
 describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteAlertsAndRules();
