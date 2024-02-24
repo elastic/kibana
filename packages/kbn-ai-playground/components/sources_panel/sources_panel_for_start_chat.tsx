@@ -10,10 +10,10 @@ import React from 'react';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesTable } from './indices_table';
 import { StartChatPanel } from '../start_chat_panel';
+import { CreateIndexCallout } from './create_index_callout';
 import { useSourceIndicesField } from '../../hooks/useSourceIndicesField';
 import { useQueryIndices } from '../../hooks/useQueryIndices';
 import { i18n } from '@kbn/i18n';
-import { CreateIndexCallout } from '@kbn/ai-playground/components/sources_panel/create_index_callout';
 
 export const SourcesPanelForStartChat: React.FC = () => {
   const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();

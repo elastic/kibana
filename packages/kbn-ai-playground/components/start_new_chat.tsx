@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
+import { SummarizationPanelForStartChat } from './summarization_panel/summarization_panel_for_start_chat';
+import { useFormContext } from 'react-hook-form';
+import { ChatFormFields } from '@kbn/ai-playground/types';
 
 const maxWidthPage = 640;
 
 export const StartNewChat: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const { watch } = useFormContext();
 
   return (
     <EuiFlexGroup justifyContent="center">
@@ -40,9 +44,25 @@ export const StartNewChat: React.FC = () => {
             <EuiIcon type="discuss" size="xl" />
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <SummarizationPanelForStartChat />
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <SourcesPanelForStartChat />
         </EuiFlexItem>
+
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiButton
+            fill
+            iconType="arrowRight"
+            iconSide="right"
+            disabled={!watch(ChatFormFields.openAIKey) || !watch(ChatFormFields.indices, []).length}
+          >
+            <FormattedMessage id="aiPlayground.startNewChat.startBtn" defaultMessage="Start" />
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
