@@ -393,8 +393,8 @@ describe('Observability Logs Explorer Locators', () => {
 
     it('should create a link with correct timeRange', async () => {
       const refresh = {
-        isPaused: false,
-        interval: 0,
+        pause: false,
+        value: 0,
       };
       const locatorParams = {
         filters: {
@@ -410,7 +410,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-        path: '/dataset-quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(interval:0,isPaused:!f),to:now)),v:1)',
+        path: '/dataset-quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(pause:!f,value:0),to:now)),v:1)',
         state: {},
       });
     });
