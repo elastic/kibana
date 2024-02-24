@@ -51,3 +51,95 @@ export type {
   EqlShellFields8190 as EqlShellFieldsLatest,
   NewTermsFields8190 as NewTermsFieldsLatest,
 };
+
+type ModelVersion1 = 1;
+type ModelVersion2 = 2 | ModelVersion1;
+type ModelVersion3 = 3 | ModelVersion2;
+
+type SchemaString = {
+  type: string;
+  version: number;
+};
+
+type SchemaObject = {
+  type: object;
+  version: number;
+  fields: SchemaType;
+};
+
+type SchemaType = Record<string, SchemaString | SchemaObject>;
+
+type AlertSchema = {
+  '@timestamp': {
+    type: string;
+    version: 1;
+  };
+  newField: {
+    type: string;
+    version: 2;
+  };
+  newFieldWithSubfields: {
+    type: object;
+    version: 3;
+    fields: {
+      subfield: {
+        type: string;
+        version: 3;
+      }
+    }
+  };
+}
+
+/** 
+ * This type is a no-op: Expand<T> evaluates to T. Its use is to force VSCode to evaluate type expressions
+ * and show the expanded form, e.g.
+ * type test5 = {
+        "@timestamp": string;
+        newField: string;
+        newFieldWithSubfields: {
+            subfield: string;
+        };
+    }
+ * instead of
+ *  type test5 = {
+        "@timestamp": string;
+        newField: string;
+        newFieldWithSubfields: Converter<ModelVersion3, {
+            subfield: {
+                type: string;
+                version: 3;
+            };
+        }>;
+    }
+ * */ 
+type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+
+type Converter<ModelVersion extends number, schema extends SchemaType> = {
+  [k in keyof schema as schema[k]['version'] extends ModelVersion
+    ? k
+    : never]: schema[k] extends SchemaObject ? Expand<Converter<ModelVersion, schema[k]['fields']>> : schema[k]['type'];
+}
+
+type Alert<ModelVersion extends number> = Converter<ModelVersion, AlertSchema>;
+
+type test = Alert<ModelVersion1>;
+type test2 = Alert<ModelVersion2>;
+type test5 = Alert<ModelVersion3>;
+
+interface AlertSchema2 {
+  1: {
+    '@timestamp': string;
+    newField: string;
+  };
+  2: {
+    newField2: number;
+  };
+}
+
+type Alert2<ModelVersion extends number> = {
+  [k in keyof AlertSchema2[1] as 1 extends ModelVersion ? k : never]: AlertSchema2[1][k];
+  [k in keyof AlertSchema2[2] as 2 extends ModelVersion ? k : never]: AlertSchema2[2][k];
+};
+
+type test3 = Alert2<ModelVersion1>;
+type test4 = Alert2<ModelVersion2>;
