@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { ChatContext } from '../providers/chat_provider';
+import { ChatContext } from '../providers/ai_playground_provider';
 
 export const useChatContext = () => {
   return useContext(ChatContext);

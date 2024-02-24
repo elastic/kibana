@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import React, { createContext, ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm } from '../types';
-import { ChatProvider } from '@kbn/ai-playground/providers/chat_provider';
 
 interface AIPlaygroundProviderProps {
   navigateToIndexPage: () => void;
   children: ReactNode;
 }
+
+export const ChatContext = createContext<{ navigateToIndexPage?: () => void }>({});
 
 const queryClient = new QueryClient({});
 
@@ -26,10 +27,10 @@ export const AIPlaygroundProvider: React.FC<AIPlaygroundProviderProps> = ({
   const form = useForm<ChatForm>();
 
   return (
-    <ChatProvider navigateToIndexPage={navigateToIndexPage}>
+    <ChatContext.Provider value={{ navigateToIndexPage }}>
       <QueryClientProvider client={queryClient}>
         <FormProvider {...form}>{children}</FormProvider>
       </QueryClientProvider>
-    </ChatProvider>
+    </ChatContext.Provider>
   );
 };
