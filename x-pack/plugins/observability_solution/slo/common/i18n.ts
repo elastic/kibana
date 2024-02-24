@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const DEFAULT_INTERVAL = '60s';
-export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+import { i18n } from '@kbn/i18n';
 
-export const RULE_DETAILS_ALERTS_TABLE_CONFIG_ID = `rule-details-alerts-table`;
+export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.observability.notAvailable', {
+  defaultMessage: 'N/A',
+});

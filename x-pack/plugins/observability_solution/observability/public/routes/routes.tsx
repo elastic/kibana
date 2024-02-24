@@ -16,10 +16,6 @@ import { LandingPage } from '../pages/landing/landing';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
-import { SlosPage } from '../pages/slos/slos';
-import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
-import { SloDetailsPage } from '../pages/slo_details/slo_details';
-import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   ALERTS_PATH,
   ALERT_DETAIL_PATH,
@@ -31,15 +27,8 @@ import {
   RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
-  SLOS_OUTDATED_DEFINITIONS_PATH,
-  SLOS_PATH,
-  SLOS_WELCOME_PATH,
-  SLO_CREATE_PATH,
-  SLO_DETAIL_PATH,
-  SLO_EDIT_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
-import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -135,48 +124,6 @@ export const routes = {
   [ALERT_DETAIL_PATH]: {
     handler: () => {
       return <AlertDetails />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLOS_PATH]: {
-    handler: () => {
-      return <SlosPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLO_CREATE_PATH]: {
-    handler: () => {
-      return <SloEditPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLOS_WELCOME_PATH]: {
-    handler: () => {
-      return <SlosWelcomePage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLOS_OUTDATED_DEFINITIONS_PATH]: {
-    handler: () => {
-      return <SlosOutdatedDefinitions />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLO_EDIT_PATH]: {
-    handler: () => {
-      return <SloEditPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [SLO_DETAIL_PATH]: {
-    handler: () => {
-      return <SloDetailsPage />;
     },
     params: {},
     exact: true,

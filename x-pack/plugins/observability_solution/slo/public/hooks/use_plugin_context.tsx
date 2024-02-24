@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const DEFAULT_INTERVAL = '60s';
-export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+import { useContext } from 'react';
+import { PluginContext } from '../context/plugin_context/plugin_context';
 
-export const RULE_DETAILS_ALERTS_TABLE_CONFIG_ID = `rule-details-alerts-table`;
+export function usePluginContext() {
+  return useContext(PluginContext);
+}

@@ -5,6 +5,44 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
+export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
+
+export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
+
+export const ALERT_ACTION_ID = 'slo.burnRate.alert';
+export const ALERT_ACTION = {
+  id: ALERT_ACTION_ID,
+  name: i18n.translate('xpack.observability.slo.alerting.burnRate.alertAction', {
+    defaultMessage: 'Critical',
+  }),
+};
+
+export const HIGH_PRIORITY_ACTION_ID = 'slo.burnRate.high';
+export const HIGH_PRIORITY_ACTION = {
+  id: HIGH_PRIORITY_ACTION_ID,
+  name: i18n.translate('xpack.observability.slo.alerting.burnRate.highPriorityAction', {
+    defaultMessage: 'High',
+  }),
+};
+
+export const MEDIUM_PRIORITY_ACTION_ID = 'slo.burnRate.medium';
+export const MEDIUM_PRIORITY_ACTION = {
+  id: MEDIUM_PRIORITY_ACTION_ID,
+  name: i18n.translate('xpack.observability.slo.alerting.burnRate.mediumPriorityAction', {
+    defaultMessage: 'Medium',
+  }),
+};
+
+export const LOW_PRIORITY_ACTION_ID = 'slo.burnRate.low';
+export const LOW_PRIORITY_ACTION = {
+  id: LOW_PRIORITY_ACTION_ID,
+  name: i18n.translate('xpack.observability.slo.alerting.burnRate.lowPriorityAction', {
+    defaultMessage: 'Low',
+  }),
+};
+
 export const SLO_MODEL_VERSION = 2;
 export const SLO_RESOURCES_VERSION = 3;
 
@@ -40,3 +78,4 @@ export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
 
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+

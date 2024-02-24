@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_INTERVAL = '60s';
-export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-
-export const RULE_DETAILS_ALERTS_TABLE_CONFIG_ID = `rule-details-alerts-table`;
+export * from './slo';
