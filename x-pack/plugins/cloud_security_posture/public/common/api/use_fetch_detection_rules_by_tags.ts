@@ -49,6 +49,14 @@ export const fetchDetectionRulesByTags = (
   option: { match: 'all' | 'any' } = { match: 'all' },
   http: HttpSetup
 ) => {
+  if (tags.length === 0) {
+    return {
+      page: 0,
+      perPage: 0,
+      total: 0,
+      data: undefined,
+    };
+  }
   const query = {
     page: 1,
     per_page: 1,
