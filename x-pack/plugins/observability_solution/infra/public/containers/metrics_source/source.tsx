@@ -148,6 +148,7 @@ export const withSourceProvider =
     return function ComponentWithSourceProvider(props: ComponentProps) {
       return (
         <SourceProvider sourceId={sourceId}>
+          {/* @ts-expect-error upgrade typescript v4.9.5*/}
           <Component {...props} />
         </SourceProvider>
       );
