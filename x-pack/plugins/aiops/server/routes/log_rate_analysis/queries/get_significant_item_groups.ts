@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { jLouvain, type Edge } from 'jlouvain';
+import { jLouvain, type Communities, type Edge } from 'jlouvain';
 import { uniqBy } from 'lodash';
 
 import type {
@@ -26,7 +26,12 @@ export function getSignificantItemGroups(
   itemsets: ItemSet[],
   significantItems: SignificantItem[],
   fields: string[]
-): SignificantItemGroup[] {
+): {
+  nodes: string[];
+  edges: Edge[];
+  jLouvainResult: Communities;
+  significantItemGroups: SignificantItemGroup[];
+} {
   console.log('itemsets', itemsets);
 
   const nodeData: string[] = significantItems.map((d) => d.key);
@@ -127,5 +132,10 @@ export function getSignificantItemGroups(
 
   // console.log('significantItemGroups', significantItemGroups[0]);
 
-  return uniqBy(significantItemGroups, 'id');
+  return {
+    nodes: nodeData,
+    edges: edgeData,
+    jLouvainResult: result,
+    significantItemGroups: uniqBy(significantItemGroups, 'id'),
+  };
 }

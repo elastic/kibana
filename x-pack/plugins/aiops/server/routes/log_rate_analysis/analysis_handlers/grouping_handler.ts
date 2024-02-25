@@ -124,7 +124,7 @@ export const groupingHandlerFactory =
       }
 
       if (fields.length > 0 && itemSets.length > 0) {
-        const significantItemGroups = getSignificantItemGroups(
+        const { nodes, edges, jLouvainResult, significantItemGroups } = getSignificantItemGroups(
           itemSets,
           [...significantTerms, ...significantCategories],
           fields
@@ -135,6 +135,10 @@ export const groupingHandlerFactory =
         const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
         if (maxItems > 1) {
+          responseStream.push({
+            type: 'jLouvain',
+            payload: { nodes, edges, jLouvainResult },
+          });
           responseStream.push(addSignificantItemsGroupAction(significantItemGroups, version));
         }
 
