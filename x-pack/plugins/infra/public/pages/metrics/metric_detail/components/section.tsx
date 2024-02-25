@@ -65,6 +65,7 @@ export const Section: FunctionComponent<SectionProps> = ({
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
       ? cloneElement(child, {
+          // @ts-expect-error upgrade typescript v4.9.5
           metrics,
           onChangeRangeTime,
           isLiveStreaming,
