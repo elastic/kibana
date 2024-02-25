@@ -20,8 +20,10 @@ type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
 };
 
 export const useCasesAddToNewCaseFlyout = ({
+  initialValue,
   toastTitle,
   toastContent,
+
   afterCaseCreated,
   onSuccess,
   onClose,
@@ -43,6 +45,7 @@ export const useCasesAddToNewCaseFlyout = ({
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
+          initialValue,
           attachments,
           headerContent,
           onClose: () => {
@@ -74,6 +77,7 @@ export const useCasesAddToNewCaseFlyout = ({
       });
     },
     [
+      initialValue,
       casesToasts,
       closeFlyout,
       dispatch,
