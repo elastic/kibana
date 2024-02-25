@@ -1473,15 +1473,15 @@
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "logstash",

@@ -107,7 +107,7 @@ export class Plugin implements InfraClientPluginClass {
       core.settings.client.get$<boolean>(enableInfrastructureHostsView),
     ]);
 
-    /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
+    /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
         map(
@@ -199,7 +199,7 @@ export class Plugin implements InfraClientPluginClass {
         euiIconType: 'logoObservability',
         order: 8100,
         appRoute: '/app/logs',
-        // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
+        // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/logs/page_content.tsx
         deepLinks: [
           {
             id: 'stream',
@@ -241,7 +241,7 @@ export class Plugin implements InfraClientPluginClass {
       });
     }
 
-    // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
+    // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
       hostsEnabled,
       metricsExplorerEnabled,

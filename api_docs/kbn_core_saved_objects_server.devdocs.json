@@ -10639,7 +10639,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/sources/saved_object_type.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts"
               },
               {
                 "plugin": "lists",
