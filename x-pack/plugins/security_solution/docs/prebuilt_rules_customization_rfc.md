@@ -26,6 +26,9 @@ _Pending_:
   - Frontend Logic
 - Other UI changes: list changes in Rule Editing, Rule Tables, etc
 
+
+
+
 ## Table of Contents
 
 The following TOC was created using the [Pandoc](https://pandoc.org/installing.html) tool.
@@ -35,74 +38,6 @@ You can create it by navigating to the directory of the markdown file and runnin
 ```
 pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -o output.md
 ```
-
--   [RFC: Prebuilt Rules Customization](#rfc-prebuilt-rules-customization)
-    -   [Table of Contents](#table-of-contents)
-    -   [Note about scope of RFC](#note-about-scope-of-rfc)
-    -   [Necessary rule schema changes](#necessary-rule-schema-changes)
-        -   [`rule_source` field](#rule_source-field)
-        -   [Deprecating the `immutable` field](#deprecating-the-immutable-field)
-        -   [Subfields in the `rule_source` field](#subfields-in-the-rule_source-field)
-            -   [`type` subfield](#type-subfield)
-            -   [`is_customized` subfield](#is_customized-subfield)
-            -   [`source_updated_at` subfield](#source_updated_at-subfield)
-        -   [Changes needed in rule schema](#changes-needed-in-rule-schema)
-            -   [API schema](#api-schema)
-                -   [API request and response rule schema](#api-request-and-response-rule-schema)
-                -   [Rule Import request schema](#rule-import-request-schema)
-            -   [Internal rule schema](#internal-rule-schema)
-                -   [Prebuilt Rule asset schema](#prebuilt-rule-asset-schema)
-        -   [Deprecating the `immutable` field](#deprecating-the-immutable-field-1)
-    -   [Mapping changes](#mapping-changes)
-    -   [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
-        -   [Context](#context)
-        -   [Problem with tightly coupled logic in our endpoints](#problem-with-tightly-coupled-logic-in-our-endpoints)
-        -   [Migration strategy](#migration-strategy)
-            -   [Normalization on read](#normalization-on-read)
-                -   [Rule Management endpoints that will perform normalization-on-read](#rule-management-endpoints-that-will-perform-normalization-on-read)
-            -   [Migration on write](#migration-on-write)
-                -   [Rule Management endpoints that should include migration-on-write logic](#rule-management-endpoints-that-should-include-migration-on-write-logic)
-        -   [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
-            -   [Updating and upgrading rules](#updating-and-upgrading-rules)
-            -   [Bulk editing rules](#bulk-editing-rules)
-    -   [Endpoints and utilities that will need to be adapted to the new schema](#endpoints-and-utilities-that-will-need-to-be-adapted-to-the-new-schema)
-        -   [Utilities](#utilities)
-            -   [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
-        -   [Rule Management endpoints](#rule-management-endpoints)
-        -   [Prebuilt Rules endpoints](#prebuilt-rules-endpoints)
-        -   [Rule monitoring endpoints](#rule-monitoring-endpoints)
-        -   [Rule Execution Logs](#rule-execution-logs)
-    -   [Exporting and importing rules](#exporting-and-importing-rules)
-        -   [Exporting rules](#exporting-rules)
-        -   [Importing rules](#importing-rules)
-        -   [Handling the `version` parameter](#handling-the-version-parameter)
-    -   [Customizing Prebuilt Rules](#customizing-prebuilt-rules)
-        -   [Endpoints](#endpoints)
-            -   [Changes needed to endpoints](#changes-needed-to-endpoints)
-                -   [Update Rule - `PUT /rules`](#update-rule---put-rules)
-                -   [Patch Rule - `PATCH /rules`](#patch-rule---patch-rules)
-                -   [Bulk Patch Rules - `PATCH /rules/_bulk_update`](#bulk-patch-rules---patch-rules_bulk_update)
-                -   [Bulk Update Rules - `PUT /rules/_bulk_update`](#bulk-update-rules---put-rules_bulk_update)
-                -   [Bulk Actions - `POST /rules/_bulk_action`](#bulk-actions---post-rules_bulk_action)
-            -   [Updating the `is_customized` field](#updating-the-is_customized-field)
-        -   [In the UI](#in-the-ui)
-            -   [Via the Rule Edit Page](#via-the-rule-edit-page)
-            -   [Via Bulk Actions](#via-bulk-actions)
-            -   [Via the Rules Details Page](#via-the-rules-details-page)
-            -   [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
-            -   [Via the Stack Management \> Rules UI](#via-the-stack-management-rules-ui)
-    -   [List of things to fix (create tickets)](#list-of-things-to-fix-create-tickets)
-        -   [Rule fields](#rule-fields)
-    -   [Upgrading Prebuilt Rules](#upgrading-prebuilt-rules)
-        -   [Changes to upgrade `_review` endpoint](#changes-to-upgrade-_review-endpoint)
-            -   [Concrete field diff algorithm by type](#concrete-field-diff-algorithm-by-type)
-                -   [String fields](#string-fields)
-        -   [Changes to upgrade `_perform` endpoints](#changes-to-upgrade-_perform-endpoints)
-        -   [Rule field diff algorithms](#rule-field-diff-algorithms)
-    -   [Changes in UI](#changes-in-ui)
-    -   [Scenarios for bulk accepting updates](#scenarios-for-bulk-accepting-updates)
-    -   [Marking rules (and their fields) as customized](#marking-rules-and-their-fields-as-customized)
-    -   [Other open questions](#other-open-questions)
 
 ## Note about scope of RFC
 
@@ -2773,113 +2708,6 @@ The `threat` field has a specific [schema](https://github.com/elastic/kibana/blo
 
 The endpoint currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
 
----
-**QUESTION:** is the following change needed? 
-
-Do we need a `merged_rule` in the respose, since `diff` already contains a `merged_version` for each field which has a conflict?
-
-But what about fields that don't have conflicts, and the algorithm decides which version to return? Don't we need that information back at the client, to form the payload for the /_perform endpoint?
-
-The POC says for the /_perform endpoint:
-
-```ts
-export interface SingleRuleUpgradeRequest {
-  id: RuleObjectId;
-  pick_version?: 'BASE' | 'CURRENT' | 'TARGET' | 'MERGED';
-  fields?: {
-    name?: FieldUpgradeRequest<RuleName>;
-    description?: FieldUpgradeRequest<RuleDescription>;
-    // etc
-    // Every non-specified field will default to pick_version: 'MERGED'.
-    // If pick_version is MERGED and there's a merge conflict the endpoint will throw.
-  };
-  rule_content_version: SemanticVersion;
-  rule_revision: number;
-}
-```
-But the _perform endpoint does not know what the /_review endpoint calculated for each field for all other fields not specified in the payload. It would have to do the diff again.
-
----
-
-The current response body of the `/upgrade/_review` endpoint looks as follows:
-
-_Source: [x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.ts](x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.ts)_
-```ts
-export interface ReviewRuleUpgradeResponseBody {
-  stats: .... 
-  /** Info about individual rules: one object per each rule available for upgrade */
-  rules: RuleUpgradeInfoForReview[];
-}
-
-export interface RuleUpgradeInfoForReview {
-  id: RuleObjectId;
-  rule_id: RuleSignatureId;
-  current_rule: RuleResponse;
-  target_rule: RuleResponse;
-  diff: PartialRuleDiff;
-  revision: number;
-};
-```
-
-We currently use:
-
-- the `current_rule` and `target_rule` fields, both of type `RuleResponse` to display the **whole rule JSON diff**.
-- the `diff` object to display the **Per-field rule diff**.
-
-However, the endpoint does not currently return a `merged_rule` version of the rule, which should represent the end result of the merge, in `RuleResponse` type.
-
-This `merged_rule` is needed to send back to the server in a subsequent call to a **Perform Upgrade - `/upgrade/_perform`** endpoint, using it as its payload. 
-
-`merged_rule` can be modified in the frontend by the user before sending it back to the server, to account for conflict resolution of fields or simple customizations that the user might want to perform on rule fields during the upgrade.
-
-The additional `merged_rule` property should be included in the `RuleUpgradeInfoForReview` interface, and have type `RuleResponse`:
-
-```ts
-export interface RuleUpgradeInfoForReview {
-  id: RuleObjectId;
-  rule_id: RuleSignatureId;
-  current_rule: RuleResponse;
-  target_rule: RuleResponse;
-  merged_rule: RuleResponse; // New field
-  diff: PartialRuleDiff;
-  revision: number;
-};
-```
-
-This `merged_rule` can be calculated in the endpoint logic by making use of the `fieldsDiff` object calculated by the `calculateRuleFieldsDiff` within the `calculateRuleDiff` function:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/calculate_rule_diff.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/calculate_rule_diff.ts)_
-```ts
-  // [PSEUDOCODE]
-
-  const fieldsDiff = calculateRuleFieldsDiff({
-    base_version: diffableBaseVersion || MissingVersion,
-    current_version: diffableCurrentVersion,
-    target_version: diffableTargetVersion,
-  });
-
-  const mergedVersion = Object.entries(fieldsDiff).reduce((acc, field) => {
-
-    const ungroupedFields = convertDiffableToRule(field);
-    return {
-      ...acc,
-      ...ungroupedFields,
-    };
-  }, {});
-```
-
-The method `calculateRuleFieldsDiff` returns all needed fields needed for each rule type, but some of them are grouped since they have a `Diffable` type. We need to create function such as `convertDiffableToRule` that inputs a `DiffableRule`  and outputs the field types that are needed in a rule object of type `RuleResponse`.
-
-This is the inverse of field grouping process that is done in the `convertRuleToDiffable` in the [`x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/normalization/convert_rule_to_diffable.ts`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/normalization/convert_rule_to_diffable.ts).
-
-This `merge_rule` will contain all fields updated to the version that the different algorithms has decided is the optimal based on the `ThreeWayDiffOutcome`. See the existing `simpleDiffAlgorithm` and the `mergeVersions` used within it: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/algorithms/simple_diff_algorithm.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/algorithms/simple_diff_algorithm.ts)
-
-
-
-
-
-
-
 
 
 
@@ -2887,7 +2715,7 @@ This `merge_rule` will contain all fields updated to the version that the differ
 
 #### Changes to `/upgrade/_perform` endpoint contract
 
-The endpoint currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
+The endpoint's currently impled as deemented contract needs to be updatscribed in this [PoC](https://github.com/elastic/kibana/pull/144060).
 
 
 
@@ -2921,7 +2749,6 @@ const performUpgradePayload = {
       rule_id: rule.rule_id,
       revision: rule.revision,
       version: rule.version,
-      merged_version: rule.merged_version,
     })),
   pick_version: 'MERGE',
 };
