@@ -10,7 +10,7 @@ import React, { useMemo, useReducer } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useActor } from '@xstate/react';
-import { hydrateDatasetSelection } from '@kbn/logs-explorer-plugin/common';
+import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
@@ -79,7 +79,9 @@ export const AlertsPopover = () => {
       pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
       const { logsExplorerState } = pageState.context;
-      const index = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
+      const index = hydrateDataSourceSelection(
+        logsExplorerState.dataSourceSelection
+      ).toDataviewSpec();
 
       return triggersActionsUi.getAddRuleFlyout<ThresholdRuleTypeParams>({
         consumer: 'logs',
