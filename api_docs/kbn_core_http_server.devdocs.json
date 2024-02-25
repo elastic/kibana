@@ -4286,7 +4286,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -6740,7 +6740,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -8286,7 +8286,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -8740,7 +8740,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -9230,7 +9230,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -13580,7 +13580,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "kubernetesSecurity",
@@ -14287,7 +14287,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",
@@ -14930,7 +14930,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",
@@ -15421,7 +15421,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",
@@ -15616,7 +15616,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",

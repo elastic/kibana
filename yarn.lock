@@ -4912,7 +4912,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/infra":
+"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
   version "0.0.0"
   uid ""
 
