@@ -41,7 +41,9 @@ type DotKey<
   TKey extends keyof TObject & string,
   TPrefix extends string
 > = TObject[TKey] extends Array<infer TValueType>
-  ? ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
+  ? TValueType extends Record<string, any>
+    ? ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
+    : never
   : TObject[TKey] extends Record<string, any>
   ? DotObject<TObject[TKey], `${TPrefix}${TKey}.`>
   : { [key in `${TPrefix}${TKey}`]: TObject[TKey] };
