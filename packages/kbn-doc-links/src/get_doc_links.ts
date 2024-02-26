@@ -536,6 +536,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       customUrls: `${MACHINE_LEARNING_DOCS}ml-configuring-url.html`,
       dataFrameAnalytics: `${MACHINE_LEARNING_DOCS}ml-dfanalytics.html`,
       dFAPrepareData: `${MACHINE_LEARNING_DOCS}ml-dfa-overview.html#prepare-transform-data`,
+      dFAStartJob: `${ELASTICSEARCH_DOCS}start-dfanalytics.html`,
+      dFACreateJob: `${ELASTICSEARCH_DOCS}put-dfanalytics.html`,
       featureImportance: `${MACHINE_LEARNING_DOCS}ml-feature-importance.html`,
       outlierDetectionRoc: `${MACHINE_LEARNING_DOCS}ml-dfa-finding-outliers.html#ml-dfanalytics-roc`,
       regressionEvaluation: `${MACHINE_LEARNING_DOCS}ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,

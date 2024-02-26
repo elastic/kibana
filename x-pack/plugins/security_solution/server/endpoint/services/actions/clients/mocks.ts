@@ -247,6 +247,7 @@ const createConnectorActionExecuteResponseMock = <TData>(
     status: 'ok',
   };
 
+  // @ts-expect-error upgrade typescript v4.9.5
   return merge(result, overrides);
 };
 
