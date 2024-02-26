@@ -35,6 +35,7 @@ export const useCasesAddToExistingCaseModal = ({
   noAttachmentsToaster,
   onSuccess,
   onClose,
+  onCreateCaseClicked,
 }: AddToExistingCaseModalProps = {}) => {
   const handleSuccess = useCallback(
     (theCase?: CaseUI) => {
@@ -138,6 +139,7 @@ export const useCasesAddToExistingCaseModal = ({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           hiddenStatuses: [CaseStatuses.closed],
+          onCreateCaseClicked,
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
@@ -151,7 +153,7 @@ export const useCasesAddToExistingCaseModal = ({
         },
       });
     },
-    [closeModal, dispatch, handleOnRowClick, onClose]
+    [closeModal, dispatch, handleOnRowClick, onClose, onCreateCaseClicked]
   );
 
   return {
