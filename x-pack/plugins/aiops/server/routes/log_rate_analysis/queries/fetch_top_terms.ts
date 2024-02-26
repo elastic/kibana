@@ -15,7 +15,7 @@ import {
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
 
-import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
+import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
@@ -60,7 +60,7 @@ export const getTopTermRequest = (
     log_rate_top_terms: {
       terms: {
         field: fieldName,
-        size: 10,
+        size: LOG_RATE_ANALYSIS_SETTINGS.TOP_TERMS_FALLBACK_SIZE,
       },
     },
   };
