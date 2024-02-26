@@ -26,6 +26,7 @@ import {
   SloDetails,
   SloTabId,
 } from '../../../pages/slo_details/components/slo_details';
+import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';
 
 export function SloOverviewDetails({
   slo,
@@ -65,6 +66,7 @@ export function SloOverviewDetails({
             })}
           </h2>
         </EuiTitle>
+        <SLOGroupings slo={slo} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <HeaderTitle slo={slo} isLoading={false} showTitle={false} />

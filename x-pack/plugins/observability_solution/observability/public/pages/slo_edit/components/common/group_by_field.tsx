@@ -15,6 +15,7 @@ import { OptionalText } from './optional_text';
 import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
 import { CreateSLOForm } from '../../types';
 import { IndexFieldSelector } from './index_field_selector';
+import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 
 export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isLoading: boolean }) {
   const { watch } = useFormContext<CreateSLOForm>();
@@ -60,8 +61,11 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
           color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
           title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
             defaultMessage:
-              "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
-            values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+              'Selected group by field {groupBy} will generate at least {card} SLO instances based on the last 24h sample data.',
+            values: {
+              card: groupByCardinality.cardinality,
+              groupBy: getGroupKeysProse(groupByField),
+            },
           })}
         />
       )}
