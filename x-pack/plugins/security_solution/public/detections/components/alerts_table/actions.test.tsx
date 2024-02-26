@@ -455,6 +455,8 @@ describe('alert actions', () => {
             savedSearch: null,
             isDiscoverSavedSearchLoaded: false,
             isDataProviderVisible: false,
+            rowHeight: 1,
+            sampleSize: 500,
           },
           to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',

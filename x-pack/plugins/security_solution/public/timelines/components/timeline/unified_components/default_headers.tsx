@@ -6,7 +6,10 @@
  */
 
 import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../../../common/types';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../body/constants';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  DEFAULT_UNIFIED_TABLE_DATE_COLUMN_MIN_WIDTH,
+} from '../body/constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
 
@@ -14,7 +17,7 @@ export const defaultUdtHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_UNIFIED_TABLE_DATE_COLUMN_MIN_WIDTH,
     esTypes: ['date'],
     type: 'date',
   },

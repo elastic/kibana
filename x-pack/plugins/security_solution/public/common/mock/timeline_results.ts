@@ -1915,7 +1915,7 @@ const mockTimelineModelColumns: TimelineModel['columns'] = [
   {
     columnHeaderType: 'not-filtered',
     id: '@timestamp',
-    initialWidth: 190,
+    initialWidth: 215,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -2219,6 +2219,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedSearch: null,
     isDataProviderVisible: false,
     sampleSize: 500,
+    rowHeight: 1,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

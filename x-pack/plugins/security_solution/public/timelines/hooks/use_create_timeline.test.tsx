@@ -34,6 +34,8 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../common/hooks/use_experimental_features');
+
 describe('useCreateTimeline', () => {
   let hookResult: RenderHookResult<
     UseCreateTimelineParams,

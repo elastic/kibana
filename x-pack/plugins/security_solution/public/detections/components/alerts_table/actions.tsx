@@ -950,7 +950,6 @@ export const sendAlertToTimelineAction = async ({
       : ruleTimelineId
     : '';
   const { to, from } = determineToAndFrom({ ecs });
-
   // For now we do not want to populate the template timeline if we have alertIds
   if (!isEmpty(timelineId)) {
     try {
@@ -974,6 +973,7 @@ export const sendAlertToTimelineAction = async ({
           )
         ),
       ]);
+
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {
