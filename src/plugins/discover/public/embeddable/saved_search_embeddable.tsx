@@ -330,7 +330,6 @@ export class SavedSearchEmbeddable
         searchProps.totalHitCount = result.records.length;
         searchProps.isLoading = false;
         searchProps.isPlainRecord = true;
-        searchProps.showTimeCol = false;
         searchProps.isSortEnabled = true;
 
         return;

@@ -72,7 +72,7 @@ export abstract class AbstractDataView {
    */
   public timeFieldName: string | undefined;
   /**
-   * Type is used to identify rollup index patterns.
+   * Type is used to identify rollup index patterns or ES|QL data views.
    */
   public type: string | undefined;
   /**

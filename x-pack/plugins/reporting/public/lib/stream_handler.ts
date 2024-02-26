@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUS } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
 
+import { Job, ReportingAPIClient } from '@kbn/reporting-public';
 import {
   getFailureToast,
   getGeneralErrorToast,
@@ -22,8 +23,6 @@ import {
   getWarningToast,
 } from '../notifier';
 import { JobSummary, JobSummarySet } from '../types';
-import { Job } from './job';
-import { ReportingAPIClient } from './reporting_api_client';
 
 /**
  * @todo Replace with `Infinity` once elastic/eui#5945 is resolved.

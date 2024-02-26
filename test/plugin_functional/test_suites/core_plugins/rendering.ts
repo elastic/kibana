@@ -39,6 +39,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
+        // @ts-expect-error upgrade typescript v4.9.5
         window.__RENDERING_SESSION__ = [];
       }
 
