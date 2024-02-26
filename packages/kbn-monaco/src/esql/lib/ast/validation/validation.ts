@@ -381,7 +381,9 @@ function validateFunction(
             parentCommand,
             parentOption,
             references,
-            isNested || !isAssignment(astFunction)
+            // use the nesting flag for now just for stats
+            // TODO: revisit this part later on to make it more generic
+            parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
           )
         );
       }
