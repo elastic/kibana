@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
@@ -16,7 +17,6 @@ import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detai
 import { LogDocument } from '../../../common/document';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
-import './virtual_column.scss';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_document')
@@ -25,6 +25,11 @@ const SourceDocument = dynamic(
 const DiscoverSourcePopoverContent = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_popover_content')
 );
+
+const sourceDocumentClassName = css`
+  display: inline !important;
+  margin-left: $euiSizeXS;
+`;
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
@@ -115,7 +120,7 @@ export const Content = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
           dataTestSubj="logsExplorerCellDescriptionList"
-          className="logsExplorerVirtualColumn__sourceDocument"
+          className={sourceDocumentClassName}
         />
       )}
     </span>
