@@ -13,7 +13,7 @@ import {
   DEFAULT_XY_HIDDEN_LEGEND,
 } from '../../../shared/charts/constants';
 
-const logRate: LensConfigWithId = {
+const logRateXY: LensConfigWithId = {
   id: 'logRate',
   chartType: 'xy',
   title: formulas.logRate.label ?? '',
@@ -30,8 +30,8 @@ const logRate: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-export const logs = {
+export const logRate = {
   xy: {
-    logRate,
+    logRate: logRateXY,
   },
 };

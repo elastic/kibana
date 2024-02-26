@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensXYConfigBase } from '@kbn/lens-embeddable-utils/config_builder';
 
 export const DEFAULT_XY_FITTING_FUNCTION: Pick<LensXYConfigBase, 'fittingFunction'> = {
   fittingFunction: 'Linear',
