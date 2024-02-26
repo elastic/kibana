@@ -100,6 +100,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
         aria-label={ariaLabel}
+        role="combobox"
       />
     ),
     [ariaLabel, handleOpenPopover, isDisabled, timelineTitle]
