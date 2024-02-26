@@ -86,6 +86,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
           const nextHasErrors =
             Object.keys(restOfPhaseErrors).length > 0 ||
             Object.values(otherPhases).some((phaseErrors) => {
+              // @ts-expect-error upgrade typescript v4.9.5
               return Object.keys(phaseErrors).length > 0;
             });
 
