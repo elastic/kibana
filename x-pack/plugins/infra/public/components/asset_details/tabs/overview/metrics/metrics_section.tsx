@@ -44,13 +44,13 @@ export const MetricsSectionCompact = ({
   const model = findInventoryModel('host');
 
   const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network, logRate } = await model.metrics.getCharts();
+    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
 
     return [
       cpu.xy.cpuUsage,
       memory.xy.memoryUsage,
       cpu.xy.normalizedLoad1m,
-      logRate.xy.logRate,
+      logs.xy.logRate,
       disk.xy.diskSpaceUsageAvailable,
       disk.xy.diskUsageByMountPoint,
       disk.xy.diskThroughputReadWrite,
@@ -88,7 +88,7 @@ const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRang
   const model = findInventoryModel('host');
 
   const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network, logRate } = await model.metrics.getCharts();
+    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
 
     return [
       cpu.xy.cpuUsage,
@@ -97,7 +97,7 @@ const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRang
       memory.xy.memoryUsageBreakdown,
       cpu.xy.normalizedLoad1m,
       cpu.xy.loadBreakdown,
-      logRate.xy.logRate,
+      logs.xy.logRate,
       disk.xy.diskSpaceUsageAvailable,
       disk.xy.diskUsageByMountPoint,
       disk.xy.diskThroughputReadWrite,

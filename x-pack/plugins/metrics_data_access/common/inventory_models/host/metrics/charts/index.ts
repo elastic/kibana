@@ -9,7 +9,7 @@ import { cpu } from './cpu';
 import { disk } from './disk';
 import { memory } from './memory';
 import { network } from './network';
-import { logRate } from './log_rate';
+import { logs } from './logs';
 import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
 
 export const charts = {
@@ -17,7 +17,7 @@ export const charts = {
   disk,
   memory,
   network,
-  logRate,
+  logs,
   kibernetesNode: kubernetesNodeCharts.node,
 } as const;
 
