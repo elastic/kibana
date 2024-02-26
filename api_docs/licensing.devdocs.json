@@ -827,12 +827,12 @@
               "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts"
             },
             {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts"
-            },
-            {
               "plugin": "logstash",
               "path": "x-pack/plugins/logstash/public/plugin.ts"
+            },
+            {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts"
             },
             {
               "plugin": "painlessLab",

@@ -42,7 +42,7 @@ export const storybookAliases = {
   fleet: 'x-pack/plugins/fleet/.storybook',
   grouping: 'packages/kbn-securitysolution-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
+  infra: 'x-pack/plugins/observability_solution/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
   logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',

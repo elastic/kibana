@@ -52,9 +52,9 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
 //
 // If it's removed before then you get:
 //
-//     x-pack/plugins/infra/common/http_api/log_alerts/chart_preview_data.ts:44:14 - error TS4023:
+//     x-pack/plugins/observability_solution/infra/common/http_api/log_alerts/chart_preview_data.ts:44:14 - error TS4023:
 //     Exported variable 'getLogAlertsChartPreviewDataAlertParamsSubsetRT' has or is using name 'Comparator'
-//     from external module "/Users/smith/Code/kibana/x-pack/plugins/infra/common/alerting/logs/log_threshold/types"
+//     from external module "/Users/smith/Code/kibana/x-pack/plugins/observability_solution/infra/common/alerting/logs/log_threshold/types"
 //     but cannot be named.
 //
 export const getLogAlertsChartPreviewDataAlertParamsSubsetRT: any = rt.intersection([
