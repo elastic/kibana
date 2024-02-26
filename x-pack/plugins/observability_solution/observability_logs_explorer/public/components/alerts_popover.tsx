@@ -110,7 +110,12 @@ export const AlertsPopover = () => {
       {state.isAddRuleFlyoutOpen && addRuleFlyout}
       <EuiPopover
         button={
-          <EuiButtonEmpty onClick={togglePopover} iconType="arrowDown" iconSide="right">
+          <EuiButtonEmpty
+            data-test-subj="observabilityLogsExplorerAlertsPopoverAlertsButton"
+            onClick={togglePopover}
+            iconType="arrowDown"
+            iconSide="right"
+          >
             <FormattedMessage
               id="xpack.observabilityLogsExplorer.alertsPopover.buttonLabel"
               defaultMessage="Alerts"
