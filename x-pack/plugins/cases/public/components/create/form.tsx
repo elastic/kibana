@@ -46,6 +46,7 @@ import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from './category';
 import { CustomFields } from './custom_fields';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 interface ContainerProps {
   big?: boolean;
@@ -219,7 +220,8 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
-    const { owner, appId } = useCasesContext();
+    const { owner } = useCasesContext();
+    const { appId } = useApplication();
     const draftStorageKey = getMarkdownEditorStorageKey({
       appId,
       caseId: 'createCase',

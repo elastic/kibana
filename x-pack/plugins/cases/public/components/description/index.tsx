@@ -26,6 +26,7 @@ import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
 import { schema } from './schema';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 const DESCRIPTION_ID = 'description';
 
@@ -97,7 +98,8 @@ export const Description = ({
   const descriptionMarkdownRef = useRef<DescriptionMarkdownRefObject | null>(null);
 
   const { euiTheme } = useEuiTheme();
-  const { appId, permissions } = useCasesContext();
+  const { permissions } = useCasesContext();
+  const { appId } = useApplication();
 
   const {
     clearDraftComment: clearLensDraftComment,

@@ -24,10 +24,10 @@ import { stringifyUrlParams } from './utils/stringify_url_params';
 import { allCasesUrlStateDeserializer } from './utils/all_cases_url_state_deserializer';
 import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializer';
 import { parseUrlParams } from './utils/parse_url_params';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { getLocalStorageKey } from './utils';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -180,7 +180,7 @@ const useAllCasesLocalStorage = (): [
   AllCasesTableState | undefined,
   Dispatch<SetStateAction<AllCasesTableState | undefined>>
 ] => {
-  const { appId } = useCasesContext();
+  const { appId } = useApplication();
 
   const [state, setState] = useLocalStorage<AllCasesTableState>(
     getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableState, appId),

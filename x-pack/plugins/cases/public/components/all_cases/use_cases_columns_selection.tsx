@@ -10,13 +10,13 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { CasesColumnSelection } from './types';
 
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from './utils/merge_selected_columns_with_configuration';
 import { getLocalStorageKey } from './utils';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 export function useCasesColumnsSelection() {
-  const { appId } = useCasesContext();
+  const { appId } = useApplication();
   const casesColumnsConfig = useCasesColumnsConfiguration();
 
   const [selectedColumns, setSelectedColumns] = useLocalStorage<CasesColumnSelection[]>(

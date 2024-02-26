@@ -37,6 +37,7 @@ import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -73,7 +74,8 @@ export const AddComment = React.memo(
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { permissions, owner, appId } = useCasesContext();
+      const { permissions, owner } = useCasesContext();
+      const { appId } = useApplication();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
       const draftStorageKey = getMarkdownEditorStorageKey({ appId, caseId, commentId: id });
 

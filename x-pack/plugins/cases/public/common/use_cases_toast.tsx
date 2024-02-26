@@ -23,7 +23,7 @@ import {
   VIEW_CASE,
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useApplication } from './lib/kibana/use_application';
 
 const LINE_CLAMP = 3;
 const Title = styled.span`
@@ -119,7 +119,7 @@ const getErrorMessage = (error: Error | ServerError): string => {
 };
 
 export const useCasesToast = () => {
-  const { appId } = useCasesContext();
+  const { appId } = useApplication();
   const { getUrlForApp, navigateToUrl } = useKibana().services.application;
 
   const toasts = useToasts();
