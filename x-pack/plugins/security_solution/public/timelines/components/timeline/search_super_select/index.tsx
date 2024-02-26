@@ -56,6 +56,7 @@ interface SearchTimelineSuperSelectProps {
   timelineType?: TimelineTypeLiteral;
   placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  'aria-label'?: string;
 }
 
 const getBasicSelectableOptions = (timelineId: string) => [
@@ -77,6 +78,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   timelineType = TimelineType.template,
   onTimelineChange,
   placeholder,
+  'aria-label': ariaLabel,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -97,9 +99,10 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onClick={handleOpenPopover}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
+        aria-label={ariaLabel}
       />
     ),
-    [handleOpenPopover, isDisabled, timelineTitle]
+    [ariaLabel, handleOpenPopover, isDisabled, timelineTitle]
   );
 
   const handleGetSelectableOptions = useCallback(
