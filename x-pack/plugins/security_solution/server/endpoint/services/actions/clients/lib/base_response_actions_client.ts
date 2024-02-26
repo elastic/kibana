@@ -11,8 +11,9 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+import { i18n } from '@kbn/i18n';
+import { getActionRequestExpiration } from '../../utils';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
-import { HOST_NOT_ENROLLED, LICENSE_TOO_LOW } from '../../create/validate';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
@@ -21,11 +22,6 @@ import type {
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
-import {
-  addRuleInfoToAction,
-  getActionParameters,
-  getActionRequestExpiration,
-} from '../../create/write_action_to_indices';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
@@ -58,10 +54,23 @@ import type {
   ResponseActionsRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
-import type { CreateActionPayload } from '../../create/types';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
+
+const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
+  'xpack.securitySolution.responseActionsList.error.licenseTooLow',
+  {
+    defaultMessage: 'At least Enterprise license is required to use Response Actions.',
+  }
+);
+
+export const HOST_NOT_ENROLLED = i18n.translate(
+  'xpack.securitySolution.responseActionsList.error.hostNotEnrolled',
+  {
+    defaultMessage: 'The host does not have Elastic Defend integration installed',
+  }
+);
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -96,7 +105,8 @@ export interface ResponseActionsClientUpdateCasesOptions {
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
   ResponseActionsRequestBody &
-    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name' | 'error'> & {
+    Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> & {
+      command: ResponseActionsApiCommandNames;
       actionId?: string;
     };
 
@@ -277,7 +287,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       if (!this.options.endpointService.getLicenseService().isEnterprise()) {
         return {
           isValid: false,
-          error: new ResponseActionsClientError(LICENSE_TOO_LOW, 403),
+          error: new ResponseActionsClientError(ENTERPRISE_LICENSE_REQUIRED_MSG, 403),
         };
       }
     }
@@ -343,14 +353,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: getActionParameters(actionRequest) as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
         },
       },
       user: {
         id: this.options.username,
       },
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
-      ...addRuleInfoToAction(actionRequest),
+      ...(actionRequest.ruleId && actionRequest.ruleName
+        ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
+        : {}),
     };
 
     try {
