@@ -1541,6 +1541,9 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 # scss overrides should be below this line for specificity
 **/*.scss @elastic/kibana-design
 
+# Observability design
+/x-pack/plugins/fleet/**/*.scss @elastic/observability-design
+/x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
 /x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
