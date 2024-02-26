@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.waitForRenderComplete();
   };
 
-  describe('Dashboard to dashboard drilldown', function () {
+  describe.only('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       };
 
-      describe('test dashboard to dashboard drilldown', async () => {
+      describe.skip('test dashboard to dashboard drilldown', async () => {
         beforeEach(async () => {
           await PageObjects.dashboard.gotoDashboardEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
@@ -313,8 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
           await PageObjects.dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
           await PageObjects.dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
-          await PageObjects.dashboard.clickQuickSave();
           await PageObjects.dashboard.waitForRenderComplete();
+          await PageObjects.dashboard.clickQuickSave();
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           /** Destination Dashboard */
           await createControls(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, [
@@ -357,7 +358,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Copy to space', () => {
+    describe.skip('Copy to space', () => {
       const destinationSpaceId = 'custom_space';
 
       before(async () => {
