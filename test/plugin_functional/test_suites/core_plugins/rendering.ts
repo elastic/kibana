@@ -39,6 +39,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
+        // @ts-expect-error upgrade typescript v4.9.5
         window.__RENDERING_SESSION__ = [];
       }
 
@@ -311,6 +312,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
@@ -374,6 +376,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
 
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)

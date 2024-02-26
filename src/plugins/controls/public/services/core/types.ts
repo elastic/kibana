@@ -11,4 +11,5 @@ import { CoreStart } from '@kbn/core/public';
 export interface ControlsCoreService {
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  notifications: CoreStart['notifications'];
 }
