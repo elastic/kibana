@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
@@ -360,7 +361,7 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        isScrollable={true}
+        isScrollable
         isNewPanel={isNewPanel}
         isSaveable={isSaveable}
       >
@@ -372,7 +373,7 @@ export function LensEditConfigurationFlyout({
           visualizationMap={visualizationMap}
           datasourceMap={datasourceMap}
           datasourceId={datasourceId}
-          hasPadding={true}
+          hasPadding
           framePublicAPI={framePublicAPI}
           setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
         />
@@ -412,6 +413,8 @@ export function LensEditConfigurationFlyout({
               ${euiScrollBarStyles(euiTheme)}
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
+              padding-right: ${euiThemeVars.euiSizeXS};
+
               .euiAccordion-isOpen & {
                 block-size: auto !important;
                 flex: 1;
@@ -451,15 +454,15 @@ export function LensEditConfigurationFlyout({
                   }
                 }}
                 isDisabled={false}
-                allowQueryCancellation={true}
+                allowQueryCancellation
               />
             </EuiFlexItem>
           )}
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                padding-left: ${euiThemeVars.euiSize};
-                padding-right: ${euiThemeVars.euiSize};
+                padding-left: ${euiThemeVars.euiSizeS};
+                padding-right: ${euiThemeVars.euiSizeS};
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'}
                 }
@@ -477,8 +480,8 @@ export function LensEditConfigurationFlyout({
             `}
                 >
                   <h5>
-                    {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
-                      defaultMessage: 'Layer configuration',
+                    {i18n.translate('xpack.lens.config.chartConfigurationLabel', {
+                      defaultMessage: 'Chart configuration',
                     })}
                   </h5>
                 </EuiTitle>
@@ -495,17 +498,21 @@ export function LensEditConfigurationFlyout({
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
             >
-              <LayerConfiguration
-                attributes={attributes}
-                getUserMessages={getUserMessages}
-                coreStart={coreStart}
-                startDependencies={startDependencies}
-                visualizationMap={visualizationMap}
-                datasourceMap={datasourceMap}
-                datasourceId={datasourceId}
-                framePublicAPI={framePublicAPI}
-                setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-              />
+              <>
+                <LayerConfiguration
+                  shouldDisplayChartSwitch
+                  attributes={attributes}
+                  getUserMessages={getUserMessages}
+                  coreStart={coreStart}
+                  startDependencies={startDependencies}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  datasourceId={datasourceId}
+                  framePublicAPI={framePublicAPI}
+                  setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                />
+                <EuiSpacer />
+              </>
             </EuiAccordion>
           </EuiFlexItem>
 
@@ -515,8 +522,8 @@ export function LensEditConfigurationFlyout({
             css={css`
                 border-top: ${euiThemeVars.euiBorderThin};
                 border-bottom: ${euiThemeVars.euiBorderThin};
-                padding-left: ${euiThemeVars.euiSize};
-                padding-right: ${euiThemeVars.euiSize};
+                padding-left: ${euiThemeVars.euiSizeS};
+                padding-right: ${euiThemeVars.euiSizeS};
                 .euiAccordion__childWrapper {
                   flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
                 }

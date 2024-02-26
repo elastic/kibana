@@ -40,11 +40,6 @@ export function getSuggestions({
     return [];
   }
 
-  // do not return the legacy metric vis for the textbased mode (i.e. ES|QL)
-  if (datasourceId === 'textBased') {
-    return [];
-  }
-
   return [getSuggestion(table)];
 }
 

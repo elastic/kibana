@@ -145,7 +145,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }
 
       if (args.metric.length > 1 || input.rows.length > 1) {
-        throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
+        // throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
       }
     }
 
