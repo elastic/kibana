@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,7 @@ const DiscoverSourcePopoverContent = dynamic(
 
 const sourceDocumentClassName = css`
   display: inline !important;
-  margin-left: $euiSizeXS;
+  margin-left: ${euiThemeVars.euiSizeXS};
 `;
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
