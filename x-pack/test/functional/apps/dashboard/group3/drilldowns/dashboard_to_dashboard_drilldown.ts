@@ -332,7 +332,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboard.gotoDashboardEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
           );
-          await PageObjects.dashboard.waitForRenderComplete();
           await openContextMenuFromPieSlice();
 
           await navigateAndEnsureIDChange(async () => {
