@@ -155,6 +155,10 @@ export const navigationTree: NavigationTreeDefinition = {
                 return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
               },
             },
+            {
+              link: 'apm:settings',
+              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
+            },
           ],
         },
         {
@@ -175,6 +179,14 @@ export const navigationTree: NavigationTreeDefinition = {
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
               },
+            },
+            {
+              link: 'metrics:settings',
+              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
+            },
+            {
+              link: 'metrics:assetDetails',
+              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
             },
           ],
         },
