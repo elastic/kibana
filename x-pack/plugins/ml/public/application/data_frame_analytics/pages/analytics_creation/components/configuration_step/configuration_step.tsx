@@ -15,6 +15,7 @@ import { ANALYTICS_STEPS } from '../../page';
 
 export interface ConfigurationStepProps extends CreateAnalyticsStepProps {
   isClone: boolean;
+  sourceDataViewTitle: string;
 }
 
 export const ConfigurationStep: FC<ConfigurationStepProps> = ({
@@ -24,6 +25,7 @@ export const ConfigurationStep: FC<ConfigurationStepProps> = ({
   step,
   stepActivated,
   isClone,
+  sourceDataViewTitle,
 }) => {
   const showForm = step === ANALYTICS_STEPS.CONFIGURATION;
   const showDetails = step !== ANALYTICS_STEPS.CONFIGURATION && stepActivated === true;
@@ -40,6 +42,7 @@ export const ConfigurationStep: FC<ConfigurationStepProps> = ({
           isClone={isClone}
           state={state}
           setCurrentStep={setCurrentStep}
+          sourceDataViewTitle={sourceDataViewTitle}
         />
       )}
       {showDetails && <ConfigurationStepDetails setCurrentStep={setCurrentStep} state={state} />}
