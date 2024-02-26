@@ -1392,18 +1392,6 @@
             "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
             "plugin": "ingestPipelines",
             "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
           },
@@ -1418,6 +1406,42 @@
           {
             "plugin": "ingestPipelines",
             "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
+            "plugin": "logstash",
+            "path": "x-pack/plugins/logstash/public/application/index.tsx"
+          },
+          {
+            "plugin": "logstash",
+            "path": "x-pack/plugins/logstash/public/application/index.tsx"
+          },
+          {
+            "plugin": "logstash",
+            "path": "x-pack/plugins/logstash/public/application/index.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
           },
           {
             "plugin": "osquery",
@@ -1482,30 +1506,6 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
           },
           {
             "plugin": "monitoring",
