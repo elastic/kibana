@@ -34,6 +34,7 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
       zIndex={100}
       button={
         <EuiButtonIcon
+          data-test-subj="observabilitySolutionWaterfallMarkerIconButton"
           aria-label={i18n.translate('xpack.uptime.synthetics.markers.openEmbeddableButton.label', {
             defaultMessage: 'Use this icon button to show metrics for this annotation marker.',
           })}
