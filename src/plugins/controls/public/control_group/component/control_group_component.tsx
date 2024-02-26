@@ -54,7 +54,6 @@ export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-
   const panels = contextSelect((state) => state.explicitInput.panels);
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
@@ -168,6 +167,11 @@ export const ControlGroup = () => {
     controlWithInvalidSelectionsId,
   ]);
 
+  const showAppendedButtonGroup = useMemo(
+    () => showAddButton || showApplySelections,
+    [showAddButton, showApplySelections]
+  );
+
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const draggingIndex = useMemo(
     () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
@@ -265,7 +269,7 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
-            {(showAddButton || showApplySelections) && (
+            {showAppendedButtonGroup && (
               <EuiFlexItem className="controlGroup--endButtonGroup" grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   {showAddButton && (

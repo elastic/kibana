@@ -671,6 +671,7 @@ export class DashboardPageControls extends FtrService {
         value
       );
       await this.testSubjects.pressEnter(
+        // force the change without waiting for the debounce
         `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
       );
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
@@ -685,6 +686,7 @@ export class DashboardPageControls extends FtrService {
         value
       );
       await this.testSubjects.pressEnter(
+        // force the change without waiting for the debounce
         `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
       );
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);

@@ -72,12 +72,12 @@ export const persistableControlGroupInputIsEqual = (
   };
 
   return (
+    Boolean(inputA.showApplySelections) === Boolean(inputB.showApplySelections) &&
     getPanelsAreEqual(inputA.panels, inputB.panels, compareSelections) &&
     deepEqual(
       omit(inputA, ['panels', 'showApplySelections']),
       omit(inputB, ['panels', 'showApplySelections'])
-    ) &&
-    Boolean(inputA.showApplySelections) === Boolean(inputB.showApplySelections)
+    )
   );
 };
 

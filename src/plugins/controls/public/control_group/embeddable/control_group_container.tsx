@@ -416,7 +416,6 @@ export class ControlGroupContainer extends Container<
         }
       })
     );
-    // console.log('FILTERS', { filters: filtersArray, timeslice });
     return { filters: filtersArray, timeslice };
   }
 
