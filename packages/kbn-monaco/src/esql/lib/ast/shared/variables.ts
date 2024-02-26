@@ -163,6 +163,21 @@ export function collectVariables(
               });
             }
           }
+
+          const optionExpressionOperations = commandOption.args.filter(isExpression);
+          for (const optionExpressionOperation of optionExpressionOperations) {
+            if (!optionExpressionOperation.text.includes(EDITOR_MARKER)) {
+              // just save the entire expression as variable string
+              const expressionType = 'number';
+              addToVariableOccurrencies(variables, {
+                name: optionExpressionOperation.text
+                  .replace(TICKS_REGEX, '')
+                  .replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK),
+                type: expressionType,
+                location: optionExpressionOperation.location,
+              });
+            }
+          }
         }
       }
     }
