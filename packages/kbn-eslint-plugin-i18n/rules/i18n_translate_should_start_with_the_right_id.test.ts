@@ -44,7 +44,7 @@ const babelTester = [
 const invalid: RuleTester.InvalidTestCase[] = [
   {
     name: 'When a string literal is passed to i18n.translate, it should start with the correct i18n identifier.',
-    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
     code: `
 import { i18n } from '@kbn/i18n';
 
@@ -66,7 +66,7 @@ function TestComponent() {
   },
   {
     name: 'When no string literal is passed to i18n.translate, it should start with the correct i18n identifier.',
-    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
     code: `
 import { i18n } from '@kbn/i18n';
 
@@ -88,7 +88,7 @@ function TestComponent() {
   },
   {
     name: 'When i18n is not imported yet, the rule should add it.',
-    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
     code: `
 function TestComponent() {
   const foo = i18n.translate();
