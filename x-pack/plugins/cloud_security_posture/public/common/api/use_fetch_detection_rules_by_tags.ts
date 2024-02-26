@@ -54,7 +54,7 @@ export const fetchDetectionRulesByTags = (
       page: 0,
       perPage: 0,
       total: 0,
-      data: undefined,
+      data: [],
     };
   }
   const query = {
