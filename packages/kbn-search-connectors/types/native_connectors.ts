@@ -3467,7 +3467,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.content.nativeConnectors.salesforce.domain.tooltip',
           {
             defaultMessage:
-              "The domain for your Salesforce instance. If your Salesforce URL is, the domain would be 'foo'.",
+              "The domain for your Salesforce instance. If your Salesforce URL is 'https://foo.salesforce.com', the domain would be 'foo'.",
           }
         ),
         type: FieldType.STRING,
