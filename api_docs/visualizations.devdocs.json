@@ -2154,7 +2154,15 @@
         "label": "getVisSchemas",
         "description": [],
         "signature": [
-          "<TVisParams>(vis: ",
+          "<TVisParams extends ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          ">(vis: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7040,7 +7048,7 @@
             "section": "def-common.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getPersistableInput: () => ",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; reload: () => Promise<void>; getPersistableInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7048,7 +7056,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; readonly isContainer: boolean; reload: () => Promise<void>; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
+          "; readonly isContainer: boolean; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7588,7 +7596,15 @@
         "\nInterface for this plugin's returned setup/start contracts.\n"
       ],
       "signature": [
-        "{ createBaseVisualization: <TVisParams>(config: ",
+        "{ createBaseVisualization: <TVisParams extends ",
+        {
+          "pluginId": "visualizations",
+          "scope": "common",
+          "docId": "kibVisualizationsPluginApi",
+          "section": "def-common.VisParams",
+          "text": "VisParams"
+        },
+        ">(config: ",
         {
           "pluginId": "visualizations",
           "scope": "public",
@@ -7614,7 +7630,15 @@
           "section": "def-common.VisParams",
           "text": "VisParams"
         },
-        ">) => void; register: <TVisParams>(name: string, editor: ",
+        ">) => void; register: <TVisParams extends ",
+        {
+          "pluginId": "visualizations",
+          "scope": "common",
+          "docId": "kibVisualizationsPluginApi",
+          "section": "def-common.VisParams",
+          "text": "VisParams"
+        },
+        ">(name: string, editor: ",
         "VisEditorConstructor",
         "<TVisParams>) => void; get: (name: string) => ",
         "VisEditorConstructor",
