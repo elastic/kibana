@@ -19,10 +19,18 @@ export interface UseFetchIndexPatternFieldsResponse {
 
 const HIGH_CARDINALITY_THRESHOLD = 1000;
 
+const buildInstanceId = (groupBy: string | string[]): string => {
+  const groups = [groupBy].flat().filter((value) => !!value);
+  const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
+
+  const hasAllGroupings = groups.map((group) => `doc['${group}'].size() > 0`).join(' && ');
+  return `if (${hasAllGroupings}) { emit(${groupings}) }`;
+};
+
 export function useFetchGroupByCardinality(
   indexPattern: string,
   timestampField: string,
-  groupBy: string
+  groupBy: string | string[]
 ): UseFetchIndexPatternFieldsResponse {
   const { data: dataService } = useKibana().services;
 
@@ -40,10 +48,16 @@ export function useFetchGroupByCardinality(
                     filter: [{ range: { [timestampField]: { gte: 'now-24h' } } }],
                   },
                 },
+                runtime_mappings: {
+                  group_combinations: {
+                    type: 'keyword',
+                    script: buildInstanceId(groupBy),
+                  },
+                },
                 aggs: {
                   groupByCardinality: {
                     cardinality: {
-                      field: groupBy,
+                      field: 'group_combinations',
                     },
                   },
                 },
