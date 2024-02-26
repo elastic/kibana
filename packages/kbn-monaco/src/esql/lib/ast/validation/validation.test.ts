@@ -1046,6 +1046,48 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field Is nOt NuLL`, []);
     }
 
+    for (const {
+      name,
+      alias,
+      signatures,
+      ...defRest
+    } of statsAggregationFunctionDefinitions.filter(
+      ({ name: fnName, signatures: statsSignatures }) =>
+        statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
+    )) {
+      for (const { params, infiniteParams, ...signRest } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+
+        testErrorsAndWarnings(
+          `from a_index | where ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`WHERE does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | where ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`WHERE does not support function ${name}`]
+        );
+      }
+    }
+
     // Test that all functions work in where
     const numericOrStringFunctions = evalFunctionsDefinitions.filter(({ name, signatures }) => {
       return signatures.some(
@@ -1187,6 +1229,67 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ numberField`, [
         `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
       ]);
+    }
+
+    for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
+      for (const { params, infiniteParams, ...signRest } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+        testErrorsAndWarnings(
+          `from a_index | eval var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`EVAL does not support function ${name}`]
+        );
+      }
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
@@ -1946,6 +2049,11 @@ describe('validation logic', () => {
       `FROM index
     | EVAL numberField * 3.281
     | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
+      []
+    );
+
+    testErrorsAndWarnings(
+      `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
       []
     );
   });
