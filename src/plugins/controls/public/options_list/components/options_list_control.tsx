@@ -19,6 +19,7 @@ import {
   EuiInputPopover,
   EuiToken,
   EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
@@ -39,7 +40,7 @@ export const OptionsListControl = ({
   loadMoreSubject: Subject<number>;
 }) => {
   const optionsList = useOptionsList();
-
+  const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
@@ -191,9 +192,10 @@ export const OptionsListControl = ({
         isSelected={isPopoverOpen}
         numActiveFilters={selectedOptionsCount}
         hasActiveFilters={Boolean(selectedOptionsCount)}
+        textProps={{ className: 'optionsList--selectionText' }}
         aria-label={fieldTitle ?? fieldName}
         aria-expanded={isPopoverOpen}
-        textProps={{ className: 'optionsList--selectionText' }}
+        aria-controls={popoverId}
         role="combobox"
       >
         {hasSelections || existsSelected
@@ -212,6 +214,7 @@ export const OptionsListControl = ({
       })}
     >
       <EuiInputPopover
+        id={popoverId}
         ownFocus
         input={button}
         hasArrow={false}
