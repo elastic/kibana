@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import Stream from 'stream';
-
 import Assist, { ConversationalChain } from '@elastic/ai-assist';
 
 import { Prompt } from '@elastic/ai-assist';
 import { ChatOpenAI } from '@elastic/ai-assist/models';
 import { fetchFields } from '@kbn/ai-playground/lib/fetch_query_source_fields';
 import { schema } from '@kbn/config-schema';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -68,14 +67,12 @@ export function registerAIPlaygroundRoutes({ log, router }: RouteDependencies) {
         rag: {
           index: data.indices,
           retriever: (question: string) => {
-            return {
-              text_expansion: {
-                'vector.tokens': {
-                  model_id: '.elser_model_2',
-                  model_text: question,
-                },
-              },
-            };
+            try {
+              const query = JSON.parse(data.elasticsearchQuery.replace(/{query}/g, question));
+              return query.query;
+            } catch (e) {
+              log.error('Failed to parse the Elasticsearch query', e);
+            }
           },
         },
         prompt: Prompt(data.prompt, {
@@ -87,33 +84,25 @@ export function registerAIPlaygroundRoutes({ log, router }: RouteDependencies) {
 
       const stream = await chain.stream(aiClient, messages);
 
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+
       const reader = (stream as ReadableStream).getReader();
+      const textDecoder = new TextDecoder();
 
-      class UIStream extends Stream.Readable {
-        _read() {
-          const that = this;
-
-          function read() {
-            reader.read().then(({ done, value }: { done: boolean; value?: string }) => {
-              if (done) {
-                that.push(null);
-                return;
-              }
-              that.push(value);
-              read();
-            });
+      async function pushStreamUpdate() {
+        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          if (done) {
+            end();
+            return;
           }
-          read();
-        }
+          push(textDecoder.decode(value));
+          pushStreamUpdate();
+        });
       }
 
-      return response.custom({
-        body: new UIStream(),
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
-      });
+      pushStreamUpdate();
+
+      return response.ok(responseWithHeaders);
     })
   );
 }

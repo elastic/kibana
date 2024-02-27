@@ -21,6 +21,8 @@ const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'text', 'content'];
 
 const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
+const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text'];
+
 interface Matches {
   queryMatches: any[];
   knnMatches: any[];
@@ -125,6 +127,26 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
       : {}),
     ...(boolMatches.knnMatches.length > 0 ? { knn: boolMatches.knnMatches } : {}),
   };
+}
+
+export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceFields): IndexFields {
+  const indexFields = Object.keys(fieldDescriptors).reduce<IndexFields>(
+    (acc: IndexFields, index: string) => {
+      const indexFieldDescriptors = fieldDescriptors[index];
+
+      const suggested = indexFieldDescriptors.source_fields.filter((x) =>
+        SUGGESTED_SOURCE_FIELDS.includes(x)
+      );
+
+      return {
+        ...acc,
+        [index]: suggested,
+      };
+    },
+    {}
+  );
+
+  return indexFields;
 }
 
 export function getDefaultQueryFields(fieldDescriptors: IndicesQuerySourceFields): IndexFields {

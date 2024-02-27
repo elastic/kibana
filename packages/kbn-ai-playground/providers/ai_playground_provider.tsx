@@ -24,7 +24,11 @@ export const AIPlaygroundProvider: React.FC<AIPlaygroundProviderProps> = ({
   navigateToIndexPage,
   children,
 }) => {
-  const form = useForm<ChatForm>();
+  const form = useForm<ChatForm>({
+    defaultValues: {
+      prompt: 'You are an assistant for question-answering tasks.',
+    },
+  });
 
   return (
     <ChatContext.Provider value={{ navigateToIndexPage }}>

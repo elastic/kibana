@@ -7,7 +7,7 @@
  */
 
 import { IndicesQuerySourceFields } from '../types';
-import { createQuery, getDefaultQueryFields } from './create_query';
+import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from './create_query';
 
 describe('create_query', () => {
   describe('createQuery', () => {
@@ -376,6 +376,55 @@ describe('create_query', () => {
 
       expect(getDefaultQueryFields(fieldDescriptors)).toEqual({
         index1: ['unknown1'],
+      });
+    });
+  });
+
+  describe('getDefaultSourceFields', () => {
+    it('should return default source fields', () => {
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        'search-search-labs': {
+          elser_query_fields: [],
+          dense_vector_query_fields: [],
+          bm25_query_fields: [
+            'additional_urls',
+            'title',
+            'links',
+            'id',
+            'url_host',
+            'url_path',
+            'url_path_dir3',
+            'body_content',
+            'domains',
+            'url',
+            'url_scheme',
+            'meta_description',
+            'headings',
+            'url_path_dir2',
+            'url_path_dir1',
+          ],
+          source_fields: [
+            'additional_urls',
+            'title',
+            'links',
+            'id',
+            'url_host',
+            'url_path',
+            'url_path_dir3',
+            'body_content',
+            'domains',
+            'url',
+            'url_scheme',
+            'meta_description',
+            'headings',
+            'url_path_dir2',
+            'url_path_dir1',
+          ],
+        },
+      };
+
+      expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
+        'search-search-labs': ['body_content'],
       });
     });
   });
