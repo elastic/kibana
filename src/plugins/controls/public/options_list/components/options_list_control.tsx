@@ -48,6 +48,7 @@ export const OptionsListControl = ({
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const fieldTitle = optionsList.select((state) => state.explicitInput.title);
   const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
   const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
@@ -190,17 +191,10 @@ export const OptionsListControl = ({
         isSelected={isPopoverOpen}
         numActiveFilters={selectedOptionsCount}
         hasActiveFilters={Boolean(selectedOptionsCount)}
-        aria-label={`${selectedOptions
-          ?.map((value) => {
-            const isInvalid = invalidSelections?.includes(value);
-            return `${
-              isInvalid
-                ? OptionsListStrings.popover.getInvalidSelectionScreenReaderText() + ' '
-                : ''
-            }${fieldFormatter(value)}`;
-          })
-          .join(delimiter)}`}
+        aria-label={fieldTitle ?? fieldName}
+        aria-expanded={isPopoverOpen}
         textProps={{ className: 'optionsList--selectionText' }}
+        role="combobox"
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
@@ -229,7 +223,9 @@ export const OptionsListControl = ({
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
         panelClassName="optionsList__popoverOverride"
-        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
+        panelProps={{
+          'aria-label': OptionsListStrings.popover.getAriaLabel(fieldTitle ?? fieldName),
+        }}
       >
         <OptionsListPopover
           isLoading={debouncedLoading}
