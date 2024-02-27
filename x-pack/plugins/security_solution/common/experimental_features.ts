@@ -165,7 +165,7 @@ export const allowedExperimentalValues = Object.freeze({
   alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /**
-   * Enables alerts suppression for Eql rules
+   * Enables alerts suppression for Eql rules, non-sequence based queries
    */
   alertSuppressionForEqlRuleEnabledNonSequence: false,
 
