@@ -165,6 +165,11 @@ export const allowedExperimentalValues = Object.freeze({
   alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /**
+   * Enables alerts suppression for Eql rules, non-sequence based queries
+   */
+  alertSuppressionForEqlRuleEnabledNonSequence: false,
+
+  /*
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: false,
