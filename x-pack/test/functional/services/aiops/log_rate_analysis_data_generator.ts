@@ -11,6 +11,8 @@ import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { frequentItemSetsLargeArraysSource } from '../../apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
+
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
   FAREQUOTE_WITH_SPIKE: 'farequote_with_spike',
@@ -24,6 +26,7 @@ const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
   ARTIFICIAL_LOGS_WITH_DIP: 'artificial_logs_with_dip',
   ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+  LARGE_ARRAYS: 'large_arrays',
 } as const;
 export type LogRateAnalysisDataGenerator =
   typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
@@ -272,14 +275,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_dip_zerodocsfallback':
         case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
-            const indexExists = await es.indices.exists({
+            await es.indices.delete({
               index: dataGenerator,
+              ignore_unavailable: true,
             });
-            if (indexExists) {
-              await es.indices.delete({
-                index: dataGenerator,
-              });
-            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
@@ -324,6 +323,47 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
+        case 'large_arrays':
+          try {
+            await es.indices.delete({
+              index: dataGenerator,
+              ignore_unavailable: true,
+            });
+          } catch (e) {
+            log.info(`Could not delete index '${dataGenerator}' in before() callback`);
+          }
+
+          // Create index with mapping
+          await es.indices.create({
+            index: dataGenerator,
+            mappings: {
+              properties: {
+                items: { type: 'keyword' },
+                '@timestamp': { type: 'date' },
+              },
+            },
+          });
+
+          interface DocWithArray {
+            '@timestamp': number;
+            items: string[];
+          }
+
+          await es.bulk({
+            refresh: 'wait_for',
+            body: frequentItemSetsLargeArraysSource.reduce((docs, items) => {
+              if (docs === undefined) return [];
+              docs.push({ index: { _index: dataGenerator } });
+              docs.push({
+                '@timestamp': 1562254538700,
+                items,
+              });
+              return docs;
+            }, [] as estypes.BulkRequest<DocWithArray, DocWithArray>['body']),
+          });
+
+          break;
+
         default:
           log.error(`Unsupported data generator '${dataGenerator}`);
       }
@@ -349,6 +389,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_spike_textfield_zerodocsfallback':
         case 'artificial_logs_with_dip_zerodocsfallback':
         case 'artificial_logs_with_dip_textfield_zerodocsfallback':
+        case 'large_arrays':
           try {
             await es.indices.delete({
               index: dataGenerator,
