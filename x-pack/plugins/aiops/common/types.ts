@@ -15,7 +15,7 @@ export interface SignificantItemDuplicateGroup {
 export type FieldValuePairCounts = Record<string, Record<string, number>>;
 
 export interface ItemSet {
-  set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
+  set: FieldValuePair[];
   size: number;
   maxPValue: number;
   doc_count: number;
