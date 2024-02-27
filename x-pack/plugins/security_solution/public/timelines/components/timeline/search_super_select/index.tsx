@@ -6,7 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiInputPopover, EuiFieldText } from '@elastic/eui';
+import { EuiInputPopover, EuiFieldText, htmlIdGenerator } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -90,6 +90,8 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(true);
   }, []);
 
+  const popoverId = useMemo(() => htmlIdGenerator('searchTimelinePopover')(), []);
+
   const superSelect = useMemo(
     () => (
       <EuiFieldText
@@ -100,10 +102,12 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
         aria-label={ariaLabel}
+        aria-controls={popoverId}
+        aria-expanded={isPopoverOpen}
         role="combobox"
       />
     ),
-    [ariaLabel, handleOpenPopover, isDisabled, timelineTitle]
+    [ariaLabel, handleOpenPopover, isDisabled, isPopoverOpen, popoverId, timelineTitle]
   );
 
   const handleGetSelectableOptions = useCallback(
@@ -133,7 +137,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
 
   return (
     <StyledEuiInputPopover
-      id="searchTimelinePopover"
+      id={popoverId}
       input={superSelect}
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
