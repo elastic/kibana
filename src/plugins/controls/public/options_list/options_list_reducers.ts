@@ -11,7 +11,6 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
-import { OptionsListEmbeddableInput } from '../../common';
 import { isValidSearch } from '../../common/options_list/is_valid_search';
 import {
   OptionsListSortingType,
@@ -92,12 +91,6 @@ export const optionsListReducers = {
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
     if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
-  },
-  setSelections: (
-    state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<OptionsListEmbeddableInput['selectedOptions']>
-  ) => {
-    state.explicitInput.selectedOptions = action.payload;
   },
   setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.explicitInput.exclude = action.payload;

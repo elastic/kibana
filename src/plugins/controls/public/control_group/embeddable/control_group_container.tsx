@@ -242,7 +242,7 @@ export class ControlGroupContainer extends Container<
     );
 
     /**
-     * recalculate filters when `showApplySelections` value changes to keep state clean
+     * force publish filters when `showApplySelections` value changes to keep state clean
      */
     this.subscriptions.add(
       this.getInput$()

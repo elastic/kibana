@@ -81,7 +81,7 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class OptionsListEmbeddable
   extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
-  implements IClearableControl<OptionsListEmbeddableInput>
+  implements IClearableControl
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;

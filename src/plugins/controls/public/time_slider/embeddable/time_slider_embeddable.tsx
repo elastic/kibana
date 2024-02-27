@@ -57,7 +57,7 @@ type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class TimeSliderControlEmbeddable
   extends Embeddable<TimeSliderControlEmbeddableInput, ControlOutput>
-  implements IClearableControl<TimeSliderControlEmbeddableInput>
+  implements IClearableControl
 {
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;
@@ -220,9 +220,10 @@ export class TimeSliderControlEmbeddable
   }
 
   private syncWithTimeRange() {
-    this.prevTimeRange = this.getInput().timeRange;
+    const { explicitInput: currentInput } = this.getState();
 
-    this.selectionsToFilters(this.getInput()).then(({ timeslice }) => {
+    this.prevTimeRange = currentInput.timeRange;
+    this.selectionsToFilters(currentInput).then(({ timeslice }) => {
       this.dispatch.publishValue({ value: timeslice });
       this.dispatch.setValue({ value: timeslice });
       if (timeslice) this.onRangeChange(timeslice[TO_INDEX] - timeslice[FROM_INDEX]);

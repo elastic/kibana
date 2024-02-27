@@ -311,16 +311,14 @@ export class RangeSliderEmbeddable
     const [min, max] = [selectedMin, selectedMax].map(parseFloat);
 
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return { filters: [] };
-
-    if (isEmpty(selectedMin) && isEmpty(selectedMax)) return { filters: [] };
+    if (!dataView || !field || (isEmpty(selectedMin) && isEmpty(selectedMax))) {
+      return { filters: [] };
+    }
 
     const params = {} as RangeFilterParams;
-
     if (selectedMin) {
       params.gte = min;
     }
-
     if (selectedMax) {
       params.lte = max;
     }

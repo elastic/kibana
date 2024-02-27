@@ -21,7 +21,6 @@ export interface ControlFilterOutput {
 export interface ControlTimesliceOutput {
   timeslice?: TimeSlice;
 }
-export type SingleControlOutput = ControlFilterOutput | ControlTimesliceOutput;
 
 export type ControlGroupFilterOutput = ControlFilterOutput & ControlTimesliceOutput;
 
