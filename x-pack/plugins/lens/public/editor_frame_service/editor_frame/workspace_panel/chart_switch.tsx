@@ -384,9 +384,13 @@ export const ChartSwitch = memo(function ChartSwitch({
     ]
   );
 
-  const { icon, label } = visualizationMap[visualization.activeId || ''].getDescription(
-    visualization.state
-  );
+  const { icon, label } = (visualization.activeId &&
+    visualizationMap[visualization.activeId]?.getDescription(visualization.state)) || {
+    label: i18n.translate('xpack.lens.configPanel.selectVisualization', {
+      defaultMessage: 'Select a visualization',
+    }),
+    icon: undefined,
+  };
 
   return (
     <div className="lnsChartSwitch__header">
