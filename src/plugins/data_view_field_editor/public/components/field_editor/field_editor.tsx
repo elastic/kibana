@@ -208,6 +208,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
 
   useEffect(() => {
+    console.log('#####', updatedName, updatedType[0].value, updatedScript, updatedFormat);
     updatePreviewParams({
       name: Boolean(updatedName?.trim()) ? updatedName : null,
       type: updatedType?.[0].value,
