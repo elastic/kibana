@@ -13,6 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import { act } from 'react-dom/test-utils';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const selectedDataView = {
   id: 'mock-data-logs-id',
@@ -23,7 +24,13 @@ const selectedDataView = {
   getName: () => 'kibana_sample_data_logs',
 } as unknown as DataView;
 
-const dataViewIds = ['mock-data-logs-id', 'mock-ecommerce-id', 'mock-test-id', 'mock-ad-hoc-id'];
+const dataViewIds = [
+  'mock-data-logs-id',
+  'mock-ecommerce-id',
+  'mock-test-id',
+  'mock-ad-hoc-id',
+  'mock-ad-hoc-esql-id',
+];
 
 const dataViewOptions = [
   selectedDataView,
@@ -61,6 +68,16 @@ const dataViewOptions = [
     isTimeBased: jest.fn(),
     isPersisted: jest.fn(() => false),
     getName: () => 'ad-hoc data view',
+  },
+  {
+    id: 'mock-ad-hoc-esql-id',
+    namespaces: ['default'],
+    title: 'ad-hoc data view esql',
+    type: ESQL_TYPE,
+    typeMeta: {},
+    isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => false),
+    getName: () => 'ad-hoc data view esql',
   },
 ];
 
@@ -119,24 +136,35 @@ describe('DataViewSelectPopover', () => {
           "isAdhoc": false,
           "name": undefined,
           "title": "kibana_sample_data_logs",
+          "type": undefined,
         },
         Object {
           "id": "mock-ecommerce-id",
           "isAdhoc": false,
           "name": undefined,
           "title": "kibana_sample_data_ecommerce",
+          "type": undefined,
         },
         Object {
           "id": "mock-test-id",
           "isAdhoc": false,
           "name": undefined,
           "title": "test",
+          "type": undefined,
         },
         Object {
           "id": "mock-ad-hoc-id",
           "isAdhoc": true,
           "name": undefined,
           "title": "ad-hoc data view",
+          "type": undefined,
+        },
+        Object {
+          "id": "mock-ad-hoc-esql-id",
+          "isAdhoc": true,
+          "name": undefined,
+          "title": "ad-hoc data view esql",
+          "type": "esql",
         },
       ]
     `);
