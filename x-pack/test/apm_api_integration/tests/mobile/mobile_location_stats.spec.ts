@@ -232,7 +232,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Location stats', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177396
+  registry.when.skip('Location stats', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
         synthtraceEsClient,
