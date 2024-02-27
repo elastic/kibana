@@ -17,12 +17,17 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CONFIGURATION_LABEL, OVERVIEW_LABEL } from '../../../../../common/i18n_string';
+import {
+  CONFIGURATION_LABEL,
+  OVERVIEW_LABEL,
+  SCHEDULING_LABEL,
+} from '../../../../../common/i18n_string';
 import { ConnectorLinkElasticsearch } from './connector_link';
 import { ConnectorConfigFields } from './connector_config_fields';
 import { ConnectorIndexName } from './connector_index_name';
 import { ConnectorConfigurationPanels } from './connector_config_panels';
 import { ConnectorOverview } from './connector_overview';
+import { ConnectorScheduling } from '../conector_scheduling_tab/connector_scheduling';
 
 interface ConnectorConfigurationProps {
   connector: Connector;
@@ -33,15 +38,20 @@ type ConnectorConfigurationStep = 'link' | 'configure' | 'connect' | 'connected'
 export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ connector }) => {
   const [currentStep, setCurrentStep] = useState<ConnectorConfigurationStep>('link');
   useEffect(() => {
-    const step =
-      connector.status === ConnectorStatus.CREATED
-        ? 'link'
-        : connector.status === ConnectorStatus.NEEDS_CONFIGURATION &&
-          Object.keys(connector.configuration || {}).length > 0
-        ? 'configure'
-        : connector.status === ConnectorStatus.CONFIGURED
-        ? 'connect'
-        : 'connected';
+    let step: ConnectorConfigurationStep = 'link';
+    switch (connector.status) {
+      case ConnectorStatus.CREATED:
+        step = 'link';
+        break;
+      case ConnectorStatus.NEEDS_CONFIGURATION:
+        step = Object.keys(connector.configuration || {}).length > 0 ? 'configure' : 'link';
+        break;
+      case ConnectorStatus.CONFIGURED:
+        step = 'connect';
+        break;
+      default:
+        step = 'connected';
+    }
     setCurrentStep(step);
   }, [connector.status, setCurrentStep, connector.configuration]);
   const steps: EuiStepsHorizontalProps['steps'] = [
@@ -102,6 +112,16 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
       ),
       id: 'configuration',
       name: CONFIGURATION_LABEL,
+    },
+    {
+      content: (
+        <>
+          <EuiSpacer />
+          <ConnectorScheduling connector={connector} />
+        </>
+      ),
+      id: 'scheduling',
+      name: SCHEDULING_LABEL,
     },
   ];
 
