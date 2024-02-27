@@ -184,7 +184,7 @@ export class ReportingAPIClient implements IReportingAPI {
         body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-    await this.addPendingJobId(resp.job.id);
+    this.addPendingJobId(resp.job.id);
     return new Job(resp.job);
   }
 

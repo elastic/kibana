@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, filter, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 
 import { DocLinksStart, NotificationsSetup, ThemeServiceStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -74,7 +74,7 @@ export class ReportingNotifierStreamHandler {
     Rx.timer(0, interval)
       .pipe(
         takeUntil(stop$), // stop the interval when stop method is called
-        mergeMap(this.jobCompletionNotifications.getPendingJobIds), // read all pending job IDs from session storage
+        map(this.jobCompletionNotifications.getPendingJobIds), // read all pending job IDs from session storage
         filter((previousPending) => previousPending.length > 0), // stop the pipeline here if there are none pending
         mergeMap((previousPending) => this.findChangedStatusJobs(previousPending)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => this.showNotifications({ completed, failed })),
@@ -105,7 +105,7 @@ export class ReportingNotifierStreamHandler {
       const completedOptions = { toastLifeTimeMs: COMPLETED_JOB_TOAST_TIMEOUT };
 
       // notifications with download link
-      for (const job of completedJobs) {
+      for (const job of completedJobs ?? []) {
         if (job.csvContainsFormulas) {
           notifications.toasts.addWarning(
             getWarningFormulasToast(job, getManagementLink, getDownloadLink, theme),
@@ -130,7 +130,7 @@ export class ReportingNotifierStreamHandler {
       }
 
       // no download link available
-      for (const job of failedJobs) {
+      for (const job of failedJobs ?? []) {
         const errorText = await apiClient.getError(job.id);
         this.notifications.toasts.addDanger(
           getFailureToast(errorText, job, getManagementLink, theme, docLinks)
@@ -172,7 +172,7 @@ export class ReportingNotifierStreamHandler {
 
         // refresh the storage of pending job IDs, minus
         // the newly completed and failed jobs
-        await this.jobCompletionNotifications.setPendingJobIds(newPending);
+        this.jobCompletionNotifications.setPendingJobIds(newPending);
 
         return { completed: newCompleted, failed: newFailed };
       }),
@@ -186,9 +186,9 @@ export class ReportingNotifierStreamHandler {
             err,
             this.theme
           )
-        ); // prettier-ignore
+        );
         window.console.error(err);
-        return Rx.of({ completed: [], failed: [] }); // log the error and resume
+        return Rx.of({});
       })
     );
   }

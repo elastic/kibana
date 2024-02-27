@@ -10,57 +10,38 @@ import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '@kbn/reporting-common'
 import { JobId } from '@kbn/reporting-common/types';
 
 export function jobCompletionNotifications() {
-  // Reading and writing to the local storage must be atomic,
-  // i.e. performed in a single operation. This storage queue
-  // Operations on the localStorage key can happen from various
-  // parts of code. Using a queue to manage async operations allows
-  // operations to process one at a time
-  let operationQueue = Promise.resolve();
-  async function addToQueue(func: (error: Error | null) => void) {
-    operationQueue = operationQueue.then(() => func(null)).catch(func);
-    await operationQueue;
-  }
-
-  async function getPendingJobIds(): Promise<JobId[]> {
-    let jobs: JobId[] = [];
-    await addToQueue(async () => {
-      // get the current jobs
-      const jobsData = localStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
-      jobs = jobsData ? JSON.parse(jobsData) : [];
-    });
+  function getPendingJobIds(): JobId[] {
+    const jobs: JobId[] = [];
+    // get all current jobs
+    for (const key in localStorage) {
+      // check if key belongs to us
+      if (key.indexOf(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY) === 0) {
+        // get jobId from key
+        const jobId = key.replace(`${JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY}-`, '');
+        jobs.push(jobId);
+      }
+    }
     return jobs;
   }
 
-  async function addPendingJobId(jobId: JobId) {
-    await addToQueue(async (error: Error | null) => {
-      return new Promise((resolve, reject) => {
-        if (error) {
-          window.console.error(error);
-          reject(error);
-        }
-        // get the current jobs synchronously
-        const jobsData = localStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
-        const jobs: JobId[] = jobsData ? JSON.parse(jobsData) : [];
-        // add the new job
-        jobs.push(jobId);
-        // write back to local storage
-        localStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
-        resolve();
-      });
-    });
+  function addPendingJobId(jobId: JobId) {
+    // write back to local storage, value doesn't matter
+    localStorage.setItem(`${JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY}-${jobId}`, jobId);
   }
 
-  async function setPendingJobIds(jobIds: JobId[]) {
-    await addToQueue(async (error: Error | null) => {
-      return new Promise((resolve, reject) => {
-        if (error) {
-          reject(error);
-        }
-        // write update jobs back to local storage
-        localStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
-        resolve();
-      });
-    });
+  function setPendingJobIds(jobIds: JobId[]) {
+    // clear reporting jobIds
+    for (const key in localStorage) {
+      if (key.indexOf(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY) === 0) {
+        localStorage.removeItem(key);
+      }
+    }
+
+    // write update jobs back to local storage
+    for (let j = 0; j < jobIds.length; j++) {
+      const jobId = jobIds[j];
+      localStorage.setItem(`${JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY}-${jobId}`, jobId);
+    }
   }
 
   return {
