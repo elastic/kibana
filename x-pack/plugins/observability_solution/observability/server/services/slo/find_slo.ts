@@ -48,6 +48,7 @@ function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOW
       ...sloList.find((s) => s.id === sloSummary.id)!,
       instanceId: sloSummary.instanceId,
       summary: sloSummary.summary,
+      groupings: sloSummary.groupings,
     }));
 }
 

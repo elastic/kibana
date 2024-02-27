@@ -17,7 +17,6 @@ import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badg
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
 import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
-import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
 export type ViewMode = 'default' | 'compact';
 
 export interface SloBadgesProps {
@@ -43,7 +42,6 @@ export function SloBadges({
         <>
           <SloStatusBadge slo={slo} />
           <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
-          <SloGroupByBadge slo={slo} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
           <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />

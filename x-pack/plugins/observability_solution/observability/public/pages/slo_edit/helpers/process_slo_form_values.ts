@@ -46,7 +46,7 @@ export function transformSloResponseToCreateSloForm(
           timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
         }),
     },
-    groupBy: values.groupBy,
+    groupBy: [values.groupBy].flat(),
     tags: values.tags,
   };
 }
@@ -73,7 +73,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
         }),
     },
     tags: values.tags,
-    groupBy: values.groupBy,
+    groupBy: [values.groupBy].flat(),
   };
 }
 
@@ -99,7 +99,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
         }),
     },
     tags: values.tags,
-    groupBy: values.groupBy,
+    groupBy: [values.groupBy].flat(),
   };
 }
 
@@ -185,7 +185,7 @@ export function transformPartialUrlStateToFormState(
   }
 
   if (values.groupBy) {
-    state.groupBy = values.groupBy;
+    state.groupBy = [values.groupBy].flat().filter((group) => !!group) as string[];
   }
 
   if (values.timeWindow?.duration && values.timeWindow?.type) {
