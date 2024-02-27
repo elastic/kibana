@@ -105,7 +105,7 @@ export const createEqlAlertType = (
       const isSuppressionActive = await isAlertSuppressionActive({
         licensing,
         experimentalFeatures,
-        experimentalFeatureKey: 'alertSuppressionForEqlRuleEnabled',
+        experimentalFeatureKey: 'alertSuppressionForEqlRuleEnabledNonSequence',
         alertSuppression: completeRule.ruleParams.alertSuppression,
       });
       const result = await eqlExecutor({
