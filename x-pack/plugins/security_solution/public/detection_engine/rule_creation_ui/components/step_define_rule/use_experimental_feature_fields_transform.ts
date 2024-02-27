@@ -19,7 +19,6 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
   const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-
   const isAlertSuppressionForEqlRuleEnabledNonSequence = useIsExperimentalFeatureEnabled(
     'alertSuppressionForEqlRuleEnabledNonSequence'
   );

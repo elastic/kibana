@@ -21,7 +21,6 @@ import {
   ALERT_SUPPRESSION_PER_RULE_EXECUTION,
 } from '../../../rule_creation_ui/components/description_step/translations';
 
-
 jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
   isSavedQueryLoading: false,
   savedQueryBar: {
@@ -42,7 +41,6 @@ jest
   );
 
 describe('RuleDefinitionSection', () => {
-
   describe('Alert Suppression', () => {
     beforeEach(() => {
       jest.clearAllMocks();
