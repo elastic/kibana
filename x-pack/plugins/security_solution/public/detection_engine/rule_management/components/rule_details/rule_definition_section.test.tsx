@@ -15,6 +15,12 @@ import type {
 import * as useAlertSuppressionMock from '../../logic/use_alert_suppression';
 import * as useGetSavedQueryMock from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as useUpsellingMessageMock from '../../../../common/hooks/use_upselling';
+import {
+  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
+  ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS,
+  ALERT_SUPPRESSION_PER_RULE_EXECUTION,
+} from '../../../rule_creation_ui/components/description_step/translations';
+
 
 jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
   isSavedQueryLoading: false,
@@ -36,66 +42,126 @@ jest
   );
 
 describe('RuleDefinitionSection', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-  test('should render AlertSuppressionTitle and SuppressAlertsByField when group_by is present', () => {
-    jest
-      .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-      .mockReturnValueOnce({ isSuppressionEnabled: true });
-    const rule: Partial<RuleResponse> = {
-      alert_suppression: {
-        group_by: ['field1', 'field2'],
-        duration: { value: 2, unit: 'h' },
-        missing_fields_strategy: 'suppress' as AlertSuppressionMissingFieldsStrategy,
-      },
-    };
 
-    render(<RuleDefinitionSection rule={rule} />);
+  describe('Alert Suppression', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-    expect(screen.getByTestId('alertSuppressionGroupByPropertyTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('alertSuppressionDurationPropertyTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')).toBeInTheDocument();
-  });
+    test('should display all suppression fields when the rule contains alert_suppression with all properties similar to a query rule', () => {
+      jest
+        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
+        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      const rule: Partial<RuleResponse> = {
+        alert_suppression: {
+          group_by: ['field1', 'field2'],
+          duration: { value: 2, unit: 'h' },
+          missing_fields_strategy: 'suppress' as AlertSuppressionMissingFieldsStrategy,
+        },
+      };
 
-  // TODO check if this is true o.O oh no!!!
-  test('should render only AlertSuppressionTitle and SuppressAlertsDuration when group_by is not present', () => {
-    jest
-      .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-      .mockReturnValueOnce({ isSuppressionEnabled: true });
-    const rule: Partial<RuleResponse> = {
-      alert_suppression: {
-        duration: { value: 2, unit: 'h' },
-        missing_fields_strategy: 'doNotSuppress' as AlertSuppressionMissingFieldsStrategy,
-      },
-    };
+      render(<RuleDefinitionSection rule={rule} />);
 
-    render(<RuleDefinitionSection rule={rule} />);
+      expect(screen.getByTestId('alertSuppressionGroupByPropertyTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionDurationPropertyTitle')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionGroupByPropertyValue')).toHaveTextContent(
+        'field1field2'
+      );
+      expect(screen.getByTestId('alertSuppressionDurationPropertyValue')).toHaveTextContent('2h');
+      expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyValue')).toHaveTextContent(
+        ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
+      );
+    });
+    test('should display the suppression duration correctly when it runs per rule execution', () => {
+      jest
+        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
+        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      const rule: Partial<RuleResponse> = {
+        alert_suppression: {
+          group_by: ['field1', 'field2'],
+          missing_fields_strategy: 'suppress' as AlertSuppressionMissingFieldsStrategy,
+        },
+      };
 
-    expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
+      render(<RuleDefinitionSection rule={rule} />);
 
-    expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')).toBeInTheDocument();
-  });
+      expect(screen.getByTestId('alertSuppressionGroupByPropertyTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionDurationPropertyTitle')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionGroupByPropertyValue')).toHaveTextContent(
+        'field1field2'
+      );
+      expect(screen.getByTestId('alertSuppressionDurationPropertyValue')).toHaveTextContent(
+        ALERT_SUPPRESSION_PER_RULE_EXECUTION
+      );
+      expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyValue')).toHaveTextContent(
+        ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
+      );
+    });
 
-  test('should not render anything when isSuppressionEnabled is false', () => {
-    const rule: Partial<RuleResponse> = {
-      alert_suppression: {
-        group_by: ['field1', 'field2'],
-        duration: { value: 2, unit: 'h' },
-        missing_fields_strategy: 'doNotSuppress' as AlertSuppressionMissingFieldsStrategy,
-      },
-    };
+    test('should render only AlertSuppressionTitle and SuppressAlertsDuration when rule type does not have group_by field like threshold', () => {
+      jest
+        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
+        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      const rule: Partial<RuleResponse> = {
+        alert_suppression: {
+          duration: { value: 2, unit: 'm' },
+          missing_fields_strategy: 'doNotSuppress' as AlertSuppressionMissingFieldsStrategy,
+        },
+      };
 
-    jest
-      .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-      .mockReturnValueOnce({ isSuppressionEnabled: false });
+      render(<RuleDefinitionSection rule={rule} />);
 
-    render(<RuleDefinitionSection rule={rule} />);
+      expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionDurationPropertyValue')).toHaveTextContent('2m');
+      expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyValue')).toHaveTextContent(
+        ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS
+      );
+    });
 
-    expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertSuppressionDurationPropertyTitle')).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('alertSuppressionSuppressionFieldPropertyTitle')
-    ).not.toBeInTheDocument();
+    test('should not render anything when isSuppressionEnabled is false', () => {
+      const rule: Partial<RuleResponse> = {
+        alert_suppression: {
+          group_by: ['field1', 'field2'],
+          duration: { value: 2, unit: 'h' },
+          missing_fields_strategy: 'doNotSuppress' as AlertSuppressionMissingFieldsStrategy,
+        },
+      };
+
+      jest
+        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
+        .mockReturnValueOnce({ isSuppressionEnabled: false });
+
+      render(<RuleDefinitionSection rule={rule} />);
+
+      expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertSuppressionDurationPropertyTitle')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+      ).not.toBeInTheDocument();
+    });
+    test('should not render anything when alert_suppression property is not present in the rule', () => {
+      const rule: Partial<RuleResponse> = {};
+
+      jest
+        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
+        .mockReturnValueOnce({ isSuppressionEnabled: false });
+
+      render(<RuleDefinitionSection rule={rule} />);
+
+      expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertSuppressionDurationPropertyTitle')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+      ).not.toBeInTheDocument();
+    });
   });
 });

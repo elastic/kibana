@@ -38,7 +38,7 @@ describe('useAlertSuppression', () => {
       jest
         .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
         .mockImplementation((featureFlagName: string) => {
-          return featureFlagName === 'alertSuppressionForEqlRuleEnabled';
+          return featureFlagName === 'alertSuppressionForEqlRuleEnabledNonSequence';
         });
       const { result } = renderHook(() => useAlertSuppression('eql'));
 
@@ -48,7 +48,7 @@ describe('useAlertSuppression', () => {
       jest
         .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
         .mockImplementation((featureFlagName: string) => {
-          return featureFlagName !== 'alertSuppressionForEqlRuleEnabled';
+          return featureFlagName !== 'alertSuppressionForEqlRuleEnabledNonSequence';
         });
       const { result } = renderHook(() => useAlertSuppression('eql'));
 

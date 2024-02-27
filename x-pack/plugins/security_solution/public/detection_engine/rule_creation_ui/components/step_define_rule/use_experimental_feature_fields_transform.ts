@@ -19,8 +19,9 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
   const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-  const isAlertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForEqlRuleEnabled'
+
+  const isAlertSuppressionForEqlRuleEnabledNonSequence = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEqlRuleEnabledNonSequence'
   );
   const transformer = useCallback(
     (fields: T) => {
@@ -28,7 +29,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
         ? !isAlertSuppressionForIndicatorMatchRuleEnabled
         : false;
       const isEqlSuppressionDisabled = isEqlRule(fields.ruleType)
-        ? !isAlertSuppressionForEqlRuleEnabled
+        ? !isAlertSuppressionForEqlRuleEnabledNonSequence
         : false;
       // reset any alert suppression values hidden behind feature flag
       if (isEqlSuppressionDisabled || isIndicatorMatchSuppressionDisabled) {
@@ -43,7 +44,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForIndicatorMatchRuleEnabled, isAlertSuppressionForEqlRuleEnabled]
+    [isAlertSuppressionForIndicatorMatchRuleEnabled, isAlertSuppressionForEqlRuleEnabledNonSequence]
   );
 
   return transformer;

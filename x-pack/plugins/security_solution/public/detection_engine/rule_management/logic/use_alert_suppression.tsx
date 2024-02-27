@@ -16,7 +16,9 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
   const isThreatMatchRuleFFEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-  const isEQLRuleFFEnabled = useIsExperimentalFeatureEnabled('alertSuppressionForEqlRuleEnabled');
+  const isEQLRuleNonSequenceFFEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEqlRuleEnabledNonSequence'
+  );
 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) return false;
@@ -26,10 +28,11 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
       return isThreatMatchRuleFFEnabled && isSuppressibleAlertRule(ruleType);
 
     // Remove this condition when the Feature Flag for enabling Suppression in the EQL rule is removed.
-    if (ruleType === 'eql') return isEQLRuleFFEnabled && isSuppressibleAlertRule(ruleType);
+    if (ruleType === 'eql')
+      return isEQLRuleNonSequenceFFEnabled && isSuppressibleAlertRule(ruleType);
 
     return isSuppressibleAlertRule(ruleType);
-  }, [ruleType, isEQLRuleFFEnabled, isThreatMatchRuleFFEnabled]);
+  }, [ruleType, isEQLRuleNonSequenceFFEnabled, isThreatMatchRuleFFEnabled]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),
