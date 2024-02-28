@@ -102,7 +102,7 @@ export const createEqlAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
         });
-      const isSuppressionActive = await isAlertSuppressionActive({
+      const isNonSeqAlertSuppressionActive = await isAlertSuppressionActive({
         licensing,
         experimentalFeatures,
         experimentalFeatureKey: 'alertSuppressionForEqlRuleEnabledNonSequence',
@@ -126,7 +126,7 @@ export const createEqlAlertType = (
         wrapSuppressedHits,
         alertTimestampOverride,
         alertWithSuppression,
-        isAlertSuppressionActive: isSuppressionActive,
+        isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
       });
       return { ...result, state };
     },

@@ -123,15 +123,14 @@ export const eqlExecutor = async ({
 
     let createResult;
 
-    const events = response.hits.events;
-    const sequences = response.hits.sequences;
+    const { events, sequences } = response.hits;
+    const isEventSuppressionActive = isAlertSuppressionActive && events?.length;
 
-    // before for sequence we need to create util fn that generate interesected fields instead source t
-    // then pass to suppression
-    if (isAlertSuppressionActive) {
+    // Validating events until the implementation of suppression for sequence-based queries
+    if (isEventSuppressionActive) {
       const alertSuppression = completeRule.ruleParams.alertSuppression;
       createResult = await bulkCreateSuppressedAlertsInMemory({
-        enrichedEvents: events ?? [], // Will be changed once the sequence query is handled
+        enrichedEvents: events,
         toReturn: result,
         wrapHits,
         bulkCreate,
@@ -140,7 +139,7 @@ export const eqlExecutor = async ({
         ruleExecutionLogger,
         tuple,
         alertSuppression,
-        wrapSuppressedHits, // maybe we need another one for sequence that utilize the wrapsequencefactory to create the shellalerts with the suppression
+        wrapSuppressedHits,
         alertTimestampOverride,
         alertWithSuppression,
       });
@@ -156,17 +155,19 @@ export const eqlExecutor = async ({
               );
             })();
 
-      createResult = await bulkCreate(
-        newSignals,
-        undefined,
-        createEnrichEventsFunction({
-          services,
-          logger: ruleExecutionLogger,
-        })
-      );
-      addToSearchAfterReturn({ current: result, next: createResult });
+      if (newSignals?.length) {
+        createResult = await bulkCreate(
+          newSignals,
+          undefined,
+          createEnrichEventsFunction({
+            services,
+            logger: ruleExecutionLogger,
+          })
+        );
+        addToSearchAfterReturn({ current: result, next: createResult });
+      }
     }
-    const maxSignalsWarning = isAlertSuppressionActive
+    const maxSignalsWarning = isEventSuppressionActive
       ? getSuppressionMaxSignalsWarning()
       : getMaxSignalsWarning();
 
