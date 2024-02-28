@@ -41,9 +41,9 @@ export const paths = {
       `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}?_a=${encodedParams}`,
     sloDetails: (sloId: string, instanceId?: string) =>
       !!instanceId
-        ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}?instanceId=${encodeURI(
-            instanceId
-          )}`
+        ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(
+            sloId
+          )}?instanceId=${encodeURIComponent(instanceId)}`
         : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}`,
   },
 };

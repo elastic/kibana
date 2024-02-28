@@ -43,7 +43,7 @@ interface Options {
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   private async getAPMTransactionDurationPreviewData(
     indicator: APMTransactionDurationIndicator,
@@ -494,6 +494,7 @@ export class GetPreviewData {
           filter: [
             { range: { '@timestamp': { gte: options.range.start, lte: options.range.end } } },
             { exists: { field: 'summary.final_attempt' } },
+            { term: { 'meta.space_id': this.spaceId } },
             ...filter,
           ],
         },
