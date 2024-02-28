@@ -15,6 +15,7 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+import { createApiKey } from '@kbn/enterprise-search-plugin/server/lib/analytics/create_api_key';
 
 export function registerAIPlaygroundRoutes({ log, router }: RouteDependencies) {
   router.post(
@@ -103,6 +104,44 @@ export function registerAIPlaygroundRoutes({ log, router }: RouteDependencies) {
       pushStreamUpdate();
 
       return response.ok(responseWithHeaders);
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/ai_playground/api_key',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          expiresInDays: schema.number(),
+          indices: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { name, expiresInDays, indices } = request.body;
+      const { client } = (await context.core).elasticsearch;
+
+      const apiKey = await client.asCurrentUser.security.createApiKey({
+        name,
+        expiration: `${expiresInDays}d`,
+        role_descriptors: {
+          [`aiPlaygroud-${name}-role`]: {
+            cluster: [],
+            indices: [
+              {
+                names: indices,
+                privileges: ['read'],
+              },
+            ],
+          },
+        },
+      });
+
+      return response.ok({
+        body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }

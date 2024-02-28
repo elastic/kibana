@@ -33,9 +33,9 @@ import { createQuery, getDefaultQueryFields } from '../../lib/create_query';
 interface ViewQueryActionProps {}
 
 export const ViewQueryAction: React.FC<ViewQueryActionProps> = () => {
-  const { getValues } = useFormContext<ChatForm>();
+  const { watch } = useFormContext<ChatForm>();
   const [showFlyout, setShowFlyout] = useState(false);
-  const selectedIndices: string[] = getValues('indices');
+  const selectedIndices: string[] = watch('indices');
   const { fields } = useIndicesFields(selectedIndices || []);
   const defaultFields = useMemo(() => getDefaultQueryFields(fields), [fields]);
   const [queryFields, setQueryFields] = useState(defaultFields);
