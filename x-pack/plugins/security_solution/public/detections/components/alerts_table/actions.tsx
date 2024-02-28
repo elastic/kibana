@@ -274,6 +274,13 @@ export const isThresholdAlert = (ecsData: Ecs): boolean => {
   );
 };
 
+export const isEqlAlert = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  return (
+    ruleType === 'eql' || (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'eql')
+  );
+};
+
 export const isNewTermsAlert = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   return (
@@ -1021,7 +1028,7 @@ export const sendAlertToTimelineAction = async ({
             },
             getExceptionFilter
           );
-        } else if (isSuppressedAlert(ecsData)) {
+        } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
           return createSuppressedTimeline(
             ecsData,
             createTimeline,
@@ -1091,7 +1098,9 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
-  } else if (isSuppressedAlert(ecsData)) {
+  }
+  // TODO check if this is the correct way
+  else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(
