@@ -18,6 +18,7 @@ import { SloItemActions } from './slo_item_actions';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloBadges } from './badges/slo_badges';
 import { SloSummary } from './slo_summary';
+import { SLOGroupings } from './common/slo_groupings';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
@@ -54,13 +55,16 @@ export function SloListItem({
         <EuiFlexItem grow>
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem>
                   <EuiText size="s">
                     {slo.summary ? (
-                      <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                        {slo.name}
-                      </a>
+                      <>
+                        <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                          {slo.name}
+                        </a>
+                        <SLOGroupings slo={slo} />
+                      </>
                     ) : (
                       <span>{slo.name}</span>
                     )}

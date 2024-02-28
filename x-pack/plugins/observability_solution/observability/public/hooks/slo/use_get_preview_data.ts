@@ -24,11 +24,13 @@ export function useGetPreviewData({
   indicator,
   objective,
   groupBy,
+  groupings,
   instanceId,
 }: {
   isValid: boolean;
   groupBy?: string;
   instanceId?: string;
+  groupings?: Record<string, unknown>;
   objective?: Objective;
   indicator: Indicator;
   range: { start: number; end: number };
@@ -36,7 +38,7 @@ export function useGetPreviewData({
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: sloKeys.preview(indicator, range),
+    queryKey: sloKeys.preview(indicator, range, groupings),
     queryFn: async ({ signal }) => {
       const response = await http.post<GetPreviewDataResponse>(
         '/internal/observability/slos/_preview',
@@ -46,6 +48,7 @@ export function useGetPreviewData({
             range,
             groupBy,
             instanceId,
+            groupings,
             ...(objective ? { objective } : null),
           }),
           signal,
