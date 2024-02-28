@@ -329,7 +329,9 @@ describe('DataViewLazy', () => {
       dataViewLazy.getFormatterForFieldNoDefault = () => undefined;
     });
 
-    test.only('add and remove runtime field to existing field', async () => {
+    /*
+    // keeping disabled test since we'd like to move toward this functionality in the future
+    test('add and remove runtime field to existing field', async () => {
       fieldCapsResponse = fieldCapsResponse.filter((field) => field.name === '@tags');
       await dataViewLazy.addRuntimeField('@tags', runtimeWithAttrs);
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).runtimeFieldMap).toEqual({
@@ -338,8 +340,7 @@ describe('DataViewLazy', () => {
       });
       const field = (await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['@tags'];
       expect(field.runtimeField).toEqual(runtime);
-      // TODO
-      // expect(field.count).toEqual(5);
+      expect(field.count).toEqual(5);
       expect(field.format).toEqual({
         id: 'bytes',
       });
@@ -357,12 +358,9 @@ describe('DataViewLazy', () => {
         (await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['@tags'].runtimeField
       ).toBeUndefined();
     });
+    */
 
-    // todo - mapped fields need to override runtime fields
-    // I think I'd prefer to skip this as its not where we want to be long term.
-    // Might be less work to make it work now
-    /*
-        test('ignore runtime field mapping if a mapped field exists with the same name', async () => {
+    test('ignore runtime field mapping if a mapped field exists with the same name', async () => {
       expect(dataViewLazy.getRuntimeMappings()).toEqual({
         runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
       });
@@ -396,7 +394,6 @@ describe('DataViewLazy', () => {
 
       expect((await dataViewLazy.getFieldByName('theme'))?.runtimeField).toEqual(undefined);
     });
-    // */
 
     test('add and remove runtime field as new field', async () => {
       dataViewLazy.addRuntimeField('new_field', runtimeWithAttrs);

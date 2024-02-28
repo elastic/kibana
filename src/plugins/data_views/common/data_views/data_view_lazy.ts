@@ -105,6 +105,10 @@ export class DataViewLazy extends AbstractDataView {
     Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
       (col, field) => {
         let cachedField = this.fieldCache.get(field.name);
+        // if mapped field, can't be runtime field
+        if (cachedField?.isMapped) {
+          return col;
+        }
         if (cachedField) {
           cachedField.runtimeField = field.runtimeField;
           cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
@@ -395,15 +399,8 @@ export class DataViewLazy extends AbstractDataView {
       const fld = this.fieldCache.get(field.name);
       if (fld) {
         // get fresh attributes
-        // not format, customLabel, runtimeField, count - which are saved on data view
-        console.log(
-          '###',
-          fld.spec.count,
-          fld.spec.customLabel,
-          fld.spec.runtimeField,
-          fld.spec.format
-        );
         assign(fld.spec, field);
+        fld.spec.runtimeField = undefined; // unset if it was a runtime field but now mapped
         fld.spec.isMapped = true;
       }
       dataViewFields[field.name] =
