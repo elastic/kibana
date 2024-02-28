@@ -37,6 +37,7 @@ import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { GoodBadEventsChart } from '../../../slos/components/common/good_bad_events_chart';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
@@ -49,6 +50,7 @@ interface DataPreviewChartProps {
   thresholdColor?: string;
   thresholdMessage?: string;
   ignoreMoreThan100?: boolean;
+  useGoodBadEventsChart?: boolean;
 }
 
 const ONE_HOUR_IN_MILLISECONDS = 1 * 60 * 60 * 1000;
@@ -60,6 +62,7 @@ export function DataPreviewChart({
   thresholdColor,
   thresholdMessage,
   ignoreMoreThan100,
+  useGoodBadEventsChart,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
@@ -75,12 +78,14 @@ export function DataPreviewChart({
     end: new Date().getTime(),
   });
 
+  const indicator = watch('indicator');
+
   const {
     data: previewData,
     isLoading: isPreviewLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'), range);
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range);
 
   const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
 
@@ -239,7 +244,20 @@ export function DataPreviewChart({
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {isSuccess && (
+          {isSuccess && useGoodBadEventsChart && (
+            <GoodBadEventsChart
+              data={previewData || []}
+              bottomTitle={i18n.translate(
+                'xpack.observability.slo.sloEdit.dataPreviewChart.xTitle',
+                {
+                  defaultMessage: 'Last hour',
+                }
+              )}
+              isLoading={isPreviewLoading}
+              annotation={annotation}
+            />
+          )}
+          {isSuccess && !useGoodBadEventsChart && (
             <Chart size={{ height: 160, width: '100%' }}>
               <Tooltip
                 type="vertical"

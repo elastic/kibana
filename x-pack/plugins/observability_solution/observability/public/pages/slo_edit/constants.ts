@@ -10,6 +10,7 @@ import {
   ALL_VALUE,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   BudgetingMethod,
   HistogramIndicator,
   IndicatorType,
@@ -23,6 +24,7 @@ import {
   BUDGETING_METHOD_TIMESLICES,
   INDICATOR_APM_AVAILABILITY,
   INDICATOR_APM_LATENCY,
+  INDICATOR_SYNTHETICS_AVAILABILITY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
   INDICATOR_HISTOGRAM,
@@ -57,6 +59,10 @@ export const SLI_OPTIONS: Array<{
   {
     value: 'sli.apm.transactionErrorRate',
     text: INDICATOR_APM_AVAILABILITY,
+  },
+  {
+    value: 'sli.synthetics.availability',
+    text: INDICATOR_SYNTHETICS_AVAILABILITY,
   },
 ];
 
@@ -188,6 +194,16 @@ export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator =
   },
 };
 
+export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndicator = {
+  type: 'sli.synthetics.availability' as const,
+  params: {
+    projects: [],
+    tags: [],
+    monitorIds: [],
+    index: 'synthetics-*',
+  },
+};
+
 export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   name: '',
   description: '',
@@ -218,6 +234,22 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm = {
+  name: '',
+  description: '',
+  indicator: SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
+  timeWindow: {
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
+  },
+  tags: [],
+  budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
+  objective: {
+    target: 99,
+  },
+  groupBy: ['monitor.name', 'observer.geo.name'],
 };
 
 export const COMPARATOR_GT = i18n.translate(

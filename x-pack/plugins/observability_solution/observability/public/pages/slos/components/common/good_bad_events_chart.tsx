@@ -1,0 +1,138 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
+import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import moment from 'moment';
+import React, { useRef } from 'react';
+import { useKibana } from '../../../../utils/kibana_react';
+
+export interface Props {
+  data: GetPreviewDataResponse;
+  annotation?: React.ReactNode;
+  isLoading?: boolean;
+  bottomTitle?: string;
+}
+
+export function GoodBadEventsChart({ annotation, data, isLoading = false, bottomTitle }: Props) {
+  const { charts, uiSettings } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
+  const baseTheme = charts.theme.useChartsBaseTheme();
+  const chartRef = useRef(null);
+  const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
+
+  const dateFormat = uiSettings.get('dateFormat');
+
+  const yAxisNumberFormat = '0,0';
+
+  const domain = {
+    fit: true,
+    min: NaN,
+    max: NaN,
+  };
+
+  return (
+    <>
+      {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
+
+      {!isLoading && (
+        <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+          <Tooltip type={TooltipType.VerticalCursor} />
+          <Settings
+            baseTheme={baseTheme}
+            showLegend={true}
+            showLegendExtra={false}
+            legendPosition={Position.Left}
+            noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
+            onPointerUpdate={handleCursorUpdate}
+            externalPointerEvents={{
+              tooltip: { visible: true },
+            }}
+            pointerUpdateDebounce={0}
+            pointerUpdateTrigger={'x'}
+            locale={i18n.getLocale()}
+          />
+          {annotation}
+          <Axis
+            id="bottom"
+            title={bottomTitle}
+            position={Position.Bottom}
+            showOverlappingTicks
+            tickFormat={(d) => moment(d).format(dateFormat)}
+          />
+          <Axis
+            id="left"
+            position={Position.Left}
+            tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+            domain={domain}
+          />
+          <>
+            <BarSeries
+              id={i18n.translate(
+                'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
+                { defaultMessage: 'Good events' }
+              )}
+              color={euiTheme.colors.success}
+              barSeriesStyle={{
+                rect: { fill: euiTheme.colors.success },
+                displayValue: { fill: euiTheme.colors.success },
+              }}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="key"
+              yAccessors={['value']}
+              stackAccessors={[0]}
+              data={
+                data?.map((datum) => ({
+                  key: new Date(datum.date).getTime(),
+                  value: datum.events?.good,
+                })) ?? []
+              }
+            />
+
+            <BarSeries
+              id={i18n.translate(
+                'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
+                { defaultMessage: 'Bad events' }
+              )}
+              color={euiTheme.colors.danger}
+              barSeriesStyle={{
+                rect: { fill: euiTheme.colors.danger },
+                displayValue: { fill: euiTheme.colors.danger },
+              }}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="key"
+              yAccessors={['value']}
+              stackAccessors={[0]}
+              data={
+                data?.map((datum) => ({
+                  key: new Date(datum.date).getTime(),
+                  value: datum.events?.bad,
+                })) ?? []
+              }
+            />
+          </>
+        </Chart>
+      )}
+    </>
+  );
+}
