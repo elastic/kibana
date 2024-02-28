@@ -52,10 +52,17 @@ export const mockControlGroupContainer = async (explicitInput?: Partial<ControlG
   const controlGroupFactoryStub = new ControlGroupContainerFactory(
     {} as unknown as EmbeddablePersistableStateService
   );
-  const controlGroupContainer = await controlGroupFactoryStub.create({
+  const input: ControlGroupInput = {
     id: 'mocked-control-group',
     ...getDefaultControlGroupInput(),
     ...explicitInput,
+  };
+  const controlGroupContainer = await controlGroupFactoryStub.create(input, undefined, {
+    lastSavedInput: {
+      panels: input.panels,
+      chainingSystem: 'HIERARCHICAL',
+      controlStyle: 'twoLine',
+    },
   });
 
   return controlGroupContainer;
