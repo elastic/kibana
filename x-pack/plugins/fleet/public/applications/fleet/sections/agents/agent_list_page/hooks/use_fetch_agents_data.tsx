@@ -33,7 +33,7 @@ export function useFetchAgentsData() {
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications } = useStartServices();
-  // useBreadcrumbs('agent_list');
+
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
   const defaultKuery: string = (urlParams.kuery as string) || '';
