@@ -20,11 +20,7 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
-import {
-  apiIsOfType,
-  HasParentApi,
-  PublishesLocalUnifiedSearch,
-} from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import { DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
@@ -46,11 +42,7 @@ interface UrlDrilldownDeps {
   application: () => ApplicationStart;
 }
 
-export type ActionContext = ApplyGlobalFilterActionContext & {
-  embeddable: Partial<
-    PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>
-  >;
-};
+export type ActionContext = ApplyGlobalFilterActionContext;
 
 export interface Config extends SerializableRecord {
   openInNewTab: boolean;

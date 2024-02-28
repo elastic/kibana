@@ -6,7 +6,6 @@
  */
 
 import React, { FormEvent } from 'react';
-import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
 import { mount } from 'enzyme';
@@ -62,19 +61,13 @@ describe('open in discover drilldown', () => {
 
   it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    await drilldown.isCompatible(
-      { openInNewTab: true },
-      { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
-    );
+    await drilldown.isCompatible({ openInNewTab: true }, { embeddable: { type: 'lens' }, filters });
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 
   it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    await drilldown.execute(
-      { openInNewTab: true },
-      { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
-    );
+    await drilldown.execute({ openInNewTab: true }, { embeddable: { type: 'lens' }, filters });
     expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 });

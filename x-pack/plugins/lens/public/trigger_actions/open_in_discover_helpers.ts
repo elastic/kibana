@@ -22,15 +22,14 @@ interface DiscoverAppLocatorParams extends SerializableRecord {
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
-interface Context {
-  embeddable: EmbeddableApiContext['embeddable'];
+type Context = EmbeddableApiContext & {
   filters?: Filter[];
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
   dataViews: Pick<DataViewsService, 'get'>;
   locator?: DiscoverAppLocator;
   timeFieldName?: string;
-}
+};
 
 const isApiCompatible = (api: unknown | null): api is OpenInDiscoverActionApi =>
   Boolean(

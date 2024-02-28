@@ -6,7 +6,7 @@
  */
 
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
 import { Embeddable } from '../embeddable';
@@ -16,7 +16,7 @@ import type { DiscoverAppLocator } from './open_in_discover_helpers';
 describe('open in discover action', () => {
   describe('compatibility check', () => {
     it('is incompatible with non-lens embeddables', async () => {
-      const embeddable = { type: 'NOT_LENS' } as IEmbeddable;
+      const embeddable = { type: 'NOT_LENS' };
 
       const isCompatible = await createOpenInDiscoverAction(
         {} as DiscoverAppLocator,
@@ -24,7 +24,7 @@ describe('open in discover action', () => {
         true
       ).isCompatible({
         embeddable,
-      } as ActionExecutionContext<{ embeddable: IEmbeddable }>);
+      } as ActionExecutionContext<EmbeddableApiContext>);
 
       expect(isCompatible).toBeFalsy();
     });
@@ -32,6 +32,13 @@ describe('open in discover action', () => {
       // setup
       const embeddable = { type: DOC_TYPE } as Embeddable;
       embeddable.canViewUnderlyingData = () => Promise.resolve(true);
+      embeddable.getViewUnderlyingDataArgs = jest.fn(() => ({
+        dataViewSpec: { id: 'index-pattern-id' },
+        timeRange: { from: 'now-7d', to: 'now' },
+        filters: [],
+        query: undefined,
+        columns: [],
+      }));
 
       let hasDiscoverAccess = true;
       // make sure it would work if we had access to Discover
@@ -42,7 +49,7 @@ describe('open in discover action', () => {
           hasDiscoverAccess
         ).isCompatible({
           embeddable,
-        } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
+        } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
       // make sure no Discover access makes the action incompatible
@@ -54,7 +61,7 @@ describe('open in discover action', () => {
           hasDiscoverAccess
         ).isCompatible({
           embeddable,
-        } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
+        } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
     });
     it('checks for ability to view underlying data if lens embeddable', async () => {
@@ -63,6 +70,7 @@ describe('open in discover action', () => {
 
       // test false
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(false));
+      embeddable.getViewUnderlyingDataArgs = jest.fn(() => undefined);
       expect(
         await createOpenInDiscoverAction(
           {} as DiscoverAppLocator,
@@ -70,7 +78,7 @@ describe('open in discover action', () => {
           true
         ).isCompatible({
           embeddable,
-        } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
+        } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
 
       expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
@@ -84,7 +92,7 @@ describe('open in discover action', () => {
           true
         ).isCompatible({
           embeddable,
-        } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
+        } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
       expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
@@ -101,6 +109,7 @@ describe('open in discover action', () => {
     };
 
     const embeddable = {
+      canViewUnderlyingData: jest.fn(() => Promise.resolve(true)),
       getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
       type: 'lens',
     };
@@ -123,9 +132,7 @@ describe('open in discover action', () => {
       true
     ).execute({
       embeddable,
-    } as unknown as ActionExecutionContext<{
-      embeddable: IEmbeddable;
-    }>);
+    } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
