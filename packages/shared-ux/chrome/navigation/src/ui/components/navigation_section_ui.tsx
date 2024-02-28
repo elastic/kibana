@@ -195,7 +195,7 @@ const nodeToEuiCollapsibleNavProps = (
   const dataTestSubj = getTestSubj(navNode, isSelected);
 
   let spaceBefore = navNode.spaceBefore;
-  if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
+  if (spaceBefore === undefined && treeDepth === 1 && hasChildren && !isItem) {
     // For groups at level 1 that don't have a space specified we default to add a "m"
     // space. For all other groups, unless specified, there is no vertical space.
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
@@ -309,7 +309,7 @@ const nodeToEuiCollapsibleNavProps = (
   const hasVisibleChildren = (items?.length ?? 0) > 0;
   const isVisible = isItem || hasVisibleChildren;
 
-  if (isVisible && spaceBefore) {
+  if (isVisible && Boolean(spaceBefore)) {
     items.unshift({
       renderItem: () => <EuiSpacer size={spaceBefore!} />,
     });

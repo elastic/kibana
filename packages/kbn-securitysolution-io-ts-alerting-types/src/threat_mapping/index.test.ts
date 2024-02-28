@@ -42,6 +42,7 @@ describe('threat_mapping', () => {
           field: 'field.one',
           type: 'mapping',
           value: 'field.one',
+          // @ts-expect-error upgrade typescript v4.9.5
           extra: 'blah',
         },
       ];
@@ -120,6 +121,7 @@ describe('threat_mapping', () => {
             value: 'field.one',
           },
         ],
+        // @ts-expect-error upgrade typescript v4.9.5
         extra: 'invalid',
       },
     ];
@@ -140,6 +142,7 @@ describe('threat_mapping', () => {
             field: 'field.one',
             type: 'mapping',
             value: 'field.one',
+            // @ts-expect-error upgrade typescript v4.9.5
             extra: 'blah',
           },
         ],

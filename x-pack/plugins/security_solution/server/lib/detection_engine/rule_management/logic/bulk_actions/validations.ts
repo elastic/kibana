@@ -101,6 +101,7 @@ export const validateBulkEditRule = async ({
 const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
   return edit.every(({ type }) =>
     [BulkActionEditTypeEnum.set_rule_actions, BulkActionEditTypeEnum.add_rule_actions].includes(
+      // @ts-expect-error upgrade typescript v4.9.5
       type
     )
   );
