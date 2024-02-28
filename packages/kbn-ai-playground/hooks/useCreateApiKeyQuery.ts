@@ -20,7 +20,7 @@ export const useCreateApiKeyQuery = () => {
   const { services } = useKibana<AIPlaygroundPluginStartDeps>();
   const { getValues } = useFormContext();
 
-  const { data, isLoading, isSuccess, mutate } = useMutation({
+  const { data, isError, isLoading, isSuccess, mutateAsync } = useMutation({
     mutationFn: async ({ name, expiresInDays }: UseApiKeyQueryParams) => {
       const response = await services.http.post<{
         apiKey: { encoded: string; name: string; expiration: number };
@@ -36,5 +36,11 @@ export const useCreateApiKeyQuery = () => {
     },
   });
 
-  return { apiKey: data, isLoading, isCreated: isSuccess, action: mutate };
+  return {
+    apiKey: data,
+    isLoading,
+    isSuccess,
+    isError,
+    action: mutateAsync,
+  };
 };

@@ -42,7 +42,7 @@ export const CreateApiKeyForm = () => {
     formState: { isDirty, isValid },
     handleSubmit,
   } = useForm<ApiKeyForm>();
-  const { action, isLoading, isCreated } = useCreateApiKeyQuery();
+  const { action, isLoading, isSuccess, isError } = useCreateApiKeyQuery();
   const onSubmit = async (data: ApiKeyForm) => {
     await action(data);
 
@@ -79,7 +79,7 @@ export const CreateApiKeyForm = () => {
         <Controller
           name={ApiKeyFormFields.ExpireInDays}
           control={control}
-          rules={{ min: 0 }}
+          rules={{ min: 0, required: true }}
           render={({ field }) => (
             <EuiFormControlLayout
               fullWidth
@@ -110,7 +110,7 @@ export const CreateApiKeyForm = () => {
 
       <EuiFormRow fullWidth>
         <EuiFlexGroup gutterSize="m">
-          {isCreated && !isDirty ? (
+          {isSuccess && !isDirty ? (
             <EuiButton color="success" iconType="check">
               <FormattedMessage
                 id="aiPlayground.viewCode.apiForm.createdButton"
@@ -122,6 +122,7 @@ export const CreateApiKeyForm = () => {
               isDisabled={!isValid || isLoading}
               isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
+              color={isError ? 'danger' : 'primary'}
             >
               <FormattedMessage
                 id="aiPlayground.viewCode.apiForm.createButton"
