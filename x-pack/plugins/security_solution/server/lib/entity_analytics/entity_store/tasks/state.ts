@@ -30,6 +30,7 @@ export const stateSchemaByVersion = {
           lastProcessedCompositeTimestamp: schema.maybe(schema.string()),
           lastProcessedCriticalityTimestamp: schema.maybe(schema.string()),
           lastProcessedRiskScoreTimestamp: schema.maybe(schema.string()),
+          lastProcessedAgentCheckinTimestamp: schema.maybe(schema.string()),
         })
       ),
       ids: schema.maybe(
@@ -42,6 +43,7 @@ export const stateSchemaByVersion = {
               id_value: schema.string(),
             })
           ),
+          lastProcessedAgentId: schema.maybe(schema.string()),
         })
       ),
       namespace: schema.string(),
