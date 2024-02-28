@@ -153,7 +153,7 @@ export const EditField = React.memo(
 
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {
-              const ParametersForm = getParametersFormForType(type?.[0].value, subType?.[0].value);
+              const ParametersForm = getParametersFormForType(type?.[0]?.value, subType?.[0].value);
 
               if (!ParametersForm) {
                 return null;

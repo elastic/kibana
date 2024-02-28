@@ -41,7 +41,7 @@ export const SubTypeParameter = ({
   }
 
   const typeDefinition = TYPE_DEFINITION[type as MainType];
-  const hasSubType = typeDefinition.subTypes !== undefined;
+  const hasSubType = typeDefinition?.subTypes !== undefined;
 
   if (!hasSubType) {
     return null;
