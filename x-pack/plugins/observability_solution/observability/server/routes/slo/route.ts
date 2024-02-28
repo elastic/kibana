@@ -567,11 +567,14 @@ const getPreviewData = createObservabilityServerRoute({
     access: 'internal',
   },
   params: getPreviewDataParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ request, context, params, dependencies }) => {
     await assertPlatinumLicense(context);
 
+    const spaceId =
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const service = new GetPreviewData(esClient);
+    const service = new GetPreviewData(esClient, spaceId);
     return await service.execute(params.body);
   },
 });
