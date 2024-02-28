@@ -94,7 +94,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         {!metricsFeatures.includes(CaseMetricsFeature.LIFESPAN) ? (
           <EuiFlexItem grow={false}>
-            <ActionBarStatusItem title={title} data-test-subj="case-view-status-date">
+            <ActionBarStatusItem title={title} data-test-subj="case-action-bar-status-date">
               <FormattedRelativePreferenceDate value={date} />
             </ActionBarStatusItem>
           </EuiFlexItem>
