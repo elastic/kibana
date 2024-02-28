@@ -215,7 +215,7 @@ function generateSearchQuery(
     getFixedIntervalAndBucketsPerDay(timeWindowDurationInDays);
 
   const extraFilterByInstanceId =
-    !!slo.groupBy && slo.groupBy !== ALL_VALUE && instanceId !== ALL_VALUE
+    !!slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) && instanceId !== ALL_VALUE
       ? [{ term: { 'slo.instanceId': instanceId } }]
       : [];
 

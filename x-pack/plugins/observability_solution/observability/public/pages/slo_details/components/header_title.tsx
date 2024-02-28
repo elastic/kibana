@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { SloGroupByBadge } from '../../../components/slo/slo_status_badge/slo_group_by_badge';
+import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 
 export interface Props {
@@ -32,22 +32,25 @@ export function HeaderTitle(props: Props) {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {showTitle && <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>}
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="flexStart"
-            responsive={false}
-          >
-            <SloStatusBadge slo={slo} />
-            <SloGroupByBadge slo={slo} />
-          </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        {showTitle && (
+          <>
+            <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
+            <SLOGroupings slo={slo} />
+          </>
+        )}
+
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexStart"
+          responsive={false}
+        >
+          <SloStatusBadge slo={slo} />
         </EuiFlexGroup>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">

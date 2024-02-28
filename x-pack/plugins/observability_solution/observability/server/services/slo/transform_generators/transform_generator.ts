@@ -17,8 +17,8 @@ export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
-    const mustIncludeAllInstanceId = slo.groupBy === ALL_VALUE || slo.groupBy === '';
-
+    const groupings = [slo.groupBy].flat().filter((value) => !!value);
+    const hasGroupings = !groupings.includes(ALL_VALUE) && groupings.length;
     return {
       'slo.id': {
         type: 'keyword',
@@ -32,15 +32,30 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      ...(mustIncludeAllInstanceId && {
-        'slo.instanceId': {
-          type: 'keyword',
-          script: {
-            source: `emit('${ALL_VALUE}')`,
-          },
-        },
-      }),
+      ...(hasGroupings
+        ? {
+            'slo.instanceId': {
+              type: 'keyword',
+              script: {
+                source: this.buildInstanceId(slo),
+              },
+            },
+          }
+        : {
+            'slo.instanceId': {
+              type: 'keyword',
+              script: {
+                source: `emit('${ALL_VALUE}')`,
+              },
+            },
+          }),
     };
+  }
+
+  public buildInstanceId(slo: SLO): string {
+    const groups = [slo.groupBy].flat().filter((value) => !!value);
+    const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
+    return `emit(${groupings})`;
   }
 
   public buildDescription(slo: SLO): string {
@@ -57,9 +72,11 @@ export abstract class TransformGenerator {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
+    const groups = [slo.groupBy].flat().filter((group) => !!group);
+
     const groupings =
-      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE
-        ? [slo.groupBy].flat().reduce(
+      !groups.includes(ALL_VALUE) && groups.length
+        ? groups.reduce(
             (acc, field) => {
               return {
                 ...acc,
@@ -70,7 +87,11 @@ export abstract class TransformGenerator {
                 },
               };
             },
-            { 'slo.instanceId': { terms: { field: slo.groupBy } } }
+            {
+              'slo.instanceId': {
+                terms: { field: 'slo.instanceId' },
+              },
+            }
           )
         : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
 
