@@ -10,7 +10,7 @@ import { SLO } from '../../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../../common/slo/constants';
@@ -26,7 +26,7 @@ export function generateSummaryTransformForTimeslicesAndRolling(
       index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
     },
     source: {
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
       query: {
         bool: {
           filter: [

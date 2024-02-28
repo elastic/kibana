@@ -67,5 +67,18 @@ export const getGroupBy = (slo: SLO) => {
         missing_bucket: true,
       },
     },
+    // optional fields: only specified for Synthetics indicators. Must include missing_bucket:true
+    'monitor.id': {
+      terms: {
+        field: 'monitor.id',
+        missing_bucket: true,
+      },
+    },
+    'observer.name': {
+      terms: {
+        field: 'observer.name',
+        missing_bucket: true,
+      },
+    },
   };
 };

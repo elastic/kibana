@@ -15,7 +15,7 @@ import {
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
+import { SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../common/slo/constants';
 import { DateRange, SLO, Summary, Groupings } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
@@ -62,7 +62,7 @@ export class DefaultSummaryClient implements SummaryClient {
     };
 
     const result = await this.esClient.search({
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
       size: 0,
       query: {
         bool: {

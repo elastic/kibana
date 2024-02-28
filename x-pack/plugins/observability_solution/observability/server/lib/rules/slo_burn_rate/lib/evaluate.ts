@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { Duration, SLO, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/slo/constants';
+import { SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../../../common/slo/constants';
 import {
   buildQuery,
   EvaluationAfterKey,
@@ -72,7 +72,7 @@ async function queryAllResults(
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
   const results = await esClient.search<undefined, EvalutionAggResults>({
-    index: SLO_DESTINATION_INDEX_PATTERN,
+    index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
     ...queryAndAggs,
   });
   if (!results.aggregations) {

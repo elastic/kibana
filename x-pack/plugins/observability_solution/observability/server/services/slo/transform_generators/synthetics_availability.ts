@@ -50,6 +50,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     // we'll output documents for each environment value
     const extraGroupByFields = {
       'monitor.id': { terms: { field: 'monitor.id' } },
+      'observer.name': { terms: { field: 'observer.name' } },
       ...(!indicator.params.tags?.find((param) => param.value === ALL_VALUE) && {
         tags: { terms: { field: 'tags' } },
       }),

@@ -10,7 +10,7 @@ import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
+import { SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../common/slo/constants';
 import { SLOId, Status, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getFlattenedGroupings } from './utils';
@@ -79,7 +79,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
     try {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
         track_total_hits: true,
         query: {
           bool: {
@@ -118,7 +118,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       // The temp summary documents are _eventually_ removed as we get through the real summary documents
       const summarySloIds = summaryDocuments.map((doc) => doc._source?.slo.id);
       await this.esClient.deleteByQuery({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
         wait_for_completion: false,
         query: {
           bool: {
