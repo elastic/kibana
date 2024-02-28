@@ -51,6 +51,11 @@ interface DataPreviewChartProps {
   thresholdMessage?: string;
   ignoreMoreThan100?: boolean;
   useGoodBadEventsChart?: boolean;
+  label?: string;
+  range?: {
+    start: number;
+    end: number;
+  };
 }
 
 const ONE_HOUR_IN_MILLISECONDS = 1 * 60 * 60 * 1000;
@@ -62,7 +67,9 @@ export function DataPreviewChart({
   thresholdColor,
   thresholdMessage,
   ignoreMoreThan100,
+  label,
   useGoodBadEventsChart,
+  range,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
@@ -73,7 +80,7 @@ export function DataPreviewChart({
     watch,
   });
 
-  const [range, _] = useState({
+  const [defaultRange, _] = useState({
     start: new Date().getTime() - ONE_HOUR_IN_MILLISECONDS,
     end: new Date().getTime(),
   });
@@ -85,7 +92,7 @@ export function DataPreviewChart({
     isLoading: isPreviewLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range);
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range || defaultRange);
 
   const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
 
@@ -186,7 +193,7 @@ export function DataPreviewChart({
       id: 'label',
       type: 'custom',
       truncate: true,
-      cell: ({ label }) => <span className="echTooltip__label">{label}</span>,
+      cell: ({ cellLabel }) => <span className="echTooltip__label">{cellLabel}</span>,
       style: {
         textAlign: 'left',
       },
@@ -247,12 +254,7 @@ export function DataPreviewChart({
           {isSuccess && useGoodBadEventsChart && (
             <GoodBadEventsChart
               data={previewData || []}
-              bottomTitle={i18n.translate(
-                'xpack.observability.slo.sloEdit.dataPreviewChart.xTitle',
-                {
-                  defaultMessage: 'Last hour',
-                }
-              )}
+              bottomTitle={label || DEFAULT_LABEL}
               isLoading={isPreviewLoading}
               annotation={annotation}
             />
@@ -324,9 +326,7 @@ export function DataPreviewChart({
 
               <Axis
                 id="time"
-                title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.xTitle', {
-                  defaultMessage: 'Last hour',
-                })}
+                title={label || DEFAULT_LABEL}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
                 timeAxisLayerCount={2}
@@ -362,3 +362,7 @@ export function DataPreviewChart({
     </EuiFlexItem>
   );
 }
+
+const DEFAULT_LABEL = i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.xTitle', {
+  defaultMessage: 'Last hour',
+});

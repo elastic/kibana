@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
-import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../synthetics_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+
+const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
@@ -24,6 +25,11 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     'indicator.params.tags',
     'indicator.params.index',
   ]);
+
+  const [range, _] = useState({
+    start: new Date().getTime() - ONE_DAY_IN_MILLISECONDS,
+    end: new Date().getTime(),
+  });
 
   const filters = {
     monitorIds: monitorIds.map((id) => id.value).filter((id) => id !== '*'),
@@ -129,7 +135,14 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         title="Synthetics availability SLIs are automatically partitioned by monitor and location"
         iconType="iInCircle"
       />
-      <DataPreviewChart useGoodBadEventsChart />
+      <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
     </EuiFlexGroup>
   );
 }
+
+const LABEL = i18n.translate(
+  'xpack.observability.slo.sloEdit.dataPreviewChart.syntheticsAvailability.xTitle',
+  {
+    defaultMessage: 'Last 24 hours',
+  }
+);
