@@ -63,6 +63,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
     },
   },
   groupBy: ALL_VALUE,
+  groupings: {},
   instanceId: ALL_VALUE,
   tags: ['k8s', 'production', 'critical'],
   enabled: true,

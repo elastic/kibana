@@ -28,6 +28,8 @@ export class SecurityLicenseService {
       license: Object.freeze({
         isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
 
+        getUnavailableReason: () => rawLicense?.getUnavailableReason(),
+
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
 
         hasAtLeast: (licenseType: LicenseType) => rawLicense?.hasAtLeast(licenseType),
