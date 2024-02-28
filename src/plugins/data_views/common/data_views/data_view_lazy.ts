@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, cloneDeep, pickBy, mapValues, omit } from 'lodash';
+import { each, cloneDeep, pickBy, mapValues, omit, assign } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 import { DataViewField } from '../fields';
@@ -367,7 +367,6 @@ export class DataViewLazy extends AbstractDataView {
     return dataViewFields;
   }
 
-  // todo test rollup, metaFields
   private async getMappedFields({
     fieldName,
     forceRefresh = false,
@@ -390,25 +389,21 @@ export class DataViewLazy extends AbstractDataView {
       fieldTypes,
     });
 
-    // const dataViewFields: DataViewField[] = [];
     const dataViewFields: Record<string, DataViewField> = {};
     response.fields.forEach((field) => {
       // keep existing field object, make sure content is fresh
       const fld = this.fieldCache.get(field.name);
       if (fld) {
-        // todo - am I copying whole spec?
         // get fresh attributes
-        fld.spec.aggregatable = field.aggregatable;
-        fld.spec.conflictDescriptions = field.conflictDescriptions;
-        fld.spec.esTypes = field.esTypes;
-        fld.spec.readFromDocValues = field.readFromDocValues;
-        fld.spec.searchable = field.searchable;
-        fld.spec.aggregatable = field.aggregatable;
-        fld.spec.shortDotsEnable = field.shortDotsEnable;
-        fld.spec.subType = field.subType;
-        fld.spec.timeSeriesDimension = field.timeSeriesDimension;
-        fld.spec.timeSeriesMetric = field.timeSeriesMetric;
-        fld.spec.type = field.type;
+        // not format, customLabel, runtimeField, count - which are saved on data view
+        console.log(
+          '###',
+          fld.spec.count,
+          fld.spec.customLabel,
+          fld.spec.runtimeField,
+          fld.spec.format
+        );
+        assign(fld.spec, field);
         fld.spec.isMapped = true;
       }
       dataViewFields[field.name] =

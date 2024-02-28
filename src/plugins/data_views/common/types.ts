@@ -322,7 +322,7 @@ export interface GetFieldsOptions {
  * FieldsForWildcard response
  */
 export interface FieldsForWildcardResponse {
-  fields: FieldSpec[];
+  fields: FieldsForWildcardSpec[];
   indices: string[];
   etag?: string;
 }
@@ -378,6 +378,9 @@ export enum DataViewType {
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
+
+// omit items saved DataView
+type FieldsForWildcardSpec = Omit<FieldSpec, 'format' | 'customLabel' | 'runtimeField' | 'count'>;
 
 /**
  * Serialized version of DataViewField
