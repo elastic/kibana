@@ -17,6 +17,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { EndpointFleetServicesFactory } from '../../../../endpoint/services/fleet';
 import type { StartPlugins } from '../../../../plugin';
 import { entityStoreServiceFactory } from '../entity_store_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
@@ -69,7 +70,7 @@ export const registerEntityStoreTask = ({
   }
 
   const getEntityStoreService: GetEntityStoreService = (namespace) =>
-    getStartServices().then(([coreStart, _]) => {
+    getStartServices().then(([coreStart, { fleet }]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
@@ -102,6 +103,19 @@ export const registerEntityStoreTask = ({
         soClient,
       });
 
+      // TODO there is probably a nicer way to get fleet services
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { agentService, packageService, packagePolicyService, agentPolicyService } = fleet!;
+      const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
+        {
+          agentService,
+          packageService,
+          packagePolicyService,
+          agentPolicyService,
+        },
+        coreStart.savedObjects
+      );
+
       return entityStoreServiceFactory({
         assetCriticalityService,
         esClient,
@@ -110,6 +124,7 @@ export const registerEntityStoreTask = ({
         entityStoreDataClient,
         riskScoreDataClient,
         spaceId: namespace,
+        fleetServices: endpointFleetServicesFactory.asInternalUser(),
       });
     });
 

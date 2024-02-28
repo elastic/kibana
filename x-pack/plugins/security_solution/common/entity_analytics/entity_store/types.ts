@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Agent } from '@kbn/fleet-plugin/common';
+
 export interface EntityStoreEntity {
   '@timestamp': string;
-  entity_type?: string;
-  first_seen?: string;
-  last_seen?: string;
+  entity_type: string;
+  first_seen: string;
+  last_seen: string;
   host: {
     architecture?: string[];
     id?: string[];
@@ -39,10 +41,7 @@ export interface EntityStoreEntity {
       criticality?: string;
     };
   };
-  agent?: {
-    type?: string[];
-    id?: string[];
-  };
+  agent?: Agent;
   cloud?: {
     provider?: string[];
     region?: string[];

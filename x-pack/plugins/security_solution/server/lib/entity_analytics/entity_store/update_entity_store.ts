@@ -8,6 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import _ from 'lodash';
 import moment from 'moment';
+import type { Agent } from '@kbn/fleet-plugin/common';
+import type { EndpointInternalFleetServicesInterface } from '../../../endpoint/services/fleet';
 import type { EcsRiskScore } from '../../../../common/entity_analytics/risk_engine';
 import type { NewEntityStoreEntity } from '../../../../common/entity_analytics/entity_store/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -15,7 +17,7 @@ import type { AssetCriticalityService } from '../asset_criticality';
 import { AssetCriticalityDataClient } from '../asset_criticality';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import type { EntityStoreDataClient } from './entity_store_data_client';
+import { EntityStoreDataClient } from './entity_store_data_client';
 import {
   FIELD_HISTORY_MAX_SIZE,
   COMPOSITES_INDEX_PATTERN,
@@ -37,6 +39,7 @@ export interface UpdateEntityStoreResponse {
     lastProcessedCompositeTimestamp?: string;
     lastProcessedCriticalityTimestamp?: string;
     lastProcessedRiskScoreTimestamp?: string;
+    lastProcessedAgentCheckinTimestamp?: string;
   };
   ids: {
     lastProcessedCompositeId?: string;
@@ -45,6 +48,7 @@ export interface UpdateEntityStoreResponse {
       id_field: string;
       id_value: string;
     };
+    lastProcessedAgentId?: string;
   };
 }
 interface OSInformation {
@@ -104,6 +108,7 @@ export const updateEntityStore = async ({
   entityStoreDataClient,
   riskScoreDataClient,
   ids,
+  fleetServices,
 }: UpdateEntityStoreParams & {
   spaceId: string;
   esClient: ElasticsearchClient;
@@ -112,6 +117,7 @@ export const updateEntityStore = async ({
   entityStoreDataClient: EntityStoreDataClient;
   riskEngineDataClient: RiskEngineDataClient;
   riskScoreDataClient: RiskScoreDataClient;
+  fleetServices: EndpointInternalFleetServicesInterface;
 }): Promise<UpdateEntityStoreResponse> => {
   const lastProcessedCompositeTimestamp =
     timestamps?.lastProcessedCompositeTimestamp || moment().subtract(1, 'day').toISOString();
@@ -121,6 +127,10 @@ export const updateEntityStore = async ({
 
   const lastProcessedRiskScoreTimestamp =
     timestamps?.lastProcessedRiskScoreTimestamp || moment().subtract(1, 'day').toISOString();
+
+  // TODO: this is a bad field to search on here, as status can change independently of checkin
+  const lastProcessedAgentCheckinTimestamp =
+    timestamps?.lastProcessedAgentCheckinTimestamp || moment().subtract(7, 'day').toISOString();
 
   const composites = await getNextEntityComposites({
     esClient,
@@ -146,6 +156,13 @@ export const updateEntityStore = async ({
     ids?.lastProcessedRiskScoreId
   );
 
+  const agentRecordsById = await getNewAgentRecords(
+    Object.keys(compositesByHostName),
+    fleetServices,
+    lastProcessedAgentCheckinTimestamp,
+    ids?.lastProcessedAgentId
+  );
+
   const compositeEntities: NewEntityStoreEntity[] = Object.entries(compositesByHostName).map(
     ([hostName, composite]) => {
       const criticalityId = AssetCriticalityDataClient.createId({
@@ -167,6 +184,12 @@ export const updateEntityStore = async ({
         delete riskScoresById[riskScoreId];
       }
 
+      const agent = agentRecordsById[hostName];
+      if (agent) {
+        logger.info(`Found agent for host ${hostName}`);
+        delete agentRecordsById[hostName];
+      }
+
       return buildEntityFromComposite({ composite, assetCriticality, riskScore });
     }
   );
@@ -181,11 +204,18 @@ export const updateEntityStore = async ({
     return buildEntityFromHostRiskScore(riskScore);
   });
 
-  const entities = [
-    ...compositeEntities,
+  const remainingAgentEntities = Object.values(agentRecordsById).map((agent) => {
+    logger.info(`Found agent for host ${agent.local_metadata.host.name}`);
+    return buildEntityFromAgent(agent);
+  });
+
+  const mergedRemainingEntities = mergeNewEntities([
     ...remainingCriticalityEntities,
     ...remainingRiskScoreEntities,
-  ];
+    ...remainingAgentEntities,
+  ]);
+
+  const entities = [...compositeEntities, ...mergedRemainingEntities];
 
   const { errors, created, updated } = await entityStoreDataClient.bulkUpsertEntities({
     entities,
@@ -195,6 +225,7 @@ export const updateEntityStore = async ({
     composites,
     assetCriticalities: Object.values(assetCriticalitiesById),
     riskScores: Object.values(riskScoresById),
+    agents: Object.values(agentRecordsById),
     ...timestamps,
     ...ids,
   });
@@ -212,6 +243,7 @@ function createLastProcessedInfo(opts: {
   composites: CompositeDocument[];
   assetCriticalities: AssetCriticalityRecord[];
   riskScores: EcsRiskScore[];
+  agents: Agent[];
   lastProcessedCompositeTimestamp?: string;
   lastProcessedCriticalityTimestamp?: string;
   lastProcessedRiskScoreTimestamp?: string;
@@ -221,6 +253,8 @@ function createLastProcessedInfo(opts: {
     id_field: string;
     id_value: string;
   };
+  lastProcessedAgentCheckinTimestamp?: string;
+  lastProcessedAgentId?: string;
 }): {
   ids: UpdateEntityStoreResponse['ids'];
   timestamps: UpdateEntityStoreResponse['timestamps'];
@@ -245,6 +279,9 @@ function createLastProcessedInfo(opts: {
   const lastProcessedRiskScore = opts.riskScores
     .sort((a, b) => moment(a['@timestamp']).diff(moment(b['@timestamp'])))
     .at(-1);
+  const lastProcessedAgent = opts.agents
+    .sort((a, b) => moment(a.last_checkin).diff(moment(b.last_checkin)))
+    .at(-1);
 
   return {
     ids: {
@@ -252,6 +289,7 @@ function createLastProcessedInfo(opts: {
       lastProcessedCriticalityId: lastProcessedCriticality
         ? AssetCriticalityDataClient.createIdFromRecord(lastProcessedCriticality)
         : lastProcessedCriticalityId,
+      lastProcessedAgentId: lastProcessedAgent?.id || opts.lastProcessedAgentId,
       lastProcessedRiskScoreId: lastProcessedRiskScore?.host?.risk
         ? {
             id_field: lastProcessedRiskScore.host.risk.id_field,
@@ -266,6 +304,8 @@ function createLastProcessedInfo(opts: {
         lastProcessedCriticality?.['@timestamp'] || lastProcessedCriticalityTimestamp,
       lastProcessedRiskScoreTimestamp:
         lastProcessedRiskScore?.['@timestamp'] || lastProcessedRiskScoreTimestamp,
+      lastProcessedAgentCheckinTimestamp:
+        lastProcessedAgent?.last_checkin || opts.lastProcessedAgentCheckinTimestamp,
     },
   };
 }
@@ -398,6 +438,9 @@ async function getNextRiskScores({
       namespace: 'default',
     });
   } catch (e) {
+    // TODO logger
+    // eslint-disable-next-line no-console
+    console.error(`Error getting risk scores from timestamp: ${e}`);
     riskScores = [];
   }
 
@@ -534,6 +577,8 @@ function buildEntityFromCriticalityRecord(
         criticality: assetCriticalityRecord.criticality_level,
       },
     },
+    first_seen: assetCriticalityRecord['@timestamp'],
+    last_seen: assetCriticalityRecord['@timestamp'],
   };
 }
 
@@ -548,6 +593,22 @@ function buildEntityFromHostRiskScore(riskScore: EcsRiskScore): NewEntityStoreEn
       name: riskScore.host?.name,
       risk: riskScore.host?.risk,
     },
+    first_seen: riskScore['@timestamp'],
+    last_seen: riskScore['@timestamp'],
+  };
+}
+
+function buildEntityFromAgent(agent: Agent): NewEntityStoreEntity {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    entity_type: 'host',
+    host: {
+      name: agent.local_metadata.host.name,
+    },
+    agent,
+    first_seen: agent.enrolled_at,
+    last_seen: agent.last_checkin || now,
   };
 }
 
@@ -557,45 +618,52 @@ async function getNewAssetCriticalitiesAndEntityAssetCriticalities(
   lastProcessedCriticalityTimestamp?: string,
   lastProcessedCriticalityId?: string
 ): Promise<Record<string, AssetCriticalityRecord>> {
-  const newAssetCriticalities = await getNextAssetCriticalities({
-    assetCriticalityService,
-    fromTimestamp: lastProcessedCriticalityTimestamp,
-    lastProcessedId: lastProcessedCriticalityId,
-  });
+  try {
+    const newAssetCriticalities = await getNextAssetCriticalities({
+      assetCriticalityService,
+      fromTimestamp: lastProcessedCriticalityTimestamp,
+      lastProcessedId: lastProcessedCriticalityId,
+    });
 
-  const assetCriticalitiesById = _.keyBy(newAssetCriticalities, (criticality) =>
-    AssetCriticalityDataClient.createId({
-      idField: criticality.id_field,
-      idValue: criticality.id_value,
-    })
-  );
-
-  const assetCriticalitiesToGet = hostNames.filter(
-    (hostName) =>
-      !assetCriticalitiesById[
-        AssetCriticalityDataClient.createId({ idField: 'host.name', idValue: hostName })
-      ]
-  );
-
-  const entityAssetCriticalities = !assetCriticalitiesToGet.length
-    ? []
-    : await assetCriticalityService.getCriticalitiesByIdentifiers(
-        assetCriticalitiesToGet.map((hostName) => ({
-          id_field: 'host.name',
-          id_value: hostName,
-        }))
-      );
-
-  entityAssetCriticalities.forEach((criticality) => {
-    assetCriticalitiesById[
+    const assetCriticalitiesById = _.keyBy(newAssetCriticalities, (criticality) =>
       AssetCriticalityDataClient.createId({
         idField: criticality.id_field,
         idValue: criticality.id_value,
       })
-    ] = criticality;
-  });
+    );
 
-  return assetCriticalitiesById;
+    const assetCriticalitiesToGet = hostNames.filter(
+      (hostName) =>
+        !assetCriticalitiesById[
+          AssetCriticalityDataClient.createId({ idField: 'host.name', idValue: hostName })
+        ]
+    );
+
+    const entityAssetCriticalities = !assetCriticalitiesToGet.length
+      ? []
+      : await assetCriticalityService.getCriticalitiesByIdentifiers(
+          assetCriticalitiesToGet.map((hostName) => ({
+            id_field: 'host.name',
+            id_value: hostName,
+          }))
+        );
+
+    entityAssetCriticalities.forEach((criticality) => {
+      assetCriticalitiesById[
+        AssetCriticalityDataClient.createId({
+          idField: criticality.id_field,
+          idValue: criticality.id_value,
+        })
+      ] = criticality;
+    });
+
+    return assetCriticalitiesById;
+  } catch (e) {
+    // TODO logger
+    // eslint-disable-next-line no-console
+    console.error(`Error getting asset criticalities: ${e}`);
+    throw e;
+  }
 }
 
 function createRiskScoreId({
@@ -650,3 +718,174 @@ async function getNewRiskScoresAndEntityRiskScores(
 
   return riskScoresById;
 }
+
+function mergeNewEntities(entities: NewEntityStoreEntity[]): NewEntityStoreEntity[] {
+  const entitiesByHostName = _.groupBy(entities, (entity) => entity.host.name);
+
+  return Object.entries(entitiesByHostName).map(([hostName, hostEntities]) => {
+    const mergedEntity = hostEntities.reduce(
+      (merged, entity) => EntityStoreDataClient.mergeEntities(merged, entity),
+      {} as NewEntityStoreEntity
+    );
+
+    return mergedEntity;
+  });
+}
+
+// TODO: last checkin is a bad field to seacrch on here, as status can change independently of checkin
+// we really want to avoid having to search all agents as there could be 100k+ agents here
+async function getNewAgentRecords(
+  hostNames: string[],
+  fleetServices: EndpointInternalFleetServicesInterface,
+  lastProcessedAgentCheckinTimestamp?: string,
+  lastProcessedAgentId?: string
+): Promise<Record<string, Agent>> {
+  const hostNamesFilter = hostNames.length
+    ? hostNames.map((hostName) => `local_metadata.host.name: ${hostName}`).join(' or ')
+    : '';
+
+  const lastCheckinFilter = lastProcessedAgentCheckinTimestamp
+    ? `last_checkin > "${lastProcessedAgentCheckinTimestamp}"`
+    : '';
+
+  const hostnameExistsFilter = 'local_metadata.host.name:*';
+
+  const hostsKuery = [hostNamesFilter, lastCheckinFilter].filter(Boolean).join(' or ');
+
+  const kuery = `(${hostsKuery}) and ${hostnameExistsFilter}`;
+
+  const { agents } = await fleetServices.agent.listAgents({
+    kuery,
+    showInactive: true,
+    sortField: 'last_checkin',
+    sortOrder: 'desc',
+  });
+
+  if (!lastProcessedAgentId || !lastProcessedAgentCheckinTimestamp || !agents.length) {
+    return _.keyBy(agents, 'local_metadata.host.name');
+  }
+
+  const lastProcessedIndex = agents.findIndex(
+    (agent) =>
+      agent.id === lastProcessedAgentId &&
+      agent?.last_checkin &&
+      agent.last_checkin > lastProcessedAgentCheckinTimestamp
+  );
+
+  if (lastProcessedIndex === -1) {
+    return _.keyBy(agents, 'local_metadata.host.name');
+  }
+
+  return _.keyBy(agents.slice(lastProcessedIndex + 1), 'local_metadata.host.name');
+}
+
+// example agent record
+// {
+//   "_index": ".fleet-agents-7",
+//   "_id": "c05bc335-7ad7-45f5-bdf5-f7c9c3416999",
+//   "_score": 1,
+//   "_source": {
+//     "access_api_key_id": "WDxG740BAG_XfFTa8Wbz",
+//     "action_seq_no": [
+//       -1
+//     ],
+//     "active": true,
+//     "agent": {
+//       "id": "c05bc335-7ad7-45f5-bdf5-f7c9c3416999",
+//       "version": "8.13.0"
+//     },
+//     "enrolled_at": "2024-02-28T10:33:40Z",
+//     "local_metadata": {
+//       "elastic": {
+//         "agent": {
+//           "build.original": "8.13.0 (build: edeb9adbf0c11a997359038d1393d14ab03462ce at 2024-02-23 12:32:56 +0000 UTC)",
+//           "complete": false,
+//           "id": "c05bc335-7ad7-45f5-bdf5-f7c9c3416999",
+//           "log_level": "info",
+//           "snapshot": false,
+//           "upgradeable": false,
+//           "version": "8.13.0"
+//         }
+//       },
+//       "host": {
+//         "architecture": "x86_64",
+//         "hostname": "ec7ed2db3b3f",
+//         "id": "",
+//         "ip": [
+//           "127.0.0.1/8",
+//           "172.17.0.10/16"
+//         ],
+//         "mac": [
+//           "02:42:ac:11:00:0a"
+//         ],
+//         "name": "ec7ed2db3b3f"
+//       },
+//       "os": {
+//         "family": "debian",
+//         "full": "Ubuntu focal(20.04.6 LTS (Focal Fossa))",
+//         "kernel": "5.15.0-1032-gcp",
+//         "name": "Ubuntu",
+//         "platform": "ubuntu",
+//         "version": "20.04.6 LTS (Focal Fossa)"
+//       }
+//     },
+//     "policy_id": "policy-elastic-agent-on-cloud",
+//     "type": "PERMANENT",
+//     "outputs": {
+//       "es-containerhost": {
+//         "api_key": "XjxH740BAG_XfFTaAmYH:AtX5ejLMRIyfcmRXTMX-Lg",
+//         "permissions_hash": "b8bf91d03aa17d178cdd82db91a1e0e7711e8fd623ee2d5cb689f912ad5cd026",
+//         "type": "elasticsearch",
+//         "api_key_id": "XjxH740BAG_XfFTaAmYH"
+//       }
+//     },
+//     "policy_revision_idx": 5,
+//     "policy_coordinator_idx": 1,
+//     "updated_at": "2024-02-28T10:36:25Z",
+//     "components": [
+//       {
+//         "id": "fleet-server-es-containerhost",
+//         "units": [
+//           {
+//             "id": "fleet-server-es-containerhost-fleet-server-fleet_server-elastic-cloud-fleet-server",
+//             "type": "input",
+//             "message": "Re-configuring",
+//             "status": "CONFIGURING"
+//           },
+//           {
+//             "id": "fleet-server-es-containerhost",
+//             "type": "output",
+//             "message": "Re-configuring",
+//             "status": "CONFIGURING"
+//           }
+//         ],
+//         "type": "fleet-server",
+//         "message": "Healthy: communicating with pid '153'",
+//         "status": "HEALTHY"
+//       },
+//       {
+//         "id": "apm-es-containerhost",
+//         "units": [
+//           {
+//             "id": "apm-es-containerhost",
+//             "type": "output",
+//             "message": "Healthy",
+//             "status": "HEALTHY"
+//           },
+//           {
+//             "id": "apm-es-containerhost-elastic-cloud-apm",
+//             "type": "input",
+//             "message": "Healthy",
+//             "status": "HEALTHY"
+//           }
+//         ],
+//         "type": "apm",
+//         "message": "Healthy: communicating with pid '179'",
+//         "status": "HEALTHY"
+//       }
+//     ],
+//     "last_checkin_message": "Running",
+//     "last_checkin_status": "online",
+//     "last_checkin": "2024-02-28T10:36:20Z"
+//   }
+// }

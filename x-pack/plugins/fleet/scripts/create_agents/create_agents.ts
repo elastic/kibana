@@ -31,7 +31,7 @@ const printUsage = () =>
     [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
 `);
 
-const DEFAULT_KIBANA_URL = 'http://localhost:5601';
+const DEFAULT_KIBANA_URL = 'http://localhost:5601/mark';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
 const PUBLIC_VERSION_V1 = '2023-10-31';

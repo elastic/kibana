@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EndpointInternalFleetServicesInterface } from '../../../endpoint/services/fleet';
 import { updateEntityStore } from './update_entity_store';
 import type { UpdateEntityStoreParams, UpdateEntityStoreResponse } from './update_entity_store';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -23,6 +24,7 @@ export interface EntityStoreServiceFactoryParams {
   riskEngineDataClient: RiskEngineDataClient;
   entityStoreDataClient: EntityStoreDataClient;
   riskScoreDataClient: RiskScoreDataClient;
+  fleetServices: EndpointInternalFleetServicesInterface;
   spaceId: string;
 }
 
@@ -33,6 +35,7 @@ export const entityStoreServiceFactory = ({
   entityStoreDataClient,
   riskEngineDataClient,
   riskScoreDataClient,
+  fleetServices,
   spaceId,
 }: EntityStoreServiceFactoryParams): EntityStoreService => ({
   updateEntityStore: (params) =>
@@ -44,6 +47,7 @@ export const entityStoreServiceFactory = ({
       spaceId,
       assetCriticalityService,
       esClient,
+      fleetServices,
       logger,
     }),
 });

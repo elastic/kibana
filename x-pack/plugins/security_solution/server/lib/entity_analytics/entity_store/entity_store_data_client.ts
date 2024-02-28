@@ -31,6 +31,32 @@ interface EntityStoreClientOpts {
 
 export class EntityStoreDataClient {
   constructor(private readonly options: EntityStoreClientOpts) {}
+  static mergeEntities(
+    entityA: NewEntityStoreEntity | EntityStoreEntity,
+    entityB: NewEntityStoreEntity | EntityStoreEntity // takes precedence over entityA
+  ): EntityStoreEntity {
+    const ipHistory = [
+      ...(entityA.host?.ip_history || []),
+      ...(entityB.host?.ip_history || []),
+    ].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+    const uniqueLimitedIpHistory = _.uniqWith(
+      ipHistory,
+      (a, b) => a.ip === b.ip && a.timestamp === b.timestamp
+    ).slice(0, FIELD_HISTORY_MAX_SIZE);
+
+    return {
+      ...entityA,
+      ...entityB,
+      first_seen: entityA.first_seen,
+      last_seen: entityB.last_seen,
+      host: {
+        ...entityA.host,
+        ...entityB.host,
+        ip_history: uniqueLimitedIpHistory,
+      },
+    };
+  }
   /**
    * It creates the entity store index or update mappings if index exists
    */
@@ -54,23 +80,7 @@ export class EntityStoreDataClient {
   }
 
   public async bulkUpsertEntities({ entities }: { entities: NewEntityStoreEntity[] }) {
-    const existingEntities = await this.options.esClient.search<EntityStoreEntity>({
-      index: getEntityStoreIndex(this.options.namespace),
-      body: {
-        query: {
-          terms: {
-            'host.name': entities.map((entity) => entity.host.name),
-          },
-        },
-      },
-    });
-
-    const existingEntitiesByHostName = existingEntities.hits.hits.reduce((acc, hit) => {
-      if (hit._source?.host.name) {
-        acc[hit._source.host.name] = hit;
-      }
-      return acc;
-    }, {} as Record<string, SearchHit<EntityStoreEntity>>);
+    const existingEntitiesByHostName = await this.getExistingEntitiesByHostname(entities);
 
     const operations: BulkRequest<EntityStoreEntity, NewEntityStoreEntity>['operations'] = [];
 
@@ -78,9 +88,9 @@ export class EntityStoreDataClient {
     entities.forEach((entity) => {
       const existingEntity = existingEntitiesByHostName[entity.host.name];
       if (existingEntity?._source) {
-        const mergedEntity = mergeWithExistingEntity(existingEntity._source, entity);
+        const mergedEntity = EntityStoreDataClient.mergeEntities(existingEntity._source, entity);
 
-        if (entitiesAreMeaningullyDifferent(mergedEntity, existingEntity._source)) {
+        if (entitiesAreMeaningfullyDifferent(mergedEntity, existingEntity._source)) {
           operations.push(
             ...[
               {
@@ -136,38 +146,43 @@ export class EntityStoreDataClient {
       updated: result.items.filter((item) => wasSuccessfulOp(item.update)).length,
     };
   }
+
+  private async getExistingEntitiesByHostname(
+    entities: NewEntityStoreEntity[]
+  ): Promise<Record<string, SearchHit<EntityStoreEntity>>> {
+    if (entities.length === 0) {
+      return {};
+    }
+    try {
+      const existingEntities = await this.options.esClient.search<EntityStoreEntity>({
+        index: getEntityStoreIndex(this.options.namespace),
+        body: {
+          query: {
+            terms: {
+              'host.name': entities.map((entity) => entity.host.name),
+            },
+          },
+        },
+      });
+
+      const existingEntitiesByHostName = existingEntities.hits.hits.reduce((acc, hit) => {
+        if (hit._source?.host.name) {
+          acc[hit._source.host.name] = hit;
+        }
+        return acc;
+      }, {} as Record<string, SearchHit<EntityStoreEntity>>);
+
+      return existingEntitiesByHostName;
+    } catch (e) {
+      this.options.logger.error(`Error getting existing entities by hostname: ${e}`);
+      throw e;
+    }
+  }
 }
 
 const wasSuccessfulOp = (op?: BulkResponseItem) => op?.status === 201 || op?.status === 200;
 
-function mergeWithExistingEntity(
-  existingEntity: EntityStoreEntity,
-  newEntity: NewEntityStoreEntity
-): EntityStoreEntity {
-  const ipHistory = [
-    ...(existingEntity.host?.ip_history || []),
-    ...(newEntity.host?.ip_history || []),
-  ].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-
-  const uniqueLimitedIpHistory = _.uniqWith(
-    ipHistory,
-    (a, b) => a.ip === b.ip && a.timestamp === b.timestamp
-  ).slice(0, FIELD_HISTORY_MAX_SIZE);
-
-  return {
-    ...existingEntity,
-    ...newEntity,
-    first_seen: existingEntity.first_seen,
-    last_seen: newEntity.last_seen,
-    host: {
-      ...existingEntity.host,
-      ...newEntity.host,
-      ip_history: uniqueLimitedIpHistory,
-    },
-  };
-}
-
-function entitiesAreMeaningullyDifferent(entityA: EntityStoreEntity, entityB: EntityStoreEntity) {
+function entitiesAreMeaningfullyDifferent(entityA: EntityStoreEntity, entityB: EntityStoreEntity) {
   const getCoreEntityFields = (entity: EntityStoreEntity) => _.omit(entity, ['@timestamp']);
 
   return !_.isEqual(getCoreEntityFields(entityA), getCoreEntityFields(entityB));
