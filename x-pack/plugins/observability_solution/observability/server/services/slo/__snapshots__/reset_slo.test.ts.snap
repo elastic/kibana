@@ -69,7 +69,7 @@ exports[`ResetSLO resets all associated resources 5`] = `
   "calls": Array [
     Array [
       Object {
-        "index": ".slo-observability.sli-v3*",
+        "index": ".slo-observability.sli-v3*,.slo-observability.sli-v4*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -86,7 +86,7 @@ exports[`ResetSLO resets all associated resources 5`] = `
     ],
     Array [
       Object {
-        "index": ".slo-observability.summary-v3*",
+        "index": ".slo-observability.summary-v3*,.slo-observability.summary-v4*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -202,7 +202,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
           "managed": true,
           "managed_by": "observability",
-          "version": 3,
+          "version": 4,
         },
         "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.summary.pipeline-irrelevant-1",
@@ -474,7 +474,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
           },
         },
         "id": "slo-irrelevant",
-        "index": ".slo-observability.summary-v3.temp",
+        "index": ".slo-observability.summary-v4.temp",
         "refresh": true,
       },
     ],

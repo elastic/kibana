@@ -108,7 +108,7 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = 
   "calls": Array [
     Array [
       Object {
-        "index": ".slo-observability.sli-v3*",
+        "index": ".slo-observability.sli-v3*,.slo-observability.sli-v4*",
         "query": Object {
           "match": Object {
             "slo.id": "irrelevant",
@@ -119,7 +119,7 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = 
     ],
     Array [
       Object {
-        "index": ".slo-observability.summary-v3*",
+        "index": ".slo-observability.summary-v3*,.slo-observability.summary-v4*",
         "query": Object {
           "match": Object {
             "slo.id": "irrelevant",
