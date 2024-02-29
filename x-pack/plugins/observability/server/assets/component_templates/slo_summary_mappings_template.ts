@@ -77,6 +77,9 @@ export const getSLOSummaryMappingsTemplate = (
                 type: {
                   type: 'keyword',
                 },
+                params: {
+                  type: 'flattened',
+                },
               },
             },
             objective: {

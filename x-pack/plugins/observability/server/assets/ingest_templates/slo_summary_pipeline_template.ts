@@ -89,6 +89,13 @@ export const getSLOSummaryPipelineTemplate = (slo: SLO, spaceId: string) => {
       },
       {
         set: {
+          description: 'Set indicator.params field',
+          field: 'slo.indicator.params',
+          value: slo.indicator.params,
+        },
+      },
+      {
+        set: {
           description: 'Set budgetingMethod field',
           field: 'slo.budgetingMethod',
           value: slo.budgetingMethod,
