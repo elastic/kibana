@@ -8,41 +8,37 @@
 
 import React, { useState, useMemo, ReactElement } from 'react';
 import {
-  EuiButton,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiModalFooter,
   EuiTab,
   EuiTabs,
   EuiForm,
-  EuiCopy,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ModalProps {
   objectType: string;
   onClose: () => void;
-  tabs: Array<{ id: string; name: string; content: ReactElement }>;
+  tabs: Array<{ id: string; name: string; content: ReactElement; sortOrder: number }>;
   modalBodyDescriptions: Array<{ id: string; description: any }>;
-  copyData: string;
 }
 
 /**
  * <ShareModal objectType={} />
  */
 
-export const ShareModal = ({ onClose, objectType, tabs, copyData }: ModalProps) => {
+export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
   const [selectedTabId, setSelectedTabId] = useState('link');
+
+  useMemo(() => {
+    return tabs.find(({ id }) => id === selectedTabId);
+  }, [selectedTabId, tabs]);
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
   };
-
-  const selectedTabContent = useMemo(() => {
-    return tabs.find((obj) => obj.id === selectedTabId)?.content;
-  }, [selectedTabId, tabs]);
 
   const renderTabs = () => {
     return tabs.map((tab, index) => (
@@ -54,32 +50,6 @@ export const ShareModal = ({ onClose, objectType, tabs, copyData }: ModalProps) 
         {tab.name}
       </EuiTab>
     ));
-  };
-
-  const renderButtons = (id: string) => {
-    if (id === 'link') {
-      return (
-        <EuiCopy textToCopy={copyData}>
-          {(copy) => (
-            <EuiButton fill data-test-subj="copyShareUrlButton" onClick={copy}>
-              <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
-            </EuiButton>
-          )}
-        </EuiCopy>
-      );
-    } else if (id === 'embed') {
-      return (
-        <EuiButton fill data-test-subj="copyShareUrlButton">
-          <FormattedMessage id="share.link.copyEmbedCodeButton" defaultMessage="Copy Embed code" />
-        </EuiButton>
-      );
-    } else {
-      return (
-        <EuiButton fill data-test-subj="copyShareUrlButton">
-          <FormattedMessage id="share.link.generateExportButton" defaultMessage="Generate export" />
-        </EuiButton>
-      );
-    }
   };
 
   const renderTitle = () => (
@@ -98,9 +68,8 @@ export const ShareModal = ({ onClose, objectType, tabs, copyData }: ModalProps) 
       </EuiModalHeader>
       <EuiModalBody>
         <EuiTabs>{renderTabs()}</EuiTabs>
-        <EuiForm>{selectedTabContent}</EuiForm>
+        <EuiForm>{tabs.find(({ id }) => id === selectedTabId)?.content}</EuiForm>
       </EuiModalBody>
-      <EuiModalFooter>{renderButtons(selectedTabId)}</EuiModalFooter>
     </EuiModal>
   );
 };
