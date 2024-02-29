@@ -303,7 +303,7 @@ export function DifferentialTopNFunctionsGrid({
         }}
         pagination={{
           pageIndex,
-          pageSize: 50,
+          pageSize: 100,
           // Left it empty on purpose as it is a required property on the pagination
           onChangeItemsPerPage: () => {},
           onChangePage,
