@@ -16,7 +16,8 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { NonEmptyString } from '../model/rule_schema/common_attributes.gen';
+import { AlertIds } from '../../model/alert.gen';
+import { NonEmptyString } from '../../model/primitives.gen';
 
 export type AlertAssignees = z.infer<typeof AlertAssignees>;
 export const AlertAssignees = z.object({
@@ -29,12 +30,6 @@ export const AlertAssignees = z.object({
    */
   remove: z.array(NonEmptyString),
 });
-
-/**
- * A list of alerts ids.
- */
-export type AlertIds = z.infer<typeof AlertIds>;
-export const AlertIds = z.array(NonEmptyString).min(1);
 
 export type SetAlertAssigneesRequestBody = z.infer<typeof SetAlertAssigneesRequestBody>;
 export const SetAlertAssigneesRequestBody = z.object({
