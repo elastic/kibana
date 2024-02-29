@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { take, toArray } from 'rxjs/operators';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
-import { ILicense, LicenseType } from '../common/types';
-import { ElasticsearchError } from './types';
-import { LicensingPlugin } from './plugin';
+import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ClusterClientMock,
   coreMock,
@@ -24,7 +21,9 @@ import {
   ServiceStatusLevel,
   ServiceStatusLevels,
 } from '@kbn/core/server';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { LicenseType } from '../common/types';
+import { ElasticsearchError } from './types';
+import { LicensingPlugin } from './plugin';
 
 function buildRawLicense(
   options: Partial<estypes.XpackInfoMinimalLicenseInformation> = {}
@@ -345,7 +344,6 @@ describe('licensing plugin', () => {
       });
 
       describe('only fetch the license if ES is available', () => {
-        let customLicense$: Observable<ILicense>;
         let customClient: ClusterClientMock;
         let coreStatus$: BehaviorSubject<CoreStatus>;
         let coreStatus: CoreStatus;
@@ -392,8 +390,7 @@ describe('licensing plugin', () => {
             features: {},
           });
 
-          const { license$ } = createLicensePoller(customClient, customPollingFrequency);
-          customLicense$ = license$;
+          createLicensePoller(customClient, customPollingFrequency);
         });
 
         it(`only fetch the license if ES is available`, async () => {
