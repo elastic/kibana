@@ -299,7 +299,7 @@ export const TopNFunctionsGrid = ({
         )}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={sortedRows.length > 100 ? 100 : sortedRows.length}
+        rowCount={sortedRows.length}
         renderCellValue={RenderCellValue}
         sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
         leadingControlColumns={leadingControlColumns}
