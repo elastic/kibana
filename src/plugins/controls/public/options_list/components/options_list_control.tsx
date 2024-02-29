@@ -19,6 +19,7 @@ import {
   EuiInputPopover,
   EuiToken,
   EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
@@ -39,7 +40,7 @@ export const OptionsListControl = ({
   loadMoreSubject: Subject<number>;
 }) => {
   const optionsList = useOptionsList();
-
+  const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
@@ -48,6 +49,7 @@ export const OptionsListControl = ({
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const fieldTitle = optionsList.select((state) => state.explicitInput.title);
   const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
   const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
@@ -190,17 +192,11 @@ export const OptionsListControl = ({
         isSelected={isPopoverOpen}
         numActiveFilters={selectedOptionsCount}
         hasActiveFilters={Boolean(selectedOptionsCount)}
-        aria-label={`${selectedOptions
-          ?.map((value) => {
-            const isInvalid = invalidSelections?.includes(value);
-            return `${
-              isInvalid
-                ? OptionsListStrings.popover.getInvalidSelectionScreenReaderText() + ' '
-                : ''
-            }${fieldFormatter(value)}`;
-          })
-          .join(delimiter)}`}
         textProps={{ className: 'optionsList--selectionText' }}
+        aria-label={fieldTitle ?? fieldName}
+        aria-expanded={isPopoverOpen}
+        aria-controls={popoverId}
+        role="combobox"
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
@@ -218,6 +214,7 @@ export const OptionsListControl = ({
       })}
     >
       <EuiInputPopover
+        id={popoverId}
         ownFocus
         input={button}
         hasArrow={false}
@@ -229,7 +226,9 @@ export const OptionsListControl = ({
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
         panelClassName="optionsList__popoverOverride"
-        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
+        panelProps={{
+          'aria-label': OptionsListStrings.popover.getAriaLabel(fieldTitle ?? fieldName),
+        }}
       >
         <OptionsListPopover
           isLoading={debouncedLoading}

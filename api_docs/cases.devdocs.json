@@ -760,7 +760,7 @@
           "label": "hooks",
           "description": [],
           "signature": [
-            "{ useCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments, headerContent, }?: { attachments?: ",
+            "{ useCasesAddToNewCaseFlyout: ({ initialValue, toastTitle, toastContent, afterCaseCreated, onSuccess, onClose, }?: AddToNewCaseFlyoutProps) => { open: ({ attachments, headerContent, }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -768,7 +768,7 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: (props?: ",
+            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: ({ successToaster, noAttachmentsToaster, onSuccess, onClose, onCreateCaseClicked, }?: ",
             "AddToExistingCaseModalProps",
             ") => { open: ({ getAttachments, }?: { getAttachments?: (({ theCase }: { theCase?: ",
             {
