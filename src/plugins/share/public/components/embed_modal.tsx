@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiForm, EuiFormHelpText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCopy,
+  EuiForm,
+  EuiFormHelpText,
+  EuiFormRow,
+  EuiModalFooter,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -26,6 +34,7 @@ interface EmbedProps {
   shareableUrlForSavedObject?: string;
   shareableUrl?: string;
   isEmbedded?: boolean;
+  action: any;
 }
 
 export enum ExportUrlAsType {
@@ -40,6 +49,7 @@ export const EmbedModal = ({
   shareableUrlForSavedObject,
   shareableUrl,
   isEmbedded,
+  action,
 }: EmbedProps) => {
   const [urlParams, setUrlParams] = useState<any>();
   const [useShortUrl, setUseShortUrl] = useState<boolean>(true);
@@ -202,6 +212,19 @@ export const EmbedModal = ({
     setUrl(tempUrl);
   };
 
+  const renderButtons = () => {
+    const { dataTestSubj, formattedMessageId, defaultMessage } = action;
+    return (
+      <EuiCopy textToCopy={''}>
+        {(copy) => (
+          <EuiButton fill data-test-subj={dataTestSubj} onClick={copy}>
+            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+          </EuiButton>
+        )}
+      </EuiCopy>
+    );
+  };
+
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {
       return;
@@ -225,16 +248,20 @@ export const EmbedModal = ({
     );
   };
   return (
-    <EuiForm>
-      <EuiSpacer size="s" />
-      <EuiFormHelpText>
-        <FormattedMessage
-          id="share.embed.helpText"
-          defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
-        />
-      </EuiFormHelpText>
-      <EuiSpacer />
-      {renderUrlParamExtensions()}
-    </EuiForm>
+    <>
+      <EuiForm>
+        <EuiSpacer size="s" />
+        <EuiFormHelpText>
+          <FormattedMessage
+            id="share.embed.helpText"
+            defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
+          />
+        </EuiFormHelpText>
+        <EuiSpacer />
+        {renderUrlParamExtensions()}
+        <EuiSpacer />
+      </EuiForm>
+      <EuiModalFooter>{renderButtons()}</EuiModalFooter>
+    </>
   );
 };
