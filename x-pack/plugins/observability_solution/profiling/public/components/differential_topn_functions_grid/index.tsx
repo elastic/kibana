@@ -231,7 +231,7 @@ export function DifferentialTopNFunctionsGrid({
     );
   }
 
-  const rowCount = Math.min(Math.max(sortedBaseRows.length, sortedComparisonRows.length), 100);
+  const rowCount = Math.max(sortedBaseRows.length, sortedComparisonRows.length);
 
   return (
     <>
