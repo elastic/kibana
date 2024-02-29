@@ -20,7 +20,8 @@ import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isLoading: boolean }) {
   const { watch } = useFormContext<CreateSLOForm>();
 
-  const groupByFields = dataView?.fields?.filter((field) => field.aggregatable) ?? [];
+  const groupByFields =
+    dataView?.fields?.filter((field) => field.aggregatable && field.type !== 'date') ?? [];
   const index = watch('indicator.params.index');
   const timestampField = watch('indicator.params.timestampField');
   const groupByField = watch('groupBy');
