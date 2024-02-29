@@ -16,6 +16,7 @@ export const useIndicesFields = (indices: string[]) => {
   const { data, isLoading } = useQuery({
     enabled: indices.length > 0,
     queryKey: ['fields', indices.toString()],
+    initialData: {},
     queryFn: async () => {
       const response = await services.http.post<IndicesQuerySourceFields>(
         '/internal/enterprise_search/ai_playground/query_source_fields',
@@ -30,5 +31,5 @@ export const useIndicesFields = (indices: string[]) => {
     },
   });
 
-  return { fields: data || {}, isLoading };
+  return { fields: data!, isLoading };
 };

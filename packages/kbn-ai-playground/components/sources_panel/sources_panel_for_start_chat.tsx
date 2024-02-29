@@ -37,7 +37,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
       const defaultFields = getDefaultQueryFields(fields);
       elasticsearchQueryOnChange(createQuery(defaultFields, fields));
     }
-  }, [selectedIndices, fields, elasticsearchQueryOnChange]);
+  }, [fields, elasticsearchQueryOnChange]);
 
   return (
     <StartChatPanel
