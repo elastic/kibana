@@ -57,7 +57,7 @@ describe(
       cy.task('esArchiverUnload', 'auditbeat_multiple');
     });
 
-    it('can not create rule with rule execution suppression on basic license for non-sequence based queries', () => {
+    it('can not create rule with rule execution suppression on basic license for non-sequence based alerts', () => {
       selectEqlRuleType();
 
       cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');

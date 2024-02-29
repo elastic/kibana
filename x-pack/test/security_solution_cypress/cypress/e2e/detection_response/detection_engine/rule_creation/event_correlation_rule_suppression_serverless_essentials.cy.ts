@@ -56,7 +56,7 @@ describe(
     after(() => {
       cy.task('esArchiverUnload', 'auditbeat_multiple');
     });
-    it('creates rule with per rule execution suppression for essentials license for non-sequence based queries', () => {
+    it('creates rule with per rule execution suppression for essentials license for non-sequence based alerts', () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRule(rule);
