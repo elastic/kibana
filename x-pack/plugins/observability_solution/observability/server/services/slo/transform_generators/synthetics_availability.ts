@@ -21,7 +21,6 @@ import {
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SyntheticsAvailabilityIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
-
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
@@ -60,7 +59,21 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       }),
     };
 
-    return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
+    // These are the group by fields that will be used in `groupings` key
+    // in the summary and rollup documents. For Synthetics, we want to use the
+    // user-readible `monitor.name` and `observer.geo.name` fields by default,
+    // unless otherwise specified by the user.
+    const flattenedGroupBy = [slo.groupBy].flat().filter((value) => !!value);
+    const groupings =
+      flattenedGroupBy.length && !flattenedGroupBy.includes(ALL_VALUE)
+        ? slo.groupBy
+        : ['monitor.name', 'observer.geo.name'];
+
+    return this.buildCommonGroupBy(
+      { ...slo, groupBy: groupings },
+      '@timestamp',
+      extraGroupByFields
+    );
   }
 
   private buildSource(slo: SLO, indicator: SyntheticsAvailabilityIndicator, spaceId: string) {
