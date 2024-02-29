@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from '@kbn/core-capabilities-common';
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { ShareModal } from '@kbn/share-modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,13 @@ import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
 import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
 import { LinkModal } from './link_modal';
 import { EmbedModal } from './embed_modal';
+
+export interface ModalTabActionHandler {
+  id: string;
+  dataTestSubj: string;
+  formattedMessageId: string;
+  defaultMessage: string;
+}
 
 export interface ShareContextTabProps {
   allowEmbed: boolean;
@@ -53,7 +60,29 @@ export const ShareMenuTabs = ({
   isDirty,
   isEmbedded,
 }: ShareContextTabProps) => {
-  const [data, setData] = useState<string>('');
+  const actionHandler = useCallback(
+    () => [
+      {
+        id: 'link',
+        dataTestSubj: 'copyShareUrlButton',
+        formattedMessageId: 'share.link.copyLinkButton',
+        defaultMessage: 'Copy link',
+      },
+      {
+        id: 'embed',
+        dataTestSubj: 'copyEmbedUrlButton',
+        formattedMessageId: 'share.link.copyEmbedCodeButton',
+        defaultMessage: 'Copy Embed',
+      },
+      {
+        id: 'export',
+        dataTestSubj: 'generateExportButton',
+        formattedMessageId: 'share.link.generateExportButton',
+        defaultMessage: 'Generate export',
+      },
+    ],
+    []
+  );
 
   const getTabs = () => {
     const tabs = [];
@@ -66,6 +95,7 @@ export const ShareMenuTabs = ({
       sortOrder: 0,
       // do not break functional tests
       'data-test-subj': 'Permalinks',
+      action: actionHandler().filter(({ id }) => id === 'link')[0],
       content: (
         <LinkModal
           objectType={objectType}
@@ -73,7 +103,7 @@ export const ShareMenuTabs = ({
           isDirty={isDirty}
           isEmbedded={isEmbedded}
           onClose={onClose}
-          setCopyLinkData={setData}
+          action={actionHandler().filter(({ id }) => id === 'link')[0]}
         />
       ),
     });
@@ -84,8 +114,13 @@ export const ShareMenuTabs = ({
           defaultMessage: 'Embed',
         }),
         sortOrder: 1,
+        action: actionHandler().filter(({ id }) => id === 'embed')[0],
         content: (
-          <EmbedModal urlParamExtensions={embedUrlParamExtensions} urlService={urlService} />
+          <EmbedModal
+            urlParamExtensions={embedUrlParamExtensions}
+            urlService={urlService}
+            action={actionHandler().filter(({ id }) => id === 'embed')[0]}
+          />
         ),
       });
     }
@@ -94,6 +129,7 @@ export const ShareMenuTabs = ({
       tabs.push({
         ...shareMenuItem,
         id: panel.id,
+        actionHandler: actionHandler().filter(({ id }) => id === id)[0],
       });
     });
     return tabs;
@@ -126,7 +162,6 @@ export const ShareMenuTabs = ({
       modalBodyDescriptions={getModalBodyDescriptions()}
       onClose={onClose}
       tabs={getTabs()}
-      copyData={data}
     />
   );
 };
