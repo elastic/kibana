@@ -95,7 +95,7 @@ describe('Alert as data fields checks', () => {
    * on all the rule types.
    */
   test('ensure rule types list up to date', async () => {
-    expect(ruleTypes).toEqual(ruleTypeRegistry.getAllTypes());
+    expect(ruleTypes.sort()).toEqual(ruleTypeRegistry.getAllTypes().sort());
   });
 
   for (const ruleTypeId of ruleTypes) {
