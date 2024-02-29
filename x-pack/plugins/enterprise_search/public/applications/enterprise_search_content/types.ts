@@ -5,31 +5,11 @@
  * 2.0.
  */
 
-import { ConnectorIndex, CrawlerIndex, ElasticsearchIndex } from '../../../common/types/indices';
+import { ElasticsearchIndex, ElasticsearchViewIndexExtension } from '@kbn/search-connectors';
 
-export interface Crawler {
-  domains: [];
-}
+import { ConnectorIndex } from '@kbn/search-connectors/types/indices';
 
-export enum IngestionMethod {
-  CONNECTOR = 'connector',
-  CRAWLER = 'crawler',
-  API = 'api',
-}
-
-export enum IngestionStatus {
-  CONFIGURED,
-  CONNECTED,
-  ERROR,
-  SYNC_ERROR,
-  INCOMPLETE,
-}
-
-interface ElasticsearchViewIndexExtension {
-  ingestionMethod: IngestionMethod;
-  ingestionStatus: IngestionStatus;
-  lastUpdated: string | 'never' | null; // date string
-}
+import { CrawlerIndex } from '../../../common/types/indices';
 
 export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;
 

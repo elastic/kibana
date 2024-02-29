@@ -130,7 +130,6 @@ describe('XYChart component', () => {
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       setChartSize: jest.fn(),
-      shouldUseVeil: false,
     };
   });
 
