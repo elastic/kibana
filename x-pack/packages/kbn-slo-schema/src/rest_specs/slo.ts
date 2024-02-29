@@ -22,6 +22,7 @@ import {
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  metaSchema,
   timesliceMetricIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
@@ -152,7 +153,7 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema, meta: metaSchema }),
 ]);
 
 const sloGroupWithSummaryResponseSchema = t.type({

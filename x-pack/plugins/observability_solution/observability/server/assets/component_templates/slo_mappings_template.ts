@@ -53,6 +53,9 @@ export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplat
             },
           },
         },
+        config_id: {
+          type: 'keyword',
+        },
         observer: {
           properties: {
             name: {

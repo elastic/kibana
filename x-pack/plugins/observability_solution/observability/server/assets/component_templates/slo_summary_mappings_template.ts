@@ -35,6 +35,25 @@ export const getSLOSummaryMappingsTemplate = (
             },
           },
         },
+        // Synthetics monitor id and location id specific fields
+        monitor: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+        config_id: {
+          type: 'keyword',
+        },
+        observer: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        // SLO field mappings
         slo: {
           properties: {
             id: {

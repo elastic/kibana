@@ -31,6 +31,7 @@ import {
   toIndicatorTypeLabel,
 } from '../../../../utils/slo/labels';
 import { ApmIndicatorOverview } from './apm_indicator_overview';
+import { SyntheticsIndicatorOverview } from './synthetics_indicator_overview';
 
 import { OverviewItem } from './overview_item';
 
@@ -50,6 +51,8 @@ export function Overview({ slo }: Props) {
     case 'sli.apm.transactionErrorRate':
       IndicatorOverview = <ApmIndicatorOverview slo={slo} />;
       break;
+    case 'sli.synthetics.availability':
+      IndicatorOverview = <SyntheticsIndicatorOverview slo={slo} />;
   }
 
   return (

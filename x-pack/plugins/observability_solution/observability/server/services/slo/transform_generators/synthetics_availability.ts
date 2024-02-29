@@ -51,6 +51,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     const extraGroupByFields = {
       'monitor.id': { terms: { field: 'monitor.id' } },
       'observer.name': { terms: { field: 'observer.name' } },
+      config_id: { terms: { field: 'config_id' } },
       ...(!indicator.params.tags?.find((param) => param.value === ALL_VALUE) && {
         tags: { terms: { field: 'tags' } },
       }),

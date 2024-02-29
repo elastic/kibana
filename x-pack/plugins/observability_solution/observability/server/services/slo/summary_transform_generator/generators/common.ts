@@ -74,6 +74,12 @@ export const getGroupBy = (slo: SLO) => {
         missing_bucket: true,
       },
     },
+    config_id: {
+      terms: {
+        field: 'config_id',
+        missing_bucket: true,
+      },
+    },
     'observer.name': {
       terms: {
         field: 'observer.name',
