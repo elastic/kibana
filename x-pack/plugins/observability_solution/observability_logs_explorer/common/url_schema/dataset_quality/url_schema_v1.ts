@@ -50,8 +50,8 @@ const timeRangeRT = rt.strict({
   from: rt.string,
   to: rt.string,
   refresh: rt.strict({
-    isPaused: rt.boolean,
-    interval: rt.number,
+    pause: rt.boolean,
+    value: rt.number,
   }),
 });
 

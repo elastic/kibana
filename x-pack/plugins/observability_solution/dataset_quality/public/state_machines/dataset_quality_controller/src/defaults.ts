@@ -31,8 +31,8 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       from: 'now-24h',
       to: 'now',
       refresh: {
-        isPaused: true,
-        interval: ONE_MINUTE_IN_MS,
+        pause: true,
+        value: ONE_MINUTE_IN_MS,
       },
     },
     integrations: [],
