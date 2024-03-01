@@ -73,6 +73,10 @@ const SortableControlInner = forwardRef<
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
     const panels = controlGroup.select((state) => state.explicitInput.panels);
 
+    if (Object.keys(panels).length === 0) {
+      return null;
+    }
+
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
     const title = panels[embeddableId].explicitInput.title;

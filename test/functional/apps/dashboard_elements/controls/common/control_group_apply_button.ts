@@ -14,6 +14,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
+  const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   const { dashboard, header, dashboardControls, timePicker } = getPageObjects([
@@ -23,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Dashboard control group apply button', () => {
+  describe.only('Dashboard control group apply button', () => {
     let controlIds: string[];
 
     before(async () => {
@@ -32,6 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
 
+      await elasticChart.setNewChartUiDebugFlag();
+      await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+
       // populate an initial set of controls and get their ids.
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
@@ -39,28 +43,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'animal.keyword',
         title: 'Animal',
       });
-
       await dashboardControls.createControl({
         controlType: RANGE_SLIDER_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'weightLbs',
         title: 'Animal Name',
       });
-
       await dashboardControls.createTimeSliderControl();
-
       controlIds = await dashboardControls.getAllControlIds();
-      await dashboardControls.updateShowApplyButtonSetting(true);
 
-      await elasticChart.setNewChartUiDebugFlag();
-      await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+      // save the dashboard
       await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       await dashboard.expectMissingUnsavedChangesBadge();
     });
 
-    describe('options list', () => {
+    it('able to set apply button setting', async () => {
+      await dashboardControls.updateShowApplyButtonSetting(true);
+      await testSubjects.existOrFail('controlGroup--applyFiltersButton');
+      await dashboard.expectUnsavedChangesBadge();
+
+      await dashboard.clickQuickSave();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.expectMissingUnsavedChangesBadge();
+    });
+
+    it('renabling auto-apply forces filters to be published', async () => {
+      const optionsListId = controlIds[0];
+      await dashboardControls.verifyApplyButtonEnabled(false);
+      await dashboardControls.optionsListOpenPopover(optionsListId);
+      await dashboardControls.optionsListPopoverSelectOption('cat');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
+      await header.waitUntilLoadingHasFinished();
+      await dashboardControls.verifyApplyButtonEnabled();
+
+      await dashboardControls.updateShowApplyButtonSetting(false);
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.expectUnsavedChangesBadge();
+      expect(await pieChart.getPieSliceCount()).to.be(4);
+      await dashboard.clickDiscardChanges();
+    });
+
+    describe('options list selections', () => {
       let optionsListId: string;
 
       before(async () => {
@@ -105,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('range slider', () => {
+    describe('range slider selections', () => {
       let rangeSliderId: string;
 
       before(async () => {
@@ -151,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('time slider', () => {
+    describe('time slider selections', () => {
       let valueBefore: string;
 
       before(async () => {
@@ -191,41 +218,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);
       });
-    });
-
-    after(async () => {
-      const optionsListId = controlIds[0];
-      await dashboardControls.verifyApplyButtonEnabled(false);
-      await dashboardControls.optionsListOpenPopover(optionsListId);
-      await dashboardControls.optionsListPopoverSelectOption('cat');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
-      await header.waitUntilLoadingHasFinished();
-      await dashboardControls.verifyApplyButtonEnabled();
-
-      await dashboardControls.updateShowApplyButtonSetting(false);
-      await header.waitUntilLoadingHasFinished();
-      await dashboard.waitForRenderComplete();
-
-      await dashboard.expectUnsavedChangesBadge();
-      expect(await pieChart.getPieSliceCount()).to.be(4);
-    });
-
-    it('renabling auto-apply forces filters to be published', async () => {
-      const optionsListId = controlIds[0];
-      await dashboardControls.verifyApplyButtonEnabled(false);
-      await dashboardControls.optionsListOpenPopover(optionsListId);
-      await dashboardControls.optionsListPopoverSelectOption('cat');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
-      await header.waitUntilLoadingHasFinished();
-      await dashboardControls.verifyApplyButtonEnabled();
-
-      await dashboardControls.updateShowApplyButtonSetting(false);
-      await header.waitUntilLoadingHasFinished();
-      await dashboard.waitForRenderComplete();
-
-      await dashboard.expectUnsavedChangesBadge();
-      expect(await pieChart.getPieSliceCount()).to.be(4);
-      await dashboard.clickDiscardChanges();
     });
   });
 }
