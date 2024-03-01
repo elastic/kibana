@@ -203,6 +203,24 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
+  public async updateShowApplyButtonSetting(showApplyButton: boolean) {
+    this.log.debug(`Update show apply button setting to ${showApplyButton}`);
+    await this.openControlGroupSettingsFlyout();
+    // the "showApplyButton" toggle has in inverse relationship with the `showApplyButton` seting - so, negate `showApplyButton`
+    await this.setSwitchState(!showApplyButton, 'control-group-auto-apply-selections');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async verifyApplyButtonEnabled(enabled: boolean = true) {
+    this.log.debug(
+      `Checking that control group apply button is ${enabled ? 'enabled' : 'not enabled'}`
+    );
+    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
+    await this.retry.try(async () => {
+      expect(await applyButton.isEnabled()).to.be(enabled);
+    });
+  }
+
   /* -----------------------------------------------------------
      Individual controls functions
      ----------------------------------------------------------- */

@@ -10,7 +10,6 @@ import '../control_group.scss';
 
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import {
   closestCenter,
@@ -45,29 +44,26 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { ControlGroupStrings } from '../control_group_strings';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
-import { ControlGroupReduxState } from '../types';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-
-const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
 export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = contextSelect((state) => state.explicitInput.panels);
-  const viewMode = contextSelect((state) => state.explicitInput.viewMode);
-  const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
-  const showApplySelections = contextSelect((state) => state.explicitInput.showApplySelections);
-
-  const showAddButton = contextSelect((state) => state.componentState.showAddButton);
-  const unpublishedFilters = contextSelect((state) => state.componentState.unpublishedFilters);
-  const controlWithInvalidSelectionsId = contextSelect(
-    (state) => state.componentState.controlWithInvalidSelectionsId
+  const panels = controlGroup.select((state) => state.explicitInput.panels);
+  const viewMode = controlGroup.select((state) => state.explicitInput.viewMode);
+  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
+  const showApplySelections = controlGroup.select(
+    (state) => state.explicitInput.showApplySelections
   );
 
-  const applyResetButtonsEnabled = useMemo(() => {
-    return Boolean(unpublishedFilters); // if undefined, no unpublished filters; otherwise, there exists unpublished filters
-  }, [unpublishedFilters]);
+  const showAddButton = controlGroup.select((state) => state.componentState.showAddButton);
+  const unpublishedFilters = controlGroup.select(
+    (state) => state.componentState.unpublishedFilters
+  );
+  const controlWithInvalidSelectionsId = controlGroup.select(
+    (state) => state.componentState.controlWithInvalidSelectionsId
+  );
 
   const [tourStepOpen, setTourStepOpen] = useState<boolean>(true);
   const [suppressTourChecked, setSuppressTourChecked] = useState<boolean>(false);
@@ -91,9 +87,30 @@ export const ControlGroup = () => {
      * This forces the tour step to get unmounted so that it can attach to the new invalid
      * control - otherwise, the anchor will remain attached to the old invalid control
      */
+    let mounted = true;
     setRenderTourStep(false);
-    setTimeout(() => setRenderTourStep(true), 100);
+    setTimeout(() => {
+      if (mounted) {
+        setRenderTourStep(true);
+      }
+    }, 100);
+    return () => {
+      mounted = false;
+    };
   }, [controlWithInvalidSelectionsId]);
+
+  const applyButtonEnabled = useMemo(() => {
+    /**
+     * this is undefined if there are no unpublished filters / timeslice; note that an empty filter array counts
+     * as unpublished filters and so the apply button should still be enabled in this case
+     */
+    return Boolean(unpublishedFilters);
+  }, [unpublishedFilters]);
+
+  const showAppendedButtonGroup = useMemo(
+    () => showAddButton || showApplySelections,
+    [showAddButton, showApplySelections]
+  );
 
   const tourStep = useMemo(() => {
     if (
@@ -166,11 +183,6 @@ export const ControlGroup = () => {
     suppressTourChecked,
     controlWithInvalidSelectionsId,
   ]);
-
-  const showAppendedButtonGroup = useMemo(
-    () => showAddButton || showApplySelections,
-    [showAddButton, showApplySelections]
-  );
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const draggingIndex = useMemo(
@@ -270,7 +282,11 @@ export const ControlGroup = () => {
               </DndContext>
             </EuiFlexItem>
             {showAppendedButtonGroup && (
-              <EuiFlexItem className="controlGroup--endButtonGroup" grow={false}>
+              <EuiFlexItem
+                grow={false}
+                className="controlGroup--endButtonGroup"
+                data-test-subj="controlGroup--endButtonGroup"
+              >
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   {showAddButton && (
                     <EuiFlexItem grow={false}>
@@ -280,6 +296,7 @@ export const ControlGroup = () => {
                           iconSize="m"
                           display="base"
                           iconType={'plusInCircle'}
+                          data-test-subj="controlGroup--addControlButton"
                           aria-label={ControlGroupStrings.management.getAddControlTitle()}
                           onClick={() => controlGroup.openAddDataControlFlyout()}
                         />
@@ -290,18 +307,19 @@ export const ControlGroup = () => {
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={ControlGroupStrings.management.getApplyButtonTitle(
-                          applyResetButtonsEnabled
+                          applyButtonEnabled
                         )}
                       >
                         <EuiButtonIcon
                           size="m"
-                          disabled={!applyResetButtonsEnabled}
+                          disabled={!applyButtonEnabled}
                           iconSize="m"
                           display="fill"
                           color={'success'}
                           iconType={'check'}
+                          data-test-subj="controlGroup--applyFiltersButton"
                           aria-label={ControlGroupStrings.management.getApplyButtonTitle(
-                            applyResetButtonsEnabled
+                            applyButtonEnabled
                           )}
                           onClick={() => {
                             if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);

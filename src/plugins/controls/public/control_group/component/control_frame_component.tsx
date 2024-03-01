@@ -7,7 +7,8 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
 import {
   EuiFormControlLayout,
@@ -19,11 +20,8 @@ import {
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
-import {
-  controlGroupSelector,
-  useControlGroupContainer,
-} from '../embeddable/control_group_container';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlError } from './control_error_component';
 
 export interface ControlFrameProps {
@@ -39,13 +37,14 @@ export const ControlFrame = ({
   embeddableId,
   embeddableType,
 }: ControlFrameProps) => {
+  const isMounted = useRef(false);
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const controlGroup = useControlGroupContainer();
 
-  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
-  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
-  const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
+  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
+  const viewMode = controlGroup.select((state) => state.explicitInput.viewMode);
+  const disabledActions = controlGroup.select((state) => state.explicitInput.disabledActions);
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
@@ -57,13 +56,20 @@ export const ControlFrame = ({
 
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
+  useMount(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  });
+
   useEffect(() => {
     if (embeddableRoot.current) {
       embeddable?.render(embeddableRoot.current);
     }
-    const inputSubscription = embeddable
-      ?.getInput$()
-      .subscribe((newInput) => setTitle(newInput.title));
+    const inputSubscription = embeddable?.getInput$().subscribe((newInput) => {
+      if (isMounted.current) setTitle(newInput.title);
+    });
     return () => {
       inputSubscription?.unsubscribe();
     };

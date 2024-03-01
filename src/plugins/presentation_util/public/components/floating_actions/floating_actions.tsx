@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, ReactElement, useEffect, useState } from 'react';
 import classNames from 'classnames';
+import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import {
-  type ViewMode,
-  type IEmbeddable,
-  type EmbeddableInput,
   panelHoverTrigger,
   PANEL_HOVER_TRIGGER,
+  type EmbeddableInput,
+  type IEmbeddable,
+  type ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
@@ -41,8 +43,15 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
-
+  const isMounted = useRef(false);
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
+
+  useMount(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  });
 
   useEffect(() => {
     if (!embeddable) return;
@@ -57,6 +66,9 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      if (!isMounted.current) return;
+
       if (actions.length > 0) {
         setFloatingActions(
           <>
@@ -77,11 +89,19 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   }, [embeddable, getTriggerCompatibleActions, viewMode, disabledActions]);
 
   return (
-    <div className="presentationUtil__floatingActionsWrapper">
+    <div
+      className="presentationUtil__floatingActionsWrapper"
+      data-test-subj={`presentationUtil__floatingActionsWrapper__${embeddable?.id}`}
+    >
       {children}
-      {isEnabled && floatingActions && (
-        <div className={classNames('presentationUtil__floatingActions', className)}>
-          {floatingActions}
+      {isEnabled && embeddable && (
+        <div
+          className={classNames('presentationUtil__floatingActions', className)}
+          data-test-subj={`presentationUtil__floatingActions__${embeddable.id}`}
+        >
+          {floatingActions ?? (
+            <EuiLoadingSpinner data-test-subj="presentationUtil_loadingfloatingActions" size="s" />
+          )}
         </div>
       )}
     </div>

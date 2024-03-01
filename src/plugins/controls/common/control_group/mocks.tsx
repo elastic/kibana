@@ -7,9 +7,10 @@
  */
 
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { ControlGroupInput } from './types';
 import { getDefaultControlGroupInput } from '..';
 import { ControlGroupContainerFactory } from '../../public';
+import { ControlGroupComponentState } from '../../public/control_group/types';
+import { ControlGroupInput } from './types';
 
 export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): ControlGroupInput => ({
   id: 'mocked_control_group',
@@ -48,7 +49,10 @@ export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): Con
   ...(partial ?? {}),
 });
 
-export const mockControlGroupContainer = async (explicitInput?: Partial<ControlGroupInput>) => {
+export const mockControlGroupContainer = async (
+  explicitInput?: Partial<ControlGroupInput>,
+  initialComponentState?: Partial<ControlGroupComponentState>
+) => {
   const controlGroupFactoryStub = new ControlGroupContainerFactory(
     {} as unknown as EmbeddablePersistableStateService
   );
@@ -58,6 +62,7 @@ export const mockControlGroupContainer = async (explicitInput?: Partial<ControlG
     ...explicitInput,
   };
   const controlGroupContainer = await controlGroupFactoryStub.create(input, undefined, {
+    ...initialComponentState,
     lastSavedInput: {
       panels: input.panels,
       chainingSystem: 'HIERARCHICAL',
