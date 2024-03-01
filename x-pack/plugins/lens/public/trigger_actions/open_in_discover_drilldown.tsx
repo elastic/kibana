@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -20,20 +18,15 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import {
+  apiIsOfType,
+  HasParentApi,
+  PublishesLocalUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import { DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
-interface EmbeddableQueryInput extends EmbeddableInput {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
-
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
-
-/** @internal */
-export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
   locator: () => DiscoverAppLocator | undefined;
@@ -42,7 +35,9 @@ interface UrlDrilldownDeps {
   application: () => ApplicationStart;
 }
 
-export type ActionContext = ApplyGlobalFilterActionContext;
+export type ActionContext = ApplyGlobalFilterActionContext & {
+  embeddable: Partial<PublishesLocalUnifiedSearch & HasParentApi<PublishesLocalUnifiedSearch>>;
+};
 
 export interface Config extends SerializableRecord {
   openInNewTab: boolean;
