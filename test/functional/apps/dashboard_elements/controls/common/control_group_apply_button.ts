@@ -58,8 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       await dashboard.expectMissingUnsavedChangesBadge();
-
-      debugger;
     });
 
     describe('options list', () => {
