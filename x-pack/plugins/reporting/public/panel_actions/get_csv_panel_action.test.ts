@@ -14,11 +14,11 @@ import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDependencies } from '../plugin';
 import type { ActionContext } from './get_csv_panel_action';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 
 const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;

@@ -10,7 +10,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { Toast } from '@kbn/core/public';
-
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { ReplacePanelActionApi } from './replace_panel_action';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
@@ -83,9 +83,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
           <EuiTitle size="m">
             <h2>
               <span>
-                {dashboardReplacePanelActionStrings.getFlyoutHeader(
-                  this.props.api.panelTitle?.value ?? this.props.api.defaultPanelTitle?.value
-                )}
+                {dashboardReplacePanelActionStrings.getFlyoutHeader(getPanelTitle(this.props.api))}
               </span>
             </h2>
           </EuiTitle>
