@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe.only('Dashboard control group hierarchical chaining', () => {
+  describe('Dashboard control group hierarchical chaining', () => {
     let controlIds: string[];
 
     before(async () => {
