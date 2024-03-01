@@ -111,17 +111,7 @@ export const RulesTableHeader = ({
     <EuiFlexGroup direction="column">
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <SearchField
-            isSearching={isSearching}
-            searchValue={searchValue}
-            search={search}
-            totalRulesCount={totalRulesCount}
-            pageSize={pageSize}
-            selectedRules={selectedRules}
-            refetchRulesStates={refetchRulesStates}
-            setSelectAllRules={setSelectAllRules}
-            setSelectedRules={setSelectedRules}
-          />
+          <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiFlexGroup gutterSize="s" direction="row">
@@ -223,18 +213,7 @@ const SearchField = ({
   search,
   isSearching,
   searchValue,
-}: Pick<
-  RulesTableToolbarProps,
-  | 'isSearching'
-  | 'searchValue'
-  | 'search'
-  | 'totalRulesCount'
-  | 'pageSize'
-  | 'selectedRules'
-  | 'refetchRulesStates'
-  | 'setSelectAllRules'
-  | 'setSelectedRules'
->) => {
+}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
   useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
