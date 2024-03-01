@@ -211,6 +211,16 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
+  public async clickApplyButton() {
+    this.log.debug('Clicking the apply button');
+    await this.verifyApplyButtonEnabled();
+
+    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
+    await applyButton.click();
+
+    await this.verifyApplyButtonEnabled(false);
+  }
+
   public async verifyApplyButtonEnabled(enabled: boolean = true) {
     this.log.debug(
       `Checking that control group apply button is ${enabled ? 'enabled' : 'not enabled'}`

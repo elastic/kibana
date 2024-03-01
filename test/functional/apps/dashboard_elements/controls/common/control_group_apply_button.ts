@@ -12,24 +12,21 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const security = getService('security');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
-  const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { dashboard, dashboardControls, timePicker } = getPageObjects([
+  const { dashboard, header, dashboardControls, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
+    'header',
   ]);
 
-  describe('Dashboard control group hierarchical chaining', () => {
+  describe.only('Dashboard control group apply button', () => {
     let controlIds: string[];
 
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
-
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
@@ -58,10 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
       await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
-    });
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      await dashboard.expectMissingUnsavedChangesBadge();
 
-    after(async () => {
-      await security.testUser.restoreDefaults();
+      debugger;
     });
 
     describe('options list', () => {
@@ -76,15 +74,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(optionsListId);
         await dashboardControls.optionsListPopoverSelectOption('cat');
         await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
+        await header.waitUntilLoadingHasFinished();
         await dashboardControls.verifyApplyButtonEnabled();
       });
 
-      it('waits to apply selections until button is pressed', async () => {
+      it('waits to apply filters until button is pressed', async () => {
         await dashboard.expectMissingUnsavedChangesBadge();
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        const applyButton = await testSubjects.find('controlGroup--applyFiltersButton');
-        await applyButton.click();
+        await dashboardControls.clickApplyButton();
+        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         await dashboard.expectUnsavedChangesBadge();
@@ -95,9 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(optionsListId);
         await dashboardControls.optionsListPopoverSelectOption('dog');
         await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
+        await header.waitUntilLoadingHasFinished();
         await dashboardControls.verifyApplyButtonEnabled();
 
         await dashboard.clickDiscardChanges();
+        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         expect(await pieChart.getPieSliceCount()).to.be(5);
@@ -119,12 +120,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.verifyApplyButtonEnabled();
       });
 
-      it('waits to apply filter until apply button is pressed', async () => {
+      it('waits to apply filters until apply button is pressed', async () => {
         await dashboard.expectMissingUnsavedChangesBadge();
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        const applyButton = await testSubjects.find('controlGroup--applyFiltersButton');
-        await applyButton.click();
+        await dashboardControls.clickApplyButton();
+        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         await dashboard.expectUnsavedChangesBadge();
@@ -134,9 +135,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('hitting dashboard resets selections + unapplies filters', async () => {
         await dashboardControls.rangeSliderSetLowerBound(rangeSliderId, '15');
         await dashboardControls.rangeSliderEnsurePopoverIsClosed(rangeSliderId);
+        await header.waitUntilLoadingHasFinished();
         await dashboardControls.verifyApplyButtonEnabled();
 
         await dashboard.clickDiscardChanges();
+        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         expect(await pieChart.getPieSliceCount()).to.be(5);
@@ -161,6 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.verifyApplyButtonEnabled(false);
         await dashboardControls.gotoNextTimeSlice();
         await dashboardControls.gotoNextTimeSlice(); // go to an empty timeslice
+        await header.waitUntilLoadingHasFinished();
         await dashboardControls.verifyApplyButtonEnabled();
       });
 
@@ -168,9 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.expectMissingUnsavedChangesBadge();
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.verifyApplyButtonEnabled();
-        const applyButton = await testSubjects.find('controlGroup--applyFiltersButton');
-        await applyButton.click();
+        await dashboardControls.clickApplyButton();
+        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         await dashboard.expectUnsavedChangesBadge();
@@ -182,6 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.verifyApplyButtonEnabled();
 
         await dashboard.clickDiscardChanges();
+        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         expect(await pieChart.getPieSliceCount()).to.be(5);
@@ -189,6 +193,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);
       });
+    });
+
+    after(async () => {
+      const optionsListId = controlIds[0];
+      await dashboardControls.verifyApplyButtonEnabled(false);
+      await dashboardControls.optionsListOpenPopover(optionsListId);
+      await dashboardControls.optionsListPopoverSelectOption('cat');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
+      await header.waitUntilLoadingHasFinished();
+      await dashboardControls.verifyApplyButtonEnabled();
+
+      await dashboardControls.updateShowApplyButtonSetting(false);
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.expectUnsavedChangesBadge();
+      expect(await pieChart.getPieSliceCount()).to.be(4);
+    });
+
+    it('renabling auto-apply forces filters to be published', async () => {
+      const optionsListId = controlIds[0];
+      await dashboardControls.verifyApplyButtonEnabled(false);
+      await dashboardControls.optionsListOpenPopover(optionsListId);
+      await dashboardControls.optionsListPopoverSelectOption('cat');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
+      await header.waitUntilLoadingHasFinished();
+      await dashboardControls.verifyApplyButtonEnabled();
+
+      await dashboardControls.updateShowApplyButtonSetting(false);
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.expectUnsavedChangesBadge();
+      expect(await pieChart.getPieSliceCount()).to.be(4);
+      await dashboard.clickDiscardChanges();
     });
   });
 }

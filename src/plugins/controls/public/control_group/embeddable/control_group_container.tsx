@@ -293,14 +293,14 @@ export class ControlGroupContainer extends Container<
 
   public resetToLastSavedState() {
     const {
-      explicitInput: { showApplySelections },
+      explicitInput: { showApplySelections: currentShowApplySelections },
       componentState: { lastSavedInput },
     } = this.getState();
 
     if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
       this.updateInput(lastSavedInput);
-      if (showApplySelections) {
-        /** Calling reset should force the changes to be published */
+      if (currentShowApplySelections || lastSavedInput.showApplySelections) {
+        /** If either the current or past state has auto-apply off, calling reset should force the changes to be published */
         this.calculateFiltersFromSelections(lastSavedInput.panels).then((filterOutput) => {
           this.publishFilters(filterOutput);
         });
