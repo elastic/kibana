@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import {
@@ -221,10 +221,14 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   role: 'assistant',
                   content: 'My response',
                 });
+              });
 
-                await common.waitUntilUrlIncludes(
-                  `/conversations/${response.body.conversations[0].conversation.id}`
-                );
+              it('updates the list of conversations', async () => {
+                const links = await testSubjects.findAll(ui.pages.conversations.conversationLink);
+                expect(links.length).to.eql(1);
+
+                const title = await links[0].getVisibleText();
+                expect(title).to.eql('My title');
               });
 
               describe('and adding another prompt', () => {
