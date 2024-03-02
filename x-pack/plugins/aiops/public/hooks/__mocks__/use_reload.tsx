@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { useIndexData } from './use_index_data';
-export { useHasRequiredIndicesPermissions } from './use_has_index_permission';
+const staticMock = {
+  refreshTimestamp: 1708711043761,
+};
+
+export const useReload = jest.fn(() => {
+  return staticMock;
+});
