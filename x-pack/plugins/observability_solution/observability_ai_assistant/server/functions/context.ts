@@ -285,7 +285,8 @@ async function scoreSuggestions({
   });
 
   if (scores.length === 0) {
-    return { relevantDocuments: [], scores: [] };
+    // seemingly invalid or no scores, return all
+    return { relevantDocuments: suggestions, scores: [] };
   }
 
   const suggestionIds = suggestions.map((document) => document.id);
