@@ -26,6 +26,9 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../store';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { allowedExperimentalValues } from '../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -48,27 +51,18 @@ jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
 
 jest.mock('../../../../common/lib/kuery');
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => {
-  return {
-    useIsExperimentalFeatureEnabled: jest.fn((x: string) => {
-      if (x === 'unifiedComponentsInTimelineEnabled') {
-        return true;
-      }
-      return false;
-    }),
-  };
+jest.mock('../../../../common/hooks/use_experimental_features');
+
+const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
+  if (feature === 'unifiedComponentsInTimelineEnabled') {
+    return true;
+  }
+  return allowedExperimentalValues[feature] ?? false;
 });
 
 // unified-field-list is is reporiting multiple analytics events
 jest.mock('../../../../common/lib/kibana');
 jest.mock(`@kbn/analytics-client`);
-
-const startDate = '2011-03-23T18:49:23.132Z';
-const endDate = '2024-03-24T03:33:52.253Z';
-
-const TestComponentWrapper = () => {
-  return <TestProviders>{children}</TestProviders>;
-};
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -175,6 +169,10 @@ describe('query tab with unified timeline', () => {
     (useSourcererDataView as jest.Mock).mockImplementation(() => ({
       ...mockSourcererScope,
     }));
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+      useIsExperimentalFeatureEnabledMock
+    );
   });
 
   it('should render unifiedDataTable in timeline', async () => {

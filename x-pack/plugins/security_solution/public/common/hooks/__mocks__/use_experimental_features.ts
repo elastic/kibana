@@ -8,10 +8,12 @@
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
-export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
-  if (feature in allowedExperimentalValues) {
-    return allowedExperimentalValues[feature];
-  }
+export const useIsExperimentalFeatureEnabled = jest
+  .fn()
+  .mockImplementation((feature: keyof ExperimentalFeatures): boolean => {
+    if (feature in allowedExperimentalValues) {
+      return allowedExperimentalValues[feature];
+    }
 
-  throw new Error(`Invalid experimental value ${feature}}`);
-};
+    throw new Error(`Invalid experimental value ${feature}}`);
+  });
