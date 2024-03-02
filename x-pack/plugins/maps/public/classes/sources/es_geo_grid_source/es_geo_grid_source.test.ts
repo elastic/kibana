@@ -40,7 +40,7 @@ export class MockSearchSource {
     return {
       aggs: {},
       scripted_fields: 'shouldNotGetAddedToTileUrl',
-      fields: this.setField.mock.calls
+      fields: this.setField.mock.calls,
     };
   }
 }
