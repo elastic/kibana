@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import {
@@ -27,7 +27,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   const toasts = getService('toasts');
 
-  const { header, common } = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header', 'common']);
 
   const flyoutService = getService('flyout');
 
