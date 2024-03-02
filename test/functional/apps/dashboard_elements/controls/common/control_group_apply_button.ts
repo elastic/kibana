@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe.only('Dashboard control group apply button', () => {
+  describe('Dashboard control group apply button', () => {
     let controlIds: string[];
 
     before(async () => {
