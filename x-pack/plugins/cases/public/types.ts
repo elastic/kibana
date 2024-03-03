@@ -73,7 +73,12 @@ export interface CasesPublicStartDependencies {
   features: FeaturesPluginStart;
   files: FilesStart;
   lens: LensPublicStart;
-  licensing: LicensingPluginStart;
+  /**
+   * Cases in used by other plugins. Plugins pass the
+   * service to their KibanaContext. ML does not pass
+   * the licensing service thus it is optional.
+   */
+  licensing?: LicensingPluginStart;
   contentManagement: ContentManagementPublicStart;
   security: SecurityPluginStart;
   serverless?: ServerlessPluginStart;
