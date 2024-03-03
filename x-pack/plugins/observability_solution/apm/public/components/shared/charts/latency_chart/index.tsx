@@ -101,8 +101,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant;
 
   useEffect(() => {
     return setScreenContext(

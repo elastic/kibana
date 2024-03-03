@@ -56,8 +56,7 @@ export function TransactionOverview() {
     false
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant;
 
   useEffect(() => {
     return setScreenContext({

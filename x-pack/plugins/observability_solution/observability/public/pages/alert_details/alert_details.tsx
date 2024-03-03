@@ -57,9 +57,7 @@ export function AlertDetails() {
     },
     http,
     triggersActionsUi: { ruleTypeRegistry },
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
+    observabilityAIAssistant: { setScreenContext },
     uiSettings,
   } = useKibana().services;
 

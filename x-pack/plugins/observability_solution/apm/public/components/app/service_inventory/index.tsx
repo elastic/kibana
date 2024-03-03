@@ -266,8 +266,7 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant;
 
   useEffect(() => {
     if (isFailure(mainStatisticsStatus)) {

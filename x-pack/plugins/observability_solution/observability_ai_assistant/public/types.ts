@@ -136,8 +136,11 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
 
 export interface ObservabilityAIAssistantPublicSetup {}
 
-export interface ObservabilityAIAssistantPublicStart {
-  service: ObservabilityAIAssistantService;
+export interface ObservabilityAIAssistantPublicStart
+  extends Pick<
+    ObservabilityAIAssistantService,
+    'isEnabled' | 'start' | 'register' | 'getScreenContexts' | 'setScreenContext'
+  > {
   ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
   ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
     Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &

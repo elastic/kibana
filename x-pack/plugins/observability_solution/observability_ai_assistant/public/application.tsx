@@ -16,8 +16,8 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { observabilityAIAssistantRouter } from './routes/config';
 import type {
-  ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
+  ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
 
 // This is the Conversation application.

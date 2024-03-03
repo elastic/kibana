@@ -129,9 +129,7 @@ const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
   observabilityAIAssistant: {
-    service: {
-      setScreenContext: () => noop,
-    },
+    setScreenContext: () => noop,
   },
 } as unknown as ApmPluginContextValue;
 

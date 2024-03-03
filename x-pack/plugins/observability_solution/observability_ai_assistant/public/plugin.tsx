@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { bindAll, pick } from 'lodash';
 import { createService } from './service/create_service';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
@@ -142,8 +143,17 @@ export class ObservabilityAIAssistantPlugin
 
     const isEnabled = service.isEnabled();
 
+    const publicService = pick(
+      bindAll(service, Object.keys(service)),
+      'getScreenContexts',
+      'setScreenContext',
+      'isEnabled',
+      'start',
+      'register'
+    );
+
     return {
-      service,
+      ...publicService,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
       ObservabilityAIAssistantContextualInsight: isEnabled
         ? withSuspense(

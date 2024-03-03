@@ -53,8 +53,7 @@ export function ServiceOverview() {
   const { serviceName, fallbackToTransactions, agentName, serverlessType } =
     useApmServiceContext();
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant;
 
   useEffect(() => {
     return setScreenContext({

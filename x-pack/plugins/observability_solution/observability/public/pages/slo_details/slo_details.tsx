@@ -41,9 +41,7 @@ export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
+    observabilityAIAssistant: { setScreenContext },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { search } = useLocation();

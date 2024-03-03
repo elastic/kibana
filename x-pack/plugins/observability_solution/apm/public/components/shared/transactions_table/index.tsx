@@ -164,8 +164,7 @@ export function TransactionsTable({
       };
     }, [mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant;
 
   useEffect(() => {
     return setScreenContext({
