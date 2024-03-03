@@ -44,6 +44,7 @@ import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { ContextDefinition, FunctionDefinition, FunctionResponse } from '../common/functions/types';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_provider';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -142,6 +143,7 @@ export interface ObservabilityAIAssistantPublicStart
     'isEnabled' | 'start' | 'register' | 'getScreenContexts' | 'setScreenContext'
   > {
   ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
+  ObservabilityAIAssistantMultipaneFlyoutContext: typeof ObservabilityAIAssistantMultipaneFlyoutContext;
   ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
     Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
       RefAttributes<{}>

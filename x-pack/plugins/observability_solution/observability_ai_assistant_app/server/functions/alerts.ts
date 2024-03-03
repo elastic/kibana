@@ -13,6 +13,7 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
 import { FunctionRegistrationParameters } from '.';
 
 const OMITTED_ALERT_FIELDS = [
@@ -38,7 +39,11 @@ const DEFAULT_FEATURE_IDS = [
   'observability',
 ] as const;
 
-export function registerAlertsFunction({ functions, resources }: FunctionRegistrationParameters) {
+export function registerAlertsFunction({
+  functions,
+  resources,
+  pluginsStart,
+}: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
       name: 'alerts',
@@ -94,8 +99,9 @@ export function registerAlertsFunction({ functions, resources }: FunctionRegistr
       },
       signal
     ) => {
-      const racContext = await resources.context.rac;
-      const alertsClient = await racContext.getAlertsClient();
+      const alertsClient = await pluginsStart.ruleRegistry.getRacClientWithRequest(
+        resources.request as KibanaRequest
+      );
 
       const start = datemath.parse(startAsDatemath)!.valueOf();
       const end = datemath.parse(endAsDatemath)!.valueOf();

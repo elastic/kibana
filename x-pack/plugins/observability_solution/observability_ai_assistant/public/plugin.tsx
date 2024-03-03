@@ -31,6 +31,7 @@ import type {
 } from './types';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_provider';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -110,16 +111,6 @@ export class ObservabilityAIAssistantPlugin
       shareStart: pluginsStart.share,
     }));
 
-    service.register(async ({ registerRenderFunction }) => {
-      const mod = await import('./functions');
-
-      return mod.registerFunctions({
-        service,
-        pluginsStart,
-        registerRenderFunction,
-      });
-    });
-
     const withProviders = <P extends {}, R = {}>(
       Component: ComponentType<P>,
       services: Omit<CoreStart, 'plugins'> & {
@@ -155,6 +146,7 @@ export class ObservabilityAIAssistantPlugin
     return {
       ...publicService,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      ObservabilityAIAssistantMultipaneFlyoutContext,
       ObservabilityAIAssistantContextualInsight: isEnabled
         ? withSuspense(
             withProviders(

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
 import { lensFunctionDefinition } from '../../common/functions/lens';
-import type { ChatFunctionClient } from '../service/chat_function_client';
 
 export function registerLensFunction({ functions }: { functions: ChatFunctionClient }) {
   functions.registerFunction(lensFunctionDefinition, async () => {

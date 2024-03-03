@@ -13,13 +13,24 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ConfigSchema,
   ObservabilityAIAssistantService,
+  RegisterRenderFunctionDefinition,
+  RenderFunction,
 } from './types';
 
 export type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
+  RegisterRenderFunctionDefinition,
+  RenderFunction,
 };
+
+export { type ChatActionClickHandler, ChatActionClickType } from './components/chat/types';
+
+export {
+  VisualizeESQLUserIntention,
+  VISUALIZE_ESQL_USER_INTENTIONS,
+} from '../common/functions/visualize_esql';
 
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';

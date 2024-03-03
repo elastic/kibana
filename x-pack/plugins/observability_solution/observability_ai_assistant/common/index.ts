@@ -6,5 +6,9 @@
  */
 
 export type { Message, Conversation, KnowledgeBaseEntry } from './types';
-export { KnowledgeBaseEntryRole } from './types';
-export { MessageRole } from './types';
+export { KnowledgeBaseEntryRole, MessageRole } from './types';
+export { FunctionVisibility } from './functions/types';
+export {
+  VISUALIZE_ESQL_USER_INTENTIONS,
+  VisualizeESQLUserIntention,
+} from './functions/visualize_esql';

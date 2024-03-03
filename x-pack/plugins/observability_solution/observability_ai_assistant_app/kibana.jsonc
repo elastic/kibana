@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-ai-assistant-app-plugin",
+  "owner": "@elastic/obs-knowledge-team",
+  "plugin": {
+    "id": "observabilityAIAssistantApp",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "observabilityAIAssistantApp"],
+    "requiredPlugins": [
+      "observabilityAIAssistant",
+      "actions",
+      "data",
+      "dataViews",
+      "lens",
+      "ruleRegistry",
+      "uiActions",
+      "dataViews"
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": ["cloud"],
+    "extraPublicDirs": []
+  }
+}

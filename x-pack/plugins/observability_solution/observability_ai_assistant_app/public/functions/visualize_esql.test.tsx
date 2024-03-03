@@ -12,7 +12,6 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks/lens_plugin_mock';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ObservabilityAIAssistantMultipaneFlyoutProvider } from '../context/observability_ai_assistant_multipane_flyout_provider';
 import { VisualizeESQL } from './visualize_esql';
 
 describe('VisualizeESQL', () => {
@@ -50,8 +49,11 @@ describe('VisualizeESQL', () => {
         },
       },
     ] as DatatableColumn[];
+
+    const ObservabilityAIAssistantMultipaneFlyoutContext = React.createContext<any>(undefined);
+
     render(
-      <ObservabilityAIAssistantMultipaneFlyoutProvider
+      <ObservabilityAIAssistantMultipaneFlyoutContext.Provider
         value={{
           container: document.createElement('div'),
           setVisibility: setVisibilitySpy ?? jest.fn(),
@@ -65,8 +67,11 @@ describe('VisualizeESQL', () => {
           query={'from foo | keep bytes, destination'}
           onActionClick={jest.fn()}
           userOverrides={userOverrides}
+          ObservabilityAIAssistantMultipaneFlyoutContext={
+            ObservabilityAIAssistantMultipaneFlyoutContext
+          }
         />
-      </ObservabilityAIAssistantMultipaneFlyoutProvider>
+      </ObservabilityAIAssistantMultipaneFlyoutContext.Provider>
     );
   }
 

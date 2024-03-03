@@ -9,13 +9,9 @@ import dedent from 'dedent';
 import { registerContextFunction } from './context';
 import { registerSummarizationFunction } from './summarize';
 import type { RegistrationCallback } from '../service/types';
-import { registerAlertsFunction } from './alerts';
 import { registerElasticsearchFunction } from './elasticsearch';
-import { registerQueryFunction } from './query';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
-import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
-import { registerVisualizeESQLFunction } from './visualize_esql';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],
@@ -93,7 +89,6 @@ export const registerFunctions: RegistrationCallback = async ({
         `;
 
       registerSummarizationFunction(registrationParameters);
-      registerLensFunction(registrationParameters);
     } else {
       description += `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`;
     }
@@ -101,10 +96,17 @@ export const registerFunctions: RegistrationCallback = async ({
     registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
 
     registerElasticsearchFunction(registrationParameters);
-    registerKibanaFunction(registrationParameters);
-    registerQueryFunction(registrationParameters);
-    registerVisualizeESQLFunction(registrationParameters);
-    registerAlertsFunction(registrationParameters);
+    const request = registrationParameters.resources.request;
+
+    if ('id' in request) {
+      registerKibanaFunction({
+        ...registrationParameters,
+        resources: {
+          ...registrationParameters.resources,
+          request,
+        },
+      });
+    }
     registerGetDatasetInfoFunction(registrationParameters);
 
     functions.registerContext({

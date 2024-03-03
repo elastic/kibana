@@ -6,11 +6,9 @@
  */
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLSearchReponse } from '@kbn/es-types';
-import {
-  visualizeESQLFunction,
-  VisualizeESQLUserIntention,
-} from '../../common/functions/visualize_esql';
-import type { FunctionRegistrationParameters } from '.';
+import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
+import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
+import { FunctionRegistrationParameters } from '.';
 
 export function registerVisualizeESQLFunction({
   functions,

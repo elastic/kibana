@@ -12,13 +12,12 @@ import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/publ
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { Assign } from 'utility-types';
-import type { LensFunctionArguments } from '../../common/functions/lens';
-import type {
-  ObservabilityAIAssistantPluginStartDependencies,
-  ObservabilityAIAssistantService,
+import {
   RegisterRenderFunctionDefinition,
   RenderFunction,
-} from '../types';
+} from '@kbn/observability-ai-assistant-plugin/public/types';
+import type { LensFunctionArguments } from '../../common/functions/lens';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export enum SeriesType {
   Bar = 'bar',
@@ -139,13 +138,11 @@ function Lens({
 }
 
 export function registerLensRenderFunction({
-  service,
   registerRenderFunction,
   pluginsStart,
 }: {
-  service: ObservabilityAIAssistantService;
   registerRenderFunction: RegisterRenderFunctionDefinition;
-  pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
     'lens',

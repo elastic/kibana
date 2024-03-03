@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import type {
-  ObservabilityAIAssistantPluginStartDependencies,
-  ObservabilityAIAssistantService,
-  RegisterRenderFunctionDefinition,
-} from '../types';
+import type { RegisterRenderFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/public/types';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { registerLensRenderFunction } from './lens';
 import { registerVisualizeQueryRenderFunction } from './visualize_esql';
 
 export async function registerFunctions({
   registerRenderFunction,
-  service,
   pluginsStart,
 }: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
-  service: ObservabilityAIAssistantService;
-  pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
-  registerLensRenderFunction({ service, pluginsStart, registerRenderFunction });
-  registerVisualizeQueryRenderFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensRenderFunction({ pluginsStart, registerRenderFunction });
+  registerVisualizeQueryRenderFunction({ pluginsStart, registerRenderFunction });
 }

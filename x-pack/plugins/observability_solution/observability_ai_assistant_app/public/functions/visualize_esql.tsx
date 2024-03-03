@@ -4,40 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiToolTip,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { i18n } from '@kbn/i18n';
 import type {
+  InlineEditLensEmbeddableContext,
   LensPublicStart,
   TypedLensByValueInput,
-  InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
-import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
-import ReactDOM from 'react-dom';
-import useAsync from 'react-use/lib/useAsync';
-import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
-import {
-  VisualizeESQLFunctionArguments,
-  VisualizeESQLUserIntention,
-} from '../../common/functions/visualize_esql';
-import { ObservabilityAIAssistantMultipaneFlyoutContext } from '../context/observability_ai_assistant_multipane_flyout_provider';
 import type {
-  ObservabilityAIAssistantPluginStartDependencies,
-  ObservabilityAIAssistantService,
+  ChatActionClickHandler,
+  ObservabilityAIAssistantPublicStart,
   RegisterRenderFunctionDefinition,
   RenderFunction,
-} from '../types';
-import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
+} from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ChatActionClickType,
+  VisualizeESQLUserIntention,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
+import useAsync from 'react-use/lib/useAsync';
+import { v4 as uuidv4 } from 'uuid';
+import { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 enum ChartType {
   XY = 'XY',
@@ -86,6 +86,7 @@ interface VisualizeESQLProps {
   userOverrides?: unknown;
   /** User's preferation chart type as it comes from the model */
   preferredChartType?: ChartType;
+  ObservabilityAIAssistantMultipaneFlyoutContext: ObservabilityAIAssistantPublicStart['ObservabilityAIAssistantMultipaneFlyoutContext'];
 }
 
 function generateId() {
@@ -101,6 +102,7 @@ export function VisualizeESQL({
   onActionClick,
   userOverrides,
   preferredChartType,
+  ObservabilityAIAssistantMultipaneFlyoutContext,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -300,13 +302,11 @@ export function VisualizeESQL({
 }
 
 export function registerVisualizeQueryRenderFunction({
-  service,
   registerRenderFunction,
   pluginsStart,
 }: {
-  service: ObservabilityAIAssistantService;
   registerRenderFunction: RegisterRenderFunctionDefinition;
-  pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
     'visualize_query',
@@ -372,6 +372,9 @@ export function registerVisualizeQueryRenderFunction({
 
       return (
         <VisualizeESQL
+          ObservabilityAIAssistantMultipaneFlyoutContext={
+            pluginsStart.observabilityAIAssistant.ObservabilityAIAssistantMultipaneFlyoutContext
+          }
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}

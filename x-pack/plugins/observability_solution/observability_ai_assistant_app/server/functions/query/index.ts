@@ -11,20 +11,19 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith, type Observable } from 'rxjs';
 import { promisify } from 'util';
-import type { FunctionRegistrationParameters } from '..';
-import type { ChatCompletionChunkEvent } from '../../../common/conversation_complete';
-import { FunctionVisibility } from '../../../common/functions/types';
+import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
   VISUALIZE_ESQL_USER_INTENTIONS,
-} from '../../../common/functions/visualize_esql';
-import { MessageRole } from '../../../common/types';
+} from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import {
   concatenateChatCompletionChunks,
-  type ConcatenatedMessage,
-} from '../../../common/utils/concatenate_chat_completion_chunks';
-import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
-import { createFunctionResponseMessage } from '../../service/util/create_function_response_message';
+  ConcatenatedMessage,
+} from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
+import { ChatCompletionChunkEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
+import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/server/service/util/create_function_response_message';
+import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 
 const readFile = promisify(Fs.readFile);

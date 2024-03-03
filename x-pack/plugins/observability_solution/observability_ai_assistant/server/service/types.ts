@@ -6,6 +6,7 @@
  */
 
 import type { FromSchema } from 'json-schema-to-ts';
+import type { FakeRequest, KibanaRequest } from '@kbn/core/server';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -18,8 +19,8 @@ import type { ObservabilityAIAssistantClient } from './client';
 
 export type RespondFunctionResources = Pick<
   ObservabilityAIAssistantRouteHandlerResources,
-  'context' | 'logger' | 'plugins' | 'request'
->;
+  'context' | 'logger' | 'plugins'
+> & { request: KibanaRequest | FakeRequest };
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
