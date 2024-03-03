@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, cloneDeep, pickBy, mapValues, omit, assign } from 'lodash';
+import { each, cloneDeep, pickBy, mapValues, omit, assign, chain } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 import { DataViewField } from '../fields';
@@ -60,7 +60,6 @@ export class DataViewLazy extends AbstractDataView {
     this.apiClient = config.apiClient;
   }
 
-  // todo sort alphabetically
   async getFields({
     mapped = true,
     scripted = true,
@@ -97,7 +96,21 @@ export class DataViewLazy extends AbstractDataView {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
 
-    return { ...scriptedResult, ...mappedResult, ...runtimeResult };
+    const fieldMap = { ...scriptedResult, ...mappedResult, ...runtimeResult };
+    let fieldMapSorted = {};
+    let hasBeenSorted = false;
+
+    return {
+      getFieldMap: () => fieldMap,
+      // todo test
+      getFieldMapSorted: () => {
+        if (!hasBeenSorted) {
+          fieldMapSorted = chain(fieldMap).toPairs().sortBy(0).fromPairs().value();
+          hasBeenSorted = true;
+        }
+        return fieldMapSorted;
+      },
+    };
   }
 
   private getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
@@ -379,14 +392,13 @@ export class DataViewLazy extends AbstractDataView {
     metaFields,
     fieldTypes,
   }: Omit<GetFieldsParams, 'mapped' | 'scripted' | 'runtime'>) {
-    // todo look at refreshFieldsFn
     const response = await this.apiClient.getFieldsForWildcard({
       pattern: this.getIndexPattern(),
       metaFields: metaFields ? this.metaFields : undefined,
       type: this.type,
       rollupIndex: this.typeMeta?.params?.rollup_index,
       fields: fieldName || ['*'],
-      allowNoIndex: true, // todo research this
+      allowNoIndex: true, // note this in pr
       indexFilter,
       includeUnmapped,
       forceRefresh,
@@ -432,12 +444,14 @@ export class DataViewLazy extends AbstractDataView {
   async getComputedFields({ fieldNames = ['*'] }: { fieldNames: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
 
-    const fieldMap = await this.getFields({
-      fieldName: fieldNames,
-      fieldTypes: ['date', 'date_nanos'],
-      scripted: false,
-      runtime: false,
-    });
+    const fieldMap = (
+      await this.getFields({
+        fieldName: fieldNames,
+        fieldTypes: ['date', 'date_nanos'],
+        scripted: false,
+        runtime: false,
+      })
+    ).getFieldMap();
 
     const docvalueFields = Object.values(fieldMap).map((dateField) => {
       return {
@@ -513,8 +527,8 @@ export class DataViewLazy extends AbstractDataView {
 
     if (params.fieldParams) {
       const fields: DataViewFieldSpecMap = {};
-      const fldMap = await this.getFields(params.fieldParams);
-      Object.values(fldMap).forEach((field) => {
+      const fieldMap = (await this.getFields(params.fieldParams)).getFieldMap();
+      Object.values(fieldMap).forEach((field) => {
         fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
       });
       spec.fields = fields;
@@ -549,8 +563,10 @@ export class DataViewLazy extends AbstractDataView {
    * returns true if dataview contains TSDB fields
    */
   async isTSDBMode() {
-    return await this.getFields({ fieldName: ['*'] }).then((fields) =>
-      Object.values(fields).some((field) => field.timeSeriesDimension || field.timeSeriesMetric)
+    const fieldMap = (await this.getFields({ fieldName: ['*'] })).getFieldMap();
+
+    return Object.values(fieldMap).some(
+      (field) => field.timeSeriesDimension || field.timeSeriesMetric
     );
   }
 
@@ -573,7 +589,7 @@ export class DataViewLazy extends AbstractDataView {
   getTimeField = () => (this.timeFieldName ? this.getFieldByName(this.timeFieldName) : undefined);
 
   async getFieldByName(name: string, forceRefresh = false) {
-    const fieldMap = await this.getFields({ fieldName: [name], forceRefresh });
+    const fieldMap = (await this.getFields({ fieldName: [name], forceRefresh })).getFieldMap();
     return fieldMap[name];
   }
 

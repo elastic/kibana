@@ -428,7 +428,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       if (!newCount) fieldObject.deleteCount();
       else fieldObject.count = newCount;
     }
-    this.setFieldAttrs(fieldName, 'count', newCount);
+    this.setFieldCountInternal(fieldName, newCount);
   }
 
   /**

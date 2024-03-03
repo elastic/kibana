@@ -310,7 +310,6 @@ export abstract class AbstractDataView {
   }
 
   /**
-   * TODO use with regular data view class
    * Set field count
    * @param fieldName name of field to set count on
    * @param count count value. If undefined, count is removed
@@ -360,7 +359,6 @@ export abstract class AbstractDataView {
     };
   }
 
-  // todo merge with other fn?
   protected upsertScriptedFieldInternal = (field: FieldSpec) => {
     this.scriptedFields[field.name] = {
       name: field.name,
@@ -371,7 +369,6 @@ export abstract class AbstractDataView {
     };
   };
 
-  // todo merge with other fn?
   protected deleteScriptedFieldInternal = (fieldName: string) => {
     delete this.scriptedFields[fieldName];
   };
