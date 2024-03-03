@@ -10,6 +10,13 @@ import { AGG_TYPE } from '../../../../common/constants';
 import type { IESSource } from '../es_source';
 import { IESAggField } from '../../fields/agg';
 
+export function hasESAggSourceMethod(
+  source: IESSource,
+  methodName: keyof IESAggSource
+): source is Pick<IESAggSource, typeof methodName> {
+  return typeof (source as IESAggSource)[methodName] === 'function';
+}
+
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string>;
