@@ -42,6 +42,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
+      field_types: fieldTypes,
     } = request.query;
 
     let parsedFields: string[] = [];
@@ -63,6 +64,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
+        fieldTypes,
         indexFilter: getIndexFilterDsl({ excludedTiers }),
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
