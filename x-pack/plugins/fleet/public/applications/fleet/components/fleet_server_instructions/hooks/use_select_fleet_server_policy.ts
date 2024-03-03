@@ -26,7 +26,7 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   const eligibleFleetServerPolicies = useMemo(
     () =>
       agentPoliciesData
-        ? agentPoliciesData.items?.filter((item) => policyHasFleetServer(item))
+        ? agentPoliciesData.items?.filter((item) => !item.is_managed && policyHasFleetServer(item))
         : [],
     [agentPoliciesData]
   );
