@@ -69,7 +69,7 @@ export class DataViewLazy extends AbstractDataView {
     unmapped,
     indexFilter,
     metaFields = true,
-  }: GetFieldsParams) {
+  }: GetFieldsParams = {}) {
     let mappedResult: DataViewFieldMap = {};
     let scriptedResult: DataViewFieldMap = {};
     let runtimeResult: DataViewFieldMap = {};
@@ -102,7 +102,6 @@ export class DataViewLazy extends AbstractDataView {
 
     return {
       getFieldMap: () => fieldMap,
-      // todo test
       getFieldMapSorted: () => {
         if (!hasBeenSorted) {
           fieldMapSorted = chain(fieldMap).toPairs().sortBy(0).fromPairs().value();
@@ -563,7 +562,7 @@ export class DataViewLazy extends AbstractDataView {
    * returns true if dataview contains TSDB fields
    */
   async isTSDBMode() {
-    const fieldMap = (await this.getFields({ fieldName: ['*'] })).getFieldMap();
+    const fieldMap = (await this.getFields()).getFieldMap();
 
     return Object.values(fieldMap).some(
       (field) => field.timeSeriesDimension || field.timeSeriesMetric

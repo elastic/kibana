@@ -327,6 +327,7 @@ export class DataViewsService {
    */
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+  private dataViewLazyCache: Map<string, DataViewLazy>;
   /**
    * Can the user save advanced settings?
    */
@@ -363,6 +364,7 @@ export class DataViewsService {
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = createDataViewCache();
+    this.dataViewLazyCache = new Map();
     this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
@@ -445,18 +447,28 @@ export class DataViewsService {
     }));
   };
 
-  /*
-
-  getAllDataViewAsync = async (refresh: boolean = false) => {
+  getAllDataViewLazy = async (refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map((obj) => new DataViewAsync(obj));
+
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+
+    return this.savedObjectsCache.map(
+      (so) =>
+        new DataViewLazy({
+          spec: this.savedObjectToSpec(so),
+          fieldFormats: this.fieldFormats,
+          shortDotsEnable,
+          metaFields,
+          apiClient: this.apiClient,
+        })
+    );
   };
-  */
 
   /**
    * Clear index pattern saved objects cache.
@@ -933,20 +945,32 @@ export class DataViewsService {
   };
 
   getDataViewLazy = async (id: string) => {
-    // todo add cache
-    const savedObject = await this.savedObjectsClient.get(id);
-    const spec = this.savedObjectToSpec(savedObject);
-    // todo make shared code
-    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+    const dataViewLazyFromCache = this.dataViewLazyCache.get(id);
+    if (dataViewLazyFromCache) {
+      return dataViewLazyFromCache;
+    } else {
+      // todo verify behavior
+      const savedObject = await this.savedObjectsClient.get(id);
+      if (!savedObject) {
+        return;
+      }
 
-    return new DataViewLazy({
-      spec,
-      fieldFormats: this.fieldFormats,
-      shortDotsEnable,
-      metaFields,
-      apiClient: this.apiClient,
-    });
+      const spec = this.savedObjectToSpec(savedObject);
+      // todo make shared code
+      const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+      const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+
+      const dataViewLazy = new DataViewLazy({
+        spec,
+        fieldFormats: this.fieldFormats,
+        shortDotsEnable,
+        metaFields,
+        apiClient: this.apiClient,
+      });
+
+      this.dataViewLazyCache.set(id, dataViewLazy);
+      return dataViewLazy;
+    }
   };
 
   /**
