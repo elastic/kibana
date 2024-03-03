@@ -157,7 +157,7 @@ export abstract class AbstractDataView {
       : [];
 
     this.allowNoIndex = spec?.allowNoIndex || false;
-    // TODO CRUD operations on scripted fields need to be examined
+
     this.scriptedFields = spec?.fields
       ? Object.values(spec.fields)
           .filter((field) => field.scripted)
