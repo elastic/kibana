@@ -13,11 +13,12 @@ import { lastValueFrom, startWith, type Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
 import type { ChatCompletionChunkEvent } from '../../../common/conversation_complete';
+import { FunctionVisibility } from '../../../common/functions/types';
 import {
   VisualizeESQLUserIntention,
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../../../common/functions/visualize_esql';
-import { FunctionVisibility, MessageRole } from '../../../common/types';
+import { MessageRole } from '../../../common/types';
 import {
   concatenateChatCompletionChunks,
   type ConcatenatedMessage,
@@ -69,10 +70,10 @@ const loadEsqlDocs = once(async () => {
 
 export function registerQueryFunction({
   client,
-  registerFunction,
+  functions,
   resources,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'execute_query',
       contexts: ['core'],
@@ -103,7 +104,7 @@ export function registerQueryFunction({
       return { content: response };
     }
   );
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'query',
       contexts: ['core'],

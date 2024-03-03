@@ -13,11 +13,10 @@ import {
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerVisualizeESQLFunction({
-  client,
-  registerFunction,
+  functions,
   resources,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     visualizeESQLFunction,
     async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
       // With limit 0 I get only the columns, it is much more performant

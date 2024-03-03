@@ -35,9 +35,6 @@ import type {
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
-  ContextDefinition,
-  FunctionDefinition,
-  FunctionResponse,
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
@@ -46,10 +43,10 @@ import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import { ContextDefinition, FunctionDefinition, FunctionResponse } from '../common/functions/types';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export type { CreateChatCompletionResponseChunk } from '../common/types';
 export type { PendingMessage };
 
 export interface ObservabilityAIAssistantChatService {
@@ -137,9 +134,9 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   ml: MlPluginStart;
 }
 
-export interface ObservabilityAIAssistantPluginSetup {}
+export interface ObservabilityAIAssistantPublicSetup {}
 
-export interface ObservabilityAIAssistantPluginStart {
+export interface ObservabilityAIAssistantPublicStart {
   service: ObservabilityAIAssistantService;
   ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
   ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<

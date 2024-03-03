@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   type Message,
   MessageRole,
-  type ObservabilityAIAssistantPluginStart,
+  type ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
@@ -20,7 +20,7 @@ export interface LogAIAssistantDocument {
 }
 
 export interface LogAIAssistantProps {
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   doc: LogAIAssistantDocument | undefined;
 }
 

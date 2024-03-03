@@ -22,9 +22,9 @@ import { createService } from './service/create_service';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
   ConfigSchema,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPluginSetupDependencies,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from './types';
@@ -34,8 +34,8 @@ import { ObservabilityAIAssistantProvider } from './context/observability_ai_ass
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
-      ObservabilityAIAssistantPluginSetup,
-      ObservabilityAIAssistantPluginStart,
+      ObservabilityAIAssistantPublicSetup,
+      ObservabilityAIAssistantPublicStart,
       ObservabilityAIAssistantPluginSetupDependencies,
       ObservabilityAIAssistantPluginStartDependencies
     >
@@ -49,7 +49,7 @@ export class ObservabilityAIAssistantPlugin
   setup(
     coreSetup: CoreSetup,
     pluginsSetup: ObservabilityAIAssistantPluginSetupDependencies
-  ): ObservabilityAIAssistantPluginSetup {
+  ): ObservabilityAIAssistantPublicSetup {
     coreSetup.application.register({
       id: 'observabilityAIAssistant',
       title: i18n.translate('xpack.observabilityAiAssistant.appTitle', {
@@ -99,7 +99,7 @@ export class ObservabilityAIAssistantPlugin
   start(
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
-  ): ObservabilityAIAssistantPluginStart {
+  ): ObservabilityAIAssistantPublicStart {
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,

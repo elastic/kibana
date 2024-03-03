@@ -38,12 +38,8 @@ const DEFAULT_FEATURE_IDS = [
   'observability',
 ] as const;
 
-export function registerAlertsFunction({
-  client,
-  registerFunction,
-  resources,
-}: FunctionRegistrationParameters) {
-  registerFunction(
+export function registerAlertsFunction({ functions, resources }: FunctionRegistrationParameters) {
+  functions.registerFunction(
     {
       name: 'alerts',
       contexts: ['core'],

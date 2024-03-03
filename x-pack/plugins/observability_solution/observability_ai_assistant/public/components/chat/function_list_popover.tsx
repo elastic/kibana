@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import { type FunctionDefinition, FunctionVisibility } from '../../../common/types';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { FunctionDefinition, FunctionVisibility } from '../../../common/functions/types';
 
 interface FunctionListOption {
   label: string;

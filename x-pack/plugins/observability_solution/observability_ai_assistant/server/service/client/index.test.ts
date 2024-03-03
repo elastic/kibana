@@ -23,7 +23,7 @@ import {
   MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
-import type { CreateChatCompletionResponseChunk } from '../../../public/types';
+import type { CreateChatCompletionResponseChunk } from '../../../common/utils/process_openai_stream';
 import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { createFunctionResponseMessage } from '../util/create_function_response_message';

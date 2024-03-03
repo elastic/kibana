@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FunctionDefinition } from '../../common/types';
+import type { FunctionDefinition } from '../../common/functions/types';
 
 type Params = FunctionDefinition['parameters'];
 

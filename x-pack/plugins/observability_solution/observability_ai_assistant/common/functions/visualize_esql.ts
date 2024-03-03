@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FromSchema } from 'json-schema-to-ts';
-import { FunctionVisibility } from '../types';
+import type { FromSchema } from 'json-schema-to-ts';
+import { FunctionVisibility } from './types';
 
 export enum VisualizeESQLUserIntention {
   generateQueryOnly = 'generateQueryOnly',

@@ -14,8 +14,8 @@ import type { StreamingChatResponseEventWithoutError } from '../common/conversat
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils/builders';
@@ -69,22 +69,22 @@ export const mockService: ObservabilityAIAssistantService = {
   getScreenContexts: () => [],
 };
 
-function createSetupContract(): ObservabilityAIAssistantPluginSetup {
+function createSetupContract(): ObservabilityAIAssistantPublicSetup {
   return {};
 }
 
-function createStartContract(): ObservabilityAIAssistantPluginStart {
+function createStartContract(): ObservabilityAIAssistantPublicStart {
   return {
     service: mockService,
 
     ObservabilityAIAssistantActionMenuItem: (() => (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       <div>Im a button</div>
-    )) as unknown as ObservabilityAIAssistantPluginStart['ObservabilityAIAssistantActionMenuItem'],
+    )) as unknown as ObservabilityAIAssistantPublicStart['ObservabilityAIAssistantActionMenuItem'],
     ObservabilityAIAssistantContextualInsight: (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       <div>I give insight</div>
-    ) as unknown as ObservabilityAIAssistantPluginStart['ObservabilityAIAssistantContextualInsight'],
+    ) as unknown as ObservabilityAIAssistantPublicStart['ObservabilityAIAssistantContextualInsight'],
     useGenAIConnectors: () => ({
       loading: false,
       selectConnector: () => {},

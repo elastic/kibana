@@ -7,8 +7,8 @@
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
   ConfigSchema,
@@ -16,8 +16,8 @@ import type {
 } from './types';
 
 export type {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 };
 
@@ -31,8 +31,8 @@ export type {
 } from './api';
 
 export const plugin: PluginInitializer<
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>

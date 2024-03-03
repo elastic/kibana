@@ -16,7 +16,7 @@ import {
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
-import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
+import { getAssistantSystemMessage } from '../service/get_assistant_system_message';
 import type {
   ObservabilityAIAssistantChatService,
   ObservabilityAIAssistantService,
@@ -70,7 +70,7 @@ export function useChat({
   const [chatState, setChatState] = useState(ChatState.Ready);
 
   const systemMessage = useMemo(() => {
-    return getAssistantSetupMessage({ contexts: chatService.getContexts() });
+    return getAssistantSystemMessage({ contexts: chatService.getContexts() });
   }, [chatService]);
 
   useOnce(initialMessages);

@@ -7,13 +7,9 @@
 
 import { merge, uniqueId } from 'lodash';
 import { DeepPartial } from 'utility-types';
-import {
-  type Conversation,
-  type FunctionDefinition,
-  type Message,
-  MessageRole,
-} from '../../common/types';
-import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
+import type { FunctionDefinition } from '../../common/functions/types';
+import { type Conversation, type Message, MessageRole } from '../../common/types';
+import { getAssistantSystemMessage } from '../service/get_assistant_system_message';
 
 type BuildMessageProps = DeepPartial<Message> & {
   message: {
@@ -116,7 +112,7 @@ export function buildConversation(params?: Partial<Conversation>) {
       title: '',
       last_updated: '',
     },
-    messages: [getAssistantSetupMessage({ contexts: [] })],
+    messages: [getAssistantSystemMessage({ contexts: [] })],
     labels: {},
     numeric_labels: {},
     namespace: '',

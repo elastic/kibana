@@ -10,11 +10,8 @@ import { format, parse } from 'url';
 import { castArray, first, pick, pickBy } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
-export function registerKibanaFunction({
-  registerFunction,
-  resources,
-}: FunctionRegistrationParameters) {
-  registerFunction(
+export function registerKibanaFunction({ functions, resources }: FunctionRegistrationParameters) {
+  functions.registerFunction(
     {
       name: 'kibana',
       contexts: ['core'],

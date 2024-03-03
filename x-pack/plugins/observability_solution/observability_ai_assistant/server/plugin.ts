@@ -26,8 +26,8 @@ import { registerServerRoutes } from './routes/register_routes';
 import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
 import {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
@@ -37,8 +37,8 @@ import { registerFunctions } from './functions';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
-      ObservabilityAIAssistantPluginSetup,
-      ObservabilityAIAssistantPluginStart,
+      ObservabilityAIAssistantServerSetup,
+      ObservabilityAIAssistantServerStart,
       ObservabilityAIAssistantPluginSetupDependencies,
       ObservabilityAIAssistantPluginStartDependencies
     >
@@ -52,10 +52,10 @@ export class ObservabilityAIAssistantPlugin
   public setup(
     core: CoreSetup<
       ObservabilityAIAssistantPluginStartDependencies,
-      ObservabilityAIAssistantPluginStart
+      ObservabilityAIAssistantServerStart
     >,
     plugins: ObservabilityAIAssistantPluginSetupDependencies
-  ): ObservabilityAIAssistantPluginSetup {
+  ): ObservabilityAIAssistantServerSetup {
     plugins.features.registerKibanaFeature({
       id: OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
       name: i18n.translate('xpack.observabilityAiAssistant.featureRegistry.featureName', {
@@ -154,7 +154,7 @@ export class ObservabilityAIAssistantPlugin
     };
   }
 
-  public start(): ObservabilityAIAssistantPluginStart {
+  public start(): ObservabilityAIAssistantServerStart {
     return {
       service: this.service!,
     };

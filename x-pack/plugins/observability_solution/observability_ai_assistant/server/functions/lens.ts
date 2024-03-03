@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { lensFunctionDefinition } from '../../common/functions/lens';
-import { RegisterFunction } from '../service/types';
+import type { ChatFunctionClient } from '../service/chat_function_client';
 
-export function registerLensFunction({ registerFunction }: { registerFunction: RegisterFunction }) {
-  registerFunction(lensFunctionDefinition, async () => {
+export function registerLensFunction({ functions }: { functions: ChatFunctionClient }) {
+  functions.registerFunction(lensFunctionDefinition, async () => {
     return {
       content: {},
     };

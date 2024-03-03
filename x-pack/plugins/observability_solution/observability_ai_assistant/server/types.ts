@@ -26,14 +26,14 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { ObservabilityAIAssistantService } from './service';
 
-export interface ObservabilityAIAssistantPluginSetup {
+export interface ObservabilityAIAssistantServerSetup {
   /**
    * Returns a Observability AI Assistant service instance
    */
   service: ObservabilityAIAssistantService;
 }
 
-export interface ObservabilityAIAssistantPluginStart {
+export interface ObservabilityAIAssistantServerStart {
   /**
    * Returns a Observability AI Assistant service instance
    */
@@ -50,6 +50,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
 }
+
 export interface ObservabilityAIAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   security: SecurityPluginStart;

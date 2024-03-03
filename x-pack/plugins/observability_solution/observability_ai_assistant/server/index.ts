@@ -12,8 +12,8 @@ export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get
 
 import { config as configSchema } from './config';
 export type {
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantServerSetup,
 } from './types';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
