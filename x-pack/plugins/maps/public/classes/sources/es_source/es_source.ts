@@ -186,10 +186,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         hasESAggSourceMethod(this, 'isGeoGridPrecisionAware') &&
         hasESAggSourceMethod(this, 'getGeoGridPrecision') &&
         this.isGeoGridPrecisionAware()
-          ? expandToTileBoundaries(
-              requestMeta.buffer,
-              this.getGeoGridPrecision(requestMeta.zoom)
-            )
+          ? expandToTileBoundaries(requestMeta.buffer, this.getGeoGridPrecision(requestMeta.zoom))
           : requestMeta.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
