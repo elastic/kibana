@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
-import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import { useCallback } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from './use_kibana';
 
 interface UseLicenseReturnValue {
   getLicense: () => ILicense | null;
@@ -17,12 +16,18 @@ interface UseLicenseReturnValue {
 }
 
 export const useLicense = (): UseLicenseReturnValue => {
-  const service = useObservabilityAIAssistant();
+  const {
+    services: {
+      plugins: {
+        start: { licensing },
+      },
+    },
+  } = useKibana();
 
-  const license = useObservable<ILicense | null>(service.getLicense() ?? new Observable(), null);
+  const license = useObservable<ILicense | null>(licensing.license$);
 
   return {
-    getLicense: () => license,
+    getLicense: () => license ?? null,
     hasAtLeast: useCallback(
       (level: LicenseType) => {
         if (!license) return;

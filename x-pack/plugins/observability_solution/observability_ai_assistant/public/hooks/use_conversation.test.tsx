@@ -37,9 +37,6 @@ type MockedService = DeeplyMockedKeys<ObservabilityAIAssistantService>;
 
 const mockService: MockedService = {
   callApi: jest.fn(),
-  getCurrentUser: jest.fn(),
-  getLicense: jest.fn(),
-  getLicenseManagementLocator: jest.fn(),
   isEnabled: jest.fn(),
   start: jest.fn(),
   register: jest.fn(),

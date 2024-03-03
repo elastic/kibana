@@ -30,7 +30,6 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
@@ -61,7 +60,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;

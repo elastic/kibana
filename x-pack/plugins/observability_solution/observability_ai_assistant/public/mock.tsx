@@ -5,9 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { bindAll, noop, pick } from 'lodash';
+import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
@@ -48,22 +46,6 @@ export const mockService: ObservabilityAIAssistantService = {
     return mockChatService;
   },
   callApi: {} as ObservabilityAIAssistantAPIClient,
-  getCurrentUser: async (): Promise<AuthenticatedUser> => ({
-    username: 'user',
-    roles: [],
-    enabled: true,
-    authentication_realm: { name: 'foo', type: '' },
-    lookup_realm: { name: 'foo', type: '' },
-    authentication_provider: { name: '', type: '' },
-    authentication_type: '',
-    elastic_cloud_user: false,
-  }),
-  getLicense: () => new Observable(),
-  getLicenseManagementLocator: () =>
-    ({
-      url: {},
-      navigate: () => {},
-    } as unknown as SharePluginStart),
   register: () => {},
   setScreenContext: () => noop,
   getScreenContexts: () => [],
@@ -75,14 +57,7 @@ function createSetupContract(): ObservabilityAIAssistantPublicSetup {
 
 function createStartContract(): ObservabilityAIAssistantPublicStart {
   return {
-    ...pick(
-      bindAll(mockService, Object.keys(mockService)),
-      'setScreenContext',
-      'getScreenContexts',
-      'isEnabled',
-      'start',
-      'register'
-    ),
+    service: mockService,
     ObservabilityAIAssistantMultipaneFlyoutContext: React.createContext<any>(undefined),
     ObservabilityAIAssistantActionMenuItem: (() => (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n

@@ -4,34 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType, lazy, Ref } from 'react';
-import ReactDOM from 'react-dom';
+
 import {
+  AppMountParameters,
   DEFAULT_APP_CATEGORIES,
-  type AppMountParameters,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { bindAll, pick } from 'lodash';
-import { createService } from './service/create_service';
+import React, { ComponentType, lazy, Ref } from 'react';
+import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
+import { registerTelemetryEventTypes } from './analytics';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_provider';
+import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
+import { createService } from './service/create_service';
 import type {
   ConfigSchema,
-  ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPluginSetupDependencies,
-  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantPluginStartDependencies,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
-import { registerTelemetryEventTypes } from './analytics';
-import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
-import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_provider';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -74,7 +74,9 @@ export class ObservabilityAIAssistantPlugin
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
-          coreSetup.getStartServices(),
+          coreSetup.getStartServices() as Promise<
+            [CoreStart, ObservabilityAIAssistantPluginStartDependencies, unknown]
+          >,
         ]);
 
         ReactDOM.render(
@@ -106,9 +108,6 @@ export class ObservabilityAIAssistantPlugin
       analytics: coreStart.analytics,
       coreStart,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
-      licenseStart: pluginsStart.licensing,
-      securityStart: pluginsStart.security,
-      shareStart: pluginsStart.share,
     }));
 
     const withProviders = <P extends {}, R = {}>(
@@ -134,17 +133,8 @@ export class ObservabilityAIAssistantPlugin
 
     const isEnabled = service.isEnabled();
 
-    const publicService = pick(
-      bindAll(service, Object.keys(service)),
-      'getScreenContexts',
-      'setScreenContext',
-      'isEnabled',
-      'start',
-      'register'
-    );
-
     return {
-      ...publicService,
+      service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
       ObservabilityAIAssistantMultipaneFlyoutContext,
       ObservabilityAIAssistantContextualInsight: isEnabled

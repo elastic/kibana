@@ -25,7 +25,7 @@ const coreMock = {
     },
   },
   observabilityAIAssistant: {
-    setScreenContext: () => noop,
+    service: { setScreenContext: () => noop },
   },
 } as unknown as Partial<CoreStart>;
 

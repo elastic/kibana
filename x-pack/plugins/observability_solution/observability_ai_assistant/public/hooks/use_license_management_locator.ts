@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import { useKibana } from './use_kibana';
 
 const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
 
 export const useLicenseManagementLocator = () => {
-  const service = useObservabilityAIAssistant();
+  const {
+    services: {
+      plugins: {
+        start: { share },
+      },
+    },
+  } = useKibana();
 
-  const locators = service.getLicenseManagementLocator();
-
-  const locator = locators.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
+  const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
 
   // license management does not exist on serverless
   if (!locator) return;

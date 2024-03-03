@@ -39,7 +39,9 @@ export function SloList() {
   });
 
   const {
-    observabilityAIAssistant: { setScreenContext },
+    observabilityAIAssistant: {
+      service: { setScreenContext },
+    },
   } = useKibana().services;
   const { results = [], total = 0 } = sloList ?? {};
 

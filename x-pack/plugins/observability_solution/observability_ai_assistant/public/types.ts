@@ -5,46 +5,37 @@
  * 2.0.
  */
 
-import type { ForwardRefExoticComponent, RefAttributes } from 'react';
-import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type {
-  DataViewsPublicPluginSetup,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
-import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { Observable } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+import { ContextDefinition, FunctionDefinition, FunctionResponse } from '../common/functions/types';
 import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
 } from '../common/types';
-import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { InsightProps } from './components/insight/insight';
-import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
-import { ContextDefinition, FunctionDefinition, FunctionResponse } from '../common/functions/types';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_provider';
+import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -82,11 +73,8 @@ export interface ObservabilityAIAssistantChatService {
 }
 
 export interface ObservabilityAIAssistantService {
-  isEnabled: () => boolean;
   callApi: ObservabilityAIAssistantAPIClient;
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-  getLicense: () => Observable<ILicense>;
-  getLicenseManagementLocator: () => SharePluginStart;
+  isEnabled: () => boolean;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
   setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
@@ -112,9 +100,7 @@ export interface ConfigSchema {}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   data: DataPublicPluginSetup;
-  dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
-  lens: LensPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -123,9 +109,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
-  lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   security: SecurityPluginStart;
@@ -137,11 +121,8 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
 
 export interface ObservabilityAIAssistantPublicSetup {}
 
-export interface ObservabilityAIAssistantPublicStart
-  extends Pick<
-    ObservabilityAIAssistantService,
-    'isEnabled' | 'start' | 'register' | 'getScreenContexts' | 'setScreenContext'
-  > {
+export interface ObservabilityAIAssistantPublicStart {
+  service: ObservabilityAIAssistantService;
   ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
   ObservabilityAIAssistantMultipaneFlyoutContext: typeof ObservabilityAIAssistantMultipaneFlyoutContext;
   ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<

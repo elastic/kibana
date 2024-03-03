@@ -11,7 +11,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
   ObservabilityAIAssistantAppPublicSetup,
@@ -46,7 +46,7 @@ export class ObservabilityAIAssistantAppPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies
   ): ObservabilityAIAssistantAppPublicStart {
-    pluginsStart.observabilityAIAssistant.register(async ({ registerRenderFunction }) => {
+    pluginsStart.observabilityAIAssistant.service.register(async ({ registerRenderFunction }) => {
       const { registerFunctions } = await import('./functions');
 
       await registerFunctions({ pluginsStart, registerRenderFunction });

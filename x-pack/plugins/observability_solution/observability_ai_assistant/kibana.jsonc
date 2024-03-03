@@ -17,7 +17,8 @@
       "ml",
       "share",
       "triggersActionsUi",
-      "data"
+      "data",
+      "ruleRegistry"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": ["cloud"],

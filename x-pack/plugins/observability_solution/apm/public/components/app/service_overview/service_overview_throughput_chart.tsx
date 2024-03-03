@@ -154,7 +154,8 @@ export function ServiceOverviewThroughputChart({
       : []),
   ];
 
-  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant;
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
     return setScreenContext(

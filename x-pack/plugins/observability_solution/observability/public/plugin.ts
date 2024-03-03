@@ -417,7 +417,8 @@ export class Plugin
                   ]
                 : [];
 
-              const isAiAssistantEnabled = pluginsStart.observabilityAIAssistant.isEnabled();
+              const isAiAssistantEnabled =
+                pluginsStart.observabilityAIAssistant.service.isEnabled();
 
               const aiAssistantLink =
                 isAiAssistantEnabled &&
