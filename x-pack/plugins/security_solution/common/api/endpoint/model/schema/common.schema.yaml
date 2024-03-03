@@ -123,13 +123,6 @@ components:
         minLength: 1
       minItems: 1
       description: List of endpoint IDs (cannot contain empty strings)
-    AlertIds:
-      type: array
-      items:
-        type: string
-        minLength: 1
-      minItems: 1
-      description: If defined, any case associated with the given IDs will be updated (cannot contain empty strings)
     CaseIds:
       type: array
       items:
@@ -151,7 +144,7 @@ components:
         endpoint_ids:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
-          $ref: '#/components/schemas/AlertIds'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
         case_ids:
           $ref: '#/components/schemas/CaseIds'
         comment:

@@ -9,7 +9,7 @@
 import { Timerange } from '@kbn/apm-synthtrace-client';
 import { Logger } from '../lib/utils/create_logger';
 import { RunOptions } from './utils/parse_run_cli_flags';
-import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
+import { ApmSynthtraceEsClient, InfraSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 
 type Generate<TFields> = (options: {
@@ -17,6 +17,7 @@ type Generate<TFields> = (options: {
   clients: {
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
+    infraEsClient: InfraSynthtraceEsClient;
   };
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
@@ -24,6 +25,7 @@ export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Pr
   bootstrap?: (options: {
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
+    infraEsClient: InfraSynthtraceEsClient;
   }) => Promise<void>;
   generate: Generate<TFields>;
 }>;
