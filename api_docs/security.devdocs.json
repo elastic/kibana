@@ -300,6 +300,22 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicense.getUnavailableReason",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnavailableReason",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicense.isEnabled",
             "type": "Function",
             "tags": [],
@@ -6685,6 +6701,22 @@
             "description": [],
             "signature": [
               "() => boolean"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.getUnavailableReason",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnavailableReason",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,

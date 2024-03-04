@@ -45,10 +45,16 @@ export const sloKeys = {
   definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
     [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
-  burnRates: (sloId: string, instanceId: string | undefined) =>
-    [...sloKeys.all, 'burnRates', sloId, instanceId] as const,
-  preview: (indicator: Indicator, range: { start: number; end: number }) =>
-    [...sloKeys.all, 'preview', indicator, range] as const,
+  burnRates: (
+    sloId: string,
+    instanceId: string | undefined,
+    windows: Array<{ name: string; duration: string }>
+  ) => [...sloKeys.all, 'burnRates', sloId, instanceId, windows] as const,
+  preview: (
+    indicator: Indicator,
+    range: { start: number; end: number },
+    groupings?: Record<string, unknown>
+  ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
 };
 
 export type SloKeys = typeof sloKeys;
