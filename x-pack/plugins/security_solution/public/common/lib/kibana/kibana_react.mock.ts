@@ -55,6 +55,7 @@ import { getDefaultConfigSettings } from '../../../../common/config_settings';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { calculateBounds } from '@kbn/data-plugin/common';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -124,6 +125,24 @@ export const createStartServicesMock = (
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
+
+  /*
+   * Below mocks are needed by unified field list
+   * when data service is passed through as a prop
+   *
+   * */
+  data.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+    from: '2021-08-31T22:00:00.000Z',
+    to: '2022-09-01T09:16:29.553Z',
+  }));
+  data.query.timefilter.timefilter.getTime = jest.fn(() => {
+    return { from: 'now-15m', to: 'now' };
+  });
+  data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+    return { pause: true, value: 1000 };
+  });
+  data.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
+  /** ************************************************* */
 
   return {
     ...core,

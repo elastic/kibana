@@ -19,11 +19,7 @@ import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
-import { queryServiceMock } from '@kbn/data-plugin/public/query/mocks';
-import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { useKibana } from '../../../../common/lib/kibana';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { calculateBounds } from '@kbn/data-plugin/common';
 import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -114,32 +110,7 @@ const useTimelineEventsMock = jest.fn(() => [
 ]);
 
 describe('query tab with unified timeline', () => {
-  const kibanaServiceMock: StartServices = {
-    ...createStartServicesMock(),
-    data: {
-      ...dataPluginMock.createStartContract(),
-      query: {
-        ...queryServiceMock.createStartContract(),
-        timefilter: {
-          ...timefilterServiceMock.createStartContract(),
-          timefilter: {
-            ...timefilterServiceMock.createStartContract().timefilter,
-            getAbsoluteTime: jest.fn(() => ({
-              from: '2021-08-31T22:00:00.000Z',
-              to: '2022-09-01T09:16:29.553Z',
-            })),
-            getTime: jest.fn(() => {
-              return { from: 'now-15m', to: 'now' };
-            }),
-            getRefreshInterval: jest.fn(() => {
-              return { pause: true, value: 1000 };
-            }),
-            calculateBounds: jest.fn(calculateBounds),
-          },
-        },
-      },
-    },
-  };
+  const kibanaServiceMock: StartServices = createStartServicesMock();
 
   afterEach(() => {
     cleanup();

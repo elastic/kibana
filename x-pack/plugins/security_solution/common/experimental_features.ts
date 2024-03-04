@@ -217,16 +217,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Apr 23, 2024
    */
   perFieldPrebuiltRulesDiffingEnabled: true,
-
-  /**
-   * Disables discover esql tab within timeline
-   */
-  timelineEsqlTabDisabled: false,
-
-  /**
-   * Disables date pickers and sourcerer in analyzer if needed.
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
