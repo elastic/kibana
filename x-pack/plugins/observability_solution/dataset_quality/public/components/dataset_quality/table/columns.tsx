@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiSkeletonRectangle,
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
@@ -29,10 +28,11 @@ import {
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicator, QualityPercentageIndicator } from '../../quality_indicator';
+import { QualityIndicator } from '../../quality_indicator';
 import { IntegrationIcon } from '../../common';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
+import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -210,17 +210,10 @@ export const getDatasetQualityTableColumns = ({
       field: 'degradedDocs',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
-        <EuiSkeletonRectangle
-          width="50px"
-          height="20px"
-          borderRadius="m"
+        <DegradedDocsPercentageLink
           isLoading={loadingDegradedStats}
-          contentAriaLabel="Example description"
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
-          </EuiFlexGroup>
-        </EuiSkeletonRectangle>
+          dataStreamStat={dataStreamStat}
+        />
       ),
       width: '140px',
     },
