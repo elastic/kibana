@@ -10,12 +10,25 @@ import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_h
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
 
-interface SuggestionsApi {
+export enum ChartType {
+  XY = 'XY',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heat map',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tag cloud',
+  Waffle = 'Waffle',
+}
+
+interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
   dataView: DataView;
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
   excludedVisualizations?: string[];
+  preferredChartType?: ChartType;
 }
 
 export const suggestionsApi = ({
@@ -24,7 +37,8 @@ export const suggestionsApi = ({
   datasourceMap,
   visualizationMap,
   excludedVisualizations,
-}: SuggestionsApi) => {
+  preferredChartType,
+}: SuggestionsApiProps) => {
   const initialContext = context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
@@ -86,9 +100,37 @@ export const suggestionsApi = ({
     dataViews,
   }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
   const suggestionsList = [activeVisualization, ...newSuggestions];
+
+  // check if there is an XY chart suggested
+  // if user has requested for a line or area, we want to sligthly change the state
+  // to return line / area instead of a bar chart
+  const chartType = preferredChartType?.toLowerCase();
+  const XYSuggestion = suggestionsList.find((sug) => sug.visualizationId === 'lnsXY');
+  if (XYSuggestion && chartType && ['area', 'line'].includes(chartType)) {
+    const visualizationState = visualizationMap[
+      XYSuggestion.visualizationId
+    ]?.switchVisualizationType?.(chartType, XYSuggestion?.visualizationState);
+    return [
+      {
+        ...XYSuggestion,
+        visualizationState,
+      },
+    ];
+  }
+
+  // in case the user asks for another type (except from area, line) check if it exists
+  // in suggestions and return this instead
+  if (suggestionsList.length > 1 && preferredChartType) {
+    const suggestionFromModel = suggestionsList.find(
+      (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
+    );
+    if (suggestionFromModel) {
+      return [suggestionFromModel];
+    }
+  }
+  // if there is no preference from the user, send everything
   // until we separate the text based suggestions logic from the dataview one,
   // we want to sort XY first
   const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
-
   return sortXYFirst;
 };

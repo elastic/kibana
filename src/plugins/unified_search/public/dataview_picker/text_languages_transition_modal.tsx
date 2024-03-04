@@ -41,7 +41,11 @@ export default function TextBasedLanguagesTransitionModal({
 
   const language = getLanguageDisplayName(textBasedLanguage);
   return (
-    <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
+    <EuiModal
+      onClose={() => setIsTextLangTransitionModalVisible(false)}
+      style={{ width: 700 }}
+      data-test-subj="unifiedSearch_switch_modal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate(

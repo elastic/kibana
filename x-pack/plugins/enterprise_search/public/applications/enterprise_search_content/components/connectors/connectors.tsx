@@ -214,6 +214,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                 />
               </EuiFlexItem>
               <ConnectorsTable
+                isCrawler={isCrawler}
                 items={connectors || []}
                 meta={data?.meta}
                 onChange={handlePageChange(onPaginate)}
