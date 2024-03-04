@@ -11,7 +11,7 @@ import { Logger } from '@kbn/core/server';
 import { typedSearch } from '../../utils/queries';
 import { IllegalArgumentError } from '../../errors';
 import {
-  SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
 } from '../../../common/slo/constants';
 import { Status } from '../../domain/models';
@@ -60,7 +60,7 @@ export class FindSLOGroups {
     }
 
     const response = await typedSearch(this.esClient, {
-      index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {

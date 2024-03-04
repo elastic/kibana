@@ -11,9 +11,9 @@ import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+  SLO_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
-  SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../../common/slo/constants';
 import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
@@ -100,7 +100,7 @@ export class ResetSLO {
    */
   private async deleteRollupData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+      index: SLO_DESTINATION_INDEX_PATTERN,
       refresh: true,
       query: {
         bool: {
@@ -118,7 +118,7 @@ export class ResetSLO {
    */
   private async deleteSummaryData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       query: {
         bool: {

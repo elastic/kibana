@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOInstancesResponse } from '@kbn/slo-schema';
-import { SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../common/slo/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLORepository } from './slo_repository';
 
 export class GetSLOInstances {
@@ -21,7 +21,7 @@ export class GetSLOInstances {
     }
 
     const result = await this.esClient.search({
-      index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+      index: SLO_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {

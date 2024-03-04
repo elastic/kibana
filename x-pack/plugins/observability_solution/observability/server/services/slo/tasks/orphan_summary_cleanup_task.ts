@@ -16,7 +16,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { StoredSLO } from '../../../domain/models';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { ObservabilityConfig } from '../../..';
-import { SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../../common/slo/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -106,7 +106,7 @@ export class SloOrphanSummaryCleanupTask {
 
           await this.esClient.deleteByQuery({
             wait_for_completion: false,
-            index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+            index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
             query: {
               bool: {
                 should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
@@ -149,7 +149,7 @@ export class SloOrphanSummaryCleanupTask {
       }
     >({
       size: 0,
-      index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       aggs: {
         slos: {
           composite: {

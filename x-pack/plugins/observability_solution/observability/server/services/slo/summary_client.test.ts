@@ -7,7 +7,7 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
-import { SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../common/slo/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
@@ -58,7 +58,7 @@ describe('SummaryClient', () => {
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+          index: SLO_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {
@@ -92,7 +92,7 @@ describe('SummaryClient', () => {
         await summaryClient.computeSummary(slo);
 
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+          index: SLO_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {
@@ -136,7 +136,7 @@ describe('SummaryClient', () => {
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+          index: SLO_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {
@@ -186,7 +186,7 @@ describe('SummaryClient', () => {
         expect(result).toMatchSnapshot();
 
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
-          index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+          index: SLO_DESTINATION_INDEX_PATTERN,
           size: 0,
           query: {
             bool: {

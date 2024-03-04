@@ -14,8 +14,8 @@ import { cloneDeep, omit, pick } from 'lodash';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
-  SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
@@ -341,7 +341,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+        index: SLO_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [
@@ -355,7 +355,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        index: SLO_SUMMARY_DESTINATION_SUPPORTED_INDEX_PATTERNS,
+        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [

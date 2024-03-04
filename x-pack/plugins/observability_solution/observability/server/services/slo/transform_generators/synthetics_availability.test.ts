@@ -23,13 +23,13 @@ describe('APM Transaction Duration Transform Generator', () => {
       _meta: {
         managed: true,
         managed_by: 'observability',
-        version: 4,
+        version: 3.1,
       },
       defer_validation: true,
       description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
       dest: {
-        index: '.slo-observability.sli-v4',
-        pipeline: '.slo-observability.sli.pipeline-v4',
+        index: '.slo-observability.sli-v3.1',
+        pipeline: '.slo-observability.sli.pipeline-v3.1',
       },
       frequency: '1m',
       pivot: {

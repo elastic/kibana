@@ -20,7 +20,7 @@ import {
 import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
 import moment from 'moment';
-import { SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS } from '../../../common/slo/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { DateRange, HistoricalSummary, SLO, SLOId } from '../../domain/models';
 import {
   computeSLI,
@@ -69,7 +69,7 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
     }, {});
 
     const searches = list.flatMap(({ sloId, instanceId, slo }) => [
-      { index: SLO_DESTINATION_SUPPORTED_INDEX_PATTERNS },
+      { index: SLO_DESTINATION_INDEX_PATTERN },
       generateSearchQuery(slo, instanceId, dateRangeBySlo[sloId]),
     ]);
 
