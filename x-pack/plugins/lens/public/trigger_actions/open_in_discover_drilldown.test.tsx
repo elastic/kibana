@@ -16,6 +16,7 @@ import {
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
+import { OpenInDiscoverActionApi } from './types';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),
@@ -61,13 +62,19 @@ describe('open in discover drilldown', () => {
 
   it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    await drilldown.isCompatible({ openInNewTab: true }, { embeddable: { type: 'lens' }, filters });
+    await drilldown.isCompatible(
+      { openInNewTab: true },
+      { embeddable: { type: 'lens' } as unknown as OpenInDiscoverActionApi, filters }
+    );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 
   it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    await drilldown.execute({ openInNewTab: true }, { embeddable: { type: 'lens' }, filters });
+    await drilldown.execute(
+      { openInNewTab: true },
+      { embeddable: { type: 'lens' } as unknown as OpenInDiscoverActionApi, filters }
+    );
     expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 });

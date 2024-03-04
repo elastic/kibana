@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { HasType } from '@kbn/presentation-publishing';
-import { DOC_TYPE } from '../../common/constants';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import { HasLensConfig, ViewUnderlyingDataArgs } from '../embeddable';
 
-export type OpenInDiscoverActionApi = HasType<typeof DOC_TYPE> &
-  HasLensConfig & {
-    canViewUnderlyingData: () => Promise<boolean>;
-    getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs;
-  };
+export type OpenInDiscoverActionApi = HasLensConfig & {
+  canViewUnderlyingData: () => Promise<boolean>;
+  getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs;
+};
+
+export const isApiCompatibleWithOpenInDiscoverAction = (
+  api: unknown | null
+): api is OpenInDiscoverActionApi =>
+  Boolean(
+    apiIsOfType(api, 'lens') &&
+      typeof (api as OpenInDiscoverActionApi).canViewUnderlyingData === 'function' &&
+      typeof (api as OpenInDiscoverActionApi).getViewUnderlyingDataArgs === 'function'
+  );

@@ -9,8 +9,8 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { apiIsOfType, EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { OpenInDiscoverActionApi } from './types';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { isApiCompatibleWithOpenInDiscoverAction } from './types';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -31,17 +31,13 @@ type Context = EmbeddableApiContext & {
   timeFieldName?: string;
 };
 
-const isApiCompatible = (api: unknown | null): api is OpenInDiscoverActionApi =>
-  Boolean(
-    apiIsOfType(api, 'lens') &&
-      typeof (api as OpenInDiscoverActionApi).canViewUnderlyingData === 'function' &&
-      typeof (api as OpenInDiscoverActionApi).getViewUnderlyingDataArgs === 'function'
-  );
-
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
   try {
-    return isApiCompatible(embeddable) && (await embeddable.canViewUnderlyingData());
+    return (
+      isApiCompatibleWithOpenInDiscoverAction(embeddable) &&
+      (await embeddable.canViewUnderlyingData())
+    );
   } catch (e) {
     // Fetching underlying data failed, log the error and behave as if the action is not compatible
     // eslint-disable-next-line no-console
@@ -56,7 +52,7 @@ async function getDiscoverLocationParams({
   dataViews,
   timeFieldName,
 }: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
-  if (!isApiCompatible(embeddable)) {
+  if (!isApiCompatibleWithOpenInDiscoverAction(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }
