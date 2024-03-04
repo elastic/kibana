@@ -1915,7 +1915,7 @@ const mockTimelineModelColumns: TimelineModel['columns'] = [
   {
     columnHeaderType: 'not-filtered',
     id: '@timestamp',
-    initialWidth: 215,
+    initialWidth: 190,
   },
   {
     columnHeaderType: 'not-filtered',

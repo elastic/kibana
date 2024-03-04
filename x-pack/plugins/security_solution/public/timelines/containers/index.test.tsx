@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import { renderHook, act } from '@testing-library/react-hooks';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import { initSortDefault, useTimelineEvents } from '.';
@@ -134,7 +134,7 @@ describe('useTimelineEvents', () => {
       // useEffect on params request
       await waitForNextUpdate();
       expect(result.current).toEqual([
-        false,
+        DataLoadingState.loaded,
         {
           events: [],
           id: TimelineId.active,
@@ -166,7 +166,7 @@ describe('useTimelineEvents', () => {
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       expect(result.current).toEqual([
-        false,
+        DataLoadingState.loaded,
         {
           events: mockEvents,
           id: TimelineId.active,
@@ -209,7 +209,7 @@ describe('useTimelineEvents', () => {
       expect(mockSearch).toHaveBeenCalledTimes(2);
 
       expect(result.current).toEqual([
-        false,
+        DataLoadingState.loaded,
         {
           events: mockEvents,
           id: TimelineId.active,

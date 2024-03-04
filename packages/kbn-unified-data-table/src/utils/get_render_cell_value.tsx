@@ -74,7 +74,7 @@ export const getRenderCellValueFn = ({
       }
     }, [ctx, row, setCellProps]);
 
-    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
+    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId] && row) {
       return (
         <span className={CELL_CLASS}>
           {externalCustomRenderers[columnId]({

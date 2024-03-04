@@ -87,7 +87,7 @@ export const DetailsPanel = React.memo(
       }
     }, [dispatch, scopeId]);
 
-    const activeTab = tabType ?? TimelineTabs.query;
+    const activeTab: TimelineTabs = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {
       if (handleOnPanelClosed) handleOnPanelClosed();
       else defaultOnPanelClose();

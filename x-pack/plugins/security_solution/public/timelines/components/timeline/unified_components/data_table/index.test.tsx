@@ -55,6 +55,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof TimelineDataTableCom
         expandedDetail={{}}
         onChangePage={onChangePageMock}
         updatedAt={Date.now()}
+        {...props}
       />
     </TestProviders>
   );
@@ -89,7 +90,6 @@ describe('unified data table', () => {
         }}
       />
     );
-    screen.debug(undefined, 1000000);
 
     await waitFor(() => {
       expect(screen.getByTestId('timeline:details-panel:flyout')).toBeVisible();
