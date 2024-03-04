@@ -61,7 +61,6 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { actionCreateService } from '../../services/actions';
 import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
 import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
@@ -159,7 +158,6 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
-        actionCreateService: actionCreateService(mockScopedClient.asInternalUser, endpointContext),
         licenseService,
       });
 
