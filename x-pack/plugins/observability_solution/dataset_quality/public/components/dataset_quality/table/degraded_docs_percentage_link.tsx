@@ -24,21 +24,19 @@ export const DegradedDocsPercentageLink = ({
   });
 
   return (
-    <>
-      <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          {dataStreamStat.degradedDocs ? (
-            <EuiLink
-              data-test-subj="datasetQualityDegradedDocsPercentageLink"
-              {...logsExplorerLinkProps}
-            >
-              <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
-            </EuiLink>
-          ) : (
+    <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        {dataStreamStat.degradedDocs ? (
+          <EuiLink
+            data-test-subj="datasetQualityDegradedDocsPercentageLink"
+            {...logsExplorerLinkProps}
+          >
             <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
-          )}
-        </EuiFlexGroup>
-      </EuiSkeletonRectangle>
-    </>
+          </EuiLink>
+        ) : (
+          <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
+        )}
+      </EuiFlexGroup>
+    </EuiSkeletonRectangle>
   );
 };
