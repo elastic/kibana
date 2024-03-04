@@ -153,7 +153,10 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema, meta: metaSchema }),
+  t.intersection([
+    t.type({ summary: summarySchema, groupings: groupingsSchema }),
+    t.partial({ meta: metaSchema }),
+  ]),
 ]);
 
 const sloGroupWithSummaryResponseSchema = t.type({

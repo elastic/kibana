@@ -25,10 +25,10 @@ export interface UseFetchSyntheticsSuggestions {
 export interface Params {
   fieldName: string;
   filters?: {
-    locations: string[];
-    monitorIds: string[];
-    tags: string[];
-    projects: string[];
+    locations?: string[];
+    monitorIds?: string[];
+    tags?: string[];
+    projects?: string[];
   };
   search: string;
 }

@@ -6,6 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { SLO } from '../../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 
@@ -312,7 +313,7 @@ describe('APM Transaction Duration Transform Generator', () => {
           ...indicator.params,
           tags,
         },
-      },
+      } as SLO['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -337,7 +338,7 @@ describe('APM Transaction Duration Transform Generator', () => {
           ...indicator.params,
           monitorIds,
         },
-      },
+      } as SLO['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -362,7 +363,7 @@ describe('APM Transaction Duration Transform Generator', () => {
           ...indicator.params,
           projects,
         },
-      },
+      } as SLO['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 

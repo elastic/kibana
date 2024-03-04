@@ -149,7 +149,7 @@ function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: 
   return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
 
-function getMetaFields(
+export function getMetaFields(
   slo: SLO,
   source: { monitor?: { id?: string }; config_id?: string; observer?: { name?: string } }
 ): Meta {
