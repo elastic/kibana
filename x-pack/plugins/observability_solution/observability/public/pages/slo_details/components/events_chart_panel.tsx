@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -61,7 +60,7 @@ export function EventsChartPanel({ slo, range }: Props) {
     range,
     isValid: true,
     indicator: slo.indicator,
-    groupBy: slo.groupBy,
+    groupings: slo.groupings,
     instanceId: slo.instanceId,
   });
 
