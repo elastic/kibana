@@ -11,7 +11,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
