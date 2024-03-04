@@ -557,7 +557,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 
 export const fillEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query, { force: true });
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
 };
 
 export const clearEsqlQueryBar = () => {
