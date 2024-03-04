@@ -16,11 +16,11 @@ export const createOnUknownDataViewSelectionHandler = (
   discover: DiscoverStart
 ): LogsExplorerCustomizationEvents['onUknownDataViewSelection'] => {
   return (context) => {
-    if (isDataViewSelection(context.datasetSelection))
+    if (isDataViewSelection(context.dataSourceSelection))
       discover.locator?.navigate({
         breakdownField: context.chart.breakdownField ?? undefined,
         columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(context),
-        dataViewSpec: context.datasetSelection.selection.dataView.toDataviewSpec(),
+        dataViewSpec: context.dataSourceSelection.selection.dataView.toDataviewSpec(),
         filters: context.filters,
         query: context.query,
         refreshInterval: context.refreshInterval,
