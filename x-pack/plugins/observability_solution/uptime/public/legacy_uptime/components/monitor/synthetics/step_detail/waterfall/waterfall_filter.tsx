@@ -143,6 +143,7 @@ export const WaterfallFilter = ({
         <EuiPopover
           button={
             <EuiButtonIcon
+              data-test-subj="observabilitySolutionWaterfallFilterButton"
               aria-label={FILTER_POPOVER_OPEN_LABEL}
               iconType="filter"
               onClick={() => setIsPopoverOpen((prevState) => !prevState)}
