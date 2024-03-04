@@ -15,9 +15,9 @@ import {
   EuiModalFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState, LocatorPublic } from '../../common';
 import { BrowserUrlService, UrlParamExtension } from '../types';
@@ -36,6 +36,11 @@ interface EmbedProps {
   isEmbedded?: boolean;
   action: any;
 }
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
+}
 
 export enum ExportUrlAsType {
   EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
@@ -51,62 +56,69 @@ export const EmbedModal = ({
   isEmbedded,
   action,
 }: EmbedProps) => {
-  const [urlParams, setUrlParams] = useState<any>();
-  const [useShortUrl, setUseShortUrl] = useState<boolean>(true);
+  const isMounted = useMountedState();
+  const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
+  const [useShortUrl] = useState<boolean>(true);
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
-  const [url, setUrl] = useState<undefined | string>(undefined);
-  const [, setIsCreatingShortUrl] = useState<boolean>(false);
-  const [, setShortUrlErrorMsg] = useState<string | undefined>('');
-  const [shortUrlCache, setShortUrlCache] = useState<undefined | string>();
+  const [url, setUrl] = useState<string>('');
+  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
 
-  const getUrlParamExtensions = (tempUrl: string): string => {
-    return urlParams
-      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-          const urlParam = urlParams[key];
-          return urlParam
-            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                const isQueryParamEnabled = urlParam[queryParam];
-                return isQueryParamEnabled
-                  ? queryAccumulator + `&${queryParam}=true`
-                  : queryAccumulator;
-              }, urlAccumulator)
-            : urlAccumulator;
-        }, tempUrl)
-      : tempUrl;
-  };
+  const getUrlParamExtensions = useCallback(
+    (tempUrl: string): string => {
+      return urlParams
+        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+            const urlParam = urlParams[key];
+            return urlParam
+              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                  const isQueryParamEnabled = urlParam[queryParam];
+                  return isQueryParamEnabled
+                    ? queryAccumulator + `&${queryParam}=true`
+                    : queryAccumulator;
+                }, urlAccumulator)
+              : urlAccumulator;
+          }, tempUrl)
+        : tempUrl;
+    },
+    [urlParams]
+  );
 
-  const makeUrlEmbeddable = (tempUrl: string): string => {
-    const embedParam = '?embed=true';
-    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
+  // const makeUrlEmbeddable = (tempUrl: string): string => {
+  //   const embedParam = '?embed=true';
+  //   const urlHasQueryString = tempUrl.indexOf('?') !== -1;
 
-    if (urlHasQueryString) {
-      return tempUrl.replace('?', `${embedParam}&`);
-    }
+  //   if (urlHasQueryString) {
+  //     return tempUrl.replace('?', `${embedParam}&`);
+  //   }
 
-    return `${tempUrl}${embedParam}`;
-  };
+  //   return `${tempUrl}${embedParam}`;
+  // };
 
-  const updateUrlParams = (tempUrl: string) => {
-    tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
-    tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
+  const updateUrlParams = useCallback(
+    (tempUrl: string) => {
+      // tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+      tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
+      return tempUrl;
+    },
+    [getUrlParamExtensions, urlParams]
+  );
 
-    return tempUrl;
-  };
+  const getSnapshotUrl = useCallback(
+    (forSavedObject?: boolean) => {
+      let tempUrl = '';
+      if (forSavedObject && shareableUrlForSavedObject) {
+        tempUrl = shareableUrlForSavedObject;
+      }
+      if (!tempUrl) {
+        tempUrl = shareableUrl || window.location.href;
+      }
+      return updateUrlParams(tempUrl);
+    },
+    [shareableUrl, shareableUrlForSavedObject, updateUrlParams]
+  );
 
-  const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let tempUrl = '';
-    if (forSavedObject && shareableUrlForSavedObject) {
-      tempUrl = shareableUrlForSavedObject;
-    }
-    if (!tempUrl) {
-      tempUrl = shareableUrl || window.location.href;
-    }
-    return updateUrlParams(tempUrl);
-  };
-
-  const getSavedObjectUrl = () => {
+  const getSavedObjectUrl = useCallback(() => {
     const tempUrl = getSnapshotUrl(true);
 
     const parsedUrl = parseUrl(tempUrl);
@@ -132,57 +144,26 @@ export const EmbedModal = ({
       }),
     });
     return updateUrlParams(formattedUrl);
-  };
+  }, [getSnapshotUrl, updateUrlParams]);
 
-  const createShortUrl = async () => {
-    setIsCreatingShortUrl(true);
-    setShortUrlErrorMsg(undefined);
-
-    try {
-      if (shareableUrlLocatorParams) {
-        const shortUrls = urlService.shortUrls.get(null);
-        const shortUrl = await await shortUrls.createWithLocator(shareableUrlLocatorParams);
-        setShortUrlCache(await shortUrl.locator.getUrl(shortUrl.params, { absolute: true }));
-      } else {
-        const snapshotUrl = getSnapshotUrl();
-        const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
-        setShortUrlCache(shortUrl.url);
+  const addUrlAnonymousAccessParameters = useCallback(
+    (tempUrl: string): string => {
+      if (!anonymousAccessParameters || !usePublicUrl) {
+        return tempUrl;
       }
 
-      setIsCreatingShortUrl(false);
-      setUseShortUrl(true);
-      setUrlHelper();
-    } catch (fetchError) {
-      setShortUrlCache(undefined);
-      setUseShortUrl(false);
-      setIsCreatingShortUrl(false);
-      setShortUrlErrorMsg(
-        i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
-          defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-          values: {
-            errorMessage: fetchError.message,
-          },
-        })
-      );
-      setUrlHelper();
-    }
-  };
+      const parsedUrl = new URL(tempUrl);
 
-  const addUrlAnonymousAccessParameters = (tempUrl: string): string => {
-    if (!anonymousAccessParameters || !usePublicUrl) {
-      return tempUrl;
-    }
+      for (const [name, value] of Object.entries(anonymousAccessParameters)) {
+        parsedUrl.searchParams.set(name, value);
+      }
 
-    const parsedUrl = new URL(tempUrl);
+      return parsedUrl.toString();
+    },
+    [anonymousAccessParameters, usePublicUrl]
+  );
 
-    for (const [name, value] of Object.entries(anonymousAccessParameters)) {
-      parsedUrl.searchParams.set(name, value);
-    }
-
-    return parsedUrl.toString();
-  };
-
-  const makeIframeTag = (tempUrl?: string) => {
+  const makeIframeTag = (tempUrl: string) => {
     if (!tempUrl) {
       return;
     }
@@ -190,12 +171,12 @@ export const EmbedModal = ({
     return `<iframe src="${tempUrl}" height="600" width="800"></iframe>`;
   };
 
-  const setUrlHelper = () => {
-    let tempUrl: string | undefined;
+  const setUrlHelper = useCallback(() => {
+    let tempUrl: string = '';
 
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      tempUrl = getSavedObjectUrl();
-    } else if (useShortUrl) {
+      tempUrl = getSavedObjectUrl() ?? '';
+    } else if (useShortUrl && shortUrlCache) {
       tempUrl = shortUrlCache;
     } else {
       tempUrl = getSnapshotUrl();
@@ -206,18 +187,40 @@ export const EmbedModal = ({
     }
 
     if (isEmbedded) {
-      tempUrl = makeIframeTag(url);
+      tempUrl = makeIframeTag(url) ?? '';
     }
-
     setUrl(tempUrl);
-  };
+  }, [
+    addUrlAnonymousAccessParameters,
+    exportUrlAs,
+    getSavedObjectUrl,
+    getSnapshotUrl,
+    isEmbedded,
+    shortUrlCache,
+    url,
+    useShortUrl,
+  ]);
+
+  const resetUrl = useCallback(() => {
+    if (isMounted()) {
+      setShortUrlCache(undefined);
+      setUrlHelper();
+    }
+  }, [isMounted, setUrlHelper]);
+
+  useEffect(() => {
+    setUrlHelper();
+    getUrlParamExtensions(url);
+    window.addEventListener('hashchange', resetUrl, false);
+    isMounted();
+  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted]);
 
   const renderButtons = () => {
     const { dataTestSubj, formattedMessageId, defaultMessage } = action;
     return (
-      <EuiCopy textToCopy={''}>
+      <EuiCopy textToCopy={url ?? ''}>
         {(copy) => (
-          <EuiButton fill data-test-subj={dataTestSubj} onClick={copy}>
+          <EuiButton fill data-test-subj={dataTestSubj} data-share-url={url} onClick={copy}>
             <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
           </EuiButton>
         )}
@@ -227,14 +230,14 @@ export const EmbedModal = ({
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {
-      return;
+      return <></>;
     }
 
     const setParamValue =
       (paramName: string) =>
       (values: { [queryParam: string]: boolean } = {}): void => {
-        setUrlParams({ [paramName]: { ...values } });
-        useShortUrl ? createShortUrl() : setUrlHelper();
+        setUrlParams({ ...urlParams, [paramName]: { ...values } });
+        setUrlHelper();
       };
 
     return (
