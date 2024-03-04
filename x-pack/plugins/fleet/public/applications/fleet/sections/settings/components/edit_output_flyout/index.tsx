@@ -166,18 +166,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderTypeSpecificWarning = () => {
-    const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
-    if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
+    if (!isESOutput && !isRemoteESOutput) {
       return null;
     }
 
     const generateWarningMessage = () => {
       switch (inputs.typeInput.value) {
-        case outputType.Kafka:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOutputTypeCallout', {
-            defaultMessage:
-              'Kafka output is currently not supported on Agents using the Elastic Defend integration.',
-          });
         default:
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
