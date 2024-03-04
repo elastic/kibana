@@ -63,6 +63,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     });
 
     const { tagsAggs, locationsAggs, projectsAggs } = (data?.aggregations as AggsResponse) ?? {};
+    const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
     return {
       monitorIds: data.saved_objects.map(({ attributes }) => ({
@@ -78,7 +79,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
         })) ?? [],
       locations:
         locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-          label: allLocations.find((location) => location.id === key)?.label || key,
+          label: allLocationsMap.get(key)?.label || key,
           value: key,
           count,
         })) ?? [],
