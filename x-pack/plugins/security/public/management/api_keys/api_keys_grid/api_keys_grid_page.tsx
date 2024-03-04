@@ -128,6 +128,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
     currentUser,
   ] = state.value && state.value;
 
+  const categorizedApiKeys = apiKeys.map((apiKey) => apiKey as CategorizedApiKey);
+
   const pagination = {
     pageIndex: from / pageSize,
     pageSize,
@@ -253,7 +255,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             >
               {(invalidateApiKeyPrompt) => (
                 <ApiKeysTable
-                  apiKeys={apiKeys}
+                  apiKeys={categorizedApiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
@@ -348,7 +350,7 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
 };
 
 export interface ApiKeysTableProps {
-  apiKeys: ApiKey[];
+  apiKeys: CategorizedApiKey[];
   currentUser: AuthenticatedUser;
   createdApiKey?: CreateAPIKeyResult;
   readOnly?: boolean;
@@ -580,7 +582,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       <EuiSpacer />
 
       <EuiBasicTable
-        // @ts-ignore
         items={apiKeys}
         itemId="id"
         columns={columns}
