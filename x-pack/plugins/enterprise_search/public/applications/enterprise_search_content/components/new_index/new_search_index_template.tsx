@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent } from 'react';
 
+import { css } from '@emotion/react';
 import { useValues, useActions } from 'kea';
 
 import {
@@ -180,12 +181,22 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   )}
                   isInvalid={formInvalid}
                   error={
-                    <EuiText size="xs" style={{ lineBreak: 'anywhere' }}>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        line-break: anywhere;
+                      `}
+                    >
                       {formError()}
                     </EuiText>
                   }
                   helpText={
-                    <EuiText size="xs" style={{ lineBreak: 'anywhere' }}>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        line-break: anywhere;
+                      `}
+                    >
                       {searchHelpTest}
                     </EuiText>
                   }
