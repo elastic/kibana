@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -19,6 +19,7 @@ import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_bu
 import { EmbeddableSloProps } from './types';
 import { SloOverviewDetails } from '../common/slo_overview_details'; // TODO change to slo_details
 import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
+import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';
 
 export function SloErrorBudget({
   sloId,
@@ -106,33 +107,20 @@ export function SloErrorBudget({
     <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
-          {hasGroupBy ? (
-            <EuiTitle size="xs">
-              <h4>{slo.name}</h4>
-            </EuiTitle>
-          ) : (
-            <EuiLink
-              css={{ fontSize: '16px' }}
-              data-test-subj="o11ySloErrorBudgetLink"
-              onClick={() => {
-                setSelectedSlo(slo);
-              }}
-            >
-              <h4>{slo.name}</h4>
-            </EuiLink>
-          )}
+          <EuiLink
+            css={{ fontSize: '16px' }}
+            data-test-subj="o11ySloErrorBudgetLink"
+            onClick={() => {
+              setSelectedSlo(slo);
+            }}
+          >
+            <h4>{slo.name}</h4>
+          </EuiLink>
         </EuiFlexItem>
 
         {hasGroupBy && (
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="o11ySloErrorBudgetLink"
-              onClick={() => {
-                setSelectedSlo(slo);
-              }}
-            >
-              {slo.groupBy}: {slo.instanceId}
-            </EuiLink>
+            <SLOGroupings slo={slo} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
