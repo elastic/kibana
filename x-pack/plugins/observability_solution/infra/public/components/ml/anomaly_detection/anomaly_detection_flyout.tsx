@@ -8,15 +8,21 @@
 import React, { useState, useCallback } from 'react';
 import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSourceContext } from '../../../../../../containers/metrics_source';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
-import { useInfraMLCapabilities } from '../../../../../../containers/ml/infra_ml_capabilities';
-import { MetricHostsModuleProvider } from '../../../../../../containers/ml/modules/metrics_hosts/module';
-import { MetricK8sModuleProvider } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { useActiveKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
+import { MetricHostsModuleProvider } from '../../../containers/ml/modules/metrics_hosts/module';
+import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_k8s/module';
+import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
-export const AnomalyDetectionFlyout = () => {
+export const AnomalyDetectionFlyout = ({
+  hideJobType,
+  hideSelectGroup,
+}: {
+  hideJobType?: boolean;
+  hideSelectGroup?: boolean;
+}) => {
   const { hasInfraMLSetupCapabilities } = useInfraMLCapabilities();
   const [showFlyout, setShowFlyout] = useState(false);
   const [screenName, setScreenName] = useState<'home' | 'setup'>('home');
@@ -77,6 +83,8 @@ export const AnomalyDetectionFlyout = () => {
                   hasSetupCapabilities={hasInfraMLSetupCapabilities}
                   goToSetup={openJobSetup}
                   closeFlyout={closeFlyout}
+                  hideJobType={hideJobType}
+                  hideSelectGroup={hideSelectGroup}
                 />
               )}
               {screenName === 'setup' && (
