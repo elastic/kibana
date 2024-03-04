@@ -5,27 +5,52 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface OfflineCalloutProps {
+  agentType: ResponseActionAgentType;
   endpointId: string;
+  hostName: string;
 }
 
-export const OfflineCallout = memo<OfflineCalloutProps>(({ endpointId }) => {
+export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
+  const isEndpointAgent = agentType === 'endpoint';
+  const isSentinelOneAgent = agentType === 'sentinel_one';
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+
   const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
     refetchInterval: 10000,
+    enabled: isEndpointAgent,
   });
 
-  if (!endpointDetails) {
+  const { data } = useGetSentinelOneAgentStatus([endpointId]);
+
+  // TODO: simplify this to use the yet to be implemented agentStatus API hook
+  const showOfflineCallout = useMemo(
+    () =>
+      (isEndpointAgent && endpointDetails?.host_status === HostStatus.OFFLINE) ||
+      (isSentinelOneAgent && data?.[endpointId].status === HostStatus.OFFLINE),
+    [data, endpointDetails?.host_status, endpointId, isEndpointAgent, isSentinelOneAgent]
+  );
+
+  if (
+    (isEndpointAgent && !endpointDetails) ||
+    (isSentinelOneV1Enabled && isSentinelOneAgent && !data)
+  ) {
     return null;
   }
 
-  if (endpointDetails.host_status === HostStatus.OFFLINE) {
+  if (showOfflineCallout) {
     return (
       <>
         <EuiCallOut
@@ -40,7 +65,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ endpointId }) => {
             <FormattedMessage
               id="xpack.securitySolution.responder.hostOffline.callout.body"
               defaultMessage="The host {name} is offline, so its responses may be delayed. Pending commands will execute when the host reconnects."
-              values={{ name: <strong>{endpointDetails.metadata.host.name}</strong> }}
+              values={{ name: <strong>{hostName}</strong> }}
             />
           </p>
         </EuiCallOut>
