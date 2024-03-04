@@ -242,7 +242,6 @@ export class RangeSliderEmbeddable
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    this.dispatch.setLoading(true);
     const { min, max } = await this.fetchMinMax({
       dataView,
       field,
@@ -250,7 +249,6 @@ export class RangeSliderEmbeddable
 
     batch(() => {
       this.dispatch.setMinMax({ min, max });
-      this.dispatch.setLoading(false);
       this.dispatch.setDataViewId(dataView.id);
       this.dispatch.setErrorMessage(undefined);
     });
