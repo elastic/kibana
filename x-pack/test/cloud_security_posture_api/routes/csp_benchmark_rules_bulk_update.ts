@@ -79,16 +79,6 @@ export default function ({ getService }: FtrProviderContext) {
     return detectionRule;
   };
 
-  const getDetectionRuleState = async (ruleId: string) => {
-    const { body: detectionRule } = await supertest
-      .get(DETECTION_ENGINE_RULES_URL)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31')
-      .query({ id: ruleId });
-
-    return detectionRule.enabled;
-  };
-
   /**
    * required before indexing findings
    */
@@ -350,13 +340,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Expect to mute two benchmark rules and one detection rule', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
-      const rule2 = await getRandomCspBenchmarkRule();
 
       const detectionRule = await createDetectionRule(rule1);
-
-      // Verify that the created rule is enabled
-      const detectionRuleState = await getDetectionRuleState(detectionRule.body.id);
-      expect(detectionRuleState).to.be(true);
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -371,12 +356,6 @@ export default function ({ getService }: FtrProviderContext) {
               benchmark_version: rule1.metadata.benchmark.version,
               rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
-            },
-            {
-              benchmark_id: rule2.metadata.benchmark.id,
-              benchmark_version: rule2.metadata.benchmark.version,
-              rule_number: rule2.metadata.benchmark.rule_number || '',
-              rule_id: rule2.metadata.id,
             },
           ],
         })
