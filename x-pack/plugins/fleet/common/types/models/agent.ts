@@ -10,7 +10,6 @@ import type {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
-  AgentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -18,8 +17,16 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-type AgentStatusTuple = typeof AgentStatuses;
-export type AgentStatus = AgentStatusTuple[number];
+export type AgentStatus =
+  | 'offline'
+  | 'error'
+  | 'online'
+  | 'inactive'
+  | 'enrolling'
+  | 'unenrolling'
+  | 'unenrolled'
+  | 'updating'
+  | 'degraded';
 
 export type SimplifiedAgentStatus =
   | 'healthy'

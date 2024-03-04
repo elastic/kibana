@@ -17,7 +17,6 @@ import type { SecurityMetadata } from '../../../actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
-import { useDataViewId } from '../../hooks/use_data_view_id';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';
@@ -55,16 +54,13 @@ export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellAction
 export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
   sourcererScopeId = SourcererScopeName.default,
   data,
-  metadata,
   children,
   ...props
 }) => {
   const getFieldSpec = useGetFieldSpec(sourcererScopeId);
-  const dataViewId = useDataViewId(sourcererScopeId);
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
   // It is necessary because the data object is an array or an object and useMemo would always re-render
   const dependencyKey = JSON.stringify(data);
-
   const fieldData: CellActionsData[] = useMemo(
     () =>
       (Array.isArray(data) ? data : [data])
@@ -77,10 +73,8 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
     [dependencyKey, getFieldSpec]
   );
 
-  const metadataWithDataView = useMemo(() => ({ ...metadata, dataViewId }), [dataViewId, metadata]);
-
   return fieldData.length > 0 ? (
-    <CellActions data={fieldData} metadata={metadataWithDataView} {...props}>
+    <CellActions data={fieldData} {...props}>
       {children}
     </CellActions>
   ) : (

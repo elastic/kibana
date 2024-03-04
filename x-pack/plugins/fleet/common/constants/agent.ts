@@ -35,15 +35,3 @@ export const FleetServerAgentComponentStatuses = [
   'STOPPING',
   'STOPPED',
 ] as const;
-
-export const AgentStatuses = [
-  'offline',
-  'error',
-  'online',
-  'inactive',
-  'enrolling',
-  'unenrolling',
-  'unenrolled',
-  'updating',
-  'degraded',
-] as const;
