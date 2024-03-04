@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import React, { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import {
@@ -29,6 +28,7 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface Props {
   isSelectorView?: boolean;
@@ -61,7 +61,10 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isMessageDismissed, setIsMessageDismissed] = useState(false);
     const localStorageKey = `cases.${owner[0] ?? ''}.utilityBar.hideMaxLimitWarning`;
-    const [localStorageWarning, setLocalStorageWarning] = useLocalStorage<boolean>(localStorageKey);
+    const [localStorageWarning, setLocalStorageWarning] = useCasesLocalStorage<boolean>(
+      localStorageKey,
+      false
+    );
 
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
