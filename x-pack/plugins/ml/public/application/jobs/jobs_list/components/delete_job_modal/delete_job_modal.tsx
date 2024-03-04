@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -40,10 +40,10 @@ interface Props {
 export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [jobIds, setJobIds] = useState<string[]>([]);
+  const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);
   const [canDelete, setCanDelete] = useState(false);
-  const [hasManagedJob, setHasManagedJob] = useState(false);
   const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
+  const [deleteAlertingRules, setDeleteAlertingRules] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -58,12 +58,21 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   }, []);
 
   const showModal = useCallback((jobs: MlSummaryJob[]) => {
-    setJobIds(jobs.map(({ id }) => id));
-    setHasManagedJob(jobs.some((job) => isManagedJob(job)));
+    setAdJobs(jobs);
     setModalVisible(true);
     setDeleting(false);
     setDeleteUserAnnotations(false);
   }, []);
+
+  const { jobIds, hasManagedJob, hasAlertingRules } = useMemo(() => {
+    return {
+      jobIds: adJobs.map(({ id }) => id),
+      hasManagedJob: adJobs.some((job) => isManagedJob(job)),
+      hasAlertingRules: adJobs.some(
+        (job) => Array.isArray(job.alertingRules) && job.alertingRules.length > 0
+      ),
+    };
+  }, [adJobs]);
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
@@ -74,14 +83,15 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setDeleting(true);
     deleteJobs(
       jobIds.map((id) => ({ id })),
-      deleteUserAnnotations
+      deleteUserAnnotations,
+      deleteAlertingRules
     );
 
     setTimeout(() => {
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }, [jobIds, deleteUserAnnotations, closeModal, refreshJobs]);
+  }, [jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
@@ -143,13 +153,28 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                     label={i18n.translate(
                       'xpack.ml.jobsList.deleteJobModal.deleteUserAnnotations',
                       {
-                        defaultMessage: 'Delete annotations.',
+                        defaultMessage: 'Delete annotations',
                       }
                     )}
                     checked={deleteUserAnnotations}
                     onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
                     data-test-subj="mlDeleteJobConfirmModalDeleteAnnotationsSwitch"
                   />
+                  {hasAlertingRules ? (
+                    <>
+                      <EuiSpacer size={'s'} />
+                      <EuiSwitch
+                        label={i18n.translate(
+                          'xpack.ml.jobsList.resetJobModal.deleteAlertingRules',
+                          {
+                            defaultMessage: 'Delete alerting rules',
+                          }
+                        )}
+                        checked={deleteAlertingRules}
+                        onChange={(e) => setDeleteAlertingRules(e.target.checked)}
+                      />
+                    </>
+                  ) : null}
                 </EuiText>
               </>
             )}

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logExplorerAppTitle = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
+export const logsExplorerAppTitle = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
   defaultMessage: 'Logs Explorer',
 });
 
@@ -51,5 +51,12 @@ export const feedbackLinkTitle = i18n.translate(
   'xpack.observabilityLogsExplorer.feedbackLinkTitle',
   {
     defaultMessage: 'Give feedback',
+  }
+);
+
+export const datasetQualityLinkTitle = i18n.translate(
+  'xpack.observabilityLogsExplorer.datasetQualityLinkTitle',
+  {
+    defaultMessage: 'Datasets',
   }
 );

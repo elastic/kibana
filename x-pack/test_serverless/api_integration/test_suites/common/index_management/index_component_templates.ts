@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
             hasSettings: true,
+            isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
           });
@@ -118,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { body } = await getOneComponentTemplate(COMPONENT_NAME).expect(200);
 
           expect(body).to.eql({
+            isDeprecated: false,
             name: COMPONENT_NAME,
             ...COMPONENT,
             _kbnMeta: {

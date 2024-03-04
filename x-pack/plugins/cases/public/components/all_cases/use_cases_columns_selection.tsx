@@ -12,7 +12,7 @@ import type { CasesColumnSelection } from './types';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
-import { mergeSelectedColumnsWithConfiguration } from './utils';
+import { mergeSelectedColumnsWithConfiguration } from './utils/merge_selected_columns_with_configuration';
 
 const getTableColumnsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesTableColumns;

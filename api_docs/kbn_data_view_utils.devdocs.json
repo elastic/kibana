@@ -1,0 +1,45 @@
+{
+  "id": "@kbn/data-view-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.ESQL_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_TYPE",
+        "description": [
+          "\nESQL type constant"
+        ],
+        "signature": [
+          "\"esql\""
+        ],
+        "path": "packages/kbn-data-view-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

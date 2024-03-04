@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ConnectorIndex, ElasticsearchViewIndexExtension } from './indices';
 export interface SelectOption {
   label: string;
   value: string;
@@ -215,6 +216,7 @@ export interface SchedulingConfiguraton {
 
 export interface Connector {
   api_key_id: string | null;
+  api_key_secret_id: string | null;
   configuration: ConnectorConfiguration;
   custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
@@ -281,3 +283,5 @@ export interface NativeConnector {
   name: string;
   serviceType: string;
 }
+
+export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;

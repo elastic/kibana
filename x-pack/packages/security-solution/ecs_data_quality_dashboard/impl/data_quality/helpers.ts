@@ -23,6 +23,7 @@ import type {
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
+  IlmPhase,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
@@ -449,51 +450,116 @@ export const getErrorSummaries = (
 
 export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
 
-export interface ResultData {
-  meta: DataQualityIndexCheckedParams;
-  rollup: PatternRollup;
+export interface StorageResult {
+  batchId: string;
+  indexName: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  ilmPhase?: IlmPhase;
+  markdownComments: string[];
+  ecsVersion: string;
+  indexId: string;
+  error: string | null;
 }
 
-export async function postResult({
+export const formatStorageResult = ({
   result,
+  report,
+  partitionedFieldMetadata,
+}: {
+  result: DataQualityCheckResult;
+  report: DataQualityIndexCheckedParams;
+  partitionedFieldMetadata: PartitionedFieldMetadata;
+}): StorageResult => ({
+  batchId: report.batchId,
+  indexName: result.indexName,
+  isCheckAll: report.isCheckAll,
+  checkedAt: result.checkedAt ?? Date.now(),
+  docsCount: result.docsCount ?? 0,
+  totalFieldCount: partitionedFieldMetadata.all.length,
+  ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
+  customFieldCount: partitionedFieldMetadata.custom.length,
+  incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
+  sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
+  sameFamilyFields: report.sameFamilyFields ?? [],
+  unallowedMappingFields: report.unallowedMappingFields ?? [],
+  unallowedValueFields: report.unallowedValueFields ?? [],
+  sizeInBytes: report.sizeInBytes ?? 0,
+  ilmPhase: result.ilmPhase,
+  markdownComments: result.markdownComments,
+  ecsVersion: report.ecsVersion,
+  indexId: report.indexId,
+  error: result.error,
+});
+
+export const formatResultFromStorage = ({
+  storageResult,
+  pattern,
+}: {
+  storageResult: StorageResult;
+  pattern: string;
+}): DataQualityCheckResult => ({
+  docsCount: storageResult.docsCount,
+  error: storageResult.error,
+  ilmPhase: storageResult.ilmPhase,
+  incompatible: storageResult.incompatibleFieldCount,
+  indexName: storageResult.indexName,
+  markdownComments: storageResult.markdownComments,
+  sameFamily: storageResult.sameFamilyFieldCount,
+  checkedAt: storageResult.checkedAt,
+  pattern,
+});
+
+export async function postStorageResult({
+  storageResult,
   httpFetch,
   toasts,
-  abortController,
+  abortController = new AbortController(),
 }: {
-  result: ResultData;
+  storageResult: StorageResult;
   httpFetch: HttpHandler;
   toasts: IToasts;
-  abortController: AbortController;
+  abortController?: AbortController;
 }): Promise<void> {
   try {
     await httpFetch<void>(RESULTS_API_ROUTE, {
       method: 'POST',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
-      body: JSON.stringify(result),
+      body: JSON.stringify(storageResult),
     });
   } catch (err) {
     toasts.addError(err, { title: i18n.POST_RESULT_ERROR_TITLE });
   }
 }
 
-export async function getResults({
-  patterns,
+export async function getStorageResults({
+  pattern,
   httpFetch,
   toasts,
   abortController,
 }: {
-  patterns: string[];
+  pattern: string;
   httpFetch: HttpHandler;
   toasts: IToasts;
   abortController: AbortController;
-}): Promise<ResultData[]> {
+}): Promise<StorageResult[]> {
   try {
-    const results = await httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
+    const results = await httpFetch<StorageResult[]>(RESULTS_API_ROUTE, {
       method: 'GET',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
-      query: { patterns: patterns.join(',') },
+      query: { pattern },
     });
     return results;
   } catch (err) {

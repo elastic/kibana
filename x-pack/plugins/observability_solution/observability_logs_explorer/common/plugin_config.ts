@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface ObservabilityLogExplorerConfig {
+export interface ObservabilityLogsExplorerConfig {
   navigation: {
     showAppLink: boolean;
   };

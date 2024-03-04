@@ -51,7 +51,11 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
   const rulePage = {
     toggleBulkActionButton: async () => {
       const bulkActionButtonToBeClicked = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
-      await bulkActionButtonToBeClicked.click();
+      await retry.waitFor('bulk action options to be displayed', async () => {
+        await bulkActionButtonToBeClicked.click();
+        const bulkActionOptions = await testSubjects.findAll(RULES_BULK_ACTION_OPTION_DISABLE);
+        return bulkActionOptions.length > 0;
+      });
     },
 
     clickBulkActionOption: async (optionTestId: string) => {
@@ -138,6 +142,52 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
         action + '-benchmark-rule-take-action-button'
       );
       await takeActionOption.click();
+    },
+
+    getCountersEmptyState: async () => {
+      return await testSubjects.exists('rules-counters-empty-state');
+    },
+
+    getPostureScoreCounter: async () => {
+      return await testSubjects.find('rules-counters-posture-score-counter');
+    },
+
+    clickPostureScoreButton: async () => {
+      const postureScoreButton = await testSubjects.find('rules-counters-posture-score-button');
+      await postureScoreButton.click();
+    },
+
+    getIntegrationsEvaluatedCounter: async () => {
+      return await testSubjects.find('rules-counters-integrations-evaluated-counter');
+    },
+
+    clickIntegrationsEvaluatedButton: async () => {
+      const integrationsEvaluatedButton = await testSubjects.find(
+        'rules-counters-integrations-evaluated-button'
+      );
+      await integrationsEvaluatedButton.click();
+    },
+
+    getFailedFindingsCounter: async () => {
+      return await testSubjects.find('rules-counters-failed-findings-counter');
+    },
+
+    clickFailedFindingsButton: async () => {
+      const failedFindingsButton = await testSubjects.find('rules-counters-failed-findings-button');
+      await failedFindingsButton.click();
+    },
+
+    getDisabledRulesCounter: async () => {
+      return await testSubjects.find('rules-counters-disabled-rules-counter');
+    },
+
+    clickDisabledRulesButton: async () => {
+      const disabledRulesButton = await testSubjects.find('rules-counters-disabled-rules-button');
+      await disabledRulesButton.click();
+    },
+
+    doesElementExist: async (selector: string) => {
+      return await testSubjects.exists(selector);
     },
   };
 

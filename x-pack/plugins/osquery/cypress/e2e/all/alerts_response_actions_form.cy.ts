@@ -170,6 +170,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         cy.contains('Search for a pack to run');
         cy.contains('Pack is a required field');
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+        cy.contains(packName);
       })
       .clickOutside();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
@@ -181,7 +182,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
 
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+    cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,
@@ -221,7 +222,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
 
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleMultiQuery').should(({ request }) => {
+    cy.wait('@saveRuleMultiQuery', { timeout: 15000 }).should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,

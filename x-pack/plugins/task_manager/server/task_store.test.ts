@@ -25,6 +25,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr } from './lib/result_type';
+import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();
@@ -108,6 +109,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -280,6 +284,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -351,6 +358,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -459,6 +469,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -610,6 +623,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -693,6 +709,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -729,6 +748,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -768,6 +790,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -828,6 +853,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -923,6 +951,9 @@ describe('TaskStore', () => {
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
             allowReadingInvalidState: false,
+            requestTimeouts: {
+              update_by_query: 1000,
+            },
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -945,6 +976,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -965,6 +999,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -985,6 +1022,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -1155,6 +1195,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1177,12 +1220,52 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: true,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
         logger,
         definitions: taskDefinitions,
         allowReadingInvalidState: true,
+      });
+    });
+  });
+
+  describe('updateByQuery', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+    test('should pass requestTimeout', async () => {
+      childEsClient.updateByQuery.mockResponse({
+        hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
+      } as UpdateByQueryResponse);
+      await store.updateByQuery({ script: '' }, { max_docs: 10 });
+      expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
+        requestTimeout: 1000,
       });
     });
   });

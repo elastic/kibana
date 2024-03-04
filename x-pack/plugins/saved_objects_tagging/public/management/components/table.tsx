@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useEffect, FC, ReactNode } from 'react';
+import React, { FC, ReactNode } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,14 +57,6 @@ export const TagTable: FC<TagTableProps> = ({
   actionBar,
   actions,
 }) => {
-  const tableRef = useRef<EuiInMemoryTable<TagWithRelations>>(null);
-
-  useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.setSelection(selectedTags);
-    }
-  }, [selectedTags]);
-
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',
@@ -144,7 +136,6 @@ export const TagTable: FC<TagTableProps> = ({
   return (
     <EuiInMemoryTable
       data-test-subj={`tagsManagementTable ${testSubjectState}`}
-      ref={tableRef}
       childrenBetween={actionBar}
       loading={loading}
       itemId={'id'}
@@ -159,7 +150,7 @@ export const TagTable: FC<TagTableProps> = ({
       selection={
         allowSelection
           ? {
-              initialSelected: selectedTags,
+              selected: selectedTags,
               onSelectionChange,
             }
           : undefined

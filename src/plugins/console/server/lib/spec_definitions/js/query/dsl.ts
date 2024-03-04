@@ -421,12 +421,33 @@ export const query = (specService: SpecDefinitionsService) => {
       },
       __scope_link: '.more_like_this',
     },
+    pinned: {
+      __template: {
+        organic: {},
+        ids: [],
+      },
+      organic: {
+        query: {},
+      },
+      ids: [],
+    },
     prefix: {
       __template: prefixTemplate,
       '{field}': {
         value: '',
         boost: 1.0,
       },
+    },
+    rank_feature: {
+      __template: {
+        field: 'FIELD',
+      },
+      field: '{field}',
+      boost: 1.0,
+      saturation: {},
+      log: {},
+      sigmoid: {},
+      linear: {},
     },
     query_string: {
       __template: {

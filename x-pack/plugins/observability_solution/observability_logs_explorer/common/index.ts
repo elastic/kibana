@@ -6,9 +6,15 @@
  */
 
 export {
-  type ObservabilityLogExplorerLocators,
+  type ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
   AllDatasetsLocatorDefinition,
 } from './locators';
-export { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from './url_schema';
+export {
+  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
+  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
+  logsExplorerUrlSchemaV1,
+  logsExplorerUrlSchemaV2,
+  datasetQualityUrlSchemaV1,
+} from './url_schema';
 export { deepCompactObject } from './utils/deep_compact_object';

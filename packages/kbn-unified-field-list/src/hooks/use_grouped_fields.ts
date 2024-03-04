@@ -156,6 +156,10 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         if (field.type === 'nested') {
           return 'availableFields';
         }
+
+        if (field?.isNull) {
+          return 'emptyFields';
+        }
         if (dataView?.getFieldByName && !dataView.getFieldByName(field.name)) {
           return 'unmappedFields';
         }
@@ -303,8 +307,12 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       },
     };
 
-    // do not show empty field accordion if there is no existence information
-    if (fieldsExistenceInfoUnavailable) {
+    // the fieldsExistenceInfoUnavailable check should happen only for dataview based
+    const dataViewFieldsExistenceUnavailable = dataViewId && fieldsExistenceInfoUnavailable;
+    // for textbased queries, rely on the empty fields length
+    const textBasedFieldsExistenceUnavailable = !dataViewId && !groupedFields.emptyFields.length;
+
+    if (dataViewFieldsExistenceUnavailable || textBasedFieldsExistenceUnavailable) {
       delete fieldGroupDefinitions.EmptyFields;
     }
 

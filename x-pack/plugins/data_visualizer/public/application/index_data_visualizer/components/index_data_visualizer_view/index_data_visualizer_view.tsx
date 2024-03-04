@@ -8,6 +8,7 @@
 import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import {
   useEuiBreakpoint,
@@ -21,7 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { type Filter, FilterStateStore, type Query } from '@kbn/es-query';
+import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
@@ -47,9 +48,9 @@ import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
 } from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
-import { OverallStats } from '../../types/overall_stats';
+import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import {
@@ -62,50 +63,20 @@ import { DocumentCountContent } from '../../../common/components/document_count_
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
-  RandomSamplerOption,
+  type RandomSamplerOption,
 } from '../../constants/random_sampler';
-
-interface DataVisualizerPageState {
-  overallStats: OverallStats;
-  metricConfigs: FieldVisConfig[];
-  totalMetricFieldCount: number;
-  populatedMetricFieldCount: number;
-  metricsLoaded: boolean;
-  nonMetricConfigs: FieldVisConfig[];
-  nonMetricsLoaded: boolean;
-  documentCountStats?: FieldVisConfig;
-}
+import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
 const defaultSearchQuery = {
   match_all: {},
 };
 
-export function getDefaultPageState(): DataVisualizerPageState {
-  return {
-    overallStats: {
-      totalCount: 0,
-      aggregatableExistsFields: [],
-      aggregatableNotExistsFields: [],
-      nonAggregatableExistsFields: [],
-      nonAggregatableNotExistsFields: [],
-    },
-    metricConfigs: [],
-    totalMetricFieldCount: 0,
-    populatedMetricFieldCount: 0,
-    metricsLoaded: false,
-    nonMetricConfigs: [],
-    nonMetricsLoaded: false,
-    documentCountStats: undefined,
-  };
-}
 export const getDefaultDataVisualizerListState = (
   overrides?: Partial<DataVisualizerIndexBasedAppState>
 ): Required<DataVisualizerIndexBasedAppState> => ({
@@ -115,7 +86,6 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  samplerShardSize: 5000,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -245,7 +215,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
   };
 
-  const input: DataVisualizerGridInput = useMemo(() => {
+  const input: Required<DataVisualizerGridInput, 'dataView'> = useMemo(() => {
     return {
       dataView: currentDataView,
       savedSearch: currentSavedSearch,
@@ -390,14 +360,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         language: searchQueryLanguage,
       };
 
-      const combinedQuery = createMergedEsQuery(
+      const combinedQuery = buildEsQuery(
+        currentDataView,
         {
           query: searchString || '',
           language: searchQueryLanguage,
         },
         data.query.filterManager.getFilters() ?? [],
-        currentDataView,
-        uiSettings
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
 
       setSearchParams({

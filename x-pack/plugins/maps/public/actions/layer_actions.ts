@@ -63,6 +63,7 @@ import {
 import { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
+import { isESVectorTileSource } from '../classes/sources/es_source';
 import {
   DRAW_MODE,
   LAYER_STYLE_TYPE,
@@ -827,7 +828,7 @@ export function setTileState(
       newValue: tileErrors,
     });
 
-    if (!isLayerGroup(layer) && layer.getSource().isESSource()) {
+    if (!isLayerGroup(layer) && isESVectorTileSource(layer.getSource())) {
       getInspectorAdapters(getState()).vectorTiles.setTileResults(
         layerId,
         tileMetaFeatures,

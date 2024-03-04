@@ -27,7 +27,7 @@ import { Meta } from '../../../../../common/types/pagination';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers/eui_components';
-import { SEARCH_INDEX_PATH } from '../../routes';
+import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
@@ -37,6 +37,7 @@ import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
 
 interface ConnectorsTableProps {
+  isCrawler: boolean;
   isLoading?: boolean;
   items: ConnectorViewItem[];
   meta?: Meta;
@@ -53,21 +54,32 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     },
   },
   onChange,
+  isCrawler,
   isLoading,
   onDelete,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
-        {
-          defaultMessage: 'Connector name',
-        }
-      ),
-      width: '25%',
-    },
+    ...(!isCrawler
+      ? [
+          {
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
+              {
+                defaultMessage: 'Connector name',
+              }
+            ),
+            render: (connector: Connector) => (
+              <EuiLinkTo
+                to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
+              >
+                {connector.name}
+              </EuiLinkTo>
+            ),
+            width: '25%',
+          },
+        ]
+      : []),
     {
       field: 'index_name',
       name: i18n.translate(
@@ -84,7 +96,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         ) : (
           '--'
         ),
-      width: '25%',
+      width: isCrawler ? '70%' : '25%',
     },
     {
       field: 'docsCount',
@@ -96,18 +108,22 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       truncateText: true,
     },
-    {
-      field: 'service_type',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
-        {
-          defaultMessage: 'Connector type',
-        }
-      ),
-      render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
-      truncateText: true,
-      width: '25%',
-    },
+    ...(!isCrawler
+      ? [
+          {
+            field: 'service_type',
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
+              {
+                defaultMessage: 'Connector type',
+              }
+            ),
+            render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
+            truncateText: true,
+            width: '15%',
+          },
+        ]
+      : []),
     {
       field: 'status',
       name: i18n.translate(
@@ -121,6 +137,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
       },
       truncateText: true,
+      width: '15%',
     },
     {
       actions: [
@@ -161,8 +178,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             ),
           onClick: (connector) => {
             navigateToUrl(
-              generateEncodedPath(SEARCH_INDEX_PATH, {
-                indexName: connector.index_name || '',
+              generateEncodedPath(CONNECTOR_DETAIL_PATH, {
+                connectorId: connector.id,
               })
             );
           },
@@ -177,6 +194,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
     },
   ];
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>

@@ -16,11 +16,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   describe('Search bar features', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     describe('list features', () => {

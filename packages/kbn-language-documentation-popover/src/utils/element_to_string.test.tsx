@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { elementToString } from './element_to_string';
 
 describe('elementToString', () => {
@@ -21,7 +21,7 @@ describe('elementToString', () => {
   });
 
   test('Should convert to string if markdown is passed', () => {
-    const text = elementToString(<Markdown markdown={`## Markdown goes here `} />);
+    const text = elementToString(<Markdown markdownContent="## Markdown goes here " readOnly />);
     expect(text).toEqual('## Markdown goes here ');
   });
 
@@ -29,7 +29,7 @@ describe('elementToString', () => {
     const text = elementToString(
       <>
         <h1>Meow</h1>
-        <Markdown markdown={`## Markdown goes here `} />
+        <Markdown markdownContent="## Markdown goes here " readOnly />
       </>
     );
     expect(text).toEqual('## Markdown goes here ');

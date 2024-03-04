@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isLiteralItem } from '../shared/helpers';
+import { isColumnItem, isLiteralItem } from '../shared/helpers';
 import { ESQLCommandOption, ESQLMessage } from '../types';
 import { CommandOptionsDefinition } from './types';
 
@@ -33,7 +33,43 @@ export const metadataOption: CommandOptionsDefinition = {
     params: [{ name: 'column', type: 'column' }],
   },
   optional: true,
-  wrapped: ['[', ']'],
+  skipCommonValidation: true,
+  validate: (option, command, references) => {
+    const messages: ESQLMessage[] = [];
+    // need to test the parent command here
+    if (/\[metadata/i.test(command.text)) {
+      messages.push({
+        location: option.location,
+        text: i18n.translate('monaco.esql.validation.metadataBracketsDeprecation', {
+          defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
+        }),
+        type: 'warning',
+        code: 'metadataBracketsDeprecation',
+      });
+    }
+    const fields = option.args.filter(isColumnItem);
+    const metadataFieldsAvailable = references as unknown as Set<string>;
+    if (metadataFieldsAvailable.size > 0) {
+      for (const field of fields) {
+        if (!metadataFieldsAvailable.has(field.name)) {
+          messages.push({
+            location: field.location,
+            text: i18n.translate('monaco.esql.validation.wrongMetadataArgumentType', {
+              defaultMessage:
+                'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
+              values: {
+                value: field.name,
+                availableFields: Array.from(metadataFieldsAvailable).join(', '),
+              },
+            }),
+            type: 'error',
+            code: 'unknownMetadataField',
+          });
+        }
+      }
+    }
+    return messages;
+  },
 };
 
 export const asOption: CommandOptionsDefinition = {
@@ -99,6 +135,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
           },
         }),
         type: 'error',
+        code: 'wrongDissectOptionArgumentType',
       });
     }
     return messages;

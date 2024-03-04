@@ -23,6 +23,7 @@ export const getComposableTemplate = ({
   isLegacy = false,
   type = 'default',
   allowAutoCreate = false,
+  composedOf = [],
 }: Partial<
   TemplateDeserialized & {
     isLegacy?: boolean;
@@ -53,6 +54,7 @@ export const getComposableTemplate = ({
       hasDatastream,
       isLegacy,
     },
+    composedOf,
   };
 
   return indexTemplate;

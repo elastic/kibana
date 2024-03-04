@@ -21,7 +21,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { processTopValues } from './utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
+import { MAX_PERCENT, PERCENTILE_SPACING } from './constants';
 import type {
   Aggs,
   Bucket,
@@ -154,7 +154,6 @@ export const fetchNumericFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<NumericFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getNumericFieldsStatsRequest(params, fields);
 
   return dataSearch
@@ -183,9 +182,6 @@ export const fetchNumericFieldsStats = (
           );
 
           const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-          if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-            topAggsPath.push('top');
-          }
 
           const fieldAgg = get(aggregations, [...topAggsPath], {}) as { buckets: Bucket[] };
           const { topValuesSampleSize, topValues } = processTopValues(fieldAgg);

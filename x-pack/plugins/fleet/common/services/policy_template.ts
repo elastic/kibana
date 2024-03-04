@@ -80,13 +80,15 @@ export const getNormalizedDataStreams = (
   }
 
   return policyTemplates.map((policyTemplate) => {
+    const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
+
     const dataStream: RegistryDataStream = {
       type: policyTemplate.type,
-      dataset: datasetName || createDefaultDatasetName(packageInfo, policyTemplate),
+      dataset,
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
-      path: packageInfo.name,
+      path: dataset,
       elasticsearch: packageInfo.elasticsearch || {},
       streams: [
         {

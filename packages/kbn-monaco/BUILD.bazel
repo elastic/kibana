@@ -29,6 +29,7 @@ SHARED_DEPS = [
   "@npm//antlr4ts",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
+  "@npm//js-levenshtein",
 ]
 
 webpack_cli(

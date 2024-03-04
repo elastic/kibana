@@ -26,7 +26,7 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
-export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
+export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
@@ -34,8 +34,6 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-modal-new-timeline
 export const BOTTOM_BAR_CREATE_NEW_TIMELINE =
   '[data-test-subj="timeline-bottom-bar-create-new-timeline"]';
 
-export const CREATE_NEW_TIMELINE_TEMPLATE =
-  '[data-test-subj="timeline-modal-new-timeline-template"]';
 export const BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE =
   '[data-test-subj="timeline-bottom-bar-create-new-timeline-template"]';
 
@@ -129,8 +127,6 @@ export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
 
 export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
 
-export const TIMELINE_DATA_PROVIDER_FIELD_INPUT = '[data-test-subj="comboBoxSearchInput"]';
-
 export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 
 export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
@@ -177,7 +173,7 @@ export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 export const TIMELINE_FILTER_VALUE =
   '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
 
-export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
+export const TIMELINE_FLYOUT = '[data-test-subj="timeline-container"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
@@ -185,7 +181,7 @@ export const TIMELINE_HEADER = '[data-test-subj="timeline-hide-show-container"]'
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-empty-button"]`;
 
-export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
+export const TIMELINE_PANEL = `[data-test-subj="timeline-modal-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
@@ -205,7 +201,7 @@ export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMe
 
 export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
 
-export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+export const TIMELINE_TITLE = '[data-test-subj="timeline-modal-header-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-modal-title-input"]';
 
@@ -225,9 +221,9 @@ export const TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH =
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
-export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
+export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="timeline-portal-ref"]';
 
-export const TIMELINE_WRAPPER = '[data-test-subj="timeline-wrapper"]';
+export const TIMELINE_WRAPPER = '[data-test-subj="timeline-portal-overlay-mask"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
@@ -254,9 +250,6 @@ export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-rende
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
-
-export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
-  '[data-test-subj="timeline-tab-content-graph-notes"]';
 
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
@@ -316,7 +309,7 @@ export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
   'timeline-modal-new-timeline-dropdown-button'
 );
 
-export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('save-timeline-action');
+export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('timeline-modal-save-timeline');
 export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('timeline-modal-save-timeline');
 
 export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(

@@ -315,6 +315,7 @@ export interface GetFieldsOptions {
   fields?: string[];
   allowHidden?: boolean;
   forceRefresh?: boolean;
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -408,6 +409,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
@@ -458,6 +463,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -544,5 +551,6 @@ export interface HasDataService {
 
 export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
   fieldListCachingEnabled?: boolean;
 }

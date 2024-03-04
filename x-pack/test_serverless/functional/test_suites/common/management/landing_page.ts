@@ -10,20 +10,15 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlManagementPage']);
   const browser = getService('browser');
   const retry = getService('retry');
 
   describe('Management landing page', function () {
     this.tags('smoke');
     before(async () => {
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page', async () => {
@@ -39,6 +34,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('app-card-index_management');
       await retry.waitFor('Index Management title to be visible', async () => {
         return await testSubjects.exists('indexManagementHeaderContent');
+      });
+    });
+
+    describe('Roles management card', () => {
+      it('should not be displayed by default', async () => {
+        await pageObjects.common.navigateToApp('management');
+
+        await pageObjects.svlManagementPage.assertRoleManagementCardDoesNotExist();
       });
     });
   });

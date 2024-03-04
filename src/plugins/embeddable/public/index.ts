@@ -92,8 +92,28 @@ export type {
   EmbeddableStartDependencies,
 } from './plugin';
 export type { EnhancementRegistryDefinition } from './types';
-export type { EmbeddableComponentFactory } from './registry/types';
-export { CreateEmbeddableComponent } from './registry/create_embeddable_component';
+
+export {
+  ReactEmbeddableRenderer,
+  reactEmbeddableRegistryHasKey,
+  RegisterReactEmbeddable,
+  registerReactEmbeddableFactory,
+  useReactEmbeddableApiHandle,
+  type DefaultEmbeddableApi,
+  type ReactEmbeddable,
+  type ReactEmbeddableFactory,
+  type ReactEmbeddableRegistration,
+  type ReactEmbeddableTitlesApi,
+  type SerializedReactEmbeddableTitles,
+  ReactEmbeddableParentContext,
+  useReactEmbeddableParentApi,
+  useReactEmbeddableUnsavedChanges,
+  initializeReactEmbeddableUuid,
+  initializeReactEmbeddableTitles,
+  serializeReactEmbeddableTitles,
+} from './react_embeddable_system';
+
+export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

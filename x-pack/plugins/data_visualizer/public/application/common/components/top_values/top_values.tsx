@@ -28,6 +28,7 @@ import { kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
+import { EMPTY_EXAMPLE } from '../examples_list/examples_list';
 
 interface Props {
   stats: FieldVisStats | undefined;
@@ -115,16 +116,17 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
       >
         {Array.isArray(topValues)
           ? topValues.map((value) => {
-              const fieldValue = value.key_as_string ?? value.key.toString();
+              const fieldValue = value.key_as_string ?? (value.key ? value.key.toString() : '');
+              const displayValue = fieldValue ?? EMPTY_EXAMPLE;
               return (
-                <EuiFlexGroup gutterSize="xs" alignItems="center" key={fieldValue}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" key={displayValue}>
                   <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                     <EuiProgress
                       value={value.percent}
                       max={1}
                       color={barColor}
                       size="xs"
-                      label={kibanaFieldFormat(value.key, fieldFormat)}
+                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : fieldValue}
                       className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                       valueText={`${value.doc_count}${
                         totalDocuments !== undefined
@@ -134,7 +136,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                     />
                   </EuiFlexItem>
                   {fieldName !== undefined &&
-                  fieldValue !== undefined &&
+                  displayValue !== undefined &&
                   onAddFilter !== undefined ? (
                     <div
                       css={css`
@@ -149,10 +151,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                           'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
                           {
                             defaultMessage: 'Filter for {fieldName}: "{value}"',
-                            values: { fieldName, value: fieldValue },
+                            values: { fieldName, value: displayValue },
                           }
                         )}
-                        data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${fieldValue}`}
+                        data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${displayValue}`}
                         style={{
                           minHeight: 'auto',
                           minWidth: 'auto',
@@ -170,10 +172,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                           'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
                           {
                             defaultMessage: 'Filter out {fieldName}: "{value}"',
-                            values: { fieldName, value: fieldValue },
+                            values: { fieldName, value: displayValue },
                           }
                         )}
-                        data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${fieldValue}`}
+                        data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${displayValue}`}
                         style={{
                           minHeight: 'auto',
                           minWidth: 'auto',

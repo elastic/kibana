@@ -129,7 +129,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
             <EuiSpacer />
             <EuiSwitch
               label={i18n.translate('xpack.ml.jobsList.resetJobModal.deleteUserAnnotations', {
-                defaultMessage: 'Delete annotations.',
+                defaultMessage: 'Delete annotations',
               })}
               checked={deleteUserAnnotations}
               onChange={(e) => setDeleteUserAnnotations(e.target.checked)}

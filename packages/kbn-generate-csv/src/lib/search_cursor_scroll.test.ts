@@ -24,10 +24,11 @@ describe('CSV Export Search Cursor', () => {
   beforeEach(async () => {
     settings = {
       scroll: {
-        duration: '10m',
+        duration: jest.fn(() => '10m'),
         size: 500,
       },
       includeFrozen: false,
+      taskInstanceFields: { startedAt: null, retryAt: null },
       maxConcurrentShardRequests: 5,
     };
 
@@ -37,7 +38,14 @@ describe('CSV Export Search Cursor', () => {
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursorScroll('test-index-pattern-string', settings, { data, es }, logger);
+    cursor = new SearchCursorScroll(
+      'test-index-pattern-string',
+      settings,
+      { data, es },
+      new AbortController(),
+      logger
+    );
+
     await cursor.initialize();
   });
 

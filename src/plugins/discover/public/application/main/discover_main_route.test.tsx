@@ -117,7 +117,7 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
     customizationCallbacks: [],
     customizationContext: {
       displayMode: 'standalone',
-      showLogExplorerTabs: false,
+      showLogsExplorerTabs: false,
     },
   };
 

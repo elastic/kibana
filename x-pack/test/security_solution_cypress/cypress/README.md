@@ -15,6 +15,8 @@ If you are still having doubts, questions or queries, please feel free to ping o
 
 [**Running the tests**](#running-the-tests)
 
+[**Enabling Experimental Flags**](#enabling-experimental-flags)
+
 [**Debugging your test**](#debugging-your-test)
 
 [**Folder structure**](#folder-structure)
@@ -93,6 +95,29 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
+
+### Enabling experimental flags
+
+When writing a test that requires an experimental flag enabled, you need to pass an extra configuration to the header of the test:
+
+```typescript
+describe(
+  'My Experimental Flag test',
+  {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'MY_EXPERIMENTAL_FLAG',
+          ])}`,
+        ],
+      },
+    },
+  },
+  ...
+```
+
+Note that this configuration doesn't work for local development. In this case, you need to update the configuration files: `../config` and `../serverless_config`, but you shouldn't commit these changes.
 
 ## Debugging your test
 

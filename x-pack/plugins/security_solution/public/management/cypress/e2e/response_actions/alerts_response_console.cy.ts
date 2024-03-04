@@ -104,7 +104,7 @@ describe(
 
       getAlertsTableRows().should('have.length.greaterThan', 0);
       openInvestigateInTimelineView();
-      cy.getByTestSubj('timeline-flyout').within(() => {
+      cy.getByTestSubj('timeline-container').within(() => {
         openAlertDetailsView();
       });
       openResponderFromEndpointAlertDetails();

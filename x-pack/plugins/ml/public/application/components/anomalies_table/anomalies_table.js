@@ -144,9 +144,8 @@ export class AnomaliesTableInternal extends Component {
   };
 
   unsetShowRuleEditorFlyoutFunction = () => {
-    const showRuleEditorFlyout = () => {};
     this.setState({
-      showRuleEditorFlyout,
+      showRuleEditorFlyout: () => {},
     });
   };
 

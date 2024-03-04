@@ -120,6 +120,7 @@ export interface BenchmarkRuleSelectParams {
 export interface PageUrlParams {
   benchmarkId: BenchmarksCisId;
   benchmarkVersion: string;
+  ruleId?: string;
 }
 
 export const rulesToUpdate = schema.arrayOf(
