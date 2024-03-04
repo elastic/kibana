@@ -115,7 +115,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                           {
                             defaultMessage: '{documentAmount} Documents',
                             values: {
-                              documentAmount: indexData?.total.docs.count ?? '-',
+                              documentAmount: indexData?.count ?? '-',
                             },
                           }
                         )}

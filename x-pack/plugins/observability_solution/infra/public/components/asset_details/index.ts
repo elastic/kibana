@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export interface ChartArgs {
-  dataViewId?: string;
-}
+export { AssetDetails } from './asset_details';
+export { HostKpiCharts } from './components/kpis/host_kpi_charts';
