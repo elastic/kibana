@@ -14,6 +14,7 @@ import {
 } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { CustomThresholdLocators } from '@kbn/observability-plugin/server';
 import { sloFeatureId } from '../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../common/constants';
 import { sloBurnRateRuleType } from './slo_burn_rate';
@@ -23,7 +24,8 @@ export function registerRuleTypes(
   alertingPlugin: PluginSetupContract,
   basePath: IBasePath,
   logger: Logger,
-  ruleDataService: IRuleDataService
+  ruleDataService: IRuleDataService,
+  locators: CustomThresholdLocators // TODO move this somewhere else
 ) {
   // SLO RULE
   const ruleDataClientSLO = ruleDataService.initializeIndex({

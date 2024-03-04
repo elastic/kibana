@@ -11,10 +11,13 @@
       "slo"
     ],
     "requiredPlugins": [
+      "alerting",
       "observability",
       "observabilityShared",
       "ruleRegistry",
+      "taskManager",
       "triggersActionsUi",
+      "share",
       "unifiedSearch",
       "uiActions",
       "lens",
@@ -23,6 +26,7 @@
       "dataViews",
       "dataViewEditor",
       "presentationUtil",
+      "features",
       "licensing"
     ]
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
+import { SLO_RESOURCES_VERSION } from '../../../common/constants';
 
 export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplateRequest => ({
   name,

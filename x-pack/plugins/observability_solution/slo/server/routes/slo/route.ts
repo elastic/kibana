@@ -36,18 +36,18 @@ import {
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
   FindSLOGroups,
-} from '../../services/slo';
-import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
-import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
-import { getBurnRates } from '../../services/slo/get_burn_rates';
-import { getGlobalDiagnosis } from '../../services/slo/get_diagnosis';
-import { GetPreviewData } from '../../services/slo/get_preview_data';
-import { GetSLOInstances } from '../../services/slo/get_slo_instances';
-import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
-import { ManageSLO } from '../../services/slo/manage_slo';
-import { ResetSLO } from '../../services/slo/reset_slo';
-import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
-import { DefaultSummaryTransformGenerator } from '../../services/slo/summary_transform_generator/summary_transform_generator';
+} from '../../services';
+import { FetchHistoricalSummary } from '../../services/fetch_historical_summary';
+import { FindSLODefinitions } from '../../services/find_slo_definitions';
+import { getBurnRates } from '../../services/get_burn_rates';
+import { getGlobalDiagnosis } from '../../services/get_diagnosis';
+import { GetPreviewData } from '../../services/get_preview_data';
+import { GetSLOInstances } from '../../services/get_slo_instances';
+import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
+import { ManageSLO } from '../../services/manage_slo';
+import { ResetSLO } from '../../services/reset_slo';
+import { DefaultSummarySearchClient } from '../../services/summary_search_client';
+import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -56,9 +56,9 @@ import {
   MetricCustomTransformGenerator,
   TimesliceMetricTransformGenerator,
   TransformGenerator,
-} from '../../services/slo/transform_generators';
-import type { ObservabilityRequestHandlerContext } from '../../types';
-import { createObservabilityServerRoute } from '../create_observability_server_route';
+} from '../../services/transform_generators';
+import type { SloRequestHandlerContext } from '../../types';
+import { createSloServerRoute } from '../create_slo_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -69,7 +69,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
 };
 
-const assertPlatinumLicense = async (context: ObservabilityRequestHandlerContext) => {
+const assertPlatinumLicense = async (context: SloRequestHandlerContext) => {
   const licensing = await context.licensing;
   const hasCorrectLicense = licensing.license.hasAtLeast('platinum');
 
@@ -78,7 +78,7 @@ const assertPlatinumLicense = async (context: ObservabilityRequestHandlerContext
   }
 };
 
-const createSLORoute = createObservabilityServerRoute({
+const createSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -116,7 +116,7 @@ const createSLORoute = createObservabilityServerRoute({
   },
 });
 
-const inspectSLORoute = createObservabilityServerRoute({
+const inspectSLORoute = createSloServerRoute({
   endpoint: 'POST /internal/api/observability/slos/_inspect 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -152,7 +152,7 @@ const inspectSLORoute = createObservabilityServerRoute({
   },
 });
 
-const updateSLORoute = createObservabilityServerRoute({
+const updateSLORoute = createSloServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -190,7 +190,7 @@ const updateSLORoute = createObservabilityServerRoute({
   },
 });
 
-const deleteSLORoute = createObservabilityServerRoute({
+const deleteSLORoute = createSloServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -231,7 +231,7 @@ const deleteSLORoute = createObservabilityServerRoute({
   },
 });
 
-const getSLORoute = createObservabilityServerRoute({
+const getSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_read'],
@@ -253,7 +253,7 @@ const getSLORoute = createObservabilityServerRoute({
   },
 });
 
-const enableSLORoute = createObservabilityServerRoute({
+const enableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -282,7 +282,7 @@ const enableSLORoute = createObservabilityServerRoute({
   },
 });
 
-const disableSLORoute = createObservabilityServerRoute({
+const disableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -311,7 +311,7 @@ const disableSLORoute = createObservabilityServerRoute({
   },
 });
 
-const resetSLORoute = createObservabilityServerRoute({
+const resetSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/_reset 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -349,7 +349,7 @@ const resetSLORoute = createObservabilityServerRoute({
   },
 });
 
-const findSLORoute = createObservabilityServerRoute({
+const findSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
   options: {
     tags: ['access:slo_read'],
@@ -373,7 +373,7 @@ const findSLORoute = createObservabilityServerRoute({
   },
 });
 
-const findSLOGroupsRoute = createObservabilityServerRoute({
+const findSLOGroupsRoute = createSloServerRoute({
   endpoint: 'GET /internal/api/observability/slos/_groups',
   options: {
     tags: ['access:slo_read'],
@@ -392,7 +392,7 @@ const findSLOGroupsRoute = createObservabilityServerRoute({
   },
 });
 
-const deleteSloInstancesRoute = createObservabilityServerRoute({
+const deleteSloInstancesRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
   options: {
     tags: ['access:slo_write'],
@@ -408,7 +408,7 @@ const deleteSloInstancesRoute = createObservabilityServerRoute({
   },
 });
 
-const findSloDefinitionsRoute = createObservabilityServerRoute({
+const findSloDefinitionsRoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
   options: {
     tags: ['access:slo_read'],
@@ -427,7 +427,7 @@ const findSloDefinitionsRoute = createObservabilityServerRoute({
   },
 });
 
-const fetchHistoricalSummary = createObservabilityServerRoute({
+const fetchHistoricalSummary = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
     tags: ['access:slo_read'],
@@ -449,7 +449,7 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
 });
 
-const getSLOInstancesRoute = createObservabilityServerRoute({
+const getSLOInstancesRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/{id}/_instances',
   options: {
     tags: ['access:slo_read'],
@@ -471,7 +471,7 @@ const getSLOInstancesRoute = createObservabilityServerRoute({
   },
 });
 
-const getDiagnosisRoute = createObservabilityServerRoute({
+const getDiagnosisRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/_diagnosis',
   options: {
     tags: [],
@@ -494,7 +494,7 @@ const getDiagnosisRoute = createObservabilityServerRoute({
   },
 });
 
-const getSloBurnRates = createObservabilityServerRoute({
+const getSloBurnRates = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
   options: {
     tags: ['access:slo_read'],
@@ -520,7 +520,7 @@ const getSloBurnRates = createObservabilityServerRoute({
   },
 });
 
-const getPreviewData = createObservabilityServerRoute({
+const getPreviewData = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_preview',
   options: {
     tags: ['access:slo_read'],

@@ -27,7 +27,7 @@ import {
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
 import { Duration } from '../../../domain/models';
-import { KibanaSavedObjectsSLORepository } from '../../../services/slo';
+import { KibanaSavedObjectsSLORepository } from '../../../services';
 import {
   AlertStates,
   BurnRateAlertContext,

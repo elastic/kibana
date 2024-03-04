@@ -17,13 +17,13 @@ import {
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
-import { ObservabilityConfig } from '..';
+import { SloConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
 
 interface RegisterRoutes {
-  config: ObservabilityConfig;
+  config: SloConfig;
   core: CoreSetup;
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
