@@ -13,9 +13,9 @@ import { LogsExplorerCustomizations } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
   AllDatasetSelection,
-  isDatasetSelection,
+  isDataSourceSelection,
   isDataViewSelection,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -78,11 +78,11 @@ export const createPureLogsExplorerControllerStateMachine = (
           on: {
             INITIALIZE_DATA_VIEW: {
               target: 'initializingDataView',
-              actions: ['storeDatasetSelection'],
+              actions: ['storeDataSourceSelection'],
             },
             INITIALIZE_DATASET: {
               target: 'initializingDataset',
-              actions: ['storeDatasetSelection'],
+              actions: ['storeDataSourceSelection'],
             },
             DATASET_SELECTION_RESTORE_FAILURE: {
               target: 'initializingDataset',
@@ -155,12 +155,12 @@ export const createPureLogsExplorerControllerStateMachine = (
           ],
           entry: ['resetRows'],
           states: {
-            datasetSelection: {
+            dataSourceSelection: {
               initial: 'idle',
               states: {
                 idle: {
                   on: {
-                    UPDATE_DATASET_SELECTION: [
+                    UPDATE_DATA_SOURCE_SELECTION: [
                       {
                         cond: 'isUnknownDataViewDescriptor',
                         actions: ['redirectToDiscover'],
@@ -168,11 +168,11 @@ export const createPureLogsExplorerControllerStateMachine = (
                       {
                         cond: 'isLogsDataViewDescriptor',
                         target: 'changingDataView',
-                        actions: ['storeDatasetSelection'],
+                        actions: ['storeDataSourceSelection'],
                       },
                       {
                         target: 'creatingAdHocDataView',
-                        actions: ['storeDatasetSelection'],
+                        actions: ['storeDataSourceSelection'],
                       },
                     ],
                   },
@@ -268,35 +268,23 @@ export const createPureLogsExplorerControllerStateMachine = (
     {
       actions: {
         storeDefaultSelection: actions.assign((_context) => ({
-          datasetSelection: AllDatasetSelection.create(),
+          dataSourceSelection: AllDatasetSelection.create(),
         })),
-        storeDatasetSelection: actions.assign((_context, event) =>
-          'data' in event && (isDatasetSelection(event.data) || isDataViewSelection(event.data))
-            ? {
-                datasetSelection: event.data,
-              }
+        storeDataSourceSelection: actions.assign((_context, event) =>
+          'data' in event && isDataSourceSelection(event.data)
+            ? { dataSourceSelection: event.data }
             : {}
         ),
         storeDiscoverStateContainer: actions.assign((_context, event) =>
           'discoverStateContainer' in event
-            ? {
-                discoverStateContainer: event.discoverStateContainer,
-              }
+            ? { discoverStateContainer: event.discoverStateContainer }
             : {}
         ),
         storeControlGroupAPI: actions.assign((_context, event) =>
-          'controlGroupAPI' in event
-            ? {
-                controlGroupAPI: event.controlGroupAPI,
-              }
-            : {}
+          'controlGroupAPI' in event ? { controlGroupAPI: event.controlGroupAPI } : {}
         ),
         storeControlPanels: actions.assign((_context, event) =>
-          'data' in event && ControlPanelRT.is(event.data)
-            ? {
-                controlPanels: event.data,
-              }
-            : {}
+          'data' in event && ControlPanelRT.is(event.data) ? { controlPanels: event.data } : {}
         ),
         resetRows: actions.assign((_context, event) => ({
           rows: [],
@@ -312,13 +300,13 @@ export const createPureLogsExplorerControllerStateMachine = (
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
         isLogsDataViewDescriptor: (_context, event) => {
-          if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
+          if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isLogsDataType();
           }
           return false;
         },
         isUnknownDataViewDescriptor: (_context, event) => {
-          if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
+          if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isUnknownDataType();
           }
           return false;
