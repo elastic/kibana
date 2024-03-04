@@ -79,6 +79,16 @@ export default function ({ getService }: FtrProviderContext) {
     return detectionRule;
   };
 
+  const getDetectionRuleState = async (ruleId: string) => {
+    const { body: detectionRule } = await supertest
+      .get(DETECTION_ENGINE_RULES_URL)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .query({ id: ruleId });
+
+    return detectionRule.enabled;
+  };
+
   /**
    * required before indexing findings
    */
@@ -94,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
   // Failing: See https://github.com/elastic/kibana/issues/174204
-  describe.skip('Verify update csp rules states API', async () => {
+  describe('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized();
     });
@@ -343,6 +353,10 @@ export default function ({ getService }: FtrProviderContext) {
       const rule2 = await getRandomCspBenchmarkRule();
 
       const detectionRule = await createDetectionRule(rule1);
+
+      // Verify that the created rule is enabled
+      const detectionRuleState = await getDetectionRuleState(detectionRule.body.id);
+      expect(detectionRuleState).to.be(true);
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
