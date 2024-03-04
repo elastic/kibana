@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.sli-v4',
+              index: '.slo-observability.sli-v4,.slo-observability.sli-v3*"',
               pipeline: '.slo-observability.sli.pipeline-v4',
             },
             frequency: '1m',
@@ -194,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
             version: '10.0.0',
             create_time: summaryTransform.body.transforms[0].create_time,
             source: {
-              index: ['.slo-observability.sli-v4*'],
+              index: ['.slo-observability.sli-v3*', '.slo-observability.sli-v4*'],
               query: {
                 bool: {
                   filter: [
