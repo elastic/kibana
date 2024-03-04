@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { DashboardModel } from './types';
+import { node } from './node';
 
-export const createDashboardModel = ({
-  charts,
-  dependsOn = [],
-}: DashboardModel): DashboardModel => {
-  return {
-    dependsOn,
-    charts,
-  };
-};
+export const charts = {
+  node,
+} as const;
