@@ -17,7 +17,7 @@ import type { FieldType } from '../../../rule_creation/logic/esql_validator';
 
 export const esqlToOptions = (
   data: { error: unknown } | Datatable | undefined | null,
-  fieldType: FieldType
+  fieldType?: FieldType
 ) => {
   if (data && 'error' in data) {
     return [];
