@@ -8,6 +8,10 @@
 import { Config, FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import https from 'https';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { InheritedServices } from './ftr_provider_context';
 import {
@@ -45,6 +49,33 @@ export interface CreateTest {
   kbnTestServer: any;
 }
 
+function downloadFile(filePath: string, url: string): string {
+  const file = fs.createWriteStream(filePath);
+  https.get(url, (response) => {
+    response.pipe(file);
+    file.on('finish', () => {
+      file.close();
+    });
+  });
+}
+
+function downloadElserModel() {
+  const elserModelDir = fs.mkdtempSync(path.join(os.tmpdir(), 'elser_model_'));
+  downloadFile(
+    path.join(elserModelDir, 'elser_model_2.metadata.json'),
+    'https://ml-models.elastic.co/elser_model_2.metadata.json'
+  );
+  downloadFile(
+    path.join(elserModelDir, 'elser_model_2.pt'),
+    'https://ml-models.elastic.co/elser_model_2.pt'
+  );
+  downloadFile(
+    path.join(elserModelDir, 'elser_model_2.vocab.json'),
+    'https://ml-models.elastic.co/elser_model_2.vocab.json'
+  );
+  return elserModelDir;
+}
+
 export function createObservabilityAIAssistantAPIConfig({
   config,
   license,
@@ -59,6 +90,8 @@ export function createObservabilityAIAssistantAPIConfig({
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
+
+  const elserModelPath = downloadElserModel();
 
   const createTest: Omit<CreateTest, 'testFiles'> = {
     ...config.getAll(),
@@ -82,6 +115,10 @@ export function createObservabilityAIAssistantAPIConfig({
     esTestCluster: {
       ...config.get('esTestCluster'),
       license,
+      serverArgs: [
+        ...config.get('esTestCluster.serverArgs'),
+        `--xpack.ml.model_repository=${elserModelPath}`,
+      ],
     },
     kbnTestServer: {
       ...config.get('kbnTestServer'),
