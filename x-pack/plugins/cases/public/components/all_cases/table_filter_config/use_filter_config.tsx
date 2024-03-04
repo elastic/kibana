@@ -9,12 +9,12 @@ import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { merge, isEqual, isEmpty } from 'lodash';
-import { useApplication } from '../../../common/lib/kibana/use_application';
 import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { deflattenCustomFieldKey, getLocalStorageKey, isFlattenCustomField } from '../utils';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const mergeSystemAndCustomFieldConfigs = ({
   systemFilterConfig,
@@ -50,9 +50,9 @@ const shouldBeActive = ({
 };
 
 const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
-  const { appId } = useApplication();
+  const { owner } = useCasesContext();
   const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
-    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableFiltersConfig, appId),
+    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableFiltersConfig, owner[0]),
     []
   );
 

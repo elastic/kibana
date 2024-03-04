@@ -18,7 +18,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap } from './builder';
 import { useCaseViewParams } from '../../common/navigation';
 import { useUserActionsHandler } from './use_user_actions_handler';
-import { useApplication } from '../../common/lib/kibana/use_application';
 
 const MyEuiCommentList = styled(EuiCommentList)`
   ${({ theme }) => `
@@ -96,7 +95,7 @@ export const UserActionsList = React.memo(
   }: UserActionListProps) => {
     const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
       useCasesContext();
-    const { appId } = useApplication();
+    const { owner } = useCasesContext();
     const { commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
 
@@ -127,7 +126,7 @@ export const UserActionsList = React.memo(
         }
 
         const userActionBuilder = builder({
-          appId,
+          appId: owner[0],
           caseData,
           casesConfiguration,
           caseConnectors,
@@ -158,7 +157,7 @@ export const UserActionsList = React.memo(
       }, []);
     }, [
       caseUserActions,
-      appId,
+      owner,
       caseData,
       casesConfiguration,
       caseConnectors,

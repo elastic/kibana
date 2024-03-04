@@ -29,7 +29,6 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
-import { useApplication } from '../../common/lib/kibana/use_application';
 
 interface Props {
   isSelectorView?: boolean;
@@ -57,12 +56,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
   }) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
-    const { permissions } = useCasesContext();
-    const { appId } = useApplication();
+    const { permissions, owner } = useCasesContext();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isMessageDismissed, setIsMessageDismissed] = useState(false);
-    const localStorageKey = `cases.${appId}.utilityBar.hideMaxLimitWarning`;
+    const localStorageKey = `cases.${owner[0] ?? ''}.utilityBar.hideMaxLimitWarning`;
     const [localStorageWarning, setLocalStorageWarning] = useLocalStorage<boolean>(localStorageKey);
 
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);

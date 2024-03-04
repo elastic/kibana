@@ -26,7 +26,6 @@ import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
 import { schema } from './schema';
-import { useApplication } from '../../common/lib/kibana/use_application';
 
 const DESCRIPTION_ID = 'description';
 
@@ -98,8 +97,7 @@ export const Description = ({
   const descriptionMarkdownRef = useRef<DescriptionMarkdownRefObject | null>(null);
 
   const { euiTheme } = useEuiTheme();
-  const { permissions } = useCasesContext();
-  const { appId } = useApplication();
+  const { permissions, owner } = useCasesContext();
 
   const {
     clearDraftComment: clearLensDraftComment,
@@ -123,7 +121,7 @@ export const Description = ({
 
   const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
 
-  const draftDescription = getDraftDescription(appId, caseData.id, DESCRIPTION_ID);
+  const draftDescription = getDraftDescription(owner[0], caseData.id, DESCRIPTION_ID);
 
   if (
     hasIncomingLensState &&

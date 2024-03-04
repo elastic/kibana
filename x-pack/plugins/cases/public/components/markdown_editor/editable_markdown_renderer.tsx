@@ -13,7 +13,7 @@ import { MarkdownEditorForm } from '.';
 import { removeItemFromSessionStorage } from '../utils';
 import { getMarkdownEditorStorageKey } from './utils';
 import { EditableMarkdownFooter } from './editable_markdown_footer';
-import { useApplication } from '../../common/lib/kibana/use_application';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface EditableMarkdownRefObject {
   setComment: (newComment: string) => void;
@@ -37,8 +37,8 @@ const EditableMarkDownRenderer = forwardRef<
     { id, content, caseId, fieldName, onChangeEditable, onSaveContent, editorRef, formSchema },
     ref
   ) => {
-    const { appId } = useApplication();
-    const draftStorageKey = getMarkdownEditorStorageKey({ appId, caseId, commentId: id });
+    const { owner } = useCasesContext();
+    const draftStorageKey = getMarkdownEditorStorageKey({ appId: owner[0], caseId, commentId: id });
 
     const initialState = { content };
 

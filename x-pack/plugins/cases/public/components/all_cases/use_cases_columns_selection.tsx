@@ -13,14 +13,14 @@ import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from './utils/merge_selected_columns_with_configuration';
 import { getLocalStorageKey } from './utils';
-import { useApplication } from '../../common/lib/kibana/use_application';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export function useCasesColumnsSelection() {
-  const { appId } = useApplication();
+  const { owner } = useCasesContext();
   const casesColumnsConfig = useCasesColumnsConfiguration();
 
   const [selectedColumns, setSelectedColumns] = useLocalStorage<CasesColumnSelection[]>(
-    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableColumns, appId)
+    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableColumns, owner[0])
   );
 
   const columns = selectedColumns || [];
