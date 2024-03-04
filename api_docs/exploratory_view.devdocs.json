@@ -972,8 +972,8 @@
                 "pluginId": "cases",
                 "scope": "public",
                 "docId": "kibCasesPluginApi",
-                "section": "def-public.CasesPublicStart",
-                "text": "CasesPublicStart"
+                "section": "def-public.CasesUiStart",
+                "text": "CasesUiStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",

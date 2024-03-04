@@ -107,7 +107,6 @@ describe('action_alerts_filter_timeframe', () => {
     );
     expect(alertsFilterTimeframeStart.exists()).toBeTruthy();
     {
-      // @ts-expect-error upgrade typescript v4.9.5
       const selectedDate: Moment = Reflect.get(
         alertsFilterTimeframeStart.first().props(),
         'selected'
@@ -118,7 +117,6 @@ describe('action_alerts_filter_timeframe', () => {
     const alertsFilterTimeframeEnd = wrapper.find('[data-test-subj="alertsFilterTimeframeEnd"]');
     expect(alertsFilterTimeframeEnd.exists()).toBeTruthy();
     {
-      // @ts-expect-error upgrade typescript v4.9.5
       const selectedDate: Moment = Reflect.get(
         alertsFilterTimeframeEnd.first().props(),
         'selected'

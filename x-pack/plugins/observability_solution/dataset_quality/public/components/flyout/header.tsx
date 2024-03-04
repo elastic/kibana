@@ -55,12 +55,7 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
             justifyContent="flexEnd"
             alignItems="center"
           >
-            <EuiButton
-              data-test-subj="datasetQualityHeaderButton"
-              size="s"
-              {...logsExplorerLinkProps}
-              iconType="logoObservability"
-            >
+            <EuiButton size="s" {...logsExplorerLinkProps} iconType="logoObservability">
               {flyoutOpenInLogsExplorerText}
             </EuiButton>
           </EuiFlexGroup>

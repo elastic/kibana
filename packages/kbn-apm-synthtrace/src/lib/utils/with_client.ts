@@ -12,9 +12,7 @@ import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
 
 export type SynthtraceEsClient = ApmSynthtraceEsClient | LogsSynthtraceEsClient;
 export type SynthGenerator<TFields> =
-  // @ts-expect-error upgrade typescript v4.9.5
   | SynthtraceGenerator<TFields>
-  // @ts-expect-error upgrade typescript v4.9.5
   | Array<SynthtraceGenerator<TFields>>
   | Readable;
 

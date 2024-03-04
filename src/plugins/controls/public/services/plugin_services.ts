@@ -25,7 +25,6 @@ import { httpServiceFactory } from './http/http_service';
 import { optionsListServiceFactory } from './options_list/options_list_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { settingsServiceFactory } from './settings/settings_service';
-import { controlsStorageServiceFactory } from './storage/storage_service';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search_service';
 
 export const providers: PluginServiceProviders<
@@ -40,7 +39,6 @@ export const providers: PluginServiceProviders<
   optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
-  storage: new PluginServiceProvider(controlsStorageServiceFactory),
   core: new PluginServiceProvider(coreServiceFactory),
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };

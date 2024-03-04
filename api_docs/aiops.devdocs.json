@@ -714,8 +714,8 @@
                 "pluginId": "cases",
                 "scope": "public",
                 "docId": "kibCasesPluginApi",
-                "section": "def-public.CasesPublicStart",
-                "text": "CasesPublicStart"
+                "section": "def-public.CasesUiStart",
+                "text": "CasesUiStart"
               },
               " | undefined"
             ],

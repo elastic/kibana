@@ -13,7 +13,6 @@ import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
-import { EuiDataGridProps } from '@elastic/eui';
 
 jest.mock('./table_vis_columns', () => ({
   createGridColumns: jest.fn(() => []),
@@ -108,8 +107,7 @@ describe('TableVisBasic', () => {
       undefined
     );
 
-    const { onSort } = comp.find('EuiDataGrid').prop<EuiDataGridProps['sorting']>('sorting')!;
-
+    const { onSort } = comp.find('EuiDataGrid').prop('sorting');
     // sort the first column
     onSort([{ id: 'first', direction: 'asc' }]);
     expect(uiStateProps.setSort).toHaveBeenCalledWith({ columnIndex: 0, direction: 'asc' });

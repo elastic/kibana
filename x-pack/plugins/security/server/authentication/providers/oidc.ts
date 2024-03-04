@@ -131,7 +131,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     // we should clear such session an log user out.
     if (state?.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
-      this.logger.warn(message);
+      this.logger.debug(message);
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
@@ -186,7 +186,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     // we should clear such session an log user out.
     if (state?.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
-      this.logger.warn(message);
+      this.logger.debug(message);
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
@@ -245,7 +245,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     if (!stateNonce || !stateOIDCState || !stateRedirectURL) {
       const message =
         'Response session state does not have corresponding state or nonce parameters or redirect URL.';
-      this.logger.error(message);
+      this.logger.debug(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
@@ -374,7 +374,6 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
-      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
 
@@ -386,7 +385,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     // supported.
     if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
-        this.logger.warn(
+        this.logger.debug(
           'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
         );
         return this.initiateAuthenticationHandshake(request);

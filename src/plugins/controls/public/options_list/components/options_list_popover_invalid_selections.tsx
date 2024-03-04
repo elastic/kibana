@@ -9,19 +9,16 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiSelectable,
   EuiSelectableOption,
+  EuiSelectable,
   EuiSpacer,
   EuiTitle,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
-import { useFieldFormatter } from '../../hooks/use_field_formatter';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListPopoverInvalidSelections = () => {
   const optionsList = useOptionsList();
@@ -43,7 +40,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
-        'data-test-subj': `optionsList-control-invalid-selection-${key}`,
+        'data-test-subj': `optionsList-control-ignored-selection-${key}`,
         prepend: (
           <EuiScreenReaderOnly>
             <div>
@@ -63,25 +60,13 @@ export const OptionsListPopoverInvalidSelections = () => {
       <EuiTitle
         size="xxs"
         className="optionsList-control-ignored-selection-title"
-        data-test-subj="optionList__invalidSelectionLabel"
+        data-test-subj="optionList__ignoredSelectionLabel"
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              type="warning"
-              color="warning"
-              title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
-              size="s"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <label>
-              {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-                invalidSelections?.length ?? 0
-              )}
-            </label>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <label>
+          {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+            invalidSelections?.length ?? 0
+          )}
+        </label>
       </EuiTitle>
       <EuiSelectable
         aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(

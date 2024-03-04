@@ -8,7 +8,6 @@
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   ServiceLocations,
-  ServiceLocationsApiResponse,
   ServiceLocationsApiResponseCodec,
   ThrottlingOptions,
 } from '../../../../../common/runtime_types';
@@ -18,7 +17,7 @@ export const fetchServiceLocations = async (): Promise<{
   throttling: ThrottlingOptions | undefined;
   locations: ServiceLocations;
 }> => {
-  const { throttling, locations } = await apiService.get<ServiceLocationsApiResponse>(
+  const { throttling, locations } = await apiService.get(
     SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
     undefined,
     ServiceLocationsApiResponseCodec

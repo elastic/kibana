@@ -19,7 +19,6 @@ import {
   Column,
   PercentileRanksColumnWithExtendedMeta,
   CommonColumnConverterArgs,
-  PercentileColumn,
 } from './types';
 
 export const isPercentileRanksColumnWithMeta = (
@@ -57,19 +56,18 @@ export const convertToPercentileRankColumn = (
   }
 
   const commonColumnParams = createColumn(series, metric, field, { reducedTimeRange, timeShift });
-  const meta: PercentileColumn['meta'] =
-    index !== undefined
-      ? {
-          reference: `${metric.id}.${index}`,
-          ...commonColumnParams.meta,
-        }
-      : commonColumnParams.meta;
   return {
     operationType: 'percentile_rank',
     sourceField: field.name,
     ...commonColumnParams,
     params: { ...params, ...getFormat(series) },
-    meta,
+    meta:
+      index !== undefined
+        ? {
+            reference: `${metric.id}.${index}`,
+            ...commonColumnParams.meta,
+          }
+        : commonColumnParams.meta,
   };
 };
 

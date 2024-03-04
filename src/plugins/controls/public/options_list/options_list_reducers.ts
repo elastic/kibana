@@ -50,12 +50,6 @@ export const optionsListReducers = {
   ) => {
     state.componentState.allowExpensiveQueries = action.payload;
   },
-  setInvalidSelectionWarningOpen: (
-    state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<boolean>
-  ) => {
-    state.componentState.showInvalidSelectionWarning = action.payload;
-  },
   setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.componentState.popoverOpen = action.payload;
   },

@@ -16,9 +16,9 @@ import type {
 import { getCasesFromAlertsUrl } from '../../../common/api';
 import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
 import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '../../../common/ui';
-import type { CasesPublicStart } from '../../types';
+import type { CasesUiStart } from '../../types';
 
-export const createClientAPI = ({ http }: { http: HttpStart }): CasesPublicStart['api'] => {
+export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
   return {
     getRelatedCases: async (
       alertId: string,

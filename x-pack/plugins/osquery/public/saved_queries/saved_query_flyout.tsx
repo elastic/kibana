@@ -30,9 +30,16 @@ import { useCreateSavedQuery } from './use_create_saved_query';
 interface AddQueryFlyoutProps {
   defaultValue: SavedQuerySOFormData;
   onClose: () => void;
+  isExternal?: boolean;
 }
 
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
+const additionalZIndexStyle = { style: 'z-index: 6000' };
+
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
+  defaultValue,
+  onClose,
+  isExternal,
+}) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const hooksForm = useSavedQueryForm({
@@ -60,6 +67,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
+        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">

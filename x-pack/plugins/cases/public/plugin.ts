@@ -28,27 +28,16 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
+import type { CasesPluginSetup, CasesPluginStart, CasesUiSetup, CasesUiStart } from './types';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerActions } from './components/visualizations/actions';
-import type {
-  CasesPublicSetup,
-  CasesPublicStart,
-  CasesPublicSetupDependencies,
-  CasesPublicStartDependencies,
-} from './types';
 
 /**
  * @public
  * A plugin for retrieving Cases UI components
  */
 export class CasesUiPlugin
-  implements
-    Plugin<
-      CasesPublicSetup,
-      CasesPublicStart,
-      CasesPublicSetupDependencies,
-      CasesPublicStartDependencies
-    >
+  implements Plugin<void, CasesUiStart, CasesPluginSetup, CasesPluginStart>
 {
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
@@ -61,7 +50,7 @@ export class CasesUiPlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: CasesPublicSetupDependencies): CasesPublicSetup {
+  public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
@@ -94,7 +83,7 @@ export class CasesUiPlugin
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
-            CasesPublicStartDependencies,
+            CasesPluginStart,
             unknown
           ];
 
@@ -125,7 +114,7 @@ export class CasesUiPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
+  public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
 
     KibanaServices.init({

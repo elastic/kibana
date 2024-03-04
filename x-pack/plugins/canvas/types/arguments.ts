@@ -38,7 +38,6 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
     domNode: HTMLElement,
     config: ArgumentConfig,
     handlers: ArgumentHandlers,
-    // @ts-expect-error upgrade typescript v4.9.5
     onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
   /**
@@ -49,7 +48,6 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
     domNode: HTMLElement,
     config: ArgumentConfig,
     handlers: ArgumentHandlers,
-    // @ts-expect-error upgrade typescript v4.9.5
     onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
 }

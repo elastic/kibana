@@ -121,9 +121,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       try {
         await this.options.tokens.invalidate(state);
       } catch (err) {
-        this.logger.debug(
-          `Failed invalidating access and/or refresh tokens: ${getDetailedErrorMessage(err)}`
-        );
+        this.logger.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
         return DeauthenticationResult.failed(err);
       }
     }
@@ -165,7 +163,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
         },
       });
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Failed to exchange SPNEGO token for an access token: ${getDetailedErrorMessage(err)}`
       );
 
@@ -180,7 +178,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
       const challengeParts = challenge.split(/\s+/);
       if (challengeParts.length > 2) {
-        this.logger.warn('Challenge consists of more than two parts and may be malformed.');
+        this.logger.debug('Challenge consists of more than two parts and may be malformed.');
       }
 
       let responseChallenge;
@@ -252,9 +250,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
-      );
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -273,7 +269,6 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
-      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
 
@@ -281,7 +276,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     // allow this because expired underlying token is an implementation detail and Kibana user
     // facing session is still valid.
     if (refreshTokenResult === null) {
-      this.logger.warn('Both access and refresh tokens are expired. Re-authenticating…');
+      this.logger.debug('Both access and refresh tokens are expired. Re-authenticating...');
       return this.authenticateViaSPNEGO(request, state);
     }
 
@@ -316,7 +311,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
         // means (e.g. when anonymous access is enabled in Elasticsearch).
         authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}`,
       });
-      this.logger.error('Request was not supposed to be authenticated, ignoring result.');
+      this.logger.debug('Request was not supposed to be authenticated, ignoring result.');
       return AuthenticationResult.notHandled();
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch

@@ -7,7 +7,7 @@
  */
 import * as t from 'io-ts';
 import { mapValues } from 'lodash';
-import { isParsableType, ParseableType } from '../parseable_types';
+import { isParsableType } from '../parseable_types';
 
 interface JSONSchemaObject {
   type: 'object';
@@ -45,7 +45,7 @@ type JSONSchema =
   | JSONSchemaAllOf
   | JSONSchemaAnyOf;
 
-export const toJsonSchema = (type: t.Type<any> | ParseableType): JSONSchema => {
+export const toJsonSchema = (type: t.Mixed): JSONSchema => {
   if (isParsableType(type)) {
     switch (type._tag) {
       case 'ArrayType':

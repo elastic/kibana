@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
+import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -216,23 +216,22 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       // Create session only if it doesn't exist yet, otherwise keep it unchanged.
       return AuthenticationResult.succeeded(user, { authHeaders, state: state ? undefined : {} });
     } catch (err) {
-      const errorMessage = getDetailedErrorMessage(err);
       if (getErrorStatusCode(err) === 401) {
         if (!this.httpAuthorizationHeader) {
           this.logger.error(
-            `Failed to authenticate anonymous request using Elasticsearch reserved anonymous user. Anonymous access may not be properly configured in Elasticsearch: ${errorMessage}`
+            `Failed to authenticate anonymous request using Elasticsearch reserved anonymous user. Anonymous access may not be properly configured in Elasticsearch: ${err.message}`
           );
         } else if (this.httpAuthorizationHeader.scheme.toLowerCase() === 'basic') {
           this.logger.error(
-            `Failed to authenticate anonymous request using provided username/password credentials. The user with the provided username may not exist or the password is wrong: ${errorMessage}`
+            `Failed to authenticate anonymous request using provided username/password credentials. The user with the provided username may not exist or the password is wrong: ${err.message}`
           );
         } else {
           this.logger.error(
-            `Failed to authenticate anonymous request using provided API key. The key may not exist or expired: ${errorMessage}`
+            `Failed to authenticate anonymous request using provided API key. The key may not exist or expired: ${err.message}`
           );
         }
       } else {
-        this.logger.error(`Failed to authenticate request : ${errorMessage}`);
+        this.logger.error(`Failed to authenticate request : ${err.message}`);
       }
       return AuthenticationResult.failed(err);
     }

@@ -31,7 +31,6 @@ export const CrawlerTotalStats: React.FC = () => {
 
   const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
-      // @ts-expect-error upgrade typescript v4.9.5
       'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
@@ -58,7 +57,6 @@ export const CrawlerTotalStats: React.FC = () => {
       title: domains.length,
     },
     {
-      // @ts-expect-error upgrade typescript v4.9.5
       'data-test-subj': 'entSearchContent-indexOverview-totalStats-documentCount',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',

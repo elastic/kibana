@@ -74,6 +74,10 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           async function assertAnalysisResult(data: any[]) {
+            expect(data.length).to.eql(
+              testData.expected.actionsLengthGroupOnly,
+              `Expected 'actionsLengthGroupOnly' to be ${testData.expected.actionsLengthGroupOnly}, got ${data.length}.`
+            );
             data.forEach((d) => {
               expect(typeof d.type).to.be('string');
             });
@@ -97,9 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(orderBy(groups, ['docCount'], ['desc'])).to.eql(
               orderBy(testData.expected.groups, ['docCount'], ['desc']),
-              `Grouping result does not match expected values. Expected ${JSON.stringify(
-                testData.expected.groups
-              )}, got ${JSON.stringify(groups)}`
+              'Grouping result does not match expected values.'
             );
 
             const groupHistogramActions = getGroupHistogramActions(data, apiVersion);
@@ -108,10 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(groupHistograms.length).to.be(groups.length);
             // each histogram should have a length of 20 items.
             groupHistograms.forEach((h, index) => {
-              expect(h.histogram.length).to.eql(
-                testData.expected.histogramLength,
-                `Expected group histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
-              );
+              expect(h.histogram.length).to.be(20);
             });
           }
 
@@ -136,6 +135,11 @@ export default ({ getService }: FtrProviderContext) => {
             expect(Buffer.isBuffer(resp.body)).to.be(true);
 
             const chunks: string[] = resp.body.toString().split('\n');
+
+            expect(chunks.length).to.eql(
+              testData.expected.chunksLengthGroupOnly,
+              `Expected 'chunksLength' to be ${testData.expected.chunksLengthGroupOnly}, got ${chunks.length}.`
+            );
 
             const lastChunk = chunks.pop();
             expect(lastChunk).to.be('');

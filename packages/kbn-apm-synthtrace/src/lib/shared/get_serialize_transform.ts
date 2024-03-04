@@ -37,7 +37,6 @@ export function getSerializeTransform<TFields = ApmFields>() {
         push(this, nextEvents, nextCallback);
       }
     },
-    // @ts-expect-error upgrade typescript v4.9.5
     write(chunk: Serializable<TFields>, encoding, callback) {
       push(this, chunk.serialize(), callback);
     },

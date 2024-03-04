@@ -52,15 +52,16 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           async function assertAnalysisResult(data: any[]) {
+            expect(data.length).to.eql(
+              testData.expected.actionsLength,
+              `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
+            );
             data.forEach((d) => {
               expect(typeof d.type).to.be('string');
             });
 
             const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
-            expect(addSignificantItemsActions.length).to.greaterThan(
-              0,
-              'Expected significant items actions to be greater than 0.'
-            );
+            expect(addSignificantItemsActions.length).to.greaterThan(0);
 
             const significantItems = orderBy(
               addSignificantItemsActions.flatMap((d) => d.payload),
@@ -79,10 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(histogramActions.length).to.be(significantItems.length);
             // each histogram should have a length of 20 items.
             histograms.forEach((h, index) => {
-              expect(h.histogram.length).to.eql(
-                testData.expected.histogramLength,
-                `Expected histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
-              );
+              expect(h.histogram.length).to.be(20);
             });
 
             const groupActions = getGroupActions(data, apiVersion);
@@ -104,10 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(groupHistograms.length).to.be(groups.length);
             // each histogram should have a length of 20 items.
             groupHistograms.forEach((h, index) => {
-              expect(h.histogram.length).to.eql(
-                testData.expected.histogramLength,
-                `Expected group histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
-              );
+              expect(h.histogram.length).to.be(20);
             });
           }
 
@@ -132,6 +127,11 @@ export default ({ getService }: FtrProviderContext) => {
             expect(Buffer.isBuffer(resp.body)).to.be(true);
 
             const chunks: string[] = resp.body.toString().split('\n');
+
+            expect(chunks.length).to.eql(
+              testData.expected.chunksLength,
+              `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
+            );
 
             const lastChunk = chunks.pop();
             expect(lastChunk).to.be('');

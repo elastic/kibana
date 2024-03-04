@@ -111,8 +111,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           invalidSelections: ['meow', 'bark'],
         });
-        // there are no valid selections, so no pie chart is rendered.
-        expect(await pieChart.expectEmptyPieChart());
+        // only valid selections are applied as filters.
+        expect(await pieChart.getPieSliceCount()).to.be(1);
       });
     });
 
@@ -153,8 +153,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           invalidSelections: [],
         });
-        // there are no valid selections, so no pie chart is rendered.
-        expect(await pieChart.expectEmptyPieChart());
       });
     });
   });

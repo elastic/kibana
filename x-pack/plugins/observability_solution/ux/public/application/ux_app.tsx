@@ -49,7 +49,6 @@ import { PluginContext } from '../context/plugin_context';
 
 export type BreadcrumbTitle<T = {}> =
   | string
-  // @ts-expect-error upgrade typescript v4.9.5
   | ((props: RouteComponentProps<T>) => string)
   | null;
 

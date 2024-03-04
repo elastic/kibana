@@ -70,7 +70,6 @@ describe('FullTimeRangeSelector', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <DatePickerContextProvider {...mockDependencies}>
-          {/* @ts-expect-error upgrade typescript v4.9.5*/}
           <FullTimeRangeSelector {...props} />
         </DatePickerContextProvider>
       </IntlProvider>
@@ -99,7 +98,6 @@ describe('FullTimeRangeSelector', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <DatePickerContextProvider {...mockDependencies}>
-          {/* @ts-expect-error upgrade typescript v4.9.5*/}
           <FullTimeRangeSelector {...props} />
         </DatePickerContextProvider>
       </IntlProvider>

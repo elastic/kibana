@@ -12,7 +12,7 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
 } from './base_response_actions_client';
-import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
+import { ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
   ActionDetails,
   LogsEndpointAction,
@@ -34,6 +34,7 @@ import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
+import { HOST_NOT_ENROLLED } from '../../create/validate';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 jest.mock('../../action_details_by_id', () => {
@@ -307,8 +308,8 @@ describe('ResponseActionsClientImpl base class', () => {
         agent_type: 'endpoint',
         endpoint_ids: ['one'],
         comment: 'test comment',
-        ruleName: undefined,
-        ruleId: undefined,
+        rule_name: undefined,
+        rule_id: undefined,
         alert_ids: undefined,
         case_ids: undefined,
         hosts: undefined,
@@ -389,11 +390,11 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should include Rule information if rule_id and rule_name were provided', async () => {
-      indexDocOptions.ruleId = '1-2-3';
-      indexDocOptions.ruleName = 'rule 123';
+      indexDocOptions.rule_id = '1-2-3';
+      indexDocOptions.rule_name = 'rule 123';
       expectedIndexDoc.rule = {
-        name: indexDocOptions.ruleName,
-        id: indexDocOptions.ruleId,
+        name: indexDocOptions.rule_name,
+        id: indexDocOptions.rule_id,
       };
 
       await expect(
@@ -402,7 +403,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should NOT include Rule information if rule_id or rule_name are missing', async () => {
-      indexDocOptions.ruleId = '1-2-3';
+      indexDocOptions.rule_id = '1-2-3';
 
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)

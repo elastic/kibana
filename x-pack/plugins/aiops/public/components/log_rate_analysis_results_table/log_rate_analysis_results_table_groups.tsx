@@ -31,7 +31,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { stringHash } from '@kbn/ml-string-hash';
 
 import { MiniHistogram } from '../mini_histogram';
 
@@ -204,7 +203,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           const { fieldName, fieldValue, duplicate } = groupItem;
           if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
-            <span key={`${stringHash(`${fieldName}:${fieldValue}`)}-id`}>
+            <span key={`${fieldName}-id`}>
               <EuiBadge
                 data-test-subj="aiopsLogRateAnalysisResultsTableColumnGroupBadge"
                 color="hollow"

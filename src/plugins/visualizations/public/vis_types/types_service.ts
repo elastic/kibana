@@ -10,7 +10,6 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 import { VisTypeDefinition } from './types';
 import { VisGroups } from './vis_groups_enum';
-import { VisParams } from '../../common';
 
 /**
  * Vis Types Service
@@ -20,9 +19,7 @@ import { VisParams } from '../../common';
 export class TypesService {
   private types: Record<string, BaseVisType<any>> = {};
 
-  private registerVisualization<TVisParam extends VisParams>(
-    visDefinition: BaseVisType<TVisParam>
-  ) {
+  private registerVisualization<TVisParam>(visDefinition: BaseVisType<TVisParam>) {
     if (this.types[visDefinition.name]) {
       throw new Error('type already exists!');
     }
@@ -35,9 +32,7 @@ export class TypesService {
        * registers a visualization type
        * @param config - visualization type definition
        */
-      createBaseVisualization: <TVisParams extends VisParams>(
-        config: VisTypeDefinition<TVisParams>
-      ): void => {
+      createBaseVisualization: <TVisParams>(config: VisTypeDefinition<TVisParams>): void => {
         const vis = new BaseVisType(config);
         this.registerVisualization(vis);
       },
@@ -56,9 +51,7 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: <TVisParams extends VisParams>(
-        visualization: string
-      ): BaseVisType<TVisParams> | undefined => {
+      get: <TVisParams>(visualization: string): BaseVisType<TVisParams> | undefined => {
         return this.types[visualization];
       },
       /**

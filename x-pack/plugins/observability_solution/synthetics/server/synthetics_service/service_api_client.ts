@@ -280,20 +280,15 @@ export class ServiceAPIClient {
     };
   }
 
-  isLoggable(result: unknown): result is { status?: any; request?: any } {
-    const objCast = result as object;
-    return Object.keys(objCast).some((k) => k === 'status' || k === 'request');
-  }
-
   logSuccessMessage(
     url: string,
     method: string,
     numMonitors: number,
-    result: AxiosResponse<unknown> | ServicePayload
+    result: AxiosResponse<any> | ServicePayload
   ) {
-    if (this.isLoggable(result)) {
+    if ('status' in result || 'request' in result) {
       if (result.data) {
-        this.logger.debug(result.data as any);
+        this.logger.debug(result.data);
       }
       this.logger.debug(
         `Successfully called service location ${url}${result.request?.path} with method ${method} with ${numMonitors} monitors`

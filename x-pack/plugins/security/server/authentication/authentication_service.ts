@@ -112,13 +112,9 @@ export class AuthenticationService {
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
-        this.logger.error(
-          `License information could not be obtained from Elasticsearch due to an error: ${
-            license.getUnavailableReason() ?? 'unknown'
-          }`
-        );
+        this.logger.error('License is not available, authentication is not possible.');
         return response.customError({
-          body: 'License information could not be obtained from Elasticsearch. Please check the logs for further details.',
+          body: 'License is not available.',
           statusCode: 503,
           headers: { 'Retry-After': '30' },
         });
@@ -165,7 +161,7 @@ export class AuthenticationService {
 
       if (authenticationResult.failed()) {
         const error = authenticationResult.error!;
-        this.logger.error(`Authentication attempt failed: ${getDetailedErrorMessage(error)}`);
+        this.logger.info(`Authentication attempt failed: ${getDetailedErrorMessage(error)}`);
 
         // proxy Elasticsearch "native" errors
         const statusCode = getErrorStatusCode(error);
@@ -246,12 +242,11 @@ export class AuthenticationService {
 
       if (!license.isLicenseAvailable() || !license.isEnabled()) {
         this.logger.error(
-          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
+          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}).`
         );
         return toolkit.notHandled();
       }
 
-      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
       if (getErrorStatusCode(error) !== 401) {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
@@ -302,7 +297,7 @@ export class AuthenticationService {
       } else if (authenticationResult.redirected()) {
         this.logger.error('Re-authentication failed since redirect is required.');
       } else {
-        this.logger.debug('Re-authentication cannot be handled.');
+        this.logger.error('Re-authentication cannot be handled.');
       }
 
       return toolkit.notHandled();
@@ -346,7 +341,7 @@ export class AuthenticationService {
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
-    const authenticator = (this.authenticator = new Authenticator({
+    this.authenticator = new Authenticator({
       audit,
       loggers,
       clusterClient,
@@ -363,7 +358,7 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
-    }));
+    });
 
     return {
       apiKeys: {
@@ -377,41 +372,7 @@ export class AuthenticationService {
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
       },
 
-      login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
-        const providerIdentifier =
-          'name' in attempt.provider ? attempt.provider.name : attempt.provider.type;
-        this.logger.info(`Performing login attempt with "${providerIdentifier}" provider.`);
-
-        let loginResult: AuthenticationResult;
-        try {
-          loginResult = await authenticator.login(request, attempt);
-        } catch (err) {
-          this.logger.error(
-            `Login attempt with "${providerIdentifier}" provider failed due to unexpected error: ${getDetailedErrorMessage(
-              err
-            )}`
-          );
-          throw err;
-        }
-
-        if (loginResult.succeeded() || loginResult.redirected()) {
-          this.logger.info(
-            `Login attempt with "${providerIdentifier}" provider succeeded (requires redirect: ${loginResult.redirected()}).`
-          );
-        } else if (loginResult.failed()) {
-          this.logger.error(
-            `Login attempt with "${providerIdentifier}" provider failed: ${
-              loginResult.error ? getDetailedErrorMessage(loginResult.error) : 'unknown error'
-            }`
-          );
-        } else if (loginResult.notHandled()) {
-          this.logger.error(
-            `Login attempt with "${providerIdentifier}" provider cannot be handled.`
-          );
-        }
-
-        return loginResult;
-      },
+      login: this.authenticator.login.bind(this.authenticator),
       logout: this.authenticator.logout.bind(this.authenticator),
       acknowledgeAccessAgreement: this.authenticator.acknowledgeAccessAgreement.bind(
         this.authenticator

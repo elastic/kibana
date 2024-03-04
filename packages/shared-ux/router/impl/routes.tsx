@@ -30,12 +30,9 @@ export const Routes = ({
         if (React.isValidElement(child) && child.type === LegacyRoute) {
           const path = replace(child?.props.path, match.url + '/', '');
           const renderFunction =
-            // @ts-expect-error upgrade typescript v4.9.5
             typeof child?.props.children === 'function'
-              ? // @ts-expect-error upgrade typescript v4.9.5
-                child?.props.children
-              : // @ts-expect-error upgrade typescript v4.9.5
-                child?.props.render;
+              ? child?.props.children
+              : child?.props.render;
 
           return (
             <Route
@@ -43,7 +40,6 @@ export const Routes = ({
               element={
                 <>
                   <MatchPropagator />
-                  {/* @ts-expect-error upgrade typescript v4.9.5*/}
                   {(child?.props?.component && <child.props.component />) ||
                     (renderFunction && renderFunction()) ||
                     children}

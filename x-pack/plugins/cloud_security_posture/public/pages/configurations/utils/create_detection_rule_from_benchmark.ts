@@ -60,7 +60,7 @@ const generateFindingsRuleQuery = (benchmarkRule: CspBenchmarkRule['metadata']) 
 /*
  * Creates a detection rule from a Benchmark rule
  */
-export const createDetectionRuleFromBenchmarkRule = async (
+export const createDetectionRuleFromBenchmark = async (
   http: HttpSetup,
   benchmarkRule: CspBenchmarkRule['metadata']
 ) => {

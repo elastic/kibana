@@ -26,10 +26,17 @@ interface QueryDetailsFlyoutProps {
   };
   onClose: () => void;
 }
+const additionalZIndexStyle = { style: 'z-index: 6000' };
 
 const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => (
   <EuiPortal>
-    <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
+    <EuiFlyout
+      size="m"
+      ownFocus
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      maskProps={additionalZIndexStyle} // For an edge case to display above the alerts flyout
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="flyoutTitle">

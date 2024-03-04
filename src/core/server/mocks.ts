@@ -143,7 +143,6 @@ export type CustomRequestHandlerMock<T> = {
 };
 
 const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
-  // @ts-expect-error upgrade typescript v4.9.5
   const mock = Object.entries(contextParts).reduce(
     (context, [key, value]) => {
       // @ts-expect-error type matching from inferred types is hard

@@ -8,14 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@elastic/ecs';
-import moment from 'moment/moment';
 import type {
-  ResponseActionAgentType,
   ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import {
-  ENDPOINT_ACTION_RESPONSES_DS,
   ENDPOINT_ACTIONS_DS,
+  ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
 import type {
@@ -26,16 +25,15 @@ import type {
   EndpointAction,
   EndpointActionDataParameterTypes,
   EndpointActionResponse,
-  EndpointActionResponseDataOutput,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
   WithAllKeys,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
-
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
  * @param item
@@ -593,8 +591,4 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
   };
 
   return actionDetails as T;
-};
-
-export const getActionRequestExpiration = (): string => {
-  return moment().add(2, 'weeks').toISOString();
 };

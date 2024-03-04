@@ -195,7 +195,6 @@ export async function createRule<Params extends RuleParams = never>(
     {
       legacyId,
       actionsWithRefs: actions,
-      // @ts-expect-error upgrade typescript v4.9.5
       paramsWithRefs: updatedParams,
     }
   );

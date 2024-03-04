@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import {
   LICENSE_MISSING_ERROR,
@@ -24,9 +23,7 @@ function getDefaultWriteAccessFlag(method: SupportedMethod) {
   return method !== 'GET';
 }
 
-export const createSyntheticsRouteWithAuth = <
-  ClientContract extends HttpResponsePayload | ResponseError = any
->(
+export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
   routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {
   const restRoute = routeCreator();

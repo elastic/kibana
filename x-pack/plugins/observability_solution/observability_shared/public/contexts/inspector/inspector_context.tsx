@@ -13,7 +13,7 @@ import { FetcherResult } from '../../hooks/use_fetcher';
 type InspectResponse = Request[];
 
 export interface InspectorContextValue {
-  addInspectorRequest: (result: FetcherResult<any>) => void;
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void;
   inspectorAdapters: { requests: RequestAdapter };
 }
 
@@ -24,12 +24,12 @@ const value: InspectorContextValue = {
 
 export const InspectorContext = createContext<InspectorContextValue>(value);
 
-export interface InspectorRequestProps {
-  mainStatisticsData?: { _inspect?: InspectResponse };
-  _inspect?: InspectResponse;
-}
-
-export type AddInspectorRequest = (result: FetcherResult<InspectorRequestProps>) => void;
+export type AddInspectorRequest = (
+  result: FetcherResult<{
+    mainStatisticsData?: { _inspect?: InspectResponse };
+    _inspect?: InspectResponse;
+  }>
+) => void;
 
 export function InspectorContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();

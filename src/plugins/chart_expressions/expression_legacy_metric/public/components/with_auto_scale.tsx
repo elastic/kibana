@@ -63,13 +63,10 @@ function hasAutoscaleProps<T>(props: T): props is T & AutoScaleProps {
   return false;
 }
 
-function getWrappedComponentProps<T>(props: T): T {
+function getWrappedComponentProps<T>(props: T) {
   if (hasAutoscaleProps(props)) {
-    return {
-      ...props,
-      autoScaleParams: undefined,
-      renderComplete: undefined,
-    };
+    const { autoScaleParams, renderComplete, ...rest } = props;
+    return rest;
   }
 
   return props;
@@ -135,7 +132,7 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
               : {}),
           }}
         >
-          <WrappedComponent {...restProps} />
+          <WrappedComponent {...(restProps as T)} />
         </div>
       </div>
     );

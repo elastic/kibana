@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
-
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { duplicateIdentifier } from './duplicate_identifier';
@@ -30,7 +28,7 @@ export function getSignificantItemGroups(
     (g) => g.group.length > 1
   );
 
-  // `frequent_item_sets` returns lots of different small groups of field/value pairs that co-occur.
+  // `frequent_item_sets` returns lot of different small groups of field/value pairs that co-occur.
   // The following steps analyse these small groups, identify overlap between these groups,
   // and then summarize them in larger groups where possible.
 
@@ -60,5 +58,5 @@ export function getSignificantItemGroups(
     )
   );
 
-  return uniqBy(significantItemGroups, 'id');
+  return significantItemGroups;
 }

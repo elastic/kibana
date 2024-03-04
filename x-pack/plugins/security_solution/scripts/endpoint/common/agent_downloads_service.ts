@@ -198,7 +198,6 @@ const handleProcessInterruptions = async <T>(
     throw e;
   }
 
-  // @ts-expect-error upgrade typescript v4.9.5
   if ('finally' in runnerResponse) {
     (runnerResponse as Promise<T>).finally(() => {
       stopListeners();

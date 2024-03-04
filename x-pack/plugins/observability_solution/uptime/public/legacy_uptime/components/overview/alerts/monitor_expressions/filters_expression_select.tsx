@@ -164,7 +164,6 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj="observabilitySolutionFiltersExpressionsSelectButton"
                 aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(title)}
                 iconType="trash"
                 color="danger"

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -28,11 +28,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 export interface RenderAppProps {
   mountParams: AppMountParameters;
   coreStart: CoreStart;
-  pluginsStart: { cases: CasesPublicStart };
+  pluginsStart: { cases: CasesUiStart };
 }
 
 interface CasesFixtureAppDeps {
-  cases: CasesPublicStart;
+  cases: CasesUiStart;
 }
 
 const permissions = {

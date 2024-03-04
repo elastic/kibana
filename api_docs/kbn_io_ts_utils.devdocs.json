@@ -638,9 +638,7 @@
         "description": [],
         "signature": [
           "(type: ",
-          "Type",
-          "<any, any, unknown> | ",
-          "ParseableType",
+          "Mixed",
           ") => JSONSchema"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
@@ -650,14 +648,12 @@
           {
             "parentPluginId": "@kbn/io-ts-utils",
             "id": "def-common.toJsonSchema.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "Type",
-              "<any, any, unknown> | ",
-              "ParseableType"
+              "Mixed"
             ],
             "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
             "deprecated": false,

@@ -57,7 +57,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
-export class Vis<TVisParams extends VisParams = VisParams> {
+export class Vis<TVisParams = VisParams> {
   public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';

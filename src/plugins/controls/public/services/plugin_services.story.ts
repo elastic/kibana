@@ -21,7 +21,6 @@ import { httpServiceFactory } from './http/http.stub';
 import { optionsListServiceFactory } from './options_list/options_list.story';
 import { overlaysServiceFactory } from './overlays/overlays.story';
 import { settingsServiceFactory } from './settings/settings.story';
-import { storageServiceFactory } from './storage/storage_service.stub';
 import { ControlsServices } from './types';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
 
@@ -34,7 +33,7 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   settings: new PluginServiceProvider(settingsServiceFactory),
   core: new PluginServiceProvider(coreServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
-  storage: new PluginServiceProvider(storageServiceFactory),
+
   controls: new PluginServiceProvider(controlsServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };

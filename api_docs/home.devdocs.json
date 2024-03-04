@@ -1447,7 +1447,7 @@
           "references": [
             {
               "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/plugin.ts"
+              "path": "x-pack/plugins/apm/public/plugin.ts"
             }
           ]
         }

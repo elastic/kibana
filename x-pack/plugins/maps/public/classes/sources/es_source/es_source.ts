@@ -185,11 +185,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const buffer: MapExtent =
         'isGeoGridPrecisionAware' in this &&
         'getGeoGridPrecision' in this &&
-        // @ts-expect-error upgrade typescript v4.9.5
         (this as IESAggSource).isGeoGridPrecisionAware()
           ? expandToTileBoundaries(
               requestMeta.buffer,
-              // @ts-expect-error upgrade typescript v4.9.5
               (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom)
             )
           : requestMeta.buffer;

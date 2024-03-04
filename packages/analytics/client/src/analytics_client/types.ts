@@ -205,7 +205,6 @@ export interface IAnalyticsClient {
    *
    * @track-adoption
    */
-  // @ts-expect-error upgrade typescript v4.9.5
   registerContextProvider: <Context>(contextProviderOpts: ContextProviderOpts<Context>) => void;
   /**
    * Removes the context provider and stop enriching the events from its context.

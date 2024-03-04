@@ -100,7 +100,7 @@ export type UMRouteHandler<ClientContract = unknown> = ({
   response,
   server,
   savedObjectsClient,
-  subject, // @ts-expect-error upgrade typescript v4.9.5
+  subject,
 }: UptimeRouteContext) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
 
 export interface RouteContext<Query = Record<string, any>> {

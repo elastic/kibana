@@ -133,7 +133,6 @@ export const ServiceLocationsApiResponseCodec = t.interface({
   throttling: t.union([ThrottlingOptionsCodec, t.undefined]),
   locations: ServiceLocationsCodec,
 });
-export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
 
 export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;

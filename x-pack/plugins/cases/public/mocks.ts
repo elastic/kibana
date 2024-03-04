@@ -6,9 +6,9 @@
  */
 
 import { mockCasesContext } from './mocks/mock_cases_context';
-import type { CasesPublicStart } from './types';
+import type { CasesUiStart } from './types';
 
-const apiMock: jest.Mocked<CasesPublicStart['api']> = {
+const apiMock: jest.Mocked<CasesUiStart['api']> = {
   getRelatedCases: jest.fn(),
   cases: {
     find: jest.fn(),
@@ -18,7 +18,7 @@ const apiMock: jest.Mocked<CasesPublicStart['api']> = {
   },
 };
 
-const uiMock: jest.Mocked<CasesPublicStart['ui']> = {
+const uiMock: jest.Mocked<CasesUiStart['ui']> = {
   getCases: jest.fn(),
   getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
@@ -28,7 +28,7 @@ const uiMock: jest.Mocked<CasesPublicStart['ui']> = {
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
 
-const hooksMock: jest.Mocked<CasesPublicStart['hooks']> = {
+const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
   useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
     open: openAddToNewCaseFlyoutMock,
   })),
@@ -37,7 +37,7 @@ const hooksMock: jest.Mocked<CasesPublicStart['hooks']> = {
   })),
 };
 
-const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
+const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
   canUseCases: jest.fn(),
   getUICapabilities: jest.fn().mockReturnValue({
     all: false,
@@ -54,10 +54,10 @@ const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
 };
 
 export interface CaseUiClientMock {
-  api: jest.Mocked<CasesPublicStart['api']>;
-  ui: jest.Mocked<CasesPublicStart['ui']>;
-  hooks: jest.Mocked<CasesPublicStart['hooks']>;
-  helpers: jest.Mocked<CasesPublicStart['helpers']>;
+  api: jest.Mocked<CasesUiStart['api']>;
+  ui: jest.Mocked<CasesUiStart['ui']>;
+  hooks: jest.Mocked<CasesUiStart['hooks']>;
+  helpers: jest.Mocked<CasesUiStart['helpers']>;
 }
 
 export const mockCasesContract = (): CaseUiClientMock => ({

@@ -495,6 +495,54 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
               },
@@ -513,54 +561,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "security",
@@ -823,6 +823,18 @@
               "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability/public/plugin.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/apm/public/context/license/license_context.tsx"
+            },
+            {
               "plugin": "crossClusterReplication",
               "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts"
             },
@@ -831,10 +843,6 @@
               "path": "x-pack/plugins/logstash/public/plugin.ts"
             },
             {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts"
-            },
-            {
               "plugin": "painlessLab",
               "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
             },
@@ -857,14 +865,6 @@
             {
               "plugin": "watcher",
               "path": "x-pack/plugins/watcher/public/plugin.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx"
             }
           ]
         },
@@ -1808,6 +1808,54 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
               },
@@ -1826,54 +1874,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
               },
               {
                 "plugin": "security",

@@ -8,7 +8,9 @@
 
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
@@ -35,7 +37,7 @@ describe('Options list control', () => {
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
-    return render(
+    return mountWithIntl(
       <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListControl {...defaultProps} />
       </OptionsListEmbeddableContext.Provider>
@@ -46,15 +48,15 @@ describe('Options list control', () => {
     const control = await mountComponent({
       explicitInput: { id: 'testExists', exclude: false, existsSelected: true },
     });
-    const existsOption = control.getByTestId('optionsList-control-testExists');
-    expect(existsOption).toHaveTextContent('Exists');
+    const existsOption = findTestSubject(control, 'optionsList-control-testExists');
+    expect(existsOption.text()).toBe('Exists');
   });
 
   test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', async () => {
     const control = await mountComponent({
       explicitInput: { id: 'testDoesNotExist', exclude: true, existsSelected: true },
     });
-    const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
-    expect(existsOption).toHaveTextContent('DOES NOT Exist');
+    const existsOption = findTestSubject(control, 'optionsList-control-testDoesNotExist');
+    expect(existsOption.text()).toBe('DOES NOT Exist');
   });
 });

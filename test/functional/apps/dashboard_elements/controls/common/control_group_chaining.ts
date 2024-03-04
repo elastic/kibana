@@ -154,8 +154,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         suggestions: { Fluffy: 6, 'Fee Fee': 3, Rover: 3 },
         invalidSelections: ['sylvester'],
       });
+      const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
+        'ruff',
+        'bark',
+        'grrr',
+        'bow ow ow',
+        'grr',
+      ]);
       await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-        suggestions: {},
+        suggestions: { ...suggestions, grr: suggestions.grr - 1 },
         invalidSelections: ['meow'],
       });
     });
@@ -181,7 +188,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('cat');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      await dashboardControls.clearControlSelections(controlIds[1]);
       await dashboardControls.optionsListOpenPopover(controlIds[1]);
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
@@ -195,6 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
       await dashboard.waitForRenderComplete();
 
+      await dashboardControls.clearControlSelections(controlIds[1]);
       await dashboardControls.optionsListOpenPopover(controlIds[1]);
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.ensureAvailableOptionsEqual(

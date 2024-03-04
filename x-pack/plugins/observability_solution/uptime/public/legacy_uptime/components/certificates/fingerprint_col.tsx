@@ -24,14 +24,11 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
     return (
       <StyledSpan data-test-subj={val} className="eui-textNoWrap">
         <EuiToolTip content={val}>
-          <EuiButtonEmpty data-test-subj="observabilitySolutionShaComponentButton" flush="right">
-            {text}{' '}
-          </EuiButtonEmpty>
+          <EuiButtonEmpty flush="right">{text} </EuiButtonEmpty>
         </EuiToolTip>
         <EuiCopy textToCopy={val ?? ''}>
           {(copy) => (
             <EuiButtonIcon
-              data-test-subj="observabilitySolutionShaComponentButton"
               aria-label={COPY_FINGERPRINT}
               onClick={copy}
               iconType="copy"

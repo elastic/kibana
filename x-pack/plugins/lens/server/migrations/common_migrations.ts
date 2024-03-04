@@ -502,11 +502,7 @@ export const commonMigratePartitionChartGroups = (
   }>
 ): LensDocShape850<{
   shape: string;
-  layers: Array<{
-    primaryGroups?: string[];
-    secondaryGroups?: string[];
-    [key: string]: unknown; // unknown carryover key/values
-  }>;
+  layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
 }> => {
   if (
     attributes.state.visualization?.layers &&

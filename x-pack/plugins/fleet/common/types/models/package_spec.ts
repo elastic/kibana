@@ -69,7 +69,6 @@ export type PackageSpecCategory =
   | 'datastore'
   | 'dns_security'
   | 'edr_xdr'
-  | 'cloudsecurity_cdr'
   | 'elasticsearch_sdk'
   | 'elastic_stack'
   | 'email_security'

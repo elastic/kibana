@@ -24,7 +24,6 @@ export function LazyWrapper<T>({ getLazyComponent, lazyComponentProps }: Props<T
   return (
     <EuiErrorBoundary>
       <Suspense fallback={<Fallback />}>
-        {/* @ts-expect-error upgrade typescript v4.9.5*/}
         <LazyComponent {...lazyComponentProps} />
       </Suspense>
     </EuiErrorBoundary>

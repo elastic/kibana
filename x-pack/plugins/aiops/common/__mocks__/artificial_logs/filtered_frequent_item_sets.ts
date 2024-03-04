@@ -9,10 +9,7 @@ import type { ItemSet } from '../../types';
 
 export const filteredFrequentItemSets: ItemSet[] = [
   {
-    set: [
-      { fieldName: 'response_code', fieldValue: '500' },
-      { fieldName: 'url', fieldValue: 'home.php' },
-    ],
+    set: { response_code: '500', url: 'home.php' },
     size: 2,
     maxPValue: 0.010770456205312423,
     doc_count: 792,
@@ -20,10 +17,7 @@ export const filteredFrequentItemSets: ItemSet[] = [
     total_doc_count: 1505,
   },
   {
-    set: [
-      { fieldName: 'user', fieldValue: 'Peter' },
-      { fieldName: 'url', fieldValue: 'home.php' },
-    ],
+    set: { user: 'Peter', url: 'home.php' },
     size: 2,
     maxPValue: 0.010770456205312423,
     doc_count: 634,

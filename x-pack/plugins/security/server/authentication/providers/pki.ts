@@ -12,7 +12,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -171,7 +170,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       try {
         await this.options.tokens.invalidate({ accessToken: state.accessToken });
       } catch (err) {
-        this.logger.debug(`Failed invalidating access token: ${getDetailedErrorMessage(err)}`);
+        this.logger.debug(`Failed invalidating access token: ${err.message}`);
         return DeauthenticationResult.failed(err);
       }
     }
@@ -222,7 +221,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       try {
         await this.options.tokens.invalidate({ accessToken });
       } catch (err) {
-        this.logger.error(`Failed to invalidate access token: ${getDetailedErrorMessage(err)}`);
+        this.logger.debug(`Failed to invalidate access token: ${err.message}`);
         return AuthenticationResult.failed(err);
       }
 
@@ -240,9 +239,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
-      );
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -291,9 +288,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       })) as any;
     } catch (err) {
       this.logger.debug(
-        `Failed to exchange peer certificate chain to an access token: ${getDetailedErrorMessage(
-          err
-        )}`
+        `Failed to exchange peer certificate chain to an access token: ${err.message}`
       );
       return AuthenticationResult.failed(err);
     }

@@ -25,7 +25,6 @@ import {
   useIsWithinMinBreakpoint,
   useEuiTheme,
   useEuiThemeCSSVariables,
-  EuiPageSidebar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -235,11 +234,11 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               className="kbnSolutionNav__flyout"
               hideCloseButton={!canBeCollapsed}
             >
-              <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
+              <div className={sideNavClasses}>
                 {titleText}
                 <EuiSpacer size="l" />
                 {sideNavContent}
-              </EuiPageSidebar>
+              </div>
             </EuiFlyout>
           )}
           {canBeCollapsed && (

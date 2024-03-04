@@ -33,14 +33,6 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.excludeExists', {
         defaultMessage: 'DOES NOT',
       }),
-    getInvalidSelectionWarningLabel: (invalidSelectionCount: number) =>
-      i18n.translate('controls.optionsList.control.invalidSelectionWarningLabel', {
-        defaultMessage:
-          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results.',
-        values: {
-          invalidSelectionCount,
-        },
-      }),
   },
   editor: {
     getSelectionOptionsTitle: () =>
@@ -51,7 +43,7 @@ export const OptionsListStrings = {
       multi: {
         getLabel: () =>
           i18n.translate('controls.optionsList.editor.multiSelectLabel', {
-            defaultMessage: 'Allow multiple selections',
+            defaultMessage: 'Allow  multiple selections',
           }),
       },
       single: {
@@ -203,19 +195,19 @@ export const OptionsListStrings = {
     getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
         defaultMessage:
-          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
         values: { fieldName, invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
         defaultMessage:
-          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}}',
+          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
       }),
     getInvalidSelectionsLabel: (selectedOptions: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsLabel', {
         defaultMessage:
-          '{selectedOptions} {selectedOptions, plural, one {selection} other {selections}} invalid',
+          '{selectedOptions} {selectedOptions, plural, one {selection} other {selections}} ignored',
         values: { selectedOptions },
       }),
     getInvalidSelectionScreenReaderText: () =>

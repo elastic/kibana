@@ -23,7 +23,6 @@ describe('QueryClicksTable', () => {
       key: 'some-document',
       document: {
         id: 'some-document',
-        engine: 'some-engine',
       },
       tags: ['tagA'],
       doc_count: 10,
@@ -32,7 +31,6 @@ describe('QueryClicksTable', () => {
       key: 'another-document',
       document: {
         id: 'another-document',
-        engine: 'another-engine',
       },
       tags: ['tagB'],
       doc_count: 5,
@@ -57,7 +55,7 @@ describe('QueryClicksTable', () => {
       '/app/enterprise_search/engines/some-engine/documents/some-document'
     );
     expect(wrapper.find(EuiLink).last().prop('href')).toEqual(
-      '/app/enterprise_search/engines/another-engine/documents/another-document'
+      '/app/enterprise_search/engines/some-engine/documents/another-document'
     );
     // deleted-document should not have a link
 

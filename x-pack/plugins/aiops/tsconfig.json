@@ -67,7 +67,6 @@
     "@kbn/analytics",
     "@kbn/ml-ui-actions",
     "@kbn/core-http-server",
-    "@kbn/core-ui-settings-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

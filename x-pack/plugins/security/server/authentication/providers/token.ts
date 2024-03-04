@@ -155,9 +155,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       try {
         await this.options.tokens.invalidate(state);
       } catch (err) {
-        this.logger.debug(
-          `Failed invalidating user's access token: ${getDetailedErrorMessage(err)}`
-        );
+        this.logger.debug(`Failed invalidating user's access token: ${err.message}`);
         return DeauthenticationResult.failed(err);
       }
     }
@@ -191,9 +189,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
-      );
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -212,7 +208,6 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
-      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
 
@@ -220,7 +215,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     // login page to re-authenticate, or fail if redirect isn't possible.
     if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
-        this.logger.warn('Clearing session since both access and refresh tokens are expired.');
+        this.logger.debug('Clearing session since both access and refresh tokens are expired.');
 
         // Set state to `null` to let `Authenticator` know that we want to clear current session.
         return AuthenticationResult.redirectTo(this.getLoginPageURL(request), { state: null });

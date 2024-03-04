@@ -84,7 +84,6 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                 params: {
                   query: 'PTR',
                 },
-                // @ts-expect-error upgrade typescript v4.9.5
                 indexRefName: 'filter-index-pattern-0',
               },
               query: {

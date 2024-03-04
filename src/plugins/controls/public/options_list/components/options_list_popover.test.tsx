@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { render, RenderResult, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { ReactWrapper } from 'enzyme';
 
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { pluginServices } from '../../services';
@@ -41,36 +42,41 @@ describe('Options list popover', () => {
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
-    return render(
+    return mountWithIntl(
       <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListPopover {...compProps} />
       </OptionsListEmbeddableContext.Provider>
     );
   }
 
-  const clickShowOnlySelections = (popover: RenderResult) => {
-    const showOnlySelectedButton = popover.getByTestId('optionsList-control-show-only-selected');
-    userEvent.click(showOnlySelectedButton);
+  const clickShowOnlySelections = (popover: ReactWrapper) => {
+    const showOnlySelectedButton = findTestSubject(
+      popover,
+      'optionsList-control-show-only-selected'
+    );
+    showOnlySelectedButton.simulate('click');
   };
 
   test('no available options', async () => {
     const popover = await mountComponent({ componentState: { availableOptions: [] } });
-    const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-    const noOptionsDiv = within(availableOptionsDiv).getByTestId(
+    const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
+    const noOptionsDiv = findTestSubject(
+      availableOptionsDiv,
       'optionsList-control-noSelectionsMessage'
     );
-    expect(noOptionsDiv).toBeInTheDocument();
+    expect(noOptionsDiv.exists()).toBeTruthy();
   });
 
   describe('show only selected', () => {
     test('display error message when the show only selected toggle is true but there are no selections', async () => {
       const popover = await mountComponent();
       clickShowOnlySelections(popover);
-      const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-      const noSelectionsDiv = within(availableOptionsDiv).getByTestId(
+      const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
+      const noSelectionsDiv = findTestSubject(
+        availableOptionsDiv,
         'optionsList-control-selectionsEmptyMessage'
       );
-      expect(noSelectionsDiv).toBeInTheDocument();
+      expect(noSelectionsDiv.exists()).toBeTruthy();
     });
 
     test('show only selected options', async () => {
@@ -79,11 +85,11 @@ describe('Options list popover', () => {
         explicitInput: { selectedOptions: selections },
       });
       clickShowOnlySelections(popover);
-      const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-      const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
-      const availableOptions = within(availableOptionsList).getAllByRole('option');
-      availableOptions.forEach((child, i) => {
-        expect(child).toHaveTextContent(`${selections[i]}. Checked option.`);
+      const availableOptions = popover.find(
+        '[data-test-subj="optionsList-control-available-options"] ul'
+      );
+      availableOptions.children().forEach((child, i) => {
+        expect(child.text()).toBe(`${selections[i]}. Checked option.`);
       });
     });
 
@@ -93,16 +99,16 @@ describe('Options list popover', () => {
         explicitInput: { selectedOptions: selections },
         componentState: { field: { type: 'string' } as any as FieldSpec },
       });
-      let searchBox = popover.getByTestId('optionsList-control-search-input');
-      let sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      expect(searchBox).not.toBeDisabled();
-      expect(sortButton).not.toBeDisabled();
+      let searchBox = findTestSubject(popover, 'optionsList-control-search-input');
+      let sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      expect(searchBox.prop('disabled')).toBeFalsy();
+      expect(sortButton.prop('disabled')).toBeFalsy();
 
       clickShowOnlySelections(popover);
-      searchBox = popover.getByTestId('optionsList-control-search-input');
-      sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      expect(searchBox).toBeDisabled();
-      expect(sortButton).toBeDisabled();
+      searchBox = findTestSubject(popover, 'optionsList-control-search-input');
+      sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      expect(searchBox.prop('disabled')).toBe(true);
+      expect(sortButton.prop('disabled')).toBe(true);
     });
   });
 
@@ -118,16 +124,23 @@ describe('Options list popover', () => {
           invalidSelections: ['woof'],
         },
       });
-      const validSelection = popover.getByTestId('optionsList-control-selection-bark');
-      expect(validSelection).toHaveTextContent('bark. Checked option.');
+      const validSelection = findTestSubject(popover, 'optionsList-control-selection-bark');
+      expect(validSelection.find('.euiSelectableListItem__text').text()).toEqual(
+        'bark. Checked option.'
+      );
       expect(
-        within(validSelection).getByTestId('optionsList-document-count-badge')
-      ).toHaveTextContent('75');
-      const title = popover.getByTestId('optionList__invalidSelectionLabel');
-      expect(title).toHaveTextContent('Invalid selection');
-      const invalidSelection = popover.getByTestId('optionsList-control-invalid-selection-woof');
-      expect(invalidSelection).toHaveTextContent('woof. Checked option.');
-      expect(invalidSelection).toHaveClass('optionsList__selectionInvalid');
+        validSelection.find('div[data-test-subj="optionsList-document-count-badge"]').text().trim()
+      ).toEqual('75');
+      const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
+      expect(title).toEqual('Ignored selection');
+      const invalidSelection = findTestSubject(
+        popover,
+        'optionsList-control-ignored-selection-woof'
+      );
+      expect(invalidSelection.find('.euiSelectableListItem__text').text()).toEqual(
+        'woof. Checked option.'
+      );
+      expect(invalidSelection.hasClass('optionsList__selectionInvalid')).toBe(true);
     });
 
     test('test title when multiple invalid selections', async () => {
@@ -139,28 +152,28 @@ describe('Options list popover', () => {
           invalidSelections: ['woof', 'meow'],
         },
       });
-      const title = popover.getByTestId('optionList__invalidSelectionLabel');
-      expect(title).toHaveTextContent('Invalid selections');
+      const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
+      expect(title).toEqual('Ignored selections');
     });
   });
 
   describe('include/exclude toggle', () => {
     test('should default to exclude = false', async () => {
       const popover = await mountComponent();
-      const includeButton = popover.getByTestId('optionsList__includeResults');
-      const excludeButton = popover.getByTestId('optionsList__excludeResults');
-      expect(includeButton).toHaveAttribute('aria-pressed', 'true');
-      expect(excludeButton).toHaveAttribute('aria-pressed', 'false');
+      const includeButton = findTestSubject(popover, 'optionsList__includeResults');
+      const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
+      expect(includeButton.prop('aria-pressed')).toBe(true);
+      expect(excludeButton.prop('aria-pressed')).toBe(false);
     });
 
     test('if exclude = true, select appropriate button in button group', async () => {
       const popover = await mountComponent({
         explicitInput: { exclude: true },
       });
-      const includeButton = popover.getByTestId('optionsList__includeResults');
-      const excludeButton = popover.getByTestId('optionsList__excludeResults');
-      expect(includeButton).toHaveAttribute('aria-pressed', 'false');
-      expect(excludeButton).toHaveAttribute('aria-pressed', 'true');
+      const includeButton = findTestSubject(popover, 'optionsList__includeResults');
+      const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
+      expect(includeButton.prop('aria-pressed')).toBe(false);
+      expect(excludeButton.prop('aria-pressed')).toBe(true);
     });
   });
 
@@ -169,16 +182,14 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         explicitInput: { existsSelected: true },
       });
-      const woofOption = popover.getByTestId('optionsList-control-selection-woof');
-      userEvent.click(woofOption);
+      const woofOption = findTestSubject(popover, 'optionsList-control-selection-woof');
+      woofOption.simulate('click');
 
-      const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-      const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
-      const selectedOptions = within(availableOptionsList).getAllByRole('option', {
-        checked: true,
+      const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
+      availableOptionsDiv.children().forEach((child, i) => {
+        if (child.text() === 'woof') expect(child.prop('aria-pressed')).toBe(true);
+        else expect(child.prop('aria-pressed')).toBeFalsy();
       });
-      expect(selectedOptions).toHaveLength(1);
-      expect(selectedOptions[0]).toHaveTextContent('woof. Checked option.');
     });
 
     test('clicking "Exists" unselects all other selections', async () => {
@@ -186,18 +197,19 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         explicitInput: { existsSelected: false, selectedOptions: selections },
       });
-      const existsOption = popover.getByTestId('optionsList-control-selection-exists');
-      let availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-      let checkedOptions = within(availableOptionsDiv).getAllByRole('option', { checked: true });
-      expect(checkedOptions).toHaveLength(2);
-      expect(checkedOptions[0]).toHaveTextContent('woof. Checked option.');
-      expect(checkedOptions[1]).toHaveTextContent('bark. Checked option.');
+      const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
+      let availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
+      availableOptionsDiv.children().forEach((child, i) => {
+        if (selections.includes(child.text())) expect(child.prop('aria-pressed')).toBe(true);
+        else expect(child.prop('aria-pressed')).toBeFalsy();
+      });
 
-      userEvent.click(existsOption);
-      availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-      checkedOptions = within(availableOptionsDiv).getAllByRole('option', { checked: true });
-      expect(checkedOptions).toHaveLength(1);
-      expect(checkedOptions[0]).toHaveTextContent('Exists. Checked option.');
+      existsOption.simulate('click');
+      availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
+      availableOptionsDiv.children().forEach((child, i) => {
+        if (child.text() === 'Exists (*)') expect(child.prop('aria-pressed')).toBe(true);
+        else expect(child.prop('aria-pressed')).toBeFalsy();
+      });
     });
 
     test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
@@ -205,8 +217,8 @@ describe('Options list popover', () => {
         componentState: { availableOptions: [] },
         explicitInput: { existsSelected: false },
       });
-      const existsOption = popover.queryByTestId('optionsList-control-selection-exists');
-      expect(existsOption).toBeNull();
+      const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
+      expect(existsOption.exists()).toBeFalsy();
     });
 
     test('if existsSelected = true, "Exists" is the only option when "Show only selected options" is toggled', async () => {
@@ -214,10 +226,10 @@ describe('Options list popover', () => {
         explicitInput: { existsSelected: true },
       });
       clickShowOnlySelections(popover);
-      const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-      const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
-      const availableOptions = within(availableOptionsList).getAllByRole('option');
-      expect(availableOptions[0]).toHaveTextContent('Exists. Checked option.');
+      const availableOptions = popover.find(
+        '[data-test-subj="optionsList-control-available-options"] ul'
+      );
+      expect(availableOptions.text()).toBe('Exists. Checked option.');
     });
   });
 
@@ -228,13 +240,11 @@ describe('Options list popover', () => {
           field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
         },
       });
-      const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      sortButton.simulate('click');
 
-      const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
-      const optionsText = within(sortingOptionsDiv)
-        .getAllByRole('option')
-        .map((el) => el.textContent);
+      const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+      const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
       expect(optionsText).toEqual(['By document count. Checked option.', 'Alphabetically']);
     });
 
@@ -245,18 +255,16 @@ describe('Options list popover', () => {
           field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
         },
       });
-      const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      sortButton.simulate('click');
 
-      const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
-      const optionsText = within(sortingOptionsDiv)
-        .getAllByRole('option')
-        .map((el) => el.textContent);
+      const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+      const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
       expect(optionsText).toEqual(['By document count', 'Alphabetically. Checked option.']);
 
-      const ascendingButton = popover.getByTestId('optionsList__sortOrder_asc');
+      const ascendingButton = findTestSubject(popover, 'optionsList__sortOrder_asc').instance();
       expect(ascendingButton).toHaveClass('euiButtonGroupButton-isSelected');
-      const descendingButton = popover.getByTestId('optionsList__sortOrder_desc');
+      const descendingButton = findTestSubject(popover, 'optionsList__sortOrder_desc').instance();
       expect(descendingButton).not.toHaveClass('euiButtonGroupButton-isSelected');
     });
 
@@ -264,13 +272,11 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         componentState: { field: { name: 'Test IP field', type: 'ip' } as FieldSpec },
       });
-      const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      sortButton.simulate('click');
 
-      const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
-      const optionsText = within(sortingOptionsDiv)
-        .getAllByRole('option')
-        .map((el) => el.textContent);
+      const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+      const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
       expect(optionsText).toEqual(['By document count. Checked option.']);
     });
 
@@ -278,13 +284,11 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         componentState: { field: { name: 'Test date field', type: 'date' } as FieldSpec },
       });
-      const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      sortButton.simulate('click');
 
-      const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
-      const optionsText = within(sortingOptionsDiv)
-        .getAllByRole('option')
-        .map((el) => el.textContent);
+      const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+      const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
       expect(optionsText).toEqual(['By document count. Checked option.', 'By date']);
     });
 
@@ -292,13 +296,11 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         componentState: { field: { name: 'Test number field', type: 'number' } as FieldSpec },
       });
-      const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      sortButton.simulate('click');
 
-      const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
-      const optionsText = within(sortingOptionsDiv)
-        .getAllByRole('option')
-        .map((el) => el.textContent);
+      const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+      const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
       expect(optionsText).toEqual(['By document count. Checked option.', 'Numerically']);
     });
   });
@@ -308,8 +310,8 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         componentState: { field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec },
       });
-      const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeNull();
+      const warning = findTestSubject(popover, 'optionsList-allow-expensive-queries-warning');
+      expect(warning).toEqual({});
     });
 
     test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
@@ -322,8 +324,8 @@ describe('Options list popover', () => {
           allowExpensiveQueries: false,
         },
       });
-      const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeInstanceOf(HTMLDivElement);
+      const warning = findTestSubject(popover, 'optionsList-allow-expensive-queries-warning');
+      expect(warning.getDOMNode()).toBeInstanceOf(HTMLDivElement);
     });
   });
 
@@ -338,8 +340,8 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         explicitInput,
       });
-      const test = popover.queryByTestId(testSubject);
-      expect(test).toBeNull();
+      const test = findTestSubject(popover, testSubject);
+      expect(test.exists()).toBeFalsy();
     };
 
     test('can hide exists option', async () => {

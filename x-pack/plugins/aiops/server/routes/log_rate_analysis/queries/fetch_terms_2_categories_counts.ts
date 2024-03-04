@@ -99,10 +99,10 @@ export async function fetchTerms2CategoriesCounts(
         ) as estypes.MsearchMultisearchBody
       );
       results.push({
-        set: [
-          { fieldName: term.fieldName, fieldValue: term.fieldValue },
-          { fieldName: category.fieldName, fieldValue: category.fieldValue },
-        ],
+        set: {
+          [term.fieldName]: term.fieldValue,
+          [category.fieldName]: category.fieldValue,
+        },
         size: 2,
         maxPValue: Math.max(term.pValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
@@ -116,7 +116,10 @@ export async function fetchTerms2CategoriesCounts(
       searches.push(
         getTerm2CategoryCountRequest(
           params,
-          itemSet.set,
+          Object.entries(itemSet.set).map(([fieldName, fieldValue]) => ({
+            fieldName,
+            fieldValue,
+          })),
           category.fieldName,
           { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
@@ -124,7 +127,10 @@ export async function fetchTerms2CategoriesCounts(
         ) as estypes.MsearchMultisearchBody
       );
       results.push({
-        set: [...itemSet.set, { fieldName: category.fieldName, fieldValue: category.fieldValue }],
+        set: {
+          ...itemSet.set,
+          [category.fieldName]: category.fieldValue,
+        },
         size: Object.keys(itemSet.set).length + 1,
         maxPValue: Math.max(itemSet.maxPValue ?? 1, category.pValue ?? 1),
         doc_count: 0,

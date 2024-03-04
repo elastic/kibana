@@ -877,7 +877,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           activeVisualization.removeLayer &&
           state.visualization.state
         ) {
-          const updater = layerIds.reduce<unknown>(
+          const updater = layerIds.reduce(
             (acc, layerId) =>
               activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
             state.visualization.state

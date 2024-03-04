@@ -48,10 +48,7 @@ describe('Security Plugin', () => {
     });
 
     mockSetupDependencies = {
-      licensing: {
-        license$: of({ getUnavailableReason: jest.fn() }),
-        featureUsage: { register: jest.fn() },
-      },
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
     } as unknown as PluginSetupDependencies;
@@ -121,7 +118,6 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
-            "getUnavailableReason": [Function],
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],

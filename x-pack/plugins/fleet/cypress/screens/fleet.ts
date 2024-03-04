@@ -123,6 +123,7 @@ export const SETTINGS_OUTPUTS = {
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
+  WARNING_KAFKA_CALLOUT: 'settingsOutputsFlyout.kafkaOutputTypeCallout',
   WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
   PRESET_INPUT: 'settingsOutputsFlyout.presetInput',
 };

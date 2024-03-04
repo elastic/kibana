@@ -2,7 +2,7 @@
 
 exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 <Fragment>
-  <EuiSideNavClass
+  <EuiSideNav
     aria-hidden={true}
     className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
     data-test-subj="DTS"
@@ -68,6 +68,12 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
         },
       ]
     }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
     mobileTitle={
       <React.Fragment>
         <FormattedMessage
@@ -91,7 +97,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 
 exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 <Fragment>
-  <EuiSideNavClass
+  <EuiSideNav
     aria-hidden={true}
     className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
     heading={
@@ -156,6 +162,12 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
         },
       ]
     }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
     mobileTitle={
       <React.Fragment>
         <FormattedMessage
@@ -179,7 +191,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 
 exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
 <Fragment>
-  <EuiSideNavClass
+  <EuiSideNav
     aria-hidden={true}
     className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
     heading={
@@ -246,6 +258,12 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
           "name": "Data",
           "tabIndex": -1,
         },
+      ]
+    }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
       ]
     }
     mobileTitle={

@@ -31,7 +31,6 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
     ): Promise<ResponseType | null> => {
       return new Promise((resolve, reject) => {
         data.search
-          // @ts-expect-error upgrade typescript v4.9.5
           .search<RequestBody, ResponseType>(requestBody, {
             abortSignal: abortController.current.signal,
             ...options,

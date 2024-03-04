@@ -136,6 +136,12 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 <EuiSpacer />
               </>
             )}
+            {!connector.index_name && (
+              <>
+                <AttachIndexBox connector={connector} />
+                <EuiSpacer />
+              </>
+            )}
             <EuiSteps
               steps={[
                 {
@@ -230,12 +236,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
               ]}
             />
           </EuiPanel>
-          {!connector.index_name && (
-            <>
-              <EuiSpacer />
-              <AttachIndexBox connector={connector} />
-            </>
-          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">

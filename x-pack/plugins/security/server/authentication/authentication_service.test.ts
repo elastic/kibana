@@ -206,7 +206,7 @@ describe('AuthenticationService', () => {
 
         expect(mockResponse.customError).toHaveBeenCalledTimes(1);
         expect(mockResponse.customError).toHaveBeenCalledWith({
-          body: 'License information could not be obtained from Elasticsearch. Please check the logs for further details.',
+          body: 'License is not available.',
           statusCode: 503,
           headers: { 'Retry-After': '30' },
         });

@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API /infra/metadata', () => {
     describe('works', () => {
-      // FLAKY: https://github.com/elastic/kibana/issues/177381
-      describe.skip('Host asset type', () => {
+      describe('Host asset type', () => {
         before(() => esArchiver.load(ARCHIVE_NAME));
         after(() => esArchiver.unload(ARCHIVE_NAME));
 

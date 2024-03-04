@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
-import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -87,7 +86,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
         state: authHeaders,
       });
     } catch (err) {
-      this.logger.debug(`Failed to perform a login: ${getDetailedErrorMessage(err)}`);
+      this.logger.debug(`Failed to perform a login: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -171,9 +170,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
-      );
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }

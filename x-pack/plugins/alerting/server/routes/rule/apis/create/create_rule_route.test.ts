@@ -55,7 +55,6 @@ describe('createRuleRoute', () => {
         alertsFilter: {
           query: {
             kql: 'name:test',
-            // @ts-expect-error upgrade typescript v4.9.5
             dsl: '{"must": {"term": { "name": "test" }}}',
             filters: [],
           },

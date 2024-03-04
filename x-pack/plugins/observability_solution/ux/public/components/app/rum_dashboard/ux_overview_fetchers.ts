@@ -132,7 +132,6 @@ async function esQuery<T>(
   dataStartPlugin: DataPublicPluginStart,
   query: IKibanaSearchRequest<T> & { params: { index?: string } }
 ) {
-  // @ts-expect-error upgrade typescript v4.9.5
   return new Promise<ESSearchResponse<{}, T, { restTotalHitsAsInt: false }>>(
     (resolve, reject) => {
       const search$ = dataStartPlugin.search

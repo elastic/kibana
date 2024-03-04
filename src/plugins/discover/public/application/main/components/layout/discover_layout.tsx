@@ -7,14 +7,7 @@
  */
 import './discover_layout.scss';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  EuiProgress,
-  useEuiBackgroundColor,
-  EuiDelayRender,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -88,10 +81,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
-    state.dataView!,
-    state.isDataViewLoading,
-  ]);
+  const dataView = useInternalStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -303,11 +293,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             height: 100%;
           `}
         >
-          {dataViewLoading && (
-            <EuiDelayRender delay={300}>
-              <EuiProgress size="xs" color="accent" position="absolute" />
-            </EuiDelayRender>
-          )}
           <SavedSearchURLConflictCallout
             savedSearch={savedSearch}
             spaces={spaces}

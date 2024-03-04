@@ -31,10 +31,8 @@ const errorsToString = (errors: ValidationError[]): string[] | null => {
 };
 
 export const useField = <T, FormType = FormData, I = T>(
-  // @ts-expect-error upgrade typescript v4.9.5
   form: FormHook<FormType>,
   path: string,
-  // @ts-expect-error upgrade typescript v4.9.5
   config: FieldConfig<T, FormType, I> & InternalFieldConfig<T>,
   valueChangeListener?: (value: I) => void,
   errorChangeListener?: (errors: string[] | null) => void,
@@ -233,7 +231,7 @@ export const useField = <T, FormType = FormData, I = T>(
       // -- helpers
       const doByPassValidation = ({
         type: validationType,
-        isBlocking, // @ts-expect-error upgrade typescript v4.9.5
+        isBlocking,
       }: ValidationConfig<FormType, string, I>) => {
         if (validationType !== undefined && validationType !== validationTypeToValidate) {
           return true;
@@ -248,7 +246,6 @@ export const useField = <T, FormType = FormData, I = T>(
 
       const enhanceValidationError = (
         validationError: ValidationError,
-        // @ts-expect-error upgrade typescript v4.9.5
         validation: ValidationConfig<FormType, string, I>,
         validationType: string
       ) => ({
@@ -278,7 +275,6 @@ export const useField = <T, FormType = FormData, I = T>(
           inflightValidation.current = validator({
             value: valueToValidate,
             errors: validationErrors,
-            // @ts-expect-error upgrade typescript v4.9.5
             form: { getFormData, getFields },
             formData,
             path,
@@ -322,7 +318,6 @@ export const useField = <T, FormType = FormData, I = T>(
           const validationResult = validator({
             value: valueToValidate,
             errors: validationErrors,
-            // @ts-expect-error upgrade typescript v4.9.5
             form: { getFormData, getFields },
             formData,
             path,

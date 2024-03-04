@@ -38,7 +38,6 @@ import {
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
-import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -98,13 +97,11 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
                     <PageHeader />
                     <EuiSpacer />
                     <ReloadContextProvider reload$={reload$}>
-                      <FilterQueryContextProvider>
-                        <ChangePointDetectionContextProvider>
-                          <ChangePointDetectionControlsContextProvider>
-                            <ChangePointDetectionPage />
-                          </ChangePointDetectionControlsContextProvider>
-                        </ChangePointDetectionContextProvider>
-                      </FilterQueryContextProvider>
+                      <ChangePointDetectionContextProvider>
+                        <ChangePointDetectionControlsContextProvider>
+                          <ChangePointDetectionPage />
+                        </ChangePointDetectionControlsContextProvider>
+                      </ChangePointDetectionContextProvider>
                     </ReloadContextProvider>
                   </DatePickerContextProvider>
                 </StorageContextProvider>

@@ -15,16 +15,14 @@
       font-weight: $euiFontWeightRegular;
     }
 
-    .optionsList__selections {
-      overflow: hidden !important;
-    }
-
-    .optionsList__filter {
+    .optionsList__filterValid {
       font-weight: $euiFontWeightMedium;
     }
 
     .optionsList__filterInvalid {
-      color: $euiColorWarningText;
+      color: $euiTextSubduedColor;
+      text-decoration: line-through;
+      font-weight: $euiFontWeightRegular;
     }
 
     .optionsList__negateLabel {
@@ -76,11 +74,12 @@
   }
 
   .optionsList-control-ignored-selection-title {
-    padding-left: $euiSizeM;
+    padding-left: $euiSizeS;
   }
 
   .optionsList__selectionInvalid {
-    color: $euiColorWarningText;
+    text-decoration: line-through;
+    color: $euiTextSubduedColor;
   }
 
   .optionslist--loadingMoreGroupLabel {

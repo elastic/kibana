@@ -19,15 +19,7 @@ type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
   toastContent?: string;
 };
 
-export const useCasesAddToNewCaseFlyout = ({
-  initialValue,
-  toastTitle,
-  toastContent,
-
-  afterCaseCreated,
-  onSuccess,
-  onClose,
-}: AddToNewCaseFlyoutProps = {}) => {
+export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) => {
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
 
@@ -45,13 +37,13 @@ export const useCasesAddToNewCaseFlyout = ({
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
-          initialValue,
+          ...props,
           attachments,
           headerContent,
           onClose: () => {
             closeFlyout();
-            if (onClose) {
-              return onClose();
+            if (props.onClose) {
+              return props.onClose();
             }
           },
           onSuccess: async (theCase: CaseUI) => {
@@ -59,34 +51,24 @@ export const useCasesAddToNewCaseFlyout = ({
               casesToasts.showSuccessAttach({
                 theCase,
                 attachments: attachments ?? [],
-                title: toastTitle,
-                content: toastContent,
+                title: props.toastTitle,
+                content: props.toastContent,
               });
             }
-            if (onSuccess) {
-              return onSuccess(theCase);
+            if (props.onSuccess) {
+              return props.onSuccess(theCase);
             }
           },
           afterCaseCreated: async (...args) => {
             closeFlyout();
-            if (afterCaseCreated) {
-              return afterCaseCreated(...args);
+            if (props.afterCaseCreated) {
+              return props.afterCaseCreated(...args);
             }
           },
         },
       });
     },
-    [
-      initialValue,
-      casesToasts,
-      closeFlyout,
-      dispatch,
-      toastTitle,
-      toastContent,
-      afterCaseCreated,
-      onSuccess,
-      onClose,
-    ]
+    [casesToasts, closeFlyout, dispatch, props]
   );
   return {
     open: openFlyout,

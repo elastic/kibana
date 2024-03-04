@@ -32,7 +32,7 @@ interface IntervalOptions {
   rate?: number;
 }
 
-export class Interval<TFields extends Fields = Fields> {
+export class Interval<TFields = Fields> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: unitOfTime.DurationConstructor;
 
@@ -63,7 +63,7 @@ export class Interval<TFields extends Fields = Fields> {
     return timestamps;
   }
 
-  *generator<TGeneratedFields extends Fields = TFields>(
+  *generator<TGeneratedFields = TFields>(
     map: (
       timestamp: number,
       index: number

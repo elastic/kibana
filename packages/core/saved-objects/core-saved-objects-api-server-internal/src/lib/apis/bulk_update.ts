@@ -262,7 +262,6 @@ export const performBulkUpdate = async <T>(
 
       const typeDefinition = registry.getType(type)!;
       const updatedAttributes = mergeForUpdate({
-        // @ts-expect-error upgrade typescript v4.9.5
         targetAttributes: {
           ...migrated!.attributes,
         },

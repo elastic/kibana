@@ -19,6 +19,10 @@ export interface TestData<T extends ApiVersion> {
   dataGenerator?: LogRateAnalysisDataGenerator;
   requestBody: AiopsLogRateAnalysisSchema<T>;
   expected: {
+    chunksLength: number;
+    chunksLengthGroupOnly: number;
+    actionsLength: number;
+    actionsLengthGroupOnly: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
     significantItems: SignificantItem[];

@@ -65,7 +65,6 @@ export interface EmbeddableFactory<
    */
   readonly isEditable: () => Promise<boolean>;
 
-  // @ts-expect-error upgrade typescript v4.9.5
   readonly savedObjectMetaData?: SavedObjectMetaData<TSavedObjectAttributes>;
 
   /**

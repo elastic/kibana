@@ -36,11 +36,12 @@ describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverle
     closeResponder();
   };
 
-  beforeEach(() => {
+  before(() => {
     login();
   });
 
-  describe('from Cases', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169894
+  describe.skip('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
@@ -50,7 +51,7 @@ describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverle
 
     const openCaseAlertDetails = () => {
       cy.getByTestSubj(`comment-action-show-alert-${caseAlertActions.comments[alertId]}`).click();
-      return cy.getByTestSubj('take-action-dropdown-btn').click();
+      cy.getByTestSubj('take-action-dropdown-btn').click();
     };
 
     before(() => {
@@ -97,6 +98,10 @@ describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverle
         // @ts-expect-error ignore setting to undefined
         alertData = undefined;
       }
+    });
+
+    beforeEach(() => {
+      login();
     });
 
     it('should display responder option in take action menu', () => {

@@ -13,7 +13,6 @@ import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { VisParams } from '../../common';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -62,7 +61,7 @@ describe('NewVisModal', () => {
     },
   ] as BaseVisType[];
   const visTypes: TypesStart = {
-    get<T extends VisParams>(id: string): BaseVisType<T> {
+    get<T>(id: string): BaseVisType<T> {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: () => _visTypes,

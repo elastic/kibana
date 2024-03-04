@@ -12,7 +12,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { lastValueFrom, Subscription, switchMap } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -28,7 +28,6 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
-  ControlGroupContainer,
   ControlInput,
   ControlOutput,
   RangeSliderEmbeddableInput,
@@ -82,7 +81,6 @@ export class RangeSliderEmbeddable
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
-  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -94,6 +92,7 @@ export class RangeSliderEmbeddable
   // Internal data fetching state for this input control.
   private dataView?: DataView;
   private field?: DataViewField;
+  private filters: Filter[] = [];
 
   // state management
   public select: RangeSliderReduxEmbeddableTools['select'];
@@ -110,7 +109,6 @@ export class RangeSliderEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent); // get filters for initial output...
-    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
@@ -128,23 +126,27 @@ export class RangeSliderEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
-
     this.initialize();
   }
 
   private initialize = async () => {
-    const [initialMin, initialMax] = this.getInput().value ?? [];
-    if (!isEmpty(initialMin) || !isEmpty(initialMax)) {
-      const filter = await this.buildFilter();
-      this.dispatch.publishFilters(filter);
+    const initialValue = this.getInput().value;
+    if (!initialValue) {
+      this.setInitializationFinished();
     }
-    this.setInitializationFinished();
 
-    this.runRangeSliderQuery()
-      .then(async () => {
-        this.setupSubscriptions();
-      })
-      .catch((e) => this.onLoadingError(e.message));
+    try {
+      await this.runRangeSliderQuery();
+      await this.buildFilter();
+    } catch (e) {
+      this.onLoadingError(e.message);
+    }
+
+    if (initialValue) {
+      this.setInitializationFinished();
+    }
+
+    this.setupSubscriptions();
   };
 
   private setupSubscriptions = () => {
@@ -159,22 +161,18 @@ export class RangeSliderEmbeddable
         filters: newInput.filters,
         query: newInput.query,
       })),
-      distinctUntilChanged(diffDataFetchProps)
+      distinctUntilChanged(diffDataFetchProps),
+      skip(1)
     );
 
-    const valueChangePipe = this.getInput$().pipe(
-      distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', '']))
-    );
-
+    // fetch available min/max when input changes
     this.subscriptions.add(
       dataFetchPipe
         .pipe(
-          switchMap(async () => {
+          switchMap(async (changes) => {
             try {
-              this.dispatch.setLoading(true);
               await this.runRangeSliderQuery();
-              await this.runValidations();
-              this.dispatch.setLoading(false);
+              await this.buildFilter();
             } catch (e) {
               this.onLoadingError(e.message);
             }
@@ -183,21 +181,13 @@ export class RangeSliderEmbeddable
         .subscribe()
     );
 
-    // publish filters when value changes
+    // build filters when value changes
     this.subscriptions.add(
-      valueChangePipe
+      this.getInput$()
         .pipe(
-          switchMap(async () => {
-            try {
-              this.dispatch.setLoading(true);
-              const rangeFilter = await this.buildFilter();
-              this.dispatch.publishFilters(rangeFilter);
-              await this.runValidations();
-              this.dispatch.setLoading(false);
-            } catch (e) {
-              this.onLoadingError(e.message);
-            }
-          })
+          distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
+          skip(1), // skip the first input update because initial filters will be built by initialize.
+          switchMap(this.buildFilter)
         )
         .subscribe()
     );
@@ -238,18 +228,39 @@ export class RangeSliderEmbeddable
   };
 
   private runRangeSliderQuery = async () => {
+    this.dispatch.setLoading(true);
+
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
+    const embeddableInput = this.getInput();
+    const { ignoreParentSettings, timeRange: globalTimeRange, timeslice } = embeddableInput;
+    let { filters = [] } = embeddableInput;
+
+    const timeRange =
+      timeslice !== undefined
+        ? {
+            from: new Date(timeslice[0]).toISOString(),
+            to: new Date(timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : globalTimeRange;
+    if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
+      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
+      if (timeFilter) {
+        filters = filters.concat(timeFilter);
+      }
+    }
+
+    this.filters = filters;
     const { min, max } = await this.fetchMinMax({
       dataView,
       field,
     });
 
-    batch(() => {
-      this.dispatch.setMinMax({ min, max });
-      this.dispatch.setDataViewId(dataView.id);
-      this.dispatch.setErrorMessage(undefined);
+    this.dispatch.setMinMax({
+      min,
+      max,
     });
   };
 
@@ -260,11 +271,15 @@ export class RangeSliderEmbeddable
     dataView: DataView;
     field: DataViewField;
   }): Promise<{ min?: number; max?: number }> => {
-    const { query } = this.getInput();
     const searchSource = await this.dataService.searchSource.create();
     searchSource.setField('size', 0);
     searchSource.setField('index', dataView);
-    searchSource.setField('filter', this.getGlobalFilters(dataView));
+
+    const { ignoreParentSettings, query } = this.getInput();
+
+    if (!ignoreParentSettings?.ignoreFilters) {
+      searchSource.setField('filter', this.filters);
+    }
 
     if (query) {
       searchSource.setField('query', query);
@@ -302,25 +317,40 @@ export class RangeSliderEmbeddable
 
   private buildFilter = async () => {
     const {
+      componentState: { min: availableMin, max: availableMax },
       explicitInput: { value },
     } = this.getState();
 
+    const { ignoreParentSettings, query } = this.getInput();
+
     const [selectedMin, selectedMax] = value ?? ['', ''];
-    const [min, max] = [selectedMin, selectedMax].map(parseFloat);
+    const hasData = availableMin !== undefined && availableMax !== undefined;
+    const hasLowerSelection = !isEmpty(selectedMin);
+    const hasUpperSelection = !isEmpty(selectedMax);
+    const hasEitherSelection = hasLowerSelection || hasUpperSelection;
 
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return [];
+    if (!dataView || !field) return;
 
-    if (isEmpty(selectedMin) && isEmpty(selectedMax)) return [];
+    if (!hasData || !hasEitherSelection) {
+      batch(() => {
+        this.dispatch.setLoading(false);
+        this.dispatch.setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection);
+        this.dispatch.setDataViewId(dataView.id);
+        this.dispatch.publishFilters([]);
+        this.dispatch.setErrorMessage(undefined);
+      });
+      return;
+    }
 
     const params = {} as RangeFilterParams;
 
     if (selectedMin) {
-      params.gte = min;
+      params.gte = Math.max(parseFloat(selectedMin), availableMin);
     }
 
     if (selectedMax) {
-      params.lte = max;
+      params.lte = Math.min(parseFloat(selectedMax), availableMax);
     }
 
     const rangeFilter = buildRangeFilter(field, params, dataView);
@@ -328,60 +358,11 @@ export class RangeSliderEmbeddable
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
 
-    return [rangeFilter];
-  };
-
-  private onLoadingError(errorMessage: string) {
-    batch(() => {
-      this.dispatch.setLoading(false);
-      this.dispatch.publishFilters([]);
-      this.dispatch.setErrorMessage(errorMessage);
-    });
-  }
-
-  private getGlobalFilters = (dataView: DataView) => {
-    const {
-      filters: globalFilters,
-      ignoreParentSettings,
-      timeRange: globalTimeRange,
-      timeslice,
-    } = this.getInput();
-
-    const filters: Filter[] = [];
-
-    if (!ignoreParentSettings?.ignoreFilters && globalFilters) {
-      filters.push(...globalFilters);
-    }
-
-    const timeRange =
-      timeslice !== undefined
-        ? {
-            from: new Date(timeslice[0]).toISOString(),
-            to: new Date(timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : globalTimeRange;
-
-    if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
-      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
-      if (timeFilter) filters.push(timeFilter);
-    }
-
-    return filters;
-  };
-
-  private runValidations = async () => {
-    const { dataView } = await this.getCurrentDataViewAndField();
-    if (!dataView) return;
     // Check if new range filter results in no data
-    const { ignoreParentSettings, query } = this.getInput();
-    if (ignoreParentSettings?.ignoreValidations) {
-      this.dispatch.setIsInvalid(false);
-    } else {
+    if (!ignoreParentSettings?.ignoreValidations) {
       const searchSource = await this.dataService.searchSource.create();
 
-      const { filters: rangeFilters = [] } = this.getOutput();
-      const filters = this.getGlobalFilters(dataView).concat(rangeFilters);
+      const filters = [...this.filters, rangeFilter];
 
       searchSource.setField('size', 0);
       searchSource.setField('index', dataView);
@@ -394,33 +375,43 @@ export class RangeSliderEmbeddable
       const total = resp?.rawResponse?.hits?.total;
 
       const docCount = typeof total === 'number' ? total : total?.value;
-
-      const {
-        explicitInput: { value },
-      } = this.getState();
-      this.reportInvalidSelections(
-        !value || (value[0] === '' && value[1] === '') ? false : !docCount // don't set the range slider invalid if it has no selections
-      );
+      if (!docCount) {
+        batch(() => {
+          this.dispatch.setLoading(false);
+          this.dispatch.setIsInvalid(true);
+          this.dispatch.setDataViewId(dataView.id);
+          this.dispatch.publishFilters([]);
+          this.dispatch.setErrorMessage(undefined);
+        });
+        return;
+      }
     }
-  };
 
-  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
-    this.dispatch.setIsInvalid(hasInvalidSelections);
-    this.parent?.reportInvalidSelections({
-      id: this.id,
-      hasInvalidSelections,
+    batch(() => {
+      this.dispatch.setLoading(false);
+      this.dispatch.setIsInvalid(false);
+      this.dispatch.setDataViewId(dataView.id);
+      this.dispatch.publishFilters([rangeFilter]);
+      this.dispatch.setErrorMessage(undefined);
     });
   };
+
+  private onLoadingError(errorMessage: string) {
+    batch(() => {
+      this.dispatch.setLoading(false);
+      this.dispatch.publishFilters([]);
+      this.dispatch.setErrorMessage(errorMessage);
+    });
+  }
 
   public clearSelections() {
     this.dispatch.setSelectedRange(['', '']);
   }
 
   public reload = async () => {
-    this.dispatch.setLoading(true);
     try {
       await this.runRangeSliderQuery();
-      this.dispatch.setLoading(false);
+      await this.buildFilter();
     } catch (e) {
       this.onLoadingError(e.message);
     }

@@ -168,7 +168,6 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.optInConfig$.next(optInConfigInstance);
   };
 
-  // @ts-expect-error upgrade typescript v4.9.5
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
     this.contextService.registerContextProvider(contextProviderOpts);
   };

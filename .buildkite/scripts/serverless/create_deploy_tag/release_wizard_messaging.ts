@@ -34,9 +34,9 @@ type StateNames =
   | 'wait_for_confirmation'
   | 'create_deploy_tag'
   | 'tag_created'
-  | 'trigger_gpctl'
   | 'end'
-  | 'error_generic';
+  | 'error_generic'
+  | string;
 
 interface StateShape {
   name: string;
@@ -117,20 +117,7 @@ const states: Record<StateNames, StateShape> = {
     name: 'Release tag created',
     description: 'The initial step release is completed, follow up jobs will be triggered soon.',
     instruction: `<h3>Deploy tag successfully created!</h3>`,
-    instructionStyle: 'success',
-    display: true,
-  },
-  trigger_gpctl: {
-    name: 'Triggering GPCTL deployment',
-    description: 'Triggering the GPCTL deployment for the release - sit back and relax.',
-    instruction: `GPCTL deployment triggered, follow the trigger step for more info.`,
-    instructionStyle: 'info',
-    display: true,
-  },
-  end: {
-    name: 'End of the release process',
-    description: 'The release process has ended.',
-    pre: async () => {
+    post: async () => {
       // The deployTag here is only for communication, if it's missing, it's not a big deal, but it's an error
       const deployTag =
         buildkite.getMetadata(DEPLOY_TAG_META_KEY) ||
@@ -141,7 +128,8 @@ const states: Record<StateNames, StateShape> = {
       buildkite.setAnnotation(
         WIZARD_CTX_INSTRUCTION,
         'success',
-        `<h3>Release successfully initiated!</h3>`
+        `<h3>Deploy tag successfully created!</h3><br/>
+Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}'>here on buildkite.</a>`
       );
 
       if (!selectedCommit) {
@@ -165,6 +153,12 @@ const states: Record<StateNames, StateShape> = {
         deployTag,
       });
     },
+    instructionStyle: 'success',
+    display: true,
+  },
+  end: {
+    name: 'End of the release process',
+    description: 'The release process has ended.',
     display: false,
   },
   error_generic: {
@@ -185,7 +179,7 @@ export async function main(args: string[]) {
   if (!args.includes('--state')) {
     throw new Error('Missing --state argument');
   }
-  const targetState = args.slice(args.indexOf('--state') + 1)[0] as StateNames;
+  const targetState = args.slice(args.indexOf('--state') + 1)[0];
 
   let data: any;
   if (args.includes('--data')) {
@@ -193,7 +187,7 @@ export async function main(args: string[]) {
   }
 
   const resultingTargetState = await transition(targetState, data);
-  if (resultingTargetState === 'trigger_gpctl') {
+  if (resultingTargetState === 'tag_created') {
     return await transition('end');
   } else {
     return resultingTargetState;
@@ -202,7 +196,7 @@ export async function main(args: string[]) {
 
 export async function transition(targetStateName: StateNames, data?: any) {
   // use the buildkite agent to find what state we are in:
-  const currentStateName = (buildkite.getMetadata('release_state') || 'start') as StateNames;
+  const currentStateName = buildkite.getMetadata('release_state') || 'start';
   const stateData = JSON.parse(buildkite.getMetadata('state_data') || '{}');
 
   if (!currentStateName) {
@@ -249,10 +243,10 @@ function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | 
     : `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
 
   const wizardSteps = Object.keys(states)
-    .filter((stateName) => states[stateName as StateNames].display)
-    .filter((stateName) => !(IS_AUTOMATED_RUN && states[stateName as StateNames].skipWhenAutomated))
+    .filter((stateName) => states[stateName].display)
+    .filter((stateName) => !(IS_AUTOMATED_RUN && states[stateName].skipWhenAutomated))
     .map((stateName) => {
-      const stateInfo = states[stateName as StateNames];
+      const stateInfo = states[stateName];
       const stateStatus = stateData[stateName];
       const stateEmoji = {
         ok: ':white_check_mark:',
@@ -277,7 +271,7 @@ ${wizardSteps.join('\n')}
 }
 
 function updateWizardInstruction(targetState: string, stateData: any) {
-  const { instructionStyle, instruction } = states[targetState as StateNames];
+  const { instructionStyle, instruction } = states[targetState];
 
   if (IS_AUTOMATED_RUN) {
     buildkite.setAnnotation(

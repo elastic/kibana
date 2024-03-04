@@ -35,7 +35,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
   }
 >`
-  .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
+  .kbnSolutionNav {
     background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 

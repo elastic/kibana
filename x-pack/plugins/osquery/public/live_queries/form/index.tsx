@@ -17,6 +17,7 @@ import {
   containsDynamicQuery,
   replaceParamsQuery,
 } from '../../../common/utils/replace_params_query';
+import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../../common';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import { useKibana } from '../../common/lib/kibana';
@@ -75,7 +76,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 }) => {
   const alertAttachmentContext = useContext(AlertAttachmentContext);
 
-  const { application } = useKibana().services;
+  const { application, appName } = useKibana().services;
   const permissions = application.capabilities.osquery;
   const canRunPacks = useMemo(
     () =>
@@ -330,7 +331,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </FormProvider>
 
       {showSavedQueryFlyout ? (
-        <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={serializedData} />
+        <SavedQueryFlyout
+          isExternal={appName !== OSQUERY_PLUGIN_NAME}
+          onClose={handleCloseSaveQueryFlyout}
+          defaultValue={serializedData}
+        />
       ) : null}
     </>
   );
