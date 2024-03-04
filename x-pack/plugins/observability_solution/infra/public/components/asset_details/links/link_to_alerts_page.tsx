@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { encode } from '@kbn/rison';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
