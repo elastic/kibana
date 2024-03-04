@@ -7,6 +7,7 @@
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 
+import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
@@ -38,7 +39,8 @@ let compatibleE5ModelId = E5_MODEL_ID;
  * @returns List of models
  */
 export const fetchMlModels = async (
-  trainedModelsProvider: MlTrainedModels | undefined
+  trainedModelsProvider: MlTrainedModels | undefined,
+  log: Logger
 ): Promise<MlModel[]> => {
   if (!trainedModelsProvider) {
     throw new Error('Machine Learning is not enabled');
@@ -82,7 +84,7 @@ export const fetchMlModels = async (
   // We must do this one by one because the API doesn't support fetching multiple models with include=definition_status
   const enrichmentCalls = models
     .filter((model) => model.isPromoted && !model.isPlaceholder && !model.hasStats)
-    .map((model) => enrichModelWithDownloadStatus(model, trainedModelsProvider));
+    .map((model) => enrichModelWithDownloadStatus(model, trainedModelsProvider, log));
   await Promise.all(enrichmentCalls);
 
   // Pin ELSER to the top, then E5 below, then the rest of the models sorted alphabetically
@@ -146,7 +148,11 @@ const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModel
   return model;
 };
 
-const enrichModelWithDownloadStatus = (model: MlModel, trainedModelsProvider: MlTrainedModels) => {
+const enrichModelWithDownloadStatus = (
+  model: MlModel,
+  trainedModelsProvider: MlTrainedModels,
+  log: Logger
+) => {
   return trainedModelsProvider
     .getTrainedModels({
       model_id: model.modelId,
@@ -161,6 +167,10 @@ const enrichModelWithDownloadStatus = (model: MlModel, trainedModelsProvider: Ml
           ? MlModelDeploymentState.NotDeployed
           : MlModelDeploymentState.Downloading;
       }
+    })
+    .catch((err) => {
+      // Log and swallow error
+      log.warn(`Failed to retrieve definition status of model ${model.modelId}: ${err}`);
     });
 };
 
