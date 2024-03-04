@@ -218,8 +218,13 @@ export class ControlGroupContainer extends Container<
           first()
         )
         .subscribe(async () => {
-          const { lastSavedInput } = this.getState().componentState;
-          const filterOutput = await this.calculateFiltersFromSelections(lastSavedInput.panels);
+          const {
+            componentState: { lastSavedInput },
+            explicitInput: { panels },
+          } = this.getState();
+          const filterOutput = await this.calculateFiltersFromSelections(
+            lastSavedInput?.panels ?? panels
+          );
           this.dispatch.setLastSavedFilters(filterOutput);
         })
     );

@@ -52,7 +52,7 @@ export interface ControlGroupSettings {
 }
 
 export type ControlGroupComponentState = ControlGroupSettings & {
-  lastSavedInput: PersistableControlGroupInput;
+  lastSavedInput?: PersistableControlGroupInput;
   lastSavedFilters?: ControlGroupFilterOutput;
   unpublishedFilters?: ControlGroupFilterOutput;
   controlWithInvalidSelectionsId?: string;
