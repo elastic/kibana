@@ -39,7 +39,6 @@ import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
-import { denormalizeActions } from '../../../../rules_client/lib/denormalize_actions';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -169,10 +168,14 @@ export async function createRule<Params extends RuleParams = never>(
     );
   }
 
+  const allActions = [...data.actions, ...(data.systemActions ?? [])];
   // Extract saved object references for this rule
-  const { references, params: updatedParams } = await withSpan(
-    { name: 'extractReferences', type: 'rules' },
-    () => extractReferences(context, ruleType, data.actions, validatedAlertTypeParams)
+  const {
+    references,
+    params: updatedParams,
+    actions,
+  } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
+    extractReferences(context, ruleType, allActions, validatedAlertTypeParams)
   );
 
   const createTime = Date.now();
@@ -181,13 +184,10 @@ export async function createRule<Params extends RuleParams = never>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
   const throttle = data.throttle ?? null;
 
-  const allActions = [...data.actions, ...(data.systemActions ?? [])];
-  const { actions: actionsWithRefs } = await denormalizeActions(context, allActions);
-
-  const { systemActions, actions, ...restData } = data;
+  const { systemActions, actions: actionToNotUse, ...restData } = data;
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
-    actionsWithRefs,
+    actionsWithRefs: actions,
     rule: {
       ...restData,
       // TODO (http-versioning) create a rule domain version of this function
@@ -210,6 +210,7 @@ export async function createRule<Params extends RuleParams = never>(
     },
     params: {
       legacyId,
+      // @ts-expect-error upgrade typescript v4.9.5
       paramsWithRefs: updatedParams,
     },
   });

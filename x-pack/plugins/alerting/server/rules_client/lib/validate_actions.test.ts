@@ -8,7 +8,7 @@
 import { validateActions, ValidateActionsData } from './validate_actions';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { AlertsFilter, RecoveredActionGroup, RuleAction, RuleNotifyWhen } from '../../../common';
-import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
+import { NormalizedAlertAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();

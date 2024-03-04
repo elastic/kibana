@@ -8,7 +8,7 @@
 import { SavedObjectReference } from '@kbn/core/server';
 import { RuleTypeParams } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { NormalizedAlertActionWithGeneratedValues } from '../types';
+import { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
 import { RulesClientContext } from '../types';
 import { denormalizeActions } from './denormalize_actions';
@@ -22,10 +22,11 @@ export async function extractReferences<
   ruleActions: NormalizedAlertActionWithGeneratedValues[],
   ruleParams: Params
 ): Promise<{
+  actions: DenormalizedAction[];
   params: ExtractedParams;
   references: SavedObjectReference[];
 }> {
-  const { references: actionReferences } = await denormalizeActions(context, ruleActions);
+  const { references: actionReferences, actions } = await denormalizeActions(context, ruleActions);
 
   // Extracts any references using configured reference extractor if available
   const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
@@ -43,6 +44,7 @@ export async function extractReferences<
   const references = [...actionReferences, ...paramReferences];
 
   return {
+    actions,
     params,
     references,
   };
