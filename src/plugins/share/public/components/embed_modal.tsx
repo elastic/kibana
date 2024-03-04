@@ -10,10 +10,10 @@ import {
   EuiButton,
   EuiCopy,
   EuiForm,
-  EuiFormHelpText,
   EuiFormRow,
   EuiModalFooter,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -84,20 +84,8 @@ export const EmbedModal = ({
     [urlParams]
   );
 
-  // const makeUrlEmbeddable = (tempUrl: string): string => {
-  //   const embedParam = '?embed=true';
-  //   const urlHasQueryString = tempUrl.indexOf('?') !== -1;
-
-  //   if (urlHasQueryString) {
-  //     return tempUrl.replace('?', `${embedParam}&`);
-  //   }
-
-  //   return `${tempUrl}${embedParam}`;
-  // };
-
   const updateUrlParams = useCallback(
     (tempUrl: string) => {
-      // tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
       tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
       return tempUrl;
     },
@@ -252,13 +240,13 @@ export const EmbedModal = ({
   return (
     <>
       <EuiForm>
-        <EuiSpacer size="s" />
-        <EuiFormHelpText>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
           <FormattedMessage
             id="share.embed.helpText"
             defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
           />
-        </EuiFormHelpText>
+        </EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
         <EuiSpacer />

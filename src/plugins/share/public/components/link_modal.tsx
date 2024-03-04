@@ -11,9 +11,9 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiForm,
-  EuiFormHelpText,
   EuiModalFooter,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -151,14 +151,14 @@ export const LinkModal = ({
   return (
     <>
       <EuiForm>
-        <EuiSpacer size="s" />
-        <EuiFormHelpText>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
           <FormattedMessage
             id="share.link.helpText"
             defaultMessage="Share a direct link to this {objectType}."
             values={{ objectType }}
           />
-        </EuiFormHelpText>
+        </EuiText>
         <EuiSpacer size="l" />
         <EuiCodeBlock whiteSpace="pre">{renderLink()}</EuiCodeBlock>
         <EuiSpacer />
