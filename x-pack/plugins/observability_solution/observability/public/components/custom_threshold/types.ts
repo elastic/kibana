@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -66,7 +66,7 @@ export interface AlertParams {
 }
 
 export interface InfraClientStartDeps {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
