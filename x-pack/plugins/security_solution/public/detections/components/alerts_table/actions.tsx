@@ -1027,6 +1027,7 @@ export const sendAlertToTimelineAction = async ({
             },
             getExceptionFilter
           );
+          // The Query field should remain unpopulated with the suppressed EQL alert.
         } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
           return createSuppressedTimeline(
             ecsData,
@@ -1097,6 +1098,7 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
+    // The Query field should remain unpopulated with the suppressed EQL alert.
   } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
