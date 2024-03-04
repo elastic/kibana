@@ -34,9 +34,7 @@ export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
 
   useMemo(() => {
     return tabs.find(({ id }) => id === selectedTabId);
-  }, []);
-
-  console.log(tabs);
+  }, [selectedTabId, tabs]);
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
@@ -63,7 +61,7 @@ export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
   );
 
   return (
-    // @ts-ignore
+    // @ts-ignore css prop in EuiModal
     <EuiModal css={{ width: '500px' }} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{renderTitle()}</EuiModalHeaderTitle>
