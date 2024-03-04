@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MetricsHostsAnomaly } from '../../../../../../../../common/http_api/infra_ml/results';
-import { formatOneDecimalPlace } from '../../../../../../../../common/log_analysis';
+import { MetricsHostsAnomaly } from '../../../../../common/http_api/infra_ml/results';
+import { formatOneDecimalPlace } from '../../../../../common/log_analysis';
 
 export const AnomalySummary = ({ anomaly }: { anomaly: MetricsHostsAnomaly }) => {
   const { actual, typical } = anomaly;
