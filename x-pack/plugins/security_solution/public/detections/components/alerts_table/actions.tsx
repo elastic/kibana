@@ -102,7 +102,6 @@ export const updateAlertStatusAction = async ({
       signalIds: alertIds,
     });
 
-    // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
     if (response.version_conflicts && alertIds.length === 1) {
