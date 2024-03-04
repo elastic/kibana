@@ -28,6 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
     await testSubjects.click('logsTab');
