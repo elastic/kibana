@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, FC } from 'react';
+import d3 from 'd3';
+import React, { useEffect, useMemo, useRef, useState, FC } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -209,6 +210,122 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     { reducer: streamReducer, initialState },
     { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
+
+  // jLouvain POC
+  const d3El = useRef(null);
+  const d3Init = useRef(false);
+  useEffect(() => {
+    console.log('data', data);
+    let force;
+    if (
+      d3Init.current === false &&
+      data.nodes.length > 0 &&
+      data.edges.length > 0 &&
+      d3El.current
+    ) {
+      d3Init.current = true;
+      console.log('RENDER?', d3El.current);
+      const d3Div = d3.select(d3El.current);
+
+      const width = 800;
+      const height = 400;
+
+      const original_node_data = d3.entries(data.nodes);
+      const original_edge_data = data.edges.map((d) => {
+        const updatedSource = original_node_data.find((n) => n.value === d.source);
+        const updatedTarget = original_node_data.find((n) => n.value === d.target);
+        if (!updatedSource || !updatedTarget) {
+          console.log('NOT FOUND !!!', JSON.stringify([d.source, d.target]));
+        }
+        d.source = updatedSource;
+        d.target = updatedTarget;
+        return d;
+      });
+      const max_weight = d3.max(original_edge_data, function (d) {
+        return d.weight;
+      });
+      const weight_scale = d3.scale.linear().domain([0, max_weight]).range([1, 5]);
+
+      force = d3.layout
+        .force()
+        .charge(-30)
+        .linkDistance(40)
+        .gravity(-0.01)
+        // .center(width / 2, height / 2)
+        .size([width, height]);
+
+      const svg = d3Div.append('svg').attr('width', width).attr('height', height);
+
+      console.log('original_node_data', original_node_data, original_edge_data);
+      force.nodes(original_node_data).links(original_edge_data);
+
+      const link = svg
+        .selectAll('.link')
+        .data(force.links())
+        .enter()
+        .append('line')
+        .attr('class', 'link')
+        .style('stroke-width', function (d) {
+          return weight_scale(d.weight);
+        })
+        .style('stroke', '#999')
+        .style('stroke-opacity', 0.6);
+
+      const color = d3.scale.category20().domain(d3.range([0, data.nodes.length]));
+
+      const node = svg
+        .selectAll('.node')
+        .data(force.nodes())
+        .enter()
+        .append('circle')
+        .attr('class', 'node')
+        .attr('r', 5)
+        // .style('fill', '#a30500')
+        .style('fill', function (d) {
+          // console.log('group', data.jLouvainResult[d.value]);
+          return color(data.jLouvainResult[d.value]);
+          return '#a30500';
+          // return color(d.);
+        })
+        .style('stroke', '#fff')
+        .style('stroke-width', '1.5px')
+        .call(force.drag);
+
+      force.on('tick', function () {
+        const nodes = force.nodes();
+        nodes[0].x = width / 2;
+        nodes[0].y = height / 2;
+
+        link
+          .attr('x1', function (d) {
+            return !isNaN(d.source.x) ? d.source.x : Math.random();
+          })
+          .attr('y1', function (d) {
+            return !isNaN(d.source.y) ? d.source.y : Math.random();
+          })
+          .attr('x2', function (d) {
+            return !isNaN(d.target.x) ? d.target.x : Math.random();
+          })
+          .attr('y2', function (d) {
+            return !isNaN(d.target.y) ? d.target.y : Math.random();
+          });
+
+        node
+          .attr('cx', function (d) {
+            return !isNaN(d.x) ? d.x : Math.random();
+          })
+          .attr('cy', function (d) {
+            return !isNaN(d.y) ? d.y : Math.random();
+          });
+      });
+
+      force.start();
+    }
+
+    return () => {
+      force && force.stop();
+    };
+  }, [data.nodes, data.edges, d3El.current]);
 
   const { significantItems, zeroDocsFallback } = data;
 
@@ -459,17 +576,22 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         }
       >
         {showLogRateAnalysisResultsTable && groupResults ? (
-          <LogRateAnalysisResultsGroupsTable
-            significantItems={data.significantItems}
-            groupTableItems={groupTableItems}
-            loading={isRunning}
-            dataView={dataView}
-            timeRangeMs={timeRangeMs}
-            searchQuery={searchQuery}
-            barColorOverride={barColorOverride}
-            barHighlightColorOverride={barHighlightColorOverride}
-            zeroDocsFallback={zeroDocsFallback}
-          />
+          <>
+            <div css={{ width: '800px', height: '400px' }} ref={d3El}>
+              jLouvain
+            </div>
+            <LogRateAnalysisResultsGroupsTable
+              significantItems={data.significantItems}
+              groupTableItems={groupTableItems}
+              loading={isRunning}
+              dataView={dataView}
+              timeRangeMs={timeRangeMs}
+              searchQuery={searchQuery}
+              barColorOverride={barColorOverride}
+              barHighlightColorOverride={barHighlightColorOverride}
+              zeroDocsFallback={zeroDocsFallback}
+            />
+          </>
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
           <LogRateAnalysisResultsTable

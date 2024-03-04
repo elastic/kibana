@@ -34,20 +34,34 @@ export function getSignificantItemGroups(
 } {
   console.log('itemsets', itemsets);
 
-  const nodeData: string[] = significantItems.map((d) => d.key);
+  const nodeData: string[] = significantItems.map((d) => `${d.fieldName}:${d.fieldValue}`);
   const edgeData: Edge[] = [];
 
-  for (const itemSet of itemsets) {
+  for (const [itemSetIndex, itemSet] of itemsets.entries()) {
     const itemNames = itemSet.set.map((d) => `${d.fieldName}:${d.fieldValue}`);
-    for (const source of itemNames) {
-      for (const target of itemNames) {
-        const sourceTargetExists = edgeData.some(
-          (d) =>
-            (d.source === source && d.target === target) ||
-            (d.source === target && d.target === source)
-        );
-        if (source !== target && !sourceTargetExists) {
-          edgeData.push({ source, target, weight: itemSet.doc_count });
+
+    if (itemNames.length === 2) {
+      const source = itemNames[0];
+      const target = itemNames[1];
+      const sourceTargetExists = edgeData.some(
+        (d) =>
+          (d.source === source && d.target === target) ||
+          (d.source === target && d.target === source)
+      );
+      if (source !== target && !sourceTargetExists) {
+        edgeData.push({ source, target, weight: itemSet.doc_count });
+      }
+    } else {
+      for (const source of itemNames) {
+        for (const target of itemNames) {
+          const sourceTargetExists = edgeData.some(
+            (d) =>
+              (d.source === source && d.target === target) ||
+              (d.source === target && d.target === source)
+          );
+          if (source !== target && !sourceTargetExists) {
+            edgeData.push({ source, target, weight: itemSet.doc_count });
+          }
         }
       }
     }

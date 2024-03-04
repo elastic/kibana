@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Communities, Edge } from 'jlouvain';
+
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
@@ -13,6 +15,9 @@ interface StreamState {
   ccsWarning: boolean;
   significantItems: SignificantItem[];
   significantItemsGroups: SignificantItemGroup[];
+  nodes: string[];
+  edges: Edge[];
+  jLouvainResult: Communities;
   errors: string[];
   loaded: number;
   loadingState: string;
@@ -25,6 +30,9 @@ export const initialState: StreamState = {
   ccsWarning: false,
   significantItems: [],
   significantItemsGroups: [],
+  nodes: [],
+  edges: [],
+  jLouvainResult: {},
   errors: [],
   loaded: 0,
   loadingState: '',
@@ -76,6 +84,8 @@ export function streamReducer(
       return { ...state, ...action.payload };
     case API_ACTION_NAME.SET_ZERO_DOCS_FALLBACK:
       return { ...state, zeroDocsFallback: action.payload };
+    case API_ACTION_NAME.JLOUVAIN:
+      return { ...state, ...action.payload };
     default:
       return state;
   }

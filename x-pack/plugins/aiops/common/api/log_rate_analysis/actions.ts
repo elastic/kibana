@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Communities, Edge } from 'jlouvain';
+
 import type {
   SignificantItem,
   SignificantItemHistogram,
@@ -38,6 +40,7 @@ export const API_ACTION_NAME = {
   RESET_GROUPS: 'reset_groups',
   SET_ZERO_DOCS_FALLBACK: 'set_zero_docs_fallback',
   UPDATE_LOADING_STATE: 'update_loading_state',
+  JLOUVAIN: 'jlouvain',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
@@ -225,6 +228,18 @@ export function setZeroDocsFallback(
   };
 }
 
+interface ApiActionJLouvain {
+  type: typeof API_ACTION_NAME.JLOUVAIN;
+  payload: { nodes: string[]; edges: Edge[]; jLouvainResult: Communities };
+}
+
+export function setJLouvain(payload: ApiActionJLouvain['payload']): ApiActionJLouvain {
+  return {
+    type: API_ACTION_NAME.JLOUVAIN,
+    payload,
+  };
+}
+
 export type AiopsLogRateAnalysisApiAction<T extends ApiVersion> =
   | ApiActionAddSignificantItems<T>
   | ApiActionAddSignificantItemsGroup<T>
@@ -236,4 +251,5 @@ export type AiopsLogRateAnalysisApiAction<T extends ApiVersion> =
   | ApiActionResetErrors
   | ApiActionResetGroups
   | ApiActionUpdateLoadingState
-  | ApiActionSetZeroDocsFallback;
+  | ApiActionSetZeroDocsFallback
+  | ApiActionJLouvain;

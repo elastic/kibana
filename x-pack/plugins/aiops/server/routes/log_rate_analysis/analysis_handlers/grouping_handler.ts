@@ -136,7 +136,7 @@ export const groupingHandlerFactory =
 
         if (maxItems > 1) {
           responseStream.push({
-            type: 'jLouvain',
+            type: 'jlouvain',
             payload: { nodes, edges, jLouvainResult },
           });
           responseStream.push(addSignificantItemsGroupAction(significantItemGroups, version));
