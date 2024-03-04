@@ -34,7 +34,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildDestination(),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
-      this.buildSettings(slo)
+      this.buildSettings(slo, 'event.ingested')
     );
   }
 
@@ -46,9 +46,9 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     const hasTags =
       !indicator.params.tags?.find((param) => param.value === ALL_VALUE) &&
       indicator.params.tags?.length;
-    const hasProjects = !indicator.params.projects?.find(
-      (param) => param.value === ALL_VALUE && indicator.params.projects?.length
-    );
+    const hasProjects =
+      !indicator.params.projects?.find((param) => param.value === ALL_VALUE) &&
+      indicator.params.projects?.length;
     // These groupBy fields must match the fields from the source query, otherwise
     // the transform will create permutations for each value present in the source.
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
