@@ -7,7 +7,7 @@
  */
 
 import type {
-  IndexMapping,
+  IndexMappingMeta,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { buildActiveMappings, getBaseMappings } from './build_active_mappings';
@@ -65,29 +65,22 @@ describe('buildActiveMappings', () => {
       ccc: { fields: { b: { type: 'text' }, a: { type: 'text' } }, type: 'keyword' },
     } as const;
 
-    const someOverrideMappings: Partial<IndexMapping> = {
-      dynamic: true, // just to illustrate override works, not something we want to do
-      _meta: {
-        mappingVersions: {
-          foo: '10.1.0',
-          bar: '10.2.0',
-          baz: '10.3.0',
-        },
-        docVersions: {
-          foo: '10.1.0',
-          bar: '10.2.0',
-          baz: '10.3.0',
-        },
+    const ourExternallyBuiltMeta: IndexMappingMeta = {
+      mappingVersions: {
+        foo: '10.1.0',
+        bar: '10.2.0',
+        baz: '10.3.0',
       },
-      properties: {
-        // this illustrates that we cannot override properties
-        ddd: { type: 'keyword', fields: { a: { type: 'keyword' }, b: { type: 'text' } } },
+      docVersions: {
+        foo: '10.1.0',
+        bar: '10.2.0',
+        baz: '10.3.0',
       },
     };
 
-    const mappings = buildActiveMappings(properties, someOverrideMappings);
+    const mappings = buildActiveMappings(properties, ourExternallyBuiltMeta);
     expect(mappings.dynamic).toEqual(true);
-    expect(mappings._meta).toEqual(someOverrideMappings._meta);
+    expect(mappings._meta).toEqual(ourExternallyBuiltMeta);
     expect(mappings.properties.ddd).toBeUndefined();
   });
 });

@@ -94,8 +94,8 @@ export const nextActionMap = (
       Actions.updateSourceMappingsProperties({
         client,
         sourceIndex: sourceIndex.value,
-        sourceMappings: sourceIndexMappings.value,
-        targetMappings: targetIndexMappings,
+        indexMappings: sourceIndexMappings.value,
+        appMappings: targetIndexMappings,
         hashToVersionMap,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>

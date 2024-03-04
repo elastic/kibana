@@ -24,7 +24,7 @@ describe('updateSourceMappingsProperties', () => {
     params = {
       client,
       sourceIndex: '.kibana_8.7.0_001',
-      sourceMappings: {
+      indexMappings: {
         properties: {
           a: { type: 'keyword' },
           b: { type: 'long' },
@@ -37,7 +37,7 @@ describe('updateSourceMappingsProperties', () => {
           },
         },
       },
-      targetMappings: {
+      appMappings: {
         properties: {
           a: { type: 'keyword' },
           c: { type: 'long' },
@@ -58,7 +58,7 @@ describe('updateSourceMappingsProperties', () => {
   });
 
   it('should not update mappings when there are no changes', async () => {
-    const sameMappingsParams = chain(params).set('targetMappings', params.sourceMappings).value();
+    const sameMappingsParams = chain(params).set('targetMappings', params.indexMappings).value();
     const result = await updateSourceMappingsProperties(sameMappingsParams)();
 
     expect(client.indices.putMapping).not.toHaveBeenCalled();

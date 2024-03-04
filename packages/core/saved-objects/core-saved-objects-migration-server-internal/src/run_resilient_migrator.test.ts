@@ -18,7 +18,11 @@ import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
 import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
-import { indexTypesMapMock, savedObjectTypeRegistryMock } from './run_resilient_migrator.fixtures';
+import {
+  hashToVersionMapMock,
+  indexTypesMapMock,
+  savedObjectTypeRegistryMock,
+} from './run_resilient_migrator.fixtures';
 import type { InitState, State } from './state';
 import type { Next } from './state_action_machine';
 
@@ -118,6 +122,7 @@ const mockOptions = (): RunResilientMigratorParams => {
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
     indexTypesMap: indexTypesMapMock,
+    hashToVersionMap: hashToVersionMapMock,
     targetIndexMappings: {
       properties: {
         a: { type: 'keyword' },
