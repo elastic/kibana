@@ -13,11 +13,11 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { SloTagsList } from '../common/slo_tags_list';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { LoadingBadges } from '../badges/slo_badges';
-import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SLOCardItemInstanceBadge } from './slo_card_item_instance_badge';
 
 interface Props {
   hasGroupBy: boolean;
@@ -51,7 +51,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
         ) : (
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
-            <SloIndicatorTypeBadge slo={slo} color="default" />
+            <SLOCardItemInstanceBadge slo={slo} />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />
             <SloTagsList

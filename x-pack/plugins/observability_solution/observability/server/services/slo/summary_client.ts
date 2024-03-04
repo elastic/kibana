@@ -16,23 +16,50 @@ import {
 } from '@kbn/slo-schema';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { DateRange, SLO, Summary } from '../../domain/models';
+import { DateRange, SLO, Summary, Groupings } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
+import { getFlattenedGroupings } from './utils';
 
 export interface SummaryClient {
-  computeSummary(slo: SLO, instanceId?: string): Promise<Summary>;
+  computeSummary(
+    slo: SLO,
+    groupings?: string,
+    instanceId?: string
+  ): Promise<{ summary: Summary; groupings: Groupings }>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async computeSummary(slo: SLO, instanceId: string = ALL_VALUE): Promise<Summary> {
+  async computeSummary(
+    slo: SLO,
+    instanceId: string = ALL_VALUE
+  ): Promise<{ summary: Summary; groupings: Groupings }> {
     const dateRange = toDateRange(slo.timeWindow);
-    const isDefinedWithGroupBy = slo.groupBy !== ALL_VALUE;
+    const isDefinedWithGroupBy = ![slo.groupBy].flat().includes(ALL_VALUE);
     const hasInstanceId = instanceId !== ALL_VALUE;
-    const extraInstanceIdFilter =
-      isDefinedWithGroupBy && hasInstanceId ? [{ term: { 'slo.instanceId': instanceId } }] : [];
+    const includeInstanceIdQueries = isDefinedWithGroupBy && hasInstanceId;
+    const extraInstanceIdFilter = includeInstanceIdQueries
+      ? [{ term: { 'slo.instanceId': instanceId } }]
+      : [];
+    const extraGroupingsAgg = {
+      last_doc: {
+        top_hits: {
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+          _source: {
+            includes: ['slo.groupings'],
+          },
+          size: 1,
+        },
+      },
+    };
 
     const result = await this.esClient.search({
       index: SLO_DESTINATION_INDEX_PATTERN,
@@ -51,28 +78,30 @@ export class DefaultSummaryClient implements SummaryClient {
           ],
         },
       },
-      ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-        aggs: {
-          good: { sum: { field: 'slo.numerator' } },
-          total: { sum: { field: 'slo.denominator' } },
-        },
-      }),
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-        aggs: {
+      // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
+      aggs: {
+        ...(includeInstanceIdQueries && extraGroupingsAgg),
+        ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
           good: {
             sum: { field: 'slo.isGoodSlice' },
           },
           total: {
             value_count: { field: 'slo.isGoodSlice' },
           },
-        },
-      }),
+        }),
+        ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+          good: { sum: { field: 'slo.numerator' } },
+          total: { sum: { field: 'slo.denominator' } },
+        }),
+      },
     });
 
     // @ts-ignore value is not type correctly
     const good = result.aggregations?.good?.value ?? 0;
     // @ts-ignore value is not type correctly
     const total = result.aggregations?.total?.value ?? 0;
+    // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
+    const groupings = result.aggregations?.last_doc?.hits?.hits?.[0]?._source?.slo?.groupings;
 
     const sliValue = computeSLI(good, total);
     const initialErrorBudget = 1 - slo.objective.target;
@@ -100,9 +129,12 @@ export class DefaultSummaryClient implements SummaryClient {
     }
 
     return {
-      sliValue,
-      errorBudget,
-      status: computeSummaryStatus(slo, sliValue, errorBudget),
+      summary: {
+        sliValue,
+        errorBudget,
+        status: computeSummaryStatus(slo, sliValue, errorBudget),
+      },
+      groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
     };
   }
 }

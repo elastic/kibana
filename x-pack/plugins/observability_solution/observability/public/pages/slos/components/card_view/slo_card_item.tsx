@@ -58,7 +58,13 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
 };
 
 export const getSubTitle = (slo: SLOWithSummaryResponse) => {
-  return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
+  return getFirstGroupBy(slo);
+};
+
+const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
+  const firstGroupBy = Object.entries(slo.groupings).map(([key, value]) => `${key}: ${value}`)[0];
+
+  return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
