@@ -225,6 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline Create pipeline step'
         );
+        // @ts-expect-error pipeline._meta is declared as mandatory
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
           description: modelWithoutPipelineDataExpectedValues.description,
           processors: [
@@ -286,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline Create pipeline step'
         );
+        // @ts-expect-error pipeline._meta is declared as mandatory
         await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
           description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
           processors: [
