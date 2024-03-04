@@ -43,6 +43,12 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private buildGroupBy(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
+    const hasTags =
+      !indicator.params.tags?.find((param) => param.value === ALL_VALUE) &&
+      indicator.params.tags?.length;
+    const hasProjects = !indicator.params.projects?.find(
+      (param) => param.value === ALL_VALUE && indicator.params.projects?.length
+    );
     // These groupBy fields must match the fields from the source query, otherwise
     // the transform will create permutations for each value present in the source.
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
@@ -51,10 +57,10 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       'monitor.id': { terms: { field: 'monitor.id' } },
       'observer.name': { terms: { field: 'observer.name' } },
       config_id: { terms: { field: 'config_id' } },
-      ...(!indicator.params.tags?.find((param) => param.value === ALL_VALUE) && {
+      ...(hasTags && {
         tags: { terms: { field: 'tags' } },
       }),
-      ...(!indicator.params.projects?.find((param) => param.value === ALL_VALUE) && {
+      ...(hasProjects && {
         'monitor.project.id': { terms: { field: 'monitor.project.id' } },
       }),
     };
@@ -94,7 +100,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       projects: indicator.params.projects || [],
     });
 
-    if (!monitorIds.includes(ALL_VALUE)) {
+    if (!monitorIds.includes(ALL_VALUE) && monitorIds.length) {
       queryFilter.push({
         terms: {
           'monitor.id': monitorIds,
@@ -102,7 +108,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       });
     }
 
-    if (!tags.includes(ALL_VALUE)) {
+    if (!tags.includes(ALL_VALUE) && tags.length) {
       queryFilter.push({
         terms: {
           tags,
@@ -110,7 +116,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       });
     }
 
-    if (!projects.includes(ALL_VALUE)) {
+    if (!projects.includes(ALL_VALUE) && projects.length) {
       queryFilter.push({
         terms: {
           'monitor.project.id': projects,

@@ -41,6 +41,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="column" gutterSize="l">
         <FieldSelector
+          required
           allowAllOption
           label={i18n.translate('xpack.observability.slo.sloEdit.syntheticsAvailability.monitor', {
             defaultMessage: 'Monitor name',

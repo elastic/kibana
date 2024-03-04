@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { OptionalText } from '../common/optional_text';
 import {
   useFetchSyntheticsSuggestions,
   Suggestion,
@@ -32,6 +33,7 @@ export interface Props {
   tooltip?: ReactNode;
   suggestions?: Suggestion[];
   isLoading?: boolean;
+  required?: boolean;
   filters: Record<string, string[]>;
 }
 
@@ -43,6 +45,7 @@ export function FieldSelector({
   name,
   placeholder,
   tooltip,
+  required,
   filters,
 }: Props) {
   const { control, getFieldState } =
@@ -80,12 +83,13 @@ export function FieldSelector({
         }
         isInvalid={getFieldState(name).invalid}
         fullWidth
+        labelAppend={!required ? <OptionalText /> : undefined}
       >
         <Controller
           defaultValue=""
           name={name}
           control={control}
-          rules={{ required: true }}
+          rules={{ required }}
           render={({ field, fieldState }) => (
             <EuiComboBox
               {...field}

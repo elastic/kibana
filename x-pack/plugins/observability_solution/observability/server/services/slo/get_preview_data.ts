@@ -473,15 +473,15 @@ export class GetPreviewData {
       tags: indicator.params.tags || [],
       projects: indicator.params.projects || [],
     });
-    if (!monitorIds.includes(ALL_VALUE))
+    if (!monitorIds.includes(ALL_VALUE) && monitorIds.length > 0)
       filter.push({
         terms: { 'monitor.id': monitorIds },
       });
-    if (!tags.includes(ALL_VALUE))
+    if (!tags.includes(ALL_VALUE) && tags.length > 0)
       filter.push({
         terms: { tags },
       });
-    if (!projects.includes(ALL_VALUE))
+    if (!projects.includes(ALL_VALUE) && projects.length > 0)
       filter.push({
         terms: { 'monitor.project.id': projects },
       });
