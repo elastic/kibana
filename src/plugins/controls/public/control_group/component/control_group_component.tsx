@@ -43,25 +43,27 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { ControlGroupStrings } from '../control_group_strings';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = controlGroup.select((state) => state.explicitInput.panels);
-  const viewMode = controlGroup.select((state) => state.explicitInput.viewMode);
-  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
-  const showApplySelections = controlGroup.select(
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const showApplySelections = controlGroupSelector(
     (state) => state.explicitInput.showApplySelections
   );
-
-  const showAddButton = controlGroup.select((state) => state.componentState.showAddButton);
-  const unpublishedFilters = controlGroup.select(
+  const showAddButton = controlGroupSelector((state) => state.componentState.showAddButton);
+  const unpublishedFilters = controlGroupSelector(
     (state) => state.componentState.unpublishedFilters
   );
-  const controlWithInvalidSelectionsId = controlGroup.select(
+  const controlWithInvalidSelectionsId = controlGroupSelector(
     (state) => state.componentState.controlWithInvalidSelectionsId
   );
 

@@ -14,13 +14,14 @@ import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { Provider } from 'react-redux';
 import { OptionsListEmbeddableFactory } from '../..';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../../../common';
 import { mockControlGroupContainer, mockControlGroupInput } from '../../../common/mocks';
 import { RangeSliderEmbeddableFactory } from '../../range_slider';
 import { pluginServices } from '../../services';
 import { ControlGroupContainerContext } from '../embeddable/control_group_container';
-import { ControlGroupInput, ControlGroupComponentState } from '../types';
+import { ControlGroupComponentState, ControlGroupInput } from '../types';
 import { ControlGroup } from './control_group_component';
 
 jest.mock('@dnd-kit/core', () => ({
@@ -59,9 +60,20 @@ describe('Control group component', () => {
     );
 
     const controlGroupComponent = render(
-      <ControlGroupContainerContext.Provider value={controlGroupContainer}>
-        <ControlGroup />
-      </ControlGroupContainerContext.Provider>
+      <Provider
+        // this store is ugly, but necessary because we are using controlGroupSelector rather than controlGroup.select
+        store={
+          {
+            subscribe: controlGroupContainer.onStateChange,
+            getState: controlGroupContainer.getState,
+            dispatch: jest.fn(),
+          } as any
+        }
+      >
+        <ControlGroupContainerContext.Provider value={controlGroupContainer}>
+          <ControlGroup />
+        </ControlGroupContainerContext.Provider>
+      </Provider>
     );
 
     await waitFor(() => {

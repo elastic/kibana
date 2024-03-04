@@ -14,7 +14,7 @@ import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
+import { controlGroupSelector } from '../embeddable/control_group_container';
 
 interface DragInfo {
   isOver?: boolean;
@@ -68,14 +68,8 @@ const SortableControlInner = forwardRef<
     { embeddableId, embeddableType, dragInfo, style, isEditable, ...dragHandleProps },
     dragHandleRef
   ) => {
-    const controlGroup = useControlGroupContainer();
-
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
-    const panels = controlGroup.select((state) => state.explicitInput.panels);
-
-    if (Object.keys(panels).length === 0) {
-      return null;
-    }
+    const panels = controlGroupSelector((state) => state.explicitInput.panels);
 
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
@@ -127,10 +121,8 @@ const SortableControlInner = forwardRef<
  * can be quite cumbersome.
  */
 export const ControlClone = ({ draggingId }: { draggingId: string }) => {
-  const controlGroup = useControlGroupContainer();
-
-  const panels = controlGroup.select((state) => state.explicitInput.panels);
-  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
 
   const width = panels[draggingId].width;
   const title = panels[draggingId].explicitInput.title;

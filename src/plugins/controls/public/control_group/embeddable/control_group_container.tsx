@@ -10,7 +10,7 @@ import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/e
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { batch, Provider } from 'react-redux';
+import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, first, skip } from 'rxjs/operators';
 
@@ -66,6 +66,7 @@ export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
 };
 
 export const ControlGroupContainerContext = createContext<ControlGroupContainer | null>(null);
+export const controlGroupSelector = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 export const useControlGroupContainer = (): ControlGroupContainer => {
   const controlGroup = useContext<ControlGroupContainer | null>(ControlGroupContainerContext);
   if (controlGroup == null) {
