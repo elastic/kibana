@@ -44,7 +44,7 @@ export const createOpenInDiscoverAction = (
         hasDiscoverAccess,
         locator,
         dataViews,
-        ...context,
+        embeddable: context.embeddable,
       });
     },
     execute: async (context: EmbeddableApiContext) => {
