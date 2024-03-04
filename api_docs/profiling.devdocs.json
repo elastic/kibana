@@ -17,7 +17,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/profiling/public/plugin.tsx",
+      "path": "x-pack/plugins/observability_solution/profiling/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -40,7 +40,7 @@
         "signature": [
           "{ readonly telemetry?: boolean | undefined; readonly host?: string | undefined; readonly tls_enabled?: boolean | undefined; readonly tls_supported_protocols?: string[] | undefined; readonly tls_certificate_path?: string | undefined; readonly tls_key_path?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/profiling/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -55,7 +55,7 @@
         "signature": [
           "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; readonly symbolizer?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly collector?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly enabled: boolean; }"
         ],
-        "path": "x-pack/plugins/profiling/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -69,7 +69,7 @@
       "tags": [],
       "label": "ProfilingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/profiling/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/profiling/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -83,7 +83,7 @@
       "tags": [],
       "label": "ProfilingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/profiling/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/profiling/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -104,7 +104,7 @@
         "signature": [
           "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; StorageExplorerSummary: string; StorageExplorerHostStorageDetails: string; StorageExplorerIndicesStorageDetails: string; }"
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -121,7 +121,7 @@
         "signature": [
           "(request: any) => [number, number]"
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,7 +135,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/profiling/common/index.ts",
+            "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,7 +158,7 @@
         "signature": [
           "\"profiling-events-all\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -173,7 +173,7 @@
         "signature": [
           "\"profiling-executables\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -188,7 +188,7 @@
         "signature": [
           "\"profiling-stackframes\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -203,7 +203,7 @@
         "signature": [
           "\"profiling-stacktraces\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -215,7 +215,7 @@
         "tags": [],
         "label": "NOT_AVAILABLE_LABEL",
         "description": [],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -230,7 +230,7 @@
         "signature": [
           "\"profiling\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -245,7 +245,7 @@
         "signature": [
           "\"profiling\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
