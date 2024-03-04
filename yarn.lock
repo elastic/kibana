@@ -1743,10 +1743,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.1.1":
-  version "93.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.1.1.tgz#03c9667456664978c3477abef52afd6aceb48ebf"
-  integrity sha512-YnmNST8PmgAyeahDFTUTpToiBAc6gOyK/RSSqx6NTxCmUCwXnV7Oog9TUHlQ8tYGLjfFXrAja6Msy0X2VuxHOA==
+"@elastic/eui@93.2.0":
+  version "93.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.2.0.tgz#ebe74c4aefcf78cd72a8db7332666a7aa0681954"
+  integrity sha512-YPJM+hs1Ouv7Fc04JZiEOT5nCNBMFKsQwKmmGqzEwpMDsXpx6NKT0s0AlRO43JabTWBHL9yIRE4aORhAzH6pBQ==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -3216,11 +3216,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/apm_data_access":
+"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/apm":
+"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
   version "0.0.0"
   uid ""
 
@@ -4364,7 +4364,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -4912,7 +4912,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/infra":
+"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
   version "0.0.0"
   uid ""
 
@@ -5356,11 +5356,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-plugin@link:x-pack/plugins/observability":
+"@kbn/observability-plugin@link:x-pack/plugins/observability_solution/observability":
   version "0.0.0"
   uid ""
 
@@ -6216,7 +6216,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
   version "0.0.0"
   uid ""
 
@@ -6432,7 +6432,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/uptime":
+"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
   version "0.0.0"
   uid ""
 
@@ -30080,10 +30080,10 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@4.7.4, typescript@^3.3.3333, typescript@^4.6.3, typescript@^5.0.4:
-  version "4.7.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
-  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
+typescript@4.9.5, typescript@^3.3.3333, typescript@^4.6.3, typescript@^5.0.4:
+  version "4.9.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
+  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 typewise-core@^1.2, typewise-core@^1.2.0:
   version "1.2.0"

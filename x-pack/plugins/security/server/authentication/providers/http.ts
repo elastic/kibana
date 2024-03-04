@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
+import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -86,7 +87,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     if (!this.supportedSchemes.has(authorizationHeader.scheme.toLowerCase())) {
-      this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
+      this.logger.warn(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
 
@@ -115,7 +116,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request to ${request.url.pathname}${request.url.search} via authorization header with "${authorizationHeader.scheme}" scheme: ${err.message}`
+        `Failed to authenticate request to ${request.url.pathname} via authorization header with "${
+          authorizationHeader.scheme
+        }" scheme: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
