@@ -420,7 +420,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           apiKeyRecord.name.indexOf('Alerting: ') === 0 ||
           apiKeyRecord.metadata?.managed === true
         ) {
-          console.log(apiKeyRecord);
           keyType = 'managed';
         }
         return <ApiKeyBadge type={keyType} />;
