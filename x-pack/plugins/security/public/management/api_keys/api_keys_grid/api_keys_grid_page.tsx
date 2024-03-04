@@ -414,7 +414,17 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         />
       ),
       sortable: true,
-      render: (type: CategorizedApiKey['type']) => <ApiKeyBadge type={type} />,
+      render: (type: CategorizedApiKey['type'], apiKeyRecord) => {
+        let keyType = type;
+        if (
+          apiKeyRecord.name.indexOf('Alerting: ') === 0 ||
+          apiKeyRecord.metadata?.managed === true
+        ) {
+          console.log(apiKeyRecord);
+          keyType = 'managed';
+        }
+        return <ApiKeyBadge type={keyType} />;
+      },
     }
   );
 
