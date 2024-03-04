@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.sli-v4,.slo-observability.sli-v3*"',
+              index: '.slo-observability.sli-v4',
               pipeline: '.slo-observability.sli.pipeline-v4',
             },
             frequency: '1m',
@@ -218,6 +218,24 @@ export default function ({ getService }: FtrProviderContext) {
                 'slo.instanceId': { terms: { field: 'slo.instanceId' } },
                 'slo.groupings.tags': {
                   terms: { field: 'slo.groupings.tags' },
+                },
+                config_id: {
+                  terms: {
+                    field: 'config_id',
+                    missing_bucket: true,
+                  },
+                },
+                'monitor.id': {
+                  terms: {
+                    field: 'monitor.id',
+                    missing_bucket: true,
+                  },
+                },
+                'observer.name': {
+                  terms: {
+                    field: 'observer.name',
+                    missing_bucket: true,
+                  },
                 },
                 'service.name': { terms: { field: 'service.name', missing_bucket: true } },
                 'service.environment': {
