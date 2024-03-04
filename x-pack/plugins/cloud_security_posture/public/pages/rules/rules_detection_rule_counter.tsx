@@ -10,7 +10,7 @@ import React from 'react';
 import { CspBenchmarkRule } from '../../../common/types/latest';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { DetectionRuleCounter } from '../../components/detection_rule_counter';
-import { createDetectionRuleFromBenchmark } from '../configurations/utils/create_detection_rule_from_benchmark';
+import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
 
 export const RulesDetectionRuleCounter = ({
   benchmarkRule,
@@ -18,7 +18,7 @@ export const RulesDetectionRuleCounter = ({
   benchmarkRule: CspBenchmarkRule['metadata'];
 }) => {
   const createBenchmarkRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromBenchmark(http, benchmarkRule);
+    await createDetectionRuleFromBenchmarkRule(http, benchmarkRule);
 
   return (
     <DetectionRuleCounter
