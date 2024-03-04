@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -16,6 +16,8 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -67,6 +69,11 @@ export function SloDetailsPage() {
     return urlTabId && [OVERVIEW_TAB_ID, ALERTS_TAB_ID].includes(urlTabId)
       ? (urlTabId as SloTabId)
       : OVERVIEW_TAB_ID;
+  });
+
+  const { data: activeAlerts } = useFetchActiveAlerts({
+    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE]] : [],
+    shouldRefetch: isAutoRefreshing,
   });
 
   const handleSelectedTab = (newTabId: SloTabId) => {
@@ -128,19 +135,38 @@ export function SloDetailsPage() {
             onClick={handleToggleAutoRefresh}
           />,
         ],
-        bottomBorder: false,
+        tabs: [
+          {
+            id: OVERVIEW_TAB_ID,
+            label: i18n.translate('xpack.observability.slo.sloDetails.tab.overviewLabel', {
+              defaultMessage: 'Overview',
+            }),
+            'data-test-subj': 'overviewTab',
+            isSelected: selectedTabId === OVERVIEW_TAB_ID,
+            onClick: () => handleSelectedTab(OVERVIEW_TAB_ID),
+          },
+          {
+            id: ALERTS_TAB_ID,
+            label: i18n.translate('xpack.observability.slo.sloDetails.tab.alertsLabel', {
+              defaultMessage: 'Alerts',
+            }),
+            'data-test-subj': 'alertsTab',
+            isSelected: selectedTabId === ALERTS_TAB_ID,
+            append: slo ? (
+              <EuiNotificationBadge className="eui-alignCenter" size="m">
+                {(activeAlerts && activeAlerts.get(slo)) ?? 0}
+              </EuiNotificationBadge>
+            ) : null,
+            onClick: () => handleSelectedTab(ALERTS_TAB_ID),
+          },
+        ],
       }}
       data-test-subj="sloDetailsPage"
     >
       <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && (
-        <SloDetails
-          slo={slo!}
-          isAutoRefreshing={isAutoRefreshing}
-          selectedTabId={selectedTabId}
-          handleSelectedTab={handleSelectedTab}
-        />
+        <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
       )}
     </ObservabilityPageTemplate>
   );
