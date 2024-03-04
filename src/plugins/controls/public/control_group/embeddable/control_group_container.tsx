@@ -303,7 +303,10 @@ export class ControlGroupContainer extends Container<
       componentState: { lastSavedInput },
     } = this.getState();
 
-    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
+    if (
+      lastSavedInput &&
+      !persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)
+    ) {
       this.updateInput(lastSavedInput);
       if (currentShowApplySelections || lastSavedInput.showApplySelections) {
         /** If either the current or past state has auto-apply off, calling reset should force the changes to be published */
