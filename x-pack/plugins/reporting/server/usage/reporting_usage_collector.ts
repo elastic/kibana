@@ -8,9 +8,9 @@
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { GetLicense } from '.';
 import { ReportingCore } from '..';
-import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { getReportingUsage } from './get_reporting_usage';
 import { reportingSchema } from './schema';
 import { ReportingUsageType } from './types';

@@ -8,7 +8,7 @@
 import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 
 import { omit } from 'lodash';
-import type { AppFeaturesService } from '../../../../server/lib/app_features_service';
+import type { ProductFeaturesService } from '../../../../server/lib/product_features_service';
 import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
 import type { EndpointAuthz } from '../../types/authz';
@@ -22,19 +22,19 @@ import type { MaybeImmutable } from '../../types';
  * level, use `calculateEndpointAuthz()`
  *
  * @param fleetAuthz
- * @param appFeatureService
+ * @param productFeatureService
  */
-function hasAuthFactory(fleetAuthz: FleetAuthz, appFeatureService?: AppFeaturesService) {
+function hasAuthFactory(fleetAuthz: FleetAuthz, productFeatureService?: ProductFeaturesService) {
   return function hasAuth(
     privilege: keyof typeof ENDPOINT_PRIVILEGES,
     { action }: { action?: string } = {}
   ): boolean {
     // Product features control
-    if (appFeatureService) {
+    if (productFeatureService) {
       // Only server side has to check this, to prevent "superuser" role from being allowed to use product gated APIs.
       // UI side does not need to check this. Capabilities list is correct for superuser.
-      const actionToCheck = action ?? appFeatureService.getApiActionName(privilege);
-      if (!appFeatureService.isActionRegistered(actionToCheck)) {
+      const actionToCheck = action ?? productFeatureService.getApiActionName(privilege);
+      if (!productFeatureService.isActionRegistered(actionToCheck)) {
         return false;
       }
     }
@@ -58,9 +58,9 @@ export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]> = [],
-  appFeaturesService?: AppFeaturesService // only exists on the server side
+  productFeaturesService?: ProductFeaturesService // only exists on the server side
 ): EndpointAuthz => {
-  const hasAuth = hasAuthFactory(fleetAuthz, appFeaturesService);
+  const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();

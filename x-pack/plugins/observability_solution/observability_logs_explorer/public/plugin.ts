@@ -16,9 +16,11 @@ import {
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
+  DatasetQualityLocatorDefinition,
   ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
+import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
 import { logsExplorerAppTitle } from '../common/translations';
 import type {
@@ -89,20 +91,33 @@ export class ObservabilityLogsExplorerPlugin
     }
 
     // Register Locators
-    const singleDatasetLocator = share.url.locators.create(
-      new SingleDatasetLocatorDefinition({
-        useHash,
-      })
-    );
     const allDatasetsLocator = share.url.locators.create(
       new AllDatasetsLocatorDefinition({
         useHash,
       })
     );
+    const datasetQualityLocator = share.url.locators.create(
+      new DatasetQualityLocatorDefinition({
+        useHash,
+      })
+    );
+
+    const dataViewLocator = share.url.locators.create(
+      new DataViewLocatorDefinition({
+        useHash,
+      })
+    );
+    const singleDatasetLocator = share.url.locators.create(
+      new SingleDatasetLocatorDefinition({
+        useHash,
+      })
+    );
 
     this.locators = {
-      singleDatasetLocator,
       allDatasetsLocator,
+      datasetQualityLocator,
+      dataViewLocator,
+      singleDatasetLocator,
     };
 
     return {
