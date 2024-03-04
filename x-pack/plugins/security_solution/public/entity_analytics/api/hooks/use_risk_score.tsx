@@ -82,12 +82,14 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
-  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
-  const defaultIndex = spaceId
-    ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-      : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-    : undefined;
+  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
+    useIsNewRiskScoreModuleInstalled();
+  const defaultIndex =
+    spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
+      ? riskEntity === RiskScoreEntity.host
+        ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
+        : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
+      : undefined;
   const factoryQueryType =
     riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
 

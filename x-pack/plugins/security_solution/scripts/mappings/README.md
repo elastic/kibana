@@ -24,6 +24,7 @@ Available attributes:
 * `--unmappedRate` (*required*): the percentage of unmapped fields in each index (value ranges from 0.0 to 1.0)
 * `--buckets` (*optional, default value is 1*): it is possible to split the generated indices mappings into the smaller chunks
 * `--outputDirectory` (*required*): the output folder
+* `--purgeOutputDirectory` (*optional, default value is false*): the flag indicating whether we should purge output folder before generating new mappings
 
 ### Load all generated buckets generated via previous command
 

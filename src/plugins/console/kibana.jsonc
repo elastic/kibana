@@ -15,7 +15,8 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "home"
+      "home",
+      "cloud"
     ],
     "requiredBundles": [
       "esUiShared",

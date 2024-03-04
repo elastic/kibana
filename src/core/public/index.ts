@@ -109,11 +109,12 @@ export type {
   TelemetryCounterType,
 } from '@kbn/analytics-client';
 
-export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
+export { AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
   App,
+  AppDeepLinkLocations,
   AppMount,
   AppUnmount,
   AppMountParameters,

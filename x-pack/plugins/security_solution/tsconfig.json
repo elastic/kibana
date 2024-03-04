@@ -186,6 +186,7 @@
     "@kbn/esql-utils",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/core-http-request-handler-context-server"
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-http-server-mocks"
   ]
 }

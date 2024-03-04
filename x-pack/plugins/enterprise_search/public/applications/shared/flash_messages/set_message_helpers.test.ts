@@ -7,7 +7,9 @@
 
 import '../../__mocks__/kea_logic/kibana_logic.mock';
 
-import { FlashMessagesLogic } from './flash_messages_logic';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+
+import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
 import {
   setSuccessMessage,
   setErrorMessage,
@@ -19,10 +21,18 @@ import {
 } from './set_message_helpers';
 
 describe('Flash Message Helpers', () => {
+  const mockNotifications = {
+    toasts: {
+      add: jest.fn(),
+    },
+  };
   const message = 'I am a message';
+  beforeAll(() => {
+    mountFlashMessagesLogic({ notifications: mockNotifications as unknown as NotificationsStart });
+  });
 
   beforeEach(() => {
-    FlashMessagesLogic.mount();
+    jest.clearAllMocks();
   });
 
   it('setSuccessMessage()', () => {
@@ -76,10 +86,6 @@ describe('Flash Message Helpers', () => {
   });
 
   describe('toast helpers', () => {
-    afterEach(() => {
-      FlashMessagesLogic.actions.clearToastMessages();
-    });
-
     describe('without optional args', () => {
       beforeEach(() => {
         jest.spyOn(global.Date, 'now').mockReturnValueOnce(1234567890);
@@ -88,27 +94,23 @@ describe('Flash Message Helpers', () => {
       it('flashSuccessToast', () => {
         flashSuccessToast('You did a thing!');
 
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([
-          {
-            color: 'success',
-            iconType: 'check',
-            title: 'You did a thing!',
-            id: 'successToast-1234567890',
-          },
-        ]);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledTimes(1);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledWith({
+          color: 'success',
+          iconType: 'check',
+          title: 'You did a thing!',
+        });
       });
 
       it('flashErrorToast', () => {
         flashErrorToast('Something went wrong');
 
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([
-          {
-            color: 'danger',
-            iconType: 'error',
-            title: 'Something went wrong',
-            id: 'errorToast-1234567890',
-          },
-        ]);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledTimes(1);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledWith({
+          color: 'danger',
+          iconType: 'error',
+          title: 'Something went wrong',
+        });
       });
     });
 
@@ -117,38 +119,32 @@ describe('Flash Message Helpers', () => {
         flashSuccessToast('You did a thing!', {
           text: '<button>View new thing</button>',
           toastLifeTimeMs: 50,
-          id: 'customId',
         });
 
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([
-          {
-            color: 'success',
-            iconType: 'check',
-            title: 'You did a thing!',
-            text: '<button>View new thing</button>',
-            toastLifeTimeMs: 50,
-            id: 'customId',
-          },
-        ]);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledTimes(1);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledWith({
+          color: 'success',
+          iconType: 'check',
+          title: 'You did a thing!',
+          text: '<button>View new thing</button>',
+          toastLifeTimeMs: 50,
+        });
       });
 
       it('flashErrorToast', () => {
         flashErrorToast('Something went wrong', {
           text: "Here's some helpful advice on what to do",
           toastLifeTimeMs: 50000,
-          id: 'specificErrorId',
         });
 
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([
-          {
-            color: 'danger',
-            iconType: 'error',
-            title: 'Something went wrong',
-            text: "Here's some helpful advice on what to do",
-            toastLifeTimeMs: 50000,
-            id: 'specificErrorId',
-          },
-        ]);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledTimes(1);
+        expect(mockNotifications.toasts.add).toHaveBeenCalledWith({
+          color: 'danger',
+          iconType: 'error',
+          title: 'Something went wrong',
+          text: "Here's some helpful advice on what to do",
+          toastLifeTimeMs: 50000,
+        });
       });
     });
   });
