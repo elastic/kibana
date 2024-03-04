@@ -9,22 +9,15 @@ Covers:
 - migration strategy and technical implementation
 - exporting and importing rules
 - schema-related changes needed in endpoints
+- calculation of `isCustomized` field on endpoints that update/patch rules.
+- additional changes needed to `/upgrade/_review` and `/upgrade/_perform` endpoints
+- UI Changes
 
 _Pending_:
 
-- Calculation of `isCustomized` field on endpoints that update/patch rules. Encapsulated reusable logic and how to implement it on those endpoints.
-- Rework `Changes needed in the UI`
-- Additional changes needed to `/upgrade/_review` and `/upgrade/_perform` endpoints
-  - `/upgrade/_review`:
-    - Concrete conflict solving algorithms for calculating merged versions
-    - Update algorithms used for each field
-  - `/upgrade/_perform`:
-    - Change payload to allow user to select `merge` version of a rule, and send payload with customized values
-    - (This is already described in previous RFC! Link to it, the rest is implementation detail)
-- Three Way Diff Component:
-  - UI
-  - Frontend Logic
-- Other UI changes: list changes in Rule Editing, Rule Tables, etc
+
+- Additional details on `Changes needed in the UI`: Rule Details page, Rules Table
+- Update `/upgrade/_perform` endpoint description to match POC proposal
 
 
 
