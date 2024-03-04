@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { performance } from 'perf_hooks';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
@@ -24,6 +24,7 @@ import type {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
+  WrapSuppressedHits,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -31,6 +32,7 @@ import {
   makeFloatString,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
 } from '../utils/utils';
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
@@ -40,6 +42,28 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+
+interface EqlExecutorParams {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  completeRule: CompleteRule<EqlRuleParams>;
+  tuple: RuleRangeTuple;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  version: string;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  wrapSequences: WrapSequences;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  wrapSuppressedHits: WrapSuppressedHits;
+  alertTimestampOverride: Date | undefined;
+  alertWithSuppression: SuppressedAlertService;
+  isAlertSuppressionActive: boolean;
+}
 
 export const eqlExecutor = async ({
   inputIndex,
@@ -56,22 +80,11 @@ export const eqlExecutor = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-}: {
-  inputIndex: string[];
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<EqlRuleParams>;
-  tuple: RuleRangeTuple;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  version: string;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  wrapSequences: WrapSequences;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}): Promise<SearchAfterAndBulkCreateReturnType> => {
+  wrapSuppressedHits,
+  alertTimestampOverride,
+  alertWithSuppression,
+  isAlertSuppressionActive,
+}: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('eqlExecutor', async () => {
@@ -108,32 +121,59 @@ export const eqlExecutor = async ({
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
     result.searchAfterTimes = [eqlSearchDuration];
 
-    let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
-    if (response.hits.sequences !== undefined) {
-      newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
-    } else if (response.hits.events !== undefined) {
-      newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
+    let createResult;
+
+    const { events, sequences } = response.hits;
+    const isEventSuppressionActive = isAlertSuppressionActive && events?.length;
+
+    // Validating events until the implementation of suppression for sequence-based queries
+    if (isEventSuppressionActive) {
+      const alertSuppression = completeRule.ruleParams.alertSuppression;
+      createResult = await bulkCreateSuppressedAlertsInMemory({
+        enrichedEvents: events,
+        toReturn: result,
+        wrapHits,
+        bulkCreate,
+        services,
+        buildReasonMessage: buildReasonMessageForEqlAlert,
+        ruleExecutionLogger,
+        tuple,
+        alertSuppression,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+      });
     } else {
-      throw new Error(
-        'eql query response should have either `sequences` or `events` but had neither'
-      );
-    }
+      const newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> =
+        sequences !== undefined
+          ? wrapSequences(sequences, buildReasonMessageForEqlAlert)
+          : events !== undefined
+          ? wrapHits(events, buildReasonMessageForEqlAlert)
+          : (() => {
+              throw new Error(
+                'eql query response should have either `sequences` or `events` but had neither'
+              );
+            })();
 
-    if (newSignals?.length) {
-      const createResult = await bulkCreate(
-        newSignals,
-        undefined,
-        createEnrichEventsFunction({
-          services,
-          logger: ruleExecutionLogger,
-        })
-      );
+      if (newSignals?.length) {
+        createResult = await bulkCreate(
+          newSignals,
+          undefined,
+          createEnrichEventsFunction({
+            services,
+            logger: ruleExecutionLogger,
+          })
+        );
+        addToSearchAfterReturn({ current: result, next: createResult });
+      }
+    }
+    const maxSignalsWarning = isEventSuppressionActive
+      ? getSuppressionMaxSignalsWarning()
+      : getMaxSignalsWarning();
 
-      addToSearchAfterReturn({ current: result, next: createResult });
-    }
-    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
-      result.warningMessages.push(getMaxSignalsWarning());
-    }
+    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals)
+      result.warningMessages.push(maxSignalsWarning);
+
     return result;
   });
 };
