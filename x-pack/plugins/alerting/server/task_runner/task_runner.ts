@@ -589,6 +589,7 @@ export class TaskRunner<
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
         alertDelay: alertDelay?.active ?? 0,
+        ruleRunMetricsStore,
       });
     });
 

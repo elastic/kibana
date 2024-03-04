@@ -19,7 +19,7 @@ export interface AgentPolicyServiceInterface {
   list: typeof agentPolicyService['list'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
-  bumpRevision: typeof agentPolicyService['bumpRevision'];
+  turnOffAgentTamperProtections: typeof agentPolicyService['turnOffAgentTamperProtections'];
 }
 
 // Agent services

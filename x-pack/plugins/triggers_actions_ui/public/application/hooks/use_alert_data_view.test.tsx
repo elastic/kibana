@@ -9,7 +9,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useAlertDataView } from './use_alert_data_view';
+import { useAlertDataViews } from './use_alert_data_view';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
@@ -76,7 +76,7 @@ describe('useAlertDataView', () => {
       };
 
       const { result, waitForNextUpdate } = renderHook(
-        () => useAlertDataView(observabilityAlertFeatureIds),
+        () => useAlertDataViews(observabilityAlertFeatureIds),
         {
           wrapper,
         }
@@ -91,7 +91,7 @@ describe('useAlertDataView', () => {
   it('fetch index names + fields for the provided o11y featureIds', async () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(
-        () => useAlertDataView(observabilityAlertFeatureIds),
+        () => useAlertDataViews(observabilityAlertFeatureIds),
         {
           wrapper,
         }
@@ -107,7 +107,7 @@ describe('useAlertDataView', () => {
 
   it('only fetch index names for security featureId', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useAlertDataView([AlertConsumers.SIEM]), {
+      const { waitForNextUpdate } = renderHook(() => useAlertDataViews([AlertConsumers.SIEM]), {
         wrapper,
       });
 
@@ -122,7 +122,7 @@ describe('useAlertDataView', () => {
   it('Do not fetch anything if security and o11y featureIds are mix together', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
-        () => useAlertDataView([AlertConsumers.SIEM, AlertConsumers.LOGS]),
+        () => useAlertDataViews([AlertConsumers.SIEM, AlertConsumers.LOGS]),
         {
           wrapper,
         }
@@ -144,7 +144,7 @@ describe('useAlertDataView', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
-        () => useAlertDataView(observabilityAlertFeatureIds),
+        () => useAlertDataViews(observabilityAlertFeatureIds),
         {
           wrapper,
         }

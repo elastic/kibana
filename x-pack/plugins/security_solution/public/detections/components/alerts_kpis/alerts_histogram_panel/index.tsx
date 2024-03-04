@@ -14,10 +14,12 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { sumBy } from 'lodash';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { OnEmbeddableLoaded } from '../../../../common/components/visualization_actions/types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
@@ -37,6 +39,8 @@ import {
   formatAlertsData,
   getAlertsHistogramQuery,
   showInitialLoadingSpinner,
+  createGenericSubtitle,
+  createEmbeddedDataSubtitle,
 } from './helpers';
 import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
@@ -159,6 +163,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const visualizationId = `alerts-trend-embeddable-${uniqueQueryId}`;
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
+    const [embeddedDataAvailable, setEmbeddedDataAvailable] = useState(false);
+    const [embeddedDataLoaded, setEmbeddedDataLoaded] = useState(false);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
@@ -366,6 +372,30 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
+    const onEmbeddableLoaded: OnEmbeddableLoaded = useCallback((embeddableData) => {
+      try {
+        const parsedResponses: Array<{ aggregations: Array<{ buckets: unknown[] }> }> =
+          embeddableData.responses.map((rawResponse) => JSON.parse(rawResponse));
+
+        const aggregationBucketsCount = sumBy(parsedResponses, (responseItem) =>
+          sumBy(Object.values(responseItem.aggregations), 'buckets.length')
+        );
+
+        setEmbeddedDataAvailable(!!aggregationBucketsCount);
+        setEmbeddedDataLoaded(true);
+      } catch (error) {
+        setEmbeddedDataLoaded(false);
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    }, []);
+
+    const showsEmbeddedData = showHistogram && isChartEmbeddablesEnabled;
+
+    const subtitle = showsEmbeddedData
+      ? createEmbeddedDataSubtitle(embeddedDataLoaded, embeddedDataAvailable, totalAlerts)
+      : createGenericSubtitle(isInitialLoading, showTotalAlertsCount, totalAlerts);
+
     return (
       <InspectButtonContainer show={!isInitialLoading && showHistogram}>
         <KpiPanel
@@ -385,7 +415,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             toggleStatus={showHistogram}
             toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
-            subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
+            subtitle={subtitle}
             isInspectDisabled={isInspectDisabled}
           >
             <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
@@ -441,6 +471,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 extraOptions={{
                   filters,
                 }}
+                onLoad={onEmbeddableLoaded}
                 getLensAttributes={getLensAttributes}
                 height={chartHeight ?? CHART_HEIGHT}
                 id={visualizationId}

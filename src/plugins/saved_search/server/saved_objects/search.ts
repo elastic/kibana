@@ -10,7 +10,12 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from './search_migrations';
-import { SCHEMA_SEARCH_V8_8_0, SCHEMA_SEARCH_V8_12_0, SCHEMA_SEARCH_V8_13_0 } from './schema';
+import {
+  SCHEMA_SEARCH_V8_8_0,
+  SCHEMA_SEARCH_MODEL_VERSION_1,
+  SCHEMA_SEARCH_MODEL_VERSION_2,
+  SCHEMA_SEARCH_MODEL_VERSION_3
+} from './schema';
 
 export function getSavedSearchObjectType(
   getSearchSourceMigrations: () => MigrateFunctionsObject
@@ -35,6 +40,29 @@ export function getSavedSearchObjectType(
         };
       },
     },
+    modelVersions: {
+      1: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_1.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_1,
+        },
+      },
+      2: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_2.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_2,
+        },
+      },
+      2: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_3.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_3,
+        },
+      },
+    },
     mappings: {
       dynamic: false,
       properties: {
@@ -44,8 +72,6 @@ export function getSavedSearchObjectType(
     },
     schemas: {
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
-      '8.12.0': SCHEMA_SEARCH_V8_12_0,
-      '8.13.0': SCHEMA_SEARCH_V8_13_0,
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()), // TODO: add lens embeddable migrations for `visContextJSON`
   };

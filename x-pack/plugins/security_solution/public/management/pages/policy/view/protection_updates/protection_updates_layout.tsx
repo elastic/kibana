@@ -43,6 +43,7 @@ import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoi
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
+  setUnsavedChanges: (isModified: boolean) => void;
 }
 
 const AUTOMATIC_UPDATES_CHECKBOX_LABEL = i18n.translate(
@@ -60,7 +61,7 @@ const AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL = i18n.translate(
 );
 
 export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
-  ({ policy: _policy }) => {
+  ({ policy: _policy, setUnsavedChanges }) => {
     const toasts = useToasts();
     const dispatch = useDispatch();
     const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
@@ -105,6 +106,10 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const saveButtonEnabled =
       (fetchedNote ? note !== fetchedNote.note : note !== '') ||
       manifestVersion !== deployedVersion;
+
+    useEffect(() => {
+      setUnsavedChanges(saveButtonEnabled);
+    }, [saveButtonEnabled, setUnsavedChanges]);
 
     const onSave = useCallback(() => {
       const update = cloneDeep(policy);

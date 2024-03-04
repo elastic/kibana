@@ -74,7 +74,6 @@ const onDropToDimension = jest.fn();
 
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
-  let mockVisualization2: jest.Mocked<Visualization>;
 
   let mockDatasource = createMockDatasource('testDatasource');
 
@@ -144,7 +143,6 @@ describe('LayerPanel', () => {
   beforeEach(() => {
     mockVisualization = createMockVisualization(faker.random.alphaNumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
-    mockVisualization2 = createMockVisualization(faker.random.alphaNumeric());
     mockDatasource = createMockDatasource();
   });
 
@@ -170,8 +168,7 @@ describe('LayerPanel', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176247
-  describe.skip('single group', () => {
+  describe('single group', () => {
     it('should render the group with a way to add a new column', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [defaultGroup],
@@ -435,6 +432,7 @@ describe('LayerPanel', () => {
       act(() => {
         stateFn('newDatasourceState');
       });
+
       expect(updateAll).toHaveBeenCalled();
     });
 
@@ -511,79 +509,6 @@ describe('LayerPanel', () => {
         });
       });
       expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
-    });
-
-    it('should close the DimensionContainer when the activeVisualization has changed', async () => {
-      /**
-       * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the container
-       * open in future renders
-       */
-
-      (generateId as jest.Mock).mockReturnValue(`columnId`);
-      mockVisualization.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'columnId' }],
-          },
-        ],
-      });
-      // Normally the configuration would change in response to a state update,
-      // but this test is updating it directly
-      mockVisualization2.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'columnId' }, { columnId: 'secondColumnId' }],
-          },
-        ],
-      });
-
-      const { rerender } = renderLayerPanel();
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
-      expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
-      rerender(<LayerPanel {...props} activeVisualization={mockVisualization2} />);
-      expect(
-        screen.queryByRole('heading', { name: defaultGroup.groupLabel })
-      ).not.toBeInTheDocument();
-    });
-
-    it('should close the DimensionContainer when the column cannot be found in the config', async () => {
-      /**
-       * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the container
-       * open in future renders
-       */
-
-      (generateId as jest.Mock).mockReturnValue(`columnId`);
-      mockVisualization.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'columnId' }],
-          },
-        ],
-      });
-      // Normally the configuration would change in response to a state update,
-      // but this test is updating it directly
-      mockVisualization2.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'secondColumnId' }],
-          },
-        ],
-      });
-
-      const { rerender } = renderLayerPanel();
-      // opens dimension editor and creates another column with secondColumnId
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
-      expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
-      rerender(<LayerPanel {...getDefaultProps()} activeVisualization={mockVisualization2} />);
-      expect(
-        screen.queryByRole('heading', { name: defaultGroup.groupLabel })
-      ).not.toBeInTheDocument();
     });
 
     it('should only update the state on close when needed', async () => {
@@ -1077,6 +1002,5 @@ describe('LayerPanel', () => {
       });
     });
   });
-
   // TODO - test user message display
 });

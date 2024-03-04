@@ -6,8 +6,8 @@
  */
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';

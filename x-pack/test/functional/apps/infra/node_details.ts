@@ -8,6 +8,11 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, NODE_DETAILS_PATH, DATE_PICKER_FORMAT } from './constants';
 
@@ -197,6 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.metadataSectionCollapsibleExist();
             await pageObjects.assetDetails.alertsSectionCollapsibleExist();
             await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {
@@ -224,6 +230,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           describe('Alerts Section with alerts', () => {
+            const ACTIVE_ALERTS = 2;
+            const RECOVERED_ALERTS = 2;
+            const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
+            const COLUMNS = 11;
             before(async () => {
               await navigateToNodeDetails('demo-stack-apache-01', 'demo-stack-apache-01');
               await pageObjects.header.waitUntilLoadingHasFinished();
@@ -256,6 +266,49 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               // Expand
               await pageObjects.assetDetails.alertsSectionCollapsibleClick();
               await pageObjects.assetDetails.alertsSectionClosedContentMissing();
+            });
+
+            it('should show alert summary ', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter();
+              await retry.try(async () => {
+                const cells = await observability.alerts.common.getTableCells();
+                expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
+              });
+            });
+
+            it('can be filtered to only show "all" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter();
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(ALL_ALERTS);
+              });
+            });
+
+            it('can be filtered to only show "active" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(ACTIVE_ALERTS);
+              });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus%3Aactive');
+            });
+
+            it('can be filtered to only show "recovered" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_RECOVERED);
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(RECOVERED_ALERTS);
+              });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus%3Arecovered');
+            });
+
+            it('can be filtered to only show "untracked" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_UNTRACKED);
+              await observability.alerts.common.getNoDataStateOrFail();
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus%3Auntracked');
             });
           });
         });

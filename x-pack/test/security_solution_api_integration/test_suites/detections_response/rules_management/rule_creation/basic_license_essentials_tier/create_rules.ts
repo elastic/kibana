@@ -12,16 +12,19 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detect
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
   getSimpleRule,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  deleteAllAlerts,
   updateUsername,
+  getSimpleRuleOutput,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
@@ -65,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(bodyToCompare, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
@@ -90,7 +93,42 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(bodyToCompare, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(
+          {
+            actions: [],
+            author: [],
+            created_by: 'elastic',
+            description: 'Simple Rule Query',
+            enabled: true,
+            false_positives: [],
+            from: 'now-6m',
+            immutable: false,
+            interval: '5m',
+            rule_id: 'rule-1',
+            language: 'kuery',
+            output_index: '',
+            max_signals: 100,
+            risk_score: 1,
+            risk_score_mapping: [],
+            name: 'Simple Rule Query',
+            query: 'user.name: root or user.name: admin',
+            references: [],
+            related_integrations: [],
+            required_fields: [],
+            setup: '',
+            severity: 'high',
+            severity_mapping: [],
+            updated_by: 'elastic',
+            tags: [],
+            to: 'now',
+            type: 'query',
+            threat: [],
+            exceptions_list: [],
+            version: 1,
+            revision: 0,
+          },
+          ELASTICSEARCH_USERNAME
+        );
 
         expect(bodyToCompare).to.eql(expectedRule);
       });

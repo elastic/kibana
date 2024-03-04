@@ -81,6 +81,7 @@ export const DiscoverHistogramLayout = ({
       css={histogramLayoutCss}
       table={table}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
+      abortController={stateContainer.dataState.getAbortController()}
     >
       <DiscoverMainContent
         {...mainContentProps}

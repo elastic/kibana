@@ -12,6 +12,7 @@ import {
   RuleActionParam,
   IntervalSchedule,
   RuleActionAlertsFilterProperty,
+  AlertDelay,
 } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash/fp';
 import { Rule, RuleAction } from '../../../types';
@@ -30,6 +31,7 @@ interface CommandType<
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
+    | 'setAlertDelayProperty'
 > {
   type: T;
 }
@@ -59,6 +61,12 @@ interface RuleActionPayload<Key extends keyof RuleAction> {
 interface RuleSchedulePayload<Key extends keyof IntervalSchedule> {
   key: Key;
   value: IntervalSchedule[Key];
+  index?: number;
+}
+
+interface AlertDelayPayload<Key extends keyof AlertDelay> {
+  key: Key;
+  value: AlertDelay[Key] | null;
   index?: number;
 }
 
@@ -94,6 +102,10 @@ export type RuleReducerAction =
   | {
       command: CommandType<'setRuleActionAlertsFilter'>;
       payload: Payload<string, RuleActionAlertsFilterProperty>;
+    }
+  | {
+      command: CommandType<'setAlertDelayProperty'>;
+      payload: AlertDelayPayload<keyof AlertDelay>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -277,6 +289,23 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
           rule: {
             ...rule,
             actions: [...rule.actions],
+          },
+        };
+      }
+    }
+    case 'setAlertDelayProperty': {
+      const { key, value } = action.payload as Payload<keyof AlertDelay, SavedObjectAttribute>;
+      if (rule.alertDelay && isEqual(rule.alertDelay[key], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          rule: {
+            ...rule,
+            alertDelay: {
+              ...rule.alertDelay,
+              [key]: value,
+            },
           },
         };
       }

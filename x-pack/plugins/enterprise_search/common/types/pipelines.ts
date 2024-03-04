@@ -16,6 +16,7 @@ export interface InferencePipeline {
   pipelineName: string;
   pipelineReferences: string[];
   types: string[];
+  sourceFields?: string[];
 }
 
 export enum TrainedModelState {

@@ -21,6 +21,14 @@
     "@kbn/ui-theme",
     "@kbn/i18n",
     "@kbn/es-query",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/data-views-plugin",
+    "@kbn/data-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/content-management-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/presentation-util-plugin",
+    "@kbn/unified-field-list"
   ]
 }
