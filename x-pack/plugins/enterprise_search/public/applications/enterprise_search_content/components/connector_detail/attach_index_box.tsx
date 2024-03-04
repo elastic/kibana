@@ -128,7 +128,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                     'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
                     {
                       defaultMessage:
-                        "Choose an index or create a new one. We can't create one with same name as it already exists.",
+                        "You can't create a new index using an existing index name. Choose an existing index or create a new index with a new name.",
                     }
                   )
                 : undefined
