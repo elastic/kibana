@@ -12,6 +12,7 @@ describe('pipeline_serialization', () => {
     it('should deserialize pipelines', () => {
       expect(
         deserializePipelines({
+          // @ts-expect-error pipeline._meta defined as mandatory
           pipeline1: {
             description: 'pipeline 1 description',
             version: 1,
@@ -30,13 +31,12 @@ describe('pipeline_serialization', () => {
                 },
               },
             ],
-            _meta: {},
           },
+          // @ts-expect-error pipeline._meta defined as mandatory
           pipeline2: {
             description: 'pipeline2 description',
             version: 1,
             processors: [],
-            _meta: {},
           },
           pipeline3: {
             description: 'pipeline3 description',
@@ -68,7 +68,6 @@ describe('pipeline_serialization', () => {
             },
           ],
           isManaged: false,
-          _meta: {},
         },
         {
           name: 'pipeline2',
@@ -76,7 +75,6 @@ describe('pipeline_serialization', () => {
           version: 1,
           processors: [],
           isManaged: false,
-          _meta: {},
         },
         {
           name: 'pipeline3',
