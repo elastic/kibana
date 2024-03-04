@@ -84,44 +84,17 @@ const useAsyncTable = (): UseAsyncTableResult => {
 
   const fetchApiKeys = async () => {
     setIsLoading(true);
-    let queryContainer;
-
-    if (query?.text === 'type:managed') {
-      queryContainer = {
-        bool: {
-          should: [
-            {
-              term: {
-                'metadata.managed': {
-                  value: true,
-                },
-              },
-            },
-            {
-              prefix: {
-                name: {
-                  value: 'Alerting:',
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      };
-    } else {
-      queryContainer = EuiSearchBar.Query.toESQuery(query);
-    }
+    const queryContainer =
+      Object.keys(query).length === 0 ? undefined : EuiSearchBar.Query.toESQuery(query);
 
     const requestBody = {
-      query:
-        queryContainer && Object.keys(queryContainer).length === 0 ? undefined : queryContainer,
+      query: queryContainer,
       from,
       size: pageSize,
     };
 
     try {
       const response = await new APIKeysAPIClient(services.http).queryApiKeys(requestBody);
-
       setState(response);
     } finally {
       setIsLoading(false);
@@ -752,9 +725,9 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
           hasActiveFilters={query.hasSimpleFieldClause('type', 'managed')}
           onClick={() =>
             onChange(
-              query.hasSimpleFieldClause('type', 'managed')
-                ? query.removeSimpleFieldClauses('type')
-                : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'managed')
+              query.hasClauses()
+                ? query.removeAllClauses()
+                : EuiSearchBar.Query.parse('(metadata.managed:true OR Alerting*)')
             )
           }
         >
