@@ -68,6 +68,7 @@ import { ExplorationQueryBarProps } from '../../../analytics_exploration/compone
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
 import { ConfigurationStepProps } from './configuration_step';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const runtimeMappingKey = 'runtime_mapping';
 const notIncludedReason = 'field not in includes list';
@@ -119,6 +120,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   isClone,
   state,
   setCurrentStep,
+  sourceDataViewTitle,
 }) => {
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
@@ -583,6 +585,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       <Fragment>
         <Messages messages={requestMessages} />
         <SupportedFieldsMessage jobType={jobType} />
+        <IndexPermissionsCallout indexName={sourceDataViewTitle} docsType="create" />
         <JobType type={jobType} setFormState={setFormState} />
         {savedSearchQuery === null && (
           <EuiFormRow
