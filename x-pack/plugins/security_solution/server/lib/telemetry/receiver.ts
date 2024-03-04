@@ -413,12 +413,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           body: EndpointMetricsAggregation;
         };
 
-        return {
-          endpointMetricIds: endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
-            (epMetrics) => epMetrics.latest_metrics.hits.hits[0]._id
-          ),
-          totalEndpoints: endpointMetricsResponse.aggregations.endpoint_count.value,
-        };
+        if (endpointMetricsResponse.aggregations !== undefined) {
+          const endpointMetricIds =
+            endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
+              (epMetrics) => epMetrics.latest_metrics.hits.hits[0]._id
+            );
+          const totalEndpoints = endpointMetricsResponse.aggregations.endpoint_count.value;
+          return { endpointMetricIds, totalEndpoints };
+        }
+
+        return { endpointMetricIds: [], totalEndpoints: 0 };
       });
   }
 

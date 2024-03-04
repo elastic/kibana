@@ -268,7 +268,8 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   private enrich(event: Event): Event {
     const clusterInfo = this.telemetryReceiver?.getClusterInfo();
 
-    if (typeof event.payload === 'object') {
+    // TODO(szaffarano): does it make sense to include cluster info in task metric payloads?
+    if (typeof event.payload === 'object' && event.channel !== TelemetryChannel.TASK_METRICS) {
       event.payload = {
         ...event.payload,
         // TODO(szaffarano): include license info if available
