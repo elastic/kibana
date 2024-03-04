@@ -1542,13 +1542,8 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-<<<<<<< HEAD
-/x-pack/plugins/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
-=======
 /x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
-/x-pack/plugins/infra/**/*.scss @elastic/observability-design
->>>>>>> 037d08745b89950be0631e06f0b39e275bd6a328
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
