@@ -1097,9 +1097,7 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
-  }
-  // TODO check if this is the correct way
-  else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
+  } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(
