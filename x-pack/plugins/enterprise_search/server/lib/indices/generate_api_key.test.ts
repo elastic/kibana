@@ -62,7 +62,7 @@ describe('generateApiKey lib function for connector clients', () => {
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', false, null)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', false)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
@@ -102,7 +102,7 @@ describe('generateApiKey lib function for connector clients', () => {
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', false, null)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', false)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'search-test-connector',
@@ -153,7 +153,7 @@ describe('generateApiKey lib function for connector clients', () => {
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', false, null)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', false)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
@@ -222,7 +222,7 @@ describe('generateApiKey lib function for native connectors', () => {
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true, null)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
@@ -264,7 +264,7 @@ describe('generateApiKey lib function for native connectors', () => {
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', true, null)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', true)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'search-test-connector',
@@ -296,7 +296,7 @@ describe('generateApiKey lib function for native connectors', () => {
           hits: [
             {
               _id: 'connectorId',
-              _source: { api_key_id: '1', doc: 'doc' },
+              _source: { api_key_id: '1', api_key_secret_id: '2', doc: 'doc' },
               fields: { api_key_id: '1' },
             },
           ],
@@ -317,7 +317,7 @@ describe('generateApiKey lib function for native connectors', () => {
     }));
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true, '1234')
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
@@ -334,7 +334,7 @@ describe('generateApiKey lib function for native connectors', () => {
       },
     });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      document: { api_key_id: 'apiKeyId', api_key_secret_id: '1234', doc: 'doc' },
+      document: { api_key_id: 'apiKeyId', api_key_secret_id: '2', doc: 'doc' },
       id: 'connectorId',
       index: CONNECTORS_INDEX,
     });
@@ -342,6 +342,6 @@ describe('generateApiKey lib function for native connectors', () => {
       ids: ['1'],
     });
     expect(createConnectorSecret).toBeCalledTimes(0);
-    expect(updateConnectorSecret).toHaveBeenCalledWith(mockClient.asCurrentUser, 'encoded', '1234');
+    expect(updateConnectorSecret).toHaveBeenCalledWith(mockClient.asCurrentUser, 'encoded', '2');
   });
 });

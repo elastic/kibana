@@ -13,6 +13,10 @@ import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
+import { getField } from '../../shared/utils';
+import { EventKind } from '../../shared/constants/event_kinds';
+import { useRightPanelContext } from '../context';
+
 export interface DescriptionSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
@@ -21,9 +25,13 @@ export interface DescriptionSectionProps {
 }
 
 /**
- * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
+ * Second section of the overview tab in details flyout.
+ * It contains investigation guide (alerts only) and highlighted fields
  */
 export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
+  const { getFieldsData } = useRightPanelContext();
+  const eventKind = getField(getFieldsData('event.kind'));
+
   return (
     <ExpandableSection
       expanded={expanded}
@@ -34,9 +42,14 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
         />
       }
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
+      gutterSize="s"
     >
-      <InvestigationGuide />
-      <EuiSpacer size="m" />
+      {eventKind === EventKind.signal && (
+        <>
+          <InvestigationGuide />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <HighlightedFields />
     </ExpandableSection>
   );

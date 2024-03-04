@@ -1290,6 +1290,36 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORT_TABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "REPORT_TABLE_ID",
+        "description": [],
+        "signature": [
+          "\"reportJobListing\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORT_TABLE_ROW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "REPORT_TABLE_ROW_ID",
+        "description": [],
+        "signature": [
+          "\"reportJobRow\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.REPORTING_MANAGEMENT_HOME",
         "type": "string",
         "tags": [],
@@ -1409,6 +1439,247 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.INTERNAL_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "INTERNAL_ROUTES",
+        "description": [],
+        "path": "packages/kbn-reporting/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.MIGRATE",
+            "type": "Object",
+            "tags": [],
+            "label": "MIGRATE",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY",
+                "type": "string",
+                "tags": [],
+                "label": "MIGRATE_ILM_POLICY",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS",
+                "type": "string",
+                "tags": [],
+                "label": "GET_ILM_POLICY_STATUS",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.DIAGNOSE",
+            "type": "Object",
+            "tags": [],
+            "label": "DIAGNOSE",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.DIAGNOSE.BROWSER",
+                "type": "string",
+                "tags": [],
+                "label": "BROWSER",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT",
+                "type": "string",
+                "tags": [],
+                "label": "SCREENSHOT",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.JOBS",
+            "type": "Object",
+            "tags": [],
+            "label": "JOBS",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.COUNT",
+                "type": "string",
+                "tags": [],
+                "label": "COUNT",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.LIST",
+                "type": "string",
+                "tags": [],
+                "label": "LIST",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.INFO_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "INFO_PREFIX",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.DELETE_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DELETE_PREFIX",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DOWNLOAD_PREFIX",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.DOWNLOAD_CSV",
+            "type": "string",
+            "tags": [],
+            "label": "DOWNLOAD_CSV",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.GENERATE_PREFIX",
+            "type": "string",
+            "tags": [],
+            "label": "GENERATE_PREFIX",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.PUBLIC_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "PUBLIC_ROUTES",
+        "description": [],
+        "path": "packages/kbn-reporting/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PUBLIC_ROUTES.GENERATE_PREFIX",
+            "type": "string",
+            "tags": [],
+            "label": "GENERATE_PREFIX",
+            "description": [
+              "/**\n   * Public endpoint for POST URL strings and automated report generation\n   * exportTypeId is added to the final path\n   */"
+            ],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PUBLIC_ROUTES.JOBS",
+            "type": "Object",
+            "tags": [],
+            "label": "JOBS",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DOWNLOAD_PREFIX",
+                "description": [
+                  "/**\n     * Public endpoint used by Watcher and automated report downloads\n     * jobId is added to the final path\n     */"
+                ],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.PUBLIC_ROUTES.JOBS.DELETE_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DELETE_PREFIX",
+                "description": [
+                  "/**\n     * Public endpoint potentially used to delete a report after download in automation\n     * jobId is added to the final path\n     */"
+                ],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

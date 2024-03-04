@@ -29,6 +29,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/code-editor",
     "@kbn/monaco",
+    "@kbn/cloud-plugin"
   ],
   "exclude": [
     "target/**/*",
