@@ -219,24 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
                 'slo.groupings.tags': {
                   terms: { field: 'slo.groupings.tags' },
                 },
-                config_id: {
-                  terms: {
-                    field: 'config_id',
-                    missing_bucket: true,
-                  },
-                },
-                'monitor.id': {
-                  terms: {
-                    field: 'monitor.id',
-                    missing_bucket: true,
-                  },
-                },
-                'observer.name': {
-                  terms: {
-                    field: 'observer.name',
-                    missing_bucket: true,
-                  },
-                },
                 'service.name': { terms: { field: 'service.name', missing_bucket: true } },
                 'service.environment': {
                   terms: { field: 'service.environment', missing_bucket: true },
