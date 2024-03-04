@@ -28,6 +28,53 @@ describe('buildDefaultSettings', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
 
+
+  it('should not generate default settings', () => {
+    const settings = buildDefaultSettings({
+      templateName: 'test_template',
+      packageName: 'test_package',
+      type: 'logs',
+      fields: [
+        {
+          name: 'field1Keyword',
+          type: 'keyword',
+        },
+        {
+          name: 'field2Boolean',
+          type: 'boolean',
+        },
+        {
+          name: 'field3Text',
+          type: 'text',
+        },
+        {
+          name: 'field4MatchOnlyText',
+          type: 'match_only_text',
+        },
+        {
+          name: 'field5Wildcard',
+          type: 'wildcard',
+        },
+        {
+          name: 'field6NotDefault',
+          type: 'keyword',
+          default_field: false,
+        },
+      ],
+      calculateDefaultFields: false,
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "logs",
+          },
+        },
+      }
+    `);
+  });
+
   it('should generate default settings', () => {
     const settings = buildDefaultSettings({
       templateName: 'test_template',
@@ -60,6 +107,7 @@ describe('buildDefaultSettings', () => {
           default_field: false,
         },
       ],
+      calculateDefaultFields: true,
     });
 
     expect(settings).toMatchInlineSnapshot(`
@@ -91,6 +139,7 @@ describe('buildDefaultSettings', () => {
       templateName: 'test_template',
       packageName: 'test_package',
       fields,
+      calculateDefaultFields: true,
     });
 
     expect(mockedLogger.warn).toBeCalledWith(
@@ -125,6 +174,7 @@ describe('buildDefaultSettings', () => {
       templateName: 'test_template',
       packageName: 'test_package',
       fields,
+      calculateDefaultFields: true,
     });
 
     expect(settings.index.query?.default_field).toEqual(['field_valid']);

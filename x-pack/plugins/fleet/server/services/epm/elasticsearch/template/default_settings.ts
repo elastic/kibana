@@ -32,24 +32,31 @@ export function buildDefaultSettings({
   fields,
   ilmPolicy,
   type,
+  calculateDefaultFields = false,
 }: {
   type: string;
   templateName: string;
   packageName: string;
   ilmPolicy?: string | undefined;
   fields: Field[];
+  calculateDefaultFields?: boolean;
 }) {
   const logger = appContextService.getLogger();
   // Find all field names to set `index.query.default_field` to, which will be
   // the first 1024 keyword or text fields
-  const defaultFields = flattenAndExtractFields(fields).filter(
-    (field) =>
-      field.type &&
-      QUERY_DEFAULT_FIELD_TYPES.includes(field.type) &&
-      field.default_field !== false &&
-      field.index !== false &&
-      field.doc_values !== false
-  );
+  let defaultFields: Field[] = [];
+
+  if (calculateDefaultFields) {
+    defaultFields = flattenAndExtractFields(fields).filter(
+      (field) =>
+        field.type &&
+        QUERY_DEFAULT_FIELD_TYPES.includes(field.type) &&
+        field.default_field !== false &&
+        field.index !== false &&
+        field.doc_values !== false
+    );
+  }
+
   if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
     logger.warn(
       `large amount of default fields detected for index template ${templateName} in package ${packageName}, applying the first ${QUERY_DEFAULT_FIELD_LIMIT} fields`
