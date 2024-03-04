@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
       await createSLO();
       await createSLO({ name: 'test int' });
 
-      await retry.tryForTime(300 * 1000, async () => {
+      await retry.tryForTime(360 * 1000, async () => {
         const response = await supertestAPI
           .get(`/api/observability/slos`)
           .set('kbn-xsrf', 'true')

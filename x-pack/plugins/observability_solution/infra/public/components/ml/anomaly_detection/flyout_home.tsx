@@ -29,22 +29,24 @@ import moment from 'moment';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { FeatureFeedbackButton, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
-import { KibanaEnvironmentContext } from '../../../../../../hooks/use_kibana';
-import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
-import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
-} from '../../../../../../components/logging/log_analysis_setup';
-import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
-import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { LoadingPrompt } from '../../../../../../components/loading_page';
+} from '../../logging/log_analysis_setup';
+import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
+import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
+import { LoadingPrompt } from '../../loading_page';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
+import { SubscriptionSplashPrompt } from '../../subscription_splash_content';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
+import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 
 interface Props {
   hasSetupCapabilities: boolean;
   goToSetup(type: 'hosts' | 'kubernetes'): void;
   closeFlyout(): void;
+  hideJobType?: boolean;
+  hideSelectGroup?: boolean;
 }
 
 type Tab = 'jobs' | 'anomalies';
@@ -124,7 +126,7 @@ export const FlyoutHome = (props: Props) => {
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
+              <EuiTitle size="s">
                 <h2>
                   <FormattedMessage
                     defaultMessage="Machine Learning anomaly detection"
@@ -236,11 +238,14 @@ export const FlyoutHome = (props: Props) => {
                 hasSetupCapabilities={props.hasSetupCapabilities}
                 createHosts={createHosts}
                 createK8s={createK8s}
+                hideJobType={props.hideJobType}
               />
             </>
           )}
 
-          {tab === 'anomalies' && <AnomaliesTable closeFlyout={closeFlyout} />}
+          {tab === 'anomalies' && (
+            <AnomaliesTable closeFlyout={closeFlyout} hideSelectGroup={props.hideSelectGroup} />
+          )}
         </EuiFlyoutBody>
       </>
     );
@@ -294,18 +299,18 @@ interface CreateJobTab {
   hasK8sJobs: boolean;
   createHosts(): void;
   createK8s(): void;
+  hideJobType?: boolean;
 }
 
 const CreateJobTab = (props: CreateJobTab) => {
   return (
     <>
-      {/* <EuiSpacer size="l" /> */}
       <EuiFlexGroup gutterSize={'m'}>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="infraHostsJobCard"
             isDisabled={!props.hasSetupCapabilities}
             icon={<EuiIcon type={'storage'} size="xl" />}
-            // title="Hosts"
             title={
               <FormattedMessage
                 defaultMessage="Hosts"
@@ -346,50 +351,53 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            isDisabled={!props.hasSetupCapabilities}
-            icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
-            title={
-              <FormattedMessage
-                defaultMessage="Kubernetes Pods"
-                id="xpack.infra.ml.anomalyFlyout.create.k8sTitle"
-              />
-            }
-            description={
-              <FormattedMessage
-                defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
-                id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
-              />
-            }
-            footer={
-              <>
-                {props.hasK8sJobs && (
-                  <EuiButtonEmpty
-                    data-test-subj="infraCreateJobTabRecreateJobsButton"
-                    onClick={props.createK8s}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Recreate jobs"
-                      id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
-                    />
-                  </EuiButtonEmpty>
-                )}
-                {!props.hasK8sJobs && (
-                  <EuiButton
-                    data-test-subj="infraCreateJobTabEnableButton"
-                    onClick={props.createK8s}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Enable"
-                      id="xpack.infra.ml.anomalyFlyout.create.createButton"
-                    />
-                  </EuiButton>
-                )}
-              </>
-            }
-          />
-        </EuiFlexItem>
+        {!props.hideJobType && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="infraK8sJobCard"
+              isDisabled={!props.hasSetupCapabilities}
+              icon={<EuiIcon type="logoKubernetes" size="xl" />}
+              title={
+                <FormattedMessage
+                  defaultMessage="Kubernetes Pods"
+                  id="xpack.infra.ml.anomalyFlyout.create.k8sTitle"
+                />
+              }
+              description={
+                <FormattedMessage
+                  defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
+                  id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
+                />
+              }
+              footer={
+                <>
+                  {props.hasK8sJobs && (
+                    <EuiButtonEmpty
+                      data-test-subj="infraCreateJobTabRecreateJobsButton"
+                      onClick={props.createK8s}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Recreate jobs"
+                        id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
+                      />
+                    </EuiButtonEmpty>
+                  )}
+                  {!props.hasK8sJobs && (
+                    <EuiButton
+                      data-test-subj="infraCreateJobTabEnableButton"
+                      onClick={props.createK8s}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Enable"
+                        id="xpack.infra.ml.anomalyFlyout.create.createButton"
+                      />
+                    </EuiButton>
+                  )}
+                </>
+              }
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
