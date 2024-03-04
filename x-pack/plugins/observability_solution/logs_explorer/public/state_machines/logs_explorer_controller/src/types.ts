@@ -16,14 +16,13 @@ import { DoneInvokeEvent } from 'xstate';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
-  DatasetEncodingError,
   DatasetSelection,
+  DataSourceSelection,
   DataViewSelection,
-  SingleDatasetSelection,
-} from '../../../../common/dataset_selection';
+} from '../../../../common/data_source_selection';
 
-export interface WithDatasetSelection {
-  datasetSelection: DatasetSelection | DataViewSelection;
+export interface WithDataSourceSelection {
+  dataSourceSelection: DataSourceSelection;
 }
 
 export interface WithControlPanelGroupAPI {
@@ -46,7 +45,7 @@ export interface WithDataTableRecord {
   rows: DataTableRecord[];
 }
 
-export type DefaultLogsExplorerControllerState = WithDatasetSelection &
+export type DefaultLogsExplorerControllerState = WithDataSourceSelection &
   WithQueryState &
   WithDisplayOptions &
   WithDataTableRecord;
@@ -54,11 +53,11 @@ export type DefaultLogsExplorerControllerState = WithDatasetSelection &
 export type LogsExplorerControllerTypeState =
   | {
       value: 'uninitialized';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      context: WithDataSourceSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
     }
   | {
       value: 'initializingSelection';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -67,7 +66,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initializingDataset';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -75,7 +74,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initializingDataView';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -83,7 +82,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initializingControlPanels';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -91,7 +90,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initialized';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -99,8 +98,8 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.idle';
-      context: WithDatasetSelection &
+      value: 'initialized.dataSourceSelection.idle';
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -108,8 +107,8 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.changingDataView';
-      context: WithDatasetSelection &
+      value: 'initialized.dataSourceSelection.changingDataView';
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -117,8 +116,8 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.creatingAdHocDataView';
-      context: WithDatasetSelection &
+      value: 'initialized.dataSourceSelection.creatingAdHocDataView';
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -127,7 +126,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initialized.controlGroups.uninitialized';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -136,7 +135,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initialized.controlGroups.idle';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanelGroupAPI &
         WithControlPanels &
         WithQueryState &
@@ -146,7 +145,7 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initialized.controlGroups.updatingControlPanels';
-      context: WithDatasetSelection &
+      context: WithDataSourceSelection &
         WithControlPanelGroupAPI &
         WithControlPanels &
         WithQueryState &
@@ -173,11 +172,11 @@ export type LogsExplorerControllerEvent =
     }
   | {
       type: 'INITIALIZE_DATASET';
-      data?: SingleDatasetSelection;
+      data?: DatasetSelection;
     }
   | {
-      type: 'UPDATE_DATASET_SELECTION';
-      data: DatasetSelection | DataViewSelection;
+      type: 'UPDATE_DATA_SOURCE_SELECTION';
+      data: DataSourceSelection;
     }
   | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
@@ -203,8 +202,7 @@ export type LogsExplorerControllerEvent =
       type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
       refreshInterval: RefreshInterval;
     }
-  | DoneInvokeEvent<DatasetSelection | DataViewSelection>
+  | DoneInvokeEvent<DataSourceSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
-  | DoneInvokeEvent<DatasetEncodingError>
   | DoneInvokeEvent<Error>;

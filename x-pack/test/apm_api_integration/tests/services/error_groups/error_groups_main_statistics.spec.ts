@@ -58,7 +58,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Error groups main statistics', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177664
+  registry.when.skip('Error groups main statistics', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } = config;
 
