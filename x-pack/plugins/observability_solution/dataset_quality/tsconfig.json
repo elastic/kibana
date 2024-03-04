@@ -35,7 +35,8 @@
     "@kbn/lens-plugin",
     "@kbn/data-views-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/embeddable-plugin"
+    "@kbn/embeddable-plugin",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }
