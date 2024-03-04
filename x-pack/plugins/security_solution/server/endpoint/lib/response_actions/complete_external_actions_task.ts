@@ -9,6 +9,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/logging';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
 
@@ -29,8 +30,14 @@ export interface CompleteExternalResponseActionsTaskStartOptions {
 export class CompleteExternalResponseActionsTask {
   private wasSetup = false;
   private wasStarted = false;
+  private log: Logger;
+  private cleanup: (() => void | Promise<void>) | undefined;
 
-  constructor(protected readonly options: CompleteExternalResponseActionsTaskConstructorOptions) {}
+  constructor(protected readonly options: CompleteExternalResponseActionsTaskConstructorOptions) {
+    this.log = this.options.endpointAppContext.service.createLogger(
+      COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE
+    );
+  }
 
   public async setup({ taskManager }: CompleteExternalResponseActionsTaskSetupOptions) {
     if (this.wasSetup) {
@@ -39,13 +46,24 @@ export class CompleteExternalResponseActionsTask {
 
     this.wasSetup = true;
 
+    const taskInterval =
+      this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskInterval;
+    const taskTimeout =
+      this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskTimeout;
+
+    this.log.info(
+      `Registering task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] with timeout of [${taskTimeout}] and run interval of [${taskInterval}]`
+    );
+
     taskManager.registerTaskDefinitions({
       [COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE]: {
         title: 'Security Solution Complete External Response Actions',
-        timeout: '5m', // FIXME:PT introduce server config property
+        timeout: taskTimeout,
         createTaskRunner: () => {
-          // FIXME:PT add timeout to class call below
-          return new CompleteExternalActionsTaskRunner(this.options.endpointAppContext.service);
+          return new CompleteExternalActionsTaskRunner(
+            this.options.endpointAppContext.service,
+            taskInterval
+          );
         },
       },
     });
@@ -59,13 +77,22 @@ export class CompleteExternalResponseActionsTask {
     this.wasStarted = true;
 
     // TODO:PT start task
+
+    this.cleanup = () => {
+      this.log.info(
+        `Removing task definition [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] (if it exists)`
+      );
+      taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE);
+    };
   }
 
   public async stop() {
     this.wasSetup = false;
     this.wasStarted = false;
 
-    // TODO:PT remove task registration?
-    // taskManager.removeIfExists();
+    if (this.cleanup) {
+      this.cleanup();
+      this.cleanup = undefined;
+    }
   }
 }

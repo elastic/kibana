@@ -722,6 +722,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
+    this.completeExternalResponseActionsTask.stop();
     licenseService.stop();
   }
 }
