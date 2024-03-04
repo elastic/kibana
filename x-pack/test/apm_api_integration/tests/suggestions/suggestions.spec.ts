@@ -25,28 +25,32 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('suggestions when data is loaded', { config: 'basic', archives: [] }, async () => {
-    before(async () => {
-      await generateData({
-        synthtraceEsClient,
-        start: startNumber,
-        end: endNumber,
+  // FLAKY: https://github.com/elastic/kibana/issues/177538
+  registry.when.skip(
+    'suggestions when data is loaded',
+    { config: 'basic', archives: [] },
+    async () => {
+      before(async () => {
+        await generateData({
+          synthtraceEsClient,
+          start: startNumber,
+          end: endNumber,
+        });
       });
-    });
 
-    after(() => synthtraceEsClient.clean());
+      after(() => synthtraceEsClient.clean());
 
-    describe(`field: ${SERVICE_ENVIRONMENT}`, () => {
-      describe('when fieldValue is empty', () => {
-        it('returns all environments', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: {
-              query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: '', start, end },
-            },
-          });
+      describe(`field: ${SERVICE_ENVIRONMENT}`, () => {
+        describe('when fieldValue is empty', () => {
+          it('returns all environments', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: {
+                query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: '', start, end },
+              },
+            });
 
-          expectSnapshot(body.terms).toMatchInline(`
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "custom-php-environment",
               "development-0",
@@ -66,17 +70,17 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
               "staging-4",
             ]
           `);
-        });
-      });
-
-      describe('when fieldValue is not empty', () => {
-        it('returns environments that start with the fieldValue', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'prod', start, end } },
           });
+        });
 
-          expectSnapshot(body.terms).toMatchInline(`
+        describe('when fieldValue is not empty', () => {
+          it('returns environments that start with the fieldValue', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'prod', start, end } },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "production-0",
               "production-1",
@@ -85,17 +89,17 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
               "production-4",
             ]
           `);
-        });
-
-        it('returns environments that contain the fieldValue', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: {
-              query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'evelopment', start, end },
-            },
           });
 
-          expectSnapshot(body.terms).toMatchInline(`
+          it('returns environments that contain the fieldValue', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: {
+                query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'evelopment', start, end },
+              },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "development-0",
               "development-1",
@@ -104,30 +108,30 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
               "development-4",
             ]
           `);
-        });
-
-        it('returns no results if nothing matches', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: {
-              query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'foobar', start, end },
-            },
           });
 
-          expect(body.terms).to.eql([]);
+          it('returns no results if nothing matches', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: {
+                query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'foobar', start, end },
+              },
+            });
+
+            expect(body.terms).to.eql([]);
+          });
         });
       });
-    });
 
-    describe(`field: ${SERVICE_NAME}`, () => {
-      describe('when fieldValue is empty', () => {
-        it('returns all service names', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: SERVICE_NAME, fieldValue: '', start, end } },
-          });
+      describe(`field: ${SERVICE_NAME}`, () => {
+        describe('when fieldValue is empty', () => {
+          it('returns all service names', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: '', start, end } },
+            });
 
-          expectSnapshot(body.terms).toMatchInline(`
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "custom-php-service",
               "go-0",
@@ -142,17 +146,17 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
               "java-4",
             ]
           `);
-        });
-      });
-
-      describe('when fieldValue is not empty', () => {
-        it('returns services that start with the fieldValue', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: SERVICE_NAME, fieldValue: 'java', start, end } },
           });
+        });
 
-          expectSnapshot(body.terms).toMatchInline(`
+        describe('when fieldValue is not empty', () => {
+          it('returns services that start with the fieldValue', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: 'java', start, end } },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "java-0",
               "java-1",
@@ -161,66 +165,66 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
               "java-4",
             ]
           `);
-        });
-
-        it('returns services that contains the fieldValue', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: SERVICE_NAME, fieldValue: '1', start, end } },
           });
 
-          expectSnapshot(body.terms).toMatchInline(`
+          it('returns services that contains the fieldValue', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: '1', start, end } },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "go-1",
               "java-1",
             ]
           `);
+          });
         });
       });
-    });
 
-    describe(`field: ${TRANSACTION_TYPE}`, () => {
-      describe('when fieldValue is empty', () => {
-        it('returns all transaction types', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: '', start, end } },
-          });
+      describe(`field: ${TRANSACTION_TYPE}`, () => {
+        describe('when fieldValue is empty', () => {
+          it('returns all transaction types', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: '', start, end } },
+            });
 
-          expectSnapshot(body.terms).toMatchInline(`
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "custom-php-type",
               "my-custom-type",
             ]
           `);
-        });
-      });
-
-      describe('with a string parameter', () => {
-        it('returns items matching the string parameter', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: 'custom', start, end } },
           });
+        });
 
-          expectSnapshot(body.terms).toMatchInline(`
+        describe('with a string parameter', () => {
+          it('returns items matching the string parameter', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: 'custom', start, end } },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "custom-php-type",
             ]
           `);
+          });
         });
       });
-    });
 
-    describe(`field: ${TRANSACTION_NAME}`, () => {
-      describe('when fieldValue is empty', () => {
-        it('returns all transaction names', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: TRANSACTION_NAME, fieldValue: '', start, end } },
-          });
+      describe(`field: ${TRANSACTION_NAME}`, () => {
+        describe('when fieldValue is empty', () => {
+          it('returns all transaction names', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: TRANSACTION_NAME, fieldValue: '', start, end } },
+            });
 
-          expectSnapshot(body.terms).toMatchInline(`
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "GET /api/php/memory",
               "GET /api/product/:id",
@@ -229,64 +233,65 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
               "PUT /api/user/:id",
             ]
           `);
-        });
-      });
-
-      describe('with a string parameter', () => {
-        it('returns items matching the string parameter', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: { query: { fieldName: TRANSACTION_NAME, fieldValue: 'product', start, end } },
           });
+        });
 
-          expectSnapshot(body.terms).toMatchInline(`
+        describe('with a string parameter', () => {
+          it('returns items matching the string parameter', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: { query: { fieldName: TRANSACTION_NAME, fieldValue: 'product', start, end } },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "GET /api/product/:id",
               "PUT /api/product/:id",
             ]
           `);
-        });
-      });
-
-      describe('when limiting the suggestions to a specific service', () => {
-        it('returns items matching the string parameter', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: {
-              query: {
-                serviceName: 'custom-php-service',
-                fieldName: TRANSACTION_NAME,
-                fieldValue: '',
-                start,
-                end,
-              },
-            },
           });
+        });
 
-          expectSnapshot(body.terms).toMatchInline(`
+        describe('when limiting the suggestions to a specific service', () => {
+          it('returns items matching the string parameter', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: {
+                query: {
+                  serviceName: 'custom-php-service',
+                  fieldName: TRANSACTION_NAME,
+                  fieldValue: '',
+                  start,
+                  end,
+                },
+              },
+            });
+
+            expectSnapshot(body.terms).toMatchInline(`
             Array [
               "GET /api/php/memory",
             ]
           `);
-        });
-
-        it('does not return transactions from other services', async () => {
-          const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/suggestions',
-            params: {
-              query: {
-                serviceName: 'custom-php-service',
-                fieldName: TRANSACTION_NAME,
-                fieldValue: 'product',
-                start,
-                end,
-              },
-            },
           });
 
-          expect(body.terms).to.eql([]);
+          it('does not return transactions from other services', async () => {
+            const { body } = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/suggestions',
+              params: {
+                query: {
+                  serviceName: 'custom-php-service',
+                  fieldName: TRANSACTION_NAME,
+                  fieldValue: 'product',
+                  start,
+                  end,
+                },
+              },
+            });
+
+            expect(body.terms).to.eql([]);
+          });
         });
       });
-    });
-  });
+    }
+  );
 }

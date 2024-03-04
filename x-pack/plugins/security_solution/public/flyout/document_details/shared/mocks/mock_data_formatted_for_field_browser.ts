@@ -7,10 +7,15 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
-/**
- * Mock an array of fields for an alert
- */
-export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
+export const ruleTypeField: TimelineEventsDetailsItem = {
+  category: 'kibana',
+  field: 'kibana.alert.rule.type',
+  values: ['query'],
+  originalValue: ['query'],
+  isObjectArray: false,
+};
+
+export const baseFields: TimelineEventsDetailsItem[] = [
   {
     category: 'base',
     field: '@timestamp',
@@ -62,13 +67,6 @@ export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   },
   {
     category: 'kibana',
-    field: 'kibana.alert.rule.type',
-    values: ['query'],
-    originalValue: ['query'],
-    isObjectArray: false,
-  },
-  {
-    category: 'kibana',
     field: 'kibana.alert.rule.uuid',
     values: ['rule-uuid'],
     originalValue: ['rule-uuid'],
@@ -88,4 +86,29 @@ export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
     originalValue: ['process-entity_id'],
     isObjectArray: false,
   },
+];
+
+/**
+ * Mock an array of fields for an alert
+ */
+export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
+  ruleTypeField,
+  ...baseFields,
+];
+
+export const mockDataFormattedForFieldBrowserWithOverridenField = [
+  { ...ruleTypeField, values: ['threshold'], originalValue: ['threshold'] },
+  {
+    category: 'base',
+    field: 'kibana.alert.threshold_result.terms.field',
+    values: ['original value'],
+    isObjectArray: false,
+  },
+  {
+    category: 'base',
+    field: 'kibana.alert.threshold_result.terms.value',
+    values: ['overriden value'],
+    isObjectArray: false,
+  },
+  ...baseFields,
 ];

@@ -865,7 +865,7 @@ describe('agent policy', () => {
       expect(esClient.bulk).toBeCalledWith(
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
-          body: [
+          operations: [
             expect.objectContaining({
               index: {
                 _id: expect.anything(),
