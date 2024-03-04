@@ -49,7 +49,7 @@ export interface CreateTest {
   kbnTestServer: any;
 }
 
-function downloadFile(filePath: string, url: string): string {
+function downloadFile(filePath: string, url: string) {
   const file = fs.createWriteStream(filePath);
   https.get(url, (response) => {
     response.pipe(file);
@@ -59,7 +59,7 @@ function downloadFile(filePath: string, url: string): string {
   });
 }
 
-function downloadElserModel() {
+function downloadElserModel(): string {
   const elserModelDir = fs.mkdtempSync(path.join(os.tmpdir(), 'elser_model_'));
   downloadFile(
     path.join(elserModelDir, 'elser_model_2.metadata.json'),
