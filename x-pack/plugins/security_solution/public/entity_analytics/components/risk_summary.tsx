@@ -36,16 +36,10 @@ interface UserRiskEntity {
 export type RiskEntity = HostRiskEntity | UserRiskEntity;
 
 const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, originalRisk }) => {
-  let currentRiskScore =
+  const currentRiskScore =
     riskEntity === RiskScoreEntity.host
       ? risk?.result?.[0]?.host?.risk?.calculated_level
       : risk?.result?.[0]?.user?.risk?.calculated_level;
-
-  // sometimes there is a race condition where the currentRisk is not yet available
-  // in that case, we will use the originalRisk as the currentRisk
-  if (!currentRiskScore && originalRisk) {
-    currentRiskScore = originalRisk;
-  }
 
   return (
     <>
@@ -79,7 +73,9 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
             />
           }
         />
+
         {risk.loading && <EuiLoadingSpinner data-test-subj="loading" />}
+
         {!risk.loading && (
           <>
             <EnrichedDataRow
