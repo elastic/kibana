@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.12.2",
+  "version": "8.12.3",
   "branch": "8.12",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "18.18.2",
+    "node": "18.19.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {

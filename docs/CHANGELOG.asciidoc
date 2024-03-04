@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.12.2>>
 * <<release-notes-8.12.1>>
 * <<release-notes-8.12.0>>
 * <<release-notes-8.11.4>>
@@ -59,6 +60,35 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.12.2]]
+== {kib} 8.12.2
+
+The 8.12.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.12.2]]
+=== Bug Fixes
+Alerting::
+* Fixes Discover results when an alert excludes matches from previous runs ({kibana-pull}176690[#176690]).
+* Fixes bug where using select all on the rules list bypassed filters ({kibana-pull}176962[#176962]).
+Elastic Security::
+For the Elastic Security 8.12.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes a popover about inactive agents not being dismissible ({kibana-pull}176929[#176929]).
+* Fixes logstash output being link:https://www.rfc-editor.org/rfc/rfc952[RFC-952] compliant ({kibana-pull}176298[#176298]).
+* Fixes assets being unintentionally moved to the default space during Fleet setup ({kibana-pull}176173[#176173]).
+* Fixes categories labels in integration overview ({kibana-pull}176141[#176141]).
+* Fixes the ability to delete agent policies with inactive agents from UI, the inactive agents need to be unenrolled first ({kibana-pull}175815[#175815]).
+Machine Learning::
+* Fixes Single Metric Viewer's zoom range settings in URL not being restored if the URL specifies a `forecastId` ({kibana-pull}176969[#176969]).
+* Fixes incorrect document count values in Top Values statistics ({kibana-pull}176328[#176328]).
+* Fixes color of markers in Single Metric Viewer when there is sparse data for anomaly detection ({kibana-pull}176303[#176303]).
+Management::
+* Fixes package showing 'Needs authorization' warning even after transform assets were authorized successfully ({kibana-pull}176647[#176647]).
+Observability::
+* Fixes and simplifies write access default behavior ({kibana-pull}177088[#177088]).
+* Fixes recall speed when using CVS output ({kibana-pull}176428[#176428]).
+
 [[release-notes-8.12.1]]
 == {kib} 8.12.1
 
