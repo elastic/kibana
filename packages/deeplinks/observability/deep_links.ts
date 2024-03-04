@@ -43,7 +43,12 @@ export type ObservabilityOverviewLinkId =
   | 'rules'
   | 'slos';
 
-export type MetricsLinkId = 'inventory' | 'metrics-explorer' | 'hosts' | 'settings';
+export type MetricsLinkId =
+  | 'inventory'
+  | 'metrics-explorer'
+  | 'hosts'
+  | 'settings'
+  | 'assetDetails';
 
 export type ApmLinkId =
   | 'services'
