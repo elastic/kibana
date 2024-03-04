@@ -47,6 +47,7 @@ interface FieldCapsApiParams {
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     },
     fields = ['*'],
     expandWildcards,
+    includeEmptyFields,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -81,11 +83,17 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         ignore_unavailable: true,
         index_filter: indexFilter,
         expand_wildcards: expandWildcards,
+        // @ts-expect-error
+        include_empty_fields: includeEmptyFields ?? true,
         ...fieldCapsOptions,
       },
       { meta: true }
     );
   } catch (error) {
+    // return an empty set for closed indices
+    if (error.message.startsWith('cluster_block_exception')) {
+      return { body: { indices: [], fields: {} } };
+    }
     throw convertEsError(indices, error);
   }
 }

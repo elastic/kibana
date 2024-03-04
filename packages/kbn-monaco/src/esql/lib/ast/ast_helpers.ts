@@ -21,6 +21,7 @@ import type {
   QualifiedIntegerLiteralContext,
 } from '../../antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './shared/constants';
 import type {
   ESQLCommand,
   ESQLLiteral,
@@ -99,8 +100,12 @@ export function createLiteralString(token: Token): ESQLLiteral {
   };
 }
 
-export function isMissingText(text: string) {
+function isMissingText(text: string) {
   return /<missing /.test(text);
+}
+
+export function textExistsAndIsValid(text: string | undefined): text is string {
+  return !!(text && !isMissingText(text));
 }
 
 export function createLiteral(
@@ -205,24 +210,31 @@ function getQuotedText(ctx: ParserRuleContext) {
 function getUnquotedText(ctx: ParserRuleContext) {
   return [
     65 /* esql_parser.UNQUOTED_IDENTIFIER */, 71 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
-    75 /* esql_parser.UNQUOTED_ID_PATTERN */,
+    105 /* esql_parser.UNQUOTED_ID_PATTERN */,
   ]
     .map((keyCode) => ctx.tryGetToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 /* SCRIPT_MARKER_END */
 
-const TICKS_REGEX = /(`)/g;
-
 function isQuoted(text: string | undefined) {
   return text && /^(`)/.test(text);
+}
+
+/**
+ * Follow a similar logic to the ES one:
+ * * remove backticks at the beginning and at the end
+ * * remove double backticks
+ */
+function safeBackticksRemoval(text: string | undefined) {
+  return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
   return (
     getUnquotedText(ctx)?.text ||
-    getQuotedText(ctx)?.text.replace(TICKS_REGEX, '') ||
-    ctx.text.replace(TICKS_REGEX, '') // for some reason some quoted text is not detected correctly by the parser
+    safeBackticksRemoval(getQuotedText(ctx)?.text) ||
+    safeBackticksRemoval(ctx.text) // for some reason some quoted text is not detected correctly by the parser
   );
 }
 

@@ -18,6 +18,7 @@ import type {
   PublishesLocalUnifiedSearch,
   PublishesDataViews,
 } from '@kbn/presentation-publishing';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
 import { deleteUndefinedKeys } from './util';
@@ -78,7 +79,7 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
   return {
     panel: deleteUndefinedKeys({
       id: api.uuid,
-      title: api.panelTitle?.value ?? api.defaultPanelTitle?.value,
+      title: getPanelTitle(api),
       savedObjectId: api.savedObjectId?.value,
       query: api.parentApi?.localQuery?.value,
       timeRange: api.localTimeRange?.value ?? api.parentApi?.localTimeRange?.value,

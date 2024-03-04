@@ -110,7 +110,9 @@
     "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
     "@kbn/presentation-publishing",
-    "@kbn/saved-objects-finder-plugin"
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/shared-ux-markdown"
   ],
   "exclude": ["target/**/*"]
 }

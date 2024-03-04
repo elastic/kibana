@@ -74,8 +74,8 @@ import {
   createColumnStar,
   wrapIdentifierAsArray,
   createPolicy,
-  isMissingText,
   createSetting,
+  textExistsAndIsValid,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -105,7 +105,7 @@ function extractIdentifiers(
 function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
   const args: ESQLColumn[] =
     identifiers
-      .filter((child) => child.text)
+      .filter((child) => textExistsAndIsValid(child.text))
       .map((sourceContext) => {
         return createColumn(sourceContext);
       }) ?? [];
@@ -120,7 +120,7 @@ export function collectAllColumnIdentifiers(
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName || !ctx._policyName.text || /<missing /.test(ctx._policyName.text)) {
+  if (!ctx._policyName || !textExistsAndIsValid(ctx._policyName.text)) {
     return [];
   }
   const policyComponents = ctx._policyName.text.split(':');
@@ -138,7 +138,7 @@ export function getMatchField(ctx: EnrichCommandContext) {
   const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
     const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
-    if (identifier.text) {
+    if (textExistsAndIsValid(identifier.text)) {
       fn.args.push(createColumn(identifier));
     }
     // overwrite the location inferring the correct position
@@ -156,15 +156,22 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
     const clauses = ctx.enrichWithClause();
     for (const clause of clauses) {
       if (clause._enrichField) {
-        const args = [
+        const args = [];
+        if (clause.ASSIGN()) {
+          args.push(createColumn(clause._newName));
+          if (textExistsAndIsValid(clause._enrichField?.text)) {
+            args.push(createColumn(clause._enrichField));
+          }
+        } else {
           // if an explicit assign is not set, create a fake assign with
           // both left and right value with the same column
-          clause.ASSIGN() ? createColumn(clause._newName) : createColumn(clause._enrichField),
-          createColumn(clause._enrichField),
-        ].filter(nonNullable);
+          if (textExistsAndIsValid(clause._enrichField?.text)) {
+            args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
+          }
+        }
         if (args.length) {
           const fn = createFunction('=', clause);
-          fn.args.push(args[0], [args[1]]);
+          fn.args.push(args[0], args[1] ? [args[1]] : []);
           option.args.push(fn);
         }
       }
@@ -204,7 +211,7 @@ function visitLogicalIns(ctx: LogicalInContext) {
       .filter(nonNullable)
       .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
     // distinguish between missing brackets (missing text error) and an empty list
-    if (!isMissingText(ctx.text)) {
+    if (textExistsAndIsValid(ctx.text)) {
       fn.args.push(listArgs);
     }
   }
@@ -228,7 +235,6 @@ function getMathOperation(ctx: ArithmeticBinaryContext) {
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
     ctx.EQ()?.text ||
-    ctx.CIEQ()?.text ||
     ctx.NEQ()?.text ||
     ctx.LT()?.text ||
     ctx.LTE()?.text ||
@@ -239,7 +245,7 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
-  if (isMissingText(ctx.text)) {
+  if (!textExistsAndIsValid(ctx.text)) {
     return [];
   }
   if (ctx instanceof ValueExpressionDefaultContext) {
@@ -348,12 +354,12 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       if (asToken) {
         const fn = createOption(asToken.text.toLowerCase(), clause);
         for (const arg of [clause._oldName, clause._newName]) {
-          if (arg?.text) {
+          if (textExistsAndIsValid(arg.text)) {
             fn.args.push(createColumn(arg));
           }
         }
         return fn;
-      } else if (clause._oldName?.text) {
+      } else if (textExistsAndIsValid(clause._oldName?.text)) {
         return createColumn(clause._oldName);
       }
     })
@@ -454,12 +460,14 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   if (!ctx) {
     return ast;
   }
-  return ast.concat(
-    collectLogicalExpression(ctx),
-    collectRegexExpression(ctx),
-    collectIsNullExpression(ctx),
-    collectDefaultExpression(ctx)
-  );
+  return ast
+    .concat(
+      collectLogicalExpression(ctx),
+      collectRegexExpression(ctx),
+      collectIsNullExpression(ctx),
+      collectDefaultExpression(ctx)
+    )
+    .flat();
 }
 
 export function visitField(ctx: FieldContext) {
@@ -536,7 +544,7 @@ export function visitDissect(ctx: DissectCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    ...(pattern && !isMissingText(pattern.text)
+    ...(pattern && textExistsAndIsValid(pattern.text)
       ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
       : []),
   ].filter(nonNullable);
@@ -546,7 +554,7 @@ export function visitGrok(ctx: GrokCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    ...(pattern && !isMissingText(pattern.text) ? [createLiteral('string', pattern)] : []),
+    ...(pattern && textExistsAndIsValid(pattern.text) ? [createLiteral('string', pattern)] : []),
   ].filter(nonNullable);
 }
 

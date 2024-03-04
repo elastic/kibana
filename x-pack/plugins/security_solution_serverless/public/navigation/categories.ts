@@ -45,6 +45,11 @@ export const CATEGORIES: Array<SeparatorLinkCategory<ProjectPageName>> = [
     type: LinkCategoryType.separator,
     linkIds: [SecurityPageName.mlLanding],
   },
+  // --- Hidden links that need to be configured in the navigationTree for breadcrumbs ---
+  {
+    type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.entityAnalyticsManagement], // Linked from the management cards landing.
+  },
 ];
 
 export const FOOTER_CATEGORIES: Array<LinkCategory<ProjectPageName>> = [

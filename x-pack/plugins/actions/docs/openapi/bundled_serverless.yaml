@@ -642,13 +642,15 @@ components:
           $ref: '#/components/schemas/secrets_properties_servicenow'
     create_connector_request_slack_api:
       title: Create Slack connector request
-      description: The Slack connector uses Slack Incoming Webhooks.
+      description: The Slack connector uses an API method to send Slack messages.
       type: object
       required:
         - connector_type_id
         - name
         - secrets
       properties:
+        config:
+          $ref: '#/components/schemas/config_properties_slack_api'
         connector_type_id:
           type: string
           description: The type of connector.
@@ -1345,6 +1347,30 @@ components:
           description: |
             The identifier to use for OAuth authentication. This identifier should be the user field you selected when you created an OAuth JWT API endpoint for external clients in your ServiceNow instance. For example, if the selected user field is `Email`, the user identifier should be the user's email address. This property is required when `isOAuth` is `true`.
           type: string
+    config_properties_slack_api:
+      title: Connector request properties for a Slack connector
+      description: Defines properties for connectors when type is `.slack_api`.
+      type: object
+      properties:
+        allowedChannels:
+          type: array
+          description: A list of valid Slack channels.
+          items:
+            type: object
+            required:
+              - id
+              - name
+            maxItems: 25
+            properties:
+              id:
+                type: string
+                description: The Slack channel ID.
+                example: C123ABC456
+                minLength: 1
+              name:
+                type: string
+                description: The Slack channel name.
+                minLength: 1
     secrets_properties_slack_api:
       title: Connector secrets properties for a Web API Slack connector
       description: Defines secrets for connectors when type is `.slack`.
@@ -2242,6 +2268,8 @@ components:
         - is_preconfigured
         - name
       properties:
+        config:
+          $ref: '#/components/schemas/config_properties_slack_api'
         connector_type_id:
           type: string
           description: The type of connector.
@@ -2747,6 +2775,8 @@ components:
         - name
         - secrets
       properties:
+        config:
+          $ref: '#/components/schemas/config_properties_slack_api'
         name:
           type: string
           description: The display name for the connector.

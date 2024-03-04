@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BETA, BETA_TOOLTIP } from '../../common/translations';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
 import type { ImmutableArray } from '../../../common/endpoint/types';
 import {
@@ -46,7 +46,6 @@ type ResponderInfoProps =
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
       capabilities: ImmutableArray<string>;
       platform: string;
-      lastCheckin: string;
     });
 
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
@@ -115,7 +114,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                 <HeaderSentinelOneInfo
                   agentId={agentId}
                   hostName={hostName}
-                  lastCheckin={props.lastCheckin}
                   platform={props.platform}
                 />
               );
@@ -138,7 +136,10 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                   <EuiFlexGroup>
                     <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
+                      <EuiBetaBadge
+                        label={TECHNICAL_PREVIEW}
+                        tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 );
@@ -150,7 +151,11 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               : undefined,
             PageBodyComponent: () => (
               <>
-                <OfflineCallout endpointId={props.agentId} />
+                <OfflineCallout
+                  endpointId={props.agentId}
+                  agentType={agentType}
+                  hostName={hostName}
+                />
                 <MissingEncryptionKeyCallout />
               </>
             ),
