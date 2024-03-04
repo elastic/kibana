@@ -16,13 +16,13 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableChangePointChartInput } from './embeddable/embeddable_change_point_chart';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
-  cases: CasesUiSetup;
+  cases: CasesPublicSetup;
   licensing: LicensingPluginSetup;
 
   uiActions: UiActionsSetup;
