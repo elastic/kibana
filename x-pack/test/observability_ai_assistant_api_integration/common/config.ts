@@ -117,7 +117,7 @@ export function createObservabilityAIAssistantAPIConfig({
       license,
       serverArgs: [
         ...config.get('esTestCluster.serverArgs'),
-        `--xpack.ml.model_repository=${elserModelPath}`,
+        `xpack.ml.model_repository=${elserModelPath}`,
       ],
     },
     kbnTestServer: {
