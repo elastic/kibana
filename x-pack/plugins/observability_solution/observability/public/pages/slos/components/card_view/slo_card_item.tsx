@@ -31,7 +31,6 @@ import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
-import { SloCardBadgesPortal } from './badges_portal';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 

@@ -8,9 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, {  useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -76,11 +76,7 @@ export interface Props {
   isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
 }
-export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelectedTab }: Props) {
-  const { data: activeAlerts } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
-    shouldRefetch: isAutoRefreshing,
-  });
+export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
   const burnRateOptions =
     rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
@@ -138,7 +134,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
           <BurnRates
             slo={slo}
             isAutoRefreshing={isAutoRefreshing}
-            burnRateOptions={BURN_RATE_OPTIONS}
+            burnRateOptions={burnRateOptions}
           />
         </EuiFlexItem>
         <EuiFlexItem>
