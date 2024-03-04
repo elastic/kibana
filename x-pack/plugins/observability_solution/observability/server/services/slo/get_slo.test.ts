@@ -30,6 +30,7 @@ describe('GetSLO', () => {
       mockRepository.findById.mockResolvedValueOnce(slo);
       mockSummaryClient.computeSummary.mockResolvedValueOnce({
         groupings: {},
+        meta: {},
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,
