@@ -15,7 +15,7 @@ import {
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
 
-import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
+import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
@@ -24,7 +24,7 @@ import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
-// `x-pack/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
+// `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
 export const getTopTermRequest = (
   params: AiopsLogRateAnalysisSchema,
@@ -60,7 +60,7 @@ export const getTopTermRequest = (
     log_rate_top_terms: {
       terms: {
         field: fieldName,
-        size: 10,
+        size: LOG_RATE_ANALYSIS_SETTINGS.TOP_TERMS_FALLBACK_SIZE,
       },
     },
   };

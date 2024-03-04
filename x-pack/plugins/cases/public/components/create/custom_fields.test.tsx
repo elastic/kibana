@@ -16,8 +16,7 @@ import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
 import * as i18n from './translations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/176805
-describe.skip('CustomFields', () => {
+describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 

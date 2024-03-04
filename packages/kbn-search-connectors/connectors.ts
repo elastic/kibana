@@ -44,6 +44,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'confluence',
   },
   {
+    iconPath: 'confluence_cloud.svg',
+    isBeta: false,
+    isNative: true,
+    isTechPreview: true,
+    keywords: ['confluence', 'data', 'center', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.confluence_data_center.name', {
+      defaultMessage: 'Confluence Data Center',
+    }),
+    serviceType: 'confluence',
+  },
+  {
     iconPath: 'dropbox.svg',
     isBeta: false,
     isNative: true,
@@ -61,6 +72,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     keywords: ['jira', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.jira.name', {
       defaultMessage: 'Jira Cloud & Server',
+    }),
+    serviceType: 'jira',
+  },
+  {
+    iconPath: 'jira_cloud.svg',
+    isBeta: false,
+    isTechPreview: true,
+    isNative: true,
+    keywords: ['jira', 'data', 'center', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.jira_data_center.name', {
+      defaultMessage: 'Jira Data Center',
     }),
     serviceType: 'jira',
   },
@@ -135,6 +157,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'network_drive',
   },
   {
+    iconPath: 'notion.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['notion', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.notion.name', {
+      defaultMessage: 'Notion',
+    }),
+    serviceType: 'notion',
+  },
+  {
     iconPath: 'postgresql.svg',
     isBeta: false,
     isNative: true,
@@ -143,6 +175,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
+  },
+  {
+    iconPath: 'redis.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['redis', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.redis.name', {
+      defaultMessage: 'Redis',
+    }),
+    serviceType: 'redis',
   },
   {
     iconPath: 'salesforce.svg',
