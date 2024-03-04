@@ -9,7 +9,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
+
+const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE = 'endpoint:complete-external-response-actions';
 
 export interface CompleteExternalResponseActionsTaskConstructorOptions {
   endpointAppContext: EndpointAppContext;
@@ -24,11 +27,6 @@ export interface CompleteExternalResponseActionsTaskStartOptions {
 }
 
 export class CompleteExternalResponseActionsTask {
-  /**
-   * The task `type` as registered with Task Manager
-   */
-  static readonly TASK_TYPE = 'endpoint:complete-external-response-actions';
-
   private wasSetup = false;
   private wasStarted = false;
 
@@ -41,7 +39,16 @@ export class CompleteExternalResponseActionsTask {
 
     this.wasSetup = true;
 
-    // TODO:PT register task
+    taskManager.registerTaskDefinitions({
+      [COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE]: {
+        title: 'Security Solution Complete External Response Actions',
+        timeout: '5m', // FIXME:PT introduce server config property
+        createTaskRunner: () => {
+          // FIXME:PT add timeout to class call below
+          return new CompleteExternalActionsTaskRunner(this.options.endpointAppContext.service);
+        },
+      },
+    });
   }
 
   public async start({ taskManager }: CompleteExternalResponseActionsTaskStartOptions) {
