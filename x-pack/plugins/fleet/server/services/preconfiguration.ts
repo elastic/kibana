@@ -305,6 +305,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
+    // @ts-expect-error upgrade typescript v4.9.5
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
