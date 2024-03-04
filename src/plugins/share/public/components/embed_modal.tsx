@@ -145,31 +145,30 @@ export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
   };
 
   const setUrlHelper = useCallback(() => {
-    let tempUrl: string = '';
+    let tempUrl: string | undefined;
 
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      tempUrl = getSavedObjectUrl() ?? '';
+      tempUrl = getSavedObjectUrl();
     } else if (useShortUrl && shortUrlCache) {
       tempUrl = shortUrlCache;
     } else {
       tempUrl = getSnapshotUrl();
     }
 
-    if (url) {
-      tempUrl = addUrlAnonymousAccessParameters(url);
+    if (tempUrl) {
+      tempUrl = addUrlAnonymousAccessParameters(tempUrl!);
     }
 
     if (isEmbedded) {
-      tempUrl = makeIframeTag(url) ?? '';
+      tempUrl = makeIframeTag(tempUrl!);
     }
-    setUrl(tempUrl);
+    setUrl(tempUrl!);
   }, [
     addUrlAnonymousAccessParameters,
     exportUrlAs,
     getSavedObjectUrl,
     getSnapshotUrl,
     shortUrlCache,
-    url,
     useShortUrl,
   ]);
 
@@ -190,7 +189,7 @@ export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
   const renderButtons = () => {
     const { dataTestSubj, formattedMessageId, defaultMessage } = action;
     return (
-      <EuiCopy textToCopy={url ?? ''}>
+      <EuiCopy textToCopy={url}>
         {(copy) => (
           <EuiButton fill data-test-subj={dataTestSubj} data-share-url={url} onClick={copy}>
             <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
