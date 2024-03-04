@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
+import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import { useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../synthetics_common/field_selector';
@@ -32,9 +32,9 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
   });
 
   const filters = {
-    monitorIds: monitorIds.map((id) => id.value).filter((id) => id !== '*'),
-    projects: projects.map((project) => project.value).filter((id) => id !== '*'),
-    tags: tags.map((tag) => tag.value).filter((id) => id !== '*'),
+    monitorIds: monitorIds.map((id) => id.value).filter((id) => id !== ALL_VALUE),
+    projects: projects.map((project) => project.value).filter((id) => id !== ALL_VALUE),
+    tags: tags.map((tag) => tag.value).filter((id) => id !== ALL_VALUE),
   };
 
   return (

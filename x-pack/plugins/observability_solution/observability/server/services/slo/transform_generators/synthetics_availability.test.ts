@@ -12,7 +12,7 @@ import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availabil
 
 const generator = new SyntheticsAvailabilityTransformGenerator();
 
-describe('APM Transaction Duration Transform Generator', () => {
+describe('Synthetics Availability Transform Generator', () => {
   const spaceId = 'custom-space';
 
   it('returns the expected transform params', () => {

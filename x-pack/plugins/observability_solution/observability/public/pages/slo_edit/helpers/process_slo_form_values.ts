@@ -165,6 +165,7 @@ export function transformPartialUrlStateToFormState(
   switch (indicator?.type) {
     case 'sli.synthetics.availability':
       state = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY);
+      break;
     default:
       state = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES);
   }
