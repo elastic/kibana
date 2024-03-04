@@ -14,7 +14,6 @@ import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput, PersistableControlGroupInput } from '../../common/control_group/types';
 import { TimeSlice } from '../../common/types';
 
-/** TODO: make filters singular */
 export interface ControlFilterOutput {
   filters?: Filter[];
 }

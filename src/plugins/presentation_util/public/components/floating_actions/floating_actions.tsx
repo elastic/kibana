@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 import classNames from 'classnames';
-import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
+import React, { FC, ReactElement, useEffect, useState } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   panelHoverTrigger,
   PANEL_HOVER_TRIGGER,
@@ -43,20 +41,13 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
-  const isMounted = useRef(false);
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
-
-  useMount(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  });
 
   useEffect(() => {
     if (!embeddable) return;
 
     const getActions = async () => {
+      let mounted = true;
       const context = {
         embeddable,
         trigger: panelHoverTrigger,
@@ -67,8 +58,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      if (!isMounted.current) return;
-
+      if (!mounted) return;
       if (actions.length > 0) {
         setFloatingActions(
           <>
@@ -83,6 +73,9 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       } else {
         setFloatingActions(undefined);
       }
+      return () => {
+        mounted = false;
+      };
     };
 
     getActions();
@@ -94,14 +87,9 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       data-test-subj={`presentationUtil__floatingActionsWrapper__${embeddable?.id}`}
     >
       {children}
-      {isEnabled && embeddable && (
-        <div
-          className={classNames('presentationUtil__floatingActions', className)}
-          data-test-subj={`presentationUtil__floatingActions__${embeddable.id}`}
-        >
-          {floatingActions ?? (
-            <EuiLoadingSpinner data-test-subj="presentationUtil_loadingfloatingActions" size="s" />
-          )}
+      {isEnabled && floatingActions && (
+        <div className={classNames('presentationUtil__floatingActions', className)}>
+          {floatingActions}
         </div>
       )}
     </div>

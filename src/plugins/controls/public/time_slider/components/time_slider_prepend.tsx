@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
-import React, { FC, useState } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
-import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { first } from 'rxjs/operators';
 import { useControlGroupContainer } from '../../control_group/embeddable/control_group_container';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { TimeSliderStrings } from './time_slider_strings';
 
 interface Props {
   onNext: () => void;
@@ -32,7 +32,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
 
-  const playNextFrame = () => {
+  const playNextFrame = useCallback(() => {
     // advance to next frame
     props.onNext();
 
@@ -48,15 +48,15 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         });
       setSubscription(nextFrameSubscription);
     }
-  };
+  }, [props]);
 
-  const onPlay = () => {
+  const onPlay = useCallback(() => {
     timeSlider.dispatch.setIsOpen({ isOpen: true });
     setIsPaused(false);
     playNextFrame();
-  };
+  }, [timeSlider.dispatch, playNextFrame]);
 
-  const onPause = () => {
+  const onPause = useCallback(() => {
     timeSlider.dispatch.setIsOpen({ isOpen: true });
     setIsPaused(true);
     if (subscription) {
@@ -67,7 +67,22 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
       clearTimeout(timeoutId);
       setTimeoutId(undefined);
     }
-  };
+  }, [timeSlider.dispatch, subscription, timeoutId]);
+
+  const PlayButton = useMemo(
+    () => (
+      <EuiButtonIcon
+        className="timeSlider-playToggle"
+        onClick={isPaused ? onPlay : onPause}
+        disabled={showApplySelectionsButton}
+        iconType={isPaused ? 'playFilled' : 'pause'}
+        size="s"
+        display="fill"
+        aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(isPaused)}
+      />
+    ),
+    [isPaused, onPlay, onPause, showApplySelectionsButton]
+  );
 
   return (
     <div>
@@ -78,37 +93,16 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         }}
         iconType="framePrevious"
         color="text"
-        aria-label={i18n.translate('controls.timeSlider.previousLabel', {
-          defaultMessage: 'Previous time window',
-        })}
+        aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
         data-test-subj="timeSlider-previousTimeWindow"
       />
-      {props.waitForControlOutputConsumersToLoad$ === undefined ? null : (
-        // <EuiToolTip
-        //   content={
-        //     showApplySelectionsButton
-        //       ? 'Only applicable when auto-apply selections is enabled.'
-        //       : 'Play'
-        //   }
-        // >
-        <EuiButtonIcon
-          className="timeSlider-playToggle"
-          onClick={isPaused ? onPlay : onPause}
-          disabled={showApplySelectionsButton}
-          iconType={isPaused ? 'playFilled' : 'pause'}
-          size="s"
-          display="fill"
-          aria-label={
-            isPaused
-              ? i18n.translate('controls.timeSlider.playLabel', {
-                  defaultMessage: 'Play',
-                })
-              : i18n.translate('controls.timeSlider.pauseLabel', {
-                  defaultMessage: 'Pause',
-                })
-          }
-        />
-        // </EuiToolTip>
+      {props.waitForControlOutputConsumersToLoad$ ===
+      undefined ? null : showApplySelectionsButton ? (
+        <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
+          {PlayButton}
+        </EuiToolTip>
+      ) : (
+        PlayButton
       )}
       <EuiButtonIcon
         onClick={() => {
@@ -117,9 +111,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         }}
         iconType="frameNext"
         color="text"
-        aria-label={i18n.translate('controls.timeSlider.nextLabel', {
-          defaultMessage: 'Next time window',
-        })}
+        aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
         data-test-subj="timeSlider-nextTimeWindow"
       />
     </div>
