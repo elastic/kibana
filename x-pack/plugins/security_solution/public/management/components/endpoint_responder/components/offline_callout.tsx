@@ -35,6 +35,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
 
   const { data } = useGetSentinelOneAgentStatus([endpointId]);
 
+  // TODO: simplify this to use the yet to be implemented agentStatus API hook
   const showOfflineCallout = useMemo(
     () =>
       (isEndpointAgent && endpointDetails?.host_status === HostStatus.OFFLINE) ||
