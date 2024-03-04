@@ -166,6 +166,7 @@ export const StepsList = ({
       render: (_val: string, item) =>
         compactView ? (
           <EuiButtonIcon
+            data-test-subj="observabilitySolutionColumnsButton"
             href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
             target="_blank"
             iconType="visArea"
