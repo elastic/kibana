@@ -30,7 +30,7 @@ export class ContextService {
   public registerContextProvider<Context>({
     name,
     context$,
-    schema,
+    schema, // @ts-expect-error upgrade typescript v4.9.5
   }: ContextProviderOpts<Context>) {
     if (this.contextProvidersSubscriptions.has(name)) {
       throw new Error(`Context provider with name '${name}' already registered`);
@@ -60,6 +60,7 @@ export class ContextService {
       .subscribe((context) => {
         // We store each context linked to the context provider so they can increase and reduce
         // the number of fields they report without having left-overs in the global context.
+        // @ts-expect-error upgrade typescript v4.9.5
         this.contextProvidersRegistry.set(name, context);
 
         // For every context change, we rebuild the global context.

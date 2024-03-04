@@ -532,7 +532,25 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('the button before pressing it', async () => {
       return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
     });
-    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+    await this.retry.waitForWithTimeout('view all matches to load', 60000, async () => {
+      try {
+        // We need to manually click the button since testSubjects.click will
+        // use a retry, but we want this to throw if the click fails since it
+        // means the button disappeared before we could click it
+        const button = await this.testSubjects.find('discoverNoResultsViewAllMatches', 1000);
+        // Don't click the button if it's disabled since it means the previous
+        // click succeeded and the request is still loading
+        if (await button.isEnabled()) {
+          await button.click();
+        }
+      } catch {
+        // We could get an exception here if the button isn't found or isn't in
+        // the DOM by the time we try to click it, so just ignore it and move on
+      }
+      await this.waitUntilSearchingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
+      return !(await this.testSubjects.exists('discoverNoResultsViewAllMatches'));
+    });
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
@@ -551,13 +569,18 @@ export class DiscoverPageObject extends FtrService {
     return hasBadge;
   }
 
-  public async selectIndexPattern(indexPattern: string) {
+  public async selectIndexPattern(
+    indexPattern: string,
+    waitUntilLoadingHasFinished: boolean = true
+  ) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
     );
-    await this.header.waitUntilLoadingHasFinished();
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async getIndexPatterns() {
