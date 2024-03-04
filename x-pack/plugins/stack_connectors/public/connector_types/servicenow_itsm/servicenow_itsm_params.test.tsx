@@ -339,5 +339,27 @@ describe('ServiceNowITSMParamsFields renders', () => {
         incident: { correlation_id: 'updated correlation id' },
       });
     });
+
+    test('throws error if correlation_id is null and sub action is recovered', () => {
+      const newProps = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'closeIncident',
+          subActionParams: {
+            incident: {
+              ...defaultProps.actionParams.subActionParams.incident,
+              correlation_id: null,
+            },
+            comments: null,
+          },
+        },
+        errors: { 'subActionParams.incident.correlation_id': ['correlation_id_error'] },
+        selectedActionGroupId: ACTION_GROUP_RECOVERED,
+      };
+
+      const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+
+      expect(wrapper.find('.euiFormErrorText').text()).toBe('correlation_id_error');
+    });
   });
 });

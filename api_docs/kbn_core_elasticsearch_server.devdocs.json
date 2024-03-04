@@ -766,7 +766,7 @@
               },
               {
                 "plugin": "observabilityOnboarding",
-                "path": "x-pack/plugins/observability_onboarding/server/plugin.ts"
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/server/plugin.ts"
               },
               {
                 "plugin": "console",
