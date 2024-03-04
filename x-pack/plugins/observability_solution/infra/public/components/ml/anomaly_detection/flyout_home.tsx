@@ -356,7 +356,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             <EuiCard
               data-test-subj="infraK8sJobCard"
               isDisabled={!props.hasSetupCapabilities}
-              icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
+              icon={<EuiIcon type="logoKubernetes" size="xl" />}
               title={
                 <FormattedMessage
                   defaultMessage="Kubernetes Pods"
