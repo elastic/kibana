@@ -89,3 +89,9 @@ export const CONFIGURATION_LABEL = i18n.translate(
     defaultMessage: 'Configuration',
   }
 );
+export const SCHEDULING_LABEL = i18n.translate(
+  'xpack.serverlessSearch.connectors.schedulingLabel',
+  {
+    defaultMessage: 'Scheduling',
+  }
+);
