@@ -14,6 +14,7 @@ export interface EsBucket {
   doc_count: number;
 }
 export interface ApiKeyAggregationResult {
+  total: number;
   aggregations: {
     usernames: {
       doc_count_error_upper_bound: number;
@@ -113,6 +114,7 @@ export function defineQueryApiKeysAggregationsRoute({
 
         return response.ok<ApiKeyAggregationResult>({
           body: {
+            total: transportResponse.total,
             aggregations: transportResponse.aggregations,
           },
         });

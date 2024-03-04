@@ -47,7 +47,6 @@ import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
 import type { AuthenticatedUser } from '../../../../common';
 import type { ApiKey, ApiKeyAggregations, RestApiKey } from '../../../../common/model';
-import type { QueryApiKeyResult } from '../../../../server/routes/api_keys';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
@@ -55,35 +54,16 @@ import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 
-interface UseAsyncTableResult {
-  state: QueryApiKeyResult;
-  isLoading: boolean;
-  query: Query;
-  from: number;
-  pageSize: number;
-  totalKeys: number;
-  setQuery: React.Dispatch<React.SetStateAction<Query>>;
-  setFrom: React.Dispatch<React.SetStateAction<number>>;
-  setPageSize: React.Dispatch<React.SetStateAction<number>>;
-  fetchApiKeys: () => Promise<void>;
-}
+export const APIKeysGridPage: FunctionComponent = () => {
+  const { services } = useKibana<CoreStart>();
+  const history = useHistory();
+  const authc = useAuthentication();
 
-const useAsyncTable = (): UseAsyncTableResult => {
-  const [state, setState] = useState<QueryApiKeyResult>({} as QueryApiKeyResult);
-  const [totalKeys, setTotalKeys] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(25);
-  const { services } = useKibana<CoreStart>();
 
-  const fetchApiKeyTotal = async () => {
-    const response = await new APIKeysAPIClient(services.http).queryApiKeys();
-    setTotalKeys(response.total || 0);
-  };
-
-  const fetchApiKeys = async () => {
-    setIsLoading(true);
+  const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
     const queryContainer =
       Object.keys(query).length === 0 ? undefined : EuiSearchBar.Query.toESQuery(query);
 
@@ -92,71 +72,20 @@ const useAsyncTable = (): UseAsyncTableResult => {
       from,
       size: pageSize,
     };
-
-    try {
-      const response = await new APIKeysAPIClient(services.http).queryApiKeys(requestBody);
-      setState(response);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchApiKeys();
-  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    fetchApiKeyTotal();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return {
-    state,
-    isLoading,
-    query,
-    from,
-    totalKeys,
-    setQuery,
-    setFrom,
-    fetchApiKeys,
-    pageSize,
-    setPageSize,
-  };
-};
-
-export const APIKeysGridPage: FunctionComponent = () => {
-  const { services } = useKibana<CoreStart>();
-  const history = useHistory();
-  const authc = useAuthentication();
-
-  const [state, queryApiKeysAggregationsFn] = useAsyncFn(
-    () =>
-      Promise.all([
-        new APIKeysAPIClient(services.http).queryApiKeyAggregations(),
-        authc.getCurrentUser(),
-      ]),
-    [services.http]
-  );
+    return Promise.all([
+      new APIKeysAPIClient(services.http).queryApiKeyAggregations(),
+      new APIKeysAPIClient(services.http).queryApiKeys(requestBody),
+      authc.getCurrentUser(),
+    ]);
+  }, [services.http, query, from, pageSize]);
 
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
 
-  const {
-    state: requestState,
-    isLoading,
-    from,
-    totalKeys,
-    setQuery,
-    setFrom,
-    fetchApiKeys,
-    pageSize,
-    setPageSize,
-  } = useAsyncTable();
-
   useEffect(() => {
-    fetchApiKeys();
-    queryApiKeysAggregationsFn();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    queryApiKeysAndAggregations();
+  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTableChange = ({ page }: Criteria<ApiKey>) => {
     setFrom(page?.index! * pageSize);
@@ -170,7 +99,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   };
 
   if (!state.value) {
-    if (isLoading) {
+    if (state.loading) {
       return (
         <SectionLoading>
           <FormattedMessage
@@ -183,7 +112,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
     return (
       <ApiKeysEmptyPrompt error={state.error}>
-        <EuiButton iconType="refresh" onClick={() => fetchApiKeys()}>
+        <EuiButton iconType="refresh" onClick={() => queryApiKeysAndAggregations()}>
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeys.retryButton"
             defaultMessage="Try again"
@@ -193,12 +122,16 @@ export const APIKeysGridPage: FunctionComponent = () => {
     );
   }
 
-  const [{ aggregations }, currentUser] = state.value && state.value;
+  const [
+    { aggregations, total: totalKeys },
+    { canManageApiKeys, apiKeys, count, canManageOwnApiKeys, canManageCrossClusterApiKeys },
+    currentUser,
+  ] = state.value && state.value;
 
   const pagination = {
     pageIndex: from / pageSize,
     pageSize,
-    totalItemCount: requestState.total,
+    totalItemCount: totalKeys,
     pageSizeOptions: [25, 50, 100],
   };
   return (
@@ -214,10 +147,10 @@ export const APIKeysGridPage: FunctionComponent = () => {
             onSuccess={(createApiKeyResponse) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              fetchApiKeys();
+              queryApiKeysAndAggregations();
             }}
             onCancel={() => history.push({ pathname: '/' })}
-            canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
+            canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
           />
         </Breadcrumb>
       </Route>
@@ -234,7 +167,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            fetchApiKeys();
+            queryApiKeysAndAggregations();
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
@@ -299,7 +232,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
               </>
             )}
 
-            {requestState.canManageOwnApiKeys && !requestState.canManageApiKeys ? (
+            {canManageOwnApiKeys && !canManageApiKeys ? (
               <>
                 <EuiCallOut
                   title={
@@ -314,28 +247,28 @@ export const APIKeysGridPage: FunctionComponent = () => {
             ) : undefined}
 
             <InvalidateProvider
-              isAdmin={requestState.canManageApiKeys}
+              isAdmin={canManageApiKeys}
               notifications={services.notifications}
               apiKeysAPIClient={new APIKeysAPIClient(services.http)}
             >
               {(invalidateApiKeyPrompt) => (
                 <ApiKeysTable
-                  apiKeys={requestState.apiKeys}
+                  apiKeys={apiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
                       apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      fetchApiKeys
+                      queryApiKeysAndAggregations
                     )
                   }
                   currentUser={currentUser}
                   createdApiKey={createdApiKey}
-                  canManageCrossClusterApiKeys={requestState.canManageCrossClusterApiKeys}
-                  canManageApiKeys={requestState.canManageApiKeys}
-                  canManageOwnApiKeys={requestState.canManageOwnApiKeys}
+                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+                  canManageApiKeys={canManageApiKeys}
+                  canManageOwnApiKeys={canManageOwnApiKeys}
                   readOnly={readOnly}
                   loading={state.loading}
-                  totalItemCount={requestState.total}
+                  totalItemCount={totalKeys}
                   pagination={pagination}
                   onTableChange={onTableChange}
                   onSearchChange={onSearchChange}

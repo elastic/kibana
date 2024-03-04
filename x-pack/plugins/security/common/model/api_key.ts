@@ -92,5 +92,6 @@ export interface ApiKeyAggregations {
 }
 
 export interface ApiKeyAggregationsResponse {
+  total: number;
   aggregations: ApiKeyAggregations;
 }
