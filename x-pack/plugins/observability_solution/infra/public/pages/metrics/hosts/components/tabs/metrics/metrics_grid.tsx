@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -18,14 +18,32 @@ export const MetricsGrid = () => {
   const model = findInventoryModel('host');
   const { dataView } = useMetricsDataViewContext();
 
-  const { value: dashboards } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
-
-  const charts = useMemo(
-    () => dashboards?.hostsView.get({ metricsDataViewId: dataView?.id }).charts ?? [],
-    [dataView, dashboards]
-  );
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpu, disk, memory, network } = await model.metrics.getCharts();
+    return [
+      cpu.xy.cpuUsage,
+      cpu.xy.normalizedLoad1m,
+      memory.xy.memoryUsage,
+      memory.xy.memoryFree,
+      disk.xy.diskUsage,
+      disk.xy.diskSpaceAvailable,
+      disk.xy.diskIORead,
+      disk.xy.diskIOWrite,
+      disk.xy.diskReadThroughput,
+      disk.xy.diskWriteThroughput,
+      network.xy.rx,
+      network.xy.tx,
+    ].map((chart) => ({
+      ...chart,
+      ...(dataView?.id
+        ? {
+            dataset: {
+              index: dataView.id,
+            },
+          }
+        : {}),
+    }));
+  }, [dataView?.id]);
 
   return (
     <>

@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
-import { useDataView } from '../../../../../hooks/use_data_view';
-import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
-import { LensChart, TooltipContent } from '../../../../../components/lens';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 
-export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number; id: string }) => {
+export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
-  const { isRequestRunning: hostCountLoading } = useHostCountContext();
-  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
+  const { isRequestRunning: hostCountLoading, data: hostCountData } = useHostCountContext();
+  const { dataView } = useMetricsDataViewContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
@@ -34,6 +33,18 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
         }),
       ];
 
+  const subtitle =
+    searchCriteria.limit < (hostCountData?.count.value ?? 0)
+      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
+          defaultMessage: 'Average (of {limit} hosts)',
+          values: {
+            limit: searchCriteria.limit,
+          },
+        })
+      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+          defaultMessage: 'Average',
+        });
+
   // prevents requestTs and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
@@ -42,29 +53,18 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
     searchSessionId,
+    subtitle,
   });
 
-  const tooltipContent = useMemo(
-    () =>
-      id in METRICS_TOOLTIP ? (
-        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
-      ) : undefined,
-    [id]
-  );
-
   return (
-    <LensChart
-      {...chartProps}
-      id={`hostsViewKPI-${id}`}
+    <HostKpiCharts
+      dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
-      loading={loading}
-      height={height}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      toolTip={tooltipContent}
-      disableTriggers
-      hidePanelTitles
+      options={{ subtitle: afterLoadedState.subtitle }}
+      loading={loading}
     />
   );
 };
