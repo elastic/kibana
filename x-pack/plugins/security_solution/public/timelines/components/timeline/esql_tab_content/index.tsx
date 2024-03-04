@@ -253,7 +253,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
        * */
       const shouldApplyESQLUrlState = !savedSearchAppState?.appState && hasESQLURlState;
 
-      if (shouldApplyESQLUrlState) {
+      if (!shouldApplyESQLUrlState) {
         /*
          * If url state applies, it should be a no-op and there is no need to update the state container.
          * Discover should automatically pick up url state
