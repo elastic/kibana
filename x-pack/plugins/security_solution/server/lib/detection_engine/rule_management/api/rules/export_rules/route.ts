@@ -21,7 +21,7 @@ import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_pre
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../../constants';
+import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,

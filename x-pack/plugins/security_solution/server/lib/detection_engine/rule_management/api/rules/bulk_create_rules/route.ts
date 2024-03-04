@@ -26,7 +26,7 @@ import { transformValidateBulkError } from '../../../utils/validate';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
-import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../../constants';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import {
   transformBulkError,
   createBulkErrorObject,
