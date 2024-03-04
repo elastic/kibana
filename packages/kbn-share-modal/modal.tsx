@@ -61,7 +61,7 @@ export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
   );
 
   return (
-    // @ts-ignore
+    // @ts-ignore css prop in EuiModal
     <EuiModal css={{ width: '500px' }} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{renderTitle()}</EuiModalHeaderTitle>

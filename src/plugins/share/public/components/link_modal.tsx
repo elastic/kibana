@@ -138,7 +138,7 @@ export const LinkModal = ({
   const renderButtons = () => {
     const { formattedMessageId, defaultMessage } = action;
     return (
-      <EuiCopy textToCopy={''}>
+      <EuiCopy textToCopy={renderLink() ?? ''}>
         {(copy) => (
           <EuiButton fill data-test-subj={''} onClick={copy}>
             <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
