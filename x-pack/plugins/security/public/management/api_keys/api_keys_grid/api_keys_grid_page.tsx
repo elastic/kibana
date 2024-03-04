@@ -124,7 +124,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const [
     { aggregations, total: totalKeys },
-    { canManageApiKeys, apiKeys, count, canManageOwnApiKeys, canManageCrossClusterApiKeys },
+    { canManageApiKeys, apiKeys, canManageOwnApiKeys, canManageCrossClusterApiKeys },
     currentUser,
   ] = state.value && state.value;
 
