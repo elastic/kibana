@@ -1436,7 +1436,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       const left = res.left;
-      if (isTypeof(left, 'actual_mappings_incomplete')) {
+      if (isTypeof(left, 'index_mappings_incomplete')) {
         // reindex migration
         // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see checkTargetMappings())
         // we must "pick-up" all documents on the index (by not providing a query)

@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  buildActiveMappings,
-  diffMappings,
-  getBaseMappings,
-  getUpdatedTypes,
-} from './build_active_mappings';
+import { buildActiveMappings, getBaseMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
   test('creates a strict mapping', () => {
@@ -73,10 +68,15 @@ describe('buildActiveMappings', () => {
     const someOverrideMappings: Partial<IndexMapping> = {
       dynamic: true, // just to illustrate override works, not something we want to do
       _meta: {
-        migrationMappingPropertyHashes: {
-          foo: 'someLongHash',
-          bar: 'anotherLongHash',
-          baz: '10.3.0', // hashes and versions will NOT coexist (it's either one or the other)
+        mappingVersions: {
+          foo: '10.1.0',
+          bar: '10.2.0',
+          baz: '10.3.0',
+        },
+        docVersions: {
+          foo: '10.1.0',
+          bar: '10.2.0',
+          baz: '10.3.0',
         },
       },
       properties: {
@@ -92,205 +92,8 @@ describe('buildActiveMappings', () => {
   });
 });
 
-describe('diffMappings', () => {
-  test('is different if expected contains extra hashes', () => {
-    const actual: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('properties.baz');
-  });
-
-  test('does nothing if actual contains extra hashes', () => {
-    const actual: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(diffMappings(actual, expected)).toBeUndefined();
-  });
-
-  test('does nothing if actual hashes are identical to expected, but properties differ', () => {
-    const actual: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {
-        foo: { type: 'keyword' },
-      },
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {
-        foo: { type: 'text' },
-      },
-    };
-
-    expect(diffMappings(actual, expected)).toBeUndefined();
-  });
-
-  test('is different if meta hashes change', () => {
-    const actual: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'baz' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('properties.foo');
-  });
-
-  test('is different if dynamic is different', () => {
-    const actual: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      // @ts-expect-error
-      dynamic: 'abcde',
-      properties: {},
-    };
-
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('dynamic');
-  });
-
-  test('is different if migrationMappingPropertyHashes is missing from actual', () => {
-    const actual: IndexMapping = {
-      _meta: {},
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('_meta');
-  });
-
-  test('is different if _meta is missing from actual', () => {
-    const actual: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('_meta');
-  });
-});
-
-describe('getUpdatedTypes', () => {
-  test('gives all hashes if _meta is missing from actual', () => {
-    const actual: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar', bar: 'baz' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(getUpdatedTypes({ actual, expected })).toEqual(['foo', 'bar']);
-  });
-
-  test('gives all hashes if migrationMappingPropertyHashes is missing from actual', () => {
-    const actual: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-      _meta: {},
-    };
-    const expected: IndexMapping = {
-      _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar', bar: 'baz' },
-      },
-      dynamic: 'strict',
-      properties: {},
-    };
-
-    expect(getUpdatedTypes({ actual, expected })).toEqual(['foo', 'bar']);
-  });
-
-  test('gives a list of the types with updated hashes', () => {
-    const actual: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-      _meta: {
-        migrationMappingPropertyHashes: {
-          type1: 'type1hash1',
-          type2: 'type2hash1',
-          type3: 'type3hash1', // will be removed
-        },
-      },
-    };
-    const expected: IndexMapping = {
-      dynamic: 'strict',
-      properties: {},
-      _meta: {
-        migrationMappingPropertyHashes: {
-          type1: 'type1hash1', // remains the same
-          type2: 'type2hash2', // updated
-          type4: 'type4hash1', // new type
-        },
-      },
-    };
-
-    expect(getUpdatedTypes({ actual, expected })).toEqual(['type2', 'type4']);
-  });
-});
-
 describe('getBaseMappings', () => {
-  test('root properties cannot change, as we currently do NOT have model versions for them', () => {
+  test('changes in core fields trigger a pickup of all documents, which can be really costly. Update only if you know what you are doing', () => {
     expect(getBaseMappings()).toEqual({
       dynamic: 'strict',
       properties: {

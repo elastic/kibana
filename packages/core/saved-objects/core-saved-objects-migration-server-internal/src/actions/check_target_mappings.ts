@@ -9,7 +9,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getUpdatedRootFields, getUpdatedTypes } from '../core/build_active_mappings';
+import { getUpdatedRootFields, getUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
@@ -23,8 +23,8 @@ export interface ComparedMappingsMatch {
   type: 'compared_mappings_match';
 }
 
-export interface ActualMappingsIncomplete {
-  type: 'actual_mappings_incomplete';
+export interface IndexMappingsIncomplete {
+  type: 'index_mappings_incomplete';
 }
 
 export interface RootFieldsChanged {
@@ -39,22 +39,23 @@ export interface TypesChanged {
 
 export const checkTargetMappings =
   ({
-    actualMappings,
-    expectedMappings,
+    actualMappings: indexMappings,
+    expectedMappings: appMappings,
     hashToVersionMap = {},
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
-    ActualMappingsIncomplete | RootFieldsChanged | TypesChanged,
+    IndexMappingsIncomplete | RootFieldsChanged | TypesChanged,
     ComparedMappingsMatch
   > =>
   async () => {
     if (
-      !actualMappings?._meta?.migrationMappingPropertyHashes ||
-      actualMappings.dynamic !== expectedMappings.dynamic
+      (!indexMappings?._meta?.migrationMappingPropertyHashes &&
+        !indexMappings?._meta?.mappingVersions) ||
+      indexMappings.dynamic !== appMappings.dynamic
     ) {
-      return Either.left({ type: 'actual_mappings_incomplete' as const });
+      return Either.left({ type: 'index_mappings_incomplete' as const });
     }
 
-    const updatedFields = getUpdatedRootFields(actualMappings);
+    const updatedFields = getUpdatedRootFields(indexMappings);
 
     if (updatedFields.length) {
       return Either.left({
@@ -64,8 +65,8 @@ export const checkTargetMappings =
     }
 
     const updatedTypes = getUpdatedTypes({
-      actual: actualMappings,
-      expected: expectedMappings,
+      indexMappings,
+      appMappings,
       hashToVersionMap,
     });
 

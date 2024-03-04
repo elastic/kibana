@@ -13,6 +13,7 @@ import {
   updateSourceMappingsProperties,
   type UpdateSourceMappingsPropertiesParams,
 } from './update_source_mappings_properties';
+import { getBaseMappings } from '../core';
 
 describe('updateSourceMappingsProperties', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
@@ -27,6 +28,7 @@ describe('updateSourceMappingsProperties', () => {
         properties: {
           a: { type: 'keyword' },
           b: { type: 'long' },
+          ...getBaseMappings().properties,
         },
         _meta: {
           migrationMappingPropertyHashes: {
@@ -39,6 +41,7 @@ describe('updateSourceMappingsProperties', () => {
         properties: {
           a: { type: 'keyword' },
           c: { type: 'long' },
+          ...getBaseMappings().properties,
         },
         _meta: {
           migrationMappingPropertyHashes: {
@@ -46,6 +49,10 @@ describe('updateSourceMappingsProperties', () => {
             c: '222',
           },
         },
+      },
+      hashToVersionMap: {
+        'a|000': '10.1.0',
+        'b|111': '10.1.0',
       },
     };
   });

@@ -19,13 +19,14 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   getVirtualVersionMap,
-  type IndexMapping,
+  type IndexMappingMeta,
   type IndexTypesMap,
   type MigrationResult,
   type SavedObjectsMigrationConfigType,
   type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import Semver from 'semver';
+import { pick } from 'lodash';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
 import {
@@ -119,13 +120,6 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
 
   // we will store model versions instead of hashes (to be FIPS compliant)
   const appVersions = getVirtualVersionMap(options.typeRegistry.getAllTypes());
-  // the mappings._meta will be common to all SO indices
-  const commonIndexMeta: Partial<IndexMapping> = {
-    _meta: {
-      migrationMappingPropertyHashes: appVersions,
-      indexTypesMap,
-    },
-  };
 
   const migrators = Array.from(migratorIndices).map((indexName, i) => {
     return {
@@ -136,6 +130,16 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         // check if this migrator's index is involved in some document redistribution
         const mustRelocateDocuments = indicesWithRelocatingTypes.includes(indexName);
 
+        // a migrator's index might no longer have any associated types to it
+        const typeDefinitions = indexMap[indexName]?.typeMappings ?? {};
+
+        const mappingVersions = pick(appVersions, Object.keys(typeDefinitions));
+        const _meta: IndexMappingMeta = {
+          indexTypesMap,
+          mappingVersions,
+          docVersions: mappingVersions,
+        };
+
         return runResilientMigrator({
           client: options.elasticsearchClient,
           kibanaVersion: options.kibanaVersion,
@@ -143,10 +147,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           indexTypesMap,
           hashToVersionMap: options.hashToVersionMap,
           waitForMigrationCompletion: options.waitForMigrationCompletion,
-          targetIndexMappings: buildActiveMappings(
-            indexMap[indexName]?.typeMappings ?? {}, // a migrator's index might no longer have any associated types to it,
-            commonIndexMeta
-          ),
+          targetIndexMappings: buildActiveMappings(typeDefinitions, _meta),
           logger: options.logger,
           preMigrationScript: indexMap[indexName]?.script,
           readyToReindex,

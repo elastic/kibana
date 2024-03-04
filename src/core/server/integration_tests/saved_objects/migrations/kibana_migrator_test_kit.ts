@@ -480,6 +480,21 @@ export const getCompatibleMappingsMigrator = async ({
               createdAt: { type: 'date' },
             },
           },
+          modelVersions: {
+            0: {
+              changes: [],
+            },
+            1: {
+              changes: [
+                {
+                  type: 'mappings_addition',
+                  addedMappings: {
+                    createdAt: { type: 'date' },
+                  },
+                },
+              ],
+            },
+          },
         };
       } else {
         return type;

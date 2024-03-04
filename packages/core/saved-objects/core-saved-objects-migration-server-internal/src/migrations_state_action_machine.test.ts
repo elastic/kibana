@@ -44,7 +44,7 @@ describe('migrationsStateActionMachine', () => {
       '.kibana_task_manager': ['task'],
       '.kibana_cases': ['typeD', 'typeE'],
     },
-    targetMappings: { properties: {} },
+    targetIndexMappings: { properties: {} },
     coreMigrationVersionPerType: {},
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
