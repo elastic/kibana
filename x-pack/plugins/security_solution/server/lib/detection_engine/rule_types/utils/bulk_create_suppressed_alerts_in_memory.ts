@@ -44,7 +44,6 @@ export interface BulkCreateSuppressedAlertsParams
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
 }
-// TODO validate Warning cases + how to reuse this util
 /**
  * bulk create and suppress alerts in memory,
  * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
