@@ -194,6 +194,7 @@ describe('extract search response warnings', () => {
       };
 
       expect(
+        // @ts-expect-error type mismatch
         extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
       ).toEqual([
         {
@@ -250,6 +251,7 @@ describe('extract search response warnings', () => {
         hits: { hits: [] },
       };
       expect(
+        // @ts-expect-error type mismatch
         extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
       ).toEqual([
         {
@@ -263,6 +265,7 @@ describe('extract search response warnings', () => {
 
     it('should not include warnings when there are none', () => {
       const warnings = extractWarnings(
+        // @ts-expect-error type mismatch
         {
           took: 10,
           timed_out: false,

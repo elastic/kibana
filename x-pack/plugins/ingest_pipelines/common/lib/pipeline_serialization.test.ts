@@ -30,17 +30,18 @@ describe('pipeline_serialization', () => {
                 },
               },
             ],
+            _meta: {},
           },
           pipeline2: {
             description: 'pipeline2 description',
             version: 1,
             processors: [],
+            _meta: {},
           },
           pipeline3: {
             description: 'pipeline3 description',
             version: 1,
             processors: [],
-            // @ts-expect-error es type do not contains _meta https://github.com/elastic/elasticsearch-js/issues/1724
             _meta: {
               managed: true,
             },
@@ -67,6 +68,7 @@ describe('pipeline_serialization', () => {
             },
           ],
           isManaged: false,
+          _meta: {},
         },
         {
           name: 'pipeline2',
@@ -74,6 +76,7 @@ describe('pipeline_serialization', () => {
           version: 1,
           processors: [],
           isManaged: false,
+          _meta: {},
         },
         {
           name: 'pipeline3',

@@ -37,6 +37,7 @@ export const registerSimulateRoute = ({
         const response = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
           body: {
+            // @ts-expect-error type mismatch on pipeline._meta
             pipeline,
             docs: documents as estypes.IngestSimulateDocument[],
           },

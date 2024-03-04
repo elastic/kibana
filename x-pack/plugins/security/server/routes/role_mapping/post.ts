@@ -47,6 +47,7 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
         const esClient = (await context.core).elasticsearch.client;
         const saveResponse = await esClient.asCurrentUser.security.putRoleMapping({
           name: request.params.name,
+          // @ts-expect-error incompatible type with SecurityPutRoleMappingRequest
           body: request.body,
         });
         return response.ok({ body: saveResponse });
