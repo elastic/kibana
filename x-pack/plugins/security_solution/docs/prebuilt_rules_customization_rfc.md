@@ -19,9 +19,6 @@ _Pending_:
 - Additional details on `Changes needed in the UI`: Rule Details page, Rules Table
 - Update `/upgrade/_perform` endpoint description to match POC proposal
 
-
-
-
 ## Table of Contents
 
 The following TOC was created using the [Pandoc](https://pandoc.org/installing.html) tool.
@@ -31,6 +28,75 @@ You can create it by navigating to the directory of the markdown file and runnin
 ```
 pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -o output.md
 ```
+
+-   [Table of Contents](#table-of-contents)
+-   [Note about scope of RFC](#note-about-scope-of-rfc)
+-   [Necessary rule schema changes](#necessary-rule-schema-changes)
+    -   [`rule_source` field](#rule_source-field)
+    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field)
+    -   [Subfields in the `rule_source` field](#subfields-in-the-rule_source-field)
+        -   [`type` subfield](#type-subfield)
+        -   [`is_customized` subfield](#is_customized-subfield)
+        -   [`source_updated_at` subfield](#source_updated_at-subfield)
+    -   [Changes needed in rule schema](#changes-needed-in-rule-schema)
+        -   [API schema](#api-schema)
+            -   [API request and response rule schema](#api-request-and-response-rule-schema)
+            -   [Rule Import request schema](#rule-import-request-schema)
+        -   [Internal rule schema](#internal-rule-schema)
+            -   [Prebuilt Rule asset schema](#prebuilt-rule-asset-schema)
+    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field-1)
+-   [Mapping changes](#mapping-changes)
+-   [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
+    -   [Context](#context)
+    -   [Problem with tightly coupled logic in our endpoints](#problem-with-tightly-coupled-logic-in-our-endpoints)
+    -   [Migration strategy](#migration-strategy)
+        -   [Normalization on read](#normalization-on-read)
+            -   [Rule Management endpoints that will perform normalization-on-read](#rule-management-endpoints-that-will-perform-normalization-on-read)
+        -   [Migration on write](#migration-on-write)
+            -   [Rule Management endpoints that should include migration-on-write logic](#rule-management-endpoints-that-should-include-migration-on-write-logic)
+    -   [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
+        -   [Updating and upgrading rules](#updating-and-upgrading-rules)
+        -   [Bulk editing rules](#bulk-editing-rules)
+-   [Endpoints and utilities that will need to be adapted to the new schema](#endpoints-and-utilities-that-will-need-to-be-adapted-to-the-new-schema)
+    -   [Utilities](#utilities)
+        -   [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
+    -   [Rule Management endpoints](#rule-management-endpoints)
+    -   [Prebuilt Rules endpoints](#prebuilt-rules-endpoints)
+    -   [Rule monitoring endpoints](#rule-monitoring-endpoints)
+    -   [Rule Execution Logs](#rule-execution-logs)
+-   [Exporting and importing rules](#exporting-and-importing-rules)
+    -   [Exporting rules](#exporting-rules)
+    -   [Importing rules](#importing-rules)
+    -   [Handling the `version` parameter](#handling-the-version-parameter)
+-   [Customizing Prebuilt Rules](#customizing-prebuilt-rules)
+    -   [Endpoints](#endpoints)
+        -   [Changes needed to endpoints](#changes-needed-to-endpoints)
+        -   [Updating the `is_customized` field](#updating-the-is_customized-field)
+    -   [In the UI](#in-the-ui)
+        -   [Via the Rule Edit Page](#via-the-rule-edit-page)
+        -   [Via Bulk Actions](#via-bulk-actions)
+        -   [Via the Rules Details Page](#via-the-rules-details-page)
+        -   [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
+        -   [Via the Stack Management \> Rules UI](#via-the-stack-management-rules-ui)
+-   [List of things to fix (create tickets)](#list-of-things-to-fix-create-tickets)
+-   [Upgrading Prebuilt Rules](#upgrading-prebuilt-rules)
+    -   [Changes to upgrade `_review` endpoint](#changes-to-upgrade-_review-endpoint)
+        -   [Concrete field diff algorithms by type](#concrete-field-diff-algorithms-by-type)
+            -   [String fields](#string-fields)
+            -   [Number fields](#number-fields)
+            -   [Array fields](#array-fields)
+                -   [Array of strings fields](#array-of-strings-fields)
+                -   [Array of objects fields](#array-of-objects-fields)
+                -   [Proposed algorithm](#proposed-algorithm)
+            -   [MITRE ATT&CK framework (`threat` field)](#mitre-attck-framework-threat-field)
+        -   [Changes to `/upgrade/_review` endpoint contract](#changes-to-upgrade_review-endpoint-contract)
+    -   [Changes to `/upgrade/_perform` endpoint](#changes-to-upgrade_perform-endpoint)
+        -   [Changes to `/upgrade/_perform` endpoint contract](#changes-to-upgrade_perform-endpoint-contract)
+    -   [Changes to Rule Upgrade UX/UI flow](#changes-to-rule-upgrade-uxui-flow)
+        -   [Bulk accepting upgrades with no conflicts](#bulk-accepting-upgrades-with-no-conflicts)
+        -   [Upgrading rules with conflicts](#upgrading-rules-with-conflicts)
+-   [Scenario for bulk accepting updates](#scenario-for-bulk-accepting-updates)
+-   [Other open questions](#other-open-questions)
 
 ## Note about scope of RFC
 
