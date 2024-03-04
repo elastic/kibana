@@ -8,7 +8,7 @@
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_store:update_entities';
 export const VERSION = '1.0.0';
-export const INTERVAL = '30s';
+export const INTERVAL = '60s';
 export const TIMEOUT = '10m';
 
 export const RISK_SCORING_TASK_CONSTANTS = {
