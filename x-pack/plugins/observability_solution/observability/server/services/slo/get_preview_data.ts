@@ -517,7 +517,7 @@ export class GetPreviewData {
             bad: {
               filter: {
                 term: {
-                  'monito.status': 'down',
+                  'monitor.status': 'down',
                 },
               },
             },
