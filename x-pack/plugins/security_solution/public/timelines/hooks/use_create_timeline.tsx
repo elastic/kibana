@@ -89,14 +89,14 @@ export const useCreateTimeline = ({
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
       }
 
-      if (timerange.kind === 'absolute') {
+      if (timerange?.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...timerange,
             id: InputsModelId.timeline,
           })
         );
-      } else if (timerange.kind === 'relative') {
+      } else if (timerange?.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...timerange,

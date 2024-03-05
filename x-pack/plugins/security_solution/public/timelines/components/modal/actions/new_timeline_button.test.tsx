@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { NewTimelineButton } from './new_timeline_button';
 import { TimelineId } from '../../../../../common/types';
@@ -51,7 +51,7 @@ describe('NewTimelineButton', () => {
     );
   });
 
-  it('should call the correct action with clicking on the new timeline button', () => {
+  it('should call the correct action with clicking on the new timeline button', async () => {
     const dataViewId = '';
     const selectedPatterns: string[] = [];
     (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({
@@ -65,14 +65,16 @@ describe('NewTimelineButton', () => {
     getByTestId('timeline-modal-new-timeline-dropdown-button').click();
     getByTestId('timeline-modal-new-timeline').click();
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: defaultHeaders,
-      dataViewId,
-      id: TimelineId.test,
-      indexNames: selectedPatterns,
-      show: true,
-      timelineType: 'default',
-      updated: undefined,
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        columns: defaultHeaders,
+        dataViewId,
+        id: TimelineId.test,
+        indexNames: selectedPatterns,
+        show: true,
+        timelineType: 'default',
+        updated: undefined,
+      });
     });
   });
 });
