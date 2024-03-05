@@ -48,7 +48,18 @@ const createInternalStartMock = () => {
   return mock;
 };
 
+const createServiceMock = () => {
+  const mock = {
+    setup: jest.fn().mockReturnValue(createSetupMock()),
+    start: jest.fn().mockReturnValue(createStartMock()),
+    stop: jest.fn(),
+  };
+
+  return mock;
+};
+
 export const securityServiceMock = {
+  create: createServiceMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,
