@@ -65,7 +65,7 @@ export class NavigationServerPlugin
     const uiSettingsClient = core.uiSettings.globalAsScopedToClient(savedObjectsClient);
 
     const keys = Object.keys(uiSettings);
-    return uiSettingsClient.removeMany(keys, { validateKeys: false });
+    return uiSettingsClient.removeMany(keys, { validateKeys: false, handleWriteErrors: true });
   }
 
   private isServerless() {
