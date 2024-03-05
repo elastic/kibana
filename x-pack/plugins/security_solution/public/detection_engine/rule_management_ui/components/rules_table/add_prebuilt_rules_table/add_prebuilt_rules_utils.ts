@@ -23,9 +23,9 @@ export const isUpgradeReviewRequestEnabled = ({
     return false;
   }
 
-  // If user is read-only, allow request to proceed even
-  // though package might not be installed. For these users, the Fleet
-  // endpoint fails with 403 so isUpgradingSecurityPackages is false
+  // If user is read-only, allow request to proceed even though the Prebuilt
+  // Rules might not be installed. For these users, the Fleet endpoint quickly
+  // fails with 403 so isUpgradingSecurityPackages is false
   if (canUserCRUD === false) {
     return true;
   }
