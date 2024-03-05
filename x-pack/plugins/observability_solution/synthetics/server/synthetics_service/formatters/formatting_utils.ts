@@ -51,7 +51,7 @@ export const replaceStringWithParams = (
 };
 
 export const hasNoParams = (strVal: string) => {
-  const shellParamsRegex = /\$\{[a-zA-Z_][a-zA-Z0-9_-]*\}/g;
+  const shellParamsRegex = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
   return strVal.match(shellParamsRegex) === null;
 };
 
