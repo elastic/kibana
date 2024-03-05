@@ -87,6 +87,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
               }),
           rightSideGroupProps: {
             gutterSize: 's',
+            responsive: false,
           },
           rightSideItems: isLoading
             ? []

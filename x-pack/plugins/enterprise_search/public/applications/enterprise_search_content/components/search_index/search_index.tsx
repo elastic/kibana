@@ -229,6 +229,9 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
+        rightSideGroupProps: {
+          responsive: false,
+        },
         rightSideItems: getHeaderActions(index, hasAppSearchAccess),
       }}
     >
