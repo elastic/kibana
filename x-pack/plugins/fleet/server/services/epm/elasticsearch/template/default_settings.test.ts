@@ -19,7 +19,7 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 describe('buildDefaultSettings', () => {
-  it('should not generate default settings', () => {
+  it('should not generate default_field settings ', () => {
     const settings = buildDefaultSettings({
       type: 'logs',
     });
