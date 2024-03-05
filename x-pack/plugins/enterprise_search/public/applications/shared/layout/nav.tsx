@@ -108,17 +108,21 @@ export const useEnterpriseSearchNav = () => {
               },
             ]
           : []),
-        {
-          id: 'ai-playground',
-          name: i18n.translate('xpack.enterpriseSearch.nav.aiPlaygroundTitle', {
-            defaultMessage: 'AI Playground',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + AI_PLAYGROUND_PATH,
-          }),
-        },
+        ...(productFeatures.showAIPlayground
+          ? [
+              {
+                id: 'ai-playground',
+                name: i18n.translate('xpack.enterpriseSearch.nav.aiPlaygroundTitle', {
+                  defaultMessage: 'AI Playground',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + AI_PLAYGROUND_PATH,
+                }),
+              },
+            ]
+          : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',

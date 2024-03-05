@@ -15,9 +15,12 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { createApiKey } from '@kbn/enterprise-search-plugin/server/lib/analytics/create_api_key';
 
-export function registerAIPlaygroundRoutes({ log, router }: RouteDependencies) {
+export function registerAIPlaygroundRoutes({ log, router, config }: RouteDependencies) {
+  if (!config.showAIPlayground) {
+    return;
+  }
+
   router.post(
     {
       path: '/internal/enterprise_search/ai_playground/query_source_fields',
