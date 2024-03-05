@@ -31,15 +31,15 @@ import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
-import { KibanaEnvironmentContext } from '../../../../../../hooks/use_kibana';
-import { useSourceContext } from '../../../../../../containers/metrics_source';
-import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
-import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
-import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
-import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
-import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
+import { useSourceContext } from '../../../containers/metrics_source';
+import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
+import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
+import { FixedDatePicker } from '../../fixed_datepicker';
+import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metrics_k8s/module_descriptor';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
+import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
