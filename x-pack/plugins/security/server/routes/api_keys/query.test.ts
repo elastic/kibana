@@ -29,7 +29,7 @@ describe('Query API Keys route', () => {
     authc = authenticationServiceMock.createStart();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
     defineQueryApiKeysRoute(mockRouteDefinitionParams);
-    [[, routeHandler]] = mockRouteDefinitionParams.router.get.mock.calls;
+    [[, routeHandler]] = mockRouteDefinitionParams.router.post.mock.calls;
     mockContext = coreMock.createCustomRequestHandlerContext({
       core: coreMock.createRequestHandlerContext(),
       licensing: licensingMock.createRequestHandlerContext(),
@@ -49,7 +49,7 @@ describe('Query API Keys route', () => {
       },
     } as any);
 
-    esClientMock.asCurrentUser.security.getApiKey.mockResponse({
+    esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({
       api_keys: [
         { id: '123', invalidated: false },
         { id: '456', invalidated: true },
@@ -65,6 +65,7 @@ describe('Query API Keys route', () => {
     );
 
     expect(response.status).toBe(200);
+
     expect(response.payload.apiKeys).toContainEqual({ id: '123', invalidated: false });
     expect(response.payload.apiKeys).not.toContainEqual({ id: '456', invalidated: true });
   });
@@ -85,9 +86,9 @@ describe('Query API Keys route', () => {
     });
   });
 
-  it('should forward error from Elasticsearch GET API keys endpoint', async () => {
+  it('should forward error from Elasticsearch Query API keys endpoint', async () => {
     const error = Boom.forbidden('test not acceptable message');
-    esClientMock.asCurrentUser.security.getApiKey.mockResponseImplementation(() => {
+    esClientMock.asCurrentUser.security.queryApiKeys.mockResponseImplementation(() => {
       throw error;
     });
 
@@ -146,12 +147,6 @@ describe('Query API Keys route', () => {
         })
       );
     });
-
-    it('should request list of all Elasticsearch API keys', async () => {
-      await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
-
-      expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: false });
-    });
   });
 
   describe('when user has `manage_api_key` permission', () => {
@@ -180,12 +175,6 @@ describe('Query API Keys route', () => {
           canManageOwnApiKeys: true,
         })
       );
-    });
-
-    it('should request list of all Elasticsearch API keys', async () => {
-      await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
-
-      expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: false });
     });
   });
 
@@ -216,12 +205,6 @@ describe('Query API Keys route', () => {
         })
       );
     });
-
-    it('should request list of all Elasticsearch API keys', async () => {
-      await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
-
-      expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: false });
-    });
   });
 
   describe('when user has `manage_own_api_key` permission', () => {
@@ -250,12 +233,6 @@ describe('Query API Keys route', () => {
           canManageOwnApiKeys: true,
         })
       );
-    });
-
-    it('should only request list of API keys owned by the user', async () => {
-      await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
-
-      expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: true });
     });
   });
 });
