@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
-import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '../build_es_query';
 
@@ -19,19 +18,19 @@ function createDiscoverLocator(
 ) {
   const filters: Filter[] = [];
 
-  if (isObject(slo.indicator.params.filter)) {
+  if (kqlWithFiltersSchema.is(slo.indicator.params.filter)) {
     slo.indicator.params.filter.filters.forEach((i) => filters.push(i));
   }
 
-  const filterKuery = isObject(slo.indicator.params.filter)
+  const filterKuery = kqlWithFiltersSchema.is(slo.indicator.params.filter)
     ? slo.indicator.params.filter.kqlQuery
     : slo.indicator.params.filter;
 
   if (slo.indicator.type === 'sli.kql.custom') {
-    const goodKuery = isObject(slo.indicator.params.good)
+    const goodKuery = kqlWithFiltersSchema.is(slo.indicator.params.good)
       ? slo.indicator.params.good.kqlQuery
       : slo.indicator.params.good;
-    const goodFilters = isObject(slo.indicator.params.good)
+    const goodFilters = kqlWithFiltersSchema.is(slo.indicator.params.good)
       ? slo.indicator.params.good.filters
       : [];
     const customGoodFilter = buildEsQuery({ kuery: goodKuery, filters: goodFilters });
