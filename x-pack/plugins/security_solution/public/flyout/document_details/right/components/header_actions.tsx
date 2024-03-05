@@ -10,7 +10,6 @@ import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
-import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useAssistant } from '../hooks/use_assistant';
@@ -78,8 +77,8 @@ export const HeaderActions: VFC = memo(() => {
                     { defaultMessage: 'Share alert' }
                   )}
                   data-test-subj={SHARE_BUTTON_TEST_ID}
-                  onClick={() => copyFunction(copy, alertDetailsLink)}
-                  onKeyDown={() => copyFunction(copy, alertDetailsLink)}
+                  onClick={copy}
+                  onKeyDown={copy}
                 />
               )}
             </EuiCopy>
