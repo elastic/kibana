@@ -14,8 +14,8 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsPrivileges } from './use_lists_privileges';
 
 /**
- * Determines whether an error response from the `readListIndex` 
- * API call indicates that the index is not yet created. 
+ * Determines whether an error response from the `readListIndex`
+ * API call indicates that the index is not yet created.
  */
 const isIndexNotCreatedError = (err: unknown) => {
   return isSecurityAppError(err) && err.body.status_code === 404;
@@ -54,7 +54,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
     http,
     isEnabled: Boolean(lists && canReadIndex && canManageIndex && !createLoading),
     onError: (err) => {
-      if (isIndexNotCreated(err)) {
+      if (isIndexNotCreatedError(err)) {
         return;
       }
 
@@ -71,7 +71,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   }, [createListIndex, lists, canManageIndex, canWriteIndex]);
 
   const indexExists = useMemo(() => {
-    if (isIndexNotCreated(readError)) {
+    if (isIndexNotCreatedError(readError)) {
       return false;
     }
 
@@ -80,7 +80,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
 
   return {
     createIndex,
-    error: createListError || isIndexNotCreated(readError) ? undefined : readError,
+    error: createListError || isIndexNotCreatedError(readError) ? undefined : readError,
     indexExists,
     loading,
   };

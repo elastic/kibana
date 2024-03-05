@@ -11,11 +11,11 @@ import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
-import { createQueryWrapper } from '../mocks/query_wrapper';
+import { createQueryWrapperMock } from '../mocks/query_wrapper';
 
 jest.mock('@kbn/securitysolution-list-api');
 
-const { wrapper: queryWrapper } = createQueryWrapper();
+const { wrapper: queryWrapper } = createQueryWrapperMock();
 
 // TODO: Port this code over to the package: packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.test.ts once kibana has mocks in packages
 
