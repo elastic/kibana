@@ -4160,6 +4160,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-security-common@link:packages/core/security/core-security-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-security-server-internal@link:packages/core/security/core-security-server-internal":
   version "0.0.0"
   uid ""
