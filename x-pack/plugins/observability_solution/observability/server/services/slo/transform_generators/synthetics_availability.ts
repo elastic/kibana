@@ -43,28 +43,6 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private buildGroupBy(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
-    const hasTags =
-      !indicator.params.tags?.find((param) => param.value === ALL_VALUE) &&
-      indicator.params.tags?.length;
-    const hasProjects =
-      !indicator.params.projects?.find((param) => param.value === ALL_VALUE) &&
-      indicator.params.projects?.length;
-    // These groupBy fields must match the fields from the source query, otherwise
-    // the transform will create permutations for each value present in the source.
-    // E.g. if environment is not specified in the source query, but we include it in the groupBy,
-    // we'll output documents for each environment value
-    const extraGroupByFields = {
-      'monitor.id': { terms: { field: 'monitor.id' } },
-      'observer.name': { terms: { field: 'observer.name' } },
-      config_id: { terms: { field: 'config_id' } },
-      ...(hasTags && {
-        tags: { terms: { field: 'tags' } },
-      }),
-      ...(hasProjects && {
-        'monitor.project.id': { terms: { field: 'monitor.project.id' } },
-      }),
-    };
-
     // These are the group by fields that will be used in `groupings` key
     // in the summary and rollup documents. For Synthetics, we want to use the
     // user-readible `monitor.name` and `observer.geo.name` fields by default,
@@ -74,6 +52,40 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       flattenedGroupBy.length && !flattenedGroupBy.includes(ALL_VALUE)
         ? slo.groupBy
         : ['monitor.name', 'observer.geo.name'];
+
+    const hasTags =
+      !indicator.params.tags?.find((param) => param.value === ALL_VALUE) &&
+      indicator.params.tags?.length;
+    const hasProjects =
+      !indicator.params.projects?.find((param) => param.value === ALL_VALUE) &&
+      indicator.params.projects?.length;
+    const hasMonitorIds =
+      !indicator.params.monitorIds?.find((param) => param.value === ALL_VALUE) &&
+      indicator.params.monitorIds?.length;
+    const includesDefaultGroupings =
+      groupings.includes('monitor.name') && groupings.includes('observer.geo.name');
+    // These groupBy fields must match the fields from the source query, otherwise
+    // the transform will create permutations for each value present in the source.
+    // E.g. if environment is not specified in the source query, but we include it in the groupBy,
+    // we'll output documents for each environment value
+    const extraGroupByFields = {
+      /* additional fields needed to hyperlink back to the Synthetics app when
+       * grouping by monitor.name and observer.geo.name.
+       * `monitor.name` and `observer.geo.name` are the labels, while
+       * observer.name and config_id are the values. We need the values
+       * to build a URL back to Synthetics */
+      ...(includesDefaultGroupings && {
+        'observer.name': { terms: { field: 'observer.name' } },
+        config_id: { terms: { field: 'config_id' } },
+      }),
+      ...(hasMonitorIds && { 'monitor.id': { terms: { field: 'monitor.id' } } }),
+      ...(hasTags && {
+        tags: { terms: { field: 'tags' } },
+      }),
+      ...(hasProjects && {
+        'monitor.project.id': { terms: { field: 'monitor.project.id' } },
+      }),
+    };
 
     return this.buildCommonGroupBy(
       { ...slo, groupBy: groupings },

@@ -133,7 +133,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
 
       <EuiCallOut
         size="s"
-        title="Synthetics availability SLIs are automatically partitioned by monitor and location"
+        title="Synthetics availability SLIs are automatically grouped by monitor and location"
         iconType="iInCircle"
       />
       <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />

@@ -43,10 +43,8 @@ describe('Synthetics Availability Transform Generator', () => {
           },
           'slo.numerator': {
             filter: {
-              range: {
-                'summary.up': {
-                  gte: 1,
-                },
+              term: {
+                'monitor.status': 'up',
               },
             },
           },
@@ -61,11 +59,6 @@ describe('Synthetics Availability Transform Generator', () => {
           config_id: {
             terms: {
               field: 'config_id',
-            },
-          },
-          'monitor.id': {
-            terms: {
-              field: 'monitor.id',
             },
           },
           'observer.name': {
@@ -165,8 +158,11 @@ describe('Synthetics Availability Transform Generator', () => {
     });
   });
 
-  it('auto groups by config id, monitor.id, and observer.name', () => {
-    const slo = createSLO({ id: 'irrelevant', indicator: createSyntheticsAvailabilityIndicator() });
+  it('groups by config id and observer.name when using default groupings', () => {
+    const slo = createSLO({
+      id: 'irrelevant',
+      indicator: createSyntheticsAvailabilityIndicator(),
+    });
     const transform = generator.getTransformParams(slo, spaceId);
 
     expect(transform.pivot?.group_by).toEqual(
@@ -176,14 +172,43 @@ describe('Synthetics Availability Transform Generator', () => {
             field: 'config_id',
           },
         },
-        'monitor.id': {
+        'observer.name': {
           terms: {
-            field: 'monitor.id',
+            field: 'observer.name',
+          },
+        },
+      })
+    );
+  });
+
+  it('does not include config id and observer.name when using non default groupings', () => {
+    const slo = createSLO({
+      id: 'irrelevant',
+      indicator: createSyntheticsAvailabilityIndicator(),
+      groupBy: ['host.name'],
+    });
+    const transform = generator.getTransformParams(slo, spaceId);
+
+    expect(transform.pivot?.group_by).not.toEqual(
+      expect.objectContaining({
+        config_id: {
+          terms: {
+            field: 'config_id',
           },
         },
         'observer.name': {
           terms: {
             field: 'observer.name',
+          },
+        },
+      })
+    );
+
+    expect(transform.pivot?.group_by).toEqual(
+      expect.objectContaining({
+        'slo.groupings.host.name': {
+          terms: {
+            field: 'host.name',
           },
         },
       })
@@ -325,6 +350,11 @@ describe('Synthetics Availability Transform Generator', () => {
     expect(transform.source.query?.bool?.filter).toContainEqual({
       terms: {
         'monitor.id': ['id-1', 'id-2'],
+      },
+    });
+    expect(transform.pivot?.group_by?.['monitor.id']).toEqual({
+      terms: {
+        field: 'monitor.id',
       },
     });
   });
