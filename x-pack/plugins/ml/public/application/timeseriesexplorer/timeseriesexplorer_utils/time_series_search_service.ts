@@ -184,4 +184,4 @@ export function timeSeriesSearchServiceFactory(
   };
 }
 
-export type MlTimeSeriesSeachService = ReturnType<typeof timeSeriesSearchServiceFactory>;
+export type MlTimeSeriesSearchService = ReturnType<typeof timeSeriesSearchServiceFactory>;
