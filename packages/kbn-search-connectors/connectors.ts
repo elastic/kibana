@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 
 export interface ConnectorServerSideDefinition {
-  categories: string[];
-  description: string;
+  categories?: string[];
+  description?: string;
   iconPath: string;
   isBeta: boolean;
   isNative: boolean;
