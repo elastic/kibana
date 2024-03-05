@@ -53,7 +53,11 @@ export function createVisToADJobAction(
       }
     },
     async isCompatible({ embeddable }: EmbeddableApiContext) {
-      if (!isApiCompatible(embeddable) || !(apiIsOfType(embeddable, 'lens') || apiIsOfType(embeddable, 'map'))) return false;
+      if (
+        !isApiCompatible(embeddable) ||
+        !(apiIsOfType(embeddable, 'lens') || apiIsOfType(embeddable, 'map'))
+      )
+        return false;
 
       const [
         { getChartInfoFromVisualization, isCompatibleVisualizationType },

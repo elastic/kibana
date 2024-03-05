@@ -11,7 +11,11 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DashboardApi, DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardLocatorParams,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
 import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
