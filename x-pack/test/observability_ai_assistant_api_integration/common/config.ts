@@ -10,7 +10,6 @@ import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import https from 'https';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { InheritedServices } from './ftr_provider_context';
