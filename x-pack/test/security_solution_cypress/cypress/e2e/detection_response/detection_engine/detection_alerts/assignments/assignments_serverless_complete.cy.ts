@@ -20,69 +20,66 @@ import {
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
 
-describe(
-  'Alert user assignment - Serverless Complete',
-  {
-    tags: ['@serverless'],
-    env: {
-      ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'complete' },
-          { product_line: 'endpoint', product_tier: 'complete' },
-        ],
-      },
+// Failing: See https://github.com/elastic/kibana/issues/177573
+describe.skip('Alert user assignment - Serverless Complete', {
+  tags: ['@serverless'],
+  env: {
+    ftrConfig: {
+      productTypes: [
+        { product_line: 'security', product_tier: 'complete' },
+        { product_line: 'endpoint', product_tier: 'complete' },
+      ],
     },
   },
-  () => {
-    before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+}, () => {
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
 
-      // Login into accounts so that they got activated and visible in user profiles list
-      login(ROLES.t1_analyst);
-      login(ROLES.t2_analyst);
-      login(ROLES.t3_analyst);
-      login(ROLES.soc_manager);
-      login(ROLES.detections_admin);
-      login(ROLES.platform_engineer);
-    });
+    // Login into accounts so that they got activated and visible in user profiles list
+    login(ROLES.t1_analyst);
+    login(ROLES.t2_analyst);
+    login(ROLES.t3_analyst);
+    login(ROLES.soc_manager);
+    login(ROLES.detections_admin);
+    login(ROLES.platform_engineer);
+  });
 
-    after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_multiple');
-    });
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
+  });
 
-    beforeEach(() => {
-      loadPageAs(ALERTS_URL);
-      deleteAlertsAndRules();
-      createRule(getNewRule({ rule_id: 'new custom rule' }));
-      waitForAlertsToPopulate();
-    });
+  beforeEach(() => {
+    loadPageAs(ALERTS_URL);
+    deleteAlertsAndRules();
+    createRule(getNewRule({ rule_id: 'new custom rule' }));
+    waitForAlertsToPopulate();
+  });
 
-    context('Authorization / RBAC', () => {
-      it('users with editing privileges should be able to update assignees', () => {
-        const editors = [
-          ROLES.t1_analyst,
-          ROLES.t2_analyst,
-          ROLES.t3_analyst,
-          ROLES.rule_author,
-          ROLES.soc_manager,
-          ROLES.detections_admin,
-          ROLES.platform_engineer,
-        ];
-        editors.forEach((role) => {
-          loadPageAs(ALERTS_URL, role);
-          waitForAlertsToPopulate();
+  context('Authorization / RBAC', () => {
+    it('users with editing privileges should be able to update assignees', () => {
+      const editors = [
+        ROLES.t1_analyst,
+        ROLES.t2_analyst,
+        ROLES.t3_analyst,
+        ROLES.rule_author,
+        ROLES.soc_manager,
+        ROLES.detections_admin,
+        ROLES.platform_engineer,
+      ];
+      editors.forEach((role) => {
+        loadPageAs(ALERTS_URL, role);
+        waitForAlertsToPopulate();
 
-          // Unassign alert
-          selectFirstPageAlerts();
-          bulkRemoveAllAssignees();
-          refreshAlertPageFilter();
+        // Unassign alert
+        selectFirstPageAlerts();
+        bulkRemoveAllAssignees();
+        refreshAlertPageFilter();
 
-          updateAssigneesForFirstAlert([role]);
+        updateAssigneesForFirstAlert([role]);
 
-          // Assignees should appear in the alerts table
-          alertsTableShowsAssigneesForAlert([role]);
-        });
+        // Assignees should appear in the alerts table
+        alertsTableShowsAssigneesForAlert([role]);
       });
     });
-  }
-);
+  });
+});
