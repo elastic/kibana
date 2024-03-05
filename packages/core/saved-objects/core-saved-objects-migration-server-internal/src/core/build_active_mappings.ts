@@ -22,14 +22,14 @@ import type {
  */
 export function buildActiveMappings(
   typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
-  _meta: IndexMappingMeta = {}
+  _meta?: IndexMappingMeta
 ): IndexMapping {
   const mapping = getBaseMappings();
 
   return cloneDeep({
     ...mapping,
     properties: validateAndMerge(mapping.properties, typeDefinitions),
-    _meta,
+    ...(_meta && { _meta }),
   });
 }
 

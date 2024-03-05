@@ -2,7 +2,6 @@
 
 exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core properties 1`] = `
 Object {
-  "_meta": Object {},
   "dynamic": "strict",
   "properties": Object {
     "amap": Object {
