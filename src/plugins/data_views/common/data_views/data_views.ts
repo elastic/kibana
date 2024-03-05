@@ -11,8 +11,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { PersistenceAPI } from '../types';
+import { DEFAULT_DATA_VIEW_ID } from '../constants';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -496,7 +496,7 @@ export class DataViewsService {
    */
   setDefault = async (id: string | null, force = false) => {
     if (force || !(await this.getDefaultId())) {
-      await this.config.set(UI_SETTINGS.DEFAULT_DATA_VIEW_ID, id);
+      await this.config.set(DEFAULT_DATA_VIEW_ID, id);
     }
   };
 
@@ -1196,7 +1196,7 @@ export class DataViewsService {
 
     if (defaultId && !exists) {
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove(UI_SETTINGS.DEFAULT_DATA_VIEW_ID);
+        await this.config.remove(DEFAULT_DATA_VIEW_ID);
       }
 
       defaultId = null;
@@ -1205,7 +1205,7 @@ export class DataViewsService {
     if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
       defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set(UI_SETTINGS.DEFAULT_DATA_VIEW_ID, defaultId);
+        await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);
       }
     }
 
