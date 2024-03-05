@@ -17,6 +17,7 @@ import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { DashboardApi } from '../../../../ui_actions/types';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
@@ -48,6 +49,7 @@ function mergeQueriesCheck(
 
 export class QuickJobCreatorBase {
   constructor(
+    protected readonly dataViews: DataViewsContract,
     protected readonly kibanaConfig: IUiSettingsClient,
     protected readonly timeFilter: TimefilterContract,
     protected readonly dashboardService: DashboardStart,

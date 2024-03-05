@@ -13,6 +13,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
@@ -37,12 +38,13 @@ import { QuickJobCreatorBase, type CreateState } from '../job_from_dashboard';
 export class QuickLensJobCreator extends QuickJobCreatorBase {
   constructor(
     private readonly lens: LensPublicStart,
+    dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
     mlApiServices: MlApiServices
   ) {
-    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices);
   }
 
   public async createAndSaveJob(

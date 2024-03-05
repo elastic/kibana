@@ -73,6 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177620
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Transaction groups main statistics', () => {
       const GO_PROD_RATE = 75;
