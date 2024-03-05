@@ -108,7 +108,10 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     };
     const cancellationToken = new CancellationToken();
     const csvConfig = this.config.csv;
-    const taskInstanceFields = { startedAt: null, retryAt: null };
+
+    // these fields are necessary, but there is no retry for immediate download
+    const taskInstanceFields = { startedAt: new Date(), retryAt: new Date(Infinity) };
+
     const csv = new CsvGenerator(
       job,
       csvConfig,
