@@ -16,7 +16,7 @@ import {
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_MODEL_VERSION } from '../../../../common/slo/constants';
+import { SLO_MODEL_VERSION, SYNTHETICS_INDEX_PATTERN } from '../../../../common/slo/constants';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -66,7 +66,7 @@ export const createSyntheticsAvailabilityIndicator = (
 ): Indicator => ({
   type: 'sli.synthetics.availability',
   params: {
-    index: 'synthetics-*',
+    index: SYNTHETICS_INDEX_PATTERN,
     tags: [],
     projects: [],
     monitorIds: [],

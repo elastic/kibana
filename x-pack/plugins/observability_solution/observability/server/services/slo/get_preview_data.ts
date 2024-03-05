@@ -31,6 +31,7 @@ import {
   GetHistogramIndicatorAggregation,
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/slo/constants';
 
 interface Options {
   range: {
@@ -487,7 +488,7 @@ export class GetPreviewData {
       });
 
     const result = await this.esClient.search({
-      index: 'synthetics-*',
+      index: SYNTHETICS_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {

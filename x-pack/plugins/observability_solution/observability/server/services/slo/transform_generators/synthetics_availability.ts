@@ -17,6 +17,7 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  SYNTHETICS_INDEX_PATTERN,
 } from '../../../../common/slo/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SyntheticsAvailabilityIndicator, SLO } from '../../../domain/models';
@@ -141,7 +142,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     }
 
     return {
-      index: 'synthetics-*',
+      index: SYNTHETICS_INDEX_PATTERN,
       runtime_mappings: {
         ...this.buildCommonRuntimeMappings(slo),
       },

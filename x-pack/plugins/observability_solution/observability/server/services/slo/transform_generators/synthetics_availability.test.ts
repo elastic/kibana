@@ -9,6 +9,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/slo/constants';
 
 const generator = new SyntheticsAvailabilityTransformGenerator();
 
@@ -98,7 +99,7 @@ describe('Synthetics Availability Transform Generator', () => {
         unattended: true,
       },
       source: {
-        index: 'synthetics-*',
+        index: SYNTHETICS_INDEX_PATTERN,
         query: {
           bool: {
             filter: [

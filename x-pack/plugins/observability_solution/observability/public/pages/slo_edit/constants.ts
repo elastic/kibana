@@ -30,6 +30,7 @@ import {
   INDICATOR_HISTOGRAM,
   INDICATOR_TIMESLICE_METRIC,
 } from '../../utils/slo/labels';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/slo/constants';
 import { CreateSLOForm } from './types';
 
 export const SLI_OPTIONS: Array<{
@@ -200,7 +201,7 @@ export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndic
     projects: [],
     tags: [],
     monitorIds: [],
-    index: 'synthetics-*',
+    index: SYNTHETICS_INDEX_PATTERN,
   },
 };
 
