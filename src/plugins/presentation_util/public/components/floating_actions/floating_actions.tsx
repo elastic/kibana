@@ -82,13 +82,13 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   }, [embeddable, getTriggerCompatibleActions, viewMode, disabledActions]);
 
   return (
-    <div
-      className="presentationUtil__floatingActionsWrapper"
-      data-test-subj={`presentationUtil__floatingActionsWrapper__${embeddable?.id}`}
-    >
+    <div className="presentationUtil__floatingActionsWrapper">
       {children}
       {isEnabled && floatingActions && (
-        <div className={classNames('presentationUtil__floatingActions', className)}>
+        <div
+          data-test-subj={`presentationUtil__floatingActions__${embeddable?.id}`}
+          className={classNames('presentationUtil__floatingActions', className)}
+        >
           {floatingActions}
         </div>
       )}

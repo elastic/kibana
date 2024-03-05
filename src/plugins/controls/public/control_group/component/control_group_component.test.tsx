@@ -151,7 +151,8 @@ describe('Control group component', () => {
     const { controlGroupComponent, controlGroupContainer } = await mountComponent({
       explicitInput: { showApplySelections: true },
     });
-    expect(controlGroupComponent.getByTestId('controlGroup--applyFiltersButton')).toBeDisabled();
+    const applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
+    expect(applyButton).toBeDisabled();
     controlGroupContainer.publishFilters = jest.fn();
 
     const unpublishedFilters: ControlGroupComponentState['unpublishedFilters'] = {
@@ -164,7 +165,6 @@ describe('Control group component', () => {
       timeslice: [0, 1],
     };
     act(() => controlGroupContainer.dispatch.setUnpublishedFilters(unpublishedFilters));
-    const applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
     expect(applyButton).toBeEnabled();
     userEvent.click(applyButton);
     expect(controlGroupContainer.publishFilters).toBeCalledWith(unpublishedFilters);
@@ -191,7 +191,10 @@ describe('Control group component', () => {
 
     const { controlGroupComponent } = await mountComponent();
     expect(
-      controlGroupComponent.queryByTestId('presentationUtil_loadingfloatingActions')
-    ).not.toBeInTheDocument();
+      controlGroupComponent.queryByTestId('presentationUtil__floatingActions__control1')
+    ).toBeInTheDocument();
+    expect(
+      controlGroupComponent.queryByTestId('presentationUtil__floatingActions__control2')
+    ).toBeInTheDocument();
   });
 });
