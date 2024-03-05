@@ -79,7 +79,6 @@ describe('buildActiveMappings', () => {
     };
 
     const mappings = buildActiveMappings(properties, ourExternallyBuiltMeta);
-    expect(mappings.dynamic).toEqual(true);
     expect(mappings._meta).toEqual(ourExternallyBuiltMeta);
     expect(mappings.properties.ddd).toBeUndefined();
   });

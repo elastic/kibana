@@ -44,9 +44,9 @@ describe('updateSourceMappingsProperties', () => {
           ...getBaseMappings().properties,
         },
         _meta: {
-          migrationMappingPropertyHashes: {
-            a: '000',
-            c: '222',
+          mappingVersions: {
+            a: '10.1.0',
+            c: '10.1.0',
           },
         },
       },
@@ -58,7 +58,18 @@ describe('updateSourceMappingsProperties', () => {
   });
 
   it('should not update mappings when there are no changes', async () => {
-    const sameMappingsParams = chain(params).set('targetMappings', params.indexMappings).value();
+    // we overwrite the app mappings to have the "unchanged" values with respect to the index mappings
+    const sameMappingsParams = chain(params)
+      .set('appMappings', {
+        ...params.indexMappings,
+        _meta: {
+          mappingVersions: {
+            a: '10.1.0',
+            b: '10.1.0',
+          },
+        },
+      })
+      .value();
     const result = await updateSourceMappingsProperties(sameMappingsParams)();
 
     expect(client.indices.putMapping).not.toHaveBeenCalled();

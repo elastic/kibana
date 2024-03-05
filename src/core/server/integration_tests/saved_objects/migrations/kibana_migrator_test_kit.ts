@@ -475,16 +475,13 @@ export const getCompatibleMappingsMigrator = async ({
           ...type,
           mappings: {
             properties: {
-              name: { type: 'text' },
-              value: { type: 'integer' },
+              ...type.mappings.properties,
               createdAt: { type: 'date' },
             },
           },
           modelVersions: {
-            0: {
-              changes: [],
-            },
-            1: {
+            ...type.modelVersions,
+            2: {
               changes: [
                 {
                   type: 'mappings_addition',
@@ -518,9 +515,26 @@ export const getIncompatibleMappingsMigrator = async ({
         ...type,
         mappings: {
           properties: {
-            name: { type: 'keyword' },
-            value: { type: 'long' },
+            ...type.mappings.properties,
+            value: { type: 'text' }, // we're forcing an incompatible udpate (number => text)
             createdAt: { type: 'date' },
+          },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'data_removal', // not true (we're testing reindex migrations, and modelVersions do not support breaking changes)
+                removedAttributePaths: ['complex.properties.value'],
+              },
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  createdAt: { type: 'date' },
+                },
+              },
+            ],
           },
         },
       };

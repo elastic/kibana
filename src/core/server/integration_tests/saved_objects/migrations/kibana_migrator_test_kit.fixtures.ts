@@ -19,7 +19,7 @@ const defaultType: SavedObjectsType<any> = {
     },
   },
   modelVersions: {
-    0: {
+    1: {
       changes: [],
     },
   },

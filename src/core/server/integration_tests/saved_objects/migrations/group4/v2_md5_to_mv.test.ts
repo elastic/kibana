@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import type { Metadata } from '@elastic/elasticsearch/lib/api/types';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -119,13 +120,17 @@ describe('V2 algorithm', () => {
       result = await runMigrations();
     });
 
-    it('creates the SO indices, storing modelVersions in meta.migrationMappingPropertyHashes', async () => {
+    it('creates the SO indices, storing modelVersions in meta.mappingVersions and meta.docVersions', async () => {
       expect(result[0].status === 'skipped');
       expect(await getMappingMeta()).toEqual({
         indexTypesMap: {
           '.kibana': ['another-type', 'some-type'],
         },
-        migrationMappingPropertyHashes: {
+        mappingVersions: {
+          'another-type': '10.1.0',
+          'some-type': '10.1.0',
+        },
+        docVersions: {
           'another-type': '10.1.0',
           'some-type': '10.1.0',
         },
@@ -144,6 +149,7 @@ describe('V2 algorithm', () => {
 
         result = await restartKibana();
       });
+
       it('updates the SO indices meta.migrationMappingPropertyHashes with the appropriate model versions', async () => {
         expect(result[0].status).toEqual('patched'); // should be a compatible (non-reindexing) migration
 
@@ -151,7 +157,11 @@ describe('V2 algorithm', () => {
           indexTypesMap: {
             '.kibana': ['another-type', 'some-type'],
           },
-          migrationMappingPropertyHashes: {
+          mappingVersions: {
+            'another-type': '10.2.0', // switched to modelVersion: 2
+            'some-type': '10.1.0',
+          },
+          docVersions: {
             'another-type': '10.2.0', // switched to modelVersion: 2
             'some-type': '10.1.0',
           },
@@ -168,6 +178,8 @@ describe('V2 algorithm', () => {
   });
 
   describe('when SO indices still contain md5 hashes', () => {
+    let indexMetaAfterMigration: Metadata | undefined;
+
     beforeAll(async () => {
       const { runMigrations, client } = await getKibanaMigratorTestKit({
         kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
@@ -203,19 +215,29 @@ describe('V2 algorithm', () => {
       });
 
       result = await restartKibana();
+
+      indexMetaAfterMigration = await getMappingMeta();
     });
 
-    it('updates the SO indices meta.migrationMappingPropertyHashes with the appropriate model versions', async () => {
-      expect(result[0].status).toEqual('patched'); // should be a compatible (non-reindexing) migration
+    it('performs a compatible (non-reindexing) migration', () => {
+      expect(result[0].status).toEqual('patched');
+    });
 
-      expect(await getMappingMeta()).toEqual({
-        indexTypesMap: {
-          '.kibana': ['another-type', 'some-type'],
-        },
-        migrationMappingPropertyHashes: {
-          'another-type': '10.2.0',
-          'some-type': '10.1.0',
-        },
+    it('preserves the SO indices meta.migrationMappingPropertyHashes (although they are no longer up to date / in use)', () => {
+      expect(indexMetaAfterMigration?.migrationMappingPropertyHashes).toEqual({
+        'some-type': 'someLongHashThatWeCanImagineWasCalculatedUsingMd5',
+        'another-type': 'differentFromTheOneAboveAsTheRelatedTypeFieldsAreIntegers',
+      });
+    });
+
+    it('adds the mappingVersions and docVersions with the current modelVersions', () => {
+      expect(indexMetaAfterMigration?.mappingVersions).toEqual({
+        'some-type': '10.1.0',
+        'another-type': '10.2.0',
+      });
+      expect(indexMetaAfterMigration?.docVersions).toEqual({
+        'some-type': '10.1.0',
+        'another-type': '10.2.0',
       });
     });
 
