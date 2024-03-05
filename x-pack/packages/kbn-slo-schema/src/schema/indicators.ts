@@ -232,6 +232,7 @@ const syntheticsAvailabilityIndicatorSchema = t.type({
   params: t.intersection([
     t.type({
       monitorIds: t.array(syntheticsParamSchema),
+      index: t.string,
     }),
     t.partial({
       tags: t.array(syntheticsParamSchema),

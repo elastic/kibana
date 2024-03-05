@@ -66,6 +66,7 @@ export const createSyntheticsAvailabilityIndicator = (
 ): Indicator => ({
   type: 'sli.synthetics.availability',
   params: {
+    index: 'synthetics-*',
     tags: [],
     projects: [],
     monitorIds: [],
