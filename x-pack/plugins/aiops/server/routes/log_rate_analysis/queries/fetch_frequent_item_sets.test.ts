@@ -15,18 +15,23 @@ describe('getShouldClauses', () => {
 
     expect(shouldClauses).toEqual([
       {
-        terms: {
-          user: ['Peter'],
+        term: {
+          user: 'Peter',
         },
       },
       {
-        terms: {
-          response_code: ['500'],
+        term: {
+          response_code: '500',
         },
       },
       {
-        terms: {
-          url: ['home.php', 'login.php'],
+        term: {
+          url: 'home.php',
+        },
+      },
+      {
+        term: {
+          url: 'login.php',
         },
       },
     ]);

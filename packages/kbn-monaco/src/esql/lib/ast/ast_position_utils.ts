@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { Token } from 'antlr4ts';
+import type { Token } from 'antlr4';
 
 export function getPosition(
-  token: Pick<Token, 'startIndex' | 'stopIndex'> | undefined,
-  lastToken?: Pick<Token, 'stopIndex'> | undefined
+  token: Pick<Token, 'start' | 'stop'> | null,
+  lastToken?: Pick<Token, 'stop'> | undefined
 ) {
-  if (!token || token.startIndex < 0) {
+  if (!token || token.start < 0) {
     return { min: 0, max: 0 };
   }
-  const endFirstToken =
-    token.stopIndex > -1 ? Math.max(token.stopIndex + 1, token.startIndex) : undefined;
-  const endLastToken = lastToken?.stopIndex;
+  const endFirstToken = token.stop > -1 ? Math.max(token.stop + 1, token.start) : undefined;
+  const endLastToken = lastToken?.stop;
   return {
-    min: token.startIndex,
+    min: token.start,
     max: endLastToken ?? endFirstToken ?? Infinity,
   };
 }

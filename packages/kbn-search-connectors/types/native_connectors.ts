@@ -3066,32 +3066,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
-      max_concurrent_tasks: {
-        default_value: 2000,
-        depends_on: [],
-        display: DisplayType.NUMERIC,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.label',
-          {
-            defaultMessage: 'Maximum concurrent tasks',
-          }
-        ),
-        options: [],
-        order: 13,
-        required: false,
-        sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.tooltip',
-          {
-            defaultMessage:
-              'This value denotes the number of tasks that run in parallel. It depends on the number of accounts in the Azure AD.',
-          }
-        ),
-        type: FieldType.INTEGER,
-        ui_restrictions: [],
-        validations: [],
-        value: '',
-      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -3568,7 +3542,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       username: {
         default_value: null,
         depends_on: [],
-        display: DisplayType.TEXTAREA,
+        display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
           defaultMessage: 'Username',
         }),
