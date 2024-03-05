@@ -56,7 +56,7 @@ describe('AgentApp', () => {
       isLoading: true,
       enabled: true,
       isReady: false,
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
@@ -71,7 +71,7 @@ describe('AgentApp', () => {
       enabled: true,
       isReady: false,
       missingRequirements: ['api_keys'],
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
@@ -86,7 +86,7 @@ describe('AgentApp', () => {
       enabled: true,
       isReady: false,
       missingRequirements: ['fleet_server'],
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
@@ -102,7 +102,7 @@ describe('AgentApp', () => {
       isReady: false,
       missingRequirements: [],
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
