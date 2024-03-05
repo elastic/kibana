@@ -343,7 +343,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config, isCloud));
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.basePath));
     }
   }
