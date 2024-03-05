@@ -11,6 +11,8 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
+// We are importing from tests to tests here, not related to runtime code.
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { frequentItemSetsLargeArraysSource } from '../../test/functional/apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
 
 const indexName = 'large_arrays';
