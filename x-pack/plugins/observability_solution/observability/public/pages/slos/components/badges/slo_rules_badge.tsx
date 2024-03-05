@@ -9,11 +9,10 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { BurnRateRuleParams } from '../../../../typings';
 
 export interface Props {
-  rules: Array<Rule<SloRule>> | undefined;
+  rules: Array<Rule<BurnRateRuleParams>> | undefined;
   onClick?: () => void;
 }
 
