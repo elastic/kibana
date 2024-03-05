@@ -10,7 +10,7 @@ import { MapEmbeddablePersistableState } from './types';
 import type { MapAttributes } from '../content_management';
 import { extractReferences } from '../migrations/references';
 
-export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
+export const extract: NonNullable<EmbeddableRegistryDefinition['extract']> = (state) => {
   const typedState = state as MapEmbeddablePersistableState;
 
   // by-reference embeddable
