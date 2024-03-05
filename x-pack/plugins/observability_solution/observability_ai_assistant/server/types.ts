@@ -21,7 +21,6 @@ import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { ObservabilityAIAssistantService } from './service';
@@ -46,7 +45,6 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   dataViews: DataViewsServerPluginSetup;
-  ml: MlPluginSetup;
   licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
 }
@@ -57,7 +55,6 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   features: FeaturesPluginStart;
   taskManager: TaskManagerStartContract;
   dataViews: DataViewsServerPluginStart;
-  ml: MlPluginStart;
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
 }

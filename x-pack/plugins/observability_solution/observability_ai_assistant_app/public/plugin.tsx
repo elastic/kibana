@@ -16,9 +16,6 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
-import { EuiErrorBoundary } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { RedirectAppLinksProvider } from '@kbn/shared-ux-link-redirect-app';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -26,7 +23,6 @@ import type {
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
 import { NavControl } from './components/nav_control.tsx';
-import { ObservabilityAIAssistantAppServiceProvider } from './context/observability_ai_assistant_app_service_provider';
 import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
 import { SharedProviders } from './utils/shared_providers';
 

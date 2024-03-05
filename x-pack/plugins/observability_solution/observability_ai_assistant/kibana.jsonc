@@ -11,12 +11,12 @@
       "actions",
       "features",
       "licensing",
-      "ml",
       "security",
       "taskManager",
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
-    "optionalPlugins": ["cloud"],
-    "extraPublicDirs": []
+    "optionalPlugins": ["cloud", "ml"],
+    "extraPublicDirs": [],
+    "runtimePluginDependencies": [ "ml" ]
   }
 }

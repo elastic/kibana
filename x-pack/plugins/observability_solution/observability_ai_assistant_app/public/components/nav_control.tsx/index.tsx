@@ -10,6 +10,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
+import { combineLatest } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -29,6 +31,7 @@ export function NavControl({}: {}) {
 
   const {
     services: {
+      application: { currentAppId$, applications$ },
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
@@ -38,6 +41,8 @@ export function NavControl({}: {}) {
   } = useKibana();
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
+
+  const [isVisible, setIsVisible] = useState(false);
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -51,16 +56,35 @@ export function NavControl({}: {}) {
   const keyRef = useRef(v4());
 
   useEffect(() => {
-    service.conversations.predefinedConversation$.subscribe(() => {
+    const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       setHasBeenOpened(true);
       setIsOpen(true);
     });
-  }, [service.conversations.predefinedConversation$]);
+
+    const appSubscription = combineLatest(currentAppId$, applications$).subscribe({
+      next: ([appId, applications]) => {
+        const isObservabilityApp =
+          appId &&
+          applications.get(appId)?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
+
+        setIsVisible(!!isObservabilityApp);
+      },
+    });
+
+    return () => {
+      conversationSubscription.unsubscribe();
+      appSubscription.unsubscribe();
+    };
+  }, [service.conversations.predefinedConversation$, currentAppId$, applications$]);
 
   const { messages, title } = useObservable(service.conversations.predefinedConversation$) ?? {
     messages: [],
     title: undefined,
   };
+
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <>
