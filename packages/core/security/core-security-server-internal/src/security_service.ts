@@ -9,10 +9,10 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreInternalSecurityContract } from '@kbn/core-security-server';
-import type { InternalSecuritySetup, InternalSecurityStart } from './internal_contracts';
+import type { InternalSecurityServiceSetup, InternalSecurityServiceStart } from './internal_contracts';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 
-export class SecurityService implements CoreService<InternalSecuritySetup, InternalSecurityStart> {
+export class SecurityService implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart> {
   private readonly log: Logger;
   private securityApi?: CoreInternalSecurityContract;
 
@@ -20,7 +20,7 @@ export class SecurityService implements CoreService<InternalSecuritySetup, Inter
     this.log = coreContext.logger.get('security-service');
   }
 
-  public setup(): InternalSecuritySetup {
+  public setup(): InternalSecurityServiceSetup {
     return {
       registerSecurityApi: (api) => {
         if (this.securityApi) {
@@ -31,7 +31,7 @@ export class SecurityService implements CoreService<InternalSecuritySetup, Inter
     };
   }
 
-  public start(): InternalSecurityStart {
+  public start(): InternalSecurityServiceStart {
     if (!this.securityApi) {
       this.log.warn('Security API was not registered, using default implementation');
     }

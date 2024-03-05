@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { SecurityService } from './src/security_service';
+export type { InternalSecurityServiceSetup, InternalSecurityServiceStart } from './src/internal_contracts';

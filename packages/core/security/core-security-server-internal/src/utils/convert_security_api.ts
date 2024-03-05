@@ -7,11 +7,11 @@
  */
 
 import type { CoreInternalSecurityContract } from '@kbn/core-security-server';
-import type { InternalSecurityStart } from '../internal_contracts';
+import type { InternalSecurityServiceStart } from '../internal_contracts';
 
 export const convertSecurityApi = (
   privateApi: CoreInternalSecurityContract
-): InternalSecurityStart => {
+): InternalSecurityServiceStart => {
   // shapes are the same for now given we only have one API exposed.
   return privateApi;
 };

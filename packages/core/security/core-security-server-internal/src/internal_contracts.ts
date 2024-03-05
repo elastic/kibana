@@ -8,5 +8,5 @@
 
 import type { SecurityServiceSetup, SecurityServiceStart } from '@kbn/core-security-server';
 
-export type InternalSecuritySetup = SecurityServiceSetup;
-export type InternalSecurityStart = SecurityServiceStart;
+export type InternalSecurityServiceSetup = SecurityServiceSetup;
+export type InternalSecurityServiceStart = SecurityServiceStart;
