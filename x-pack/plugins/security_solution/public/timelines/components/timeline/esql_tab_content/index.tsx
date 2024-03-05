@@ -73,7 +73,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     initializeLocalSavedSearch,
     restoreDiscoverAppStateFromSavedSearch,
     resetDiscoverAppState,
-    getDefaultDiscoverAppState,
+    defaultDiscoverAppState,
   } = useDiscoverInTimelineContext();
 
   const {
@@ -128,7 +128,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
       if (status === 'draft') {
-        resetDiscoverAppState();
         setSavedSearchLoaded(true);
       } else {
         dispatch(
@@ -229,6 +228,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
     async ({ stateContainer }) => {
+      if (stateContainer.appState.isEmptyURL()) {
+        stateContainer.appState.set(discoverAppState ?? defaultDiscoverAppState);
+        await stateContainer.appState.replaceUrlState(discoverAppState ?? defaultDiscoverAppState);
+      }
+
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
       if (savedSearchId) {
@@ -237,10 +241,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
-      const defaultDiscoverAppState = getDefaultDiscoverAppState();
-
       const finalAppState =
-        savedSearchAppState?.appState ?? discoverAppState ?? defaultDiscoverAppState;
+        savedSearchAppState?.appState ??
+        stateContainer.appState.get() ??
+        discoverAppState ??
+        defaultDiscoverAppState;
 
       const urlAppState = stateContainer.appState.isEmptyURL()
         ? undefined
@@ -258,7 +263,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
          * If url state applies, it should be a no-op and there is no need to update the state container.
          * Discover should automatically pick up url state
          * */
-        setDiscoverAppState(finalAppState);
         stateContainer.appState.set(finalAppState);
         await stateContainer.appState.replaceUrlState(finalAppState);
       }
@@ -303,7 +307,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       discoverDataService.query.timefilter.timefilter,
       savedSearchId,
       savedSearchService,
-      getDefaultDiscoverAppState,
+      defaultDiscoverAppState,
       timelineId,
       initializeLocalSavedSearch,
     ]

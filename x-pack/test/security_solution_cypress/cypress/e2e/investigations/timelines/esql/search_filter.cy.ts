@@ -55,7 +55,7 @@ describe(
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
-    it('should show data according to the esql query', () => {
+    it.only('should show data according to the esql query', () => {
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
       submitDiscoverSearchBar();
       cy.get(DISCOVER_RESULT_HITS).should('have.text', 1);

@@ -80,7 +80,7 @@ export const useDiscoverInTimelineActions = (
     mutationKey: [version],
   });
 
-  const getDefaultDiscoverAppState: () => DiscoverAppState = useCallback(() => {
+  const defaultDiscoverAppState: DiscoverAppState = useMemo(() => {
     return {
       query: {
         esql: '',
@@ -135,16 +135,16 @@ export const useDiscoverInTimelineActions = (
    * resets discover state to a default value
    *
    * */
-  const resetDiscoverAppState = useCallback(() => {
-    const defaultDiscoverAppState = getDefaultDiscoverAppState();
+  const resetDiscoverAppState = useCallback(async () => {
     setDiscoverAppState(defaultDiscoverAppState);
-    discoverStateContainer.current?.appState.set(defaultDiscoverAppState);
-    discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
+    discoverStateContainer.current?.appState.resetToState(defaultDiscoverAppState);
+    discoverStateContainer.current?.appState.update(defaultDiscoverAppState, true);
+    await discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
     discoverStateContainer.current?.globalState.set({
       ...discoverStateContainer.current?.globalState.get(),
       time: defaultDiscoverTimeRange,
     });
-  }, [getDefaultDiscoverAppState, setDiscoverAppState, discoverStateContainer]);
+  }, [defaultDiscoverAppState, discoverStateContainer, setDiscoverAppState]);
 
   const persistSavedSearch = useCallback(
     async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {
@@ -267,7 +267,7 @@ export const useDiscoverInTimelineActions = (
       updateSavedSearch,
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
-      getDefaultDiscoverAppState,
+      defaultDiscoverAppState,
     }),
     [
       resetDiscoverAppState,
@@ -275,7 +275,7 @@ export const useDiscoverInTimelineActions = (
       updateSavedSearch,
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
-      getDefaultDiscoverAppState,
+      defaultDiscoverAppState,
     ]
   );
 

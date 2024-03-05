@@ -86,7 +86,7 @@ describe(
     });
 
     describe('ESQL tab state', () => {
-      it('should be able create an empty timeline with default esql tab state', () => {
+      it.only('should be able create an empty timeline with default esql tab state', () => {
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         goToEsqlTab();

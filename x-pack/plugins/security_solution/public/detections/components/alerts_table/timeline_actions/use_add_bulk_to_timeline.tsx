@@ -143,8 +143,8 @@ export const useAddBulkToTimelineAction = ({
   );
 
   const createTimeline = useCallback(
-    ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
-      clearActiveTimeline();
+    async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
+      await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       dispatchUpdateTimeline(dispatch)({
         duplicate: true,

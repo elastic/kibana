@@ -59,7 +59,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const dispatch = useDispatch();
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();
-  const { discoverStateContainer, getDefaultDiscoverAppState } = useDiscoverInTimelineContext();
+  const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
   const { setDiscoverAppState } = useDiscoverState();
 
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
@@ -75,31 +75,33 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
-  const configureAndOpenTimeline = useCallback(() => {
+  const configureAndOpenTimeline = useCallback(async () => {
     // Hide the assistant overlay so timeline can be seen (noop if using assistant in timeline)
     showAssistantOverlay({ showOverlay: false });
 
     if (dataProviders || filters) {
       // If esql, don't reset filters or mess with dataview & time range
       if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
-        discoverStateContainer.current?.appState.update({
-          query: {
-            esql: dataProviders[0].kqlQuery,
-          },
-        });
+        if (discoverStateContainer.current) {
+          discoverStateContainer.current?.appState.set({
+            query: {
+              esql: dataProviders[0].kqlQuery,
+            },
+          });
 
-        discoverStateContainer.current?.appState.replaceUrlState({
-          query: {
-            esql: dataProviders[0].kqlQuery,
-          },
-        });
-
-        setDiscoverAppState({
-          ...getDefaultDiscoverAppState(),
-          query: {
-            esql: dataProviders[0].kqlQuery,
-          },
-        });
+          await discoverStateContainer.current?.appState.replaceUrlState({
+            query: {
+              esql: dataProviders[0].kqlQuery,
+            },
+          });
+        } else {
+          setDiscoverAppState({
+            ...defaultDiscoverAppState,
+            query: {
+              esql: dataProviders[0].kqlQuery,
+            },
+          });
+        }
 
         dispatch(
           setActiveTabTimeline({
@@ -118,11 +120,11 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
 
       // Reset the current timeline
       if (timeRange) {
-        clearTimeline({
+        await clearTimeline({
           timeRange,
         });
       } else {
-        clearTimeline();
+        await clearTimeline();
       }
       if (dataProviders) {
         // Ensure Security Solution Default DataView is selected (so it's not just alerts)
@@ -231,7 +233,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     defaultDataView.id,
     signalIndexName,
     setDiscoverAppState,
-    getDefaultDiscoverAppState,
+    defaultDiscoverAppState,
   ]);
 
   // As we work around timeline visibility issues, we will disable the button if timeline isn't available

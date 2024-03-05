@@ -128,7 +128,9 @@ export const AlertsByStatus = ({
       name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
       href: entityFilter ? undefined : href,
       onClick: entityFilter
-        ? () => openTimelineWithFilters([[entityFilter, eventKindSignalFilter]])
+        ? async () => {
+            await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
+          }
         : goToAlerts,
     }),
     [entityFilter, href, goToAlerts, openTimelineWithFilters]

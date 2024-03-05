@@ -117,12 +117,12 @@ export const useCreateTimeline = ({
   );
 
   return useCallback(
-    (options?: { timeRange?: TimeRange }) => {
+    async (options?: { timeRange?: TimeRange }) => {
+      await resetDiscoverAppState();
       createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
       }
-      resetDiscoverAppState();
     },
     [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
   );
