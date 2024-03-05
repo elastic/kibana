@@ -73,6 +73,7 @@ Object {
     "valueInBytes": 1048576,
   },
   "name": "kibana-hostname",
+  "payloadTimeout": 20000,
   "port": 5601,
   "requestId": Object {
     "allowFromAnyIp": false,
