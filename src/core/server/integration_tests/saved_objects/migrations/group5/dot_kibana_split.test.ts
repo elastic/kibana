@@ -223,6 +223,7 @@ describe('split .kibana index into multiple system indices', () => {
             "guided-onboarding-guide-state",
             "guided-onboarding-plugin-state",
             "index-pattern",
+            "infra-custom-dashboards",
             "infrastructure-monitoring-log-view",
             "infrastructure-ui-source",
             "ingest-agent-policies",

@@ -324,7 +324,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.settings.client.get.mockReturnValue(true);
+      coreStart.theme.getTheme.mockReturnValue({ darkMode: true });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
@@ -361,7 +361,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.theme.getTheme.mockReturnValue({ darkMode: false });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(

@@ -42,7 +42,6 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
@@ -138,6 +137,7 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
+import { ChartType } from './lens_suggestions_api';
 
 export type { SaveProps } from './app_plugin';
 
@@ -280,7 +280,8 @@ export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigura
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
-  excludedVisualizations?: string[]
+  excludedVisualizations?: string[],
+  preferredChartType?: ChartType
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -451,7 +452,7 @@ export class LensPlugin {
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
@@ -705,13 +706,14 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (context, dataView, excludedVisualizations) => {
+          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
               context,
               dataView,
               excludedVisualizations,
+              preferredChartType,
             });
           },
         };
