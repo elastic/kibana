@@ -35,7 +35,7 @@
     "@kbn/logging",
     "@kbn/security-plugin-types-public",
     "@kbn/crypto-browser",
-    "@kbn/data-service",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
