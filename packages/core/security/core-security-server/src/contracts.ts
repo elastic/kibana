@@ -14,7 +14,7 @@ import type { CoreInternalSecurityContract } from './api_provider';
  *
  * @public
  */
-export interface CoreSecuritySetup {
+export interface SecurityServiceSetup {
   /**
    * Register the security implementation that then will be used and re-exposed by Core.
    *
@@ -28,7 +28,7 @@ export interface CoreSecuritySetup {
  *
  * @public
  */
-export interface CoreSecurityStart {
+export interface SecurityServiceStart {
   /**
    * The {@link CoreAuthenticationService | authentication service}
    */

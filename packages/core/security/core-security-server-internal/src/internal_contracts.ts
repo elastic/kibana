@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSecuritySetup, CoreSecurityStart } from '@kbn/core-security-server';
+import type { SecurityServiceSetup, SecurityServiceStart } from '@kbn/core-security-server';
 
-export type InternalSecuritySetup = CoreSecuritySetup;
-export type InternalSecurityStart = CoreSecurityStart;
+export type InternalSecuritySetup = SecurityServiceSetup;
+export type InternalSecurityStart = SecurityServiceStart;

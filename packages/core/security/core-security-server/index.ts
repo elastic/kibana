@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { CoreSecuritySetup, CoreSecurityStart } from './src/contracts';
+export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
 export type { CoreAuthenticationService } from './src/authc';
 export type {
   CoreInternalSecurityContract,

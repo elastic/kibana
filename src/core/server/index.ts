@@ -119,8 +119,8 @@ export type {
 } from '@kbn/core-elasticsearch-server';
 
 export type {
-  CoreSecuritySetup,
-  CoreSecurityStart,
+  SecurityServiceSetup,
+  SecurityServiceStart,
   CoreAuthenticationService,
 } from '@kbn/core-security-server';
 export type {
