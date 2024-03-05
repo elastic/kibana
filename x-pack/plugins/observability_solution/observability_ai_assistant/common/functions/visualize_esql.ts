@@ -13,6 +13,7 @@ export enum VisualizeESQLUserIntention {
   visualizeBar = 'visualizeBar',
   visualizeLine = 'visualizeLine',
   visualizeArea = 'visualizeArea',
+  visualizeTable = 'visualizeTable',
   visualizeDonut = 'visualizeDonut',
   visualizeTreemap = 'visualizeTreemap',
   visualizeHeatmap = 'visualizeHeatmap',

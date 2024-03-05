@@ -167,6 +167,7 @@ export function registerQueryFunction({
               ${VisualizeESQLUserIntention.visualizeHeatmap}
               ${VisualizeESQLUserIntention.visualizeLine}
               ${VisualizeESQLUserIntention.visualizeArea}
+              ${VisualizeESQLUserIntention.visualizeTable}
               ${VisualizeESQLUserIntention.visualizeTagcloud}
               ${VisualizeESQLUserIntention.visualizeTreemap}
               ${VisualizeESQLUserIntention.visualizeWaffle}
