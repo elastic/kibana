@@ -108,15 +108,21 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
       searchSourceStart,
     };
     const cancellationToken = new CancellationToken();
-
-    const taskInstanceFields = {
-      startedAt: new Date(),
-      retryAt: new Date(Date.now() + durationToNumber(this.config.queue.timeout)),
-    };
+    const csvConfig = this.config.csv;
+    const taskInstanceFields =
+      csvConfig.scroll.duration === 'auto'
+        ? {
+            startedAt: new Date(),
+            retryAt: new Date(Date.now() + durationToNumber(this.config.queue.timeout)),
+          }
+        : {
+            startedAt: null,
+            retryAt: null,
+          };
 
     const csv = new CsvGenerator(
       job,
-      this.config.csv,
+      csvConfig,
       taskInstanceFields,
       clients,
       dependencies,
