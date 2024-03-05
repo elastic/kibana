@@ -5814,7 +5814,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; created_at: string; metadata: Record<string, unknown>; job_type: ",
+          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -5822,7 +5822,7 @@
             "section": "def-common.SyncJobType",
             "text": "SyncJobType"
           },
-          "; last_seen: string | null; cancelation_requested_at: string | null; canceled_at: string | null; completed_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; started_at: string | null; total_document_count: number | null; trigger_method: ",
+          "; started_at: string | null; completed_at: string | null; last_seen: string | null; cancelation_requested_at: string | null; canceled_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; total_document_count: number | null; trigger_method: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -35282,200 +35282,6 @@
                         "signature": [
                           "false"
                         ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "max_concurrent_tasks",
-                    "description": [],
-                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.default_value",
-                        "type": "number",
-                        "tags": [],
-                        "label": "default_value",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.depends_on",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "depends_on",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.display",
-                        "type": "string",
-                        "tags": [],
-                        "label": "display",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.DisplayType",
-                            "text": "DisplayType"
-                          },
-                          ".NUMERIC"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.label",
-                        "type": "string",
-                        "tags": [],
-                        "label": "label",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.options",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "options",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.order",
-                        "type": "number",
-                        "tags": [],
-                        "label": "order",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.required",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "required",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.sensitive",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "sensitive",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.tooltip",
-                        "type": "string",
-                        "tags": [],
-                        "label": "tooltip",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.FieldType",
-                            "text": "FieldType"
-                          },
-                          ".INTEGER"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.ui_restrictions",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "ui_restrictions",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.validations",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "validations",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.value",
-                        "type": "string",
-                        "tags": [],
-                        "label": "value",
-                        "description": [],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false

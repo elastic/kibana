@@ -232,6 +232,32 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should create .fleet-policies document with inputs', async () => {
+        const res = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-policy-with-system',
+            namespace: 'default',
+            force: true, // using force to bypass package verification error
+          })
+          .expect(200);
+
+        const policyDocRes = await es.search({
+          index: '.fleet-policies',
+          query: {
+            term: {
+              policy_id: res.body.item.id,
+            },
+          },
+        });
+
+        expect(policyDocRes?.hits?.hits.length).to.eql(1);
+        const source = policyDocRes?.hits?.hits[0]?._source as any;
+        expect(source?.revision_idx).to.eql(1);
+        expect(source?.data?.inputs.length).to.eql(3);
+      });
+
       it('should return a 400 with an empty namespace', async () => {
         await supertest
           .post(`/api/fleet/agent_policies`)
