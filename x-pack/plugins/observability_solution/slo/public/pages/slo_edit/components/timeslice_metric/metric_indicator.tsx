@@ -48,39 +48,29 @@ function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
 
-const equationLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.equationLabel',
-  { defaultMessage: 'Equation' }
-);
+const equationLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.equationLabel', {
+  defaultMessage: 'Equation',
+});
 
 const equationTooltip = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.observability.slo.sloEdit.sliType.timesliceMetric.totalEquation.tooltip',
-      {
-        defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
-      }
-    )}
+    content={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.totalEquation.tooltip', {
+      defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+    })}
     position="top"
   />
 );
 
-const thresholdLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.thresholdLabel',
-  {
-    defaultMessage: 'Threshold',
-  }
-);
+const thresholdLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.thresholdLabel', {
+  defaultMessage: 'Threshold',
+});
 
 const thresholdTooltip = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.observability.slo.sloEdit.sliType.timesliceMetric.threshold.tooltip',
-      {
-        defaultMessage:
-          'This value combined with the comparator will determine if the slice is "good" or "bad".',
-      }
-    )}
+    content={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.threshold.tooltip', {
+      defaultMessage:
+        'This value combined with the comparator will determine if the slice is "good" or "bad".',
+    })}
     position="top"
   />
 );
@@ -140,12 +130,11 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
                   style={{ marginTop: '1.5em' }}
                   onClick={handleDeleteMetric(index)}
                   disabled={disableDelete}
-                  title={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
-                    { defaultMessage: 'Delete metric' }
-                  )}
+                  title={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel', {
+                    defaultMessage: 'Delete metric',
+                  })}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
+                    'xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
                     { defaultMessage: 'Delete metric' }
                   )}
                 />
@@ -165,12 +154,12 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
               onClick={handleAddMetric}
               isDisabled={disableAdd}
               aria-label={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.timesliceMetric.addMetricAriaLabel',
+                'xpack.slo.sloEdit.sliType.timesliceMetric.addMetricAriaLabel',
                 { defaultMessage: 'Add metric' }
               )}
             >
               <FormattedMessage
-                id="xpack.observability.slo.sloEdit.sliType.timesliceMetric.addMetricLabel"
+                id="xpack.slo.sloEdit.sliType.timesliceMetric.addMetricLabel"
                 defaultMessage="Add metric"
               />
             </EuiButtonEmpty>
@@ -200,7 +189,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
                   isInvalid={fieldState.invalid}
                   error={[
                     i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.timesliceMetric.equation.invalidCharacters',
+                      'xpack.slo.sloEdit.sliType.timesliceMetric.equation.invalidCharacters',
                       {
                         defaultMessage:
                           'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
@@ -233,7 +222,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
                   fullWidth
                   isInvalid={fieldState.invalid}
                   label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.timesliceMetric.comparatorLabel',
+                    'xpack.slo.sloEdit.sliType.timesliceMetric.comparatorLabel',
                     {
                       defaultMessage: 'Comparator',
                     }
@@ -288,13 +277,10 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
             <p>
-              {i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.timesliceMetric.equationHelpText',
-                {
-                  defaultMessage:
-                    'Supports basic math equations, valid charaters are: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
-                }
-              )}
+              {i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.equationHelpText', {
+                defaultMessage:
+                  'Supports basic math equations, valid charaters are: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+              })}
             </p>
           </EuiText>
         </EuiFlexItem>

@@ -34,7 +34,7 @@ import React, { ReactNode, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { enableInspectEsQueries } from '../../../../../common';
-import { useFetchSloInspect } from '../../../../hooks/slo/use_fetch_slo_inspect';
+import { useFetchSloInspect } from '../../../../hooks/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
@@ -102,7 +102,7 @@ function SLOInspect({ slo, disabled }: Props) {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
-              {i18n.translate('xpack.observability.monitorInspect.configLabel', {
+              {i18n.translate('xpack.slo.monitorInspect.configLabel', {
                 defaultMessage: 'SLO Configurations',
               })}
             </h2>
@@ -116,7 +116,7 @@ function SLOInspect({ slo, disabled }: Props) {
               <CodeBlockAccordion
                 id="slo"
                 label={i18n.translate(
-                  'xpack.observability.sLOInspect.codeBlockAccordion.sloConfigurationLabel',
+                  'xpack.slo.sLOInspect.codeBlockAccordion.sloConfigurationLabel',
                   { defaultMessage: 'SLO configuration' }
                 )}
                 json={inspectSloData.slo}
@@ -125,7 +125,7 @@ function SLOInspect({ slo, disabled }: Props) {
               <CodeBlockAccordion
                 id="rollUpTransform"
                 label={i18n.translate(
-                  'xpack.observability.sLOInspect.codeBlockAccordion.rollupTransformLabel',
+                  'xpack.slo.sLOInspect.codeBlockAccordion.rollupTransformLabel',
                   { defaultMessage: 'Rollup transform' }
                 )}
                 json={inspectSloData.rollUpTransform}
@@ -142,7 +142,7 @@ function SLOInspect({ slo, disabled }: Props) {
               <CodeBlockAccordion
                 id="summaryTransform"
                 label={i18n.translate(
-                  'xpack.observability.sLOInspect.codeBlockAccordion.summaryTransformLabel',
+                  'xpack.slo.sLOInspect.codeBlockAccordion.summaryTransformLabel',
                   { defaultMessage: 'Summary transform' }
                 )}
                 json={inspectSloData.summaryTransform}
@@ -159,7 +159,7 @@ function SLOInspect({ slo, disabled }: Props) {
               <CodeBlockAccordion
                 id="pipeline"
                 label={i18n.translate(
-                  'xpack.observability.sLOInspect.codeBlockAccordion.ingestPipelineLabel',
+                  'xpack.slo.sLOInspect.codeBlockAccordion.ingestPipelineLabel',
                   { defaultMessage: 'SLO Ingest pipeline' }
                 )}
                 extraAction={
@@ -176,7 +176,7 @@ function SLOInspect({ slo, disabled }: Props) {
               <CodeBlockAccordion
                 id="temporaryDoc"
                 label={i18n.translate(
-                  'xpack.observability.sLOInspect.codeBlockAccordion.temporaryDocumentLabel',
+                  'xpack.slo.sLOInspect.codeBlockAccordion.temporaryDocumentLabel',
                   { defaultMessage: 'Temporary document' }
                 )}
                 json={inspectSloData.temporaryDoc}
@@ -190,7 +190,7 @@ function SLOInspect({ slo, disabled }: Props) {
             onClick={closeFlyout}
             fill
           >
-            {i18n.translate('xpack.observability.sLOInspect.closeButtonLabel', {
+            {i18n.translate('xpack.slo.sLOInspect.closeButtonLabel', {
               defaultMessage: 'Close',
             })}
           </EuiButton>
@@ -204,10 +204,10 @@ function SLOInspect({ slo, disabled }: Props) {
       <EuiToolTip
         content={
           isFormValid
-            ? i18n.translate('xpack.observability.slo.viewFormattedResourcesConfigsButtonLabel', {
+            ? i18n.translate('xpack.slo.viewFormattedResourcesConfigsButtonLabel', {
                 defaultMessage: 'View formatted resources configs for SLO',
               })
-            : i18n.translate('xpack.observability.slo.formattedConfigLabel.valid', {
+            : i18n.translate('xpack.slo.formattedConfigLabel.valid', {
                 defaultMessage: 'Only valid form configurations can be inspected.',
               })
         }
@@ -221,7 +221,7 @@ function SLOInspect({ slo, disabled }: Props) {
           iconType="inspect"
           iconSide="left"
         >
-          {i18n.translate('xpack.observability.sLOInspect.sLOInspectButtonLabel', {
+          {i18n.translate('xpack.slo.sLOInspect.sLOInspectButtonLabel', {
             defaultMessage: 'SLO Inspect',
           })}
         </EuiButtonEmpty>

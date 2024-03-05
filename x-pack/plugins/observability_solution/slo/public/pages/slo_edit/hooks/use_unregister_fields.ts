@@ -10,7 +10,7 @@ import { assertNever } from '@kbn/std';
 import deepmerge from 'deepmerge';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useFetchApmIndex } from '../../../hooks/slo/use_fetch_apm_indices';
+import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,

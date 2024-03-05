@@ -37,7 +37,7 @@ import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
@@ -107,7 +107,7 @@ export function DataPreviewChart({
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="xpack.observability.slo.sloEdit.dataPreviewChart.panelLabel"
+            id="xpack.slo.sloEdit.dataPreviewChart.panelLabel"
             defaultMessage="SLI preview"
           />
         </h3>
@@ -124,13 +124,10 @@ export function DataPreviewChart({
           <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 160 }}>
               <EuiFlexItem grow={false}>
-                {i18n.translate(
-                  'xpack.observability.slo.sloEdit.dataPreviewChart.explanationMessage',
-                  {
-                    defaultMessage:
-                      'Fill the indicator fields to see visualisation of the current metrics',
-                  }
-                )}
+                {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.explanationMessage', {
+                  defaultMessage:
+                    'Fill the indicator fields to see visualisation of the current metrics',
+                })}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -211,7 +208,7 @@ export function DataPreviewChart({
           <EuiCallOut
             size="s"
             color="warning"
-            title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.moreThan100', {
+            title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {
               defaultMessage:
                 'Some of the SLI values are more than 100%. That means good query is returning more results than total query.',
             })}
@@ -228,12 +225,9 @@ export function DataPreviewChart({
                 {isPreviewLoading && <EuiLoadingChart size="m" mono />}
                 {isError && (
                   <span>
-                    {i18n.translate(
-                      'xpack.observability.slo.sloEdit.dataPreviewChart.errorMessage',
-                      {
-                        defaultMessage: 'The current indicator settings are invalid',
-                      }
-                    )}
+                    {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.errorMessage', {
+                      defaultMessage: 'The current indicator settings are invalid',
+                    })}
                   </span>
                 )}
               </EuiFlexItem>
@@ -252,23 +246,17 @@ export function DataPreviewChart({
                       ...firstItem,
                       formattedValue: events.good,
                       value: events.good,
-                      label: i18n.translate(
-                        'xpack.observability.slo.sloEdit.dataPreviewChart.goodEvents',
-                        {
-                          defaultMessage: 'Good events',
-                        }
-                      ),
+                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.goodEvents', {
+                        defaultMessage: 'Good events',
+                      }),
                     });
                     rows.push({
                       ...firstItem,
                       value: events.total,
                       formattedValue: events.total,
-                      label: i18n.translate(
-                        'xpack.observability.slo.sloEdit.dataPreviewChart.badEvents',
-                        {
-                          defaultMessage: 'Total events',
-                        }
-                      ),
+                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.badEvents', {
+                        defaultMessage: 'Total events',
+                      }),
                     });
                   }
 
@@ -295,7 +283,7 @@ export function DataPreviewChart({
 
               <Axis
                 id="y-axis"
-                title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.yTitle', {
+                title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.yTitle', {
                   defaultMessage: 'SLI',
                 })}
                 ticks={5}
@@ -306,7 +294,7 @@ export function DataPreviewChart({
 
               <Axis
                 id="time"
-                title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.xTitle', {
+                title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
                   defaultMessage: 'Last hour',
                 })}
                 tickFormat={(d) => moment(d).format(dateFormat)}

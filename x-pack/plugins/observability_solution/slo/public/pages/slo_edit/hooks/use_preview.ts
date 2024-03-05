@@ -8,7 +8,7 @@
 import { Indicator } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
-import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
+import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 
 export function useDebouncedGetPreviewData(
   isIndicatorValid: boolean,

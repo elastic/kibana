@@ -14,7 +14,7 @@ import type { SloItem } from '../types';
 import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 
 const ALERTS_PER_PAGE = 10;
-const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
+const ALERTS_TABLE_ID = 'xpack.sloAlertsEmbeddable.alert.table';
 
 interface Props {
   deps: SloEmbeddableDeps;

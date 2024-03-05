@@ -10,12 +10,12 @@ import { useIsMutating } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
-import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
 import { ToggleSLOView } from './toggle_slo_view';
 import { GroupView } from './grouped_slos/group_view';
-import { useKibana } from '../../../utils/kibana_react';
 
 export function SloList() {
   const { state, onStateChange } = useUrlSearchState();

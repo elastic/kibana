@@ -6,11 +6,12 @@
  */
 import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
+import { useTimeBuckets } from '@kbn/observability-plugin/public';
+import { getAlertSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
+import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { useSloAlertsQuery } from './slo_alerts_table';
-import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
-import { observabilityAlertFeatureIds } from '../../../../../common/constants';
-import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
-import { calculateTimeRangeBucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
+
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import { SloItem } from '../types';
 

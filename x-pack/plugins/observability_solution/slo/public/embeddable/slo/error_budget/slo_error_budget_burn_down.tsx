@@ -12,8 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink, EuiTitle } from '@
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
-import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
+import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
+import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
 import { EmbeddableSloProps } from './types';
@@ -93,7 +93,7 @@ export function SloErrorBudget({
     return (
       <LoadingContainer>
         <LoadingContent>
-          {i18n.translate('xpack.observability.sloEmbeddable.overview.sloNotFoundText', {
+          {i18n.translate('xpack.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
               'The SLO has been deleted. You can safely delete the widget from the dashboard.',
           })}

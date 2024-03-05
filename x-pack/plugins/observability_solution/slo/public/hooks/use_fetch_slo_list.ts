@@ -10,14 +10,11 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { SearchState } from '../../pages/slos/hooks/use_url_search_state';
-import { useCreateDataView } from '../use_create_data_view';
-import {
-  DEFAULT_SLO_PAGE_SIZE,
-  SLO_SUMMARY_DESTINATION_INDEX_NAME,
-} from '../../../common/slo/constants';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SearchState } from '../pages/slos/hooks/use_url_search_state'; // TODO SLO: move under hooks folder
+import { useCreateDataView } from './use_create_data_view'; // TODO SLO: export in observability and use from there
+import { DEFAULT_SLO_PAGE_SIZE, SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
 
-import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 export interface SLOListParams {
@@ -123,7 +120,7 @@ export function useFetchSloList({
     },
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: i18n.translate('xpack.observability.slo.list.errorNotification', {
+        title: i18n.translate('xpack.slo.list.errorNotification', {
           defaultMessage: 'Something went wrong while fetching SLOs',
         }),
       });

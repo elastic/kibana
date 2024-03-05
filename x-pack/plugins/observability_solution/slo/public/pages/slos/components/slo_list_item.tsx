@@ -15,7 +15,7 @@ import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from './common/burn_rate_rule_flyout';
 import { useSloListActions } from '../hooks/use_slo_list_actions';
 import { SloItemActions } from './slo_item_actions';
-import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import type { SloRule } from '../../../hooks/use_fetch_rules_for_slo';
 import { SloBadges } from './badges/slo_badges';
 import { SloSummary } from './slo_summary';
 

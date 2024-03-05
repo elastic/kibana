@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -23,14 +17,14 @@ export function SloGroupListError() {
       color="danger"
       title={
         <h2>
-          {i18n.translate('xpack.observability.slo.groupList.errorTitle', {
+          {i18n.translate('xpack.slo.groupList.errorTitle', {
             defaultMessage: 'Unable to load SLO groups',
           })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('xpack.observability.slo.groupList.errorMessage', {
+          {i18n.translate('xpack.slo.groupList.errorMessage', {
             defaultMessage:
               'There was an error loading the SLO groups. Contact your administrator for help.',
           })}

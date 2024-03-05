@@ -13,25 +13,40 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { SlosPlugin } from './plugin';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
-export interface SlosPluginSetupDeps {
+import { SloPlugin } from './plugin';
+
+export interface SloPublicPluginsSetup {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  licensing: LicensingPluginSetup;
+  share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
 }
 
-export interface SlosPluginStartDeps {
+export interface SloPublicPluginsStart {
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  share: SharePluginStart;
+  licensing: LicensingPluginStart;
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
 }
 
-export type SlosPluginSetup = ReturnType<SlosPlugin['setup']>;
-export type SlosPluginStart = void;
+export type SloPublicSetup = ReturnType<SloPlugin['setup']>;
+export type SloPublicStart = ReturnType<SloPlugin['start']>;

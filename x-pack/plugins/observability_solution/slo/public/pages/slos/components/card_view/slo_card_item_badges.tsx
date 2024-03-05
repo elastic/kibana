@@ -17,7 +17,7 @@ import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SloRule } from '../../../../hooks/use_fetch_rules_for_slo';
 
 interface Props {
   hasGroupBy: boolean;

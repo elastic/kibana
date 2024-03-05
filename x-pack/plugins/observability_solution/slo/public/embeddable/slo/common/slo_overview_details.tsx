@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
-import { useKibana } from '../../../utils/kibana_react';
 import {
   OVERVIEW_TAB_ID,
   SloDetails,
@@ -59,7 +59,7 @@ export function SloOverviewDetails({
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>
-            {i18n.translate('xpack.observability.sloOverviewDetails.h2.detailsLabel', {
+            {i18n.translate('xpack.sloOverviewDetails.h2.detailsLabel', {
               defaultMessage: '{sloName}',
               values: { sloName: slo.name },
             })}
@@ -79,7 +79,7 @@ export function SloOverviewDetails({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButton data-test-subj="o11ySloOverviewDetailsCloseButton" onClick={onClose}>
-              {i18n.translate('xpack.observability.sloOverviewDetails.button.closeLabel', {
+              {i18n.translate('xpack.sloOverviewDetails.button.closeLabel', {
                 defaultMessage: 'Close',
               })}
             </EuiButton>
@@ -93,7 +93,7 @@ export function SloOverviewDetails({
               }}
               data-test-subj="o11ySloOverviewDetailsDetailsButton"
             >
-              {i18n.translate('xpack.observability.sloOverviewDetails.button.detailsLabel', {
+              {i18n.translate('xpack.sloOverviewDetails.button.detailsLabel', {
                 defaultMessage: 'Details',
               })}
             </EuiButton>

@@ -36,8 +36,8 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
-import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 
 export interface Props {
@@ -71,7 +71,7 @@ export function EventsChartPanel({ slo, range }: Props) {
     slo.indicator.type !== 'sli.metric.timeslice' ? (
       <EuiTitle size="xs">
         <h2>
-          {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.title', {
+          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.title', {
             defaultMessage: 'Good vs bad events',
           })}
         </h2>
@@ -79,7 +79,7 @@ export function EventsChartPanel({ slo, range }: Props) {
     ) : (
       <EuiTitle size="xs">
         <h2>
-          {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.timesliceTitle', {
+          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.timesliceTitle', {
             defaultMessage: 'Timeslice metric',
           })}
         </h2>
@@ -150,7 +150,7 @@ export function EventsChartPanel({ slo, range }: Props) {
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
+              {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {
                 defaultMessage: 'Last 24h',
               })}
             </EuiText>
@@ -197,10 +197,9 @@ export function EventsChartPanel({ slo, range }: Props) {
               {slo.indicator.type !== 'sli.metric.timeslice' ? (
                 <>
                   <BarSeries
-                    id={i18n.translate(
-                      'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
-                      { defaultMessage: 'Good events' }
-                    )}
+                    id={i18n.translate('xpack.slo.sloDetails.eventsChartPanel.goodEventsLabel', {
+                      defaultMessage: 'Good events',
+                    })}
                     color={euiTheme.colors.success}
                     barSeriesStyle={{
                       rect: { fill: euiTheme.colors.success },
@@ -220,10 +219,9 @@ export function EventsChartPanel({ slo, range }: Props) {
                   />
 
                   <BarSeries
-                    id={i18n.translate(
-                      'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
-                      { defaultMessage: 'Bad events' }
-                    )}
+                    id={i18n.translate('xpack.slo.sloDetails.eventsChartPanel.badEventsLabel', {
+                      defaultMessage: 'Bad events',
+                    })}
                     color={euiTheme.colors.danger}
                     barSeriesStyle={{
                       rect: { fill: euiTheme.colors.danger },

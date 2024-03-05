@@ -11,8 +11,8 @@ import { SLOResponse } from '@kbn/slo-schema';
 import { SloDeleteConfirmationModal } from '../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloTimeWindowBadge } from '../slos/components/badges/slo_time_window_badge';
 import { SloIndicatorTypeBadge } from '../slos/components/badges/slo_indicator_type_badge';
-import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
-import { useResetSlo } from '../../hooks/slo/use_reset_slo';
+import { useDeleteSlo } from '../../hooks/use_delete_slo';
+import { useResetSlo } from '../../hooks/use_reset_slo';
 import { SloResetConfirmationModal } from '../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 
 interface OutdatedSloProps {

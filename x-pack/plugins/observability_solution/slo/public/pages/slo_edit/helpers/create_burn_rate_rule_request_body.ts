@@ -30,7 +30,7 @@ export function createBurnRateRuleRequestBody(
     consumer: 'slo',
     schedule: { interval: '1m' },
     tags: [],
-    name: i18n.translate('xpack.observability.slo.burnRateRule.name', {
+    name: i18n.translate('xpack.slo.burnRateRule.name', {
       defaultMessage: '{name} Burn Rate rule',
       values: { name: slo.name },
     }),

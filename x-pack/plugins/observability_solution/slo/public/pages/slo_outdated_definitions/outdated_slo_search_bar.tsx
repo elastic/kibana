@@ -58,7 +58,7 @@ export function OutdatedSloSearchBar({
             iconType="refresh"
             onClick={refreshOrUpdateSearch}
           >
-            {i18n.translate('xpack.observability.slosOutdatedDefinitions.refreshButtonLabel', {
+            {i18n.translate('xpack.slosOutdatedDefinitions.refreshButtonLabel', {
               defaultMessage: 'Refresh',
             })}
           </EuiButton>
@@ -71,7 +71,7 @@ export function OutdatedSloSearchBar({
             fill
             onClick={refreshOrUpdateSearch}
           >
-            {i18n.translate('xpack.observability.slosOutdatedDefinitions.updateButtonLabel', {
+            {i18n.translate('xpack.slosOutdatedDefinitions.updateButtonLabel', {
               defaultMessage: 'Update',
             })}
           </EuiButton>

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sloFeatureId } from '../../../common';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { sloFeatureId } from '../../common';
 
 export function useCapabilities() {
   const {

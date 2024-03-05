@@ -7,7 +7,7 @@
 
 import { GetPreviewDataResponse, Indicator, Objective } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { sloKeys } from './query_key_factory';
 
 export interface UseGetPreviewData {

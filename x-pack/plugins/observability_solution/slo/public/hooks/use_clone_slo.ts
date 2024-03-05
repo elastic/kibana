@@ -8,8 +8,8 @@
 import { encode } from '@kbn/rison';
 import { useCallback } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { paths } from '../../../common/locators/paths';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { paths } from '../../common/locators/paths';
 
 export function useCloneSlo() {
   const {

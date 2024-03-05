@@ -8,7 +8,7 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface SLOInspectResponse {
   slo: SLOResponse;

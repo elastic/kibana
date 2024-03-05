@@ -52,7 +52,8 @@ export {
 } from '../common';
 
 export type { SloEditLocatorParams } from './locators/slo_edit';
-
+export { getRenderCellValue } from './components/alerts_table/common/render_cell_value';
+export { useGetAlertFlyoutComponents } from './components/alerts_flyout/use_get_alert_flyout_components';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
@@ -71,6 +72,7 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
+export { useGetFilteredRuleTypes } from './hooks/use_get_filtered_rule_types';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 

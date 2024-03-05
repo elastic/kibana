@@ -10,15 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { useCapabilities } from '../../../hooks/slo/use_capabilities';
-import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
-import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
+import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useCloneSlo } from '../../../hooks/use_clone_slo';
+import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import type { RulesParams } from '../../../locators/rules';
-import { useKibana } from '../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 
@@ -50,7 +50,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const handleEdit = () => {
     if (slo) {
-      navigate(basePath.prepend(paths.observability.sloEdit(slo.id)));
+      navigate(basePath.prepend(paths.sloEdit(slo.id)));
     }
   };
 
@@ -103,7 +103,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleDeleteConfirm = async () => {
     if (slo) {
       deleteSlo({ id: slo.id, name: slo.name });
-      navigate(basePath.prepend(paths.observability.slos));
+      navigate(basePath.prepend(paths.slos));
     }
   };
 
@@ -126,7 +126,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             onClick={handleActionsClick}
             disabled={isLoading || !slo}
           >
-            {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
+            {i18n.translate('xpack.slo.sloDetails.headerControl.actions', {
               defaultMessage: 'Actions',
             })}
           </EuiButton>
@@ -144,7 +144,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               onClick={handleEdit}
               data-test-subj="sloDetailsHeaderControlPopoverEdit"
             >
-              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.edit', {
+              {i18n.translate('xpack.slo.sloDetails.headerControl.edit', {
                 defaultMessage: 'Edit',
               })}
             </EuiContextMenuItem>,
@@ -155,12 +155,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
               onClick={handleOpenRuleFlyout}
               data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
             >
-              {i18n.translate(
-                'xpack.observability.slo.sloDetails.headerControl.createBurnRateRule',
-                {
-                  defaultMessage: 'Create new alert rule',
-                }
-              )}
+              {i18n.translate('xpack.slo.sloDetails.headerControl.createBurnRateRule', {
+                defaultMessage: 'Create new alert rule',
+              })}
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="manageRules"
@@ -169,7 +166,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
             >
-              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.manageRules', {
+              {i18n.translate('xpack.slo.sloDetails.headerControl.manageRules', {
                 defaultMessage: 'Manage rules',
               })}
             </EuiContextMenuItem>,
@@ -183,12 +180,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
                   onClick={handleNavigateToApm}
                   data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
                 >
-                  {i18n.translate(
-                    'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
-                    {
-                      defaultMessage: 'Service details',
-                    }
-                  )}
+                  {i18n.translate('xpack.slos.sloDetails.headerControl.exploreInApm', {
+                    defaultMessage: 'Service details',
+                  })}
                 </EuiContextMenuItem>
               ) : (
                 []
@@ -202,7 +196,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
               >
-                {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
+                {i18n.translate('xpack.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',
                 })}
               </EuiContextMenuItem>,
@@ -213,7 +207,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 onClick={handleDelete}
                 data-test-subj="sloDetailsHeaderControlPopoverDelete"
               >
-                {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
+                {i18n.translate('xpack.slo.slo.item.actions.delete', {
                   defaultMessage: 'Delete',
                 })}
               </EuiContextMenuItem>

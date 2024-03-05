@@ -12,7 +12,7 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 
 export interface TimeRange {
   from: Date;

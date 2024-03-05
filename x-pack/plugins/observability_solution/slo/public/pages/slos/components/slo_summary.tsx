@@ -38,7 +38,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         >
           <EuiFlexItem grow={false}>
             <EuiStat
-              description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
+              description={i18n.translate('xpack.slo.stats.objective', {
                 defaultMessage: '{objective} target',
                 values: { objective: sloTarget },
               })}
@@ -71,7 +71,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         >
           <EuiFlexItem grow={false}>
             <EuiStat
-              description={i18n.translate('xpack.observability.slo.slo.stats.budgetRemaining', {
+              description={i18n.translate('xpack.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
               textAlign="right"

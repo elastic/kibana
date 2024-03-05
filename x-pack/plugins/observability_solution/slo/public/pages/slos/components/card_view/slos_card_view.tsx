@@ -15,9 +15,9 @@ import {
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
-import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
+import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { SloCardItem } from './slo_card_item';
 
 export interface Props {

@@ -70,9 +70,6 @@ export class SlosPlugin implements Plugin<SlosPluginSetup, SlosPluginStart> {
   public setup(core: CoreSetup, plugins: SlosPluginSetup) {
     const config = this.initContext.config.get<SloConfig>();
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-
-    const router = core.http.createRouter();
-
     // Register server side APIs
     // defineRoutes(router);
 

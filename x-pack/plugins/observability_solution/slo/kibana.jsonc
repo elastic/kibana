@@ -12,6 +12,7 @@
     ],
     "requiredPlugins": [
       "alerting",
+      "charts",
       "observability",
       "observabilityShared",
       "ruleRegistry",
@@ -28,6 +29,11 @@
       "presentationUtil",
       "features",
       "licensing"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "embeddable"
     ]
   }
 }

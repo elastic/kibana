@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 export function SloListEmpty() {
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.observability.slo.list.emptyTitle', {
+      title={i18n.translate('xpack.slo.list.emptyTitle', {
         defaultMessage: 'No results',
       })}
       color="warning"
       iconType="warning"
     >
-      {i18n.translate('xpack.observability.slo.list.emptyMessage', {
+      {i18n.translate('xpack.slo.list.emptyMessage', {
         defaultMessage: 'There are no results for your criteria.',
       })}
     </EuiCallOut>

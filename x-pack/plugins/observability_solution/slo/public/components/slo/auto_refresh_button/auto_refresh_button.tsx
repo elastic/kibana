@@ -23,7 +23,7 @@ export function AutoRefreshButton({ disabled, isAutoRefreshing, onClick }: Props
       iconType="pause"
       onClick={onClick}
     >
-      {i18n.translate('xpack.observability.slosPage.stopRefreshingButtonLabel', {
+      {i18n.translate('xpack.slosPage.stopRefreshingButtonLabel', {
         defaultMessage: 'Stop refreshing',
       })}
     </EuiButtonEmpty>
@@ -35,7 +35,7 @@ export function AutoRefreshButton({ disabled, isAutoRefreshing, onClick }: Props
       iconType="play"
       onClick={onClick}
     >
-      {i18n.translate('xpack.observability.slosPage.autoRefreshButtonLabel', {
+      {i18n.translate('xpack.slosPage.autoRefreshButtonLabel', {
         defaultMessage: 'Auto-refresh',
       })}
     </EuiButtonEmpty>

@@ -10,8 +10,8 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ChartData } from '../../../typings/slo';
-import { useKibana } from '../../../utils/kibana_react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';
 
@@ -35,7 +35,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.title', {
+                {i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.title', {
                   defaultMessage: 'Historical SLI',
                 })}
               </h2>
@@ -44,13 +44,10 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
               {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-                ? i18n.translate(
-                    'xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration',
-                    {
-                      defaultMessage: 'Last {duration}',
-                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                    }
-                  )
+                ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
+                    defaultMessage: 'Last {duration}',
+                    values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                  })
                 : toDurationAdverbLabel(slo.timeWindow.duration)}
             </EuiText>
           </EuiFlexItem>
@@ -62,10 +59,9 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
               titleColor={isSloFailed ? 'danger' : 'success'}
               title={hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat)}
               titleSize="s"
-              description={i18n.translate(
-                'xpack.observability.slo.sloDetails.sliHistoryChartPanel.current',
-                { defaultMessage: 'Observed value' }
-              )}
+              description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.current', {
+                defaultMessage: 'Observed value',
+              })}
               reverse
             />
           </EuiFlexItem>
@@ -73,10 +69,9 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
             <EuiStat
               title={numeral(slo.objective.target).format(percentFormat)}
               titleSize="s"
-              description={i18n.translate(
-                'xpack.observability.slo.sloDetails.sliHistoryChartPanel.objective',
-                { defaultMessage: 'Objective' }
-              )}
+              description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.objective', {
+                defaultMessage: 'Objective',
+              })}
               reverse
             />
           </EuiFlexItem>
@@ -85,12 +80,9 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
         <EuiFlexItem>
           <WideChart
             chart="line"
-            id={i18n.translate(
-              'xpack.observability.slo.sloDetails.sliHistoryChartPanel.chartTitle',
-              {
-                defaultMessage: 'SLI value',
-              }
-            )}
+            id={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.chartTitle', {
+              defaultMessage: 'SLI value',
+            })}
             state={isSloFailed ? 'error' : 'success'}
             data={data}
             isLoading={isLoading}

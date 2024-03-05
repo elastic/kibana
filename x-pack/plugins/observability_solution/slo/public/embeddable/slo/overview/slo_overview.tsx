@@ -13,12 +13,12 @@ import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
+import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
 import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
-import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
 import { EmbeddableSloProps } from './types';
 
@@ -92,7 +92,7 @@ export function SloOverview({
     return (
       <LoadingContainer>
         <LoadingContent>
-          {i18n.translate('xpack.observability.sloEmbeddable.overview.sloNotFoundText', {
+          {i18n.translate('xpack.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
               'The SLO has been deleted. You can safely delete the widget from the dashboard.',
           })}

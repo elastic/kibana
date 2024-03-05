@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { GroupByField } from '../common/group_by_field';
-import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { useFetchApmIndex } from '../../../../hooks/use_fetch_apm_indices';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -36,19 +36,18 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
           allowAllOption={false}
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.serviceName', {
+          label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
             defaultMessage: 'Service name',
           })}
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmAvailability.serviceName.placeholder',
-            { defaultMessage: 'Select the APM service' }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName.placeholder', {
+            defaultMessage: 'Select the APM service',
+          })}
           fieldName="service.name"
           name="indicator.params.service"
           dataTestSubj="apmAvailabilityServiceSelector"
           tooltip={
             <EuiIconTip
-              content={i18n.translate('xpack.observability.slo.sloEdit.apm.serviceName.tooltip', {
+              content={i18n.translate('xpack.slo.sloEdit.apm.serviceName.tooltip', {
                 defaultMessage: 'This is the APM service monitored by this SLO.',
               })}
               position="top"
@@ -56,14 +55,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
           }
         />
         <FieldSelector
-          label={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmAvailability.serviceEnvironment',
-            {
-              defaultMessage: 'Service environment',
-            }
-          )}
+          label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceEnvironment', {
+            defaultMessage: 'Service environment',
+          })}
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmAvailability.serviceEnvironment.placeholder',
+            'xpack.slo.sloEdit.apmAvailability.serviceEnvironment.placeholder',
             {
               defaultMessage: 'Select the environment',
             }
@@ -76,11 +72,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.transactionType', {
+          label={i18n.translate('xpack.slo.sloEdit.apmAvailability.transactionType', {
             defaultMessage: 'Transaction type',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmAvailability.transactionType.placeholder',
+            'xpack.slo.sloEdit.apmAvailability.transactionType.placeholder',
             {
               defaultMessage: 'Select the transaction type',
             }
@@ -90,11 +86,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
           dataTestSubj="apmAvailabilityTransactionTypeSelector"
         />
         <FieldSelector
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.transactionName', {
+          label={i18n.translate('xpack.slo.sloEdit.apmAvailability.transactionName', {
             defaultMessage: 'Transaction name',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmAvailability.transactionName.placeholder',
+            'xpack.slo.sloEdit.apmAvailability.transactionName.placeholder',
             {
               defaultMessage: 'Select the transaction name',
             }
@@ -110,19 +106,16 @@ export function ApmAvailabilityIndicatorTypeForm() {
           <QueryBuilder
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
+            label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
               defaultMessage: 'Query filter',
             })}
             name="indicator.params.filter"
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.apmLatency.filter.placeholder',
-              {
-                defaultMessage: 'Custom filter to apply on the index',
-              }
-            )}
+            placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
+              defaultMessage: 'Custom filter to apply on the index',
+            })}
             tooltip={
               <EuiIconTip
-                content={i18n.translate('xpack.observability.slo.sloEdit.apm.filter.tooltip', {
+                content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
                   defaultMessage:
                     'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
                 })}

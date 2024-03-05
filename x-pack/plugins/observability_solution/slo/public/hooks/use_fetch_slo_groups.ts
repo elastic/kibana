@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { FindSLOGroupsResponse } from '@kbn/slo-schema';
-import { useKibana } from '../../utils/kibana_react';
-import { useCreateDataView } from '../use_create_data_view';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCreateDataView } from './use_create_data_view'; // TODO SLO: extract from observability
 import { sloKeys } from './query_key_factory';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../common/slo/constants';
 import { SearchState } from '../../pages/slos/hooks/use_url_search_state';

@@ -8,10 +8,10 @@
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useGetFilteredRuleTypes } from '@kbn/observability-plugin/public';
 import { paths } from '../../../../../common/locators/paths';
-import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
-import { sloKeys } from '../../../../hooks/slo/query_key_factory';
-import { useKibana } from '../../../../utils/kibana_react';
+import { sloKeys } from '../../../../hooks/query_key_factory';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
 import { sloFeatureId } from '../../../../../common';
 

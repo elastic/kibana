@@ -42,7 +42,7 @@ export function HistogramIndicatorTypeForm() {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="xpack.observability.slo.sloEdit.sliType.histogram.sourceTitle"
+            id="xpack.slo.sloEdit.sliType.histogram.sourceTitle"
             defaultMessage="Source"
           />
         </h3>
@@ -57,13 +57,12 @@ export function HistogramIndicatorTypeForm() {
             <IndexFieldSelector
               indexFields={timestampFields ?? []}
               name="indicator.params.timestampField"
-              label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+              label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
                 defaultMessage: 'Timestamp field',
               })}
-              placeholder={i18n.translate(
-                'xpack.observability.slo.sloEdit.timestampField.placeholder',
-                { defaultMessage: 'Select a timestamp field' }
-              )}
+              placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
+                defaultMessage: 'Select a timestamp field',
+              })}
               isLoading={!!index && isIndexFieldsLoading}
               isDisabled={!index}
               isRequired
@@ -75,18 +74,17 @@ export function HistogramIndicatorTypeForm() {
           <QueryBuilder
             dataTestSubj="histogramIndicatorFormQueryFilterInput"
             indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.queryFilter', {
+            label={i18n.translate('xpack.slo.sloEdit.sliType.histogram.queryFilter', {
               defaultMessage: 'Query filter',
             })}
             name="indicator.params.filter"
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.histogram.customFilter',
-              { defaultMessage: 'Custom filter to apply on the index' }
-            )}
+            placeholder={i18n.translate('xpack.slo.sloEdit.sliType.histogram.customFilter', {
+              defaultMessage: 'Custom filter to apply on the index',
+            })}
             tooltip={
               <EuiIconTip
                 content={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.histogram.customFilter.tooltip',
+                  'xpack.slo.sloEdit.sliType.histogram.customFilter.tooltip',
                   {
                     defaultMessage:
                       'This KQL query can be used to filter the documents with some relevant criteria.',
@@ -104,7 +102,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.observability.slo.sloEdit.sliType.histogram.goodTitle"
+                id="xpack.slo.sloEdit.sliType.histogram.goodTitle"
                 defaultMessage="Good events"
               />
             </h3>
@@ -123,7 +121,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.observability.slo.sloEdit.sliType.histogram.totalTitle"
+                id="xpack.slo.sloEdit.sliType.histogram.totalTitle"
                 defaultMessage="Total events"
               />
             </h3>

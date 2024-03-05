@@ -24,15 +24,15 @@ type Status = 'NO_DATA' | 'BREACHED' | 'OK';
 
 function getTitleFromStatus(status: Status): string {
   if (status === 'NO_DATA')
-    return i18n.translate('xpack.observability.slo.burnRate.noDataStatusTitle', {
+    return i18n.translate('xpack.slo.burnRate.noDataStatusTitle', {
       defaultMessage: 'No value',
     });
   if (status === 'BREACHED')
-    return i18n.translate('xpack.observability.slo.burnRate.breachedStatustTitle', {
+    return i18n.translate('xpack.slo.burnRate.breachedStatustTitle', {
       defaultMessage: 'Critical value breached',
     });
 
-  return i18n.translate('xpack.observability.slo.burnRate.okStatusTitle', {
+  return i18n.translate('xpack.slo.burnRate.okStatusTitle', {
     defaultMessage: 'Acceptable value',
   });
 }
@@ -43,11 +43,11 @@ function getSubtitleFromStatus(
   slo: SLOResponse
 ): string {
   if (status === 'NO_DATA')
-    return i18n.translate('xpack.observability.slo.burnRate.noDataStatusSubtitle', {
+    return i18n.translate('xpack.slo.burnRate.noDataStatusSubtitle', {
       defaultMessage: 'Waiting for more data.',
     });
   if (status === 'BREACHED')
-    return i18n.translate('xpack.observability.slo.burnRate.breachedStatustSubtitle', {
+    return i18n.translate('xpack.slo.burnRate.breachedStatustSubtitle', {
       defaultMessage: 'At current rate, the error budget will be exhausted in {hour} hours.',
       values: {
         hour: numeral(
@@ -58,7 +58,7 @@ function getSubtitleFromStatus(
       },
     });
 
-  return i18n.translate('xpack.observability.slo.burnRate.okStatusSubtitle', {
+  return i18n.translate('xpack.slo.burnRate.okStatusSubtitle', {
     defaultMessage: 'There is no risk of error budget exhaustion.',
   });
 }
@@ -96,7 +96,7 @@ export function BurnRate({ threshold, burnRate, slo, isLoading }: BurnRateParams
               description={
                 <EuiTextColor color="default">
                   <span>
-                    {i18n.translate('xpack.observability.slo.burnRate.threshold', {
+                    {i18n.translate('xpack.slo.burnRate.threshold', {
                       defaultMessage: 'Threshold is {threshold}x',
                       values: { threshold },
                     })}

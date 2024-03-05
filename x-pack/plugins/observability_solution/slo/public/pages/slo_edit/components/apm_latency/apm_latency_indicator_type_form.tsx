@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
-import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { useFetchApmIndex } from '../../../../hooks/use_fetch_apm_indices';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -36,21 +36,18 @@ export function ApmLatencyIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
           allowAllOption={false}
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.serviceName', {
+          label={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName', {
             defaultMessage: 'Service name',
           })}
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmLatency.serviceName.placeholder',
-            {
-              defaultMessage: 'Select the APM service',
-            }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName.placeholder', {
+            defaultMessage: 'Select the APM service',
+          })}
           fieldName="service.name"
           name="indicator.params.service"
           dataTestSubj="apmLatencyServiceSelector"
           tooltip={
             <EuiIconTip
-              content={i18n.translate('xpack.observability.slo.sloEdit.apm.serviceName.tooltip', {
+              content={i18n.translate('xpack.slo.sloEdit.apm.serviceName.tooltip', {
                 defaultMessage: 'This is the APM service monitored by this SLO.',
               })}
               position="top"
@@ -58,11 +55,11 @@ export function ApmLatencyIndicatorTypeForm() {
           }
         />
         <FieldSelector
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.serviceEnvironment', {
+          label={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceEnvironment', {
             defaultMessage: 'Service environment',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmLatency.serviceEnvironment.placeholder',
+            'xpack.slo.sloEdit.apmLatency.serviceEnvironment.placeholder',
             {
               defaultMessage: 'Select the environment',
             }
@@ -75,29 +72,23 @@ export function ApmLatencyIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.transactionType', {
+          label={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionType', {
             defaultMessage: 'Transaction type',
           })}
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmLatency.transactionType.placeholder',
-            {
-              defaultMessage: 'Select the transaction type',
-            }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionType.placeholder', {
+            defaultMessage: 'Select the transaction type',
+          })}
           fieldName="transaction.type"
           name="indicator.params.transactionType"
           dataTestSubj="apmLatencyTransactionTypeSelector"
         />
         <FieldSelector
-          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.transactionName', {
+          label={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionName', {
             defaultMessage: 'Transaction name',
           })}
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.apmLatency.transactionName.placeholder',
-            {
-              defaultMessage: 'Select the transaction name',
-            }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionName.placeholder', {
+            defaultMessage: 'Select the transaction name',
+          })}
           fieldName="transaction.name"
           name="indicator.params.transactionName"
           dataTestSubj="apmLatencyTransactionNameSelector"
@@ -109,18 +100,14 @@ export function ApmLatencyIndicatorTypeForm() {
           <EuiFormRow
             label={
               <span>
-                {i18n.translate(
-                  'xpack.observability.slo.sloEdit.apmLatency.threshold.placeholder',
-                  { defaultMessage: 'Threshold (ms)' }
-                )}{' '}
+                {i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.placeholder', {
+                  defaultMessage: 'Threshold (ms)',
+                })}{' '}
                 <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.slo.sloEdit.apmLatency.threshold.tooltip',
-                    {
-                      defaultMessage:
-                        'Configure the threshold in milliseconds defining the "good" or "successful" requests for the SLO.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.tooltip', {
+                    defaultMessage:
+                      'Configure the threshold in milliseconds defining the "good" or "successful" requests for the SLO.',
+                  })}
                   position="top"
                 />
               </span>
@@ -153,19 +140,16 @@ export function ApmLatencyIndicatorTypeForm() {
           <QueryBuilder
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
+            label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
               defaultMessage: 'Query filter',
             })}
             name="indicator.params.filter"
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.apmLatency.filter.placeholder',
-              {
-                defaultMessage: 'Custom filter to apply on the index',
-              }
-            )}
+            placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
+              defaultMessage: 'Custom filter to apply on the index',
+            })}
             tooltip={
               <EuiIconTip
-                content={i18n.translate('xpack.observability.slo.sloEdit.apm.filter.tooltip', {
+                content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
                   defaultMessage:
                     'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
                 })}

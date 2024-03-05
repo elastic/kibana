@@ -21,29 +21,24 @@ import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
 
-const fieldLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.fieldLabel',
-  { defaultMessage: 'Field' }
-);
+const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
+  defaultMessage: 'Field',
+});
 
 const aggregationLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.aggregationLabel',
+  'xpack.slo.sloEdit.sliType.timesliceMetric.aggregationLabel',
   { defaultMessage: 'Aggregation' }
 );
 
-const filterLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.filterLabel',
-  { defaultMessage: 'Filter' }
-);
+const filterLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.filterLabel', {
+  defaultMessage: 'Filter',
+});
 
 const fieldTooltip = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.observability.slo.sloEdit.sliType.timesliceMetric.totalMetric.tooltip',
-      {
-        defaultMessage: 'This is the field used in the aggregation.',
-      }
-    )}
+    content={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.totalMetric.tooltip', {
+      defaultMessage: 'This is the field used in the aggregation.',
+    })}
     position="top"
   />
 );
@@ -113,11 +108,11 @@ export function MetricInput({
                 isClearable={false}
                 singleSelection={{ asPlainText: true }}
                 placeholder={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder',
+                  'xpack.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder',
                   { defaultMessage: 'Select an aggregation' }
                 )}
                 aria-label={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder',
+                  'xpack.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder',
                   { defaultMessage: 'Select an aggregation' }
                 )}
                 isInvalid={fieldState.invalid}
@@ -170,10 +165,9 @@ export function MetricInput({
                 isInvalid={fieldState.invalid}
                 label={
                   <span>
-                    {i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.timesliceMetric.percentileLabel',
-                      { defaultMessage: 'Percentile' }
-                    )}{' '}
+                    {i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.percentileLabel', {
+                      defaultMessage: 'Percentile',
+                    })}{' '}
                     {metric.name}
                   </span>
                 }
@@ -221,11 +215,11 @@ export function MetricInput({
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.timesliceMetric.metricField.placeholder',
+                    'xpack.slo.sloEdit.sliType.timesliceMetric.metricField.placeholder',
                     { defaultMessage: 'Select a metric field' }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.timesliceMetric.metricField.placeholder',
+                    'xpack.slo.sloEdit.sliType.timesliceMetric.metricField.placeholder',
                     { defaultMessage: 'Select a metric field' }
                   )}
                   isInvalid={fieldState.invalid}
@@ -270,14 +264,14 @@ export function MetricInput({
           label={`${filterLabel} ${metric.name}`}
           name={`indicator.params.metric.metrics.${index}.filter`}
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.timesliceMetric.goodQuery.placeholder',
+            'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.placeholder',
             { defaultMessage: 'KQL filter' }
           )}
           required={false}
           tooltip={
             <EuiIconTip
               content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.timesliceMetric.goodQuery.tooltip',
+                'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.tooltip',
                 {
                   defaultMessage: 'This KQL query should return a subset of events.',
                 }

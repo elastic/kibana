@@ -8,12 +8,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { SlosPluginStartDeps } from './types';
+import { SloPublicPluginsStart } from './types';
 import { SlosApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  {}: SlosPluginStartDeps,
+  {}: SloPublicPluginsStart,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(

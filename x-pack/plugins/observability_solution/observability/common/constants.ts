@@ -9,7 +9,6 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleCreationValidConsumer } from '@kbn/triggers-actions-ui-plugin/public';
 
-
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 export const ALERT_STATUS_ALL = 'all';
 export const ALERTS_URL_STORAGE_KEY = '_a';

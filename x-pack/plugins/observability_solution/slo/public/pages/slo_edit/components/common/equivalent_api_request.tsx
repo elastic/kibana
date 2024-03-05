@@ -54,17 +54,16 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              {i18n.translate(
-                'xpack.observability.equivalentApiRequest.h2.equivalentAPIRequestToLabel',
-                { defaultMessage: 'Equivalent API request' }
-              )}
+              {i18n.translate('xpack.equivalentApiRequest.h2.equivalentAPIRequestToLabel', {
+                defaultMessage: 'Equivalent API request',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiText>
             <FormattedMessage
-              id="xpack.observability.equivalentApiRequest.p.useTheRESTAPILabel"
+              id="xpack.equivalentApiRequest.p.useTheRESTAPILabel"
               defaultMessage="Use the REST API"
             />
           </EuiText>
@@ -75,7 +74,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
           <EuiSpacer size="s" />
           <EuiText>
             <FormattedMessage
-              id="xpack.observability.equivalentApiRequest.p.withTheFollowingBodyLabel"
+              id="xpack.slo.equivalentApiRequest.p.withTheFollowingBodyLabel"
               defaultMessage="with the following body:"
             />
           </EuiText>
@@ -85,10 +84,9 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
             </EuiCodeBlock>
           ) : (
             <EuiCodeBlock language="javascript" isCopyable paddingSize="s">
-              {i18n.translate(
-                'xpack.observability.equivalentApiRequest.formIsNotValidCodeBlockLabel',
-                { defaultMessage: 'Form is not valid' }
-              )}
+              {i18n.translate('xpack.slo.equivalentApiRequest.formIsNotValidCodeBlockLabel', {
+                defaultMessage: 'Form is not valid',
+              })}
             </EuiCodeBlock>
           )}
         </EuiFlyoutBody>
@@ -99,7 +97,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
             onClick={() => setIsFlyoutVisible(false)}
             flush="left"
           >
-            {i18n.translate('xpack.observability.equivalentApiRequest.closeButtonEmptyLabel', {
+            {i18n.translate('xpack.slo.equivalentApiRequest.closeButtonEmptyLabel', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
@@ -116,7 +114,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         disabled={disabled}
         onClick={() => setIsFlyoutVisible(true)}
       >
-        {i18n.translate('xpack.observability.slo.sloEdit.equivalentApiRequest', {
+        {i18n.translate('xpack.slo.sloEdit.equivalentApiRequest', {
           defaultMessage: 'Equivalent API request',
         })}
       </EuiButtonEmpty>

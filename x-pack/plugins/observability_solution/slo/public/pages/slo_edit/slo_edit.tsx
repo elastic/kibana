@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { paths } from '../../../common/locators/paths';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
@@ -35,7 +35,7 @@ export function SloEditPage() {
 
   useBreadcrumbs([
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: basePath.prepend(paths.slos),
       text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
@@ -44,7 +44,7 @@ export function SloEditPage() {
     ...(!!slo
       ? [
           {
-            href: basePath.prepend(paths.observability.sloDetails(slo!.id)),
+            href: basePath.prepend(paths.sloDetails(slo!.id)),
             text: slo!.name,
           },
         ]
@@ -61,7 +61,7 @@ export function SloEditPage() {
   ]);
 
   if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
+    navigateToUrl(basePath.prepend(paths.slos));
   }
 
   return (
@@ -78,7 +78,7 @@ export function SloEditPage() {
       }}
       data-test-subj="slosEditPage"
     >
-      <HeaderMenu />
+      {/* <HeaderMenu /> */}
       <SloEditForm slo={slo} />
     </ObservabilityPageTemplate>
   );

@@ -9,11 +9,11 @@ import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { sloKeys } from './query_key_factory';
 import { ActiveAlerts } from './active_alerts';
 
-import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
+import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 
 type SloIdAndInstanceId = [string, string];
 

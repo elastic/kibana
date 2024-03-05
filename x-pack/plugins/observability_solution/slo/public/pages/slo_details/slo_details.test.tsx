@@ -20,14 +20,14 @@ import {
 } from '../../data/slo/historical_summary_data';
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 import { buildSlo } from '../../data/slo/slo';
-import { ActiveAlerts } from '../../hooks/slo/active_alerts';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
-import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { ActiveAlerts } from '../../hooks/active_alerts';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useDeleteSlo } from '../../hooks/use_delete_slo';
+import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
+import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 
@@ -37,13 +37,13 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/slo/use_capabilities');
-jest.mock('../../hooks/slo/use_fetch_active_alerts');
-jest.mock('../../hooks/slo/use_fetch_slo_details');
-jest.mock('../../hooks/slo/use_fetch_historical_summary');
-jest.mock('../../hooks/slo/use_delete_slo');
+jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_fetch_active_alerts');
+jest.mock('../../hooks/use_fetch_slo_details');
+jest.mock('../../hooks/use_fetch_historical_summary');
+jest.mock('../../hooks/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -136,7 +136,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+      expect(mockNavigate).toBeCalledWith(paths.slos);
     });
   });
 
@@ -252,7 +252,7 @@ describe('SLO Details Page', () => {
 
     await waitFor(() => {
       expect(mockNavigate).toBeCalledWith(
-        paths.observability.sloCreateWithEncodedForm(
+        paths.sloCreateWithEncodedForm(
           encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
         )
       );
@@ -285,7 +285,7 @@ describe('SLO Details Page', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+      expect(mockNavigate).toBeCalledWith(paths.slos);
     });
   });
 

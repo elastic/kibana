@@ -46,7 +46,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
     <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.headerTitle', {
+          {i18n.translate('xpack.sloEmbeddable.config.sloSelector.headerTitle', {
             defaultMessage: 'SLO configuration',
           })}
         </EuiModalHeaderTitle>
@@ -70,10 +70,9 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
           <>
             <EuiSpacer />
             <EuiSwitch
-              label={i18n.translate(
-                'xpack.observability.sloConfiguration.euiSwitch.showAllGroupByLabel',
-                { defaultMessage: 'Show all related group-by instances' }
-              )}
+              label={i18n.translate('xpack.sloConfiguration.euiSwitch.showAllGroupByLabel', {
+                defaultMessage: 'Show all related group-by instances',
+              })}
               checked={showAllGroupByInstances}
               onChange={(e) => {
                 setShowAllGroupByInstances(e.target.checked);
@@ -85,7 +84,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
-            id="xpack.observability.sloEmbeddable.config.cancelButtonLabel"
+            id="xpack.sloEmbeddable.config.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -97,7 +96,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
           fill
         >
           <FormattedMessage
-            id="xpack.observability.embeddableSlo.config.confirmButtonLabel"
+            id="xpack.embeddableSlo.config.confirmButtonLabel"
             defaultMessage="Confirm configurations"
           />
         </EuiButton>

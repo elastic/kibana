@@ -12,7 +12,7 @@ import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useFormContext } from 'react-hook-form';
 import { OptionalText } from './optional_text';
-import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
+import { useFetchGroupByCardinality } from '../../../../hooks/use_fetch_group_by_cardinality';
 import { CreateSLOForm } from '../../types';
 import { IndexFieldSelector } from './index_field_selector';
 
@@ -35,11 +35,11 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
         defaultValue={ALL_VALUE}
         label={
           <span>
-            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
+            {i18n.translate('xpack.slo.sloEdit.groupBy.label', {
               defaultMessage: 'Group by',
             })}{' '}
             <EuiIconTip
-              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
+              content={i18n.translate('xpack.slo.sloEdit.groupBy.tooltip', {
                 defaultMessage: 'Create individual SLOs for each value of the selected field.',
               })}
               position="top"
@@ -47,7 +47,7 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
           </span>
         }
         labelAppend={<OptionalText />}
-        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
+        placeholder={i18n.translate('xpack.slo.sloEdit.groupBy.placeholder', {
           defaultMessage: 'Select an optional field to group by',
         })}
         isLoading={!!index && isLoading}
@@ -58,7 +58,7 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
           size="s"
           iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}
           color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
-          title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
+          title={i18n.translate('xpack.slo.sloEdit.groupBy.cardinalityInfo', {
             defaultMessage:
               "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
             values: { card: groupByCardinality.cardinality, groupBy: groupByField },

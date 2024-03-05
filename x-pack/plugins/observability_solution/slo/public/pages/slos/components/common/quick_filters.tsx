@@ -14,7 +14,7 @@ import { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { SearchState } from '../../hooks/use_url_search_state';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/slo/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
 
 interface Props {
   initialState: SearchState;

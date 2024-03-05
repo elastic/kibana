@@ -15,8 +15,8 @@ import {
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
-import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 

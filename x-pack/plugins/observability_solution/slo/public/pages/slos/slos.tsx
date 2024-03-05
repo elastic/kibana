@@ -9,16 +9,18 @@ import React, { useEffect } from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FeedbackButton } from './components/common/feedback_button';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloListSearchBar } from './components/slo_list_search_bar';
-import { useKibana } from '../../utils/kibana_react';
+
+// import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
 export const SLO_PAGE_ID = 'slo-page-container';
@@ -42,7 +44,7 @@ export function SlosPage() {
 
   useBreadcrumbs([
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: basePath.prepend(paths.slos),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
@@ -52,7 +54,7 @@ export function SlosPage() {
 
   useEffect(() => {
     if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
-      navigateToUrl(basePath.prepend(paths.observability.slosWelcome));
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
   }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
 
@@ -60,14 +62,13 @@ export function SlosPage() {
     <ObservabilityPageTemplate
       data-test-subj="slosPage"
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.slos.heading', {
+        pageTitle: i18n.translate('xpack.slos.heading', {
           defaultMessage: 'SLOs',
         }),
         rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
       }}
       topSearchBar={<SloListSearchBar />}
     >
-      <HeaderMenu />
       <SloOutdatedCallout />
       <SloList />
     </ObservabilityPageTemplate>

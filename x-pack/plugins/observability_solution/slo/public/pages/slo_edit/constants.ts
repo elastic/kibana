@@ -74,13 +74,13 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
 export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindow; text: string }> = [
   {
     value: 'rolling',
-    text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.rolling', {
+    text: i18n.translate('xpack.slo.sloEdit.timeWindow.rolling', {
       defaultMessage: 'Rolling',
     }),
   },
   {
     value: 'calendarAligned',
-    text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.calendarAligned', {
+    text: i18n.translate('xpack.slo.sloEdit.timeWindow.calendarAligned', {
       defaultMessage: 'Calendar aligned',
     }),
   },
@@ -89,13 +89,13 @@ export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindow; text: string }>
 export const CALENDARALIGNED_TIMEWINDOW_OPTIONS = [
   {
     value: '1w',
-    text: i18n.translate('xpack.observability.slo.sloEdit.calendarTimeWindow.weekly', {
+    text: i18n.translate('xpack.slo.sloEdit.calendarTimeWindow.weekly', {
       defaultMessage: 'Weekly',
     }),
   },
   {
     value: '1M',
-    text: i18n.translate('xpack.observability.slo.sloEdit.calendarTimeWindow.monthly', {
+    text: i18n.translate('xpack.slo.sloEdit.calendarTimeWindow.monthly', {
       defaultMessage: 'Monthly',
     }),
   },
@@ -103,7 +103,7 @@ export const CALENDARALIGNED_TIMEWINDOW_OPTIONS = [
 
 export const ROLLING_TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   value: `${number}d`,
-  text: i18n.translate('xpack.observability.slo.sloEdit.rollingTimeWindow.days', {
+  text: i18n.translate('xpack.slo.sloEdit.rollingTimeWindow.days', {
     defaultMessage: '{number} days',
     values: { number },
   }),
@@ -220,33 +220,21 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   groupBy: ALL_VALUE,
 };
 
-export const COMPARATOR_GT = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.gtLabel',
-  {
-    defaultMessage: 'Greater than',
-  }
-);
+export const COMPARATOR_GT = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.gtLabel', {
+  defaultMessage: 'Greater than',
+});
 
-export const COMPARATOR_GTE = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.gteLabel',
-  {
-    defaultMessage: 'Greater than or equal to',
-  }
-);
+export const COMPARATOR_GTE = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.gteLabel', {
+  defaultMessage: 'Greater than or equal to',
+});
 
-export const COMPARATOR_LT = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.ltLabel',
-  {
-    defaultMessage: 'Less than',
-  }
-);
+export const COMPARATOR_LT = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.ltLabel', {
+  defaultMessage: 'Less than',
+});
 
-export const COMPARATOR_LTE = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.lteLabel',
-  {
-    defaultMessage: 'Less than or equal to',
-  }
-);
+export const COMPARATOR_LTE = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.lteLabel', {
+  defaultMessage: 'Less than or equal to',
+});
 
 export const COMPARATOR_MAPPING = {
   GT: COMPARATOR_GT,

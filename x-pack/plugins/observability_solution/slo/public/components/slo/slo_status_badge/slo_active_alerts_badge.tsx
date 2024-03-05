@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { paths } from '../../../../common/locators/paths';
-import { useKibana } from '../../../utils/kibana_react';
 
 export interface Props {
   viewMode?: 'compact' | 'default';
@@ -48,15 +48,14 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         iconType="warning"
         color="danger"
         onClick={handleActiveAlertsClick}
-        onClickAriaLabel={i18n.translate(
-          'xpack.observability.slo.slo.activeAlertsBadge.ariaLabel',
-          { defaultMessage: 'active alerts badge' }
-        )}
+        onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
+          defaultMessage: 'active alerts badge',
+        })}
         data-test-subj="o11ySloActiveAlertsBadge"
       >
         {viewMode !== 'default'
           ? activeAlerts
-          : i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
+          : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
               defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
               values: { count: activeAlerts },
             })}

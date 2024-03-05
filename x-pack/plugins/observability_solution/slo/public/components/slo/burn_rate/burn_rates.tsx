@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
+import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';
 import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
 

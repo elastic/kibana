@@ -42,7 +42,7 @@ export function ErrorBudgetActions({ setDashboardAttachmentReady }: Props) {
           onClick={handleAttachToDashboard}
           data-test-subj="sloActinsAttachToDashboard"
         >
-          {i18n.translate('xpack.observability.slo.item.actions.attachToDashboard', {
+          {i18n.translate('xpack.slo.item.actions.attachToDashboard', {
             defaultMessage: 'Attach to Dashboard',
           })}
         </EuiContextMenuItem>

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { CreateSLOForm } from '../../types';
@@ -116,16 +116,10 @@ export function IndexSelection() {
   );
 }
 
-const SELECT_DATA_VIEW = i18n.translate(
-  'xpack.observability.slo.sloEdit.customKql.dataViewSelection.label',
-  {
-    defaultMessage: 'Select a Data view',
-  }
-);
+const SELECT_DATA_VIEW = i18n.translate('xpack.slo.sloEdit.customKql.dataViewSelection.label', {
+  defaultMessage: 'Select a Data view',
+});
 
-const INDEX_LABEL = i18n.translate(
-  'xpack.observability.slo.sloEdit.customKql.indexSelection.label',
-  {
-    defaultMessage: 'Index',
-  }
-);
+const INDEX_LABEL = i18n.translate('xpack.slo.sloEdit.customKql.indexSelection.label', {
+  defaultMessage: 'Index',
+});

@@ -16,7 +16,7 @@ import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
-import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import type { SloRule } from '../../../../hooks/use_fetch_rules_for_slo';
 import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
 export type ViewMode = 'default' | 'compact';
 

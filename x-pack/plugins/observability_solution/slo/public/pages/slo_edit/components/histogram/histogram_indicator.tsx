@@ -32,13 +32,13 @@ interface HistogramIndicatorProps {
 const AGGREGATIONS = {
   value_count: {
     value: 'value_count',
-    label: i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.valueCountLabel', {
+    label: i18n.translate('xpack.slo.sloEdit.sliType.histogram.valueCountLabel', {
       defaultMessage: 'Value count',
     }),
   },
   range: {
     value: 'range',
-    label: i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.rangeLabel', {
+    label: i18n.translate('xpack.slo.sloEdit.sliType.histogram.rangeLabel', {
       defaultMessage: 'Range',
     }),
   },
@@ -48,20 +48,17 @@ const AGGREGATION_OPTIONS = Object.values(AGGREGATIONS);
 
 const aggregationTooltip = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.observability.slo.sloEdit.sliType.histogram.aggregationTooltip',
-      {
-        defaultMessage:
-          'The "value count" aggreation will return the total count for the histogram field. Range will return the count from the histogram field that is within the range defined below.',
-      }
-    )}
+    content={i18n.translate('xpack.slo.sloEdit.sliType.histogram.aggregationTooltip', {
+      defaultMessage:
+        'The "value count" aggreation will return the total count for the histogram field. Range will return the count from the histogram field that is within the range defined below.',
+    })}
     position="top"
   />
 );
 
 const fromTooltip = (
   <EuiIconTip
-    content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromTooltip', {
+    content={i18n.translate('xpack.slo.sloEdit.sliType.histogram.fromTooltip', {
       defaultMessage: 'The "from" value is inclusive.',
     })}
     position="top"
@@ -70,28 +67,26 @@ const fromTooltip = (
 
 const toTooltip = (
   <EuiIconTip
-    content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toTooltip', {
+    content={i18n.translate('xpack.slo.sloEdit.sliType.histogram.toTooltip', {
       defaultMessage: 'The "to" value is NOT inclusive.',
     })}
     position="top"
   />
 );
 
-const aggregationLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.histogram.aggregationLabel',
-  { defaultMessage: 'Aggregation' }
-);
+const aggregationLabel = i18n.translate('xpack.slo.sloEdit.sliType.histogram.aggregationLabel', {
+  defaultMessage: 'Aggregation',
+});
 
-const metricLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.histogram.metricLabel',
-  { defaultMessage: 'Field' }
-);
+const metricLabel = i18n.translate('xpack.slo.sloEdit.sliType.histogram.metricLabel', {
+  defaultMessage: 'Field',
+});
 
-const toLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toLabel', {
+const toLabel = i18n.translate('xpack.slo.sloEdit.sliType.histogram.toLabel', {
   defaultMessage: 'To',
 });
 
-const fromLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromLabel', {
+const fromLabel = i18n.translate('xpack.slo.sloEdit.sliType.histogram.fromLabel', {
   defaultMessage: 'From',
 });
 
@@ -133,11 +128,11 @@ export function HistogramIndicator({
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.histogram.aggregation.placeholder',
+                    'xpack.slo.sloEdit.sliType.histogram.aggregation.placeholder',
                     { defaultMessage: 'Select an aggregation' }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.histogram.aggregation.placeholder',
+                    'xpack.slo.sloEdit.sliType.histogram.aggregation.placeholder',
                     { defaultMessage: 'Select an aggregation' }
                   )}
                   isInvalid={fieldState.invalid}
@@ -174,11 +169,11 @@ export function HistogramIndicator({
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.histogram.metricField.placeholder',
+                    'xpack.slo.sloEdit.sliType.histogram.metricField.placeholder',
                     { defaultMessage: 'Select a histogram field' }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.histogram.metricField.placeholder',
+                    'xpack.slo.sloEdit.sliType.histogram.metricField.placeholder',
                     { defaultMessage: 'Select a histogram field' }
                   )}
                   isInvalid={fieldState.invalid}
@@ -288,24 +283,18 @@ export function HistogramIndicator({
           <QueryBuilder
             dataTestSubj={`histogramIndicatorForm${type}QueryInput`}
             indexPatternString={indexPattern}
-            label={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.histogram.kqlFilterLabel',
-              {
-                defaultMessage: 'KQL filter',
-              }
-            )}
+            label={i18n.translate('xpack.slo.sloEdit.sliType.histogram.kqlFilterLabel', {
+              defaultMessage: 'KQL filter',
+            })}
             name={`indicator.params.${type}.filter`}
             placeholder=""
             required={false}
             tooltip={
               <EuiIconTip
-                content={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.histogram.query.tooltip',
-                  {
-                    defaultMessage:
-                      'This KQL query should return a subset of events for this indicator.',
-                  }
-                )}
+                content={i18n.translate('xpack.slo.sloEdit.sliType.histogram.query.tooltip', {
+                  defaultMessage:
+                    'This KQL query should return a subset of events for this indicator.',
+                })}
                 position="top"
               />
             }

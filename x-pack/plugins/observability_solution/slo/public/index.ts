@@ -4,10 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { SloPlugin } from './plugin';
+import type {
+  SloPublicSetup,
+  SloPublicStart,
+  SloPublicPluginsSetup,
+  SloPublicPluginsStart,
+} from './types';
 
-import { SlosPlugin } from './plugin';
-
-export function plugin() {
-  return new SlosPlugin();
-}
-export type { SlosPluginSetup, SlosPluginStart } from './types';
+export const plugin: PluginInitializer<
+  SloPublicSetup,
+  SloPublicStart,
+  SloPublicPluginsSetup,
+  SloPublicPluginsStart
+> = (initializerContext: PluginInitializerContext) => {
+  return new SloPlugin(initializerContext);
+};
+export type { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';

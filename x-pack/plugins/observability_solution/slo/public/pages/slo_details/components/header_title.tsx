@@ -52,7 +52,7 @@ export function HeaderTitle(props: Props) {
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
             <strong>
-              {i18n.translate('xpack.observability.slo.sloDetails.headerTitle.lastUpdatedMessage', {
+              {i18n.translate('xpack.slo.sloDetails.headerTitle.lastUpdatedMessage', {
                 defaultMessage: 'Last updated on',
               })}
             </strong>
@@ -63,7 +63,7 @@ export function HeaderTitle(props: Props) {
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
             <strong>
-              {i18n.translate('xpack.observability.slo.sloDetails.headerTitle.createdMessage', {
+              {i18n.translate('xpack.slo.sloDetails.headerTitle.createdMessage', {
                 defaultMessage: 'Created on',
               })}
             </strong>

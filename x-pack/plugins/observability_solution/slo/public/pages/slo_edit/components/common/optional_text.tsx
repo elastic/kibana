@@ -12,7 +12,7 @@ import React from 'react';
 export function OptionalText() {
   return (
     <EuiText size="xs" color="subdued">
-      {i18n.translate('xpack.observability.slo.sloEdit.optionalLabel', {
+      {i18n.translate('xpack.slo.sloEdit.optionalLabel', {
         defaultMessage: 'Optional',
       })}
     </EuiText>

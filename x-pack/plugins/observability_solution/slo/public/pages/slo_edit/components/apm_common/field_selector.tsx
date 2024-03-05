@@ -11,10 +11,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { ReactNode, useState } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
-import {
-  Suggestion,
-  useFetchApmSuggestions,
-} from '../../../../hooks/slo/use_fetch_apm_suggestions';
+import { Suggestion, useFetchApmSuggestions } from '../../../../hooks/use_fetch_apm_suggestions';
 import { CreateSLOForm } from '../../types';
 
 interface Option {
@@ -57,7 +54,7 @@ export function FieldSelector({
       ? [
           {
             value: ALL_VALUE,
-            label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
+            label: i18n.translate('xpack.slo.sloEdit.fieldSelector.all', {
               defaultMessage: 'All',
             }),
           },

@@ -8,9 +8,9 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { paths } from '../../../../../common/locators/paths';
-import { useCapabilities } from '../../../../hooks/slo/use_capabilities';
+import { useCapabilities } from '../../../../hooks/use_capabilities';
 
 export function CreateSloBtn() {
   const {

@@ -11,11 +11,11 @@ import React from 'react';
 import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
 

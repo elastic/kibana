@@ -15,14 +15,15 @@ import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useCreateSlo } from '../../hooks/slo/use_create_slo';
-import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useCreateSlo } from '../../hooks/use_create_slo';
+import { useDeleteSlo } from '../../hooks/use_delete_slo';
+import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
 
@@ -32,13 +33,13 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/slo/use_fetch_slo_list');
-jest.mock('../../hooks/slo/use_create_slo');
-jest.mock('../../hooks/slo/use_delete_slo');
-jest.mock('../../hooks/slo/use_fetch_historical_summary');
-jest.mock('../../hooks/slo/use_capabilities');
+jest.mock('../../hooks/use_fetch_slo_list');
+jest.mock('../../hooks/use_create_slo');
+jest.mock('../../hooks/use_delete_slo');
+jest.mock('../../hooks/use_fetch_historical_summary');
+jest.mock('../../hooks/use_capabilities');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
@@ -150,7 +151,7 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.observability.slosWelcome);
+        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
       });
     });
   });
@@ -172,7 +173,7 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.observability.slosWelcome);
+        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
       });
     });
 
@@ -237,9 +238,7 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockNavigate).toBeCalledWith(
-          `${paths.observability.sloEdit(sloList.results.at(0)?.id || '')}`
-        );
+        expect(mockNavigate).toBeCalledWith(`${paths.sloEdit(sloList.results.at(0)?.id || '')}`);
       });
 
       it('allows creating a new rule for an SLO', async () => {
@@ -353,7 +352,7 @@ describe('SLOs Page', () => {
         await waitFor(() => {
           const slo = sloList.results.at(0);
           expect(mockNavigate).toBeCalledWith(
-            paths.observability.sloCreateWithEncodedForm(
+            paths.sloCreateWithEncodedForm(
               encode({ ...slo, name: `[Copy] ${slo!.name}`, id: undefined })
             )
           );

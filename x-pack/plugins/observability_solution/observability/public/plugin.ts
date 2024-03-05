@@ -65,10 +65,8 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -82,9 +80,6 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { SloDetailsLocatorDefinition } from './locators/slo_details';
-import { SloEditLocatorDefinition } from './locators/slo_edit';
-import { SloListLocatorDefinition } from './locators/slo_list';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
@@ -256,12 +251,6 @@ export class Plugin
       new RuleDetailsLocatorDefinition()
     );
 
-    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
-      new SloDetailsLocatorDefinition()
-    );
-    const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
-    const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
-
     const logsExplorerLocator =
       pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
@@ -326,53 +315,6 @@ export class Plugin
       coreSetup.uiSettings,
       logsExplorerLocator
     );
-
-    const assertPlatinumLicense = async () => {
-      const licensing = await pluginsSetup.licensing;
-      const license = await firstValueFrom(licensing.license$);
-
-      const hasPlatinumLicense = license.hasAtLeast('platinum');
-      if (hasPlatinumLicense) {
-        const registerSloOverviewEmbeddableFactory = async () => {
-          const { SloOverviewEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/overview/slo_embeddable_factory'
-          );
-          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloOverviewEmbeddableFactory();
-        const registerSloAlertsEmbeddableFactory = async () => {
-          const { SloAlertsEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-          );
-          const factory = new SloAlertsEmbeddableFactoryDefinition(
-            coreSetup.getStartServices,
-            kibanaVersion
-          );
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloAlertsEmbeddableFactory();
-
-        const registerSloErrorBudgetEmbeddableFactory = async () => {
-          const { SloErrorBudgetEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/error_budget/slo_error_budget_embeddable_factory'
-          );
-          const factory = new SloErrorBudgetEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloErrorBudgetEmbeddableFactory();
-
-        const registerAsyncSloAlertsUiActions = async () => {
-          if (pluginsSetup.uiActions) {
-            const { registerSloAlertsUiActions } = await import('./ui_actions');
-            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
-          }
-        };
-        registerAsyncSloAlertsUiActions();
-      }
-    };
-
-    assertPlatinumLicense();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
@@ -472,9 +414,6 @@ export class Plugin
       useRulesLink: createUseRulesLink(),
       rulesLocator,
       ruleDetailsLocator,
-      sloDetailsLocator,
-      sloEditLocator,
-      sloListLocator,
     };
   }
 
@@ -495,22 +434,10 @@ export class Plugin
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
-    const kibanaVersion = this.initContext.env.packageInfo.version;
-    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
-        config,
-        core: coreStart,
-        isDev: this.initContext.env.mode.dev,
-        kibanaVersion,
-        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
-        isServerless: !!pluginsStart.serverless,
-      }),
     };
   }
 }

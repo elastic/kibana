@@ -19,20 +19,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { MetricDatum } from '@elastic/charts/dist/chart_types/metric/specs';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SloOverviewDetails } from '../common/slo_overview_details';
-import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
-import { useKibana } from '../../../utils/kibana_react';
 import {
   getSubTitle,
   useSloCardColor,
 } from '../../../pages/slos/components/card_view/slo_card_item';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 
 const getSloChartData = ({
   slo,
@@ -62,7 +62,7 @@ const getSloChartData = ({
     })),
     extra: (
       <FormattedMessage
-        id="xpack.observability.sLOGridItem.targetFlexItemLabel"
+        id="xpack.sLOGridItem.targetFlexItemLabel"
         defaultMessage="Target {target}"
         values={{
           target: sloTarget,

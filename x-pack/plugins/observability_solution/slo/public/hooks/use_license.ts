@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface UseLicenseReturnValue {
   getLicense: () => ILicense | null;

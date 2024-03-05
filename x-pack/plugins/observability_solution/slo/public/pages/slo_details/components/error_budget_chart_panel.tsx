@@ -14,8 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ChartData } from '../../../typings/slo';
-import { useKibana } from '../../../utils/kibana_react';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
 import { SLO_ERROR_BUDGET_EMBEDDABLE } from '../../../embeddable/slo/error_budget/slo_error_budget_embeddable';
@@ -89,12 +89,12 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           objectType={i18n.translate(
-            'xpack.observability.slo.errorBudgetBurnDown.actions.attachToDashboard.objectTypeLabel',
+            'xpack.slo.errorBudgetBurnDown.actions.attachToDashboard.objectTypeLabel',
             { defaultMessage: 'SLO Error Budget burn down' }
           )}
           documentInfo={{
             title: i18n.translate(
-              'xpack.observability.slo.errorBudgetBurnDown.actions.attachToDashboard.attachmentTitle',
+              'xpack.slo.errorBudgetBurnDown.actions.attachToDashboard.attachmentTitle',
               { defaultMessage: 'SLO Error Budget burn down' }
             ),
           }}

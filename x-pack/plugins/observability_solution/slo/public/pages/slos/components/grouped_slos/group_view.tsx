@@ -6,7 +6,7 @@
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
 import React from 'react';
-import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
+import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import type { SortDirection } from '../slo_list_search_bar';
 import { SLOView } from '../toggle_slo_view';

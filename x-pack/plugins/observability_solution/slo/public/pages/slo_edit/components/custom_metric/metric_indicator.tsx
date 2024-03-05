@@ -51,42 +51,33 @@ function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
 
-const metricLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.customMetric.metricLabel',
-  { defaultMessage: 'Metric' }
-);
+const metricLabel = i18n.translate('xpack.slo.sloEdit.sliType.customMetric.metricLabel', {
+  defaultMessage: 'Metric',
+});
 
-const filterLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.customMetric.filterLabel',
-  { defaultMessage: 'Filter' }
-);
+const filterLabel = i18n.translate('xpack.slo.sloEdit.sliType.customMetric.filterLabel', {
+  defaultMessage: 'Filter',
+});
 
 const metricTooltip = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
-      {
-        defaultMessage:
-          'This data from this field will be aggregated with the "sum" aggregation or document count.',
-      }
-    )}
+    content={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.totalMetric.tooltip', {
+      defaultMessage:
+        'This data from this field will be aggregated with the "sum" aggregation or document count.',
+    })}
     position="top"
   />
 );
 
-const equationLabel = i18n.translate(
-  'xpack.observability.slo.sloEdit.sliType.customMetric.equationLabel',
-  { defaultMessage: 'Equation' }
-);
+const equationLabel = i18n.translate('xpack.slo.sloEdit.sliType.customMetric.equationLabel', {
+  defaultMessage: 'Equation',
+});
 
 const equationTooltip = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
-      {
-        defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
-      }
-    )}
+    content={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.totalEquation.tooltip', {
+      defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+    })}
     position="top"
   />
 );
@@ -145,10 +136,9 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                 }
                 label={
                   <span>
-                    {i18n.translate(
-                      'xpack.observability.slo.sloEdit.customMetric.aggregationLabel',
-                      { defaultMessage: 'Aggregation' }
-                    )}{' '}
+                    {i18n.translate('xpack.slo.sloEdit.customMetric.aggregationLabel', {
+                      defaultMessage: 'Aggregation',
+                    })}{' '}
                     {metric.name}
                   </span>
                 }
@@ -165,11 +155,11 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                       fullWidth
                       singleSelection={{ asPlainText: true }}
                       placeholder={i18n.translate(
-                        'xpack.observability.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
+                        'xpack.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
                         { defaultMessage: 'Select an aggregation' }
                       )}
                       aria-label={i18n.translate(
-                        'xpack.observability.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
+                        'xpack.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
                         { defaultMessage: 'Select an aggregation' }
                       )}
                       isClearable
@@ -233,11 +223,11 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                         fullWidth
                         singleSelection={{ asPlainText: true }}
                         placeholder={i18n.translate(
-                          'xpack.observability.slo.sloEdit.sliType.customMetric.metricField.placeholder',
+                          'xpack.slo.sloEdit.sliType.customMetric.metricField.placeholder',
                           { defaultMessage: 'Select a metric field' }
                         )}
                         aria-label={i18n.translate(
-                          'xpack.observability.slo.sloEdit.sliType.customMetric.metricField.placeholder',
+                          'xpack.slo.sloEdit.sliType.customMetric.metricField.placeholder',
                           { defaultMessage: 'Select a metric field' }
                         )}
                         isClearable
@@ -282,19 +272,15 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                 indexPatternString={watch('indicator.params.index')}
                 label={`${filterLabel} ${metric.name}`}
                 name={`indicator.params.${type}.metrics.${index}.filter`}
-                placeholder={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.customMetric.placeholder',
-                  { defaultMessage: 'KQL filter' }
-                )}
+                placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.placeholder', {
+                  defaultMessage: 'KQL filter',
+                })}
                 required={false}
                 tooltip={
                   <EuiIconTip
-                    content={i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.customMetric.tooltip',
-                      {
-                        defaultMessage: 'This KQL query should return a subset of events.',
-                      }
-                    )}
+                    content={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.tooltip', {
+                      defaultMessage: 'This KQL query should return a subset of events.',
+                    })}
                     position="top"
                   />
                 }
@@ -308,14 +294,12 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                 style={{ marginTop: '1.5em' }}
                 onClick={handleDeleteMetric(index)}
                 disabled={disableDelete}
-                title={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
-                  { defaultMessage: 'Delete metric' }
-                )}
-                aria-label={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
-                  { defaultMessage: 'Delete metric' }
-                )}
+                title={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
+                  defaultMessage: 'Delete metric',
+                })}
+                aria-label={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
+                  defaultMessage: 'Delete metric',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -331,12 +315,12 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
               onClick={handleAddMetric}
               isDisabled={disableAdd}
               aria-label={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.addMetricAriaLabel',
+                'xpack.slo.sloEdit.sliType.customMetric.addMetricAriaLabel',
                 { defaultMessage: 'Add metric' }
               )}
             >
               <FormattedMessage
-                id="xpack.observability.slo.sloEdit.sliType.customMetric.addMetricLabel"
+                id="xpack.slo.sloEdit.sliType.customMetric.addMetricLabel"
                 defaultMessage="Add metric"
               />
             </EuiButtonEmpty>
@@ -361,17 +345,14 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                   {equationLabel} {equationTooltip}
                 </span>
               }
-              helpText={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.equationHelpText',
-                {
-                  defaultMessage:
-                    'Supports basic math equations, valid charaters are: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
-                }
-              )}
+              helpText={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.equationHelpText', {
+                defaultMessage:
+                  'Supports basic math equations, valid charaters are: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+              })}
               isInvalid={fieldState.invalid}
               error={[
                 i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.customMetric.equation.invalidCharacters',
+                  'xpack.slo.sloEdit.sliType.customMetric.equation.invalidCharacters',
                   {
                     defaultMessage:
                       'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',

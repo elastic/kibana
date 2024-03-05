@@ -12,7 +12,7 @@ import React from 'react';
 export function HeaderTitle() {
   return (
     <EuiFlexItem grow={false}>
-      {i18n.translate('xpack.observability.slosPageTitle', {
+      {i18n.translate('xpack.slosPageTitle', {
         defaultMessage: 'SLOs',
       })}
     </EuiFlexItem>

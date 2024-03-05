@@ -13,13 +13,13 @@ export function SloGroupListEmpty() {
   return (
     <EuiCallOut
       data-test-subj="sloGroupListEmpty"
-      title={i18n.translate('xpack.observability.slo.groupList.emptyTitle', {
+      title={i18n.translate('xpack.slo.groupList.emptyTitle', {
         defaultMessage: 'No SLO group results',
       })}
       color="warning"
       iconType="warning"
     >
-      {i18n.translate('xpack.observability.slo.groupList.emptyMessage', {
+      {i18n.translate('xpack.slo.groupList.emptyMessage', {
         defaultMessage: 'There are no results for your criteria.',
       })}
     </EuiCallOut>

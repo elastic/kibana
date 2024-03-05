@@ -22,7 +22,7 @@ import {
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -56,12 +56,12 @@ export function Overview({ slo }: Props) {
     <EuiPanel paddingSize="none" color="transparent" data-test-subj="overview">
       <EuiFlexGrid columns={isMobile ? 2 : 4} gutterSize="l" responsive={false}>
         <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.observedValueTitle', {
+          title={i18n.translate('xpack.slo.sloDetails.overview.observedValueTitle', {
             defaultMessage: 'Observed value',
           })}
           subtitle={
             <EuiText size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.overview.observedValueSubtitle', {
+              {i18n.translate('xpack.slo.sloDetails.overview.observedValueSubtitle', {
                 defaultMessage: '{value} (objective is {objective})',
                 values: {
                   value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
@@ -72,22 +72,21 @@ export function Overview({ slo }: Props) {
           }
         />
         <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.indicatorTypeTitle', {
+          title={i18n.translate('xpack.slo.sloDetails.overview.indicatorTypeTitle', {
             defaultMessage: 'Indicator type',
           })}
           subtitle={<EuiText size="s">{toIndicatorTypeLabel(slo.indicator.type)}</EuiText>}
         />
         <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.timeWindowTitle', {
+          title={i18n.translate('xpack.slo.sloDetails.overview.timeWindowTitle', {
             defaultMessage: 'Time window',
           })}
           subtitle={toTimeWindowLabel(slo.timeWindow)}
         />
         <OverviewItem
-          title={i18n.translate(
-            'xpack.observability.slo.sloDetails.overview.budgetingMethodTitle',
-            { defaultMessage: 'Budgeting method' }
-          )}
+          title={i18n.translate('xpack.slo.sloDetails.overview.budgetingMethodTitle', {
+            defaultMessage: 'Budgeting method',
+          })}
           subtitle={
             occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) ? (
               <EuiText size="s">{BUDGETING_METHOD_OCCURRENCES}</EuiText>
@@ -96,7 +95,7 @@ export function Overview({ slo }: Props) {
                 {BUDGETING_METHOD_TIMESLICES} (
                 {slo.indicator.type === 'sli.metric.timeslice'
                   ? i18n.translate(
-                      'xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethodDetailsForTimesliceMetric',
+                      'xpack.slo.sloDetails.overview.timeslicesBudgetingMethodDetailsForTimesliceMetric',
                       {
                         defaultMessage: '{duration} slices',
                         values: {
@@ -105,7 +104,7 @@ export function Overview({ slo }: Props) {
                       }
                     )
                   : i18n.translate(
-                      'xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethodDetails',
+                      'xpack.slo.sloDetails.overview.timeslicesBudgetingMethodDetails',
                       {
                         defaultMessage: '{duration} slices, {target} target',
                         values: {
@@ -120,13 +119,13 @@ export function Overview({ slo }: Props) {
           }
         />
         <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.descriptionTitle', {
+          title={i18n.translate('xpack.slo.sloDetails.overview.descriptionTitle', {
             defaultMessage: 'Description',
           })}
           subtitle={<EuiText size="s">{!!slo.description ? slo.description : '-'}</EuiText>}
         />
         <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.tagsTitle', {
+          title={i18n.translate('xpack.slo.sloDetails.overview.tagsTitle', {
             defaultMessage: 'Tags',
           })}
           subtitle={
@@ -157,7 +156,7 @@ export function Overview({ slo }: Props) {
 
 function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
   if (rollingTimeWindowTypeSchema.is(timeWindow.type)) {
-    return i18n.translate('xpack.observability.slo.sloDetails.overview.rollingTimeWindow', {
+    return i18n.translate('xpack.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {
         duration: toDurationLabel(timeWindow.duration),
@@ -165,7 +164,7 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
     });
   }
 
-  return i18n.translate('xpack.observability.slo.sloDetails.overview.calendarAlignedTimeWindow', {
+  return i18n.translate('xpack.slo.sloDetails.overview.calendarAlignedTimeWindow', {
     defaultMessage: '{duration} calendar aligned',
     values: {
       duration: toDurationAdverbLabel(timeWindow.duration),

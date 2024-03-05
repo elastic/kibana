@@ -24,14 +24,14 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
-import { useKibana } from '../../../../utils/kibana_react';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { SloCardItemActions } from './slo_card_item_actions';
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SloRule } from '../../../../hooks/use_fetch_rules_for_slo';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloCardItemBadges } from './slo_card_item_badges';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);

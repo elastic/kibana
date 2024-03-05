@@ -26,7 +26,7 @@ import { GroupSummary } from '@kbn/slo-schema';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { paths } from '../../../../../common/locators/paths';
-import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 import { SlosView } from '../slos_view';
@@ -144,26 +144,20 @@ export function GroupListView({
                       content={
                         <>
                           <EuiText size="s">
-                            {i18n.translate(
-                              'xpack.observability.slo.group.totalSloViolatedTooltip',
-                              {
-                                defaultMessage: 'SLO: {name}',
-                                values: {
-                                  name: summary.worst.slo?.name,
-                                },
-                              }
-                            )}
+                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
+                              defaultMessage: 'SLO: {name}',
+                              values: {
+                                name: summary.worst.slo?.name,
+                              },
+                            })}
                           </EuiText>
                           <EuiText size="s">
-                            {i18n.translate(
-                              'xpack.observability.slo.group.totalSloViolatedTooltip.instance',
-                              {
-                                defaultMessage: 'Instance: {instance}',
-                                values: {
-                                  instance: summary.worst.slo?.instanceId,
-                                },
-                              }
-                            )}
+                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
+                              defaultMessage: 'Instance: {instance}',
+                              values: {
+                                instance: summary.worst.slo?.instanceId,
+                              },
+                            })}
                           </EuiText>
                         </>
                       }
@@ -171,13 +165,10 @@ export function GroupListView({
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
                         href={basePath.prepend(
-                          paths.observability.sloDetails(
-                            summary.worst.slo?.id,
-                            summary.worst.slo?.instanceId
-                          )
+                          paths.sloDetails(summary.worst.slo?.id, summary.worst.slo?.instanceId)
                         )}
                       >
-                        {i18n.translate('xpack.observability.slo.group.worstPerforming', {
+                        {i18n.translate('xpack.slo.group.worstPerforming', {
                           defaultMessage: 'Worst performing: ',
                         })}
                         <EuiTextColor

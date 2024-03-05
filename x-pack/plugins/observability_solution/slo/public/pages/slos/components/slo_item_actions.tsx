@@ -17,9 +17,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
-import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
-import { useCapabilities } from '../../../hooks/slo/use_capabilities';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCloneSlo } from '../../../hooks/use_clone_slo';
+import { useCapabilities } from '../../../hooks/use_capabilities';
 import { paths } from '../../../../common/locators/paths';
 import { RulesParams } from '../../../locators/rules';
 import { rulesLocatorID } from '../../../../common';
@@ -73,7 +73,7 @@ export function SloItemActions({
   const { hasWriteCapabilities } = useCapabilities();
 
   const sloDetailsUrl = basePath.prepend(
-    paths.observability.sloDetails(
+    paths.sloDetails(
       slo.id,
       slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
     )

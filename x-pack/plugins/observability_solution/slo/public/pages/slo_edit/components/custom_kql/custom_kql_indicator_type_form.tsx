@@ -39,10 +39,9 @@ export function CustomKqlIndicatorTypeForm() {
           label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
             defaultMessage: 'Timestamp field',
           })}
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.timestampField.placeholder',
-            { defaultMessage: 'Select a timestamp field' }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
+            defaultMessage: 'Select a timestamp field',
+          })}
           isLoading={!!index && isIndexFieldsLoading}
           isDisabled={!index}
           isRequired
@@ -53,23 +52,19 @@ export function CustomKqlIndicatorTypeForm() {
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
+          label={i18n.translate('xpack.slo.sloEdit.sliType.customKql.queryFilter', {
             defaultMessage: 'Query filter',
           })}
           name="indicator.params.filter"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.customFilter',
-            { defaultMessage: 'Custom filter to apply on the index' }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customKql.customFilter', {
+            defaultMessage: 'Custom filter to apply on the index',
+          })}
           tooltip={
             <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.customFilter.tooltip',
-                {
-                  defaultMessage:
-                    'This KQL query can be used to filter the documents with some relevant criteria.',
-                }
-              )}
+              content={i18n.translate('xpack.slo.sloEdit.sliType.customKql.customFilter.tooltip', {
+                defaultMessage:
+                  'This KQL query can be used to filter the documents with some relevant criteria.',
+              })}
               position="top"
             />
           }
@@ -80,26 +75,20 @@ export function CustomKqlIndicatorTypeForm() {
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormGoodQueryInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
+          label={i18n.translate('xpack.slo.sloEdit.sliType.customKql.goodQuery', {
             defaultMessage: 'Good query',
           })}
           name="indicator.params.good"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.goodQueryPlaceholder',
-            {
-              defaultMessage: 'Define the good events',
-            }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customKql.goodQueryPlaceholder', {
+            defaultMessage: 'Define the good events',
+          })}
           required
           tooltip={
             <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.goodQuery.tooltip',
-                {
-                  defaultMessage:
-                    'This KQL query should return a subset of events that are considered "good" or "successful" for the purpose of calculating the SLO. The query should filter events based on some relevant criteria, such as status codes, error messages, or other relevant fields.',
-                }
-              )}
+              content={i18n.translate('xpack.slo.sloEdit.sliType.customKql.goodQuery.tooltip', {
+                defaultMessage:
+                  'This KQL query should return a subset of events that are considered "good" or "successful" for the purpose of calculating the SLO. The query should filter events based on some relevant criteria, such as status codes, error messages, or other relevant fields.',
+              })}
               position="top"
             />
           }
@@ -110,25 +99,19 @@ export function CustomKqlIndicatorTypeForm() {
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormTotalQueryInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
+          label={i18n.translate('xpack.slo.sloEdit.sliType.customKql.totalQuery', {
             defaultMessage: 'Total query',
           })}
           name="indicator.params.total"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.totalQueryPlaceholder',
-            {
-              defaultMessage: 'Define the total events',
-            }
-          )}
+          placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customKql.totalQueryPlaceholder', {
+            defaultMessage: 'Define the total events',
+          })}
           tooltip={
             <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.totalQuery.tooltip',
-                {
-                  defaultMessage:
-                    'This KQL query should return all events that are relevant to the SLO calculation, including both good and bad events.',
-                }
-              )}
+              content={i18n.translate('xpack.slo.sloEdit.sliType.customKql.totalQuery.tooltip', {
+                defaultMessage:
+                  'This KQL query should return all events that are relevant to the SLO calculation, including both good and bad events.',
+              })}
               position="top"
             />
           }

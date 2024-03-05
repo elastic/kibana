@@ -18,8 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useEffect, useState } from 'react';
 
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
+import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
@@ -36,7 +36,7 @@ const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 const BURN_RATE_OPTIONS: BurnRateOption[] = [
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
       defaultMessage: '{duration}h',
       values: { duration: 1 },
     }),
@@ -46,7 +46,7 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
       defaultMessage: '{duration}h',
       values: { duration: 6 },
     }),
@@ -56,7 +56,7 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
       defaultMessage: '{duration}h',
       values: { duration: 24 },
     }),
@@ -66,7 +66,7 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
       defaultMessage: '{duration}h',
       values: { duration: 72 },
     }),
@@ -126,7 +126,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
   const tabs: EuiTabbedContentTab[] = [
     {
       id: OVERVIEW_TAB_ID,
-      name: i18n.translate('xpack.observability.slo.sloDetails.tab.overviewLabel', {
+      name: i18n.translate('xpack.slo.sloDetails.tab.overviewLabel', {
         defaultMessage: 'Overview',
       }),
       'data-test-subj': 'overviewTab',
@@ -169,7 +169,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
     },
     {
       id: ALERTS_TAB_ID,
-      name: i18n.translate('xpack.observability.slo.sloDetails.tab.alertsLabel', {
+      name: i18n.translate('xpack.slo.sloDetails.tab.alertsLabel', {
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'alertsTab',

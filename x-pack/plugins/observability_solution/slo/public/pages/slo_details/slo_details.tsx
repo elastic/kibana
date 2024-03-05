@@ -16,9 +16,9 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import {
@@ -35,7 +35,7 @@ import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
   const {
@@ -106,7 +106,7 @@ export function SloDetailsPage() {
   }
 
   if (hasRightLicense === false) {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
+    navigateToUrl(basePath.prepend(paths.slos));
   }
 
   const isPerformingAction = isLoading || isDeleting;
@@ -132,7 +132,7 @@ export function SloDetailsPage() {
       }}
       data-test-subj="sloDetailsPage"
     >
-      <HeaderMenu />
+      {/* <HeaderMenu /> */}
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && (
         <SloDetails
@@ -152,7 +152,7 @@ function getBreadcrumbs(
 ): ChromeBreadcrumb[] {
   return [
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: basePath.prepend(paths.slos),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),

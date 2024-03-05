@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-import { useKibana } from '../../../utils/kibana_react';
 
 import { ErrorBudgetActions } from './error_budget_actions';
 
@@ -39,12 +39,9 @@ export function ErrorBudgetHeader({
             <EuiFlexItem>
               <EuiTitle size="xs" data-test-subj="errorBudgetPanelTitle">
                 <h2>
-                  {i18n.translate(
-                    'xpack.observability.slo.sloDetails.errorBudgetChartPanel.title',
-                    {
-                      defaultMessage: 'Error budget burn down',
-                    }
-                  )}
+                  {i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.title', {
+                    defaultMessage: 'Error budget burn down',
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -63,7 +60,7 @@ export function ErrorBudgetHeader({
       <EuiFlexItem>
         <EuiText color="subdued" size="s">
           {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-            ? i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration', {
+            ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
                 defaultMessage: 'Last {duration}',
                 values: { duration: toDurationLabel(slo.timeWindow.duration) },
               })

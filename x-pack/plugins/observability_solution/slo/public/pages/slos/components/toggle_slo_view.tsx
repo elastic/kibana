@@ -40,7 +40,7 @@ const toggleButtonsIcons = [
   {
     iconType: 'tableDensityCompact',
     id: 'compactView',
-    label: i18n.translate('xpack.observability.slo.listView.compactViewLabel', {
+    label: i18n.translate('xpack.slo.listView.compactViewLabel', {
       defaultMessage: 'Compact view',
     }),
   },
@@ -67,17 +67,14 @@ export function ToggleSLOView({
         {(!state.groupBy || state.groupBy === 'ungrouped') && (
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.observability.overview.pagination.description"
+              id="xpack.slo.overview.pagination.description"
               defaultMessage="Showing {currentCount} of {total} {slos}"
               values={{
                 currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
                 total,
                 slos: (
                   <strong>
-                    <FormattedMessage
-                      id="xpack.observability.overview.slos.label"
-                      defaultMessage="SLOs"
-                    />
+                    <FormattedMessage id="xpack.slo.overview.slos.label" defaultMessage="SLOs" />
                   </strong>
                 ),
               }}
@@ -94,7 +91,7 @@ export function ToggleSLOView({
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           buttonSize="compressed"
-          legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
+          legend={i18n.translate('xpack.slo.toggleSLOView.euiButtonGroup.sloView', {
             defaultMessage: 'SLO View',
           })}
           options={toggleButtonsIcons}

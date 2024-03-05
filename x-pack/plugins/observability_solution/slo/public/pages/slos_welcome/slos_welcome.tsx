@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { paths } from '../../../common/locators/paths';
 import illustration from './assets/illustration.svg';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
+// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
 export function SlosWelcomePage() {
@@ -62,7 +62,7 @@ export function SlosWelcomePage() {
 
   return hasSlosAndHasPermissions || isLoading ? null : (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
-      <HeaderMenu />
+      {/* <HeaderMenu /> */}
       <SloOutdatedCallout />
       <EuiPageTemplate.EmptyPrompt
         title={

@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -25,7 +26,6 @@ import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
-import { useKibana } from '../../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../constants';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
@@ -49,10 +49,7 @@ export function TimesliceMetricIndicatorTypeForm() {
     <>
       <EuiTitle size="xs">
         <h3>
-          <FormattedMessage
-            id="xpack.observability.slo.sloEdit.sliType.sourceTitle"
-            defaultMessage="Source"
-          />
+          <FormattedMessage id="xpack.slo.sloEdit.sliType.sourceTitle" defaultMessage="Source" />
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -68,10 +65,9 @@ export function TimesliceMetricIndicatorTypeForm() {
               label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
                 defaultMessage: 'Timestamp field',
               })}
-              placeholder={i18n.translate(
-                'xpack.observability.slo.sloEdit.timestampField.placeholder',
-                { defaultMessage: 'Select a timestamp field' }
-              )}
+              placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
+                defaultMessage: 'Select a timestamp field',
+              })}
               isLoading={!!index && isIndexFieldsLoading}
               isDisabled={!index}
               isRequired
@@ -83,21 +79,17 @@ export function TimesliceMetricIndicatorTypeForm() {
           <QueryBuilder
             dataTestSubj="timesliceMetricIndicatorFormQueryFilterInput"
             indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.timesliceMetric.queryFilter',
-              {
-                defaultMessage: 'Query filter',
-              }
-            )}
+            label={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.queryFilter', {
+              defaultMessage: 'Query filter',
+            })}
             name="indicator.params.filter"
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.timesliceMetric.customFilter',
-              { defaultMessage: 'Custom filter to apply on the index' }
-            )}
+            placeholder={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.customFilter', {
+              defaultMessage: 'Custom filter to apply on the index',
+            })}
             tooltip={
               <EuiIconTip
                 content={i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.customFilter.tooltip',
+                  'xpack.slo.sloEdit.sliType.timesliceMetric.customFilter.tooltip',
                   {
                     defaultMessage:
                       'This KQL query can be used to filter the documents with some relevant criteria.',
@@ -117,7 +109,7 @@ export function TimesliceMetricIndicatorTypeForm() {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.observability.slo.sloEdit.sliType.timesliceMetric.metricTitle"
+                id="xpack.slo.sloEdit.sliType.timesliceMetric.metricTitle"
                 defaultMessage="Metric definition"
               />
             </h3>

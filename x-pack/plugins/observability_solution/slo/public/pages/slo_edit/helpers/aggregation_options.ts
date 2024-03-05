@@ -9,69 +9,57 @@ import { i18n } from '@kbn/i18n';
 export const AGGREGATION_OPTIONS = [
   {
     value: 'avg',
-    label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.average', {
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.average', {
       defaultMessage: 'Average',
     }),
   },
   {
     value: 'max',
-    label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.max', {
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.max', {
       defaultMessage: 'Max',
     }),
   },
   {
     value: 'min',
-    label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.min', {
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.min', {
       defaultMessage: 'Min',
     }),
   },
   {
     value: 'sum',
-    label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.sum', {
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.sum', {
       defaultMessage: 'Sum',
     }),
   },
   {
     value: 'cardinality',
-    label: i18n.translate(
-      'xpack.observability.slo.sloEdit.timesliceMetric.aggregation.cardinality',
-      {
-        defaultMessage: 'Cardinality',
-      }
-    ),
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.cardinality', {
+      defaultMessage: 'Cardinality',
+    }),
   },
   {
     value: 'last_value',
-    label: i18n.translate(
-      'xpack.observability.slo.sloEdit.timesliceMetric.aggregation.last_value',
-      {
-        defaultMessage: 'Last value',
-      }
-    ),
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.last_value', {
+      defaultMessage: 'Last value',
+    }),
   },
   {
     value: 'std_deviation',
-    label: i18n.translate(
-      'xpack.observability.slo.sloEdit.timesliceMetric.aggregation.std_deviation',
-      {
-        defaultMessage: 'Std. Deviation',
-      }
-    ),
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.std_deviation', {
+      defaultMessage: 'Std. Deviation',
+    }),
   },
   {
     value: 'doc_count',
-    label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.doc_count', {
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.doc_count', {
       defaultMessage: 'Doc count',
     }),
   },
   {
     value: 'percentile',
-    label: i18n.translate(
-      'xpack.observability.slo.sloEdit.timesliceMetric.aggregation.percentile',
-      {
-        defaultMessage: 'Percentile',
-      }
-    ),
+    label: i18n.translate('xpack.slo.sloEdit.timesliceMetric.aggregation.percentile', {
+      defaultMessage: 'Percentile',
+    }),
   },
 ];
 
