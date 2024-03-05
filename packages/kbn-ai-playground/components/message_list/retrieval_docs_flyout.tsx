@@ -71,7 +71,6 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
       ),
     },
   ];
-  console.log('retrievalDocs', retrievalDocs);
 
   return (
     <EuiFlyout onClose={onClose}>

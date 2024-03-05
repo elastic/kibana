@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ChatForm, ChatFormFields } from '../../types';
 import { VideCodeFlyout } from './vide_code_flyout';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ViewCodeActionProps {}
 
 export const ViewCodeAction: React.FC<ViewCodeActionProps> = () => {

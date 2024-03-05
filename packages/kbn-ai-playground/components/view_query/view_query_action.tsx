@@ -30,6 +30,7 @@ import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/useIndicesFields';
 import { createQuery, getDefaultQueryFields } from '../../lib/create_query';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ViewQueryActionProps {}
 
 export const ViewQueryAction: React.FC<ViewQueryActionProps> = () => {
