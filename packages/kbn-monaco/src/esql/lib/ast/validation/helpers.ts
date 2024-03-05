@@ -11,6 +11,9 @@ import type { ESQLPolicy } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
+  if (firstCommand == null) {
+    return '';
+  }
   return queryString.substring(0, firstCommand.location.max + 1);
 }
 
