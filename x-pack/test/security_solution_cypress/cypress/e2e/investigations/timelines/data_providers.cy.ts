@@ -30,6 +30,7 @@ import { getTimeline } from '../../../objects/timeline';
 import { hostsUrl } from '../../../urls/navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/177486
+// Failing: See https://github.com/elastic/kibana/issues/176945
 describe.skip('Timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
