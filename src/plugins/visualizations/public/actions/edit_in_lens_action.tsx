@@ -158,10 +158,13 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
       return false;
     }
 
-    const canNavigateToLens =
-      (apiHasExpressionVariables(embeddable)
-        ? embeddable.getExpressionVariables()?.canNavigateToLens
-        : undefined) ?? (await vis.type.navigateToLens?.(vis, this.timefilter));
-    return Boolean(canNavigateToLens);
+    // determine whether navigation to lens is available
+    if (
+      apiHasExpressionVariables(embeddable) &&
+      embeddable.getExpressionVariables()?.canNavigateToLens
+    ) {
+      return true;
+    }
+    return Boolean(await vis.type.navigateToLens?.(vis, this.timefilter));
   }
 }
