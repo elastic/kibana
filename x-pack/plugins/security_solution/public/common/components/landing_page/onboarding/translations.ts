@@ -121,7 +121,7 @@ export const ADD_INTEGRATIONS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.step.addIntegrations.description',
   {
     defaultMessage:
-      'Use third-party integrations to import data from common sources and help you gather relevant information in one place. To find integrations for your use case, search for tools and data providers on the Add integrations page.',
+      'Use integrations to import data from common sources and help you gather relevant information in one place.',
   }
 );
 
