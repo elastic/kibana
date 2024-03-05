@@ -9,10 +9,16 @@ import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/serve
 import type { Logger } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
+/**
+ * A task manager runner responsible for checking the status of and completing pending actions
+ * that were sent to 3rd party EDR systems.
+ */
 export class CompleteExternalActionsTaskRunner
   implements CancellableTask<RunContext['taskInstance']>
 {
   private readonly log: Logger;
+
+  // FIXME:PT add AbortController
 
   constructor(
     private readonly endpointContextServices: EndpointAppContextService,

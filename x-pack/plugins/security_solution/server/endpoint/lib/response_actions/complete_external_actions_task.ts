@@ -10,6 +10,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
 
@@ -32,9 +33,11 @@ export class CompleteExternalResponseActionsTask {
   private wasStarted = false;
   private log: Logger;
   private cleanup: (() => void | Promise<void>) | undefined;
+  private taskTimeout = '20m';
+  private taskInterval = '30s';
 
   constructor(protected readonly options: CompleteExternalResponseActionsTaskConstructorOptions) {
-    this.log = this.options.endpointAppContext.service.createLogger(
+    this.log = this.options.endpointAppContext.logFactory.get(
       COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE
     );
   }
@@ -46,23 +49,23 @@ export class CompleteExternalResponseActionsTask {
 
     this.wasSetup = true;
 
-    const taskInterval =
+    this.taskInterval =
       this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskInterval;
-    const taskTimeout =
+    this.taskTimeout =
       this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskTimeout;
 
     this.log.info(
-      `Registering task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] with timeout of [${taskTimeout}] and run interval of [${taskInterval}]`
+      `Registering task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] with timeout of [${this.taskTimeout}] and run interval of [${this.taskInterval}]`
     );
 
     taskManager.registerTaskDefinitions({
       [COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE]: {
         title: 'Security Solution Complete External Response Actions',
-        timeout: taskTimeout,
+        timeout: this.taskTimeout,
         createTaskRunner: () => {
           return new CompleteExternalActionsTaskRunner(
             this.options.endpointAppContext.service,
-            taskInterval
+            this.taskInterval
           );
         },
       },
@@ -76,11 +79,24 @@ export class CompleteExternalResponseActionsTask {
 
     this.wasStarted = true;
 
-    // TODO:PT start task
+    try {
+      await taskManager.ensureScheduled({
+        id: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        taskType: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        scope: ['securitySolution'],
+        schedule: {
+          interval: this.taskInterval,
+        },
+        state: {},
+        params: {},
+      });
+    } catch (e) {
+      this.log.error(new EndpointError(`Error scheduling task, received ${e.message}`, e));
+    }
 
     this.cleanup = () => {
       this.log.info(
-        `Removing task definition [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] (if it exists)`
+        `Un-registering task definition [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] (if it exists)`
       );
       taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE);
     };
@@ -94,5 +110,7 @@ export class CompleteExternalResponseActionsTask {
       this.cleanup();
       this.cleanup = undefined;
     }
+
+    this.log.info(`Task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] as been stopped`);
   }
 }
