@@ -68,11 +68,6 @@ describe('Synthetics Availability Transform Generator', () => {
               field: 'monitor.id',
             },
           },
-          'monitor.project.id': {
-            terms: {
-              field: 'monitor.project.id',
-            },
-          },
           'observer.name': {
             terms: {
               field: 'observer.name',
@@ -103,11 +98,6 @@ describe('Synthetics Availability Transform Generator', () => {
               field: 'slo.revision',
             },
           },
-          tags: {
-            terms: {
-              field: 'tags',
-            },
-          },
         },
       },
       settings: {
@@ -134,21 +124,6 @@ describe('Synthetics Availability Transform Generator', () => {
                   '@timestamp': {
                     gte: 'now-7d/d',
                   },
-                },
-              },
-              {
-                terms: {
-                  'monitor.id': [],
-                },
-              },
-              {
-                terms: {
-                  tags: [],
-                },
-              },
-              {
-                terms: {
-                  'monitor.project.id': [],
                 },
               },
             ],
@@ -178,7 +153,7 @@ describe('Synthetics Availability Transform Generator', () => {
       sync: {
         time: {
           delay: '1m',
-          field: '@timestamp',
+          field: 'event.ingested',
         },
       },
       transform_id: 'slo-irrelevant-1',
@@ -322,6 +297,11 @@ describe('Synthetics Availability Transform Generator', () => {
         tags: ['tag-1', 'tag-2'],
       },
     });
+    expect(transform.pivot.group_by.tags).toEqual({
+      terms: {
+        field: 'tags',
+      },
+    });
   });
 
   it('adds monitorId filter', () => {
@@ -370,6 +350,11 @@ describe('Synthetics Availability Transform Generator', () => {
     expect(transform.source.query?.bool?.filter).toContainEqual({
       terms: {
         'monitor.project.id': ['id-1', 'id-2'],
+      },
+    });
+    expect(transform.pivot.group_by['monitor.project.id']).toEqual({
+      terms: {
+        field: 'monitor.project.id',
       },
     });
   });

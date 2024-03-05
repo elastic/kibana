@@ -79,7 +79,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
         })) ?? [],
       locations:
         locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-          label: allLocationsMap.get(key)?.label || key,
+          label: allLocationsMap.get(key) || key,
           value: key,
           count,
         })) ?? [],

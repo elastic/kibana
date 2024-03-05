@@ -90,6 +90,7 @@ describe('GetSLO', () => {
         groupBy: slo.groupBy,
         groupings: {},
         instanceId: ALL_VALUE,
+        meta: {},
         version: SLO_MODEL_VERSION,
       });
     });
