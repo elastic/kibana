@@ -27,7 +27,7 @@ import { TimeRangeConfig } from '../../../state_machines/dataset_quality_control
 import { useDatasetQualityContext } from '../../dataset_quality/context';
 import { DegradedDocsChart } from './degraded_docs_chart';
 
-const DEFAULT_REFRESH = { interval: 60000, isPaused: false };
+const DEFAULT_REFRESH = { value: 60000, pause: false };
 
 export function DegradedDocs({
   dataStream,

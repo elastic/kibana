@@ -39,6 +39,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
+        // @ts-expect-error upgrade typescript v4.9.5
         window.__RENDERING_SESSION__ = [];
       }
 
@@ -160,6 +161,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
+        'navigation.solutionNavigation.featureOn (boolean)',
+        'navigation.solutionNavigation.enabled (boolean)',
+        'navigation.solutionNavigation.optInStatus (alternatives)',
+        'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
