@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import {
   AppDeepLinkId,
@@ -13,30 +14,49 @@ import {
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
+  SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+
+import { getSolutionNavSwitcherBreadCrumb } from '../ui/solution_nav_switcher_breadcrumbs';
 
 export function buildBreadcrumbs({
   projectsUrl,
   projectName,
   projectUrl,
+  deploymentUrl = '',
+  allDeploymentsUrl = '',
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
+  solutionNavigations,
 }: {
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
+  allDeploymentsUrl?: string;
+  deploymentUrl?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
   activeNodes: ChromeProjectNavigationNode[][];
+  solutionNavigations?: {
+    definitions: SolutionNavigationDefinitions;
+    activeId: string;
+    onChange: (id: string) => void;
+  };
 }): ChromeProjectBreadcrumb[] {
-  const rootCrumb = buildRootCrumb({ projectsUrl, projectName, projectUrl });
+  const rootCrumb = buildRootCrumb({
+    projectsUrl,
+    projectName,
+    projectUrl,
+    solutionNavigations,
+    deploymentUrl,
+    allDeploymentsUrl,
+  });
 
   if (projectBreadcrumbs.params.absolute) {
     return [rootCrumb, ...projectBreadcrumbs.breadcrumbs];
@@ -89,11 +109,34 @@ function buildRootCrumb({
   projectsUrl,
   projectName,
   projectUrl,
+  solutionNavigations,
+  deploymentUrl,
+  allDeploymentsUrl,
 }: {
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
+  allDeploymentsUrl: string;
+  deploymentUrl: string;
+  solutionNavigations?: {
+    definitions: SolutionNavigationDefinitions;
+    activeId: string;
+    onChange: (id: string) => void;
+  };
 }): ChromeProjectBreadcrumb {
+  if (solutionNavigations) {
+    // if there are solution navigations, it means that we are in Kibana stateful and not
+    // in serverless with projects.
+    const { definitions, activeId, onChange } = solutionNavigations;
+    return getSolutionNavSwitcherBreadCrumb({
+      definitions,
+      onChange,
+      activeId,
+      deploymentUrl,
+      allDeploymentsUrl,
+    });
+  }
+
   return {
     text:
       projectName ??

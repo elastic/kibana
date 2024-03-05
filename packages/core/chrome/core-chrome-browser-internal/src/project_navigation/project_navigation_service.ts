@@ -21,7 +21,6 @@ import type {
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
   BehaviorSubject,
-  Observable,
   combineLatest,
   map,
   takeUntil,
@@ -30,6 +29,9 @@ import {
   distinctUntilChanged,
   skipWhile,
   filter,
+  of,
+  type Observable,
+  type Subscription,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -80,8 +82,10 @@ export class ProjectNavigationService {
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private application?: InternalApplicationStart;
   private http?: InternalHttpStart;
+  private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
   private setChromeStyle: StartDeps['setChromeStyle'] = () => {};
 
@@ -102,6 +106,15 @@ export class ProjectNavigationService {
 
     this.handleActiveNodesChange();
     this.handleSolutionNavDefinitionsChange();
+
+    this.deepLinksMap$ = navLinksService.getNavLinks$().pipe(
+      map((navLinks) => {
+        return navLinks.reduce((acc, navLink) => {
+          acc[navLink.id] = navLink;
+          return acc;
+        }, {} as Record<string, ChromeNavLink>);
+      })
+    );
 
     return {
       setProjectHome: (homeHref: string) => {
@@ -129,7 +142,7 @@ export class ProjectNavigationService {
         navTreeDefinition: Observable<NavigationTreeDefinition<LinkId>>,
         { cloudUrls }: { cloudUrls: CloudURLs }
       ) => {
-        this.initNavigation(navTreeDefinition, { navLinksService, cloudUrls });
+        this.initNavigation(navTreeDefinition, { cloudUrls });
       },
       getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
       getActiveNodes$: () => {
@@ -156,6 +169,8 @@ export class ProjectNavigationService {
           this.projectsUrl$,
           this.projectUrl$,
           this.projectName$,
+          this.solutionNavDefinitions$,
+          this.activeSolutionNavDefinitionId$,
         ]).pipe(
           map(
             ([
@@ -165,7 +180,19 @@ export class ProjectNavigationService {
               projectsUrl,
               projectUrl,
               projectName,
+              solutionNavDefinitions,
+              activeSolutionNavDefinitionId,
             ]) => {
+              const solutionNavigations =
+                Object.keys(solutionNavDefinitions).length > 0 &&
+                activeSolutionNavDefinitionId !== null
+                  ? {
+                      definitions: solutionNavDefinitions,
+                      activeId: activeSolutionNavDefinitionId,
+                      onChange: this.changeActiveSolutionNavigation.bind(this),
+                    }
+                  : undefined;
+
               return buildBreadcrumbs({
                 projectUrl,
                 projectName,
@@ -173,6 +200,7 @@ export class ProjectNavigationService {
                 projectBreadcrumbs,
                 activeNodes,
                 chromeBreadcrumbs,
+                solutionNavigations,
               });
             }
           )
@@ -191,25 +219,17 @@ export class ProjectNavigationService {
 
   private initNavigation(
     navTreeDefinition: Observable<NavigationTreeDefinition>,
-    { navLinksService, cloudUrls }: { navLinksService: ChromeNavLinks; cloudUrls: CloudURLs }
+    { cloudUrls }: { cloudUrls: CloudURLs }
   ) {
-    if (this.navigationTree$.getValue() !== undefined) {
-      throw new Error('Project navigation has already been initiated.');
+    if (this.navigationChangeSubscription) {
+      this.navigationChangeSubscription.unsubscribe();
     }
-
-    const deepLinksMap$ = navLinksService.getNavLinks$().pipe(
-      map((navLinks) => {
-        return navLinks.reduce((acc, navLink) => {
-          acc[navLink.id] = navLink;
-          return acc;
-        }, {} as Record<string, ChromeNavLink>);
-      })
-    );
 
     const cloudLinks = getCloudLinks(cloudUrls);
 
-    combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$])
+    this.navigationChangeSubscription = combineLatest([navTreeDefinition, this.deepLinksMap$])
       .pipe(
+        takeUntil(this.stop$),
         map(([def, deepLinksMap]) => {
           return parseNavigationTree(def, {
             deepLinks: deepLinksMap,
