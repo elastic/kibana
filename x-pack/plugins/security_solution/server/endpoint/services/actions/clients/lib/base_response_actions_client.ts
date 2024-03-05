@@ -527,6 +527,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
-    this.log.warn(`${this.constructor.name}#processPendingActions() is not implemented!`);
+    this.log.warn(`#processPendingActions() method is not implemented!`);
   }
 }

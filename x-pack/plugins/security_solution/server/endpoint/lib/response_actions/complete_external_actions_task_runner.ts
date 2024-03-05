@@ -7,6 +7,7 @@
 
 import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/core/server';
+import { stringify } from '../../utils/stringify';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import type { BatchHandlerCallbackOptions } from '../../utils/queue_processor';
 import { QueueProcessor } from '../../utils/queue_processor';
@@ -44,6 +45,7 @@ export class CompleteExternalActionsTaskRunner
     options: BatchHandlerCallbackOptions<LogsEndpointActionResponse>
   ): Promise<void> {
     // FIXME:PT implement
+    this.log.debug(`Batch processing:\n${stringify(options.data)}`);
   }
 
   private getNextRunDate(): Date | undefined {

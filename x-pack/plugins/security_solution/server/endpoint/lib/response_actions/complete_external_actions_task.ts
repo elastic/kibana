@@ -49,6 +49,13 @@ export class CompleteExternalResponseActionsTask {
 
     this.wasSetup = true;
 
+    if (!this.options.endpointAppContext.experimentalFeatures.responseActionsSentinelOneV2Enabled) {
+      this.log.debug(
+        `responseActionsSentinelOneV2Enabled feature flag is false. Task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] is NOT be registered!`
+      );
+      return;
+    }
+
     this.taskInterval =
       this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskInterval;
     this.taskTimeout =
@@ -78,6 +85,10 @@ export class CompleteExternalResponseActionsTask {
     }
 
     this.wasStarted = true;
+
+    if (!this.options.endpointAppContext.experimentalFeatures.responseActionsSentinelOneV2Enabled) {
+      return;
+    }
 
     try {
       await taskManager.ensureScheduled({
