@@ -3541,31 +3541,31 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3573,35 +3573,35 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/common.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/common.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/tls_rule/message_utils.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/tls_rule/message_utils.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/tls_rule/tls_rule.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/tls_rule/tls_rule.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
+                "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/common.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/common.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/tls.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/tls.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -3609,7 +3609,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.test.ts"
+                "path": "x-pack/plugins/observability_solution/observability/server/lib/rules/slo_burn_rate/executor.test.ts"
               }
             ]
           },

@@ -29,6 +29,13 @@ export const ADD_TO_LISTS_OPTION_TOOLTIP = i18n.translate(
   }
 );
 
+export const ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsTooltipAriaLabel',
+  {
+    defaultMessage: 'Learn more about shared exception lists',
+  }
+);
+
 export const ADD_TO_LISTS_OPTION_DISABLED_TOOLTIP = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsTooltipTitle',
