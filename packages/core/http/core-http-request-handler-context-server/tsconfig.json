@@ -15,7 +15,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-server",
     "@kbn/core-deprecations-server",
-    "@kbn/core-ui-settings-server"
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*",
