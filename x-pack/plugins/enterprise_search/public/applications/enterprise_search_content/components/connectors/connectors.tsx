@@ -34,7 +34,7 @@ import {
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
-import { SelectConnector } from '../new_index/select_connector/select_connector';
+import { SelectConnector } from './select_connector/select_connector';
 
 import { CannotConnect } from '../search_index/components/cannot_connect';
 
@@ -44,9 +44,15 @@ import { ConnectorsTable } from './connectors_table';
 import { CrawlerEmptyState } from './crawler_empty_state';
 import { DeleteConnectorModal } from './delete_connector_modal';
 
-export const baseBreadcrumbs = [
+export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
     defaultMessage: 'Connectors',
+  }),
+];
+
+export const crawlersBreadcrumbs = [
+  i18n.translate('xpack.enterpriseSearch.content.crawlers.breadcrumb', {
+    defaultMessage: 'Web crawlers',
   }),
 ];
 
@@ -74,7 +80,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
     <>
       <DeleteConnectorModal />
       <EnterpriseSearchContentPageTemplate
-        pageChrome={baseBreadcrumbs}
+        pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
         isLoading={isLoading}
         pageHeader={{

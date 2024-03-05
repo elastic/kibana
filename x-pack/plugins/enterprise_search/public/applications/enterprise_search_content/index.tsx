@@ -25,6 +25,7 @@ import { Connectors } from './components/connectors/connectors';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
 import { Settings } from './components/settings';
+import { SelectConnector } from './components/connectors/select_connector/select_connector';
 import {
   CONNECTORS_PATH,
   CONNECTOR_DETAIL_PATH,
@@ -34,6 +35,7 @@ import {
   SEARCH_INDICES_PATH,
   SETTINGS_PATH,
   SETUP_GUIDE_PATH,
+  NEW_INDEX_SELECT_CONNECTOR_PATH, NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH, NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -78,6 +80,15 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
+      </Route>
+      <Route path={NEW_INDEX_SELECT_CONNECTOR_PATH} exact>
+        <SelectConnector />
+      </Route>
+      <Route path={NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH} exact>
+        <SelectConnector />
+      </Route>
+      <Route path={NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH} exact>
+        <SelectConnector />
       </Route>
       <Route path={CONNECTOR_DETAIL_PATH}>
         <ConnectorDetailRouter />

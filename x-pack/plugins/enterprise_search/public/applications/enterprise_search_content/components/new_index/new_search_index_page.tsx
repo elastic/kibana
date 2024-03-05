@@ -23,6 +23,7 @@ import { parseQueryParams } from '../../../shared/query_params';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { CONNECTORS } from '../search_index/connector/constants';
 import { baseBreadcrumbs } from '../search_indices';
+import { connectorsBreadcrumbs, crawlersBreadcrumbs } from '../connectors/connectors';
 
 import { MethodApi } from './method_api/method_api';
 import { MethodConnector } from './method_connector/method_connector';
@@ -95,6 +96,20 @@ const parseIsNativeParam = (queryString: string | string[] | null): boolean | un
   return undefined;
 };
 
+const getBreadcrumb = (method: string) => {
+  switch (method) {
+    case INGESTION_METHOD_IDS.API:
+      return baseBreadcrumbs;
+    case INGESTION_METHOD_IDS.CONNECTOR: {
+      return connectorsBreadcrumbs;
+    }
+    case INGESTION_METHOD_IDS.CRAWLER:
+      return crawlersBreadcrumbs;
+    default:
+      return baseBreadcrumbs;
+  }
+};
+
 const getConnectorModeBadge = (isNative?: boolean) => {
   if (isNative) {
     return (
@@ -132,7 +147,7 @@ export const NewSearchIndexPage: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        ...baseBreadcrumbs,
+        ...getBreadcrumb(type),
         i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
           defaultMessage: 'New search index',
         }),

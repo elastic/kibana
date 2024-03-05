@@ -53,7 +53,7 @@ import { EnterpriseSearchContentPageTemplate } from '../../layout';
 
 import { CONNECTORS } from '../../search_index/connector/constants';
 
-import { baseBreadcrumbs } from '../../search_indices';
+import { connectorsBreadcrumbs } from '../connectors';
 
 import { ConnectorCheckable } from './connector_checkable';
 import { ConnectorDescriptionBadge } from './connector_description_badge_popout';
@@ -115,7 +115,7 @@ export const SelectConnector: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        ...baseBreadcrumbs,
+        ...connectorsBreadcrumbs,
         i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.breadcrumb', {
           defaultMessage: 'Select connector',
         }),
