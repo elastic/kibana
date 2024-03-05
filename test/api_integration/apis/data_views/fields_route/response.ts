@@ -107,6 +107,20 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
+    it('returns a single field as requested with jhson encoding', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
+          fields: JSON.stringify(['bar']),
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
     it('always returns a field for all passed meta fields', async () => {
       await supertest
         .get(FIELDS_PATH)

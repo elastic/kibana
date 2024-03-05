@@ -49,9 +49,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     let parsedMetaFields: string[] = [];
     let parsedFieldTypes: string[] = [];
     try {
-      parsedMetaFields = parseFields(metaFields);
-      parsedFields = parseFields(request.query.fields ?? []);
-      parsedFieldTypes = parseFields(fieldTypes || []);
+      parsedMetaFields = parseFields(metaFields, 'meta_fields');
+      parsedFields = parseFields(request.query.fields ?? [], 'fields');
+      parsedFieldTypes = parseFields(fieldTypes || [], 'field_types');
     } catch (error) {
       return response.badRequest();
     }

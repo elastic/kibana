@@ -31,14 +31,14 @@ import { getIndexFilterDsl } from './utils';
  * @returns an array of field names
  * @param fields
  */
-export const parseFields = (fields: string | string[]): string[] => {
+export const parseFields = (fields: string | string[], fldName: string): string[] => {
   if (Array.isArray(fields)) return fields;
   try {
     return JSON.parse(fields);
   } catch (e) {
     if (!fields.includes(',')) return [fields];
     throw new Error(
-      'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
+      `${fldName} should be an array of field names, a JSON-stringified array of field names, or a single field name`
     );
   }
 };
@@ -55,7 +55,7 @@ export interface IQuery {
   include_unmapped?: boolean;
   fields?: string[];
   allow_hidden?: boolean;
-  field_types?: string | string[];
+  field_types?: string[];
   include_empty_fields?: boolean;
 }
 
@@ -154,11 +154,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     let parsedMetaFields: string[] = [];
     let parsedFieldTypes: string[] = [];
     try {
-      parsedMetaFields = parseFields(metaFields);
-      parsedFields = parseFields(request.query.fields ?? []);
-      parsedFieldTypes = parseFields(fieldTypes || []);
+      parsedMetaFields = parseFields(metaFields, 'meta_fields');
+      parsedFields = parseFields(request.query.fields ?? [], 'fields');
+      parsedFieldTypes = parseFields(fieldTypes || [], 'field_types');
     } catch (error) {
-      return response.badRequest();
+      return response.badRequest({ body: error.message });
     }
 
     try {
