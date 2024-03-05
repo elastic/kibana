@@ -37,8 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
-  // Failing: See https://github.com/elastic/kibana/issues/177675
-  describe.skip('links panel create and edit', () => {
+  describe.only('links panel create and edit', () => {
     describe('creation', async () => {
       before(async () => {
         await dashboard.navigateToApp();
