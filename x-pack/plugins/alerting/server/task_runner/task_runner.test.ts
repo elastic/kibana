@@ -1883,11 +1883,11 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue({
-      ...(mockedRuleTypeSavedObject as Rule),
-      schedule: { interval: '30s' },
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, schedule: { interval: '30s' } },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(
@@ -1954,7 +1954,7 @@ describe('Task Runner', () => {
     const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
 
     // used in loadIndirectParams() which is called to load rule data
-    rulesClient.getAlertFromRaw.mockImplementation(() => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(() => {
       throw taskRunError;
     });
 
@@ -1966,8 +1966,6 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -2755,11 +2753,11 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue({
-      ...(mockedRuleTypeSavedObject as Rule),
-      schedule: { interval: '50s' },
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, schedule: { interval: '50s' } },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
     expect(
@@ -3405,6 +3403,7 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
+          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,
@@ -3440,6 +3439,7 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
+          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,
@@ -3473,6 +3473,7 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
+          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,

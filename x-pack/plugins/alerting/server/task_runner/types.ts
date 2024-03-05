@@ -67,11 +67,12 @@ export type RuleTaskStateAndMetrics = RuleTaskState & {
 };
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
-  fakeRequest: KibanaRequest;
-  rulesClient: RulesClientApi;
-  rule: SanitizedRule<Params>;
   apiKey: RawRule['apiKey'];
+  fakeRequest: KibanaRequest;
+  rule: SanitizedRule<Params>;
+  rulesClient: RulesClientApi;
   validatedParams: Params;
+  version: string | undefined;
 }
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {

@@ -73,11 +73,10 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import {
-  getRuleAttributes,
+  getDecryptedRule,
   RuleData,
   RuleDataResult,
-  ValidatedRuleData,
-  validateRule,
+  validateRuleAndCreateFakeRequest,
 } from './rule_loader';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
@@ -159,7 +158,7 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private ruleData?: RuleDataResult<RuleData<Params>>;
+  private ruleData?: RuleDataResult<RuleData>;
   private runDate = new Date();
 
   constructor({
@@ -684,59 +683,76 @@ export class TaskRunner<
   }
 
   /**
-   * Initialize event logger, load and validate the rule
+   * Before we actually run the rule:
+   * - start the RunningHandler
+   * - initialize the event logger
+   * - if rule data not loaded, load it
+   * - set the current APM transaction info
+   * - validate that rule type is enabled and params are valid
+   * - initialize monitoring data
+   * - clear expired snoozes
    */
-  private async prepareToRun(): Promise<ValidatedRuleData<Params>> {
-    if (!this.ruleData) {
-      this.ruleData = await this.loadIndirectParams();
-    }
+  private async prepareToRun(): Promise<RunRuleParams<Params>> {
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareToRun, async () => {
+      const {
+        params: { alertId: ruleId, spaceId },
+        startedAt,
+      } = this.taskInstance;
 
-    const {
-      params: { alertId: ruleId, spaceId, consumer },
-    } = this.taskInstance;
+      if (apm.currentTransaction) {
+        apm.currentTransaction.name = `Execute Alerting Rule`;
+        apm.currentTransaction.addLabels({
+          alerting_rule_space_id: spaceId,
+          alerting_rule_id: ruleId,
+        });
+      }
 
-    if (apm.currentTransaction) {
-      apm.currentTransaction.name = `Execute Alerting Rule`;
-      apm.currentTransaction.addLabels({
-        alerting_rule_space_id: spaceId,
-        alerting_rule_id: ruleId,
+      this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
+      this.logger.debug(
+        `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`
+      );
+
+      if (startedAt) {
+        // Capture how long it took for the rule to start running after being claimed
+        this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
+      }
+
+      // Load rule SO (indirect task params) if necessary
+      if (!this.ruleData) {
+        this.ruleData = await this.loadIndirectParams();
+      }
+
+      const runRuleParams = validateRuleAndCreateFakeRequest({
+        ruleData: this.ruleData,
+        paramValidator: this.ruleType.validate.params,
+        ruleId,
+        spaceId,
+        context: this.context,
+        ruleTypeRegistry: this.ruleTypeRegistry,
       });
-    }
 
-    // Initially use consumer as stored inside the task instance
-    // Replace this with consumer as read from the rule saved object after
-    // we successfully read the rule SO. This allows us to populate a consumer
-    // value for `execute-start` events (which are written before the rule SO is read)
-    // and in the event of decryption errors (where we cannot read the rule SO)
-    // Because "consumer" is set when a rule is created, this value should be static
-    // for the life of a rule but there may be edge cases where migrations cause
-    // the consumer values to become out of sync.
-    if (consumer) {
-      this.ruleConsumer = consumer;
-    }
+      // Update the consumer
+      this.ruleConsumer = runRuleParams.rule.consumer;
 
-    const namespace = this.context.spaceIdToNamespace(spaceId);
+      // Update the rule name
+      this.alertingEventLogger.setRuleName(runRuleParams.rule.name);
 
-    this.alertingEventLogger.initialize({
-      ruleId,
-      ruleType: this.ruleType as UntypedNormalizedRuleType,
-      consumer: this.ruleConsumer!,
-      spaceId,
-      executionId: this.executionId,
-      taskScheduledAt: this.taskInstance.scheduledAt,
-      ...(namespace ? { namespace } : {}),
-    });
+      // Set rule monitoring data
+      this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
-    this.alertingEventLogger.start(this.runDate);
+      (async () => {
+        try {
+          await runRuleParams.rulesClient.clearExpiredSnoozes({
+            rule: runRuleParams.rule,
+            version: runRuleParams.version,
+          });
+        } catch (e) {
+          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
+          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+        }
+      })();
 
-    return validateRule({
-      alertingEventLogger: this.alertingEventLogger,
-      ruleData: this.ruleData,
-      paramValidator: this.ruleType.validate.params,
-      ruleId,
-      spaceId,
-      context: this.context,
-      ruleTypeRegistry: this.ruleTypeRegistry,
+      return runRuleParams;
     });
   }
 
@@ -840,14 +856,40 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
-  async loadIndirectParams(): Promise<RuleDataResult<RuleData<Params>>> {
+  async loadIndirectParams(): Promise<RuleDataResult<RuleData>> {
     this.runDate = new Date();
     return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
       try {
         const {
-          params: { alertId: ruleId, spaceId },
+          params: { alertId: ruleId, spaceId, consumer },
         } = this.taskInstance;
-        const data = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+
+        // Initially use consumer as stored inside the task instance
+        // This allows us to populate a consumer value for event log
+        // `execute-start` events (which are indexed before the rule SO is read)
+        // and in the event of decryption errors (where we cannot read the rule SO)
+        // Because "consumer" is set when a rule is created, this value should be static
+        // for the life of a rule but there may be edge cases where migrations cause
+        // the consumer values to become out of sync.
+        if (consumer) {
+          this.ruleConsumer = consumer;
+        }
+
+        // Start the event logger so that something is logged in the
+        // event that rule SO decryption fails.
+        const namespace = this.context.spaceIdToNamespace(spaceId);
+        this.alertingEventLogger.initialize({
+          ruleId,
+          ruleType: this.ruleType as UntypedNormalizedRuleType,
+          consumer: this.ruleConsumer!,
+          spaceId,
+          executionId: this.executionId,
+          taskScheduledAt: this.taskInstance.scheduledAt,
+          ...(namespace ? { namespace } : {}),
+        });
+        this.alertingEventLogger.start(this.runDate);
+
+        const data = await getDecryptedRule(this.context, ruleId, spaceId);
         this.ruleData = { data };
       } catch (err) {
         const error = createTaskRunError(
@@ -868,42 +910,16 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
-
-    this.logger.debug(
-      `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`
-    );
-
-    if (startedAt) {
-      // Capture how long it took for the rule to start running after being claimed
-      this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
-    }
-
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
     try {
-      const preparedResult = await this.prepareToRun();
-
-      this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
-
-      (async () => {
-        try {
-          await preparedResult.rulesClient.clearExpiredSnoozes({
-            rule: preparedResult.rule,
-            version: preparedResult.version,
-          });
-        } catch (e) {
-          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
-          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
-        }
-      })();
-
-      stateWithMetrics = asOk(await this.runRule(preparedResult));
+      const validatedRuleData = await this.prepareToRun();
+      stateWithMetrics = asOk(await this.runRule(validatedRuleData));
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
-      schedule = asOk(attributes.rule.schedule);
+      const data = await getDecryptedRule(this.context, ruleId, spaceId);
+      schedule = asOk(data.indirectParams.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
