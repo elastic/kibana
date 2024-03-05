@@ -16,6 +16,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
+import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -69,9 +70,12 @@ export function SloDetailsPage() {
       : OVERVIEW_TAB_ID;
   });
 
-  const handleSelectedTab = (newTabId: SloTabId) => {
-    setSelectedTabId(newTabId);
-  };
+  const { tabs } = useSloDetailsTabs({
+    slo,
+    isAutoRefreshing,
+    selectedTabId,
+    setSelectedTabId,
+  });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
@@ -129,19 +133,14 @@ export function SloDetailsPage() {
             onClick={handleToggleAutoRefresh}
           />,
         ],
-        bottomBorder: false,
+        tabs,
       }}
       data-test-subj="sloDetailsPage"
     >
       <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && (
-        <SloDetails
-          slo={slo!}
-          isAutoRefreshing={isAutoRefreshing}
-          selectedTabId={selectedTabId}
-          handleSelectedTab={handleSelectedTab}
-        />
+        <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
       )}
     </ObservabilityPageTemplate>
   );
