@@ -20,6 +20,7 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
+  durationToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
@@ -107,14 +108,15 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
       searchSourceStart,
     };
     const cancellationToken = new CancellationToken();
-    const csvConfig = this.config.csv;
 
-    // these fields are necessary, but there is no retry for immediate download
-    const taskInstanceFields = { startedAt: new Date(), retryAt: new Date(Infinity) };
+    const taskInstanceFields = {
+      startedAt: new Date(),
+      retryAt: new Date(Date.now() + durationToNumber(this.config.queue.timeout)),
+    };
 
     const csv = new CsvGenerator(
       job,
-      csvConfig,
+      this.config.csv,
       taskInstanceFields,
       clients,
       dependencies,
