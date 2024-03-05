@@ -110,7 +110,6 @@ export type {
 export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_lens_config/in_app_embeddable_edit/types';
 
 export type {
-  HasLensConfig,
   LensApi,
   LensEmbeddableInput,
   LensSavedObjectAttributes,
