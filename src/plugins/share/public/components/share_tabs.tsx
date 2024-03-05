@@ -60,7 +60,7 @@ export const ShareMenuTabs = ({
   isDirty,
   isEmbedded,
 }: ShareContextTabProps) => {
-  const actionHandler = useCallback(
+  const buttonHandler = useCallback(
     () => [
       {
         id: 'link',
@@ -92,10 +92,9 @@ export const ShareMenuTabs = ({
       name: i18n.translate('share.contextMenu.permalinksLabel', {
         defaultMessage: 'Links',
       }),
-      sortOrder: 0,
       // do not break functional tests
       'data-test-subj': 'Permalinks',
-      action: actionHandler().filter(({ id }) => id === 'link')[0],
+      action: buttonHandler().filter(({ id }) => id === 'link')[0],
       content: (
         <LinkModal
           objectType={objectType}
@@ -103,35 +102,35 @@ export const ShareMenuTabs = ({
           isDirty={isDirty}
           isEmbedded={isEmbedded}
           onClose={onClose}
-          action={actionHandler().filter(({ id }) => id === 'link')[0]}
+          action={buttonHandler().filter(({ id }) => id === 'link')[0]}
         />
       ),
     });
+
+    shareMenuItems.map(({ shareMenuItem, panel }) => {
+      tabs.push({
+        ...shareMenuItem,
+        id: panel.id,
+        buttonHandler: buttonHandler().filter(({ id }) => id === id)[0],
+      });
+    });
+
     if (allowEmbed) {
       tabs.push({
         id: 'embed',
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed',
         }),
-        sortOrder: 1,
-        action: actionHandler().filter(({ id }) => id === 'embed')[0],
+        action: buttonHandler().filter(({ id }) => id === 'embed')[0],
         content: (
           <EmbedModal
             urlParamExtensions={embedUrlParamExtensions}
             urlService={urlService}
-            action={actionHandler().filter(({ id }) => id === 'embed')[0]}
+            action={buttonHandler().filter(({ id }) => id === 'embed')[0]}
           />
         ),
       });
     }
-
-    shareMenuItems.map(({ shareMenuItem, panel }) => {
-      tabs.push({
-        ...shareMenuItem,
-        id: panel.id,
-        actionHandler: actionHandler().filter(({ id }) => id === id)[0],
-      });
-    });
     return tabs;
   };
 
