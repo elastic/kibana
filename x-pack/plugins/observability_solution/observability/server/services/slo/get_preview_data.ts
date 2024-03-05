@@ -540,7 +540,7 @@ export class GetPreviewData {
       const total = bucket.total?.doc_count ?? 0;
       data.push({
         date: bucket.key_as_string,
-        sliValue: good / total,
+        sliValue: computeSLI(good, total),
         events: {
           good,
           bad,
