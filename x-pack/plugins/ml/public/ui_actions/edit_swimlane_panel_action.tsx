@@ -31,14 +31,18 @@ export function createEditSwimlanePanelAction(
         throw new Error('Not possible to execute an action without the embeddable context');
       }
 
-      const [coreStart] = await getStartServices();
+      const [coreStart, deps] = await getStartServices();
 
       try {
         const { resolveAnomalySwimlaneUserInput } = await import(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
+        const result = await resolveAnomalySwimlaneUserInput(
+          coreStart,
+          deps.data.dataViews,
+          embeddable.getInput()
+        );
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();
