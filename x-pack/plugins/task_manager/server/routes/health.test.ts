@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable, of, Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, of, Subject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
@@ -277,7 +276,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     stats$.next(warnRuntimeStat);
     await sleep(1001);
@@ -362,7 +361,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     stats$.next(errorRuntimeStat);
     await sleep(1001);
@@ -435,7 +434,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -519,7 +518,7 @@ describe('healthRoute', () => {
       docLinks,
     });
 
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
 
     await sleep(0);
 
@@ -600,7 +599,7 @@ describe('healthRoute', () => {
       shouldRunTasks: true,
       docLinks,
     });
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -683,7 +682,7 @@ describe('healthRoute', () => {
       shouldRunTasks: false,
       docLinks,
     });
-    const serviceStatus = getLatest(serviceStatus$);
+    const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
 
     const lastUpdate = new Date().toISOString();
@@ -800,10 +799,6 @@ function mockHealthStats(overrides = {}) {
     },
   };
   return merge(stub, overrides) as unknown as MonitoringStats;
-}
-
-async function getLatest<T>(stream$: Observable<T>) {
-  return new Promise<T>((resolve) => stream$.pipe(take(1)).subscribe((stats) => resolve(stats)));
 }
 
 const getTaskManagerConfig = (overrides: Partial<TaskManagerConfig> = {}) =>
