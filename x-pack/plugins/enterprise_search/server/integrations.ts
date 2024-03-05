@@ -295,13 +295,11 @@ export const registerEnterpriseSearchIntegrations = (
         'connector_client',
       ],
       uiInternalPath:
-        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=salesforce',
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=onedrive',
       icons: [
         {
           type: 'svg',
-          src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/salesforce_sandbox.svg'
-          ),
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/onedrive.svg'),
         },
       ],
       shipper: 'enterprise_search',
@@ -977,7 +975,7 @@ export const registerEnterpriseSearchIntegrations = (
         },
       ],
       shipper: 'enterprise_search',
-      isBeta: false,
+      isBeta: true,
     });
 
     customIntegrations.registerCustomIntegration({

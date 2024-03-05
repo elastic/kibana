@@ -7,7 +7,7 @@
 
 import type { ErrorToastOptions } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
@@ -124,62 +124,65 @@ export const useCasesToast = () => {
 
   const toasts = useToasts();
 
-  return {
-    showSuccessAttach: ({
-      theCase,
-      attachments,
-      title,
-      content,
-    }: {
-      theCase: CaseUI;
-      attachments?: CaseAttachmentsWithoutOwner;
-      title?: string;
-      content?: string;
-    }) => {
-      const appIdToNavigateTo = isValidOwner(theCase.owner)
-        ? OWNER_INFO[theCase.owner].appId
-        : appId;
-
-      const url = getUrlForApp(appIdToNavigateTo, {
-        deepLinkId: 'cases',
-        path: generateCaseViewPath({ detailName: theCase.id }),
-      });
-
-      const onViewCaseClick = () => {
-        navigateToUrl(url);
-      };
-
-      const renderTitle = getToastTitle({ theCase, title, attachments });
-      const renderContent = getToastContent({ theCase, content, attachments });
-
-      return toasts.addSuccess({
-        color: 'success',
-        iconType: 'check',
-        title: toMountPoint(<Title>{renderTitle}</Title>),
-        text: toMountPoint(
-          <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
-        ),
-      });
-    },
-    showErrorToast: (error: Error | ServerError, opts?: ErrorToastOptions) => {
-      if (error.name !== 'AbortError') {
-        toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
-      }
-    },
-    showSuccessToast: (title: string) => {
-      toasts.addSuccess({ title, className: 'eui-textBreakWord' });
-    },
-    showDangerToast: (title: string) => {
-      toasts.addDanger({ title, className: 'eui-textBreakWord' });
-    },
-    showInfoToast: (title: string, text?: string) => {
-      toasts.addInfo({
+  return useMemo(
+    () => ({
+      showSuccessAttach: ({
+        theCase,
+        attachments,
         title,
-        text,
-        className: 'eui-textBreakWord',
-      });
-    },
-  };
+        content,
+      }: {
+        theCase: CaseUI;
+        attachments?: CaseAttachmentsWithoutOwner;
+        title?: string;
+        content?: string;
+      }) => {
+        const appIdToNavigateTo = isValidOwner(theCase.owner)
+          ? OWNER_INFO[theCase.owner].appId
+          : appId;
+
+        const url = getUrlForApp(appIdToNavigateTo, {
+          deepLinkId: 'cases',
+          path: generateCaseViewPath({ detailName: theCase.id }),
+        });
+
+        const onViewCaseClick = () => {
+          navigateToUrl(url);
+        };
+
+        const renderTitle = getToastTitle({ theCase, title, attachments });
+        const renderContent = getToastContent({ theCase, content, attachments });
+
+        return toasts.addSuccess({
+          color: 'success',
+          iconType: 'check',
+          title: toMountPoint(<Title>{renderTitle}</Title>),
+          text: toMountPoint(
+            <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
+          ),
+        });
+      },
+      showErrorToast: (error: Error | ServerError, opts?: ErrorToastOptions) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
+        }
+      },
+      showSuccessToast: (title: string) => {
+        toasts.addSuccess({ title, className: 'eui-textBreakWord' });
+      },
+      showDangerToast: (title: string) => {
+        toasts.addDanger({ title, className: 'eui-textBreakWord' });
+      },
+      showInfoToast: (title: string, text?: string) => {
+        toasts.addInfo({
+          title,
+          text,
+          className: 'eui-textBreakWord',
+        });
+      },
+    }),
+    [appId, getUrlForApp, navigateToUrl, toasts]
+  );
 };
 
 export const CaseToastSuccessContent = ({
