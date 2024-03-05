@@ -297,7 +297,7 @@ describe('Synthetics Availability Transform Generator', () => {
         tags: ['tag-1', 'tag-2'],
       },
     });
-    expect(transform.pivot.group_by.tags).toEqual({
+    expect(transform.pivot?.group_by?.tags).toEqual({
       terms: {
         field: 'tags',
       },
@@ -352,7 +352,7 @@ describe('Synthetics Availability Transform Generator', () => {
         'monitor.project.id': ['id-1', 'id-2'],
       },
     });
-    expect(transform.pivot.group_by['monitor.project.id']).toEqual({
+    expect(transform.pivot?.group_by?.['monitor.project.id']).toEqual({
       terms: {
         field: 'monitor.project.id',
       },
