@@ -218,6 +218,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,
@@ -253,6 +254,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCreateAlertProps,
@@ -292,6 +294,7 @@ describe('OpsgenieParamFields', () => {
     expect(editAction).toBeCalledTimes(1);
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,

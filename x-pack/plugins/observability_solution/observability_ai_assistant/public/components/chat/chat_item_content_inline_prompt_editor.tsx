@@ -28,6 +28,9 @@ interface Props {
 
 const textContainerClassName = css`
   padding: 4px 0;
+  img {
+    max-width: 100%;
+  }
 `;
 
 const editorContainerClassName = css`
