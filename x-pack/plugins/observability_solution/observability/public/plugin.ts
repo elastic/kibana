@@ -204,15 +204,15 @@ export class Plugin
         },
       ],
     },
-    {
-      id: 'slos',
-      title: i18n.translate('xpack.observability.slosLinkTitle', {
-        defaultMessage: 'SLOs',
-      }),
-      visibleIn: [],
-      order: 8002,
-      path: SLOS_PATH,
-    },
+    // {
+    //   id: 'slos',
+    //   title: i18n.translate('xpack.observability.slosLinkTitle', {
+    //     defaultMessage: 'SLOs',
+    //   }),
+    //   visibleIn: [],
+    //   order: 8002,
+    //   path: SLOS_PATH,
+    // },
     getCasesDeepLinks({
       basePath: CASES_PATH,
       extend: {
@@ -377,6 +377,16 @@ export class Plugin
                     ]
                   : [];
 
+              const sloLink = [
+                {
+                  label: i18n.translate('xpack.observability.sloLinkTitle', {
+                    defaultMessage: 'SLOs',
+                  }),
+                  app: 'observabilitySLO',
+                  path: '/slos',
+                },
+              ];
+
               // Reformat the visible links to be NavigationEntry objects instead of
               // AppDeepLink objects.
               //
@@ -399,7 +409,7 @@ export class Plugin
                 {
                   label: '',
                   sortKey: 100,
-                  entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
+                  entries: [...overviewLink, ...sloLink, ...otherLinks, ...aiAssistantLink],
                 },
               ];
             })

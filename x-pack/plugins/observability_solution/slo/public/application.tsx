@@ -17,6 +17,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
 import { PluginContext } from './context/plugin_context'; // TODO SLO: rethink about this one, now it is a copy paste
 
@@ -52,15 +53,18 @@ export const renderApp = ({
   isDev,
   kibanaVersion,
   isServerless,
+  observabilityRuleTypeRegistry,
 }: {
   core: CoreStart;
   plugins: SloPublicPluginsStart;
   appMountParameters: AppMountParameters;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   isDev?: boolean;
   kibanaVersion: string;
   isServerless?: boolean;
 }) => {
+  console.log(observabilityRuleTypeRegistry, '!!observabilityRuleTypeRegistry');
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;
@@ -93,6 +97,7 @@ export const renderApp = ({
                   // isDev,
                   appMountParameters,
                   ObservabilityPageTemplate,
+                  observabilityRuleTypeRegistry,
                 }}
               >
                 <Router history={history}>
@@ -103,10 +108,7 @@ export const renderApp = ({
                         data-test-subj="observabilityMainContainer"
                       >
                         <QueryClientProvider client={queryClient}>
-                          <>
-                            <h1>Hello</h1>
-                            <App />
-                          </>
+                          <App />
                         </QueryClientProvider>
                       </RedirectAppLinks>
                     </i18nCore.Context>

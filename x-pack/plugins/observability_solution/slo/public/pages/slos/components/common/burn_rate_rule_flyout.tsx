@@ -32,7 +32,7 @@ export function BurnRateRuleFlyout({
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  const filteredRuleTypes = useGetFilteredRuleTypes();
+  // const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const queryClient = useQueryClient();
 
@@ -40,7 +40,7 @@ export function BurnRateRuleFlyout({
     if (setIsAddRuleFlyoutOpen) {
       queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
     } else {
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      navigateToUrl(basePath.prepend(paths.slos));
     }
   };
 
@@ -48,7 +48,7 @@ export function BurnRateRuleFlyout({
     if (setIsAddRuleFlyoutOpen) {
       setIsAddRuleFlyoutOpen(false);
     } else {
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      navigateToUrl(basePath.prepend(paths.slos));
     }
   };
 
@@ -56,7 +56,7 @@ export function BurnRateRuleFlyout({
     <AddRuleFlyout
       canChangeTrigger={canChangeTrigger}
       consumer={sloFeatureId}
-      filteredRuleTypes={filteredRuleTypes}
+      // filteredRuleTypes={filteredRuleTypes}
       ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
       initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
       onSave={handleSavedRule}

@@ -32,7 +32,8 @@
       "embeddable",
       "presentationUtil",
       "features",
-      "licensing"
+      "licensing",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "kibanaReact",

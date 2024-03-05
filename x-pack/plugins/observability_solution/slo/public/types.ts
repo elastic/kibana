@@ -33,8 +33,11 @@ import {
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { SloPlugin } from './plugin';
-
 export interface SloPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
@@ -46,6 +49,7 @@ export interface SloPublicPluginsSetup {
   uiActions: UiActionsSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
 }
 
 export interface SloPublicPluginsStart {
@@ -64,6 +68,7 @@ export interface SloPublicPluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

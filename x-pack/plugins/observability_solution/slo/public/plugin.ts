@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import {
   App,
@@ -22,7 +23,8 @@ import type { SloPublicSetup, SloPublicStart } from './types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
-import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
+import { BASE_PATH } from '../common/locators/paths';
+// import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
@@ -42,11 +44,13 @@ export class SloPlugin
       const { renderApp } = await import('./application');
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+      const { observabilityRuleTypeRegistry } = pluginsStart.observability;
 
       return renderApp({
         appMountParameters: params,
         core: coreStart,
         // isDev: this.initContext.env.mode.dev,
+        observabilityRuleTypeRegistry,
         kibanaVersion,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
@@ -59,7 +63,7 @@ export class SloPlugin
       title: PLUGIN_NAME,
       order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts
       euiIconType: 'logoObservability',
-      appRoute: '/app/slos',
+      appRoute: BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
       // Do I need deep links
       mount,
@@ -124,7 +128,7 @@ export class SloPlugin
 
   // TODO SLO: register alert table configuration
   public start(coreStart: CoreStart, plugins: SloPublicPluginsStart) {
-    const kibanaVersion = this.initContext.env.packageInfo.version;
+    // const kibanaVersion = this.initContext.env.packageInfo.version;
     const { ruleTypeRegistry, actionTypeRegistry } = plugins.triggersActionsUi;
     return {
       // getCreateSLOFlyout: getCreateSLOFlyoutLazy({

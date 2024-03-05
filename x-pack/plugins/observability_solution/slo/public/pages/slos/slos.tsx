@@ -45,7 +45,7 @@ export function SlosPage() {
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+      text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
       deepLinkId: 'observability-overview:slos',
@@ -62,9 +62,7 @@ export function SlosPage() {
     <ObservabilityPageTemplate
       data-test-subj="slosPage"
       pageHeader={{
-        pageTitle: i18n.translate('xpack.slos.heading', {
-          defaultMessage: 'SLOs',
-        }),
+        pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
         rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
       }}
       topSearchBar={<SloListSearchBar />}
