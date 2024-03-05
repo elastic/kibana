@@ -515,7 +515,7 @@ export const GcpInputVarFields = ({
   let credentialsTypeValue = credentialsTypeFields?.value;
 
   if (!credentialsTypeValue) {
-    if (credentialFieldValue) {
+    if (credentialFilesFields) {
       credentialsTypeValue = credentialFieldValue;
     } else if (credentialJSONFields) {
       credentialsTypeValue = credentialJSONValue;
