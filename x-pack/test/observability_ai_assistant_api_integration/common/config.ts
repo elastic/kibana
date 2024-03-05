@@ -49,9 +49,9 @@ export interface CreateTest {
   kbnTestServer: any;
 }
 
-function downloadFile(url: string, path: string): Promise<void> {
+function downloadFile(url: string, filePath: string): Promise<void> {
   return new Promise((resolve) => {
-    const file = fs.createWriteStream(path);
+    const file = fs.createWriteStream(filePath);
     https.get(url, (response) => {
       response.pipe(file);
       file.on('finish', () => {
