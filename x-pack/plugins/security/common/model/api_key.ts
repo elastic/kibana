@@ -84,14 +84,14 @@ export interface AggregationResponse<V> {
   sum_other_doc_count: number;
 }
 export interface ApiKeyAggregations {
-  usernames: AggregationResponse<string>;
-  types: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
-  expired: { doc_count: number };
-  alertingKeys: { doc_count: number };
-  managedMetadata: { doc_count: number };
+  usernames?: AggregationResponse<string>;
+  types?: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
+  expired?: { doc_count: number };
+  alertingKeys?: { doc_count: number };
+  managedMetadata?: { doc_count: number };
 }
 
 export interface ApiKeyAggregationsResponse {
   total: number;
-  aggregations: ApiKeyAggregations;
+  aggregations?: ApiKeyAggregations;
 }

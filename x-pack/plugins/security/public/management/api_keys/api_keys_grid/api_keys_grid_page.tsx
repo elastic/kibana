@@ -82,7 +82,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
-
   useEffect(() => {
     queryApiKeysAndAggregations();
   }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -364,7 +363,7 @@ export interface ApiKeysTableProps {
   onTableChange: any;
   pagination: any;
   onSearchChange: any;
-  aggregations: ApiKeyAggregations;
+  aggregations?: ApiKeyAggregations;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
@@ -904,23 +903,31 @@ export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
   expired: boolean;
 };
 
-export const categorizeAggregations = (aggregationResponse: ApiKeyAggregations) => {
-  const { usernames, types, expired, managedMetadata, alertingKeys } = aggregationResponse;
+export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations) => {
   const typeFilters: Set<CategorizedApiKey['type']> = new Set();
   const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
+  let expiredCount = 0;
 
-  types.buckets.forEach((type) => {
-    typeFilters.add(type.key);
-  });
-  usernames.buckets.forEach((username) => {
-    usernameFilters.add(username.key);
-  });
-  if (alertingKeys.doc_count > 0 || managedMetadata.doc_count > 0) {
-    typeFilters.add('managed');
+  if (aggregationResponse) {
+    const { usernames, types, expired, managedMetadata, alertingKeys } = aggregationResponse;
+    types?.buckets.forEach((type) => {
+      typeFilters.add(type.key);
+    });
+    usernames?.buckets.forEach((username) => {
+      usernameFilters.add(username.key);
+    });
+    if (
+      (alertingKeys?.doc_count && alertingKeys?.doc_count > 0) ||
+      (managedMetadata?.doc_count && managedMetadata?.doc_count > 0)
+    ) {
+      typeFilters.add('managed');
+    }
+    expiredCount = expired?.doc_count || 0;
   }
+
   return {
     typeFilters,
     usernameFilters,
-    expired: expired.doc_count,
+    expired: expiredCount,
   };
 };

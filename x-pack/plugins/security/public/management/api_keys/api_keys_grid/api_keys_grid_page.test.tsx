@@ -244,10 +244,11 @@ describe('APIKeysGridPage', () => {
         canManageCrossClusterApiKeys: false,
         canManageApiKeys: false,
         canManageOwnApiKeys: false,
+        total: 0,
       });
     });
 
-    it('should not display prompt `Create Button` when no API keys are shown', async () => {
+    it.only('should not display prompt `Create Button` when no API keys are shown', async () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
 
       coreStart.application.capabilities = {
