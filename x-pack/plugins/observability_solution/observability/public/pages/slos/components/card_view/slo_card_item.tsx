@@ -31,7 +31,6 @@ import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
-import { SloCardBadgesPortal } from './badges_portal';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
@@ -109,7 +108,19 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         `}
         title={slo.summary.status}
       >
-        <SloCardChart slo={slo} historicalSliData={historicalSliData} />
+        <SloCardChart
+          slo={slo}
+          historicalSliData={historicalSliData}
+          badges={
+            <SloCardItemBadges
+              slo={slo}
+              rules={rules}
+              activeAlerts={activeAlerts}
+              handleCreateRule={handleCreateRule}
+              hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
+            />
+          }
+        />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -121,15 +132,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           />
         )}
       </EuiPanel>
-      <SloCardBadgesPortal containerRef={containerRef}>
-        <SloCardItemBadges
-          slo={slo}
-          rules={rules}
-          activeAlerts={activeAlerts}
-          handleCreateRule={handleCreateRule}
-          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
-        />
-      </SloCardBadgesPortal>
 
       <BurnRateRuleFlyout
         slo={slo}
@@ -169,9 +171,11 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
 
 export function SloCardChart({
   slo,
+  badges,
   onClick,
   historicalSliData,
 }: {
+  badges: React.ReactNode;
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
   onClick?: () => void;
@@ -224,6 +228,7 @@ export function SloCardChart({
               ),
               icon: () => <EuiIcon type="visGauge" size="l" />,
               color: cardColor,
+              body: badges,
             },
           ],
         ]}

@@ -73,6 +73,7 @@ export const PickTimeline = ({
         timelineTitle={timelineTitle}
         onTimelineChange={handleOnTimelineChange}
         placeholder={placeholder}
+        aria-label={field.label}
       />
     </EuiFormRow>
   );
