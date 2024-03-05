@@ -8,7 +8,12 @@
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CASE_ORACLE_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../common/constants';
+import {
+  CASE_ORACLE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+} from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { createCasesClientMock } from '../../client/mocks';
@@ -35,6 +40,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
 import { MAX_OPEN_CASES } from './constants';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -101,6 +107,7 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
     casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+    casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
     getCasesClient.mockReturnValue(casesClientMock);
 
@@ -109,6 +116,7 @@ describe('CasesConnectorExecutor', () => {
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
+      spaceId: 'default',
     });
 
     dateMathMock.parse.mockImplementation(() => moment('2023-10-09T10:23:42.769Z'));
@@ -192,7 +200,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[0].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
             {
@@ -200,7 +212,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[1].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
             {
@@ -208,7 +224,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
           ]);
@@ -230,13 +250,20 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:A',
+                  'dest.ip:0.0.0.1',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
               {
                 id: 'mock-id-2',
@@ -247,13 +274,20 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:B',
+                  'dest.ip:0.0.0.1',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
               {
                 id: 'mock-id-3',
@@ -264,13 +298,20 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:B',
+                  'dest.ip:0.0.0.3',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
             ],
           });
@@ -337,7 +378,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
           ]);
@@ -373,7 +418,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
           ]);
@@ -502,16 +551,219 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:B',
+                  'dest.ip:0.0.0.3',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
             ],
           });
+        });
+
+        it('does not add the rule URL to the description if the ruleUrl is null', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, ruleUrl: null },
+          });
+
+          const description =
+            casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
+
+          expect(description).toBe(
+            'This case is auto-created by Test rule. \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`'
+          );
+        });
+
+        it('converts grouping values in the description correctly', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            alerts: [
+              {
+                _id: 'test-id',
+                _index: 'test-index',
+                foo: ['bar', 1, true, {}],
+                bar: { foo: 'test' },
+                baz: 'my value',
+              },
+            ],
+            groupingBy: ['foo', 'bar', 'baz'],
+          });
+
+          const description =
+            casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
+
+          expect(description).toBe(
+            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar` equals `{"foo":"test"}` and `baz` equals `my value`'
+          );
+        });
+
+        it('adds the counter correctly if it is bigger than INITIAL_ORACLE_RECORD_COUNTER', async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({ ...params, groupingBy: [] });
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title).toBe('Test rule (2) (Auto-created)');
+        });
+
+        it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, tags: ['a'.repeat(MAX_LENGTH_PER_TAG * 2)] },
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'host.name:A',
+            'dest.ip:0.0.0.1',
+            'a'.repeat(MAX_LENGTH_PER_TAG),
+          ]);
+        });
+
+        it(`create cases with up to ${MAX_TAGS_PER_CASE} tags`, async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, tags: Array(MAX_TAGS_PER_CASE * 2).fill('foo') },
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+          const systemTags = [
+            'auto-generated',
+            'rule:rule-test-id',
+            'host.name:A',
+            'dest.ip:0.0.0.1',
+          ];
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'host.name:A',
+            'dest.ip:0.0.0.1',
+            ...Array(MAX_TAGS_PER_CASE - systemTags.length).fill('foo'),
+          ]);
+        });
+
+        it('converts grouping values in tags correctly', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            alerts: [
+              {
+                _id: 'test-id',
+                _index: 'test-index',
+                foo: ['bar', 1, true, {}],
+                bar: { foo: 'test' },
+                baz: 'my value',
+              },
+            ],
+            groupingBy: ['foo', 'bar', 'baz'],
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'foo:["bar",1,true,{}]',
+            'bar:{"foo":"test"}',
+            'baz:my value',
+            'rule',
+            'test',
+          ]);
         });
 
         it('does not reopen closed cases if reopenClosedCases=false', async () => {
@@ -544,7 +796,7 @@ describe('CasesConnectorExecutor', () => {
           });
         });
 
-        it('create new cases if reopenClosedCases=false and there are closed cases', async () => {
+        it('creates new cases if reopenClosedCases=false and there are closed cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
             errors: [],
@@ -572,15 +824,181 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:A',
+                  'dest.ip:0.0.0.1',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
                   name: 'none',
                   type: '.none',
                 },
+                customFields: [],
               },
             ],
+          });
+        });
+
+        describe('Custom Fields', () => {
+          const mockOwner = params.owner;
+          const mockConfiguration = [
+            {
+              owner: mockOwner,
+              customFields: [
+                {
+                  key: 'first_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 1',
+                  required: true,
+                  defaultValue: 'default value',
+                },
+                {
+                  key: 'second_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 1',
+                  required: true,
+                  defaultValue: true,
+                },
+                {
+                  key: 'third_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 2',
+                  required: true,
+                  // no defaultValue
+                },
+                {
+                  key: 'fourth_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 2',
+                  required: true,
+                  // no defaultValue
+                },
+              ],
+            },
+          ];
+          const expectedCustomFieldValues = [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT as const,
+              value: 'default value',
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE as const,
+              value: true,
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.TEXT as const,
+              value: 'N/A',
+            },
+            {
+              key: 'fourth_key',
+              type: CustomFieldTypes.TOGGLE as const,
+              value: false,
+            },
+          ];
+
+          it('creates non existing cases with required custom fields correctly', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+
+            casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[2]] });
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [cases[0], cases[1]],
+              errors: [
+                {
+                  error: 'Not found',
+                  message: 'Not found',
+                  status: 404,
+                  caseId: 'mock-id-3',
+                },
+              ],
+            });
+
+            await connectorExecutor.execute(params);
+
+            expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+              cases: [
+                {
+                  id: 'mock-id-3',
+                  title: 'Test rule (Auto-created)',
+                  description:
+                    'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
+                  owner: mockOwner,
+                  settings: {
+                    syncAlerts: false,
+                  },
+                  tags: [
+                    'auto-generated',
+                    'rule:rule-test-id',
+                    'host.name:B',
+                    'dest.ip:0.0.0.3',
+                    ...rule.tags,
+                  ],
+                  connector: {
+                    fields: null,
+                    id: 'none',
+                    name: 'none',
+                    type: '.none',
+                  },
+                  customFields: expectedCustomFieldValues,
+                },
+              ],
+            });
+          });
+
+          it('creates new cases with required custom fields if reopenClosedCases=false and there are closed cases', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              reopenClosedCases: false,
+            });
+
+            expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+              { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+            ]);
+
+            expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+              cases: [
+                {
+                  id: 'mock-id-4',
+                  title: 'Test rule (Auto-created)',
+                  description:
+                    'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
+                  owner: mockOwner,
+                  settings: {
+                    syncAlerts: false,
+                  },
+                  tags: [
+                    'auto-generated',
+                    'rule:rule-test-id',
+                    'host.name:A',
+                    'dest.ip:0.0.0.1',
+                    ...rule.tags,
+                  ],
+
+                  connector: {
+                    fields: null,
+                    id: 'none',
+                    name: 'none',
+                    type: '.none',
+                  },
+                  customFields: expectedCustomFieldValues,
+                },
+              ],
+            });
           });
         });
       });
@@ -688,6 +1106,10 @@ describe('CasesConnectorExecutor', () => {
           await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+          expect(mockLogger.warn).toHaveBeenCalledWith(
+            'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
+            { tags: ['cases-connector', 'rule:rule-test-id'], labels: {} }
+          );
         });
 
         it('does not attach alerts to cases when attaching the new alerts will surpass the limit', async () => {
@@ -704,6 +1126,10 @@ describe('CasesConnectorExecutor', () => {
           await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+          expect(mockLogger.warn).toHaveBeenCalledWith(
+            'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
+            { tags: ['cases-connector', 'rule:rule-test-id'], labels: {} }
+          );
         });
 
         it('attach alerts to cases when attaching the new alerts will be equal to the limit', async () => {
@@ -949,6 +1375,28 @@ describe('CasesConnectorExecutor', () => {
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
         });
+
+        it('throws an error if there is an error when fetching configurations', async () => {
+          casesClientMock.configure.get = jest
+            .fn()
+            .mockRejectedValue(new CaseError('get configuration error'));
+
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await expect(() =>
+            connectorExecutor.execute(params)
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"get configuration error"`);
+        });
       });
     });
   });
@@ -990,6 +1438,7 @@ describe('CasesConnectorExecutor', () => {
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,
+        spaceId: 'default',
       });
     });
 
@@ -1771,7 +2220,8 @@ describe('CasesConnectorExecutor', () => {
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "invalid"'
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "invalid"',
+        { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
       );
     });
 
@@ -1781,7 +2231,8 @@ describe('CasesConnectorExecutor', () => {
       await connectorExecutor.execute(params);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date'
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date',
+        { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
       );
     });
   });
@@ -1868,7 +2319,8 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`,
+          { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
     });
@@ -1949,8 +2401,275 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`,
+          { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
+      });
+    });
+  });
+
+  describe('Sequence of executions with missing oracle or cases', () => {
+    const missingDataParams = {
+      ...params,
+      alerts: [
+        {
+          _id: 'test-id',
+          _index: 'test-index',
+          foo: 'bar',
+        },
+      ],
+      groupingBy: ['foo'],
+    };
+
+    it('oracle counter increases but some cases are missing', async () => {
+      mockGetRecordId.mockReturnValue(oracleRecords[0].id);
+      mockBulkGetRecords
+        .mockResolvedValueOnce([oracleRecords[0]])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 2 }])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 3 }]);
+
+      mockGetCaseId
+        .mockReturnValueOnce('mock-id-1')
+        .mockReturnValueOnce('mock-id-2')
+        .mockReturnValueOnce('mock-id-3');
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [cases[0]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: cases[1].id,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          cases: [cases[2]],
+          errors: [],
+        });
+
+      casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[1]] });
+
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+        caseId: 'mock-id-3',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+    });
+
+    it('oracle record is missing but some cases exists', async () => {
+      mockGetRecordId.mockReturnValue(oracleRecords[0].id);
+      mockBulkGetRecords
+        .mockResolvedValueOnce([
+          {
+            id: oracleRecords[0].id,
+            type: CASE_ORACLE_SAVED_OBJECT,
+            message: 'Not found',
+            statusCode: 404,
+            error: 'Not found',
+          },
+        ])
+        .mockResolvedValueOnce([oracleRecords[0]])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 2 }]);
+
+      mockBulkCreateRecords.mockResolvedValue([oracleRecords[0]]);
+
+      mockGetCaseId
+        .mockReturnValueOnce('mock-id-1')
+        .mockReturnValueOnce('mock-id-2')
+        .mockReturnValueOnce('mock-id-3');
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: cases[0].id,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          cases: [cases[1]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: cases[2].id,
+            },
+          ],
+        });
+
+      casesClientMock.cases.bulkCreate
+        .mockResolvedValueOnce({ cases: [cases[0]] })
+        .mockResolvedValueOnce({ cases: [cases[2]] });
+
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+        caseId: 'mock-id-3',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+    });
+
+    it('increase oracle counter but is missing', async () => {
+      const nonFoundRecord = {
+        id: oracleRecords[0].id,
+        type: CASE_ORACLE_SAVED_OBJECT,
+        message: 'Not found',
+        statusCode: 404,
+        error: 'Not found',
+      };
+
+      dateMathMock.parse
+        // time window has passed. should increase the counter
+        .mockImplementationOnce(() => moment('2023-11-10T10:23:42.769Z'))
+        // time window has not passed. counter should not be increased
+        .mockImplementationOnce(() => moment('2023-10-09T10:23:42.769Z'));
+
+      mockGetRecordId.mockReturnValue(oracleRecords[0].id);
+      mockBulkGetRecords
+        .mockResolvedValueOnce([oracleRecords[0]])
+        .mockResolvedValueOnce([nonFoundRecord]);
+
+      mockBulkCreateRecords.mockResolvedValueOnce(oracleRecords[0]);
+      mockBulkUpdateRecord.mockResolvedValueOnce(nonFoundRecord);
+
+      mockGetCaseId.mockReturnValueOnce('mock-id-1');
+
+      casesClientMock.cases.bulkGet.mockResolvedValue({
+        cases: [cases[0]],
+        errors: [],
+      });
+
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+
+      expect(mockBulkUpdateRecord).toBeCalledTimes(1);
+      expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+        { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+      ]);
+
+      expect(mockBulkCreateRecords).toBeCalledTimes(1);
+      expect(mockBulkCreateRecords).toHaveBeenCalledWith([
+        {
+          payload: {
+            cases: [],
+            grouping: {
+              foo: 'bar',
+            },
+            rules: [
+              {
+                id: 'rule-test-id',
+              },
+            ],
+          },
+          recordId: 'so-oracle-record-0',
+        },
+      ]);
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledWith({
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
       });
     });
   });

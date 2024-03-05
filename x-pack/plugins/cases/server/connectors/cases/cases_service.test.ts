@@ -144,5 +144,22 @@ describe('CasesService', () => {
         expect(service.getCaseId({ ...params, grouping, counter })).toEqual(hex);
       }
     );
+
+    it('constructs a record ID with special characters correctly', async () => {
+      const ruleId = `{}=:&".'/{}}`;
+      const spaceId = 'default';
+      const owner = 'cases';
+      const grouping = { '{:}': `{}=:&".'/{}}` };
+      const counter = 1;
+
+      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}:${counter}`;
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getCaseId({ ruleId, spaceId, owner, grouping, counter })).toEqual(hex);
+    });
   });
 });

@@ -18,6 +18,7 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { APP_ID } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
@@ -158,7 +159,15 @@ export class CasePlugin
       return this.getCasesClientWithRequest(coreStart)(request);
     };
 
-    registerConnectorTypes({ actions: plugins.actions, getCasesClient });
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+
+    registerConnectorTypes({ actions: plugins.actions, getCasesClient, getSpaceId });
 
     return {
       attachmentFramework: {

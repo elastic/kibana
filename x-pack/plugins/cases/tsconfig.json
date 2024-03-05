@@ -71,6 +71,7 @@
     "@kbn/content-management-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/datemath",
+    "@kbn/core-logging-server-mocks",
     "@kbn/core-logging-browser-mocks",
     "@kbn/index-management-plugin",
     "@kbn/rison",

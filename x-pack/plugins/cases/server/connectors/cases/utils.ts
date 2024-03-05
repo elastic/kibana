@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
+import { isPlainObject, partition, toString } from 'lodash';
+import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
 export const isRecordError = (so: OracleRecord | OracleRecordError): so is OracleRecordError =>
@@ -31,4 +34,47 @@ export const partitionByNonFoundErrors = <T extends Array<{ statusCode: number }
   ];
 
   return [nonFoundErrors, restOfErrors];
+};
+
+export const convertValueToString = (value: unknown): string => {
+  if (value == null) {
+    return '';
+  }
+
+  if (Array.isArray(value) || isPlainObject(value)) {
+    try {
+      return JSON.stringify(value);
+    } catch (error) {
+      return '';
+    }
+  }
+
+  return toString(value);
+};
+
+export const buildRequiredCustomFieldsForRequest = (
+  customFieldsConfiguration?: CustomFieldsConfiguration
+): CaseRequestCustomFields => {
+  // only populate with the default value required custom fields missing from the request
+  return customFieldsConfiguration
+    ? customFieldsConfiguration
+        .filter((customFieldConfig) => customFieldConfig.required)
+        .map((customFieldConfig) => {
+          let value = null;
+
+          if (customFieldConfig.type in VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS) {
+            value =
+              customFieldConfig.defaultValue === undefined ||
+              customFieldConfig?.defaultValue === null
+                ? VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[customFieldConfig.type]
+                : customFieldConfig?.defaultValue;
+          }
+
+          return {
+            key: customFieldConfig.key,
+            type: customFieldConfig.type,
+            value,
+          } as CaseRequestCustomField;
+        })
+    : [];
 };
