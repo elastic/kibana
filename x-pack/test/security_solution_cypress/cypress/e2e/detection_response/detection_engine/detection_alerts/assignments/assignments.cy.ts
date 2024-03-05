@@ -43,6 +43,7 @@ import {
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 
 // FLAKY: https://github.com/elastic/kibana/issues/173429
+// FLAKY: https://github.com/elastic/kibana/issues/177334
 describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
