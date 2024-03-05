@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState, useRef } from 'react';
-import { getLocalStorageKey } from '../components/all_cases/utils';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useApplication } from './lib/kibana/use_application';
 
 export const useCasesLocalStorage = <T,>(
@@ -15,7 +15,11 @@ export const useCasesLocalStorage = <T,>(
 ): [T, (newItem: T) => void] => {
   const isStorageInitialized = useRef(false);
   const { appId } = useApplication();
-  const lsKey = getLocalStorageKey(key, appId);
+  const { owner } = useCasesContext();
+
+  const lsKeyPrefix = owner.length > 0 ? owner.join('.') : appId;
+  const lsKey = getLocalStorageKey(key, lsKeyPrefix);
+
   const [value, setValue] = useState<T>(() => getStorageItem(lsKey, initialValue));
 
   const setItem = useCallback(
@@ -26,11 +30,11 @@ export const useCasesLocalStorage = <T,>(
     [lsKey]
   );
 
-  if (!appId) {
+  if (!lsKeyPrefix) {
     return [initialValue, setItem];
   }
 
-  if (appId != null && !isStorageInitialized.current) {
+  if (lsKeyPrefix != null && !isStorageInitialized.current) {
     isStorageInitialized.current = true;
     setItem(getStorageItem(lsKey, initialValue));
   }
@@ -59,4 +63,8 @@ const saveItemToStorage = <T,>(key: string, item: T) => {
   } catch (error) {
     // silent errors
   }
+};
+
+const getLocalStorageKey = (localStorageKey: string, prefix?: string) => {
+  return [prefix, localStorageKey].filter(Boolean).join('.');
 };

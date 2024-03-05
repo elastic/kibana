@@ -76,7 +76,7 @@ export const AddComment = React.memo(
       const { permissions, owner } = useCasesContext();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
       const draftStorageKey = getMarkdownEditorStorageKey({
-        appId: owner[0] ?? 'cases',
+        appId: owner[0],
         caseId,
         commentId: id,
       });

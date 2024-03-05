@@ -56,12 +56,12 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
   }) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
-    const { permissions, owner } = useCasesContext();
+    const { permissions } = useCasesContext();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isMessageDismissed, setIsMessageDismissed] = useState(false);
-    const localStorageKey = `cases.${owner[0] ?? ''}.utilityBar.hideMaxLimitWarning`;
-    const [localStorageWarning, setLocalStorageWarning] = useCasesLocalStorage<boolean>(
+    const localStorageKey = `cases.utilityBar.hideMaxLimitWarning`;
+    const [doNotShowAgain, setDoNotShowAgain] = useCasesLocalStorage<boolean>(
       localStorageKey,
       false
     );
@@ -86,7 +86,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     });
 
     const handleNotShowAgain = () => {
-      setLocalStorageWarning(true);
+      setDoNotShowAgain(true);
     };
 
     /**
@@ -103,8 +103,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
       pagination.pageSize &&
       totalCases >= MAX_DOCS_PER_PAGE &&
       pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
-
-    const isDoNotShowAgainSelected = localStorageWarning && localStorageWarning === true;
 
     const renderMaxLimitWarning = (): React.ReactNode => (
       <EuiFlexGroup gutterSize="m">
@@ -248,7 +246,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected && (
+        {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup>
