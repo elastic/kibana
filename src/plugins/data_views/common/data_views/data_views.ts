@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { UI_SETTINGS } from '@kbn/data-service';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
