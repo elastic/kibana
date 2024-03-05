@@ -15,6 +15,8 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
+  SolutionNavigationDefinitions,
+  ChromeStyle,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -37,7 +39,7 @@ import {
   ChromeNavLink,
   CloudURLs,
   NavigationTreeDefinitionUI,
-} from '@kbn/core-chrome-browser/src';
+} from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
@@ -50,6 +52,7 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
+  setChromeStyle: (style: ChromeStyle) => void;
 }
 
 export class ProjectNavigationService {
@@ -75,36 +78,30 @@ export class ProjectNavigationService {
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
+  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
   private application?: InternalApplicationStart;
   private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
+  private setChromeStyle: StartDeps['setChromeStyle'] = () => {};
 
-  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
+  public start({
+    application,
+    navLinksService,
+    http,
+    chromeBreadcrumbs$,
+    logger,
+    setChromeStyle,
+  }: StartDeps) {
     this.application = application;
     this.http = http;
     this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
+    this.setChromeStyle = setChromeStyle;
 
-    this.activeNodes$
-      .pipe(
-        takeUntil(this.stop$),
-        // skip while the project navigation is not set
-        skipWhile(() => !this.navigationTree$.getValue()),
-        // only reset when the active breadcrumb path changes, use ids to get more stable reference
-        distinctUntilChanged((prevNodes, nextNodes) =>
-          deepEqual(
-            prevNodes?.[0]?.map((node) => node.id),
-            nextNodes?.[0]?.map((node) => node.id)
-          )
-        ),
-        // skip the initial state, we only want to reset the breadcrumbs when the active nodes change
-        skip(1)
-      )
-      .subscribe(() => {
-        // reset the breadcrumbs when the active nodes change
-        this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
-      });
+    this.handleActiveNodesChange();
+    this.handleSolutionNavDefinitionsChange();
 
     return {
       setProjectHome: (homeHref: string) => {
@@ -138,9 +135,7 @@ export class ProjectNavigationService {
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));
       },
-      setSideNavComponent: (component: SideNavComponent | null) => {
-        this.customProjectSideNavComponent$.next({ current: component });
-      },
+      setSideNavComponent: this.setSideNavComponent.bind(this),
       getProjectSideNavComponent$: () => {
         return this.customProjectSideNavComponent$.asObservable();
       },
@@ -183,6 +178,14 @@ export class ProjectNavigationService {
           )
         );
       },
+      /** In stateful Kibana, get the registered solution navigations */
+      getSolutionsNavDefinitions$: this.getSolutionsNavDefinitions$.bind(this),
+      /** In stateful Kibana, update the registered solution navigations */
+      updateSolutionNavigations: this.updateSolutionNavigations.bind(this),
+      /** In stateful Kibana, change the active solution navigation */
+      changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
+      /** In stateful Kibana, get the active solution navigation definition */
+      getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
     };
   }
 
@@ -265,6 +268,106 @@ export class ProjectNavigationService {
 
   private onHistoryLocationChange(location: Location) {
     this.setActiveProjectNavigationNodes(location);
+  }
+
+  private handleActiveNodesChange() {
+    this.activeNodes$
+      .pipe(
+        takeUntil(this.stop$),
+        // skip while the project navigation is not set
+        skipWhile(() => !this.navigationTree$.getValue()),
+        // only reset when the active breadcrumb path changes, use ids to get more stable reference
+        distinctUntilChanged((prevNodes, nextNodes) =>
+          deepEqual(
+            prevNodes?.[0]?.map((node) => node.id),
+            nextNodes?.[0]?.map((node) => node.id)
+          )
+        ),
+        // skip the initial state, we only want to reset the breadcrumbs when the active nodes change
+        skip(1)
+      )
+      .subscribe(() => {
+        // reset the breadcrumbs when the active nodes change
+        this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
+      });
+  }
+
+  private handleSolutionNavDefinitionsChange() {
+    combineLatest([this.solutionNavDefinitions$, this.activeSolutionNavDefinitionId$])
+      .pipe(takeUntil(this.stop$))
+      .subscribe(this.onSolutionNavDefinitionsChange.bind(this));
+  }
+
+  private setSideNavComponent(component: SideNavComponent | null) {
+    this.customProjectSideNavComponent$.next({ current: component });
+  }
+
+  private changeActiveSolutionNavigation(id: string | null, { onlyIfNotSet = false } = {}) {
+    if (onlyIfNotSet && this.activeSolutionNavDefinitionId$.getValue() !== null) {
+      return;
+    }
+    this.activeSolutionNavDefinitionId$.next(id);
+  }
+
+  private getSolutionsNavDefinitions$() {
+    return this.solutionNavDefinitions$.asObservable();
+  }
+
+  private getActiveSolutionNavDefinition$() {
+    return combineLatest([this.solutionNavDefinitions$, this.activeSolutionNavDefinitionId$]).pipe(
+      takeUntil(this.stop$),
+      map(([definitions, id]) => {
+        if (id === null) return null;
+        if (Object.keys(definitions).length === 0) return null;
+        if (!definitions[id]) {
+          throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
+        }
+        // We strip out the sideNavComponentGetter from the definition as it should only be used internally
+        const { sideNavComponentGetter, ...definition } = definitions[id];
+        return definition;
+      })
+    );
+  }
+
+  private updateSolutionNavigations(
+    solutionNavs: SolutionNavigationDefinitions,
+    replace: boolean = false
+  ) {
+    if (replace) {
+      this.solutionNavDefinitions$.next(solutionNavs);
+    } else {
+      this.solutionNavDefinitions$.next({
+        ...this.solutionNavDefinitions$.getValue(),
+        ...solutionNavs,
+      });
+    }
+  }
+
+  private onSolutionNavDefinitionsChange([definitions, id]: [
+    SolutionNavigationDefinitions,
+    string | null
+  ]) {
+    // We don't want to change to "classic" if `id` is `null` when we haven't received
+    // any definitions yet. Serverless Kibana could be impacted by this.
+    // When we do have definitions, then passing `null` does mean we should change to "classic".
+    if (Object.keys(definitions).length === 0) return;
+
+    if (id === null) {
+      this.setChromeStyle('classic');
+      this.navigationTree$.next(undefined);
+    } else {
+      const definition = definitions[id];
+      if (!definition) {
+        throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
+      }
+
+      this.setChromeStyle('project');
+      const { sideNavComponentGetter } = definition;
+
+      if (sideNavComponentGetter) {
+        this.setSideNavComponent(sideNavComponentGetter());
+      }
+    }
   }
 
   public stop() {
