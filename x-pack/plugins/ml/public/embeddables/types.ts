@@ -20,9 +20,7 @@ import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import type { MlJobService } from '../application/services/job_service';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
