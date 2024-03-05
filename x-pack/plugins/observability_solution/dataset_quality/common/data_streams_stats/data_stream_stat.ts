@@ -20,7 +20,10 @@ export class DataStreamStat {
   sizeBytes?: DataStreamStatType['sizeBytes'];
   lastActivity?: DataStreamStatType['lastActivity'];
   integration?: Integration;
-  degradedDocs?: number;
+  degradedDocs: {
+    percentage: number;
+    count: number;
+  };
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -32,7 +35,10 @@ export class DataStreamStat {
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
     this.integration = dataStreamStat.integration;
-    this.degradedDocs = dataStreamStat.degradedDocs;
+    this.degradedDocs = {
+      percentage: dataStreamStat.degradedDocs.percentage,
+      count: dataStreamStat.degradedDocs.count,
+    };
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -50,6 +56,10 @@ export class DataStreamStat {
       integration: dataStreamStat.integration
         ? Integration.create(dataStreamStat.integration)
         : undefined,
+      degradedDocs: {
+        percentage: 0,
+        count: 0,
+      },
     };
 
     return new DataStreamStat(dataStreamStatProps);

@@ -18,6 +18,10 @@ export const DegradedDocsPercentageLink = ({
   isLoading: boolean;
   dataStreamStat: DataStreamStat;
 }) => {
+  const {
+    degradedDocs: { percentage, count },
+  } = dataStreamStat;
+
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat,
     query: { language: 'kuery', query: '_ignored:*' },
@@ -26,15 +30,15 @@ export const DegradedDocsPercentageLink = ({
   return (
     <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        {dataStreamStat.degradedDocs ? (
+        {percentage ? (
           <EuiLink
             data-test-subj="datasetQualityDegradedDocsPercentageLink"
             {...logsExplorerLinkProps}
           >
-            <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
+            <QualityPercentageIndicator percentage={percentage} degradedDocsCount={count} />
           </EuiLink>
         ) : (
-          <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
+          <QualityPercentageIndicator percentage={percentage} />
         )}
       </EuiFlexGroup>
     </EuiSkeletonRectangle>

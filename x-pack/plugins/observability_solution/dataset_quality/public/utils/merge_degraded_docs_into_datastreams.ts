@@ -12,15 +12,25 @@ export function mergeDegradedStatsIntoDataStreams(
   dataStreamStats: DataStreamStat[],
   degradedDocStats: DegradedDocsStat[]
 ) {
-  const degradedMap: Record<DegradedDocsStat['dataset'], DegradedDocsStat['percentage']> =
-    degradedDocStats.reduce(
-      (degradedMapAcc, { dataset, percentage }) =>
-        Object.assign(degradedMapAcc, { [dataset]: percentage }),
-      {}
-    );
+  const defaultDegradedDocs = {
+    percentage: 0,
+    count: 0,
+  };
+
+  const degradedMap: Record<
+    DegradedDocsStat['dataset'],
+    {
+      percentage: DegradedDocsStat['percentage'];
+      count: DegradedDocsStat['count'];
+    }
+  > = degradedDocStats.reduce(
+    (degradedMapAcc, { dataset, percentage, count }) =>
+      Object.assign(degradedMapAcc, { [dataset]: { percentage, count } }),
+    {}
+  );
 
   return dataStreamStats?.map((dataStream) => ({
     ...dataStream,
-    degradedDocs: degradedMap[dataStream.rawName],
+    degradedDocs: degradedMap[dataStream.rawName] || defaultDegradedDocs,
   }));
 }
