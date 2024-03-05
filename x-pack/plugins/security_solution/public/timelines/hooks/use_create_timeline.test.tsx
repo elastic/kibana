@@ -34,7 +34,7 @@ jest.mock('../../common/containers/use_global_time', () => {
 jest.mock('../../common/lib/kibana');
 
 describe('useCreateTimeline', () => {
-  const resetDiscoverAppState = jest.fn();
+  const resetDiscoverAppState = jest.fn().mockResolvedValue({});
   (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({ resetDiscoverAppState });
 
   it('should return a function', () => {
@@ -48,7 +48,7 @@ describe('useCreateTimeline', () => {
     expect(hookResult.result.current).toEqual(expect.any(Function));
   });
 
-  it('should dispatch correct actions when calling the returned function', () => {
+  it('should dispatch correct actions when calling the returned function', async () => {
     const createTimeline = jest.spyOn(timelineActions, 'createTimeline');
     const setSelectedDataView = jest.spyOn(sourcererActions, 'setSelectedDataView');
     const addLinkTo = jest.spyOn(inputsActions, 'addLinkTo');
@@ -63,7 +63,7 @@ describe('useCreateTimeline', () => {
 
     expect(hookResult.result.current).toEqual(expect.any(Function));
 
-    hookResult.result.current();
+    await hookResult.result.current();
     expect(createTimeline.mock.calls[0][0].id).toEqual(TimelineId.test);
     expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineType.default);
     expect(createTimeline.mock.calls[0][0].columns).toEqual(defaultHeaders);
@@ -90,7 +90,7 @@ describe('useCreateTimeline', () => {
     expect(addNotes).toHaveBeenCalledWith({ notes: [] });
   });
 
-  it('should run the onClick method if provided', () => {
+  it('should run the onClick method if provided', async () => {
     const onClick = jest.fn();
     const hookResult = renderHook(
       () =>
@@ -104,13 +104,13 @@ describe('useCreateTimeline', () => {
       }
     );
 
-    hookResult.result.current();
+    await hookResult.result.current();
 
     expect(onClick).toHaveBeenCalled();
     expect(resetDiscoverAppState).toHaveBeenCalled();
   });
 
-  it('should dispatch removeLinkTo action if absolute timeRange is passed to callback', () => {
+  it('should dispatch removeLinkTo action if absolute timeRange is passed to callback', async () => {
     const removeLinkTo = jest.spyOn(inputsActions, 'removeLinkTo');
     const setAbsoluteRangeDatePicker = jest.spyOn(inputsActions, 'setAbsoluteRangeDatePicker');
 
@@ -122,7 +122,7 @@ describe('useCreateTimeline', () => {
     );
 
     const timeRange: TimeRange = { kind: 'absolute', from: '', to: '' };
-    hookResult.result.current({ timeRange });
+    await hookResult.result.current({ timeRange });
 
     expect(removeLinkTo).toHaveBeenCalledWith([InputsModelId.timeline, InputsModelId.global]);
     expect(setAbsoluteRangeDatePicker).toHaveBeenCalledWith({
@@ -131,7 +131,7 @@ describe('useCreateTimeline', () => {
     });
   });
 
-  it('should dispatch removeLinkTo action if relative timeRange is passed to callback', () => {
+  it('should dispatch removeLinkTo action if relative timeRange is passed to callback', async () => {
     const setRelativeRangeDatePicker = jest.spyOn(inputsActions, 'setRelativeRangeDatePicker');
 
     const hookResult = renderHook(
@@ -142,7 +142,7 @@ describe('useCreateTimeline', () => {
     );
 
     const timeRange: TimeRange = { kind: 'relative', fromStr: '', toStr: '', from: '', to: '' };
-    hookResult.result.current({ timeRange });
+    await hookResult.result.current({ timeRange });
 
     expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
       ...timeRange,

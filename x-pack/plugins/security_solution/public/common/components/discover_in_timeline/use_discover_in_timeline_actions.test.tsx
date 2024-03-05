@@ -208,7 +208,7 @@ describe('useDiscoverInTimelineActions', () => {
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const appState = mockDiscoverStateContainerRef.current.appState.getState();
-        expect(appState).toMatchObject(result.current.getDefaultDiscoverAppState());
+        expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
       });
     });
     it('should reset Discover time to a default state', async () => {

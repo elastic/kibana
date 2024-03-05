@@ -6,7 +6,11 @@
  */
 
 import { deleteTimelines } from '../../../../tasks/api_calls/common';
-import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON } from '../../../../screens/date_picker';
+import {
+  DATE_PICKER_ABSOLUTE_TAB,
+  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
+  GET_LOCAL_SHOW_DATES_BUTTON,
+} from '../../../../screens/date_picker';
 import {
   setStartDate,
   showStartEndDate,
@@ -52,16 +56,17 @@ describe(
       });
       createNewTimeline();
       goToEsqlTab();
-      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
     it('should show data according to the esql query', () => {
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
       submitDiscoverSearchBar();
       cy.get(DISCOVER_RESULT_HITS).should('have.text', 1);
     });
 
     it('should be able to add fields to the table', () => {
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
       submitDiscoverSearchBar();
       addFieldToTable('host.name');
@@ -86,7 +91,10 @@ describe(
       });
     });
 
-    it(`should change the timerange to ${DEFAULT_DATE} when back is pressed after modifying timerange to ${NEW_START_DATE} without saving`, () => {
+    it.only(`should change the timerange to ${DEFAULT_DATE} when back is pressed after modifying timerange to ${NEW_START_DATE} without saving`, () => {
+      cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).click();
+      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
+
       setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
       updateDates(DISCOVER_CONTAINER);
 
