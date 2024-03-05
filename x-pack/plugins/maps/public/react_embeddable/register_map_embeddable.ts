@@ -10,7 +10,9 @@ import {
   ReactEmbeddableFactory,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { inject } from '../../common/embeddable';
 import type { MapEmbeddableInput } from '../embeddable/types';
 import type { MapApi } from './types';
 
@@ -20,7 +22,7 @@ export const registerMapEmbeddable = () => {
     MapApi
   > = {
     deserializeState: (state) => {
-      return state.rawState as MapEmbeddableInput;
+      return inject!(state.rawState as EmbeddableStateWithType, state.references ?? []) as unknown as MapEmbeddableInput;
     },
     getComponent: async (state, maybeId) => {
       const { getMapEmbeddable } = await import('./get_map_embeddable');
