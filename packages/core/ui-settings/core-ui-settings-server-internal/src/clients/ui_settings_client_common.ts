@@ -140,7 +140,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         version: this.id,
         buildNum: this.buildNum,
         log: this.log,
-        handleWriteErrors: false,
+        handleWriteErrors: true,
         type: this.type,
       });
 
