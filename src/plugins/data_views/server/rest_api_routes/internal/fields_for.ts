@@ -55,7 +55,7 @@ export interface IQuery {
   include_unmapped?: boolean;
   fields?: string[];
   allow_hidden?: boolean;
-  field_types?: string[];
+  field_types?: string | string[];
   include_empty_fields?: boolean;
 }
 
@@ -70,7 +70,11 @@ export const querySchema = schema.object({
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   allow_hidden: schema.maybe(schema.boolean()),
-  field_types: schema.maybe(schema.arrayOf(schema.string())),
+  field_types: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+      defaultValue: [],
+    })
+  ),
   include_empty_fields: schema.maybe(schema.boolean()),
 });
 
@@ -148,9 +152,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
+    let parsedFieldTypes: string[] = [];
     try {
       parsedMetaFields = parseFields(metaFields);
       parsedFields = parseFields(request.query.fields ?? []);
+      parsedFieldTypes = parseFields(fieldTypes || []);
     } catch (error) {
       return response.badRequest();
     }
@@ -165,7 +171,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        fieldTypes,
+        fieldTypes: parsedFieldTypes,
         indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
         allowHidden,
         includeEmptyFields,

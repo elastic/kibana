@@ -47,9 +47,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
+    let parsedFieldTypes: string[] = [];
     try {
       parsedMetaFields = parseFields(metaFields);
       parsedFields = parseFields(request.query.fields ?? []);
+      parsedFieldTypes = parseFields(fieldTypes || []);
     } catch (error) {
       return response.badRequest();
     }
@@ -64,7 +66,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        fieldTypes,
+        fieldTypes: parsedFieldTypes,
         indexFilter: getIndexFilterDsl({ excludedTiers }),
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
