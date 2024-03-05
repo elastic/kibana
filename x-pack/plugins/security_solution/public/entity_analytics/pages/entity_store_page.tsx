@@ -6,9 +6,21 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiButtonIcon,
+  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect } from 'react';
 import { RiskQueries } from '../../../common/search_strategy';
@@ -20,6 +32,44 @@ import { BasicTable } from '../../common/components/ml/tables/basic_table';
 import { useSearchStrategy } from '../../common/containers/use_search_strategy';
 import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
 
+const useViewEntityFlyout = () => {
+  const [isViewEntityPanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
+  const [viewEntityPanelData, setViewEntityPanelData] = React.useState<any | null>(null);
+
+  const closeViewEntityPanel = useCallback(() => {
+    setIsViewEntityPanelVisible(false);
+  }, []);
+
+  const openViewEntityPanel = useCallback((data: any) => {
+    setViewEntityPanelData(data);
+    setIsViewEntityPanelVisible(true);
+  }, []);
+
+  return {
+    closeViewEntityPanel,
+    isViewEntityPanelVisible,
+    openViewEntityPanel,
+    viewEntityPanelData,
+  };
+};
+
+const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void }) => {
+  return (
+    <EuiFlyout ownFocus onClose={onClose} size="m">
+      <EuiFlyoutHeader>
+        <EuiTitle size="m">
+          <EuiText>{'View Entity'}</EuiText>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiCodeBlock isCopyable language="json" fontSize="m">
+          {JSON.stringify(data, null, 2)}
+        </EuiCodeBlock>
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
+
 export const EntityStorePage = () => {
   const { result: donutChartResponse, search: searchDonutChart } =
     useSearchStrategy<RiskQueries.entityStore>({
@@ -27,6 +77,13 @@ export const EntityStorePage = () => {
       initialResult: {},
       errorMessage: 'donut chart error',
     });
+
+  const {
+    isViewEntityPanelVisible,
+    openViewEntityPanel,
+    closeViewEntityPanel,
+    viewEntityPanelData,
+  } = useViewEntityFlyout();
 
   useEffect(() => {
     searchDonutChart({
@@ -157,6 +214,23 @@ export const EntityStorePage = () => {
       field: 'last_seen',
       sortable: true,
     },
+    {
+      actions: [
+        {
+          render: (data) => {
+            return (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiButtonIcon
+                  iconType="inspect"
+                  aria-label="Inspect"
+                  onClick={() => openViewEntityPanel(data)}
+                />
+              </EuiFlexGroup>
+            );
+          },
+        },
+      ],
+    },
   ];
 
   return (
@@ -167,6 +241,9 @@ export const EntityStorePage = () => {
             data-test-subj="entityAnalyticsManagementPageTitle"
             title={'Entity Store - Hosts'}
           />
+          {isViewEntityPanelVisible && (
+            <ViewEntityFlyout data={viewEntityPanelData} onClose={closeViewEntityPanel} />
+          )}
           <EuiFlexGroup direction="row" gutterSize="m">
             <EuiFlexItem grow={1}>
               <EuiPanel hasBorder>
