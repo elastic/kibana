@@ -12,4 +12,7 @@ export type {
   CoreInternalSecurityContract,
   InternalAuthenticationServiceContract,
 } from './src/api_provider';
-export type { SecurityRequestHandlerContext } from './src/request_handler_context';
+export type {
+  SecurityRequestHandlerContext,
+  AuthcRequestHandlerContext,
+} from './src/request_handler_context';

@@ -24,6 +24,10 @@ import {
   CoreUiSettingsRouteHandlerContext,
   type InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreSecurityRouteHandlerContext,
+  type InternalSecurityServiceStart,
+} from '@kbn/core-security-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -34,6 +38,7 @@ export interface CoreRouteHandlerContextParams {
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   deprecations: InternalDeprecationsServiceStart;
+  security: InternalSecurityServiceStart;
 }
 
 /**
@@ -46,6 +51,7 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
   readonly deprecations: CoreDeprecationsRouteHandlerContext;
+  readonly security: CoreSecurityRouteHandlerContext;
 
   constructor(coreStart: CoreRouteHandlerContextParams, request: KibanaRequest) {
     this.elasticsearch = new CoreElasticsearchRouteHandlerContext(coreStart.elasticsearch, request);
@@ -59,5 +65,6 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       this.elasticsearch,
       this.savedObjects
     );
+    this.security = new CoreSecurityRouteHandlerContext(coreStart.security, request);
   }
 }
