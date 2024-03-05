@@ -11,7 +11,7 @@ import type {
   PublishesLocalUnifiedSearch,
   PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType, apiPublishesLocalUnifiedSearch, apiPublishesPanelTitle } from '@kbn/presentation-publishing';
 import { LensSavedObjectAttributes } from '../embeddable';
 
 export type HasLensConfig = HasType<'lens'> & {
@@ -23,8 +23,9 @@ export type LensApi = HasLensConfig &
   PublishesLocalUnifiedSearch &
   Partial<HasParentApi<unknown>>;
 
-export const apiHasLensConfig = (api: unknown): api is LensApi => {
+export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(
-    api && apiIsOfType(api, 'lens') && typeof (api as HasLensConfig).getSavedVis === 'function'
+    api && apiIsOfType(api, 'lens') && typeof (api as HasLensConfig).getSavedVis === 'function' &&
+    apiPublishesPanelTitle(api) && apiPublishesLocalUnifiedSearch(api)
   );
 };

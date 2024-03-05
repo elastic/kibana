@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { type EmbeddableApiContext, apiHasType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { apiHasLensConfig } from '@kbn/lens-plugin/public';
+import { isLensApi } from '@kbn/lens-plugin/public';
 import { apiHasMapConfig } from '@kbn/maps-plugin/public';
 import type { ActionApi } from './types';
 import { MlCoreSetup } from '../plugin';
@@ -36,7 +36,7 @@ export function createVisToADJobAction(
       }
 
       try {
-        if (apiHasLensConfig(embeddable)) {
+        if (isLensApi(embeddable)) {
           const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens, dashboard }]] =
             await Promise.all([import('../embeddables/job_creation/lens'), getStartServices()]);
           if (lens === undefined) {
@@ -74,7 +74,7 @@ export function createVisToADJobAction(
       }
 
       try {
-        if (apiHasLensConfig(embeddable) && lens) {
+        if (isLensApi(embeddable) && lens) {
           const vis = embeddable.getSavedVis();
           if (!vis) {
             return false;
