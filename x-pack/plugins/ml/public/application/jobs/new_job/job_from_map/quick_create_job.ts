@@ -105,7 +105,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
       jobId,
       datafeedConfig,
       jobConfig,
-      createdByLabel: CREATED_BY_LABEL.GEO,
+      createdByLabel: CREATED_BY_LABEL.GEO_FROM_LENS,
       dashboard,
       start,
       end,

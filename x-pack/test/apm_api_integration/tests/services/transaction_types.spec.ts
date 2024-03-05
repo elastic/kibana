@@ -53,44 +53,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177521
-  registry.when.skip(
-    'Transaction types when data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      before(async () => {
-        const interval = timerange(new Date(start).getTime(), new Date(end).getTime() - 1).interval(
-          '1m'
-        );
+  registry.when('Transaction types when data is loaded', { config: 'basic', archives: [] }, () => {
+    before(async () => {
+      const interval = timerange(new Date(start).getTime(), new Date(end).getTime() - 1).interval(
+        '1m'
+      );
 
-        const instance = apm.service(serviceName, 'production', 'node').instance('instance');
+      const instance = apm.service(serviceName, 'production', 'node').instance('instance');
 
-        await synthtrace.index([
-          interval.rate(3).generator((timestamp) => {
-            return instance
-              .transaction({ transactionName: 'GET /api', transactionType: 'request' })
-              .duration(1000)
-              .outcome('success')
-              .timestamp(timestamp);
-          }),
-          interval.rate(1).generator((timestamp) => {
-            return instance
-              .transaction({ transactionName: 'rm -rf *', transactionType: 'worker' })
-              .duration(100)
-              .outcome('failure')
-              .timestamp(timestamp);
-          }),
-        ]);
-      });
+      await synthtrace.index([
+        interval.rate(3).generator((timestamp) => {
+          return instance
+            .transaction({ transactionName: 'GET /api', transactionType: 'request' })
+            .duration(1000)
+            .outcome('success')
+            .timestamp(timestamp);
+        }),
+        interval.rate(1).generator((timestamp) => {
+          return instance
+            .transaction({ transactionName: 'rm -rf *', transactionType: 'worker' })
+            .duration(100)
+            .outcome('failure')
+            .timestamp(timestamp);
+        }),
+      ]);
+    });
 
-      after(() => synthtrace.clean());
-      it('displays available tx types', async () => {
-        const response = await getTransactionTypes();
+    after(() => synthtrace.clean());
+    it('displays available tx types', async () => {
+      const response = await getTransactionTypes();
 
-        expect(response.status).to.be(200);
-        expect(response.body.transactionTypes.length).to.be.greaterThan(0);
+      expect(response.status).to.be(200);
+      expect(response.body.transactionTypes.length).to.be.greaterThan(0);
 
-        expect(response.body.transactionTypes).to.eql(['request', 'worker']);
-      });
-    }
-  );
+      expect(response.body.transactionTypes).to.eql(['request', 'worker']);
+    });
+  });
 }
