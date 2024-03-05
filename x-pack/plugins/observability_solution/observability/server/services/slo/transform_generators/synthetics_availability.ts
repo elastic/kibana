@@ -10,7 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import {
   ALL_VALUE,
   syntheticsAvailabilityIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
@@ -162,6 +162,12 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private buildAggregations(slo: SLO) {
+    if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      throw new Error(
+        'The sli.synthetics.availability indicator MUST have an occurances budgeting method.'
+      );
+    }
+
     return {
       'slo.numerator': {
         filter: {
@@ -177,17 +183,6 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
           },
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-        'slo.isGoodSlice': {
-          bucket_script: {
-            buckets_path: {
-              goodEvents: 'slo.numerator>_count',
-              totalEvents: 'slo.denominator>_count',
-            },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
-          },
-        },
-      }),
     };
   }
 }
