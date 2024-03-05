@@ -70,6 +70,7 @@ export const ControlGroup = () => {
   const [tourStepOpen, setTourStepOpen] = useState<boolean>(true);
   const [suppressTourChecked, setSuppressTourChecked] = useState<boolean>(false);
   const [renderTourStep, setRenderTourStep] = useState(false);
+  const [applyButtonEnabled, setApplyButtonEnabled] = useState(Boolean(unpublishedFilters));
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -101,12 +102,26 @@ export const ControlGroup = () => {
     };
   }, [controlWithInvalidSelectionsId]);
 
-  const applyButtonEnabled = useMemo(() => {
-    /**
-     * this is undefined if there are no unpublished filters / timeslice; note that an empty filter array counts
-     * as unpublished filters and so the apply button should still be enabled in this case
-     */
-    return Boolean(unpublishedFilters);
+  // const applyButtonEnabled = useMemo(async () => {
+  //   /**
+  //    * this is undefined if there are no unpublished filters / timeslice; note that an empty filter array counts
+  //    * as unpublished filters and so the apply button should still be enabled in this case
+  //    */
+
+  //   await new Promise(function (resolve) {
+  //     setTimeout(() => resolve(null), 100);
+  //   });
+
+  //   return Boolean(unpublishedFilters);
+  // }, [unpublishedFilters]);
+  useEffect(() => {
+    let mounted = true;
+    setTimeout(() => {
+      if (mounted) setApplyButtonEnabled(Boolean(unpublishedFilters));
+    }, 100);
+    return () => {
+      mounted = false;
+    };
   }, [unpublishedFilters]);
 
   const showAppendedButtonGroup = useMemo(
@@ -308,6 +323,7 @@ export const ControlGroup = () => {
                   {showApplySelections && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
+                        display={'inlineBlock'}
                         content={ControlGroupStrings.management.getApplyButtonTitle(
                           applyButtonEnabled
                         )}
