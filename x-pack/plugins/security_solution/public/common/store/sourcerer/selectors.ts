@@ -94,3 +94,13 @@ export const signalIndexName = createSelector(
     },
   }
 );
+
+export const signalIndexMappingOutdated = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.signalIndexMappingOutdated,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
