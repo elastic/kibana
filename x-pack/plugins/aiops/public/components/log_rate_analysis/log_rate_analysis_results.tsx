@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, FC } from 'react';
+import React, { useEffect, useMemo, useRef, useState, FC } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
@@ -136,7 +137,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onAnalysisCompleted,
   embeddingOrigin,
 }) => {
-  const { http } = useAiopsAppContext();
+  const { analytics, http } = useAiopsAppContext();
+
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
@@ -232,12 +237,28 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
         });
       } else {
+        // Reset all overrides.
         setOverrides(undefined);
+
+        // If provided call the `onAnalysisCompleted` callback with the analysis results.
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
             analysisType,
             significantItems: data.significantItems,
             significantItemsGroups: data.significantItemsGroups,
+          });
+        }
+
+        // Track performance metric
+        if (loadIndexDataStartTime.current !== undefined) {
+          const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+          // Set this to undefined so reporting the metric gets triggered only once.
+          loadIndexDataStartTime.current = undefined;
+
+          reportPerformanceMetricEvent(analytics, {
+            eventName: 'aiopsLogRateAnalysisCompleted',
+            duration: loadIndexDataDuration,
           });
         }
       }
