@@ -69,10 +69,12 @@ export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';
 
+export { useFetchDataViews } from './hooks/use_fetch_data_views';
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 export { useGetFilteredRuleTypes } from './hooks/use_get_filtered_rule_types';
+export { useCreateRule } from './hooks/use_create_rule';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 

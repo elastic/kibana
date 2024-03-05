@@ -13,9 +13,9 @@ import type { ConfigSchema } from '../../plugin';
 
 export interface PluginContextValue {
   isDev?: boolean;
-  config: ConfigSchema;
+  // config: ConfigSchema;
   appMountParameters?: AppMountParameters;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  // observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }
 

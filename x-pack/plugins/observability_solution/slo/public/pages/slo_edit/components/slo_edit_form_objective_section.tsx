@@ -97,16 +97,13 @@ export function SloEditFormObjectiveSection() {
           <EuiFormRow
             label={
               <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.timeWindowType.label', {
+                {i18n.translate('xpack.slo.sloEdit.timeWindowType.label', {
                   defaultMessage: 'Time window',
                 })}{' '}
                 <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.slo.sloEdit.timeWindowType.tooltip',
-                    {
-                      defaultMessage: 'Choose between a rolling or a calendar aligned window.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.slo.sloEdit.timeWindowType.tooltip', {
+                    defaultMessage: 'Choose between a rolling or a calendar aligned window.',
+                  })}
                   position="top"
                 />
               </span>
@@ -133,16 +130,13 @@ export function SloEditFormObjectiveSection() {
           <EuiFormRow
             label={
               <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.timeWindowDuration.label', {
+                {i18n.translate('xpack.slo.sloEdit.timeWindowDuration.label', {
                   defaultMessage: 'Duration',
                 })}{' '}
                 <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.slo.sloEdit.timeWindowDuration.tooltip',
-                    {
-                      defaultMessage: 'The time window duration used to compute the SLO over.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.tooltip', {
+                    defaultMessage: 'The time window duration used to compute the SLO over.',
+                  })}
                   position="top"
                 />
               </span>
@@ -177,7 +171,7 @@ export function SloEditFormObjectiveSection() {
           <EuiCallOut color="warning">
             <p>
               <FormattedMessage
-                id="xpack.observability.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
+                id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
                 defaultMessage="The timeslice metric requires the budgeting method to be set to 'Timeslices' due to the nature of the statistical aggregations. The 'timeslice target' is also ignored in favor of the 'threshold' set in the metric definition above. The 'timeslice window' will set the size of the window the aggregation is performed on."
               />
             </p>
@@ -191,17 +185,14 @@ export function SloEditFormObjectiveSection() {
           <EuiFormRow
             label={
               <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
+                {i18n.translate('xpack.slo.sloEdit.budgetingMethod.label', {
                   defaultMessage: 'Budgeting method',
                 })}{' '}
                 <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.slo.sloEdit.budgetingMethod.tooltip',
-                    {
-                      defaultMessage:
-                        'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.slo.sloEdit.budgetingMethod.tooltip', {
+                    defaultMessage:
+                      'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
+                  })}
                   position="top"
                 />
               </span>
@@ -238,11 +229,11 @@ export function SloEditFormObjectiveSection() {
             isInvalid={getFieldState('objective.target').invalid}
             label={
               <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
+                {i18n.translate('xpack.slo.sloEdit.targetSlo.label', {
                   defaultMessage: 'Target / SLO (%)',
                 })}{' '}
                 <EuiIconTip
-                  content={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.tooltip', {
+                  content={i18n.translate('xpack.slo.sloEdit.targetSlo.tooltip', {
                     defaultMessage: 'The target objective in percentage for the SLO.',
                   })}
                   position="top"

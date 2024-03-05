@@ -13,9 +13,16 @@
     "requiredPlugins": [
       "alerting",
       "charts",
+      "contentManagement",
+      "controls",
+      "data",
+      "dataViews",
+      "lens",
+      "dataViewEditor",
       "observability",
       "observabilityShared",
       "ruleRegistry",
+      "security",
       "taskManager",
       "triggersActionsUi",
       "share",
@@ -23,9 +30,6 @@
       "uiActions",
       "lens",
       "embeddable",
-      "data",
-      "dataViews",
-      "dataViewEditor",
       "presentationUtil",
       "features",
       "licensing"
@@ -33,7 +37,9 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "embeddable"
+      "unifiedSearch",
+      "embeddable",
+      "ingestPipelines"
     ]
   }
 }

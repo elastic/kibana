@@ -12,8 +12,8 @@ import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../../../..';
-import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
+import { useFetchDataViews } from '@kbn/observability-plugin/public';
+import { SloPublicPluginsStart } from '../../../../types';
 import { CreateSLOForm } from '../../types';
 
 export function IndexSelection() {
@@ -22,7 +22,7 @@ export function IndexSelection() {
 
   const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
 
-  const { dataViewEditor } = useKibana<ObservabilityPublicPluginsStart>().services;
+  const { dataViewEditor } = useKibana<SloPublicPluginsStart>().services;
 
   const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
 

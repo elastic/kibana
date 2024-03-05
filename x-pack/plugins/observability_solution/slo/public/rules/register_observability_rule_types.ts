@@ -14,7 +14,7 @@ import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(
-  'xpack.observability.slo.rules.burnRate.defaultActionMessage',
+  'xpack.slo.rules.burnRate.defaultActionMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}
 
@@ -30,7 +30,7 @@ const sloBurnRateDefaultActionMessage = i18n.translate(
   }
 );
 const sloBurnRateDefaultRecoveryMessage = i18n.translate(
-  'xpack.observability.slo.rules.burnRate.defaultRecoveryMessage',
+  'xpack.slo.rules.burnRate.defaultRecoveryMessage',
   {
     defaultMessage: `\\{\\{context.reason\\}\\}
 
@@ -51,7 +51,7 @@ export const registerObservabilityRuleTypes = async (
 ) => {
   observabilityRuleTypeRegistry.register({
     id: SLO_BURN_RATE_RULE_TYPE_ID,
-    description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
+    description: i18n.translate('xpack.slo.rules.burnRate.description', {
       defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
     }),
     format: ({ fields }) => {

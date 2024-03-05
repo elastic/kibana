@@ -23,6 +23,7 @@ import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 export const routes = {
   [SLOS_PATH]: {
     handler: () => {
+      console.log('!!Slos Page');
       return <SlosPage />;
     },
     params: {},

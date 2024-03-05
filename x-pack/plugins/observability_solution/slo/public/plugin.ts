@@ -6,6 +6,7 @@
  */
 
 import {
+  App,
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -28,7 +29,7 @@ export class SloPlugin
 {
   constructor(private readonly initContext: PluginInitializerContext) {} // TODO SLO: Do I need ConfigSchema here?
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: SloPublicPluginsSetup) {
+  public setup(coreSetup: CoreSetup<SloPublicPluginsStart>, pluginsSetup: SloPublicPluginsSetup) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
     const sloDetailsLocator = pluginsSetup.share.url.locators.create(
@@ -37,8 +38,23 @@ export class SloPlugin
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
-    // Register an application into the side navigation menu
-    coreSetup.application.register({
+    const mount = async (params: AppMountParameters<unknown>) => {
+      const { renderApp } = await import('./application');
+      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
+      return renderApp({
+        appMountParameters: params,
+        core: coreStart,
+        // isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        isServerless: !!pluginsStart.serverless, // TODO SLO: do I need isServerless for SLO?
+      });
+    };
+
+    const app: App = {
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts
@@ -46,12 +62,10 @@ export class SloPlugin
       appRoute: '/app/slos',
       category: DEFAULT_APP_CATEGORIES.observability,
       // Do I need deep links
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        const [coreStart, depsStart] = await coreSetup.getStartServices();
-        return renderApp(coreStart, depsStart as SloPublicPluginsStart, params);
-      },
-    });
+      mount,
+    };
+    // Register an application into the side navigation menu
+    coreSetup.application.register(app);
 
     // TODO SLO: register slo burn rate rule
 

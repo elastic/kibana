@@ -24,10 +24,19 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  ActionTypeRegistryContract,
+  RuleTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { SloPlugin } from './plugin';
 
 export interface SloPublicPluginsSetup {
+  data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -35,9 +44,13 @@ export interface SloPublicPluginsSetup {
   share: SharePluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
+  serverless?: ServerlessPluginSetup;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 
 export interface SloPublicPluginsStart {
+  actionTypeRegistry: ActionTypeRegistryContract;
+  cloud?: CloudStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -46,6 +59,11 @@ export interface SloPublicPluginsStart {
   licensing: LicensingPluginStart;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  presentationUtil: PresentationUtilPluginStart;
+  serverless?: ServerlessPluginStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

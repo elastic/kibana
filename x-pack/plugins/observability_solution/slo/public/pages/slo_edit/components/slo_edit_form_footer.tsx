@@ -11,13 +11,13 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCreateRule } from '@kbn/observability-plugin/public';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
-import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
-import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
-import { useCreateRule } from '../../../hooks/use_create_rule';
+import { useCreateSlo } from '../../../hooks/use_create_slo';
+import { useUpdateSlo } from '../../../hooks/use_update_slo';
 import { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../utils/kibana_react';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import {
   transformCreateSLOFormToCreateSLOInput,
@@ -76,7 +76,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
       if (onSave) {
         onSave();
       } else {
-        navigate(basePath.prepend(paths.observability.slos));
+        navigate(basePath.prepend(paths.slos));
       }
     }
   }, [
@@ -104,10 +104,10 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
             onClick={handleSubmit}
           >
             {isEditMode
-              ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
+              ? i18n.translate('xpack.slo.sloEdit.editSloButton', {
                   defaultMessage: 'Update SLO',
                 })
-              : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
+              : i18n.translate('xpack.slo.sloEdit.createSloButton', {
                   defaultMessage: 'Create SLO',
                 })}
           </EuiButton>
@@ -117,13 +117,9 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
             color="primary"
             data-test-subj="sloFormCancelButton"
             disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
-            onClick={
-              onSave
-                ? () => onSave()
-                : () => navigateToUrl(basePath.prepend(paths.observability.slos))
-            }
+            onClick={onSave ? () => onSave() : () => navigateToUrl(basePath.prepend(paths.slos))}
           >
-            {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
+            {i18n.translate('xpack.slo.sloEdit.cancelButton', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>

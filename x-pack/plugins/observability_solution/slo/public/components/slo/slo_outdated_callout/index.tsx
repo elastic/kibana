@@ -8,8 +8,8 @@ import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFetchSloDefinitions } from '../../../hooks/slo/use_fetch_slo_definitions';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../../common/locators/paths';
 
 export function SloOutdatedCallout() {

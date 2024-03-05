@@ -22,11 +22,11 @@ export function SloEditFormObjectiveSectionTimeslices() {
           isInvalid={getFieldState('objective.timesliceTarget').invalid}
           label={
             <span>
-              {i18n.translate('xpack.observability.slo.sloEdit.timeSliceTarget.label', {
+              {i18n.translate('xpack.slo.sloEdit.timeSliceTarget.label', {
                 defaultMessage: 'Timeslice target (%)',
               })}{' '}
               <EuiIconTip
-                content={i18n.translate('xpack.observability.slo.sloEdit.timeSliceTarget.tooltip', {
+                content={i18n.translate('xpack.slo.sloEdit.timeSliceTarget.tooltip', {
                   defaultMessage:
                     'The individual time slices target used to determine whether the slice is good or bad.',
                 })}
@@ -67,11 +67,11 @@ export function SloEditFormObjectiveSectionTimeslices() {
           isInvalid={getFieldState('objective.timesliceWindow').invalid}
           label={
             <span>
-              {i18n.translate('xpack.observability.slo.sloEdit.timesliceWindow.label', {
+              {i18n.translate('xpack.slo.sloEdit.timesliceWindow.label', {
                 defaultMessage: 'Timeslice window (in minutes)',
               })}{' '}
               <EuiIconTip
-                content={i18n.translate('xpack.observability.slo.sloEdit.timesliceWindow.tooltip', {
+                content={i18n.translate('xpack.slo.sloEdit.timesliceWindow.tooltip', {
                   defaultMessage: 'The time slice window size used to evaluate the data from.',
                 })}
                 position="top"
