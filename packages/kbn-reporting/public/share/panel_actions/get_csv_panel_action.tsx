@@ -1,26 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { CoreSetup, CoreStart, NotificationsSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { firstValueFrom, Observable } from 'rxjs';
 
-import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { ReportingAPIClient, checkLicense } from '@kbn/reporting-public';
-import type { ReportingPublicPluginStartDependencies } from '../plugin';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
+import { checkLicense } from '../../license_check';
+import { ReportingAPIClient } from '../../reporting_api_client';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -32,10 +34,15 @@ export interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
+export interface PanelActionDependencies {
+  data: DataPublicPluginStart;
+  licensing: LicensingPluginStart;
+}
+
 interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Observable<[CoreStart, ReportingPublicPluginStartDependencies, unknown]>;
+  startServices$: Observable<[CoreStart, PanelActionDependencies, unknown]>;
   usesUiCapabilities: boolean;
 }
 
