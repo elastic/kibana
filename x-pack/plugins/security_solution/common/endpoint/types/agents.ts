@@ -10,7 +10,6 @@ import type {
   ResponseActionsApiCommandNames,
   ResponseActionAgentType,
 } from '../service/response_actions/constants';
-import {} from '../service/response_actions/constants';
 
 export interface AgentStatusInfo {
   id: string;
