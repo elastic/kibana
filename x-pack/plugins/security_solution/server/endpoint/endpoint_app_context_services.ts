@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
+import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
@@ -52,7 +52,6 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import type { ActionCreateService } from './services/actions/create/types';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 
@@ -77,11 +76,10 @@ export interface EndpointAppContextServiceStartContract {
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
-  cases: CasesStart | undefined;
+  cases: CasesServerStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
-  actionCreateService: ActionCreateService | undefined;
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
@@ -307,15 +305,6 @@ export class EndpointAppContextService {
       endpointService: this,
       isAutomated: true,
     });
-  }
-
-  /** @deprecated use `getInternalResponseActionsClient()` */
-  public getActionCreateService(): ActionCreateService {
-    if (!this.startDependencies?.actionCreateService) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-
-    return this.startDependencies.actionCreateService;
   }
 
   public async getFleetToHostFilesClient() {
