@@ -88,12 +88,12 @@ export const registerEnterpriseSearchIntegrations = (
     CONNECTOR_DEFINITIONS.forEach((connector) => {
       const connectorType = connector.isNative && isCloud ? 'native' : 'connector_client';
       const categories = connector.isNative
-        ? [...connector.categories, ...nativeSearchTag]
+        ? [...(connector.categories || []), ...nativeSearchTag]
         : connector.categories;
 
       customIntegrations.registerCustomIntegration({
-        categories,
-        description: connector.description,
+        categories: categories || [],
+        description: connector.description || '',
         icons: [
           {
             src: http.basePath.prepend(
