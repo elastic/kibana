@@ -14,7 +14,8 @@ import { customFieldsMock, customFieldsConfigurationMock } from '../../../contai
 import userEvent from '@testing-library/user-event';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 
-describe('Edit ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175112
+describe.skip('Edit ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
