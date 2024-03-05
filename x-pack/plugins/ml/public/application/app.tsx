@@ -10,6 +10,7 @@ import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -33,6 +34,8 @@ import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
+import { fieldFormatServiceFactory } from './services/field_format_service_factory';
+import { indexServiceFactory } from './util/index_service';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -53,13 +56,29 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
+export function getMlGlobalServices(
+  httpStart: HttpStart,
+  dataViews: DataViewsContract,
+  usageCollection?: UsageCollectionSetup
+) {
   const httpService = new HttpService(httpStart);
   const mlApiServices = mlApiServicesProvider(httpService);
+  // Note on the following services:
+  // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
+  //   but it's not being made available as part of global services. Since it's just
+  //   some stateless utils `useMlIndexUtils()` should be used from within components.
+  // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
+  //   so because of its own state it needs to be made available as a global service.
+  //   In the long run we should again try to get rid of it here and make it available via
+  //   its own context or possibly without having a singleton like state at all, since the
+  //   way this manages its own state right now doesn't consider React component lifecycles.
+  const mlIndexUtils = indexServiceFactory(dataViews);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
 
   return {
     httpService,
     mlApiServices,
+    mlFieldFormatService,
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),
@@ -106,7 +125,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
       ...coreStart,
-      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
 
@@ -168,25 +187,13 @@ export const renderApp = (
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
     fieldFormats: deps.fieldFormats,
-    autocomplete: deps.unifiedSearch.autocomplete,
     config: coreStart.uiSettings!,
-    chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,
     toastNotifications: coreStart.notifications.toasts,
-    overlays: coreStart.overlays,
-    theme: coreStart.theme,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    basePath: coreStart.http.basePath,
-    savedSearch: deps.savedSearch,
     application: coreStart.application,
     http: coreStart.http,
-    security: deps.security,
-    dashboard: deps.dashboard,
     maps: deps.maps,
-    dataVisualizer: deps.dataVisualizer,
-    dataViews: deps.data.dataViews,
-    share: deps.share,
-    lens: deps.lens,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());
