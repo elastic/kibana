@@ -77,7 +77,7 @@ async function downloadElserModel(): Promise<string> {
     'https://ml-models.elastic.co/elser_model_2.vocab.json',
     path.join(elserModelDir, 'elser_model_2.vocab.json')
   );
-  return elserModelDir;
+  return path.resolve(elserModelDir);
 }
 
 export async function createObservabilityAIAssistantAPIConfig({
