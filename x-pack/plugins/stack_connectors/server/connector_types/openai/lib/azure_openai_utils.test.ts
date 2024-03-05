@@ -174,6 +174,7 @@ describe('Azure Open AI Utils', () => {
       [
         'https://openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
         'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+        'https://My-test-resource-123.openaiaazure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
         'https://My-test-resource-123openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
         'https://My-test-resource-123.openai.azure.com//openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
         'https:///My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
@@ -188,6 +189,7 @@ describe('Azure Open AI Utils', () => {
       [
         'https://fooai.com/completions?api-version=2023-05-15',
         'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
+        'https://My-test-resource-123.openaiaazure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
         'https://My-test-resource-123openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
         'https://My-test-resource-123.openai.azure.com//openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
         'https:///My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
@@ -202,6 +204,7 @@ describe('Azure Open AI Utils', () => {
       [
         'https://My-test-resource-123.openai.azure.com/openai/deployments/extensions/chat/completions?api-version=2023-05-15',
         'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
+        'https://My-test-resource-123.openaiaazure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
         'https://My-test-resource-123openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
         'https:///My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
         'https://My-test-resource-123.openai.azure.com/openai//deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
