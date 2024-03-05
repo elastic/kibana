@@ -509,19 +509,15 @@ export class GetPreviewData {
           aggs: {
             good: {
               filter: {
-                range: {
-                  'summary.up': {
-                    gte: 1,
-                  },
+                term: {
+                  'monitor.status': 'up',
                 },
               },
             },
             bad: {
               filter: {
-                range: {
-                  'summary.up': {
-                    lte: 0,
-                  },
+                term: {
+                  'monito.status': 'down',
                 },
               },
             },
