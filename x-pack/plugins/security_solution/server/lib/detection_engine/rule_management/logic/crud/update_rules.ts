@@ -58,7 +58,7 @@ export const updateRules = async ({
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
       relatedIntegrations: ruleUpdate.related_integrations ?? [],
-      requiredFields: existingRule.params.requiredFields,
+      requiredFields: ruleUpdate.required_fields ?? [],
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,

@@ -116,6 +116,7 @@ export const BaseOptionalFields = z.object({
   meta: RuleMetadata.optional(),
   investigation_fields: InvestigationFields.optional(),
   throttle: RuleActionThrottle.optional(),
+  required_fields: RequiredFieldArray.optional(),
 });
 
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
