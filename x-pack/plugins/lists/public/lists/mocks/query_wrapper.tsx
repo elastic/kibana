@@ -8,7 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-export const createQueryWrapper = (): {
+export const createQueryWrapperMock = (): {
   queryClient: QueryClient;
   wrapper: React.FC;
 } => {
