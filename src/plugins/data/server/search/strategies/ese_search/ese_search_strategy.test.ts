@@ -16,6 +16,7 @@ import { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
 import { getMockSearchConfig } from '../../../../config.mock';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 
 const mockAsyncResponse = {
   body: {
@@ -246,7 +247,7 @@ describe('ES search strategy', () => {
         await esSearch
           .search(
             {
-              indexType: 'rollup',
+              indexType: DataViewType.ROLLUP,
               params,
             },
             {},
@@ -274,7 +275,7 @@ describe('ES search strategy', () => {
         await esSearch
           .search(
             {
-              indexType: 'rollup',
+              indexType: DataViewType.ROLLUP,
               params,
             },
             {},
