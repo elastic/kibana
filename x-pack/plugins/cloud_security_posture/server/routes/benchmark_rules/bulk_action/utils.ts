@@ -42,7 +42,8 @@ const disableDetectionRules = async (
 ): Promise<string[]> => {
   const detectionRulesIdsToDisable = await getDetectionRuleIdsToDisable(detectionRules);
   if (!detectionRulesIdsToDisable.length) return [];
-  await detectionRulesClient.bulkDisableRules({ ids: detectionRulesIdsToDisable });
+  const uniqueDetectionRulesIdsToDisable = [...new Set(detectionRulesIdsToDisable)];
+  await detectionRulesClient.bulkDisableRules({ ids: uniqueDetectionRulesIdsToDisable });
   return detectionRulesIdsToDisable;
 };
 

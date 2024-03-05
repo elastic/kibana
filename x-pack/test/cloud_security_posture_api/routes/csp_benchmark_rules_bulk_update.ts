@@ -93,7 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
-  // Failing: See https://github.com/elastic/kibana/issues/174204
   describe('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized();
@@ -340,6 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Expect to mute two benchmark rules and one detection rule', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
+      const rule2 = await getRandomCspBenchmarkRule();
 
       const detectionRule = await createDetectionRule(rule1);
 
@@ -356,6 +356,12 @@ export default function ({ getService }: FtrProviderContext) {
               benchmark_version: rule1.metadata.benchmark.version,
               rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
+            },
+            {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
+              rule_id: rule2.metadata.id,
             },
           ],
         })
