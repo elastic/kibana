@@ -27,7 +27,6 @@ import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 import {
   CONNECTORS_PATH,
   CRAWLERS_PATH,
@@ -89,9 +88,6 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       </Route>
       <Route path={CRAWLERS_PATH}>
         <CrawlersRouter />
-      </Route>
-      <Route path={SETTINGS_PATH}>
-        <Settings />
       </Route>
       {showAIPlayground && (
         <Route path={AI_PLAYGROUND_PATH}>
