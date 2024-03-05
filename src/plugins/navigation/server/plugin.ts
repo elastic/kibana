@@ -29,10 +29,12 @@ export class NavigationServerPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   setup(core: CoreSetup, plugins: NavigationServerSetupDependencies) {
-    const config = this.initializerContext.config.get<NavigationConfig>();
+    if (!this.isServerless()) {
+      const config = this.initializerContext.config.get<NavigationConfig>();
 
-    if (config.solutionNavigation.featureOn) {
-      core.uiSettings.registerGlobal(getUiSettings(config));
+      if (config.solutionNavigation.featureOn) {
+        core.uiSettings.registerGlobal(getUiSettings(config));
+      }
     }
 
     return {};
@@ -57,10 +59,16 @@ export class NavigationServerPlugin
    * @param uiSettings Navigation UI settings
    */
   private removeUiSettings(core: CoreStart, uiSettings: Record<string, UiSettingsParams>) {
+    if (this.isServerless()) return;
+
     const savedObjectsClient = core.savedObjects.createInternalRepository();
     const uiSettingsClient = core.uiSettings.globalAsScopedToClient(savedObjectsClient);
 
     const keys = Object.keys(uiSettings);
     return uiSettingsClient.removeMany(keys, { validateKeys: false });
+  }
+
+  private isServerless() {
+    return this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 }
