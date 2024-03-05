@@ -152,10 +152,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     return {
       'slo.numerator': {
         filter: {
-          range: {
-            'summary.up': {
-              gte: 1,
-            },
+          term: {
+            'monitor.status': 'up',
           },
         },
       },
