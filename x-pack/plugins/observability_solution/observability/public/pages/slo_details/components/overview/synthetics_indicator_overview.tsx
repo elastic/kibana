@@ -35,34 +35,39 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
   }
 
   const onMonitorClick = () => locator?.navigate({ configId, locationId });
+  const showOverviewItem = name || location;
 
   return (
     <OverviewItem
       title={MONITOR_LABEL}
       subtitle={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              color="hollow"
-              onClick={onMonitorClick}
-              iconOnClick={onMonitorClick}
-              onClickAriaLabel={MONITOR_ARIA_LABEL}
-              iconOnClickAriaLabel={MONITOR_ARIA_LABEL}
-            >
-              {i18n.translate(
-                'xpack.observability.slo.sloDetails.overview.syntheticsMonitor.name',
-                { defaultMessage: 'Name: {value}', values: { value: name } }
-              )}
-            </EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.observability.slo.sloDetails.overview.syntheticsMonitor.locationName',
-                { defaultMessage: 'Location: {value}', values: { value: location } }
-              )}
-            </EuiBadge>
-          </EuiFlexItem>
+          {name && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                onClick={onMonitorClick}
+                iconOnClick={onMonitorClick}
+                onClickAriaLabel={MONITOR_ARIA_LABEL}
+                iconOnClickAriaLabel={MONITOR_ARIA_LABEL}
+              >
+                {i18n.translate(
+                  'xpack.observability.slo.sloDetails.overview.syntheticsMonitor.name',
+                  { defaultMessage: 'Name: {value}', values: { value: name } }
+                )}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+          {location && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate(
+                  'xpack.observability.slo.sloDetails.overview.syntheticsMonitor.locationName',
+                  { defaultMessage: 'Location: {value}', values: { value: location } }
+                )}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
     />
