@@ -33,8 +33,8 @@ export class CompleteExternalResponseActionsTask {
   private wasStarted = false;
   private log: Logger;
   private cleanup: (() => void | Promise<void>) | undefined;
-  private taskTimeout = '20m';
-  private taskInterval = '30s';
+  private taskTimeout = '20m'; // Default. Real value comes from server config
+  private taskInterval = '30s'; // Default. Real value comes from server config
 
   constructor(protected readonly options: CompleteExternalResponseActionsTaskConstructorOptions) {
     this.log = this.options.endpointAppContext.logFactory.get(
@@ -91,7 +91,7 @@ export class CompleteExternalResponseActionsTask {
         params: {},
       });
     } catch (e) {
-      this.log.error(new EndpointError(`Error scheduling task, received ${e.message}`, e));
+      this.log.error(new EndpointError(`Error scheduling task, received: ${e.message}`, e));
     }
 
     this.cleanup = () => {

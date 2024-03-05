@@ -7,6 +7,9 @@
 
 import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/core/server';
+import type { BatchHandlerCallbackOptions } from '../../utils/queue_processor';
+import { QueueProcessor } from '../../utils/queue_processor';
+import type { LogsEndpointActionResponse } from '../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 /**
@@ -17,8 +20,8 @@ export class CompleteExternalActionsTaskRunner
   implements CancellableTask<RunContext['taskInstance']>
 {
   private readonly log: Logger;
-
-  // FIXME:PT add AbortController
+  private updatesQueue: QueueProcessor<LogsEndpointActionResponse>;
+  private abortController = new AbortController();
 
   constructor(
     private readonly endpointContextServices: EndpointAppContextService,
@@ -28,6 +31,18 @@ export class CompleteExternalActionsTaskRunner
       // Adding a unique identifier to the end of the class name to help identify log entries related to this run
       `${this.constructor.name}.${Math.random().toString(32).substring(2, 8)}`
     );
+
+    this.updatesQueue = new QueueProcessor<LogsEndpointActionResponse>({
+      batchHandler: this.queueBatchProcessor.bind(this),
+      batchSize: 50,
+      logger: this.log,
+    });
+  }
+
+  private async queueBatchProcessor(
+    options: BatchHandlerCallbackOptions<LogsEndpointActionResponse>
+  ): Promise<void> {
+    // FIXME:PT implement
   }
 
   private getNextRunDate(): Date | undefined {
@@ -62,6 +77,12 @@ export class CompleteExternalActionsTaskRunner
   }
 
   public async cancel() {
-    // TODO:PT implement
+    this.abortController.abort('Task canceled by Task Manager');
+
+    // Sleep 5 seconds to give an opportunity for the abort signal to be processed
+    await new Promise((r) => setTimeout(r, 5000));
+
+    // Wait for remainder of updates to be written
+    await this.updatesQueue.complete();
   }
 }
