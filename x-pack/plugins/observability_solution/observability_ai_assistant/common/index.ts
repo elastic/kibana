@@ -6,9 +6,32 @@
  */
 
 export type { Message, Conversation, KnowledgeBaseEntry } from './types';
-export { KnowledgeBaseEntryRole, MessageRole } from './types';
-export { FunctionVisibility } from './functions/types';
+export { KnowledgeBaseEntryRole, MessageRole, type ConversationCreateRequest } from './types';
+export { FunctionVisibility, type FunctionDefinition } from './functions/types';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
   VisualizeESQLUserIntention,
 } from './functions/visualize_esql';
+
+export type {
+  ChatCompletionChunkEvent,
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
+  MessageAddEvent,
+  ChatCompletionErrorEvent,
+  BufferFlushEvent,
+  StreamingChatResponseEvent,
+  StreamingChatResponseEventWithoutError,
+} from './conversation_complete';
+export {
+  StreamingChatResponseEventType,
+  ChatCompletionErrorCode,
+  ChatCompletionError,
+  createTokenLimitReachedError,
+  createConversationNotFoundError,
+  createInternalServerError,
+  isTokenLimitReachedError,
+  isChatCompletionError,
+} from './conversation_complete';
+
+export { isSupportedConnectorType } from './connectors';

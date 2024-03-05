@@ -6,16 +6,18 @@
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { act, renderHook, type RenderHookResult } from '@testing-library/react-hooks';
-import { Observable, Subject } from 'rxjs';
-import { MessageRole } from '../../common';
+import { Subject } from 'rxjs';
+import {
+  MessageRole,
+  type ObservabilityAIAssistantChatService,
+  type ObservabilityAIAssistantService,
+} from '..';
 import {
   createInternalServerError,
   StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
-} from '../../common/conversation_complete';
-import { mockService } from '../mock';
-import type { ObservabilityAIAssistantChatService } from '../types';
-import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
+  type StreamingChatResponseEventWithoutError,
+} from '../../common';
+import { ChatState, createUseChat, type UseChatProps, type UseChatResult } from './use_chat';
 import * as useKibanaModule from './use_kibana';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
@@ -23,11 +25,7 @@ type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 const mockChatService: MockedChatService = {
   chat: jest.fn(),
   complete: jest.fn(),
-  analytics: {
-    optIn: jest.fn(),
-    reportEvent: jest.fn(),
-    telemetryCounter$: new Observable() as any,
-  },
+  sendAnalyticsEvent: jest.fn(),
   getContexts: jest.fn().mockReturnValue([{ name: 'core', description: '' }]),
   getFunctions: jest.fn().mockReturnValue([]),
   hasFunction: jest.fn().mockReturnValue(false),
@@ -56,7 +54,7 @@ describe('useChat', () => {
 
   describe('initially', () => {
     beforeEach(() => {
-      hookResult = renderHook(useChat, {
+      hookResult = renderHook(createUseChat(), {
         initialProps: {
           connectorId: 'my-connector',
           chatService: mockChatService,
@@ -70,7 +68,9 @@ describe('useChat', () => {
             },
           ],
           persist: false,
-          service: mockService,
+          service: {
+            getScreenContexts: () => [],
+          } as unknown as ObservabilityAIAssistantService,
         } as UseChatProps,
       });
     });
@@ -91,13 +91,15 @@ describe('useChat', () => {
     let subject: Subject<StreamingChatResponseEventWithoutError>;
 
     beforeEach(() => {
-      hookResult = renderHook(useChat, {
+      hookResult = renderHook(createUseChat(), {
         initialProps: {
           connectorId: 'my-connector',
           chatService: mockChatService,
           initialMessages: [],
           persist: false,
-          service: mockService,
+          service: {
+            getScreenContexts: () => [],
+          } as unknown as ObservabilityAIAssistantService,
         } as UseChatProps,
       });
 

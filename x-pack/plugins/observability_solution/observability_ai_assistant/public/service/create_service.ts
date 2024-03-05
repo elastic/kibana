@@ -6,8 +6,9 @@
  */
 
 import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
-import { remove } from 'lodash';
-import { ObservabilityAIAssistantScreenContext } from '../../common/types';
+import { without } from 'lodash';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
 
@@ -24,7 +25,8 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
-  const screenContexts: ObservabilityAIAssistantScreenContext[] = [];
+  const screenContexts$ = new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([]);
+  const predefinedConversation$ = new Subject<{ messages: Message[]; title?: string }>();
 
   return {
     isEnabled: () => {
@@ -38,14 +40,20 @@ export function createService({
       return await mod.createChatService({ analytics, client, signal, registrations });
     },
     callApi: client,
+    getScreenContexts() {
+      return screenContexts$.value;
+    },
     setScreenContext: (context: ObservabilityAIAssistantScreenContext) => {
-      screenContexts.push(context);
+      screenContexts$.next(screenContexts$.value.concat(context));
       return () => {
-        remove(screenContexts, context);
+        screenContexts$.next(without(screenContexts$.value, context));
       };
     },
-    getScreenContexts: () => {
-      return screenContexts;
+    conversations: {
+      openNewConversation: ({ messages, title }: { messages: Message[]; title?: string }) => {
+        predefinedConversation$.next({ messages, title });
+      },
+      predefinedConversation$: predefinedConversation$.asObservable(),
     },
   };
 }

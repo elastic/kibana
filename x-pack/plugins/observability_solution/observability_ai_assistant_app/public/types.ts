@@ -22,6 +22,11 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicStart {}
@@ -29,7 +34,7 @@ export interface ObservabilityAIAssistantAppPublicStart {}
 export interface ObservabilityAIAssistantAppPublicSetup {}
 
 export interface ObservabilityAIAssistantAppPluginStartDependencies {
-  license: LicensingPluginStart;
+  licensing: LicensingPluginStart;
   share: SharePluginStart;
   security: SecurityPluginStart;
   lens: LensPublicStart;
@@ -37,10 +42,12 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   uiActions: UiActionsStart;
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  ml: MlPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
-  license: LicensingPluginSetup;
+  licensing: LicensingPluginSetup;
   share: SharePluginSetup;
   security: SecurityPluginSetup;
   lens: LensPublicSetup;
@@ -48,4 +55,6 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   uiActions: UiActionsSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  ml: MlPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }

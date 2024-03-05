@@ -13,6 +13,7 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ConfigSchema,
   ObservabilityAIAssistantService,
+  ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from './types';
@@ -21,16 +22,43 @@ export type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
+  ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
 };
 
-export { type ChatActionClickHandler, ChatActionClickType } from './components/chat/types';
+export { AssistantAvatar } from './components/assistant_avatar';
+export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
+export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
+
+export { createStorybookChatService, createStorybookService } from './storybook_mock';
+
+export { ChatState } from './hooks/use_chat';
+
+export { FeedbackButtons, type Feedback } from './components/buttons/feedback_buttons';
+export { ChatItemControls } from './components/chat/chat_item_controls';
+
+export { FailedToLoadResponse } from './components/message_panel/failed_to_load_response';
+
+export { MessageText } from './components/message_panel/message_text';
+
+export {
+  type ChatActionClickHandler,
+  ChatActionClickType,
+  type ChatActionClickPayload,
+} from './components/chat/types';
 
 export {
   VisualizeESQLUserIntention,
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../common/functions/visualize_esql';
+
+export { getAssistantSystemMessage } from './service/get_assistant_system_message';
+
+export { isSupportedConnectorType } from '../common';
+export { FunctionVisibility } from '../common';
+
+export { TELEMETRY, type TelemetryEventTypeWithPayload } from './analytics';
 
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';
@@ -40,6 +68,8 @@ export type {
   ObservabilityAIAssistantAPIEndpoint,
   APIReturnType,
 } from './api';
+
+export type { UseChatResult } from './hooks/use_chat';
 
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantPublicSetup,

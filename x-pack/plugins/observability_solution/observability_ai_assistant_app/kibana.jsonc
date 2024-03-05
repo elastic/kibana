@@ -15,9 +15,14 @@
       "lens",
       "ruleRegistry",
       "uiActions",
-      "dataViews"
+      "dataViews",
+      "triggersActionsUi",
+      "share",
+      "security",
+      "licensing",
+      "ml"
     ],
-    "requiredBundles": [],
+    "requiredBundles": [ "kibanaReact" ],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }

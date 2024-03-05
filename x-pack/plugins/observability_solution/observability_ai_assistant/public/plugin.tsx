@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  DEFAULT_APP_CATEGORIES,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type PluginInitializerContext,
-} from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import React, { ComponentType, lazy, Ref } from 'react';
-import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
+import React, { type ComponentType, lazy, type Ref } from 'react';
 import { registerTelemetryEventTypes } from './analytics';
-import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_provider';
+import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
+import { createUseChat } from './hooks/use_chat';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
+import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
 import { createService } from './service/create_service';
 import type {
   ConfigSchema,
@@ -52,49 +46,6 @@ export class ObservabilityAIAssistantPlugin
     coreSetup: CoreSetup,
     pluginsSetup: ObservabilityAIAssistantPluginSetupDependencies
   ): ObservabilityAIAssistantPublicSetup {
-    coreSetup.application.register({
-      id: 'observabilityAIAssistant',
-      title: i18n.translate('xpack.observabilityAiAssistant.appTitle', {
-        defaultMessage: 'Observability AI Assistant',
-      }),
-      euiIconType: 'logoObservability',
-      appRoute: '/app/observabilityAIAssistant',
-      category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: [],
-      deepLinks: [
-        {
-          id: 'conversations',
-          title: i18n.translate('xpack.observabilityAiAssistant.conversationsDeepLinkTitle', {
-            defaultMessage: 'Conversations',
-          }),
-          path: '/conversations/new',
-        },
-      ],
-      mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        // Load application bundle and Get start services
-        const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application'),
-          coreSetup.getStartServices() as Promise<
-            [CoreStart, ObservabilityAIAssistantPluginStartDependencies, unknown]
-          >,
-        ]);
-
-        ReactDOM.render(
-          <Application
-            {...appMountParameters}
-            service={this.service!}
-            coreStart={coreStart}
-            pluginsStart={pluginsStart as ObservabilityAIAssistantPluginStartDependencies}
-          />,
-          appMountParameters.element
-        );
-
-        return () => {
-          ReactDOM.unmountComponentAtNode(appMountParameters.element);
-        };
-      },
-    });
-
     registerTelemetryEventTypes(coreSetup.analytics);
 
     return {};
@@ -136,24 +87,15 @@ export class ObservabilityAIAssistantPlugin
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      useChat: createUseChat(),
       ObservabilityAIAssistantMultipaneFlyoutContext,
+      ObservabilityAIAssistantChatServiceContext,
+      useObservabilityAIAssistantChatService,
       ObservabilityAIAssistantContextualInsight: isEnabled
         ? withSuspense(
             withProviders(
               lazy(() =>
                 import('./components/insight/insight').then((m) => ({ default: m.Insight }))
-              ),
-              services
-            )
-          )
-        : null,
-      ObservabilityAIAssistantActionMenuItem: isEnabled
-        ? withSuspense(
-            withProviders(
-              lazy(() =>
-                import('./components/action_menu_item/action_menu_item').then((m) => ({
-                  default: m.ObservabilityAIAssistantActionMenuItem,
-                }))
               ),
               services
             )

@@ -6,17 +6,9 @@
  */
 
 import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { Observable } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
-export type ObservabilityAIAssistantAppService = ObservabilityAIAssistantService & {
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-  getLicense: () => Observable<ILicense>;
-  getLicenseManagementLocator: () => SharePluginStart;
-};
+export type ObservabilityAIAssistantAppService = ObservabilityAIAssistantService;
 
 export function createAppService({
   pluginsStart,
@@ -25,9 +17,5 @@ export function createAppService({
 }): ObservabilityAIAssistantAppService {
   return {
     ...pluginsStart.observabilityAIAssistant.service,
-
-    getCurrentUser: () => pluginsStart.security.authc.getCurrentUser(),
-    getLicense: () => pluginsStart.license.license$,
-    getLicenseManagementLocator: () => pluginsStart.share,
   };
 }

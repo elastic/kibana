@@ -9,18 +9,20 @@ import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { MessageRole, type Message } from '../../common';
 import {
+  MessageRole,
+  type Message,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
-} from '../../common/conversation_complete';
-import { getAssistantSystemMessage } from '../service/get_assistant_system_message';
-import type {
-  ObservabilityAIAssistantChatService,
+} from '../../common';
+import {
+  getAssistantSystemMessage,
+  type ObservabilityAIAssistantChatService,
   ObservabilityAIAssistantService,
-} from '../types';
+} from '..';
+import type {} from '../types';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 
@@ -288,4 +290,8 @@ export function useChat({
       abortControllerRef.current.abort();
     },
   };
+}
+
+export function createUseChat() {
+  return useChat;
 }

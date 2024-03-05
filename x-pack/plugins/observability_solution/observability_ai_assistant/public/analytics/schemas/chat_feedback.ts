@@ -7,7 +7,7 @@
 
 import type { EventTypeOpts } from '@kbn/analytics-client';
 import type { Message, Conversation } from '../../../common';
-import type { Feedback } from '../../components/feedback_buttons';
+import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { messageSchema } from './common';
 
 export interface ChatFeedback {

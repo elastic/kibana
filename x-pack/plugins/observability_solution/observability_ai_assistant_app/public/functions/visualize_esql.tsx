@@ -159,6 +159,7 @@ export function VisualizeESQL({
         [],
         preferredChartType
       );
+
       if (chartSuggestions?.length) {
         const [suggestion] = chartSuggestions;
 
