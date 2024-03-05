@@ -27,6 +27,8 @@ interface UserPanelHeaderProps {
   managedUser: ManagedUserData;
 }
 
+const linkTitleCSS = { width: 'fit-content' };
+
 export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
@@ -59,6 +61,7 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
             path={getUsersDetailsUrl(userName)}
             target={'_blank'}
             external={false}
+            css={linkTitleCSS}
           >
             <FlyoutTitle title={userName} iconType={'user'} isLink />
           </SecuritySolutionLinkAnchor>
