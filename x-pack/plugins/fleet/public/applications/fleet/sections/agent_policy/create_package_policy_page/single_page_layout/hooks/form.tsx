@@ -361,9 +361,6 @@ export function useOnSubmit({
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
-
-        // Maybe need to reset package policy form state here?
-
         onSaveNavigate(data!.item);
 
         notifications.toasts.addSuccess({
