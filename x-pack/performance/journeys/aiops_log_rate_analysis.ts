@@ -76,13 +76,11 @@ export const journey = new Journey({
       log.error(`Error deleting data view '${dataViewId}' in afterSteps() callback`);
     }
   },
-}).step('Go to AIOps Log Rate Analysis', async ({ page, kbnUrl, kibanaPage }) => {
+}).step('Load AIOps Log Rate Analysis', async ({ page, kbnUrl }) => {
   await page.goto(
     kbnUrl.get(
       `app/ml/aiops/log_rate_analysis?index=${dataViewId}&_g=%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A60000%29%2Ctime%3A%28from%3A%272019-07-01T15%3A35%3A38.700Z%27%2Cto%3A%272019-07-05T15%3A35%3A38.700Z%27%29%29&_a=%28logRateAnalysis%3A%28filters%3A%21%28%29%2CsearchQuery%3A%28match_all%3A%28%29%29%2CsearchQueryLanguage%3Akuery%2CsearchString%3A%27%27%2Cwp%3A%28bMax%3A1562198400000%2CbMin%3A1562097600000%2CdMax%3A1562270400000%2CdMin%3A1562234400000%29%29%29`
     )
   );
-  await kibanaPage.waitForHeader();
   await page.waitForSelector(subj('aiopsAnalysisComplete'));
-  await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
 });
