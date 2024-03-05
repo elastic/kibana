@@ -162,7 +162,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables alerts suppression for indicator match rules
    */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
+  alertSuppressionForIndicatorMatchRuleEnabled: true,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
