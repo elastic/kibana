@@ -7,6 +7,7 @@
 
 import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/core/server';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import type { BatchHandlerCallbackOptions } from '../../utils/queue_processor';
 import { QueueProcessor } from '../../utils/queue_processor';
 import type { LogsEndpointActionResponse } from '../../../../common/endpoint/types';
@@ -65,10 +66,26 @@ export class CompleteExternalActionsTaskRunner
 
   public async run() {
     this.log.info(`Started: Checking status of external response actions`);
+    this.abortController = new AbortController();
 
-    // TODO:PT implement
+    // Collect update needed to complete response actions
+    await Promise.all(
+      RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint').map(
+        (agentType) => {
+          const agentTypeActionsClient =
+            this.endpointContextServices.getInternalResponseActionsClient({ agentType });
 
+          return agentTypeActionsClient.processPendingActions({
+            abortSignal: this.abortController.signal,
+            addToQueue: this.updatesQueue.addToQueue,
+          });
+        }
+      )
+    );
+
+    await this.updatesQueue.complete();
     this.log.info(`Completed: Checking status of external response actions`);
+    this.abortController.abort(`Run complete.`);
 
     return {
       state: {},
@@ -77,12 +94,14 @@ export class CompleteExternalActionsTaskRunner
   }
 
   public async cancel() {
-    this.abortController.abort('Task canceled by Task Manager');
+    if (!this.abortController.signal.aborted) {
+      this.abortController.abort('Task canceled by Task Manager');
 
-    // Sleep 5 seconds to give an opportunity for the abort signal to be processed
-    await new Promise((r) => setTimeout(r, 5000));
+      // Sleep 5 seconds to give an opportunity for the abort signal to be processed
+      await new Promise((r) => setTimeout(r, 5000));
 
-    // Wait for remainder of updates to be written
-    await this.updatesQueue.complete();
+      // Wait for remainder of updates to be written
+      await this.updatesQueue.complete();
+    }
   }
 }

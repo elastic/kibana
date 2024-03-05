@@ -26,7 +26,11 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { CommonResponseActionMethodOptions, ResponseActionsClient } from './types';
+import type {
+  CommonResponseActionMethodOptions,
+  ProcessPendingActionsMethodOptions,
+  ResponseActionsClient,
+} from './types';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
@@ -520,5 +524,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
+  }
+
+  public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
+    this.log.warn(`${this.constructor.name}#processPendingActions() is not implemented!`);
   }
 }
