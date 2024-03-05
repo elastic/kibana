@@ -20,7 +20,8 @@ import {
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/177573
+describe.skip(
   'Alert user assignment - Serverless Complete',
   {
     tags: ['@serverless'],
