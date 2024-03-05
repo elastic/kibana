@@ -504,7 +504,7 @@ examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
-x-pack/plugins/logs_shared @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -1542,8 +1542,8 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
+/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
