@@ -17,6 +17,7 @@ import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 
 // FLAKY: https://github.com/elastic/kibana/issues/177791
+// FLAKY: https://github.com/elastic/kibana/issues/177792
 describe.skip('Category', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
