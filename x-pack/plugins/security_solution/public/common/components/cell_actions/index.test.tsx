@@ -17,7 +17,8 @@ jest.mock('@kbn/cell-actions', () => ({
   CellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
 }));
 
-const mockGetFieldSpec = jest.fn((_: string) => ({ someFieldSpec: 'theFieldSpec' }));
+const mockFieldSpec = { someFieldSpec: 'theFieldSpec' };
+const mockGetFieldSpec = jest.fn((_: string) => mockFieldSpec);
 const mockUseGetFieldSpec = jest.fn((_: unknown) => mockGetFieldSpec);
 jest.mock('../../hooks/use_get_field_spec', () => ({
   useGetFieldSpec: (param: unknown) => mockUseGetFieldSpec(param),
@@ -40,7 +41,17 @@ describe('SecurityCellActions', () => {
     jest.clearAllMocks();
   });
 
-  it('should render children when fieldData length is 0', () => {
+  it('should render CellActions component when data is not empty', () => {
+    const result = render(
+      <SecurityCellActions {...defaultProps} data={mockData}>
+        <div />
+      </SecurityCellActions>
+    );
+
+    expect(result.queryByTestId('cell-actions-component')).toBeInTheDocument();
+  });
+
+  it('should render children without CellActions component when data is empty', () => {
     const result = render(
       <SecurityCellActions {...defaultProps} data={[]}>
         <div>{'Test Children'}</div>
@@ -49,16 +60,6 @@ describe('SecurityCellActions', () => {
 
     expect(result.queryByTestId('cell-actions-component')).not.toBeInTheDocument();
     expect(result.queryByText('Test Children')).toBeInTheDocument();
-  });
-
-  it('should render CellActions component when fieldData length is greater than 0', () => {
-    const result = render(
-      <SecurityCellActions {...defaultProps} data={mockData}>
-        <div />
-      </SecurityCellActions>
-    );
-
-    expect(result.queryByTestId('cell-actions-component')).toBeInTheDocument();
   });
 
   it('should render CellActions component with correct props', () => {
@@ -80,7 +81,7 @@ describe('SecurityCellActions', () => {
 
     expect(MockCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: [{ field: { someFieldSpec: 'theFieldSpec' }, value: 'fieldValue' }],
+        data: [{ field: mockFieldSpec, value: 'fieldValue' }],
       }),
       {}
     );

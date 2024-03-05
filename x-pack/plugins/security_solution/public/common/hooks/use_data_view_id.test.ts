@@ -9,6 +9,7 @@ import { TestProviders } from '../mock';
 import { SourcererScopeName } from '../store/sourcerer/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
 import { useDataViewId } from './use_data_view_id';
+import * as sourcererSelectors from '../store/sourcerer/selectors';
 
 describe('useDataViewId', () => {
   it.each(Object.values(SourcererScopeName))(
@@ -18,4 +19,16 @@ describe('useDataViewId', () => {
       expect(result.current).toEqual(DEFAULT_DATA_VIEW_ID); // mocked value
     }
   );
+
+  it('should return undefined if dataViewId selector returns null', () => {
+    jest
+      .spyOn(sourcererSelectors, 'sourcererScopeSelectedDataViewId')
+      .mockImplementationOnce(() => null);
+
+    const { result } = renderHook(useDataViewId, {
+      initialProps: SourcererScopeName.default,
+      wrapper: TestProviders,
+    });
+    expect(result.current).toEqual(undefined);
+  });
 });
