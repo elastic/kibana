@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type EmbeddableApiContext, apiHasType } from '@kbn/presentation-publishing';
+import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
@@ -15,7 +15,7 @@ import { MlCoreSetup } from '../plugin';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export const isApiCompatible = (api: unknown | null): api is ActionApi => Boolean(apiHasType(api));
+export const isApiCompatible = (api: unknown | null): api is ActionApi => apiHasType(api);
 
 export function createVisToADJobAction(
   getStartServices: MlCoreSetup['getStartServices']
@@ -53,7 +53,7 @@ export function createVisToADJobAction(
       }
     },
     async isCompatible({ embeddable }: EmbeddableApiContext) {
-      if (!isApiCompatible(embeddable) || !['map', 'lens'].includes(embeddable.type)) return false;
+      if (!isApiCompatible(embeddable) || !(apiIsOfType(embeddable, 'lens') || apiIsOfType(embeddable, 'map'))) return false;
 
       const [
         { getChartInfoFromVisualization, isCompatibleVisualizationType },

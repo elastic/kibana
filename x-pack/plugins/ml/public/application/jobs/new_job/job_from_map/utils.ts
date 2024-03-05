@@ -10,7 +10,7 @@ import type { Query } from '@kbn/es-query';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
-import type { DashboardApi } from '../../../../ui_actions/types';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export async function redirectToGeoJobWizard(

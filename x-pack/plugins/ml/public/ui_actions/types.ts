@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import type {
-  HasType,
-  PublishesLocalUnifiedSearch,
-  PublishesPanelTitle,
-  PublishesSavedObjectId,
-} from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
-
-export type DashboardApi = Partial<
-  HasType<'dashboard'> & PublishesLocalUnifiedSearch & PublishesPanelTitle & PublishesSavedObjectId
->;
 
 export type ActionApi = MapApi | LensApi;
