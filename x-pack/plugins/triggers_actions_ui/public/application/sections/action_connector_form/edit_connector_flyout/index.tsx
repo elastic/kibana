@@ -6,11 +6,11 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiButton, EuiConfirmModal, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiButton, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { none, Option, some } from 'fp-ts/lib/Option';
+import { Option, none, some } from 'fp-ts/lib/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
 import {
   ActionConnector,
@@ -321,7 +321,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           setTab={handleSetTab}
           selectedTab={selectedTab}
           icon={actionTypeModel?.iconClass}
-          isBeta={actionTypeModel?.isBeta}
           isExperimental={actionTypeModel?.isExperimental}
         />
         <EuiFlyoutBody>

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CasesUiSetup } from '@kbn/cases-plugin/public';
+import { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { registerAnomalyChartsCasesAttachment } from './register_anomaly_charts_attachment';
 import { MlStartDependencies } from '../plugin';
 import { registerAnomalySwimLaneCasesAttachment } from './register_anomaly_swim_lane_attachment';
 
 export function registerCasesAttachments(
-  cases: CasesUiSetup,
+  cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
