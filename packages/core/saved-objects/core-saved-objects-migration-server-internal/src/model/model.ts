@@ -37,7 +37,7 @@ import {
   getMigrationType,
   indexBelongsToLaterVersion,
   indexVersion,
-  mergeMigrationMappingPropertyHashes,
+  mergeMappingMeta,
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
@@ -517,7 +517,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
           // aka we are NOT upgrading to a newer version
           // we inject the source index's current mappings in the state, to check them later
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          targetIndexMappings: mergeMappingMeta(
             stateP.targetIndexMappings,
             stateP.sourceIndexMappings.value
           ),
@@ -573,7 +573,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
         mustRefresh:
           stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
-        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+        targetIndexMappings: mergeMappingMeta(
           stateP.targetIndexMappings,
           stateP.sourceIndexMappings.value
         ),
