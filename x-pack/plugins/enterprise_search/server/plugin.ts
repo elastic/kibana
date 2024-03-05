@@ -288,7 +288,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerCNTelemetryUsageCollector(usageCollection);
+        registerCNTelemetryUsageCollector(usageCollection, this.logger);
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
