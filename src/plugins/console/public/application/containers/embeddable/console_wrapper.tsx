@@ -114,8 +114,10 @@ type ConsoleWrapperProps = Omit<EmbeddableConsoleDependencies, 'setDispatch'>;
 export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (props) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
   useEffect(() => {
-    loadDependencies(props.core, props.usageCollection).then(setDependencies);
-  }, [setDependencies, props]);
+    if (dependencies === null) {
+      loadDependencies(props.core, props.usageCollection).then(setDependencies);
+    }
+  }, [dependencies, setDependencies, props]);
   useEffect(() => {
     return () => {
       if (dependencies) {

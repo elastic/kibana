@@ -231,7 +231,7 @@ export function DifferentialTopNFunctionsGrid({
     );
   }
 
-  const rowCount = Math.min(Math.max(sortedBaseRows.length, sortedComparisonRows.length), 100);
+  const rowCount = Math.max(sortedBaseRows.length, sortedComparisonRows.length);
 
   return (
     <>
@@ -303,7 +303,7 @@ export function DifferentialTopNFunctionsGrid({
         }}
         pagination={{
           pageIndex,
-          pageSize: 50,
+          pageSize: 100,
           // Left it empty on purpose as it is a required property on the pagination
           onChangeItemsPerPage: () => {},
           onChangePage,
