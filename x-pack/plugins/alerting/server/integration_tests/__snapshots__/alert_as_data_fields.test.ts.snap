@@ -123,12 +123,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -207,12 +207,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -291,12 +291,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -375,12 +375,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -447,12 +447,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -490,12 +490,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -533,12 +533,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -660,12 +660,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9125,12 +9125,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9434,12 +9434,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9533,12 +9533,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9632,12 +9632,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9731,12 +9731,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9836,12 +9836,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
