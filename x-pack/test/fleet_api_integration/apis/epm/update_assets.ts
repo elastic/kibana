@@ -226,9 +226,6 @@ export default function (providerContext: FtrProviderContext) {
               limit: '10000',
             },
           },
-          query: {
-            default_field: ['logs_test_name', 'new_field_name'],
-          },
         },
       });
       expect(resPackage.body.component_templates[0].component_template.template.mappings).eql({
