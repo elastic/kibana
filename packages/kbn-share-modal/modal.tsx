@@ -21,13 +21,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export interface ModalProps {
   objectType: string;
   onClose: () => void;
-  tabs: Array<{ id: string; name: string; content: ReactElement; sortOrder: number }>;
+  tabs: Array<{ id: string; name: string; content: ReactElement }>;
   modalBodyDescriptions: Array<{ id: string; description: any }>;
 }
-
-/**
- * <ShareModal objectType={} />
- */
 
 export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
   const [selectedTabId, setSelectedTabId] = useState('link');
