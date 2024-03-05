@@ -10,6 +10,7 @@ import {
   Axis,
   BarSeries,
   Chart,
+  ElementClickListener,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -17,8 +18,10 @@ import {
   Settings,
   Tooltip,
   TooltipType,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -32,10 +35,13 @@ import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { max, min } from 'lodash';
+import { isObject, max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { FilterStateStore } from '@kbn/es-query';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
+import { buildEsQuery } from '../../../utils/build_es_query';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 
@@ -48,7 +54,7 @@ export interface Props {
 }
 
 export function EventsChartPanel({ slo, range }: Props) {
-  const { charts, uiSettings } = useKibana().services;
+  const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
@@ -107,6 +113,11 @@ export function EventsChartPanel({ slo, range }: Props) {
       threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
   };
 
+  const intervalInMilliseconds =
+    data && data.length > 2
+      ? moment(data[1].date).valueOf() - moment(data[0].date).valueOf()
+      : 10 * 60000;
+
   const annotation =
     slo.indicator.type === 'sli.metric.timeslice' && threshold ? (
       <>
@@ -142,18 +153,64 @@ export function EventsChartPanel({ slo, range }: Props) {
       </>
     ) : null;
 
+  const goodEventId = i18n.translate(
+    'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
+    { defaultMessage: 'Good events' }
+  );
+
+  const badEventId = i18n.translate(
+    'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
+    { defaultMessage: 'Bad events' }
+  );
+
+  const viewEventsClickHandler = () => {
+    const timeRange = {
+      from: 'now-24h',
+      to: 'now',
+      mode: 'relative' as const,
+    };
+    openInDiscover(discover, slo, false, false, timeRange);
+  };
+
+  const barClickHandler = (params: XYChartElementEvent[]) => {
+    if (slo.indicator.type === 'sli.kql.custom') {
+      const [datanum, eventDetail] = params[0];
+      const isBad = eventDetail.specId === badEventId;
+      const timeRange = {
+        from: moment(datanum.x).toISOString(),
+        to: moment(datanum.x).add(intervalInMilliseconds, 'ms').toISOString(),
+        mode: 'absolute' as const,
+      };
+      openInDiscover(discover, slo, isBad, !isBad, timeRange);
+    }
+  };
+
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{title}</EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
-                defaultMessage: 'Last 24h',
-              })}
-            </EuiText>
-          </EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={1}> {title}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
+                  defaultMessage: 'Last 24h',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {slo.indicator.type === 'sli.kql.custom' && (
+            <EuiFlexItem grow={0}>
+              <EuiButtonEmpty
+                data-test-subj="o11yEventsChartPanelViewEventsButton"
+                onClick={viewEventsClickHandler}
+              >
+                {i18n.translate('xpack.observability.slo.sloDetails.viewEventsFlexItemLabel', {
+                  defaultMessage: 'View events',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiFlexItem>
@@ -177,6 +234,7 @@ export function EventsChartPanel({ slo, range }: Props) {
                 pointerUpdateDebounce={0}
                 pointerUpdateTrigger={'x'}
                 locale={i18n.getLocale()}
+                onElementClick={barClickHandler as ElementClickListener}
               />
               {annotation}
 
@@ -196,10 +254,7 @@ export function EventsChartPanel({ slo, range }: Props) {
               {slo.indicator.type !== 'sli.metric.timeslice' ? (
                 <>
                   <BarSeries
-                    id={i18n.translate(
-                      'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
-                      { defaultMessage: 'Good events' }
-                    )}
+                    id={goodEventId}
                     color={euiTheme.colors.success}
                     barSeriesStyle={{
                       rect: { fill: euiTheme.colors.success },
@@ -219,10 +274,7 @@ export function EventsChartPanel({ slo, range }: Props) {
                   />
 
                   <BarSeries
-                    id={i18n.translate(
-                      'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
-                      { defaultMessage: 'Bad events' }
-                    )}
+                    id={badEventId}
                     color={euiTheme.colors.danger}
                     barSeriesStyle={{
                       rect: { fill: euiTheme.colors.danger },
@@ -260,4 +312,73 @@ export function EventsChartPanel({ slo, range }: Props) {
       </EuiFlexGroup>
     </EuiPanel>
   );
+}
+
+function openInDiscover(
+  discover: DiscoverStart,
+  slo: SLOWithSummaryResponse,
+  showBad = false,
+  showGood = false,
+  timeRange?: { from: string; to: string; mode: 'absolute' | 'relative' }
+) {
+  if (slo.indicator.type === 'sli.kql.custom') {
+    const filterKuery = isObject(slo.indicator.params.filter)
+      ? slo.indicator.params.filter.kqlQuery
+      : slo.indicator.params.filter;
+
+    const filterFilters = isObject(slo.indicator.params.filter)
+      ? slo.indicator.params.filter.filters
+      : [];
+
+    const goodKuery = isObject(slo.indicator.params.good)
+      ? slo.indicator.params.good.kqlQuery
+      : slo.indicator.params.good;
+    const goodFilters = isObject(slo.indicator.params.good)
+      ? slo.indicator.params.good.filters
+      : [];
+    const customGoodFilter = buildEsQuery({ kuery: goodKuery, filters: goodFilters });
+    const customBadFilter = { bool: { must_not: customGoodFilter } };
+
+    discover?.locator?.navigate({
+      ...((timeRange && { timeRange }) || {}),
+      query: {
+        query: filterKuery || '',
+        language: 'kuery',
+      },
+      filters: [
+        ...filterFilters,
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: i18n.translate('xpack.observability.slo.sloDetails.goodFilterLabel', {
+              defaultMessage: 'Good events',
+            }),
+            disabled: !showGood,
+            index: `${slo.indicator.params.index}-id`,
+            value: JSON.stringify(customGoodFilter),
+          },
+          query: customGoodFilter as Record<string, any>,
+        },
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: i18n.translate('xpack.observability.slo.sloDetails.badFilterLabel', {
+              defaultMessage: 'Bad events',
+            }),
+            disabled: !showBad,
+            index: `${slo.indicator.params.index}-id`,
+            value: JSON.stringify(customBadFilter),
+          },
+          query: customBadFilter as Record<string, any>,
+        },
+      ],
+      dataViewSpec: {
+        id: `${slo.indicator.params.index}-id`,
+        title: slo.indicator.params.index,
+        timeFieldName: slo.indicator.params.timestampField,
+      },
+    });
+  }
 }
