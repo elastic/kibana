@@ -14,7 +14,6 @@ import { each, cloneDeep, pickBy, mapValues, omit, assign, chain } from 'lodash'
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 import { DataViewField } from '../fields';
-import { DataViewLazyFieldCache, createDataViewFieldCache } from './data_view_lazy_field_cache';
 import { fieldMatchesFieldsRequested, fieldsMatchFieldsRequested } from './data_view_lazy_util';
 
 import type {
@@ -53,7 +52,7 @@ type DataViewFieldMap = Record<string, DataViewField>;
 
 export class DataViewLazy extends AbstractDataView {
   private apiClient: IDataViewsApiClient;
-  private fieldCache: DataViewLazyFieldCache = createDataViewFieldCache();
+  private fieldCache = new Map<string, DataViewField>();
 
   constructor(config: DataViewDeps) {
     super(config);
@@ -126,10 +125,8 @@ export class DataViewLazy extends AbstractDataView {
           cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
           cachedField.spec.esTypes = [field.type];
         } else {
-          cachedField = this.fieldCache.set(
-            field.name,
-            new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
-          );
+          cachedField = new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable });
+          this.fieldCache.set(field.name, cachedField);
         }
         col[field.name] = cachedField;
         return col;
@@ -230,7 +227,7 @@ export class DataViewLazy extends AbstractDataView {
       existingField.runtimeField = undefined;
     } else {
       Object.values(this.getFieldsByRuntimeFieldName(name) || {}).forEach((field) => {
-        this.fieldCache.clear(field.name);
+        this.fieldCache.delete(field.name);
       });
     }
 
@@ -287,20 +284,18 @@ export class DataViewLazy extends AbstractDataView {
       fld.spec.type = castEsToKbnFieldTypeName(fieldType);
       fld.spec.esTypes = [fieldType];
     } else {
-      fld = this.fieldCache.set(
-        fieldName,
-        new DataViewField({
-          name: fieldName,
-          runtimeField: runtimeFieldSpec,
-          type: castEsToKbnFieldTypeName(fieldType),
-          esTypes: [fieldType],
-          aggregatable: true,
-          searchable: true,
-          count: config.popularity ?? 0,
-          readFromDocValues: false,
-          shortDotsEnable: this.shortDotsEnable,
-        })
-      );
+      fld = new DataViewField({
+        name: fieldName,
+        runtimeField: runtimeFieldSpec,
+        type: castEsToKbnFieldTypeName(fieldType),
+        esTypes: [fieldType],
+        aggregatable: true,
+        searchable: true,
+        count: config.popularity ?? 0,
+        readFromDocValues: false,
+        shortDotsEnable: this.shortDotsEnable,
+      });
+      this.fieldCache.set(fieldName, fld);
     }
 
     this.setFieldCustomLabel(fieldName, config.customLabel);
@@ -373,12 +368,12 @@ export class DataViewLazy extends AbstractDataView {
       if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
         return;
       }
-      dataViewFields[field.name] =
-        this.fieldCache.get(field.name) ||
-        this.fieldCache.set(
-          field.name,
-          new DataViewField({ ...field, searchable: false, aggregatable: false })
-        );
+      let fld = this.fieldCache.get(field.name);
+      if (!fld) {
+        fld = new DataViewField({ ...field, searchable: false, aggregatable: false });
+      }
+      this.fieldCache.set(field.name, fld);
+      dataViewFields[field.name] = fld;
     });
     return dataViewFields;
   }
@@ -407,19 +402,20 @@ export class DataViewLazy extends AbstractDataView {
     const dataViewFields: Record<string, DataViewField> = {};
     response.fields.forEach((field) => {
       // keep existing field object, make sure content is fresh
-      const fld = this.fieldCache.get(field.name);
+      let fld = this.fieldCache.get(field.name);
       if (fld) {
         // get fresh attributes
         assign(fld.spec, field);
         fld.spec.runtimeField = undefined; // unset if it was a runtime field but now mapped
         fld.spec.isMapped = true;
+      } else {
+        fld = new DataViewField({
+          ...field,
+          shortDotsEnable: this.shortDotsEnable,
+        });
+        this.fieldCache.set(field.name, fld);
       }
-      dataViewFields[field.name] =
-        fld ||
-        this.fieldCache.set(
-          field.name,
-          new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
-        );
+      dataViewFields[field.name] = fld;
     });
 
     return dataViewFields;
@@ -571,7 +567,7 @@ export class DataViewLazy extends AbstractDataView {
 
   removeScriptedField(fieldName: string) {
     this.deleteScriptedFieldInternal(fieldName);
-    this.fieldCache.clear(fieldName);
+    this.fieldCache.delete(fieldName);
   }
 
   upsertScriptedField(field: FieldSpec) {
