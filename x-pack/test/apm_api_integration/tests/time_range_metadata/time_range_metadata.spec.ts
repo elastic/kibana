@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177541
-  registry.when.skip(
+  registry.when(
     'Time range metadata when generating summary data',
     { config: 'basic', archives: [] },
     () => {
@@ -148,7 +148,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177601
-  registry.when.skip(
+  registry.when(
     'Time range metadata when generating data',
     { config: 'basic', archives: [] },
     () => {
