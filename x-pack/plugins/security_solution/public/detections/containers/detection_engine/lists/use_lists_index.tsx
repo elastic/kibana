@@ -14,11 +14,10 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsPrivileges } from './use_lists_privileges';
 
 /**
- * retrieve index status from response
- * if error body is security solution and its status is 404
- * it means index is not created yet
+ * Determines whether an error response from the `readListIndex` 
+ * API call indicates that the index is not yet created. 
  */
-const isIndexNotCreated = (err: unknown) => {
+const isIndexNotCreatedError = (err: unknown) => {
   return isSecurityAppError(err) && err.body.status_code === 404;
 };
 
