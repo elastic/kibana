@@ -26,12 +26,12 @@ export function getLogsForDataset({
   dataset,
   to,
   count = 1,
-  includeMalformed = false,
+  isMalformed = false,
 }: {
   dataset: string;
   to: string;
   count?: number;
-  includeMalformed?: boolean;
+  isMalformed?: boolean;
 }) {
   return timerange(moment(to).subtract(count, 'minute'), moment(to))
     .interval('1m')
@@ -48,7 +48,7 @@ export function getLogsForDataset({
             CLUSTER[index % CLUSTER.length],
             CLOUD_PROVIDERS[index % CLOUD_PROVIDERS.length],
             CLOUD_REGION[index % CLOUD_REGION.length],
-            includeMalformed
+            isMalformed
           ),
         ]);
     });
@@ -90,7 +90,7 @@ export function getInitialTestLogs({ to, count = 1 }: { to: string; count?: numb
             CLUSTER[2],
             CLOUD_PROVIDERS[2],
             CLOUD_REGION[2],
-            true
+            false
           ),
         ]);
     });

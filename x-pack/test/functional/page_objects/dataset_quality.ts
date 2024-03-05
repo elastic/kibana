@@ -8,6 +8,7 @@
 import querystring from 'querystring';
 import rison from '@kbn/rison';
 import expect from '@kbn/expect';
+import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
@@ -27,12 +28,18 @@ const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
+  const euiSelectable = getService('selectable');
   const retry = getService('retry');
+  const find = getService('find');
+  const browser = getService('browser');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
     datasetQualityTableColumn: (column: number) =>
       `[data-test-subj="datasetQualityTable"] .euiTableRowCell:nth-child(${column})`,
+    datasetSearchInput: '[placeholder="Filter datasets"]',
+    showFullDatasetNamesSwitch: 'button[aria-label="Show full dataset names"]',
+    showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive datasets"]',
   };
 
   const testSubjectSelectors = {
@@ -44,14 +51,21 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
     datasetQualityFlyoutOpenInLogsExplorerButton: 'datasetQualityFlyoutOpenInLogsExplorerButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
+    datasetQualitySearchDatasetInput: 'datasetQualitySearchDatasetInput',
+    datasetQualityIntegrationsSelectable: 'datasetQualityIntegrationsSelectable',
+    datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
+    datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
 
+    superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
+    superDatePickerQuickMenu: 'superDatePickerQuickMenu',
     euiFlyoutCloseButton: 'euiFlyoutCloseButton',
   };
 
   return {
     selectors,
     testSubjectSelectors,
+    texts,
 
     async navigateTo({
       pageState,
@@ -76,6 +90,42 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           // in time before the app rewrites the URL
           ensureCurrentUrl: false,
         }
+      );
+    },
+
+    async parseSummaryPanel(): Promise<
+      Record<
+        | 'datasetHealthPoor'
+        | 'datasetHealthDegraded'
+        | 'datasetHealthGood'
+        | 'activeDatasets'
+        | 'estimatedData',
+        string
+      >
+    > {
+      const kpiTitleAndKeys = [
+        { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
+        { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
+        { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
+        { title: texts.activeDatasets, key: 'activeDatasets' },
+        { title: texts.estimatedData, key: 'estimatedData' },
+      ];
+
+      const kpiTexts = await Promise.all(
+        kpiTitleAndKeys.map(async ({ title, key }) => ({
+          key,
+          value: await testSubjects.getVisibleText(
+            `${testSubjectSelectors.datasetQualityDatasetHealthKpi}-${title}`
+          ),
+        }))
+      );
+
+      return kpiTexts.reduce(
+        (acc, { key, value }) => ({
+          ...acc,
+          [key]: value,
+        }),
+        {}
       );
     },
 
@@ -110,6 +160,22 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         'Last Activity',
         'Actions',
       ]);
+    },
+
+    async filterForIntegrations(integrations: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityIntegrationsSelectableButton,
+        testSubjectSelectors.datasetQualityIntegrationsSelectable,
+        integrations
+      );
+    },
+
+    async toggleShowInactiveDatasets() {
+      return find.clickByCssSelector(selectors.showInactiveDatasetsNamesSwitch);
+    },
+
+    async toggleShowFullDatasetNames() {
+      return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
     async openDatasetFlyout(datasetName: string) {
@@ -158,6 +224,42 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const elements = await getAllByText(flyoutContainer, elementSelector, text);
       return elements.length > 0;
+    },
+
+    async setDatePickerLastXUnits(
+      container: WebElementWrapper,
+      timeValue: number,
+      unit: TimeUnitId
+    ) {
+      await testSubjects.click(testSubjectSelectors.superDatePickerToggleQuickMenuButton);
+      const datePickerQuickMenu = await testSubjects.find(
+        testSubjectSelectors.superDatePickerQuickMenu
+      );
+
+      const timeTenseSelect = await datePickerQuickMenu.findByCssSelector(
+        `select[aria-label="Time tense"]`
+      );
+      const timeValueInput = await datePickerQuickMenu.findByCssSelector(
+        `input[aria-label="Time value"]`
+      );
+      const timeUnitSelect = await datePickerQuickMenu.findByCssSelector(
+        `select[aria-label="Time unit"]`
+      );
+
+      await timeTenseSelect.focus();
+      await timeTenseSelect.type('Last');
+
+      await timeValueInput.focus();
+      await timeValueInput.clearValue();
+      await timeValueInput.type(timeValue.toString());
+
+      await timeUnitSelect.focus();
+      await timeUnitSelect.type(unit);
+
+      await browser.pressKeys(browser.keys.ENTER);
+
+      // Close the date picker quick menu
+      return testSubjects.click(testSubjectSelectors.superDatePickerToggleQuickMenuButton);
     },
   };
 }
@@ -242,6 +344,16 @@ async function parseDatasetTable(tableWrapper: WebElementWrapper, columnNamesOrI
   return result;
 }
 
+/**
+ * Get all elements matching the given selector and text
+ * @example
+ * const container = await testSubjects.find('myContainer');
+ * const elements = await getAllByText(container, 'button', 'Click me');
+ *
+ * @param container { WebElementWrapper } The container to search within
+ * @param selector { string } The selector to search for (or filter elements by)
+ * @param text { string } The text to search for within the filtered elements
+ */
 export async function getAllByText(container: WebElementWrapper, selector: string, text: string) {
   const elements = await container.findAllByCssSelector(selector);
   const matchingElements: WebElementWrapper[] = [];
@@ -256,3 +368,12 @@ export async function getAllByText(container: WebElementWrapper, selector: strin
 
   return matchingElements;
 }
+
+const texts = {
+  noActivityText: 'No activity in the selected timeframe',
+  datasetHealthPoor: 'Poor',
+  datasetHealthDegraded: 'Degraded',
+  datasetHealthGood: 'Good',
+  activeDatasets: 'Active Datasets',
+  estimatedData: 'Estimated Data',
+};

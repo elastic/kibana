@@ -49,12 +49,76 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
       const lastActivityCol = cols['Last Activity'];
-      const lastAcivityColCellTexts = await lastActivityCol.getCellTexts();
-      expect(lastAcivityColCellTexts).to.eql([
-        'No activity in the selected timeframe',
-        'No activity in the selected timeframe',
-        'No activity in the selected timeframe',
+      const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
+      expect(lastActivityColCellTexts).to.eql([
+        PageObjects.datasetQuality.texts.noActivityText,
+        PageObjects.datasetQuality.texts.noActivityText,
+        PageObjects.datasetQuality.texts.noActivityText,
       ]);
+    });
+
+    it('shows degraded docs percentage', async () => {
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetNameCol = cols['Dataset Name'];
+      await datasetNameCol.sort('ascending');
+
+      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
+      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
+
+      // Index malformed document with current timestamp
+      await synthtrace.index(
+        getLogsForDataset({
+          to: Date.now(),
+          count: 1,
+          dataset: datasetNames[2],
+          isMalformed: true,
+        })
+      );
+
+      // Set time range to Last 5 minute
+      const filtersContainer = await testSubjects.find(
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFiltersContainer
+      );
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 5, 'm');
+
+      const updatedDegradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
+      expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
+    });
+
+    it('shows the updated size of the index', async () => {
+      const testDatasetIndex = 2;
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetNameCol = cols['Dataset Name'];
+      await datasetNameCol.sort('ascending');
+      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
+
+      const datasetToUpdateRowIndex = datasetNameColCellTexts.findIndex(
+        (dName: string) => dName === datasetNames[testDatasetIndex]
+      );
+
+      const sizeColCellTexts = await cols.Size.getCellTexts();
+      const beforeSize = sizeColCellTexts[datasetToUpdateRowIndex];
+
+      // Index documents with current timestamp
+      await synthtrace.index(
+        getLogsForDataset({
+          to: Date.now(),
+          count: 4,
+          dataset: datasetNames[testDatasetIndex],
+          isMalformed: false,
+        })
+      );
+
+      const colsAfterUpdate = await PageObjects.datasetQuality.parseDatasetTable();
+
+      // Assert that size has changed
+      await retry.tryForTime(15000, async () => {
+        // Refresh the table
+        await PageObjects.datasetQuality.refreshTable();
+        const updatedSizeColCellTexts = await colsAfterUpdate.Size.getCellTexts();
+        expect(updatedSizeColCellTexts[datasetToUpdateRowIndex]).to.not.eql(beforeSize);
+      });
     });
 
     it('sorts by dataset name', async () => {
@@ -117,6 +181,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetSelectorText =
         await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
       expect(datasetSelectorText).to.eql(datasetName);
+    });
+
+    it('shows the last activity when in time range', async () => {
+      await PageObjects.datasetQuality.navigateTo();
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const lastActivityCol = cols['Last Activity'];
+      const datasetNameCol = cols['Dataset Name'];
+
+      // Set time range to Last 1 minute
+      const filtersContainer = await testSubjects.find(
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFiltersContainer
+      );
+
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, '1', 's');
+      const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
+      expect(lastActivityColCellTexts).to.eql([
+        PageObjects.datasetQuality.texts.noActivityText,
+        PageObjects.datasetQuality.texts.noActivityText,
+        PageObjects.datasetQuality.texts.noActivityText,
+        PageObjects.datasetQuality.texts.noActivityText,
+      ]);
+
+      const datasetToUpdate = datasetNames[0];
+      await synthtrace.index(
+        getLogsForDataset({ to: new Date().toISOString(), count: 1, dataset: datasetToUpdate })
+      );
+      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
+      const datasetToUpdateRowIndex = datasetNameColCellTexts.findIndex(
+        (dName: string) => dName === datasetToUpdate
+      );
+
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 1, 'h');
+
+      await retry.tryForTime(5000, async () => {
+        const updatedLastActivityColCellTexts = await lastActivityCol.getCellTexts();
+        expect(updatedLastActivityColCellTexts[datasetToUpdateRowIndex]).to.not.eql(
+          PageObjects.datasetQuality.texts.noActivityText
+        );
+      });
+    });
+
+    it('hides inactive datasets', async () => {
+      // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const lastActivityCol = cols['Last Activity'];
+      const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
+      const activeDatasets = lastActivityColCellTexts.filter(
+        (activity) => activity !== PageObjects.datasetQuality.texts.noActivityText
+      );
+
+      await PageObjects.datasetQuality.toggleShowInactiveDatasets();
+      const rows = await PageObjects.datasetQuality.getDatasetTableRows();
+      expect(rows.length).to.eql(activeDatasets.length);
     });
   });
 }
