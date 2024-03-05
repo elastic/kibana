@@ -42,7 +42,7 @@ const disableDetectionRules = async (
 ): Promise<string[]> => {
   const detectionRulesIdsToDisable = await getDetectionRuleIdsToDisable(detectionRules);
   if (!detectionRulesIdsToDisable.length) return [];
-  const uniqueDetectionRulesIdsToDisable = [...new Set(detectionRulesIdsToDisable)];
+  const uniqueDetectionRulesIdsToDisable = [...new Set(detectionRulesIdsToDisable)]; // Prevent muting the same rule twice.
   await detectionRulesClient.bulkDisableRules({ ids: uniqueDetectionRulesIdsToDisable });
   return detectionRulesIdsToDisable;
 };
