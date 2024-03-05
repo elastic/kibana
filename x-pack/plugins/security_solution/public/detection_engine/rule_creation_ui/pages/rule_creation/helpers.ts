@@ -557,6 +557,7 @@ export const formatAboutStepData = (
     isAssociatedToEndpointList,
     isBuildingBlock,
     note,
+    setup,
     ruleNameOverride,
     threatIndicatorPath,
     timestampOverride,
@@ -610,8 +611,10 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
+    ...(!isEmpty(setup) ? { setup } : {}),
     ...rest,
   };
+  console.log(resp);
   return resp;
 };
 

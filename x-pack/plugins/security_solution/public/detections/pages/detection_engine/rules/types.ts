@@ -101,6 +101,7 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
+  setup: SetupGuide;
 }
 
 export interface AboutStepRuleDetails {

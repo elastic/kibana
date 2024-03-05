@@ -31,6 +31,7 @@ interface MarkdownEditorProps {
   height?: number;
   autoFocusDisabled?: boolean;
   setIsMarkdownInvalid: (value: boolean) => void;
+  includePlugins?: boolean;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -52,6 +53,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       height,
       autoFocusDisabled,
       setIsMarkdownInvalid,
+      includePlugins = true,
     },
     ref
   ) => {
@@ -73,8 +75,8 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
     const uiPluginsWithState = useMemo(() => {
-      return uiPlugins({ insightsUpsellingMessage });
-    }, [insightsUpsellingMessage]);
+      return includePlugins ? uiPlugins({ insightsUpsellingMessage }) : undefined;
+    }, [insightsUpsellingMessage, includePlugins]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {

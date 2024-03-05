@@ -128,6 +128,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/MaxSignals'
         threat:
           $ref: './common_attributes.schema.yaml#/components/schemas/ThreatArray'
+        setup:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
 
     BaseCreateProps:
       x-inline: true
@@ -174,7 +176,7 @@ components:
         revision:
           type: integer
           minimum: 0
-        # NOTE: For now, Related Integrations, Required Fields and Setup Guide are
+        # NOTE: For now, Related Integrations and Required Fields are
         # supported for prebuilt rules only. We don't want to allow users to edit these 3
         # fields via the API. If we added them to baseParams.defaultable, they would
         # become a part of the request schema as optional fields. This is why we add them
@@ -183,8 +185,6 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
         required_fields:
           $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
-        setup:
-          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
         execution_summary:
           $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
       required:
@@ -198,7 +198,6 @@ components:
         - revision
         - related_integrations
         - required_fields
-        - setup
 
     SharedCreateProps:
       x-inline: true
@@ -279,7 +278,7 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TiebreakerField'
         timestamp_field:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
-          
+
     EqlRuleCreateFields:
       allOf:
         - $ref: '#/components/schemas/EqlRequiredFields'

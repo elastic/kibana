@@ -212,7 +212,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -234,7 +234,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -261,7 +261,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
