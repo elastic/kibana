@@ -83,6 +83,7 @@ import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
+import { useMlIndexUtils } from '../util/index_service';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -375,6 +376,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
+  const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
   const {
@@ -448,7 +450,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService)
+      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService, mlIndexUtils)
         .then(({ sourceIndicesWithGeoFieldsMap, dataViews: dv }) => {
           setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap);
           setDataViews(dv);

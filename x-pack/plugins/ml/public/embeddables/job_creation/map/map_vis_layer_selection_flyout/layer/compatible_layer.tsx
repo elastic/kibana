@@ -58,6 +58,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
   const quickJobCreator = useMemo(
     () =>
       new QuickGeoJobCreator(
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,

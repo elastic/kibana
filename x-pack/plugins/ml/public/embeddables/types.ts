@@ -19,7 +19,10 @@ import type { AnomalyTimelineService } from '../application/services/anomaly_tim
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
-import type {
+import type { MlJobService } from '../application/services/job_service';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
@@ -32,6 +35,7 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlFieldFormatService } from '../application/services/field_format_service';
 import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
+import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -125,6 +129,7 @@ export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
+  mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
   mlApiServices?: MlApiServices;
 }
@@ -133,7 +138,9 @@ export interface SingleMetricViewerServices {
   anomalyExplorerService: AnomalyExplorerChartsService;
   anomalyDetectorService: AnomalyDetectorService;
   mlApiServices: MlApiServices;
+  mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
+  mlJobService: MlJobService;
   mlResultsService: MlResultsService;
   mlTimeSeriesSearchService?: MlTimeSeriesSeachService;
 }

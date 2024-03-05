@@ -76,7 +76,15 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...this.services[0] }}>
+          <KibanaContextProvider
+            services={{
+              mlServices: {
+                ...this.services[2],
+              },
+              ...this.services[0],
+              ...this.services[1],
+            }}
+          >
             <Suspense fallback={<EmbeddableLoading />}>
               <EmbeddableAnomalyChartsContainer
                 id={this.input.id}
