@@ -31,9 +31,7 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useStartServices } from '../../../../../../../../hooks';
-
-import { ExperimentalFeaturesService } from '../../../../../../services';
+import { useFleetStatus, useStartServices } from '../../../../../../../../hooks';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
@@ -91,6 +89,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     datastreams = [],
     isEditPage = false,
   }) => {
+    const fleetStatus = useFleetStatus();
+
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
@@ -100,11 +100,12 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
-    const { secretsStorage: secretsStorageEnabled } = ExperimentalFeaturesService.get();
+    const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
+    const useSecretsUI = secretsStorageEnabled && varDef.secret;
 
     let field: JSX.Element;
 
-    if (secretsStorageEnabled && varDef.secret) {
+    if (useSecretsUI) {
       field = (
         <SecretInputField
           varDef={varDef}
@@ -162,7 +163,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       </FormRow>
     );
 
-    return varDef.secret ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
+    return useSecretsUI ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
   }
 );
 

@@ -51,6 +51,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { isSecretStorageEnabled } from './secrets';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -227,6 +228,8 @@ async function createSetupSideEffects(
         apm.captureError(error);
       });
   }
+
+  const useSecretsStorage = await isSecretStorageEnabled(esClient, soClient);
 
   logger.info('Fleet setup completed');
 

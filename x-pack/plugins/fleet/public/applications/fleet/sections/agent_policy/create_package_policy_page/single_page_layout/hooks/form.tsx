@@ -340,6 +340,7 @@ export function useOnSubmit({
       } else {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
+
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
@@ -360,6 +361,9 @@ export function useOnSubmit({
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
+
+        // Maybe need to reset package policy form state here?
+
         onSaveNavigate(data!.item);
 
         notifications.toasts.addSuccess({

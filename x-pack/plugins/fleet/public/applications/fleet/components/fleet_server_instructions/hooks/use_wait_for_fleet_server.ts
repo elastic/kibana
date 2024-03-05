@@ -35,7 +35,7 @@ export const useWaitForFleetServer = () => {
             }
           } else {
             fleetStatus.setForceDisplayInstructions(true);
-            fleetStatus.refresh();
+            fleetStatus.refetch();
           }
         } catch (err) {
           notifications.toasts.addError(err, {
