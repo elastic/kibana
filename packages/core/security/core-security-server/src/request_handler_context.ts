@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type { CoreSecuritySetup, CoreSecurityStart } from './src/contracts';
-export type { CoreAuthenticationService } from './src/authc';
-export type {
-  CoreInternalSecurityContract,
-  InternalAuthenticationServiceContract,
-} from './src/api_provider';
-export type { SecurityRequestHandlerContext } from './src/request_handler_context';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+
+export interface SecurityRequestHandlerContext {
+  authc: AuthcRequestHandlerContext;
+}
+
+export interface AuthcRequestHandlerContext {
+  getCurrentUser(): AuthenticatedUser | null;
+}
