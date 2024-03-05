@@ -44,7 +44,7 @@ const disableDetectionRules = async (
   if (!detectionRulesIdsToDisable.length) return [];
   const uniqueDetectionRulesIdsToDisable = [...new Set(detectionRulesIdsToDisable)]; // Prevent muting the same rule twice.
   await detectionRulesClient.bulkDisableRules({ ids: uniqueDetectionRulesIdsToDisable });
-  return detectionRulesIdsToDisable;
+  return uniqueDetectionRulesIdsToDisable;
 };
 
 export const getDetectionRules = async (
