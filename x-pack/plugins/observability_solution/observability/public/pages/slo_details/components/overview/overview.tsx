@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   occurrencesBudgetingMethodSchema,
+  querySchema,
   rollingTimeWindowTypeSchema,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
@@ -147,7 +148,7 @@ export function Overview({ slo }: Props) {
             }
           />
         )}
-        {'good' in slo.indicator.params && (
+        {'good' in slo.indicator.params && querySchema.is(slo.indicator.params.good) && (
           <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.goodQueryTitle', {
               defaultMessage: 'Good query',
@@ -157,7 +158,7 @@ export function Overview({ slo }: Props) {
             }
           />
         )}
-        {'total' in slo.indicator.params && (
+        {'total' in slo.indicator.params && querySchema.is(slo.indicator.params.total) && (
           <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.totalQueryTitle', {
               defaultMessage: 'Total query',

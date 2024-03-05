@@ -15,20 +15,20 @@ import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
 const FilterItemI18n = injectI18n(FilterItem);
 
-export function DisplayQuery({ query, index }: { query: QuerySchema; index: string }) {
+export function DisplayQuery({ query, index }: { query?: QuerySchema; index: string }) {
   const { dataView } = useCreateDataView({
     indexPatternString: index,
   });
 
   const { docLinks, uiSettings } = useKibana().services;
 
-  if (typeof query === 'string') {
+  if (typeof query === 'string' || !query) {
     return query ? (
       <EuiCodeBlock language="json" paddingSize="s">
         {query}
       </EuiCodeBlock>
     ) : (
-      '*'
+      <>*</>
     );
   }
 
