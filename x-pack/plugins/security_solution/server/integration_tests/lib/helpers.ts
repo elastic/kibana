@@ -124,6 +124,6 @@ export function updateTimestamps(data: object[]): object[] {
   const currentTimeMillis = new Date().getTime();
   return data.map((d, i) => {
     // wait a couple of millisecs to not make timestamps overlap
-    return { ...d, '@timestamp': new Date(currentTimeMillis + i * 50) };
+    return { ...d, '@timestamp': new Date(currentTimeMillis + (i + 1) * 100) };
   });
 }

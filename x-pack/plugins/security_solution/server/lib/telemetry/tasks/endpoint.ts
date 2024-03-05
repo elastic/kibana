@@ -10,13 +10,16 @@ import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { ITelemetryEventsSender } from '../sender';
 import {
-  type EndpointMetadataAggregation,
-  type EndpointMetadataDocument,
-  type Nullable,
-  type FleetAgentResponse,
-  TelemetryCounter,
   TelemetryChannel,
+  TelemetryCounter,
+  type EndpointMetadataDocument,
+  type EndpointMetricDocument,
+  type EndpointMetricsAbstract,
   type EndpointPolicyResponseDocument,
+  type ESClusterInfo,
+  type ESLicense,
+  type FleetAgentResponse,
+  type Nullable,
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -83,12 +86,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           taskExecutionPeriod.current
         );
 
-        /** STAGE 1 - Fetch Endpoint Agent Metrics
-         *
-         * Reads Endpoint Agent metrics out of the `.ds-metrics-endpoint.metrics` data stream
-         * and buckets them by Endpoint Agent id and sorts by the top hit. The EP agent will
-         * report its metrics once per day OR every time a policy change has occured. If
-         * a metric document(s) exists for an EP agent we map to fleet agent and policy
+        /**
+         * STAGE 1 - Fetch Endpoint Agent Metrics
+         * If no metrics exist, then abort execution.
          */
         if (endpointData.endpointMetrics.totalEndpoints === 0) {
           log.l('no endpoint metrics to report');
@@ -105,32 +105,13 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           incrementBy: endpointData.endpointMetrics.totalEndpoints,
         });
 
-        /** STAGE 2 - Fetch Fleet Agent Config
-         *
-         * As the policy id + policy version does not exist on the Endpoint Metrics document
-         * we need to fetch information about the Fleet Agent and sync the metrics document
-         * with the Agent's policy data.
-         *
+        /**
+         * STAGE 2 - Fetch Fleet Agent Config
          */
-        const agentsResponse = endpointData.fleetAgentsResponse;
+        const policyInfoByAgent = endpointData.fleetAgentsResponse;
 
-        if (agentsResponse === undefined || agentsResponse === null) {
-          log.l('no fleet agent information available');
-          taskMetricsService.end(trace);
-          return 0;
-        }
-
-        const policyInfoByAgent = agentsResponse.agents.reduce((cache, agent) => {
-          if (agent.id === DefaultEndpointPolicyIdToIgnore) {
-            return cache;
-          }
-
-          if (agent.policy_id !== null && agent.policy_id !== undefined) {
-            cache.set(agent.id, agent.policy_id);
-          }
-
-          return cache;
-        }, new Map<string, string>());
+        // Ignore policy used while installing the endpoint agent
+        policyInfoByAgent.delete(DefaultEndpointPolicyIdToIgnore);
 
         const endpointPolicyById = await endpointPolicies(policyInfoByAgent.values(), receiver);
 
@@ -139,34 +120,13 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          */
         const policyResponses = endpointData.epPolicyResponse;
 
-        /** STAGE 4 - Fetch Endpoint Agent Metadata
-         *
-         * Reads Endpoint Agent metadata out of the `.ds-metrics-endpoint.metadata` data stream
-         * and buckets them by Endpoint Agent id and sorts by the top hit. The EP agent will
-         * report its metadata once per day OR every time a policy change has occured. If
-         * a metadata document(s) exists for an EP agent we map to fleet agent and policy
+        /**
+         * STAGE 4 - Fetch Endpoint Agent Metadata
          */
-        if (endpointData.endpointMetadata === undefined) {
+        const endpointMetadata = endpointData.endpointMetadata;
+        if (endpointMetadata.size === 0) {
           log.l(`no endpoint metadata to report`);
         }
-
-        const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
-          body: EndpointMetadataAggregation;
-        };
-
-        if (endpointMetadataResponse.aggregations === undefined) {
-          log.l(`no endpoint metadata to report`);
-        }
-
-        const endpointMetadata =
-          endpointMetadataResponse.aggregations.endpoint_metadata.buckets.reduce(
-            (cache, endpointAgentId) => {
-              const doc = endpointAgentId.latest_metadata.hits.hits[0];
-              cache.set(endpointAgentId.key, doc);
-              return cache;
-            },
-            new Map<string, EndpointMetadataDocument>()
-          );
 
         /** STAGE 5 - Create the telemetry log records
          *
@@ -176,95 +136,23 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          *
          */
         try {
-          const endpointMetrics = [];
+          const telemetryPayloads = [];
           for await (const metrics of receiver.fetchEndpointMetricsById(
             endpointData.endpointMetrics.endpointMetricIds
           )) {
-            endpointMetrics.push(...metrics);
+            const payloads = metrics.map((endpointMetric) =>
+              mapEndpointMetric(
+                endpointMetric,
+                policyInfoByAgent,
+                endpointPolicyById,
+                policyResponses,
+                endpointMetadata,
+                taskExecutionPeriod,
+                clusterData
+              )
+            );
+            telemetryPayloads.push(...payloads);
           }
-
-          const telemetryPayloads = endpointMetrics.map((endpointMetric) => {
-            let policyConfig = null;
-            let failedPolicy: Nullable<EndpointPolicyResponseDocument> = null;
-            let endpointMetadataById = null;
-
-            const fleetAgentId = endpointMetric.elastic.agent.id;
-            const endpointAgentId = endpointMetric.agent.id;
-
-            const policyInformation = policyInfoByAgent.get(fleetAgentId);
-            if (policyInformation) {
-              policyConfig = endpointPolicyById.get(policyInformation) || null;
-
-              if (policyConfig) {
-                failedPolicy = policyResponses.get(endpointAgentId);
-              }
-            }
-
-            if (endpointMetadata) {
-              endpointMetadataById = endpointMetadata.get(endpointAgentId);
-            }
-
-            const {
-              cpu,
-              memory,
-              uptime,
-              documents_volume: documentsVolume,
-              malicious_behavior_rules: maliciousBehaviorRules,
-              system_impact: systemImpact,
-              threads,
-              event_filter: eventFilter,
-            } = endpointMetric.Endpoint.metrics;
-            const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
-            if (endpointPolicyDetail) {
-              endpointPolicyDetail.value = addDefaultAdvancedPolicyConfigSettings(
-                endpointPolicyDetail.value
-              );
-            }
-            return {
-              '@timestamp': taskExecutionPeriod.current,
-              cluster_uuid: clusterData.clusterInfo.cluster_uuid,
-              cluster_name: clusterData.clusterInfo.cluster_name,
-              license_id: clusterData.licenseInfo?.uid,
-              endpoint_id: endpointAgentId,
-              endpoint_version: endpointMetric.agent.version,
-              endpoint_package_version: policyConfig?.package?.version || null,
-              endpoint_metrics: {
-                cpu: cpu.endpoint,
-                memory: memory.endpoint.private,
-                uptime,
-                documentsVolume,
-                maliciousBehaviorRules,
-                systemImpact,
-                threads,
-                eventFilter,
-              },
-              endpoint_meta: {
-                os: endpointMetric.host.os,
-                capabilities:
-                  endpointMetadataById !== null && endpointMetadataById !== undefined
-                    ? endpointMetadataById._source.Endpoint.capabilities
-                    : [],
-              },
-              policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
-              policy_response:
-                failedPolicy !== null && failedPolicy !== undefined
-                  ? {
-                      agent_policy_status: failedPolicy.event.agent_id_status,
-                      manifest_version:
-                        failedPolicy.Endpoint.policy.applied.artifacts.global.version,
-                      status: failedPolicy.Endpoint.policy.applied.status,
-                      actions: failedPolicy.Endpoint.policy.applied.actions
-                        .map((action) => (action.status !== 'success' ? action : null))
-                        .filter((action) => action !== null),
-                      configuration: failedPolicy.Endpoint.configuration,
-                      state: failedPolicy.Endpoint.state,
-                    }
-                  : {},
-              telemetry_meta: {
-                metrics_timestamp: endpointMetric['@timestamp'],
-              },
-            };
-          });
 
           log.l(`sending ${telemetryPayloads.length} endpoint telemetry records`);
 
@@ -296,7 +184,12 @@ async function fetchEndpointData(
   receiver: ITelemetryReceiver,
   executeFrom: string,
   executeTo: string
-) {
+): Promise<{
+  fleetAgentsResponse: Map<string, string>;
+  endpointMetrics: EndpointMetricsAbstract;
+  epPolicyResponse: Map<string, EndpointPolicyResponseDocument>;
+  endpointMetadata: Map<string, EndpointMetadataDocument>;
+}> {
   const [fleetAgentsResponse, epMetricsAbstractResponse, policyResponse, endpointMetadata] =
     await Promise.allSettled([
       receiver.fetchFleetAgents(),
@@ -313,7 +206,9 @@ async function fetchEndpointData(
   };
 }
 
-async function fetchClusterData(receiver: ITelemetryReceiver) {
+async function fetchClusterData(
+  receiver: ITelemetryReceiver
+): Promise<{ clusterInfo: ESClusterInfo; licenseInfo: Nullable<ESLicense> }> {
   const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
     receiver.fetchClusterInfo(),
     receiver.fetchLicenseInfo(),
@@ -332,29 +227,117 @@ async function endpointPolicies(policies: IterableIterator<string>, receiver: IT
       let agentPolicy: Nullable<AgentPolicy>;
       try {
         agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
-      } catch (err) {
-        // log.error(`error fetching policy config due to ${err?.message}`, err);
-      }
-      const packagePolicies = agentPolicy?.package_policies;
+        const packagePolicies = agentPolicy?.package_policies;
 
-      if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
-        packagePolicies
-          .map((pPolicy) => pPolicy as PolicyData)
-          .forEach((pPolicy) => {
-            if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
-              pPolicy.inputs.forEach((input) => {
-                if (
-                  input.type === FLEET_ENDPOINT_PACKAGE &&
-                  input?.config !== undefined &&
-                  policyInfo !== undefined
-                ) {
-                  endpointPolicyCache.set(policyInfo, pPolicy);
-                }
-              });
-            }
-          });
+        if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
+          packagePolicies
+            .map((pPolicy) => pPolicy as PolicyData)
+            .forEach((pPolicy) => {
+              if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
+                pPolicy.inputs.forEach((input) => {
+                  if (
+                    input.type === FLEET_ENDPOINT_PACKAGE &&
+                    input?.config !== undefined &&
+                    policyInfo !== undefined
+                  ) {
+                    endpointPolicyCache.set(policyInfo, pPolicy);
+                  }
+                });
+              }
+            });
+        }
+      } catch (err) {
+        // just ignore the error and continue
       }
     }
   }
   return endpointPolicyCache;
+}
+
+function mapEndpointMetric(
+  endpointMetric: EndpointMetricDocument,
+  policyInfoByAgent: Map<string, string>,
+  endpointPolicyById: Map<string, PolicyData>,
+  policyResponses: Map<string, EndpointPolicyResponseDocument>,
+  endpointMetadata: Map<string, EndpointMetadataDocument>,
+  taskExecutionPeriod: TaskExecutionPeriod,
+  clusterData: { clusterInfo: ESClusterInfo; licenseInfo: Nullable<ESLicense> }
+) {
+  let policyConfig = null;
+  let failedPolicy: Nullable<EndpointPolicyResponseDocument> = null;
+  let endpointMetadataById = null;
+
+  const fleetAgentId = endpointMetric.elastic.agent.id;
+  const endpointAgentId = endpointMetric.agent.id;
+
+  const policyInformation = policyInfoByAgent.get(fleetAgentId);
+  if (policyInformation) {
+    policyConfig = endpointPolicyById.get(policyInformation) || null;
+
+    if (policyConfig) {
+      failedPolicy = policyResponses.get(endpointAgentId);
+    }
+  }
+
+  if (endpointMetadata) {
+    endpointMetadataById = endpointMetadata.get(endpointAgentId);
+  }
+
+  const {
+    cpu,
+    memory,
+    uptime,
+    documents_volume: documentsVolume,
+    malicious_behavior_rules: maliciousBehaviorRules,
+    system_impact: systemImpact,
+    threads,
+    event_filter: eventFilter,
+  } = endpointMetric.Endpoint.metrics;
+  const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
+  if (endpointPolicyDetail) {
+    endpointPolicyDetail.value = addDefaultAdvancedPolicyConfigSettings(endpointPolicyDetail.value);
+  }
+  return {
+    '@timestamp': taskExecutionPeriod.current,
+    cluster_uuid: clusterData.clusterInfo.cluster_uuid,
+    cluster_name: clusterData.clusterInfo.cluster_name,
+    license_id: clusterData.licenseInfo?.uid,
+    endpoint_id: endpointAgentId,
+    endpoint_version: endpointMetric.agent.version,
+    endpoint_package_version: policyConfig?.package?.version || null,
+    endpoint_metrics: {
+      cpu: cpu.endpoint,
+      memory: memory.endpoint.private,
+      uptime,
+      documentsVolume,
+      maliciousBehaviorRules,
+      systemImpact,
+      threads,
+      eventFilter,
+    },
+    endpoint_meta: {
+      os: endpointMetric.host.os,
+      capabilities:
+        endpointMetadataById !== null && endpointMetadataById !== undefined
+          ? endpointMetadataById.Endpoint.capabilities
+          : [],
+    },
+    policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
+    policy_response:
+      failedPolicy !== null && failedPolicy !== undefined
+        ? {
+            agent_policy_status: failedPolicy.event.agent_id_status,
+            manifest_version: failedPolicy.Endpoint.policy.applied.artifacts.global.version,
+            status: failedPolicy.Endpoint.policy.applied.status,
+            actions: failedPolicy.Endpoint.policy.applied.actions
+              .map((action) => (action.status !== 'success' ? action : null))
+              .filter((action) => action !== null),
+            configuration: failedPolicy.Endpoint.configuration,
+            state: failedPolicy.Endpoint.state,
+          }
+        : {},
+    telemetry_meta: {
+      metrics_timestamp: endpointMetric['@timestamp'],
+    },
+  };
 }

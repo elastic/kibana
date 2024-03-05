@@ -311,24 +311,22 @@ export interface EndpointMetadataAggregation {
 interface EndpointMetadataHits {
   hits: {
     total: { value: number };
-    hits: EndpointMetadataDocument[];
+    hits: Array<{ _source: EndpointMetadataDocument }>;
   };
 }
 
 export interface EndpointMetadataDocument {
-  _source: {
-    '@timestamp': string;
+  '@timestamp': string;
+  agent: {
+    id: string;
+    version: string;
+  };
+  Endpoint: {
+    capabilities: string[];
+  };
+  elastic: {
     agent: {
       id: string;
-      version: string;
-    };
-    Endpoint: {
-      capabilities: string[];
-    };
-    elastic: {
-      agent: {
-        id: string;
-      };
     };
   };
 }

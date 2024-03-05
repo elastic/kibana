@@ -73,11 +73,12 @@ import type {
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
   Nullable,
-  FleetAgentResponse,
   EndpointMetricsAggregation,
   EndpointMetricsAbstract,
   EndpointPolicyResponseDocument,
   EndpointPolicyResponseAggregation,
+  EndpointMetadataAggregation,
+  EndpointMetadataDocument,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
@@ -104,7 +105,12 @@ export interface ITelemetryReceiver {
 
   fetchDetectionRulesPackageVersion(): Promise<Nullable<Installation>>;
 
-  fetchFleetAgents(): Promise<Nullable<FleetAgentResponse>>;
+  /**
+   * As the policy id + policy version does not exist on the Endpoint Metrics document
+   * we need to fetch information about the Fleet Agent and sync the metrics document
+   * with the Agent's policy data. This method maps policy info by agent id.
+   */
+  fetchFleetAgents(): Promise<Map<string, string>>;
 
   /**
    * Reads Endpoint Agent policy responses out of the `.ds-metrics-endpoint.policy*` data
@@ -120,6 +126,12 @@ export interface ITelemetryReceiver {
     executeTo: string
   ): Promise<Map<string, EndpointPolicyResponseDocument>>;
 
+  /**
+   * Reads Endpoint Agent metrics out of the `.ds-metrics-endpoint.metrics` data stream
+   * and buckets them by Endpoint Agent id and sorts by the top hit. The EP agent will
+   * report its metrics once per day OR every time a policy change has occured. If
+   * a metric document(s) exists for an EP agent we map to fleet agent and policy.
+   */
   fetchEndpointMetricsAbstract(
     executeFrom: string,
     executeTo: string
@@ -127,12 +139,16 @@ export interface ITelemetryReceiver {
 
   fetchEndpointMetricsById(ids: string[]): AsyncGenerator<EndpointMetricDocument[], void, unknown>;
 
+  /**
+   * Reads Endpoint Agent metadata out of the `.ds-metrics-endpoint.metadata` data stream
+   * and buckets them by Endpoint Agent id and sorts by the top hit. The EP agent will
+   * report its metadata once per day OR every time a policy change has occured.
+   * If a metadata document(s) exists for an EP agent we map to fleet agent and policy.
+   */
   fetchEndpointMetadata(
     executeFrom: string,
     executeTo: string
-  ): Promise<
-    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
-  >;
+  ): Promise<Map<string, EndpointMetadataDocument>>;
 
   fetchDiagnosticAlertsBatch(
     executeFrom: string,
@@ -277,17 +293,31 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.packageService?.asInternalUser.getInstallation(PREBUILT_RULES_PACKAGE_NAME);
   }
 
-  public async fetchFleetAgents(): Promise<Nullable<FleetAgentResponse>> {
+  public async fetchFleetAgents() {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve fleet agents');
     }
 
-    return this.agentClient?.listAgents({
-      perPage: this.maxRecords,
-      showInactive: true,
-      sortField: 'enrolled_at',
-      sortOrder: 'desc',
-    });
+    return (
+      this.agentClient
+        ?.listAgents({
+          perPage: this.maxRecords,
+          showInactive: true,
+          sortField: 'enrolled_at',
+          sortOrder: 'desc',
+        })
+        .then((response) => {
+          const agents = response?.agents ?? [];
+
+          return agents.reduce((cache, agent) => {
+            if (agent.policy_id !== null && agent.policy_id !== undefined) {
+              cache.set(agent.id, agent.policy_id);
+            }
+
+            return cache;
+          }, new Map<string, string>());
+        }) ?? new Map()
+    );
   }
 
   public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
@@ -341,21 +371,19 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    const response = await this.esClient().search(query, { meta: true });
-    const { body: failedPolicyResponses } = response as unknown as {
-      body: EndpointPolicyResponseAggregation;
-    };
+    return this.esClient()
+      .search(query, { meta: true })
+      .then((response) => response.body as unknown as EndpointPolicyResponseAggregation)
+      .then((failedPolicyResponses) => {
+        const buckets = failedPolicyResponses?.aggregations?.policy_responses?.buckets ?? [];
 
-    if (!failedPolicyResponses) {
-      return new Map();
-    }
-
-    // If there is no policy responses in the 24h > now then we will continue
-    return failedPolicyResponses.aggregations?.policy_responses?.buckets.reduce(
-      (cache, endpointAgentId) =>
-        cache.set(endpointAgentId.key, endpointAgentId.latest_response.hits.hits[0]._source),
-      new Map<string, EndpointPolicyResponseDocument>()
-    );
+        // If there is no policy responses in the 24h > now then we will continue
+        return buckets.reduce(
+          (cache, endpointAgentId) =>
+            cache.set(endpointAgentId.key, endpointAgentId.latest_response.hits.hits[0]._source),
+          new Map<string, EndpointPolicyResponseDocument>()
+        );
+      });
   }
 
   public async fetchEndpointMetricsAbstract(executeFrom: string, executeTo: string) {
@@ -408,21 +436,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     return this.esClient()
       .search(query, { meta: true })
-      .then((response) => {
-        const { body: endpointMetricsResponse } = response as unknown as {
-          body: EndpointMetricsAggregation;
-        };
+      .then((response) => response.body as unknown as EndpointMetricsAggregation)
+      .then((endpointMetricsResponse) => {
+        const buckets = endpointMetricsResponse?.aggregations?.endpoint_agents?.buckets ?? [];
 
-        if (endpointMetricsResponse.aggregations !== undefined) {
-          const endpointMetricIds =
-            endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
-              (epMetrics) => epMetrics.latest_metrics.hits.hits[0]._id
-            );
-          const totalEndpoints = endpointMetricsResponse.aggregations.endpoint_count.value;
-          return { endpointMetricIds, totalEndpoints };
-        }
+        const endpointMetricIds = buckets.map(
+          (epMetrics) => epMetrics.latest_metrics.hits.hits[0]._id
+        );
+        const totalEndpoints = buckets.length;
 
-        return { endpointMetricIds: [], totalEndpoints: 0 };
+        return { endpointMetricIds, totalEndpoints };
       });
   }
 
@@ -435,7 +458,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
       _source: {
-        includes: ['agent', 'Endpoint.metrics', 'elastic.agent', 'host', 'event'],
+        includes: ['@timestamp', 'agent', 'Endpoint.metrics', 'elastic.agent', 'host', 'event'],
       },
     };
 
@@ -467,6 +490,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               latest_metadata: {
                 top_hits: {
                   size: 1,
+                  _source: {
+                    includes: ['@timestamp', 'agent', 'Endpoint.capabilities', 'elastic.agent'],
+                  },
                   sort: [
                     {
                       '@timestamp': {
@@ -482,7 +508,18 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient().search(query, { meta: true });
+    return this.esClient()
+      .search(query, { meta: true })
+      .then((response) => response.body as unknown as EndpointMetadataAggregation)
+      .then((endpointMetadataResponse) => {
+        const buckets = endpointMetadataResponse?.aggregations?.endpoint_metadata?.buckets ?? [];
+
+        return buckets.reduce((cache, endpointAgentId) => {
+          const doc = endpointAgentId.latest_metadata.hits.hits[0]._source;
+          cache.set(endpointAgentId.key, doc);
+          return cache;
+        }, new Map<string, EndpointMetadataDocument>());
+      });
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
