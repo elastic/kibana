@@ -7,7 +7,7 @@
 
 import { asyncForEach } from '@kbn/std';
 import type { PublishesDataViews } from '@kbn/presentation-publishing';
-import { type HasMapConfig } from '@kbn/maps-plugin/public';
+import { type MapApi } from '@kbn/maps-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
@@ -27,7 +27,7 @@ export class VisualizationExtractor {
   constructor() {}
 
   public async getResultLayersFromEmbeddable(
-    embeddable: HasMapConfig & Partial<PublishesDataViews>
+    embeddable: MapApi & Partial<PublishesDataViews>
   ): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
     const dataViews: DataView[] = embeddable.dataViews?.value ?? [];

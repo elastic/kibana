@@ -12,21 +12,21 @@ import type {
   PublishesPanelTitle,
   PublishesLocalUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType, apiPublishesLocalUnifiedSearch, apiPublishesPanelTitle } from '@kbn/presentation-publishing';
 import type { ILayer } from '../classes/layers/layer';
 
-export type HasMapConfig = HasType<'map'> & {
-  getLayerList: () => ILayer[];
-};
-
-export type MapApi = HasMapConfig &
+export type MapApi = HasType<'map'> &
+  {
+    getLayerList: () => ILayer[];
+  } &
   PublishesDataViews &
   PublishesPanelTitle &
   PublishesLocalUnifiedSearch &
   Partial<HasParentApi<unknown>>;
 
-export const apiHasMapConfig = (api: unknown): api is MapApi => {
+export const isMapApi = (api: unknown): api is MapApi => {
   return Boolean(
-    api && apiIsOfType(api, 'map') && typeof (api as HasMapConfig).getLayerList === 'function'
+    api && apiIsOfType(api, 'map') && typeof (api as MapApi).getLayerList === 'function' &&
+    apiPublishesPanelTitle(api) && apiPublishesLocalUnifiedSearch(api)
   );
 };
