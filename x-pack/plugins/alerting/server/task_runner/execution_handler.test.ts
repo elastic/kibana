@@ -26,7 +26,6 @@ import {
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
@@ -38,6 +37,7 @@ import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskRunnerContext } from './types';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),

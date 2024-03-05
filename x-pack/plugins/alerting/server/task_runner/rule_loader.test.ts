@@ -10,7 +10,7 @@ import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 import { getRuleAttributes, getFakeKibanaRequest, validateRule } from './rule_loader';
-import { TaskRunnerContext } from './task_runner_factory';
+import { TaskRunnerContext } from './types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import { Rule } from '../types';

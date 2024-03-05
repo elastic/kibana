@@ -19,7 +19,7 @@ import {
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import { TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
   RuleExecutionStatusErrorReasons,
