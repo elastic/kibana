@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React from 'react';
 import { combineLatest, debounceTime, of, ReplaySubject, takeUntil } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -31,7 +31,7 @@ import {
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import { getSideNavComponent } from './side_navigation';
+import { SideNavComponent } from './side_navigation';
 
 export class NavigationPublicPlugin
   implements
@@ -148,10 +148,12 @@ export class NavigationPublicPlugin
     ) => SolutionNavigationDefinition['sideNavComponentGetter'] = (navTree, id) => () => {
       project.initNavigation(of(navTree), { cloudUrls: cloud });
 
-      return getSideNavComponent({
-        navProps: { navigationTree$: navigationTreeUi$ },
-        deps: { core, activeNodes$: activeNavigationNodes$ },
-      });
+      return () => (
+        <SideNavComponent
+          navProps={{ navigationTree$: navigationTreeUi$ }}
+          deps={{ core, activeNodes$: activeNavigationNodes$ }}
+        />
+      );
     };
 
     const solutionNavs: SolutionNavigationDefinitions = {
