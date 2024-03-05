@@ -57,6 +57,7 @@ export const WorkplaceSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       isLoading={isLoading}
+      hideEmbeddedConsole
     >
       <SendWorkplaceSearchTelemetry action="viewed" metric="Workplace Search Gate form" />
 

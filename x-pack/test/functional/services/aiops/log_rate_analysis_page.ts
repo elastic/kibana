@@ -152,9 +152,8 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
     },
 
     async clickLogRateAnalysisResultsGroupSwitchOn() {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
-
       await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
         await testSubjects.existOrFail('aiopsLogRateAnalysisGroupSwitch checked');
       });
     },
@@ -245,7 +244,8 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async assertAnalysisComplete(
       analysisType: LogRateAnalysisType,
-      dataGenerator: LogRateAnalysisDataGenerator
+      dataGenerator: LogRateAnalysisDataGenerator,
+      noResults = false
     ) {
       const dataGeneratorParts = dataGenerator.split('_');
       const zeroDocsFallback = dataGeneratorParts.includes('zerodocsfallback');
@@ -253,6 +253,11 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
         await testSubjects.existOrFail('aiopsAnalysisComplete');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
         expect(currentProgressTitle).to.be('Analysis complete');
+
+        if (noResults) {
+          await testSubjects.existOrFail('aiopsNoResultsFoundEmptyPrompt');
+          return;
+        }
 
         await testSubjects.existOrFail('aiopsAnalysisTypeCalloutTitle');
         const currentAnalysisTypeCalloutTitle = await testSubjects.getVisibleText(

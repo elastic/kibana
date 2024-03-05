@@ -17,11 +17,10 @@ import type { ExpandedDetailType } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   contextId: string;
@@ -95,10 +94,6 @@ const HostNameComponent: React.FC<Props> = ({
                 tabType: tabType as TimelineTabs,
               })
             );
-          }
-
-          if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-            activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
           }
         }
       }

@@ -38,6 +38,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
+    showAIPlayground: false,
   },
   appSearch: {
     accountId: 'some-id-string',

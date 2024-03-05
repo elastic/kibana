@@ -254,7 +254,9 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; }; objectType: string; title: string; version: string; pagingStrategy?: \"scroll\" | \"pit\" | undefined; }>"
+              "> | undefined; zoom?: number | undefined; }; objectType: string; title: string; version: string; pagingStrategy?: ",
+              "CsvPagingStrategy",
+              " | undefined; }>"
             ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
             "deprecated": false,
@@ -663,7 +665,9 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; }; browserTimezone: string; objectType: string; title: string; version: string; pagingStrategy?: \"scroll\" | \"pit\" | undefined; }>"
+              "> | undefined; zoom?: number | undefined; }; browserTimezone: string; objectType: string; title: string; version: string; pagingStrategy?: ",
+              "CsvPagingStrategy",
+              " | undefined; }>"
             ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
             "deprecated": false,

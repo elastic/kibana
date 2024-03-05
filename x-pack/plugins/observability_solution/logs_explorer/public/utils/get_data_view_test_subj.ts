@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-const BASE_DATA_VIEW_TEST_SUBJ = 'logExplorerDataView';
+const BASE_DATA_VIEW_TEST_SUBJ = 'logsExplorerDataView';
 
 const publicDataViewPatternsSet = new Set(['logs-*', 'logstash-*', 'filebeat-*']);
 
-export const getDataViewTestSubj = (title: string) => {
+export const getDataViewTestSubj = (title: string = '') => {
   if (publicDataViewPatternsSet.has(title)) {
     return [BASE_DATA_VIEW_TEST_SUBJ, cleanTitle(title)].join('_');
   }

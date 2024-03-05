@@ -7,14 +7,14 @@
 
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { LogExplorerDiscoverServices } from '../../controller';
+import { LogsExplorerDiscoverServices } from '../../controller';
 import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
 import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../common/constants';
 import { Content } from './content';
 import { Resource } from './resource';
 
 export const renderCell =
-  (type: string, { data }: { data: LogExplorerDiscoverServices['data'] }) =>
+  (type: string, { data }: { data: LogsExplorerDiscoverServices['data'] }) =>
   (props: DataGridCellValueElementProps) => {
     const { dataView } = props;
     const virtualColumnServices = {

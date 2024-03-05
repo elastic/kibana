@@ -43,7 +43,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { version, source_uri: sourceUri, force } = request.body;
+  const { version, source_uri: sourceUri, force, skipRateLimitCheck } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   const latestAgentVersion = await getLatestAvailableVersion();
   try {
@@ -81,7 +81,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       .utc(moment.duration(timeToWaitMs).asMilliseconds())
       .format('mm[m]ss[s]');
 
-    if (hasBeenUpgradedRecently) {
+    if (!skipRateLimitCheck && hasBeenUpgradedRecently) {
       return response.customError({
         statusCode: 429,
         body: {
@@ -112,7 +112,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       });
     }
 
-    if (!force && !isAgentUpgradeableToVersion(agent, version)) {
+    if (!force && !skipRateLimitCheck && !isAgentUpgradeableToVersion(agent, version)) {
       return response.customError({
         statusCode: 400,
         body: {
@@ -153,6 +153,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     source_uri: sourceUri,
     agents,
     force,
+    skipRateLimitCheck,
     rollout_duration_seconds: upgradeDurationSeconds,
     start_time: startTime,
     batchSize,
@@ -178,6 +179,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       sourceUri,
       version,
       force,
+      skipRateLimitCheck,
       upgradeDurationSeconds,
       startTime,
       batchSize,
@@ -223,7 +225,7 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
 };
 
 // Check the installed fleet server version
-const checkFleetServerVersion = (
+export const checkFleetServerVersion = (
   versionToUpgradeNumber: string,
   fleetServerAgents: Agent[],
   force = false
@@ -238,9 +240,13 @@ const checkFleetServerVersion = (
     return;
   }
 
-  if (!force && semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
-    throw new AgentRequestInvalidError(
-      `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
+  ) {
+    throw new Error(
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 

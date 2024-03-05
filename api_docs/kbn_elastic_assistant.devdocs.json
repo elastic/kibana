@@ -1456,7 +1456,7 @@
           "\nThis interface is used to pass a default or base set of contexts to the Elastic AI Assistant when\ninitializing it. This is used to provide 'category' options when users create Quick Prompts.\nAlso, useful for collating all of a solutions' prompts in one place.\n\ne.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx"
         ],
         "signature": [
-          "{ description: string; category: string; tooltip: React.ReactNode; suggestedUserPrompt?: string | undefined; }"
+          "{ category: string; description: string; tooltip: React.ReactNode; suggestedUserPrompt?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
         "deprecated": false,

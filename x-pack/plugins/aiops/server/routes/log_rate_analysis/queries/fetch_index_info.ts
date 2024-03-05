@@ -16,7 +16,7 @@ import { getRandomDocsRequest } from './get_random_docs_request';
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
 // TODO Consolidate with duplicate `fetchPValues` in
-// `x-pack/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
+// `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,

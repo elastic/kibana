@@ -43,7 +43,6 @@ export class IndexMgmtUIPlugin {
       enableIndexStats,
       editableIndexSettings,
       enableDataStreamsStorageColumn,
-      enableEmbeddedConsole,
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
@@ -55,7 +54,6 @@ export class IndexMgmtUIPlugin {
         enableIndexStats: enableIndexStats ?? true,
         editableIndexSettings: editableIndexSettings ?? 'all',
         enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
-        enableEmbeddedConsole: enableEmbeddedConsole ?? false,
       };
       management.sections.section.data.registerApp({
         id: PLUGIN.id,

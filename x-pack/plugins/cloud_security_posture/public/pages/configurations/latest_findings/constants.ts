@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { GroupOption } from '@kbn/securitysolution-grouping';
+import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
 
@@ -15,13 +16,6 @@ export const FINDINGS_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {finding} other {findings}}`,
   });
-
-export const GROUPING_OPTIONS = {
-  RESOURCE_NAME: 'resource.name',
-  RULE_NAME: 'rule.name',
-  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
-  ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
-};
 
 export const NULL_GROUPING_UNIT = i18n.translate('xpack.csp.findings.grouping.nullGroupUnit', {
   defaultMessage: 'findings',
@@ -51,25 +45,25 @@ export const defaultGroupingOptions: GroupOption[] = [
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
       defaultMessage: 'Resource',
     }),
-    key: GROUPING_OPTIONS.RESOURCE_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByRuleName', {
       defaultMessage: 'Rule name',
     }),
-    key: GROUPING_OPTIONS.RULE_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.RULE_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByCloudAccount', {
       defaultMessage: 'Cloud account',
     }),
-    key: GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByKubernetesCluster', {
       defaultMessage: 'Kubernetes cluster',
     }),
-    key: GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
   },
 ];
 

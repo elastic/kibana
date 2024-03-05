@@ -21,6 +21,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/shared-ux-prompt-no-data-views-mocks",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": [
     "target/**/*",

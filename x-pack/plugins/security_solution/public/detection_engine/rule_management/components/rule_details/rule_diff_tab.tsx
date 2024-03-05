@@ -48,6 +48,15 @@ const HIDDEN_PROPERTIES = [
     and will therefore always show a diff. It adds no value to display it to the user.
   */
   'updated_at',
+
+  /*
+    These values make sense only for installed prebuilt rules. 
+    They are not present in the prebuilt rule package.
+    So, showing them in the diff doesn't add value.
+  */
+  'updated_by',
+  'created_at',
+  'created_by',
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
@@ -150,13 +159,13 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
             <EuiIconTip
               color="subdued"
-              content={i18n.BASE_VERSION_DESCRIPTION}
+              content={i18n.CURRENT_VERSION_DESCRIPTION}
               type="iInCircle"
               size="m"
               display="block"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.BASE_VERSION}</h6>
+              <h6>{i18n.CURRENT_RULE_VERSION}</h6>
             </EuiTitle>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
@@ -167,7 +176,7 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
               size="m"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.UPDATED_VERSION}</h6>
+              <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>

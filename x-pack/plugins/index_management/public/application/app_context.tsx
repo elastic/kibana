@@ -57,7 +57,6 @@ export interface AppDependencies {
     enableIndexStats: boolean;
     editableIndexSettings: 'all' | 'limited';
     enableDataStreamsStorageColumn: boolean;
-    enableEmbeddedConsole: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

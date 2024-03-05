@@ -92,14 +92,20 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Artifacts Configuration
+   * Endpoint Artifacts Configuration: the interval between runs of the task that builds the
+   * artifacts and associated manifest.
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
+   * Endpoint Artifacts Configuration: timeout value for how long the task should run.
+   */
+  packagerTaskTimeout: schema.string({ defaultValue: '20m' }),
+
+  /**
    * Artifacts Configuration for package policy update concurrency
    */
-  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 25, max: 50, min: 1 }),
 
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install

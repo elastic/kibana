@@ -25,6 +25,7 @@ import type {
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import {
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
@@ -36,6 +37,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { isUserSettingsTemplate } from './utils';
 
 interface Properties {
   [key: string]: any;
@@ -113,11 +115,14 @@ export function getTemplate({
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
+    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
+
+  template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
 
   return template;
 }
@@ -149,7 +154,7 @@ export function generateMappings(
   isIndexModeTimeSeries = false
 ): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
-  const dynamicTemplateNames = new Set<string>();
+  const dynamicTemplateNames: Record<string, number> = {};
   const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(
@@ -163,8 +168,16 @@ export function generateMappings(
         runtimeProperties?: Properties;
       }) => {
         const name = dynamicMapping.path;
-        if (dynamicTemplateNames.has(name)) {
-          return;
+        if (name in dynamicTemplateNames) {
+          if (name.includes('*') && dynamicMapping.properties?.type === 'object') {
+            // This is a conflicting intermediate object, use the last one so
+            // more specific templates are chosen before.
+            const index = dynamicTemplateNames[name];
+            delete dynamicTemplateNames[name];
+            dynamicTemplates.splice(index, 1);
+          } else {
+            return;
+          }
         }
 
         const dynamicTemplate: Properties = {};
@@ -182,8 +195,8 @@ export function generateMappings(
           dynamicTemplate.path_match = dynamicMapping.pathMatch;
         }
 
-        dynamicTemplateNames.add(name);
-        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+        const size = dynamicTemplates.push({ [name]: dynamicTemplate });
+        dynamicTemplateNames[name] = size - 1;
       },
       addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
         runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
@@ -933,8 +946,12 @@ const getDataStreams = async (
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.indices.rollover({
-      alias: dataStreamName,
+    return esClient.transport.request({
+      method: 'POST',
+      path: `/${dataStreamName}/_rollover`,
+      querystring: {
+        lazy: true,
+      },
     });
   } catch (error) {
     throw new PackageESError(

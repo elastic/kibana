@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'header',
     'timePicker',
@@ -37,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
@@ -174,7 +176,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show matches when time range is expanded', async () => {
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);
           expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);

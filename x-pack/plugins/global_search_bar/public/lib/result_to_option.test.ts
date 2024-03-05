@@ -52,6 +52,15 @@ describe('resultToOption', () => {
     );
   });
 
+  it('uses icon for `index` type', () => {
+    const input = createSearchResult({ type: 'index', icon: 'index-icon' });
+    expect(resultToOption(input, [])).toEqual(
+      expect.objectContaining({
+        icon: { type: 'index-icon' },
+      })
+    );
+  });
+
   it('does not use icon for other types', () => {
     const input = createSearchResult({ type: 'dashboard', icon: 'dash-icon' });
     expect(resultToOption(input, [])).toEqual(

@@ -39,7 +39,11 @@ xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
-xpack.fleet.internal.registry.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.capabilities: [
+  'apm',
+  'observability',
+  'uptime',
+]
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.max: '3.0'
 # Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
@@ -63,10 +67,8 @@ xpack.fleet.internal.registry.excludePackages: [
     'profiler_agent',
   ]
 
-## Required for force installation of APM Package
+## Required for force installation of integration packages
 xpack.fleet.packages:
-  - name: apm
-    version: latest
   # fleet_server package installed to publish agent metrics
   - name: fleet_server
     version: latest
@@ -86,3 +88,6 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'observability'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

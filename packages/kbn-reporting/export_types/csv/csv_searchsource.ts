@@ -10,7 +10,7 @@ import { Writable } from 'stream';
 
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import { CsvGenerator, type CsvPagingStrategy } from '@kbn/generate-csv';
+import { CsvGenerator } from '@kbn/generate-csv';
 import {
   CancellationToken,
   LICENSE_TYPE_BASIC,
@@ -20,7 +20,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { TaskInstanceFields } from '@kbn/reporting-common/types';
+import { CsvPagingStrategy, TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_JOB_TYPE,
   CSV_REPORT_TYPE,

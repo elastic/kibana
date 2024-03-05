@@ -25,7 +25,11 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+} from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
@@ -82,7 +86,9 @@ import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
+import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
+import { MapByValueInput } from './embeddable';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -212,6 +218,16 @@ export class MapsPlugin
         latest: LATEST_VERSION,
       },
       name: APP_NAME,
+    });
+
+    registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
+      if (!savedObject.managed) {
+        return { savedObjectId: savedObject.id };
+      }
+
+      return {
+        attributes: savedObjectToEmbeddableAttributes(savedObject),
+      };
     });
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);

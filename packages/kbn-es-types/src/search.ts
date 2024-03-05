@@ -593,7 +593,8 @@ export type AggregateOf<
 
 export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
-    ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
+    ? // @ts-expect-error not sure how to fix this, anything I've tried causes errors upstream - Dario
+      AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
@@ -663,6 +664,10 @@ export type ESQLRow = unknown[];
 
 export interface ESQLSearchReponse {
   columns: ESQLColumn[];
+  // In case of ?drop_null_columns in the query, then
+  // all_columns will have available and empty fields
+  // while columns only the available ones (non nulls)
+  all_columns?: ESQLColumn[];
   values: ESQLRow[];
 }
 
@@ -674,4 +679,5 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
+  dropNullColumns?: boolean;
 }

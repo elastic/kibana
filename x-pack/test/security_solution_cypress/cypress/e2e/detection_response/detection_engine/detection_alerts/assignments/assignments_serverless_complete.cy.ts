@@ -20,7 +20,7 @@ import {
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
 
-// FLAKY: https://github.com/elastic/kibana/issues/172557
+// Failing: See https://github.com/elastic/kibana/issues/177573
 describe.skip(
   'Alert user assignment - Serverless Complete',
   {

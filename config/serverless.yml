@@ -4,7 +4,6 @@ xpack.serverless.plugin.enabled: true
 # Fleet settings
 xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
-xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
@@ -58,14 +57,13 @@ guided_onboarding.enabled: false
 # Other disabled plugins
 xpack.canvas.enabled: false
 data.search.sessions.enabled: false
-advanced_settings.enabled: false
+advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false
 
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
-xpack.security.ui.roleManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
@@ -137,6 +135,7 @@ uiSettings:
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
+xpack.task_manager.request_timeouts.update_by_query: 60000
 
 ## TaskManager requeue invalid tasks, supports ZDT
 xpack.task_manager.requeue_invalid_tasks.enabled: true

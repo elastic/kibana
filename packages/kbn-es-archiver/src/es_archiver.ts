@@ -155,8 +155,8 @@ export class EsArchiver {
    *
    * @param name
    */
-  async loadIfNeeded(name: string) {
-    return await this.load(name, { skipExisting: true });
+  async loadIfNeeded(name: string, performance?: LoadActionPerfOptions) {
+    return await this.load(name, { skipExisting: true, performance });
   }
 
   /**

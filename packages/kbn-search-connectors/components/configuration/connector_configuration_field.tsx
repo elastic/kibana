@@ -174,7 +174,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         <EuiRadioGroup
           disabled={isLoading}
           idSelected={ensureStringType(value)}
-          name="radio group"
+          name={key}
           options={options.map((option) => ({ id: option.value, label: option.label }))}
           onChange={(id) => {
             validateAndSetConfigValue(id);

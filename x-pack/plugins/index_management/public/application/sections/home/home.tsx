@@ -40,7 +40,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const {
-    config: { enableEmbeddedConsole },
     plugins: { console: consolePlugin },
   } = useAppContext();
   const tabs = [
@@ -146,7 +145,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
         <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
       </Routes>
-      {(enableEmbeddedConsole && consolePlugin?.renderEmbeddableConsole?.()) ?? <></>}
+      {consolePlugin?.renderEmbeddableConsole?.() ?? <></>}
     </>
   );
   return (

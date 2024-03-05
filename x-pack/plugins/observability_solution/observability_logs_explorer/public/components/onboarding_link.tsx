@@ -48,7 +48,7 @@ export const OnboardingLink = React.memo(({ urlService }: { urlService: BrowserU
       fill
       size="s"
       iconType="indexOpen"
-      data-test-subj="logExplorerOnboardingLink"
+      data-test-subj="logsExplorerOnboardingLink"
     >
       {onboardingLinkTitle}
     </EuiButton>

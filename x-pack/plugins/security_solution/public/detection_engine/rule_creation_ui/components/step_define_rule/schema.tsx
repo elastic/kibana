@@ -603,7 +603,8 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = isQueryRule(formData.ruleType);
+          const needsValidation =
+            isQueryRule(formData.ruleType) || isThreatMatchRule(formData.ruleType);
           if (!needsValidation) {
             return;
           }

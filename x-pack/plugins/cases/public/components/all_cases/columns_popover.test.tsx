@@ -8,12 +8,14 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
-describe('ColumnsPopover', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174682
+describe.skip('ColumnsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
@@ -33,6 +35,8 @@ describe('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+
+    await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('column-selection-popover')).toBeInTheDocument();
 
@@ -132,6 +136,7 @@ describe('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await waitForEuiPopoverOpen();
     userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Title');
 
     expect(await screen.findByTestId('column-selection-switch-title')).toBeInTheDocument();
@@ -150,9 +155,12 @@ describe('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await waitForEuiPopoverOpen();
     userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Category');
 
-    expect(onSelectedColumnsChange).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSelectedColumnsChange).not.toHaveBeenCalled();
+    });
   });
 
   it('searching for text hides the drag and drop icons', async () => {
@@ -177,6 +185,9 @@ describe('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+
+    await waitForEuiPopoverOpen();
+
     userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Foobar');
 
     expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeDisabled();

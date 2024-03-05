@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { createMachine, InterpreterFrom } from 'xstate';
-import { ObservabilityLogExplorerHistory } from '../../../types';
+import { ObservabilityLogsExplorerHistory } from '../../../types';
 import { FEEDBACK_DELAY_MS } from './constants';
 import { DEFAULT_CONTEXT } from './defaults';
 import { initializeFromLocationState } from './location_state_service';
@@ -67,7 +67,7 @@ export const createPureOriginInterpreterStateMachine = (initialContext: OriginIn
 
 export interface OriginInterpreterStateMachineDependencies {
   initialContext?: OriginInterpreterContext;
-  history: ObservabilityLogExplorerHistory;
+  history: ObservabilityLogsExplorerHistory;
   toasts: IToasts;
 }
 

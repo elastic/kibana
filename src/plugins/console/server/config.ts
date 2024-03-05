@@ -23,6 +23,7 @@ const schemaLatest = schema.object(
   {
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      embeddedEnabled: schema.boolean({ defaultValue: true }),
     }),
     autocompleteDefinitions: schema.object({
       // Only displays the endpoints that are available in the specified environment
@@ -30,6 +31,7 @@ const schemaLatest = schema.object(
         defaultValue: 'stack',
       }),
     }),
+    dev: schema.object({ enableMonaco: schema.boolean({ defaultValue: false }) }),
   },
   { defaultValue: undefined }
 );
@@ -38,6 +40,7 @@ const configLatest: PluginConfigDescriptor<ConsoleConfig> = {
   exposeToBrowser: {
     ui: true,
     autocompleteDefinitions: true,
+    dev: true,
   },
   schema: schemaLatest,
   deprecations: () => [],

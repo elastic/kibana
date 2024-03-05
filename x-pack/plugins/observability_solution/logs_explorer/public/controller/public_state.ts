@@ -9,20 +9,24 @@ import {
   availableControlsPanels,
   controlPanelConfigs,
   ControlPanels,
-  hydrateDatasetSelection,
+  hydrateDataSourceSelection,
 } from '../../common';
 import {
   DEFAULT_CONTEXT,
-  LogExplorerControllerContext,
-} from '../state_machines/log_explorer_controller';
-import { LogExplorerPublicState, LogExplorerPublicStateUpdate, OptionsListControl } from './types';
+  LogsExplorerControllerContext,
+} from '../state_machines/logs_explorer_controller';
+import {
+  LogsExplorerPublicState,
+  LogsExplorerPublicStateUpdate,
+  OptionsListControl,
+} from './types';
 
 export const getPublicStateFromContext = (
-  context: LogExplorerControllerContext
-): LogExplorerPublicState => {
+  context: LogsExplorerControllerContext
+): LogsExplorerPublicState => {
   return {
     chart: context.chart,
-    datasetSelection: context.datasetSelection.toPlainSelection(),
+    dataSourceSelection: context.dataSourceSelection.toPlainSelection(),
     grid: context.grid,
     filters: context.filters,
     query: context.query,
@@ -33,18 +37,18 @@ export const getPublicStateFromContext = (
 };
 
 export const getContextFromPublicState = (
-  publicState: LogExplorerPublicStateUpdate
-): LogExplorerControllerContext => ({
+  publicState: LogsExplorerPublicStateUpdate
+): LogsExplorerControllerContext => ({
   ...DEFAULT_CONTEXT,
   chart: {
     ...DEFAULT_CONTEXT.chart,
     ...publicState.chart,
   },
   controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
-  datasetSelection:
-    publicState.datasetSelection != null
-      ? hydrateDatasetSelection(publicState.datasetSelection)
-      : DEFAULT_CONTEXT.datasetSelection,
+  dataSourceSelection:
+    publicState.dataSourceSelection != null
+      ? hydrateDataSourceSelection(publicState.dataSourceSelection)
+      : DEFAULT_CONTEXT.dataSourceSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,
     ...publicState.grid,
@@ -61,7 +65,7 @@ export const getContextFromPublicState = (
 
 const getPublicControlsStateFromControlPanels = (
   controlPanels: ControlPanels | undefined
-): LogExplorerPublicState['controls'] =>
+): LogsExplorerPublicState['controls'] =>
   controlPanels != null
     ? {
         ...(availableControlsPanels.NAMESPACE in controlPanels
@@ -87,7 +91,7 @@ const getOptionsListPublicControlStateFromControlPanel = (
 });
 
 const getControlPanelsFromPublicControlsState = (
-  publicControlsState: LogExplorerPublicStateUpdate['controls']
+  publicControlsState: LogsExplorerPublicStateUpdate['controls']
 ): ControlPanels => {
   if (publicControlsState == null) {
     return {};

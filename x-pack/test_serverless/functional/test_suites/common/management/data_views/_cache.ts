@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not have cache setting', async () => {
       await testSubjects.missingOrFail(
-        'advancedSetting-editField-data_views\\:cache_max_age-group'
+        'management-settings-editField-data_views\\:cache_max_age-group'
       );
     });
   });

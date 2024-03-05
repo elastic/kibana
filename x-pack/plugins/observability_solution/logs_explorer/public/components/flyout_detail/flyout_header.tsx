@@ -54,7 +54,7 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
                 <LogLevel
                   level={doc[constants.LOG_LEVEL_FIELD]}
                   renderInFlyout={true}
-                  dataTestSubj="logExplorerFlyoutLogLevel"
+                  dataTestSubj="logsExplorerFlyoutLogLevel"
                 />
               </EuiFlexItem>
             </HoverActionPopover>
@@ -71,7 +71,7 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
 
   const contentField = hasMessageField && (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="logExplorerFlyoutLogMessage">
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="logsExplorerFlyoutLogMessage">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -110,9 +110,9 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
       buttonContent={accordionTitle}
       paddingSize="m"
       initialIsOpen={true}
-      data-test-subj={`logExplorerFlyoutHeaderSection${flyoutContentLabel}`}
+      data-test-subj={`logsExplorerFlyoutHeaderSection${flyoutContentLabel}`}
     >
-      <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logExplorerFlyoutDetail">
+      <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logsExplorerFlyoutDetail">
         {hasMessageField ? contentField : logLevelAndTimestamp}
       </EuiFlexGroup>
     </EuiAccordion>

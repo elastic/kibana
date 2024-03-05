@@ -12,7 +12,7 @@ import { targetTags } from '../../../security_solution_endpoint/target_tags';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Response Actions support for agentType', function () {
+  describe('Response Actions support for sentinelOne agentType', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     describe('and the "responseActionsSentinelOneV1Enabled" feature flag is disabled', () => {
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(ISOLATE_HOST_ROUTE_V2)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
-          .send({ endpoint_ids: ['test'], agent_type: 'endpoint' })
+          .send({ endpoint_ids: ['test'], agent_type: 'sentinel_one' })
           .expect(400, {
             statusCode: 400,
             error: 'Bad Request',

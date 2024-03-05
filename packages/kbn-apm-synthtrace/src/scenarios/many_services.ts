@@ -62,13 +62,15 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services
 
           return !generateError
             ? span.success()
-            : span
-                .failure()
-                .errors(
-                  instance
-                    .error({ message: `No handler for ${transactionName}` })
-                    .timestamp(timestamp + 50)
-                );
+            : span.failure().errors(
+                instance
+                  .error({
+                    message: `No handler for ${transactionName}`,
+                    type: 'No handler',
+                    culprit: 'request',
+                  })
+                  .timestamp(timestamp + 50)
+              );
         });
       };
 

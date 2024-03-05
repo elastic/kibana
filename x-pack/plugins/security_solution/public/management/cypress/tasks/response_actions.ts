@@ -25,17 +25,25 @@ import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
-  cy.get('[data-test-subj^="command-type"]').should(
-    'have.length',
-    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
-  );
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
+  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
+  const config = Cypress.config();
+  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
+  const automatedProcessActionsEnabled =
+    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
+
+  const enabledActions = [
+    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+  ];
+
+  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
+  enabledActions.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };
 export const addEndpointResponseAction = () => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click();
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
   });
 };
 export const focusAndOpenCommandDropdown = (number = 0) => {
@@ -91,12 +99,10 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
 
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
-      'be.disabled'
-    );
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
   });
   // Try adding new action, should not add list item.
-  cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click({
+  cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({
     force: true,
   });
   cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');

@@ -14,10 +14,13 @@ export interface PublishesPanelTitle {
   defaultPanelTitle?: PublishingSubject<string | undefined>;
 }
 
+export function getPanelTitle(api: Partial<PublishesPanelTitle>): string | undefined {
+  return api.panelTitle?.value || api.defaultPanelTitle?.value;
+}
+
 export type PublishesWritablePanelTitle = PublishesPanelTitle & {
   setPanelTitle: (newTitle: string | undefined) => void;
   setHidePanelTitle: (hide: boolean | undefined) => void;
-  setDefaultPanelTitle?: (newDefaultTitle: string | undefined) => void;
 };
 
 export const apiPublishesPanelTitle = (
@@ -45,17 +48,20 @@ export const apiPublishesWritablePanelTitle = (
 /**
  * A hook that gets this API's panel title as a reactive variable which will cause re-renders on change.
  */
-export const usePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  useStateFromPublishingSubject<string | undefined>(api?.panelTitle);
+export const usePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) => {
+  const title = useStateFromPublishingSubject(api?.panelTitle);
+  const defaultTitle = useStateFromPublishingSubject(api?.defaultPanelTitle);
+  return title || defaultTitle;
+};
 
 /**
  * A hook that gets this API's hide panel title setting as a reactive variable which will cause re-renders on change.
  */
 export const useHidePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  useStateFromPublishingSubject<boolean | undefined>(api?.hidePanelTitle);
+  useStateFromPublishingSubject(api?.hidePanelTitle);
 
 /**
  * A hook that gets this API's default title as a reactive variable which will cause re-renders on change.
  */
 export const useDefaultPanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  useStateFromPublishingSubject<string | undefined>(api?.defaultPanelTitle);
+  useStateFromPublishingSubject(api?.defaultPanelTitle);

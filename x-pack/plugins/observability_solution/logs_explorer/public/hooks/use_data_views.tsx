@@ -8,14 +8,15 @@
 import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
-import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
+import { LogsExplorerCustomizations } from '../controller';
 
 interface DataViewsContextDeps {
   dataViewsService: DataViewsPublicPluginStart;
-  discoverService: DiscoverStart;
+  events: LogsExplorerCustomizations['events'];
 }
 
 export interface SearchDataViewsParams {
@@ -23,16 +24,15 @@ export interface SearchDataViewsParams {
   sortOrder: SortOrder;
 }
 
-export type DataViewSelectionHandler = (dataView: DataViewListItem) => void;
 export type SearchDataViews = (params: SearchDataViewsParams) => void;
 export type LoadDataViews = () => void;
 export type ReloadDataViews = () => void;
+export type IsDataViewAvailable = (dataView: DataViewDescriptor) => boolean;
 
-const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDeps) => {
+const useDataViews = ({ dataViewsService, events }: DataViewsContextDeps) => {
   const dataViewsStateService = useInterpret(() =>
     createDataViewsStateMachine({
       dataViews: dataViewsService,
-      discover: discoverService,
     })
   );
 
@@ -41,6 +41,13 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
   const error = useSelector(dataViewsStateService, (state) => state.context.error);
 
   const isLoading = useSelector(dataViewsStateService, (state) => state.matches('loading'));
+
+  const isDataViewAvailable: IsDataViewAvailable = useCallback(
+    (dataView) =>
+      dataView.isLogsDataType() ||
+      (dataView.isUnknownDataType() && Boolean(events?.onUknownDataViewSelection)),
+    [events?.onUknownDataViewSelection]
+  );
 
   const loadDataViews = useCallback(
     () => dataViewsStateService.send({ type: 'LOAD_DATA_VIEWS' }),
@@ -57,15 +64,6 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
       dataViewsStateService.send({
         type: 'SEARCH_DATA_VIEWS',
         search: searchParams,
-      }),
-    [dataViewsStateService]
-  );
-
-  const selectDataView: DataViewSelectionHandler = useCallback(
-    (dataView) =>
-      dataViewsStateService.send({
-        type: 'SELECT_DATA_VIEW',
-        dataView,
       }),
     [dataViewsStateService]
   );
@@ -93,10 +91,10 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
     dataViews,
 
     // Actions
+    isDataViewAvailable,
     loadDataViews,
     reloadDataViews,
     searchDataViews,
-    selectDataView,
     sortDataViews,
   };
 };

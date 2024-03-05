@@ -137,6 +137,7 @@ export const getSystemFilterConfig = ({
           onChange={onSystemFilterChange}
           options={mapToMultiSelectOption(tags)}
           selectedOptionKeys={filterOptions?.tags}
+          isLoading={isLoading}
         />
       ),
     },
@@ -159,6 +160,7 @@ export const getSystemFilterConfig = ({
           onChange={onSystemFilterChange}
           options={mapToMultiSelectOption(categories)}
           selectedOptionKeys={filterOptions?.category}
+          isLoading={isLoading}
         />
       ),
     },
