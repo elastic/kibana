@@ -45,7 +45,7 @@ export function createTestConfig(
   return async ({ readConfigFile, log, esVersion }: FtrConfigProviderContext) => {
     const testConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
 
-    const baseConfig = createObservabilityAIAssistantAPIConfig({
+    const baseConfig = await createObservabilityAIAssistantAPIConfig({
       config: testConfig,
       license,
       name,

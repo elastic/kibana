@@ -49,34 +49,38 @@ export interface CreateTest {
   kbnTestServer: any;
 }
 
-function downloadFile(filePath: string, url: string) {
-  const file = fs.createWriteStream(filePath);
-  https.get(url, (response) => {
-    response.pipe(file);
-    file.on('finish', () => {
-      file.close();
+function downloadFile(url: string, path: string): Promise<void> {
+  return new Promise((resolve) => {
+    const file = fs.createWriteStream(path);
+    https.get(url, (response) => {
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
     });
   });
 }
 
-function downloadElserModel(): string {
-  const elserModelDir = fs.mkdtempSync(path.join(os.tmpdir(), 'elser_model_'));
-  downloadFile(
-    path.join(elserModelDir, 'elser_model_2.metadata.json'),
-    'https://ml-models.elastic.co/elser_model_2.metadata.json'
+async function downloadElserModel(): Promise<string> {
+  const elserModelDir = path.join('.es', 'cluster-ftr', 'config', 'models');
+  fs.mkdirSync(elserModelDir, { recursive: true });
+  await downloadFile(
+    'https://ml-models.elastic.co/elser_model_2.metadata.json',
+    path.join(elserModelDir, 'elser_model_2.metadata.json')
   );
-  downloadFile(
-    path.join(elserModelDir, 'elser_model_2.pt'),
-    'https://ml-models.elastic.co/elser_model_2.pt'
+  await downloadFile(
+    'https://ml-models.elastic.co/elser_model_2.pt',
+    path.join(elserModelDir, 'elser_model_2.pt')
   );
-  downloadFile(
-    path.join(elserModelDir, 'elser_model_2.vocab.json'),
-    'https://ml-models.elastic.co/elser_model_2.vocab.json'
+  await downloadFile(
+    'https://ml-models.elastic.co/elser_model_2.vocab.json',
+    path.join(elserModelDir, 'elser_model_2.vocab.json')
   );
   return elserModelDir;
 }
 
-export function createObservabilityAIAssistantAPIConfig({
+export async function createObservabilityAIAssistantAPIConfig({
   config,
   license,
   name,
@@ -86,13 +90,11 @@ export function createObservabilityAIAssistantAPIConfig({
   license: 'basic' | 'trial';
   name: string;
   kibanaConfig?: Record<string, any>;
-}): Omit<CreateTest, 'testFiles'> {
+}): Promise<Omit<CreateTest, 'testFiles'>> {
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-
-  const elserModelPath = downloadElserModel();
-
+  const elserModelPath = await downloadElserModel();
   const createTest: Omit<CreateTest, 'testFiles'> = {
     ...config.getAll(),
     servers,
@@ -117,7 +119,7 @@ export function createObservabilityAIAssistantAPIConfig({
       license,
       serverArgs: [
         ...config.get('esTestCluster.serverArgs'),
-        `xpack.ml.model_repository=${elserModelPath}`,
+        `xpack.ml.model_repository=file://${elserModelPath}`,
       ],
     },
     kbnTestServer: {
@@ -147,12 +149,12 @@ export function createTestConfig(
     );
 
     return {
-      ...createObservabilityAIAssistantAPIConfig({
+      ...(await createObservabilityAIAssistantAPIConfig({
         config: xPackAPITestsConfig,
         name,
         license,
         kibanaConfig,
-      }),
+      })),
       testFiles: [require.resolve('../tests')],
     };
   };
