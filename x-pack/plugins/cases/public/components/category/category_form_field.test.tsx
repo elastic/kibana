@@ -25,6 +25,7 @@ import { FormTestComponent } from '../../common/test_utils';
 // FLAKY: https://github.com/elastic/kibana/issues/171605
 // FLAKY: https://github.com/elastic/kibana/issues/171606
 // FLAKY: https://github.com/elastic/kibana/issues/171607
+// FLAKY: https://github.com/elastic/kibana/issues/171608
 describe.skip('Category', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
