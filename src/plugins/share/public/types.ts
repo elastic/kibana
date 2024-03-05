@@ -109,5 +109,5 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
 }
 
 export interface ClientConfigType {
-  share: { new_version: { enabled: boolean } };
+  new_version: { enabled: boolean };
 }

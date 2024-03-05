@@ -145,7 +145,7 @@ export class SharePlugin
       this.url!,
       this.shareMenuRegistry.start(),
       disableEmbed,
-      this.config.share.new_version.enabled ?? false,
+      this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider
     );
 

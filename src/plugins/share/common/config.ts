@@ -8,16 +8,17 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const ConfigSchema = schema.object({
-  share: schema.object({
-    new_version: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+export const configSchema = schema.object({
+  new_version: schema.object({
+    enabled: schema.boolean({
+      defaultValue: false,
+      validate(value) {
+        if (value !== true && value !== false) {
+          return `cannot use values beyond true or false`;
+        }
+      },
     }),
   }),
 });
 
-export function createConfig(config: TypeOf<typeof ConfigSchema>) {
-  return {
-    ...config,
-  };
-}
+export type ConfigSchema = TypeOf<typeof configSchema>;
