@@ -836,8 +836,6 @@ export async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
-  // console.log('ast received:: %o \n', ast);
-
   const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
