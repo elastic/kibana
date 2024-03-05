@@ -6,8 +6,8 @@
  */
 
 import {
-  elasticsearchServiceMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -16,7 +16,12 @@ import { Subject } from 'rxjs';
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+
 import type { AgentPolicy } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
 import { LicenseService } from '../../common/services';
 
@@ -30,17 +35,37 @@ const agentPolicySvcMock = agentPolicyService as jest.Mocked<typeof agentPolicyS
 
 describe('Agent Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
-  const soStartMock = savedObjectsServiceMock.createStartContract();
-  const esStartMock = elasticsearchServiceMock.createStart();
-
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
+  let soStartMock: jest.Mocked<SavedObjectsServiceStart>;
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+
+  beforeEach(() => {
+    soStartMock = savedObjectsServiceMock.createStartContract();
+    soClientMock = savedObjectsClientMock.create();
+    soStartMock.getScopedClient.mockReturnValue(soClientMock);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
+    id,
+    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    attributes: {
+      is_protected: isProtected,
+    },
+    references: [],
+    score: 1,
+    ...(error ? { error } : {}),
+  });
 
   it('is activated on license changes', () => {
     // mock a license-changing service to test reactivity
     const licenseEmitter: Subject<ILicense> = new Subject();
     const licenseService = new LicenseService();
-    const pw = new PolicyWatcher(soStartMock, esStartMock, logger);
+    const pw = new PolicyWatcher(soStartMock, logger);
 
     // swap out watch function, just to ensure it gets called when a license change happens
     const mockWatch = jest.fn();
@@ -61,7 +86,78 @@ describe('Agent Policy-Changing license watcher', () => {
     licenseEmitter.complete();
   });
 
-  it('alters no-longer-licensed features', async () => {
+  it('should return if all policies are compliant', async () => {
+    jest.spyOn(agentPolicySvcMock, 'fetchAllAgentPolicies').mockReturnValue([] as any);
+
+    const pw = new PolicyWatcher(soStartMock, logger);
+
+    // emulate a license change below paid tier
+    await pw.watch(Platinum);
+
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'All agent policies are compliant, nothing to do!'
+    );
+  });
+
+  it('should bulk update policies that are not compliant', async () => {
+    const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
+      jest.fn(async function* (soClient: SavedObjectsClientContract) {
+        const chunkSize = 1000; // Emulate paginated response
+        for (let i = 0; i < items.length; i += chunkSize) {
+          yield items.slice(i, i + chunkSize);
+        }
+      });
+
+    const policiesToUpdate = Array.from({ length: 2001 }, (_, i) =>
+      createAgentPolicyMock({ id: `policy${i}`, is_protected: true })
+    );
+
+    const updatedSOs = policiesToUpdate.map((policy) => createPolicySO(policy.id, false));
+
+    agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+      createAgentPolicyMock(),
+      ...policiesToUpdate,
+    ]); // Add one policy that should not be updated
+
+    const pw = new PolicyWatcher(soStartMock, logger);
+
+    // Mock paginated responses
+
+    soClientMock.bulkUpdate.mockResolvedValueOnce({
+      saved_objects: updatedSOs.slice(0, 1000),
+    });
+    soClientMock.bulkUpdate.mockResolvedValueOnce({
+      saved_objects: updatedSOs.slice(1000, 2000),
+    });
+    soClientMock.bulkUpdate.mockResolvedValueOnce({
+      saved_objects: updatedSOs.slice(2000),
+    });
+
+    // emulate a license change below paid tier
+    await pw.watch(Basic);
+
+    // 3 calls to bulkUpdate, 2001 policies to update, 1000 per call
+    expect(soClientMock.bulkUpdate.mock.calls[0][0]).toHaveLength(999); // First fetched policy should not be updated due to is_protected: false
+    expect(soClientMock.bulkUpdate.mock.calls[1][0]).toHaveLength(1000);
+    expect(soClientMock.bulkUpdate.mock.calls[2][0]).toHaveLength(2);
+
+    expect(soClientMock.bulkUpdate).toHaveBeenCalledTimes(3);
+
+    expect(soClientMock.bulkUpdate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'policy1',
+          attributes: expect.objectContaining({ is_protected: false }),
+        }),
+      ])
+    );
+
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'Done - 2001 out of 2001 were successful. No errors encountered.'
+    );
+  });
+
+  it('should return failed policies if bulk update fails', async () => {
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
       jest.fn(async function* (soClient: SavedObjectsClientContract) {
         yield items;
@@ -69,14 +165,27 @@ describe('Agent Policy-Changing license watcher', () => {
 
     agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
       createAgentPolicyMock({ is_protected: true }),
+      createAgentPolicyMock({ is_protected: true }),
     ]);
 
-    const pw = new PolicyWatcher(soStartMock, esStartMock, logger);
+    const pw = new PolicyWatcher(soStartMock, logger);
 
-    // emulate a license change below paid tier
+    soClientMock.bulkUpdate.mockResolvedValue({
+      saved_objects: [
+        createPolicySO('agent-policy-1', false),
+        createPolicySO('agent-policy-2', false, {
+          error: 'error',
+          statusCode: 500,
+          message: 'error-test',
+        }),
+      ],
+    });
+
     await pw.watch(Basic);
 
-    expect(agentPolicySvcMock.update).toHaveBeenCalled();
-    expect(agentPolicySvcMock.update.mock.calls[0][3].is_protected).toEqual(false);
+    expect(logger.error).toHaveBeenLastCalledWith(
+      'Done - 1 out of 2 were successful. Errors encountered:\n' +
+        'Policy [agent-policy-2] failed to update due to error: error-test'
+    );
   });
 });

@@ -511,7 +511,7 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
 
     this.policyWatcher.start(licenseService);
 

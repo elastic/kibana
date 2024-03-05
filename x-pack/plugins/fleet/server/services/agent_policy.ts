@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy, groupBy, pick, chunk } from 'lodash';
+import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
   ElasticsearchClient,
-  SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -26,7 +27,14 @@ import { asyncForEach } from '@kbn/std';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { policyHasEndpointSecurity } from '../../common/services';
+import {
+  getAllowedOutputTypeForPolicy,
+  packageToPackagePolicy,
+  policyHasAPMIntegration,
+  policyHasEndpointSecurity,
+  policyHasFleetServer,
+  policyHasSyntheticsIntegration,
+} from '../../common/services';
 
 import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
 
@@ -35,40 +43,33 @@ import type { HTTPAuthorizationHeader } from '../../common/http_authorization_he
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
+  FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  FLEET_AGENT_POLICIES_SCHEMA_VERSION,
 } from '../constants';
 import type {
-  PackagePolicy,
-  NewAgentPolicy,
-  PreconfiguredAgentPolicy,
   AgentPolicy,
   AgentPolicySOAttributes,
+  ExternalCallback,
   FullAgentPolicy,
   ListWithKuery,
+  NewAgentPolicy,
   NewPackagePolicy,
+  PackagePolicy,
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
-  ExternalCallback,
+  PreconfiguredAgentPolicy,
 } from '../types';
 import {
-  getAllowedOutputTypeForPolicy,
-  packageToPackagePolicy,
-  policyHasFleetServer,
-  policyHasAPMIntegration,
-  policyHasSyntheticsIntegration,
-} from '../../common/services';
-import {
-  agentPolicyStatuses,
   AGENT_POLICY_INDEX,
-  UUID_V5_NAMESPACE,
+  agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
+  UUID_V5_NAMESPACE,
 } from '../../common/constants';
 import type {
+  DeleteAgentPolicyResponse,
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
-  DeleteAgentPolicyResponse,
   FleetServerPolicy,
   Installation,
   Output,
@@ -76,20 +77,22 @@ import type {
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
-  HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
-  PackagePolicyRestrictionRelatedError,
-  FleetUnauthorizedError,
   FleetError,
+  FleetUnauthorizedError,
+  HostedAgentPolicyRestrictionRelatedError,
+  PackagePolicyRestrictionRelatedError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
 
+import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
+
 import {
-  elasticAgentStandaloneManifest,
   elasticAgentManagedManifest,
+  elasticAgentStandaloneManifest,
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages } from './epm/packages';
@@ -98,10 +101,9 @@ import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from './app_context';
-import { getFullAgentPolicy } from './agent_policies';
-import { validateOutputForPolicy } from './agent_policies';
+import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -1323,35 +1325,33 @@ class AgentPolicyService {
       kuery: 'ingest-agent-policies.is_protected: true',
     });
 
-    const agentPoliciesWithEnabledAgentTamperProtection = [];
+    const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
 
-    for await (const agentPolicy of agentPolicyFetcher) {
-      agentPoliciesWithEnabledAgentTamperProtection.push(...agentPolicy);
+    for await (const agentPolicyPageResults of agentPolicyFetcher) {
+      const { saved_objects: bulkUpdateSavedObjects } =
+        await soClient.bulkUpdate<AgentPolicySOAttributes>(
+          agentPolicyPageResults.map((agentPolicy) => {
+            const { id, revision } = agentPolicy;
+            return {
+              id,
+              type: SAVED_OBJECT_TYPE,
+              attributes: {
+                is_protected: false,
+                revision: revision + 1,
+                updated_at: new Date().toISOString(),
+                updated_by: 'system',
+              },
+            };
+          })
+        );
+      updatedAgentPolicies.push(...bulkUpdateSavedObjects);
     }
-
-    if (agentPoliciesWithEnabledAgentTamperProtection.length === 0) {
+    if (!updatedAgentPolicies.length) {
       return {
         updatedPolicies: null,
         failedPolicies: [],
       };
     }
-
-    const { saved_objects: updatedAgentPolicies } =
-      await soClient.bulkUpdate<AgentPolicySOAttributes>(
-        agentPoliciesWithEnabledAgentTamperProtection.map((agentPolicy) => {
-          const { id, revision } = agentPolicy;
-          return {
-            id,
-            type: SAVED_OBJECT_TYPE,
-            attributes: {
-              is_protected: false,
-              revision: revision + 1,
-              updated_at: new Date().toISOString(),
-              updated_by: 'system',
-            },
-          };
-        })
-      );
 
     const failedPolicies: Array<{
       id: string;
@@ -1434,7 +1434,7 @@ class AgentPolicyService {
             id: agentPolicySO.id,
             savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
           });
-          return { id: agentPolicySO.id, ...agentPolicySO.attributes };
+          return mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
         });
       },
     });

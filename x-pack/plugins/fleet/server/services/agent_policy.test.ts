@@ -1010,7 +1010,6 @@ describe('agent policy', () => {
 
   describe('Fetch Agent Policies Methods', () => {
     const soList = Array.from({ length: 2 }, () => ({
-      created_at: '2020-01-01T00:00:00.000Z',
       updated_at: '2020-01-01T00:00:00.000Z',
     }));
 
@@ -1023,7 +1022,6 @@ describe('agent policy', () => {
                 id: 'so-123',
                 type: AGENT_POLICY_SAVED_OBJECT_TYPE,
                 version: 'abc',
-                created_at: soAttributes.created_at,
                 updated_at: soAttributes.updated_at,
                 attributes: soAttributes,
                 references: [],
@@ -1122,7 +1120,7 @@ describe('agent policy', () => {
 
       it('should provide items on every iteration', async () => {
         for await (const items of agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
-          expect(items).toEqual(soList.map((so) => ({ ...so, id: 'so-123' })));
+          expect(items.map((item) => item.id)).toEqual(soList.map((_so) => 'so-123'));
         }
 
         expect(soClientMock.find).toHaveBeenCalledTimes(3);

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import pMap from 'p-map';
-import { KbnClient } from '@kbn/test';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { createKbnClient } from '../common/stack_services';
+import { createAgentPolicy } from '../common/fleet_services';
 
 export const cli = () => {
   run(
@@ -35,12 +35,16 @@ export const cli = () => {
         default: {
           count: 10,
           concurrency: 10,
-          kibana: 'http://elastic:changeme@127.0.0.1:5601',
+          kibana: 'http://127.0.0.1:5601',
+          username: 'elastic',
+          password: 'changeme',
         },
         help: `
         --count               Number of agent policies to create. Default: 10
         --concurrency         Number of concurrent agent policies can be created. Default: 10
-        --kibana              The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
+        --kibana              The URL to kibana including credentials. Default: http://127.0.0.1:5601
+        --username            The username to use for authentication. Default: elastic
+        --password            The password to use for authentication. Default: changeme
       `,
       },
     }
@@ -48,7 +52,11 @@ export const cli = () => {
 };
 
 const agentPolicyGenerator: RunFn = async ({ flags, log }) => {
-  const kbn = new KbnClient({ log, url: flags.kibana as string });
+  const kbnClient = createKbnClient({
+    url: flags.kibana as string,
+    username: flags.username as string,
+    password: flags.password as string,
+  });
 
   const totalPoliciesCount = flags.count as unknown as number;
   let newPoliciesCount = 0;
@@ -63,18 +71,7 @@ const agentPolicyGenerator: RunFn = async ({ flags, log }) => {
         );
       }
       newPoliciesCount++;
-      return kbn.request({
-        method: 'POST',
-        path: '/api/fleet/agent_policies',
-        body: {
-          name: uuidv4(),
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          inactivity_timeout: 1209600,
-          is_protected: false,
-        },
-      });
+      return createAgentPolicy({ kbnClient });
     },
     { concurrency: flags.concurrency as unknown as number }
   );
