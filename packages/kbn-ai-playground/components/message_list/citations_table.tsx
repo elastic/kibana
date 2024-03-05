@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { AIMessage as AIMessageType, Doc } from '@kbn/ai-playground/types';
+import { AIMessage as AIMessageType, Doc } from '../../types';
 
-interface CitationsTableProps extends Pick<AIMessageType, 'citations'> {}
+type CitationsTableProps = Pick<AIMessageType, 'citations'>;
 
 export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
   const toggleDetails = (citation: Doc) => {
-    let itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
     if (itemIdToExpandedRowMapValues[citation.id]) {
       delete itemIdToExpandedRowMapValues[citation.id];

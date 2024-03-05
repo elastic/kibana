@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React from "react";
+import React from 'react';
 
 import {
   EuiButtonEmpty,
@@ -15,27 +16,24 @@ import {
   EuiIcon,
   EuiSuperSelect,
   EuiSuperSelectOption,
-  EuiToolTip
-} from "@elastic/eui";
+  EuiToolTip,
+} from '@elastic/eui';
 
-import { i18n } from "@kbn/i18n";
-import { SummarizationModelName } from "@kbn/ai-playground/types";
+import { i18n } from '@kbn/i18n';
+import { SummarizationModelName } from '../../types';
 
-import { OpenAIIcon } from "./open_ai_icon";
-
+import { OpenAIIcon } from './open_ai_icon';
 
 const renderSelectOptions = (label: string) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiIcon type={OpenAIIcon} />
     </EuiFlexItem>
-    <EuiFlexItem>
-      {label}
-    </EuiFlexItem>
+    <EuiFlexItem>{label}</EuiFlexItem>
   </EuiFlexGroup>
 );
 
-const SummarizationModel: EuiSuperSelectOption<string>[] = [
+const SummarizationModel: Array<EuiSuperSelectOption<string>> = [
   {
     value: SummarizationModelName.gpt3_5,
     inputDisplay: renderSelectOptions(SummarizationModelName.gpt3_5),
@@ -45,7 +43,6 @@ const SummarizationModel: EuiSuperSelectOption<string>[] = [
     inputDisplay: renderSelectOptions(SummarizationModelName.gpt3_5_turbo_1106),
   },
   {
-
     value: SummarizationModelName.gpt3_5_turbo_16k,
     inputDisplay: renderSelectOptions(SummarizationModelName.gpt3_5_turbo_16k),
   },
@@ -65,8 +62,11 @@ interface OpenAISummarizationModelProps {
   onSelect: (key: string) => void;
 }
 
-export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> = ({ model = SummarizationModelName.gpt3_5_turbo_1106, onSelect, openAIFlyOutOpen }) => {
-
+export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> = ({
+  model = SummarizationModelName.gpt3_5_turbo_1106,
+  onSelect,
+  openAIFlyOutOpen,
+}) => {
   const onChange = (value: string) => {
     onSelect(value);
   };
@@ -76,8 +76,7 @@ export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> =
       label={
         <EuiToolTip
           content={i18n.translate('aiPlayground.sidebar.summarizationModel.help', {
-            defaultMessage:
-              'The large language model used to summarize your documents.',
+            defaultMessage: 'The large language model used to summarize your documents.',
           })}
         >
           <>
@@ -98,11 +97,7 @@ export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> =
         </EuiButtonEmpty>
       }
     >
-      <EuiSuperSelect
-        options={SummarizationModel}
-        valueOfSelected={model}
-        onChange={onChange}
-      />
+      <EuiSuperSelect options={SummarizationModel} valueOfSelected={model} onChange={onChange} />
     </EuiFormRow>
   );
 };

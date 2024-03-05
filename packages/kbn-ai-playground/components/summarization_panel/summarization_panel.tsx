@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -32,7 +33,13 @@ export const SummarizationPanel: React.FC = () => {
           name={ChatFormFields.openAIKey}
           control={control}
           defaultValue=""
-          render={({ field }) => <OpenAIKeyFlyOut openAPIKey={field.value} onSave={field.onChange} onClose={onCloseOpenAIFlyOut} />}
+          render={({ field }) => (
+            <OpenAIKeyFlyOut
+              openAPIKey={field.value}
+              onSave={field.onChange}
+              onClose={onCloseOpenAIFlyOut}
+            />
+          )}
         />
       )}
 
@@ -40,7 +47,11 @@ export const SummarizationPanel: React.FC = () => {
         name={ChatFormFields.summarizationModel}
         control={control}
         render={({ field }) => (
-          <OpenAISummarizationModel model={field.value} onSelect={field.onChange} openAIFlyOutOpen={handleOpenAIFlyOut} />
+          <OpenAISummarizationModel
+            model={field.value}
+            onSelect={field.onChange}
+            openAIFlyOutOpen={handleOpenAIFlyOut}
+          />
         )}
       />
 
@@ -50,7 +61,6 @@ export const SummarizationPanel: React.FC = () => {
         defaultValue=""
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
       />
-
 
       <Controller
         name={ChatFormFields.citations}

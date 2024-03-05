@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { StartChatPanel } from '../start_chat_panel';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OpenAIKeyField } from './open_ai_key_field';
 import { useFormContext } from 'react-hook-form';
+import { OpenAIKeyField } from './open_ai_key_field';
+import { StartChatPanel } from '../start_chat_panel';
 import { ChatFormFields } from '../../types';
 
 const openAIApiKeyLink = 'https://platform.openai.com/api-keys';

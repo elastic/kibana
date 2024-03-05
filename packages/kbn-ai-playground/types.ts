@@ -47,7 +47,7 @@ export enum ChatFormFields {
   openAIKey = 'api_key',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
-  summarizationModel = 'summarization_model'
+  summarizationModel = 'summarization_model',
 }
 
 export interface ChatForm {

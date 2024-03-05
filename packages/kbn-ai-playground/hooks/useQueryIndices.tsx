@@ -8,8 +8,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AIPlaygroundPluginStartDeps, ElasticsearchIndex } from '../types';
 import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AIPlaygroundPluginStartDeps, ElasticsearchIndex } from '../types';
 
 export const useQueryIndices = (
   query: string = ''

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useFormContext } from 'react-hook-form';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
 import { SummarizationPanelForStartChat } from './summarization_panel/summarization_panel_for_start_chat';
-import { useFormContext } from 'react-hook-form';
-import { ChatFormFields } from '@kbn/ai-playground/types';
+import { ChatFormFields } from '../types';
 
 const maxWidthPage = 640;
 

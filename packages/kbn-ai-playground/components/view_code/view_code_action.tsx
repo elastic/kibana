@@ -9,9 +9,9 @@
 import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChatForm, ChatFormFields } from '../../types';
 import { VideCodeFlyout } from './vide_code_flyout';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ViewCodeActionProps {}
 

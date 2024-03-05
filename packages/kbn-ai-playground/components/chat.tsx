@@ -23,7 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { useChat } from '@elastic/ai-assist/dist/react';
 
-import { AIPlaygroundPluginStartDeps, ChatForm, ChatFormFields, MessageRole } from '../types';
+import { ChatForm, ChatFormFields, MessageRole } from '../types';
 
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/useChat';

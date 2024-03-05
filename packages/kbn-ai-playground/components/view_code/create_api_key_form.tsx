@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -18,9 +19,9 @@ import {
 import React, { Controller, useForm } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useCreateApiKeyQuery } from '../../hooks/useCreateApiKeyQuery';
-import { AIPlaygroundPluginStartDeps } from '@kbn/ai-playground/types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AIPlaygroundPluginStartDeps } from '../../types';
+import { useCreateApiKeyQuery } from '../../hooks/useCreateApiKeyQuery';
 
 enum ApiKeyFormFields {
   Name = 'name',

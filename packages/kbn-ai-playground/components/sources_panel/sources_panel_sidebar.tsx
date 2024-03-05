@@ -9,8 +9,8 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSourceIndicesField } from '../../hooks/useSourceIndicesField';
 import { useController } from 'react-hook-form';
+import { useSourceIndicesField } from '../../hooks/useSourceIndicesField';
 import { useIndicesFields } from '../../hooks/useIndicesFields';
 import { createQuery, getDefaultQueryFields } from '../../lib/create_query';
 import { ChatFormFields } from '../../types';
