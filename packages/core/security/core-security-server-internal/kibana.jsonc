@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-security-server-internal",
-  "owner": "@elastic-kibana-core"
+  "owner": "@elastic/kibana-core"
 }
