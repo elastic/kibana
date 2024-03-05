@@ -9,10 +9,15 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreInternalSecurityContract } from '@kbn/core-security-server';
-import type { InternalSecurityServiceSetup, InternalSecurityServiceStart } from './internal_contracts';
+import type {
+  InternalSecurityServiceSetup,
+  InternalSecurityServiceStart,
+} from './internal_contracts';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 
-export class SecurityService implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart> {
+export class SecurityService
+  implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
+{
   private readonly log: Logger;
   private securityApi?: CoreInternalSecurityContract;
 
