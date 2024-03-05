@@ -9,6 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { HttpFetchQuery, HttpHeadersInit, HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
+import { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
 type Params = HttpFetchQuery & { version?: string };
 class ApiService {
   private static instance: ApiService;
@@ -75,7 +76,11 @@ class ApiService {
       headers,
     });
 
-    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
+    this.addInspectorRequest?.({
+      data: response as InspectorRequestProps,
+      status: FETCH_STATUS.SUCCESS,
+      loading: false,
+    });
 
     return this.parseResponse(response, apiUrl, decodeType);
   }
@@ -90,7 +95,11 @@ class ApiService {
       version,
     });
 
-    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
+    this.addInspectorRequest?.({
+      data: response as InspectorRequestProps,
+      status: FETCH_STATUS.SUCCESS,
+      loading: false,
+    });
 
     return this.parseResponse(response, apiUrl, decodeType);
   }

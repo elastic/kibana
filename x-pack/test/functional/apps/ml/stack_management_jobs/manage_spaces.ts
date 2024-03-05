@@ -106,7 +106,8 @@ export default function ({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('manage spaces', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/177762
+  describe.skip('manage spaces', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

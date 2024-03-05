@@ -34,7 +34,7 @@ export const DeleteLocation = ({
     'xpack.synthetics.monitorManagement.cannotDelete.description',
     {
       defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}.
-                Remove this location from all monitors first.`,
+                Remove all monitors from this location first.`,
       values: { monCount },
     }
   );
