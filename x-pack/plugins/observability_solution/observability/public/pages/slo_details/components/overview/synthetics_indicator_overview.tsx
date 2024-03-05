@@ -37,6 +37,10 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
   const onMonitorClick = () => locator?.navigate({ configId, locationId });
   const showOverviewItem = name || location;
 
+  if (!showOverviewItem) {
+    return null;
+  }
+
   return (
     <OverviewItem
       title={MONITOR_LABEL}
