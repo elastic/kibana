@@ -15,7 +15,7 @@ import { apiPublishesViewMode, PublishesViewMode } from './publishes_view_mode';
  */
 export type CanAccessViewMode =
   | Partial<PublishesViewMode>
-  | Partial<HasParentApi<Partial<PublishesViewMode>>>;
+  | HasParentApi<Partial<PublishesViewMode>>;
 
 /**
  * A type guard which can be used to determine if a given API has access to a view mode, its own or from its parent.
