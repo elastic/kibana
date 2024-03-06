@@ -45,13 +45,19 @@ export interface StatCardProps {
   title: string;
 }
 
-const noIndexText = i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel', {
-  defaultMessage: 'No index attached',
-});
-  
-const noIndexDataText = i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexDataLabel', {
-  defaultMessage: 'Attached index does not exist',
-});
+const noIndexText = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel',
+  {
+    defaultMessage: 'No index attached',
+  }
+);
+
+const noIndexDataText = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.noIndexDataLabel',
+  {
+    defaultMessage: 'Attached index does not exist',
+  }
+);
 
 export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) => {
   return (
@@ -140,8 +146,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                       tabId: ConnectorDetailTabId.DOCUMENTS,
                     })}
                   >
-                    <EuiText size ="s" textAlign="right">
-
+                    <EuiText size="s" textAlign="right">
                       {i18n.translate(
                         'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
                         {
