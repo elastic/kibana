@@ -8,7 +8,9 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
+import { BehaviorSubject } from 'rxjs';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import {
   type ReactEmbeddableFactory,
   initializeReactEmbeddableTitles,
@@ -19,6 +21,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
+import { useActionHandlers } from './use_action_handlers';
 import type { MapEmbeddableInput } from '../embeddable/types';
 import { SavedMap } from '../routes/map_page';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
@@ -38,6 +41,7 @@ export async function getMapEmbeddable(
   const uuid = initializeReactEmbeddableUuid(maybeId);
   const { titlesApi, titleComparators, serializeTitles } =
     initializeReactEmbeddableTitles(state);
+  const timeRange = new BehaviorSubject<TimeRange | undefined>(state.timeRange);
 
   return RegisterReactEmbeddable((apiRef) => {
     
@@ -49,9 +53,13 @@ export async function getMapEmbeddable(
       }
     );
 
-    useReactEmbeddableApiHandle(
+    const thisApi = useReactEmbeddableApiHandle(
       {
         ...titlesApi,
+        localTimeRange: timeRange,
+        setLocalTimeRange: (timeRange: TimeRange | undefined) => {
+          timeRange.next(timeRange);
+        },
         unsavedChanges,
         resetUnsavedChanges,
         serializeState: async () => {
@@ -64,7 +72,9 @@ export async function getMapEmbeddable(
       },
       apiRef,
       uuid
-    );
+    ) as MapApi;
+
+    const { addFilters, getActionContext, getFilterActions, onSingleValueTrigger } = useActionHandlers(thisApi);
 
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
       const spaces = getSpacesApi();
@@ -83,18 +93,10 @@ export async function getMapEmbeddable(
         ) : (
           <Provider store={savedMap.getStore()}>
             <MapContainer
-              onSingleValueTrigger={(actionId: string, key: string, value: RawValue) => {
-                console.log(`onSingleValueTrigger, actionId: ${actionId}, key: ${key}, value: ${value}`);
-              }}
-              addFilters={(filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
-                console.log(`addFilters, filters: ${filters}, actionId: ${actionId}`);
-              }}
-              getFilterActions={() => {
-                console.log(`getFilterActions`);
-              }}
-              getActionContext={() => {
-                console.log(`getActionContext`);
-              }}
+              onSingleValueTrigger={onSingleValueTrigger}
+              addFilters={state.hideFilterActions ? null : addFilters}
+              getFilterActions={getFilterActions}
+              getActionContext={getActionContext}
               title="title"
               description="description"
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}

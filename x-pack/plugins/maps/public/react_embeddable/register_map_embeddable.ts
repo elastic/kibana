@@ -26,7 +26,7 @@ export const registerMapEmbeddable = () => {
     },
     getComponent: async (state, maybeId) => {
       const { getMapEmbeddable } = await import('./get_map_embeddable');
-      return await getMapEmbeddable(state, maybeId);
+      return await getMapEmbeddable(factory, state, maybeId);
     },
   };
 

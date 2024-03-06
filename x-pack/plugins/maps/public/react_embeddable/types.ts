@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import {
+import type { PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import type {
   DefaultEmbeddableApi,
 } from '@kbn/embeddable-plugin/public';
 
-export type MapApi = DefaultEmbeddableApi;
+export type MapApi = DefaultEmbeddableApi & 
+  Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'>;
