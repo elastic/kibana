@@ -104,7 +104,7 @@ const getInstalledPackagePolicies = (
         agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
         0;
 
-      const isAgentless = AGENTLESS_POLICY_ID === packagePolicy.policy_id;
+      const isAgentless = packagePolicy.policy_id === AGENTLESS_POLICY_ID;
 
       const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
 
