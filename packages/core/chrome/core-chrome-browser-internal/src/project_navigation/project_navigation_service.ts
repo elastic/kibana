@@ -213,8 +213,12 @@ export class ProjectNavigationService {
       this.navigationChangeSubscription.unsubscribe();
     }
 
-    const cloudLinks = getCloudLinks(cloudUrls);
-    this.cloudLinks$.next(cloudLinks);
+    let cloudLinks = this.cloudLinks$.getValue();
+    if (Object.keys(cloudLinks).length === 0) {
+      // Cloud links never change, so we only need to parse them once
+      cloudLinks = getCloudLinks(cloudUrls);
+      this.cloudLinks$.next(cloudLinks);
+    }
 
     this.navigationChangeSubscription = combineLatest([navTreeDefinition, this.deepLinksMap$])
       .pipe(
