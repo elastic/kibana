@@ -32,7 +32,7 @@ export interface IStyleProperty<T> {
   getDisplayStyleName(): string;
 }
 
-export class AbstractStyleProperty<T> implements IStyleProperty<T> {
+export class AbstractStyleProperty<T extends object> implements IStyleProperty<T> {
   protected readonly _options: T;
   protected readonly _styleName: VECTOR_STYLES;
 
