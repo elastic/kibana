@@ -5022,6 +5022,10 @@
               },
               {
                 "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/health.test.ts"
+              },
+              {
+                "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/metrics.test.ts"
               },
               {
@@ -13572,7 +13576,7 @@
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -14283,7 +14287,7 @@
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",
@@ -14906,7 +14910,7 @@
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -15417,7 +15421,7 @@
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",
@@ -15612,7 +15616,7 @@
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "lists",
