@@ -71,7 +71,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
   public getDisplayName() {
     return i18n.translate('reporting.share.panelAction.generateCsvPanelTitle', {
-      defaultMessage: 'Generate CSV report',
+      defaultMessage: 'Download CSV',
     });
   }
 
@@ -181,7 +181,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     this.isDownloading = false;
     this.notifications.toasts.addDanger({
       title: i18n.translate('reporting.share.panelAction.failedCsvReportTitle', {
-        defaultMessage: `CSV report generation failed`,
+        defaultMessage: `CSV download failed`,
       }),
       text: i18n.translate('reporting.share.panelAction.failedCsvReportMessage', {
         defaultMessage: `We couldn't generate your CSV at this time.`,
