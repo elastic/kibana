@@ -12,7 +12,8 @@ import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PLATFORM_TYPE, useDefaultDownloadSource } from '../../../hooks';
+import type { PLATFORM_TYPE } from '../../../hooks';
+import { useDefaultDownloadSource } from '../../../hooks';
 import { useStartServices, useDefaultOutput, useKibanaVersion } from '../../../hooks';
 
 import { PlatformSelector } from '../..';
