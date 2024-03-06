@@ -12,11 +12,6 @@ export const configSchema = schema.object({
   new_version: schema.object({
     enabled: schema.boolean({
       defaultValue: false,
-      validate(value) {
-        if (value !== true && value !== false) {
-          return `cannot use values beyond true or false`;
-        }
-      },
     }),
   }),
 });

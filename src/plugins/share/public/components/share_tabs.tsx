@@ -8,12 +8,9 @@
 
 import { Capabilities } from '@kbn/core-capabilities-common';
 import React from 'react';
-// import { ShareModal } from '@kbn/share-modal';
 import { EuiModal } from '@elastic/eui';
 import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
 import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
-// import { LinkModal } from './link_modal';
-// import { EmbedModal } from './embed_modal';
 
 export interface ModalTabActionHandler {
   id: string;
@@ -47,24 +44,6 @@ export interface ShareContextTabProps {
   isEmbedded: boolean;
 }
 
-export const ShareMenuTabs = ({
-  allowEmbed,
-  shareMenuItems,
-  urlService,
-  onClose,
-  objectType,
-  embedUrlParamExtensions,
-  objectId,
-  isDirty,
-  isEmbedded,
-}: ShareContextTabProps) => {
-  return (
-    <EuiModal onClose={onClose}>{'placeholder'}</EuiModal>
-    // <ShareModal
-    //   objectType={objectType}
-    //   modalBodyDescriptions={getModalBodyDescriptions()}
-    //   onClose={onClose}
-    //   tabs={getTabs()}
-    // />
-  );
+export const ShareMenuTabs = ({ onClose }: ShareContextTabProps) => {
+  return <EuiModal onClose={onClose}>{'placeholder'}</EuiModal>;
 };
