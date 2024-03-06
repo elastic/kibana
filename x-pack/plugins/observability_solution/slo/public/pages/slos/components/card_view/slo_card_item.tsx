@@ -24,7 +24,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
@@ -139,15 +139,13 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
       ) : null}
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
-          objectType={i18n.translate(
-            'xpack.observability.slo.item.actions.attachToDashboard.objectTypeLabel',
-            { defaultMessage: 'SLO Overview' }
-          )}
+          objectType={i18n.translate('xpack.slo.item.actions.attachToDashboard.objectTypeLabel', {
+            defaultMessage: 'SLO Overview',
+          })}
           documentInfo={{
-            title: i18n.translate(
-              'xpack.observability.slo.item.actions.attachToDashboard.attachmentTitle',
-              { defaultMessage: 'SLO Overview' }
-            ),
+            title: i18n.translate('xpack.slo.item.actions.attachToDashboard.attachmentTitle', {
+              defaultMessage: 'SLO Overview',
+            }),
           }}
           canSaveByReference={false}
           onClose={() => {

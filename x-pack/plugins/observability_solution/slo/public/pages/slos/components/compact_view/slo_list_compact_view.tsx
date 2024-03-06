@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useGetFilteredRuleTypes } from '@kbn/observability-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { SloTagsList } from '../common/slo_tags_list';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
@@ -104,15 +104,15 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'inspect',
-      name: i18n.translate('xpack.observability.slo.item.actions.details', {
+      name: i18n.translate('xpack.slo.item.actions.details', {
         defaultMessage: 'Details',
       }),
-      description: i18n.translate('xpack.observability.slo.item.actions.details', {
+      description: i18n.translate('xpack.slo.item.actions.details', {
         defaultMessage: 'Details',
       }),
       onClick: (slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.observability.sloDetails(
+          paths.sloDetails(
             slo.id,
             slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
           )
@@ -123,25 +123,25 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'pencil',
-      name: i18n.translate('xpack.observability.slo.item.actions.edit', {
+      name: i18n.translate('xpack.slo.item.actions.edit', {
         defaultMessage: 'Edit',
       }),
-      description: i18n.translate('xpack.observability.slo.item.actions.edit', {
+      description: i18n.translate('xpack.slo.item.actions.edit', {
         defaultMessage: 'Edit',
       }),
       'data-test-subj': 'sloActionsEdit',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
-        navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+        navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
       },
     },
     {
       type: 'icon',
       icon: 'bell',
-      name: i18n.translate('xpack.observability.slo.item.actions.createRule', {
+      name: i18n.translate('xpack.slo.item.actions.createRule', {
         defaultMessage: 'Create new alert rule',
       }),
-      description: i18n.translate('xpack.observability.slo.item.actions.createRule', {
+      description: i18n.translate('xpack.slo.item.actions.createRule', {
         defaultMessage: 'Create new alert rule',
       }),
       'data-test-subj': 'sloActionsCreateRule',
@@ -153,10 +153,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'gear',
-      name: i18n.translate('xpack.observability.slo.item.actions.manageRules', {
+      name: i18n.translate('xpack.slo.item.actions.manageRules', {
         defaultMessage: 'Manage rules',
       }),
-      description: i18n.translate('xpack.observability.slo.item.actions.manageRules', {
+      description: i18n.translate('xpack.slo.item.actions.manageRules', {
         defaultMessage: 'Manage rules',
       }),
       'data-test-subj': 'sloActionsManageRules',
@@ -169,10 +169,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'copy',
-      name: i18n.translate('xpack.observability.slo.item.actions.clone', {
+      name: i18n.translate('xpack.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
-      description: i18n.translate('xpack.observability.slo.item.actions.clone', {
+      description: i18n.translate('xpack.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
       'data-test-subj': 'sloActionsClone',
@@ -184,10 +184,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'trash',
-      name: i18n.translate('xpack.observability.slo.item.actions.delete', {
+      name: i18n.translate('xpack.slo.item.actions.delete', {
         defaultMessage: 'Delete',
       }),
-      description: i18n.translate('xpack.observability.slo.item.actions.delete', {
+      description: i18n.translate('xpack.slo.item.actions.delete', {
         defaultMessage: 'Delete',
       }),
       'data-test-subj': 'sloActionsDelete',
@@ -239,7 +239,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.observability.sloDetails(
+          paths.sloDetails(
             slo.id,
             slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
           )
@@ -271,7 +271,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         slo.groupBy !== ALL_VALUE ? (
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.observability.slo.groupByBadge', {
+            content={i18n.translate('xpack.slo.groupByBadge', {
               defaultMessage: 'Group by {groupKey}',
               values: {
                 groupKey: slo.groupBy,
@@ -415,10 +415,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   );
 }
 
-const LOADING_SLOS_LABEL = i18n.translate('xpack.observability.slo.loadingSlosLabel', {
+const LOADING_SLOS_LABEL = i18n.translate('xpack.slo.loadingSlosLabel', {
   defaultMessage: 'Loading SLOs ...',
 });
 
-const NO_SLOS_FOUND = i18n.translate('xpack.observability.slo.noSlosFound', {
-  defaultMessage: 'No SLOs found',
-});
+const NO_SLOS_FOUND = i18n.translate('xpack.slo.noSlosFound', { defaultMessage: 'No SLOs found' });

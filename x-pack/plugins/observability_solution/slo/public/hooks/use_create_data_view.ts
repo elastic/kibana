@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 
 interface UseCreateDataViewProps {
   indexPatternString: string | undefined;

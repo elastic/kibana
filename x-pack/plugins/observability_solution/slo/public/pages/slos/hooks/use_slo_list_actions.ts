@@ -8,7 +8,7 @@
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { useCallback } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import { SLO_EMBEDDABLE } from '../../../embeddable/slo/overview/slo_embeddable';
 

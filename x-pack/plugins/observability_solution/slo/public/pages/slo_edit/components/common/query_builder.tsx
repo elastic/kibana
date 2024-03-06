@@ -11,7 +11,7 @@ import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import styled from 'styled-components';
 import { kqlQuerySchema } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { observabilityAppId } from '../../../../../common';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';

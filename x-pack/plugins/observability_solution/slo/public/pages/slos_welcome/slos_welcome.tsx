@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/use_capabilities';
@@ -48,7 +48,7 @@ export function SlosWelcomePage() {
   const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;
 
   const handleClickCreateSlo = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+    navigateToUrl(basePath.prepend(paths.sloCreate));
   };
 
   const hasSlosAndHasPermissions =
@@ -56,7 +56,7 @@ export function SlosWelcomePage() {
 
   useEffect(() => {
     if (hasSlosAndHasPermissions) {
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      navigateToUrl(basePath.prepend(paths.slos));
     }
   }, [basePath, hasSlosAndHasPermissions, navigateToUrl]);
 
@@ -68,7 +68,7 @@ export function SlosWelcomePage() {
         title={
           <EuiTitle size="l">
             <h1>
-              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.title', {
+              {i18n.translate('xpack.slo.sloList.welcomePrompt.title', {
                 defaultMessage: 'Track and deliver on your SLOs',
               })}
             </h1>
@@ -81,14 +81,14 @@ export function SlosWelcomePage() {
         body={
           <>
             <p>
-              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.messageParagraph1', {
+              {i18n.translate('xpack.slo.sloList.welcomePrompt.messageParagraph1', {
                 defaultMessage:
                   'Measure key metrics important to the business, such as service-level indicators and service-level objectives (SLIs/SLOs) to deliver on SLAs.',
               })}
             </p>
 
             <p>
-              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.messageParagraph2', {
+              {i18n.translate('xpack.slo.sloList.welcomePrompt.messageParagraph2', {
                 defaultMessage:
                   'Easily report the uptime and reliability of your services to stakeholders with real-time insights.',
               })}
@@ -103,12 +103,9 @@ export function SlosWelcomePage() {
                 <EuiFlexItem>
                   <EuiTitle size="xxs">
                     <span>
-                      {i18n.translate(
-                        'xpack.observability.slo.sloList.welcomePrompt.getStartedMessage',
-                        {
-                          defaultMessage: 'To get started, create your first SLO.',
-                        }
-                      )}
+                      {i18n.translate('xpack.slo.sloList.welcomePrompt.getStartedMessage', {
+                        defaultMessage: 'To get started, create your first SLO.',
+                      })}
                     </span>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -122,7 +119,7 @@ export function SlosWelcomePage() {
                       onClick={handleClickCreateSlo}
                       disabled={!hasWriteCapabilities || !hasRequiredWritePrivileges}
                     >
-                      {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.buttonLabel', {
+                      {i18n.translate('xpack.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',
                       })}
                     </EuiButton>
@@ -134,13 +131,10 @@ export function SlosWelcomePage() {
                 <EuiFlexItem>
                   <EuiTitle size="xxs">
                     <span>
-                      {i18n.translate(
-                        'xpack.observability.slo.sloList.welcomePrompt.needLicenseMessage',
-                        {
-                          defaultMessage:
-                            'You need an Elastic Cloud subscription or Platinum license to use SLOs.',
-                        }
-                      )}
+                      {i18n.translate('xpack.slo.sloList.welcomePrompt.needLicenseMessage', {
+                        defaultMessage:
+                          'You need an Elastic Cloud subscription or Platinum license to use SLOs.',
+                      })}
                     </span>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -154,12 +148,9 @@ export function SlosWelcomePage() {
                         target="_blank"
                         data-test-subj="slosPageWelcomePromptSignupForCloudButton"
                       >
-                        {i18n.translate(
-                          'xpack.observability.slo.sloList.welcomePrompt.signupForCloud',
-                          {
-                            defaultMessage: 'Sign up for Elastic Cloud',
-                          }
-                        )}
+                        {i18n.translate('xpack.slo.sloList.welcomePrompt.signupForCloud', {
+                          defaultMessage: 'Sign up for Elastic Cloud',
+                        })}
                       </EuiButton>
                     </EuiFlexItem>
 
@@ -169,12 +160,9 @@ export function SlosWelcomePage() {
                         target="_blank"
                         data-test-subj="slosPageWelcomePromptSignupForLicenseButton"
                       >
-                        {i18n.translate(
-                          'xpack.observability.slo.sloList.welcomePrompt.signupForLicense',
-                          {
-                            defaultMessage: 'Sign up for license',
-                          }
-                        )}
+                        {i18n.translate('xpack.slo.sloList.welcomePrompt.signupForLicense', {
+                          defaultMessage: 'Sign up for license',
+                        })}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -187,7 +175,7 @@ export function SlosWelcomePage() {
           <>
             <EuiTitle size="xxs">
               <span>
-                {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.learnMore', {
+                {i18n.translate('xpack.slo.sloList.welcomePrompt.learnMore', {
                   defaultMessage: 'Want to learn more?',
                 })}
               </span>
@@ -198,7 +186,7 @@ export function SlosWelcomePage() {
               href="https://www.elastic.co/guide/en/observability/current/slo.html"
               target="_blank"
             >
-              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.learnMoreLink', {
+              {i18n.translate('xpack.slo.sloList.welcomePrompt.learnMoreLink', {
                 defaultMessage: 'Read the docs',
               })}
             </EuiLink>

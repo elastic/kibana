@@ -13,6 +13,7 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type {
@@ -37,7 +38,11 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SloPlugin } from './plugin';
+
 export interface SloPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
@@ -55,6 +60,7 @@ export interface SloPublicPluginsSetup {
 export interface SloPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cloud?: CloudStart;
+  dataViewEditor: DataViewEditorStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -69,6 +75,9 @@ export interface SloPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  lens: LensPublicStart;
+  charts: ChartsPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

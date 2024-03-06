@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/use_capabilities';
@@ -32,14 +32,14 @@ export function SlosOutdatedDefinitions() {
 
   useBreadcrumbs([
     {
-      href: basePath.prepend(paths.observability.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+      href: basePath.prepend(paths.slos),
+      text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-overview:slos', // TODO SLO: check this deeplinkid
     },
     {
-      text: i18n.translate('xpack.observability.breadcrumbs.slosOutdatedDefinitions', {
+      text: i18n.translate('xpack.slo.breadcrumbs.slosOutdatedDefinitions', {
         defaultMessage: 'Outdated SLO Definitions',
       }),
     },
@@ -73,13 +73,13 @@ export function SlosOutdatedDefinitions() {
 
   const errors = !hasRequiredWritePrivileges ? (
     <EuiText>
-      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.sloPermissionsError', {
+      {i18n.translate('xpack.slo.slosOutdatedDefinitions.sloPermissionsError', {
         defaultMessage: 'You must have write permissions for SLOs to access this page',
       })}
     </EuiText>
   ) : !hasPlatinumLicense ? (
     <EuiText>
-      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.licenseError', {
+      {i18n.translate('xpack.slo.slosOutdatedDefinitions.licenseError', {
         defaultMessage: 'You must have atleast a platinum license to access this page',
       })}
     </EuiText>
@@ -89,7 +89,7 @@ export function SlosOutdatedDefinitions() {
     <ObservabilityPageTemplate
       data-test-subj="slosOutdatedDefinitions"
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.pageTitle', {
+        pageTitle: i18n.translate('xpack.slo.slosOutdatedDefinitions.pageTitle', {
           defaultMessage: 'Outdated SLO Definitions',
         }),
       }}
@@ -101,7 +101,7 @@ export function SlosOutdatedDefinitions() {
       ) : (
         <>
           <p>
-            {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.description', {
+            {i18n.translate('xpack.slo.slosOutdatedDefinitions.description', {
               defaultMessage:
                 'The following SLOs are from a previous version and need to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transform will be updated to the latest version and the historical data will be regenerated from the source data.',
             })}

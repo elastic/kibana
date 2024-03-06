@@ -8,7 +8,7 @@ import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../../common/locators/paths';
 
@@ -19,7 +19,7 @@ export function SloOutdatedCallout() {
   } = useKibana().services;
 
   const handleClick = () => {
-    navigateToUrl(basePath.prepend(paths.observability.slosOutdatedDefinitions));
+    navigateToUrl(basePath.prepend(paths.slosOutdatedDefinitions));
   };
 
   const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });
@@ -29,7 +29,7 @@ export function SloOutdatedCallout() {
         <EuiCallOut
           color="warning"
           iconType="warning"
-          title={i18n.translate('xpack.observability.slo.outdatedSloCallout.title', {
+          title={i18n.translate('xpack.slo.outdatedSloCallout.title', {
             defaultMessage: '{total} Outdated SLOs Detected',
             values: {
               total: data.total,
@@ -38,7 +38,7 @@ export function SloOutdatedCallout() {
         >
           <p>
             <FormattedMessage
-              id="xpack.observability.slo.outdatedSloCallout.message"
+              id="xpack.slo.outdatedSloCallout.message"
               defaultMessage="We've noticed that you have {total} outdated SLO definitions, these SLOs will not be running or alerting until you've reset them. Please click the button below to review the SLO definitions; you can choose to either reset the SLO definition or remove it."
               values={{ total: data.total }}
             />
@@ -51,7 +51,7 @@ export function SloOutdatedCallout() {
               onClick={handleClick}
             >
               <FormattedMessage
-                id="xpack.observability.outdatedSloCallout.buttonLabel"
+                id="xpack.slo.outdatedSloCallout.buttonLabel"
                 defaultMessage="Review Outdated SLO Definitions"
               />
             </EuiButton>

@@ -16,7 +16,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
@@ -153,15 +153,15 @@ function getBreadcrumbs(
   return [
     {
       href: basePath.prepend(paths.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+      text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-overview:slos', // TODO SLO: do I need this?
     },
     {
       text:
         slo?.name ??
-        i18n.translate('xpack.observability.breadcrumbs.sloDetailsLinkText', {
+        i18n.translate('xpack.slo.breadcrumbs.sloDetailsLinkText', {
           defaultMessage: 'Details',
         }),
     },

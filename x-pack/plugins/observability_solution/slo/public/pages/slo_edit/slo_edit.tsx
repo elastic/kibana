@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { useCapabilities } from '../../hooks/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
@@ -36,10 +36,10 @@ export function SloEditPage() {
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
+      text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-overview:slos', // TODO SLO: do I need deepLinkId
     },
     ...(!!slo
       ? [
@@ -51,10 +51,10 @@ export function SloEditPage() {
       : []),
     {
       text: slo
-        ? i18n.translate('xpack.observability.breadcrumbs.sloEditLabel', {
+        ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
             defaultMessage: 'Edit',
           })
-        : i18n.translate('xpack.observability.breadcrumbs.sloCreateLabel', {
+        : i18n.translate('xpack.slo.breadcrumbs.sloCreateLabel', {
             defaultMessage: 'Create',
           }),
     },
@@ -68,10 +68,10 @@ export function SloEditPage() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: slo
-          ? i18n.translate('xpack.observability.sloEditPageTitle', {
+          ? i18n.translate('xpack.slo.sloEditPageTitle', {
               defaultMessage: 'Edit SLO',
             })
-          : i18n.translate('xpack.observability.sloCreatePageTitle', {
+          : i18n.translate('xpack.slo.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
         bottomBorder: false,

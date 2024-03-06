@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -62,7 +62,7 @@ export function TimesliceMetricIndicatorTypeForm() {
             <IndexFieldSelector
               indexFields={timestampFields ?? []}
               name="indicator.params.timestampField"
-              label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+              label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
                 defaultMessage: 'Timestamp field',
               })}
               placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {

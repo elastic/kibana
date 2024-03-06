@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { paths } from '../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
 
@@ -40,7 +40,7 @@ export function useUpdateSlo() {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
         toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.update.successNotification', {
+          i18n.translate('xpack.slo.update.successNotification', {
             defaultMessage: 'Successfully updated {name}',
             values: { name },
           })
@@ -48,15 +48,13 @@ export function useUpdateSlo() {
       },
       onError: (error, { slo, sloId }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.observability.slo.update.errorNotification', {
+          title: i18n.translate('xpack.slo.update.errorNotification', {
             defaultMessage: 'Something went wrong when updating {name}',
             values: { name: slo.name },
           }),
         });
 
-        navigateToUrl(
-          http.basePath.prepend(paths.observability.sloEditWithEncodedForm(sloId, encode(slo)))
-        );
+        navigateToUrl(http.basePath.prepend(paths.sloEditWithEncodedForm(sloId, encode(slo))));
       },
     }
   );

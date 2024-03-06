@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { render } from '../../../utils/test_helper';
 import { buildSlo } from '../../../data/slo/slo';
 import { ErrorBudgetHeader } from './error_budget_header';

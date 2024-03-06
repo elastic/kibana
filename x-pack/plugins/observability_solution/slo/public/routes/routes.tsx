@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useKibana } from '../utils/kibana_react';
 import { SlosPage } from '../pages/slos/slos';
 import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';

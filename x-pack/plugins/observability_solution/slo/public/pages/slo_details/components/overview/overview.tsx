@@ -22,7 +22,7 @@ import {
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,

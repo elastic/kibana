@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
-import { observabilityAppId, ObservabilityPublicPluginsStart } from '../../..';
+import { observabilityAppId } from '../../..';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { QuickFilters } from './common/quick_filters';
 
@@ -36,7 +36,7 @@ export function SloListSearchBar() {
     unifiedSearch: {
       ui: { SearchBar },
     },
-  } = useKibana<ObservabilityPublicPluginsStart>().services;
+  } = useKibana().services;
 
   const { state, onStateChange } = useUrlSearchState();
   const loading = useSloCrudLoading();
@@ -98,6 +98,6 @@ const Container = styled.div`
   }
 `;
 
-const PLACEHOLDER = i18n.translate('xpack.observability.slo.list.search', {
+const PLACEHOLDER = i18n.translate('xpack.slo.list.search', {
   defaultMessage: 'Search your SLOs ...',
 });

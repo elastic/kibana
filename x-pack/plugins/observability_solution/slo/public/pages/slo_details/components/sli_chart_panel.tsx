@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings/slo';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';

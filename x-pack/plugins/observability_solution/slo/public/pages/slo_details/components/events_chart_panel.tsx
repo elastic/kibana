@@ -36,7 +36,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 

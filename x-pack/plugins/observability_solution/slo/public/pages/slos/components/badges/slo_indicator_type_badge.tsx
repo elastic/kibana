@@ -15,7 +15,7 @@ import {
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
@@ -50,13 +50,10 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
               kqlQuery: `slo.indicator.type: ${slo.indicator.type}`,
             });
           }}
-          onClickAriaLabel={i18n.translate(
-            'xpack.observability.slo.indicatorTypeBadge.clickToFilter',
-            {
-              defaultMessage: 'Click to filter by {indicatorType} SLOs',
-              values: { indicatorType: toIndicatorTypeLabel(slo.indicator.type) },
-            }
-          )}
+          onClickAriaLabel={i18n.translate('xpack.slo.sloIndicatorTypeBadge.clickToFilter', {
+            defaultMessage: 'Click to filter by {indicatorType} SLOs',
+            values: { indicatorType: toIndicatorTypeLabel(slo.indicator.type) },
+          })}
         >
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
@@ -66,7 +63,7 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
         <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.observability.slo.indicatorTypeBadge.exploreInApm', {
+            content={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
               defaultMessage: 'View {service} details',
               values: { service: slo.indicator.params.service },
             })}
@@ -74,13 +71,10 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
             <EuiBadge
               color={color ?? euiLightVars.euiColorDisabled}
               onClick={handleNavigateToApm}
-              onClickAriaLabel={i18n.translate(
-                'xpack.observability.slo.indicatorTypeBadge.exploreInApm',
-                {
-                  defaultMessage: 'View {service} details',
-                  values: { service: slo.indicator.params.service },
-                }
-              )}
+              onClickAriaLabel={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
+                defaultMessage: 'View {service} details',
+                values: { service: slo.indicator.params.service },
+              })}
             >
               {slo.indicator.params.service}
             </EuiBadge>

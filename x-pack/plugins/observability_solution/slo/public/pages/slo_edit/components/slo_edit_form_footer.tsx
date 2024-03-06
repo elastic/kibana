@@ -11,8 +11,8 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCreateRule } from '@kbn/observability-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
@@ -66,7 +66,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     if (isEditMode) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       await updateSlo({ sloId: slo.id, slo: processedValues });
-      navigate(basePath.prepend(paths.observability.slos));
+      navigate(basePath.prepend(paths.slos));
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });

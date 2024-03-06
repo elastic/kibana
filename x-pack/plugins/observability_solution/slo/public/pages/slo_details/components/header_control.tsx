@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
@@ -180,7 +180,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                   onClick={handleNavigateToApm}
                   data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
                 >
-                  {i18n.translate('xpack.slos.sloDetails.headerControl.exploreInApm', {
+                  {i18n.translate('xpack.slo.sloDetails.headerControl.exploreInApm', {
                     defaultMessage: 'Service details',
                   })}
                 </EuiContextMenuItem>

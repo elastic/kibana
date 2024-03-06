@@ -7,7 +7,7 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
@@ -26,7 +26,7 @@ export function useResetSlo() {
         return http.post(`/api/observability/slos/${id}/_reset`);
       } catch (error) {
         return Promise.reject(
-          i18n.translate('xpack.observability.slo.slo.reset.errorMessage', {
+          i18n.translate('xpack.slo.slo.reset.errorMessage', {
             defaultMessage: 'Failed to reset {name} (id: {id}), something went wrong: {error}',
             values: { error: String(error), name, id },
           })
@@ -36,7 +36,7 @@ export function useResetSlo() {
     {
       onError: (error, { name, id }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.observability.slo.slo.reset.errorNotification', {
+          title: i18n.translate('xpack.slo.slo.reset.errorNotification', {
             defaultMessage: 'Failed to reset {name} (id: {id})',
             values: { name, id },
           }),
@@ -45,7 +45,7 @@ export function useResetSlo() {
       onSuccess: (_data, { name }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
         toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.slo.reset.successNotification', {
+          i18n.translate('xpack.slo.slo.reset.successNotification', {
             defaultMessage: '{name} reset successfully',
             values: { name },
           })

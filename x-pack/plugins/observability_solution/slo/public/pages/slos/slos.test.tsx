@@ -22,8 +22,7 @@ import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summ
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
 

@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { paths } from '../../../../common/locators/paths';
@@ -88,7 +88,7 @@ export function SloItemActions({
   };
 
   const handleEdit = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+    navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
   };
 
   const navigateToClone = useCloneSlo();
@@ -122,7 +122,7 @@ export function SloItemActions({
   const btn = (
     <EuiButtonIcon
       data-test-subj="o11ySloListItemButton"
-      aria-label={i18n.translate('xpack.observability.slo.item.actions.button', {
+      aria-label={i18n.translate('xpack.slo.item.actions.button', {
         defaultMessage: 'Actions',
       })}
       color="text"
@@ -152,7 +152,7 @@ export function SloItemActions({
             onClick={handleViewDetails}
             data-test-subj="sloActionsView"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.details', {
+            {i18n.translate('xpack.slo.item.actions.details', {
               defaultMessage: 'Details',
             })}
           </EuiContextMenuItem>,
@@ -163,7 +163,7 @@ export function SloItemActions({
             onClick={handleEdit}
             data-test-subj="sloActionsEdit"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.edit', {
+            {i18n.translate('xpack.slo.item.actions.edit', {
               defaultMessage: 'Edit',
             })}
           </EuiContextMenuItem>,
@@ -174,7 +174,7 @@ export function SloItemActions({
             onClick={handleCreateRule}
             data-test-subj="sloActionsCreateRule"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.createRule', {
+            {i18n.translate('xpack.slo.item.actions.createRule', {
               defaultMessage: 'Create new alert rule',
             })}
           </EuiContextMenuItem>,
@@ -185,7 +185,7 @@ export function SloItemActions({
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.manageRules', {
+            {i18n.translate('xpack.slo.item.actions.manageRules', {
               defaultMessage: 'Manage rules',
             })}
           </EuiContextMenuItem>,
@@ -196,9 +196,7 @@ export function SloItemActions({
             onClick={handleClone}
             data-test-subj="sloActionsClone"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.clone', {
-              defaultMessage: 'Clone',
-            })}
+            {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"
@@ -207,9 +205,7 @@ export function SloItemActions({
             onClick={handleDelete}
             data-test-subj="sloActionsDelete"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.delete', {
-              defaultMessage: 'Delete',
-            })}
+            {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="dashboardApp"
@@ -217,7 +213,7 @@ export function SloItemActions({
             onClick={handleAttachToDashboard}
             data-test-subj="sloActinsAttachToDashboard"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.attachToDashboard', {
+            {i18n.translate('xpack.slo.item.actions.attachToDashboard', {
               defaultMessage: 'Attach to Dashboard',
             })}
           </EuiContextMenuItem>,

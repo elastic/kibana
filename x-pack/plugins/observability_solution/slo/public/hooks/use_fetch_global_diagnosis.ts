@@ -9,7 +9,7 @@ import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/a
 import { i18n } from '@kbn/i18n';
 import type { PublicLicenseJSON } from '@kbn/licensing-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { convertErrorForUseInToast } from './helpers/convert_error_for_use_in_toast';
 import { sloKeys } from './query_key_factory';
 
@@ -55,7 +55,7 @@ export function useFetchSloGlobalDiagnosis(): UseFetchSloGlobalDiagnoseResponse 
     retry: false,
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: i18n.translate('xpack.observability.slo.globalDiagnosis.errorNotification', {
+        title: i18n.translate('xpack.slo.globalDiagnosis.errorNotification', {
           defaultMessage: 'You do not have the right permissions to use this feature.',
         }),
       });

@@ -382,8 +382,8 @@ export class Plugin
                   label: i18n.translate('xpack.observability.sloLinkTitle', {
                     defaultMessage: 'SLOs',
                   }),
-                  app: 'observabilitySLO',
-                  path: '/slos',
+                  app: 'slo',
+                  path: '/',
                 },
               ];
 

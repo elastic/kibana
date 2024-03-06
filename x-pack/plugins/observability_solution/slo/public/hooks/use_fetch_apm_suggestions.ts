@@ -7,8 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 
 export type Suggestion = string;
 

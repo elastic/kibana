@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 
 import { ErrorBudgetActions } from './error_budget_actions';

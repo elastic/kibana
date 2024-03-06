@@ -27,8 +27,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WindowSchema } from '../../../../../../typings';
+import { useKibana } from '../../../../../../utils/kibana_react';
 import { ErrorRateChart } from '../../../../error_rate_chart';
 import { TimeRange } from '../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert } from '../../alert_details_app_section';
@@ -91,10 +91,10 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h2>
-                  {i18n.translate(
-                    'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.title',
-                    { defaultMessage: '{sloName} burn rate', values: { sloName: slo.name } }
-                  )}
+                  {i18n.translate('xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.title', {
+                    defaultMessage: '{sloName} burn rate',
+                    values: { sloName: slo.name },
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -106,7 +106,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               >
                 <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
                 <FormattedMessage
-                  id="xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.sloDetailsLink"
+                  id="xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.sloDetailsLink"
                   defaultMessage="SLO details"
                 />
               </EuiLink>
@@ -130,7 +130,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                   <EuiText color="default" size="m">
                     <span>
                       {i18n.translate(
-                        'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.thresholdBreachedTitle',
+                        'xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.thresholdBreachedTitle',
                         { defaultMessage: 'Threshold breached' }
                       )}
                       <EuiIcon type="warning" style={{ marginLeft: '4px' }} />
@@ -150,7 +150,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                       <EuiTextColor color="default">
                         <span>
                           {i18n.translate(
-                            'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.tresholdSubtitle',
+                            'xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.tresholdSubtitle',
                             {
                               defaultMessage: 'Alert when > {threshold}x',
                               values: {

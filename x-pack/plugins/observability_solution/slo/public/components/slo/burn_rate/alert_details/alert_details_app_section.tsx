@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
 import { AlertSummaryField } from '../../../../pages/alert_details/components/alert_summary';
 import { TopAlert } from '../../../../typings/alerts';

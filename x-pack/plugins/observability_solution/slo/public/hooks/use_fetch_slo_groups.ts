@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { FindSLOGroupsResponse } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { useCreateDataView } from './use_create_data_view'; // TODO SLO: extract from observability
 import { sloKeys } from './query_key_factory';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
@@ -102,7 +102,7 @@ export function useFetchSloGroups({
     },
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: i18n.translate('xpack.observability.slo.groups.list.errorNotification', {
+        title: i18n.translate('xpack.slo.groups.list.errorNotification', {
           defaultMessage: 'Something went wrong while fetching SLO Groups',
         }),
       });

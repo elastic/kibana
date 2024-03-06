@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 import { useCallback } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { paths } from '../../common/locators/paths';
 
 export function useCloneSlo() {
@@ -21,7 +21,7 @@ export function useCloneSlo() {
     (slo: SLOWithSummaryResponse) => {
       navigateToUrl(
         basePath.prepend(
-          paths.observability.sloCreateWithEncodedForm(
+          paths.sloCreateWithEncodedForm(
             encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
           )
         )

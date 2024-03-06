@@ -23,8 +23,8 @@ import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useState } from 'react';
 import { GroupSummary } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '../../../../utils/kibana_react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
@@ -120,7 +120,7 @@ export function GroupListView({
                   {summary.violated > 0 && (
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="danger">
-                        {i18n.translate('xpack.observability.slo.group.totalViolated', {
+                        {i18n.translate('xpack.slo.group.totalViolated', {
                           defaultMessage: '{total} Violated',
                           values: {
                             total: summary.violated,
@@ -131,7 +131,7 @@ export function GroupListView({
                   )}
                   <EuiFlexItem grow={false}>
                     <EuiBadge color={'success'}>
-                      {i18n.translate('xpack.observability.slo.group.totalHealthy', {
+                      {i18n.translate('xpack.slo.group.totalHealthy', {
                         defaultMessage: '{total} Healthy',
                         values: {
                           total: summary.healthy,

@@ -8,7 +8,7 @@
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchIndexPatternFieldsResponse {
   isLoading: boolean;

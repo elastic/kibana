@@ -15,7 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { paths } from '../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
 
@@ -47,7 +47,7 @@ export function useCreateSlo() {
       onSuccess: (data, { slo }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const sloEditUrl = http.basePath.prepend(paths.observability.sloEdit(data.id));
+        const sloEditUrl = http.basePath.prepend(paths.sloEdit(data.id));
 
         toasts.addSuccess(
           {
@@ -60,7 +60,7 @@ export function useCreateSlo() {
                     name: slo.name,
                     editSLO: (
                       <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
-                        {i18n.translate('xpack.observability.useCreateSlo.editSLOLinkLabel', {
+                        {i18n.translate('xpack.slo.useCreateSlo.editSLOLinkLabel', {
                           defaultMessage: 'Edit SLO',
                         })}
                       </EuiLink>
@@ -81,15 +81,13 @@ export function useCreateSlo() {
       },
       onError: (error, { slo }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.observability.slo.create.errorNotification', {
+          title: i18n.translate('xpack.slo.create.errorNotification', {
             defaultMessage: 'Something went wrong while creating {name}',
             values: { name: slo.name },
           }),
         });
 
-        navigateToUrl(
-          http.basePath.prepend(paths.observability.sloCreateWithEncodedForm(encode(slo)))
-        );
+        navigateToUrl(http.basePath.prepend(paths.sloCreateWithEncodedForm(encode(slo))));
       },
     }
   );

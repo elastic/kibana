@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
 import { WideChart } from './wide_chart';

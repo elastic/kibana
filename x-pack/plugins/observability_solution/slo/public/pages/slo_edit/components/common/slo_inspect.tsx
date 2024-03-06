@@ -27,12 +27,12 @@ import {
   INGEST_PIPELINES_APP_LOCATOR,
   INGEST_PIPELINES_PAGES,
 } from '@kbn/ingest-pipelines-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { ReactNode, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { ObservabilityPublicPluginsStart } from '../../../..';
+import { useKibana } from '../../../../utils/kibana_react';
+import { SloPublicPluginsStart } from '../../../..';
 import { enableInspectEsQueries } from '../../../../../common';
 import { useFetchSloInspect } from '../../../../hooks/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
@@ -56,7 +56,7 @@ export function SLOInspectWrapper({ slo, disabled }: Props) {
 }
 
 function SLOInspect({ slo, disabled }: Props) {
-  const { share, http } = useKibana<ObservabilityPublicPluginsStart>().services;
+  const { share, http } = useKibana().services;
   const { trigger, getValues } = useFormContext<CreateSLOForm>();
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);

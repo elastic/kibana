@@ -11,7 +11,7 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 

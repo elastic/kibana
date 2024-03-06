@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';

@@ -21,7 +21,7 @@ import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 
 interface Data {
   key: number;

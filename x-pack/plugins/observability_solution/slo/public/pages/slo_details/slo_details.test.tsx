@@ -27,7 +27,7 @@ import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 

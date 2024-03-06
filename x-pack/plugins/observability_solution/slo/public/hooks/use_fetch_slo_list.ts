@@ -10,7 +10,7 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { SearchState } from '../pages/slos/hooks/use_url_search_state'; // TODO SLO: move under hooks folder
 import { useCreateDataView } from './use_create_data_view'; // TODO SLO: export in observability and use from there
 import { DEFAULT_SLO_PAGE_SIZE, SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';

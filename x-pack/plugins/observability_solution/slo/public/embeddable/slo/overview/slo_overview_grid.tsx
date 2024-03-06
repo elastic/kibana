@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { MetricDatum } from '@elastic/charts/dist/chart_types/metric/specs';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';

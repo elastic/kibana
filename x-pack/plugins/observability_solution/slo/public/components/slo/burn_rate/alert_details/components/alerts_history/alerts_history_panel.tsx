@@ -26,7 +26,7 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../../../utils/kibana_react';
 import { convertTo } from '../../../../../../../common/utils/formatters';
 import { WindowSchema } from '../../../../../../typings';
 import { ErrorRateChart } from '../../../../error_rate_chart';
@@ -85,7 +85,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
               <EuiTitle size="xs">
                 <h2>
                   {i18n.translate(
-                    'xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.title',
+                    'xpack.slo.burnRateRule.alertDetailsAppSection.alertsHistory.title',
                     { defaultMessage: '{sloName} alerts history', values: { sloName: slo.name } }
                   )}
                 </h2>
@@ -95,7 +95,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
               <EuiLink color="text" href={getAlertsLink()} data-test-subj="alertsLink">
                 <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
                 <FormattedMessage
-                  id="xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.alertsLink"
+                  id="xpack.slo.burnRateRule.alertDetailsAppSection.alertsHistory.alertsLink"
                   defaultMessage="View alerts"
                 />
               </EuiLink>
@@ -106,7 +106,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
             <EuiText size="s" color="subdued">
               <span>
                 {i18n.translate(
-                  'xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.subtitle',
+                  'xpack.slo.burnRateRule.alertDetailsAppSection.alertsHistory.subtitle',
                   {
                     defaultMessage: 'Last 30 days',
                   }
@@ -138,7 +138,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
                 <EuiTextColor color="default">
                   <span>
                     {i18n.translate(
-                      'xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.triggeredAlertsStatsTitle',
+                      'xpack.slo.burnRateRule.alertDetailsAppSection.alertsHistory.triggeredAlertsStatsTitle',
                       { defaultMessage: 'Alerts triggered' }
                     )}
                   </span>
@@ -171,7 +171,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
                 <EuiTextColor color="default">
                   <span>
                     {i18n.translate(
-                      'xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.avgTimeToRecoverStatsTitle',
+                      'xpack.slo.burnRateRule.alertDetailsAppSection.alertsHistory.avgTimeToRecoverStatsTitle',
                       { defaultMessage: 'Avg time to recover' }
                     )}
                   </span>

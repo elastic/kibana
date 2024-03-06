@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 
 export interface Props {
@@ -32,7 +32,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
       );
       navigateToUrl(
         `${basePath.prepend(
-          paths.observability.alerts
+          paths.observability.alerts // TODO SLO: import paths from observability
         )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
       );
     }

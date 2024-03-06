@@ -37,7 +37,7 @@ import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';

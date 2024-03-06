@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { paths } from '../../../../../common/locators/paths';
 import { useCapabilities } from '../../../../hooks/use_capabilities';
 
@@ -21,7 +21,7 @@ export function CreateSloBtn() {
   const { hasWriteCapabilities } = useCapabilities();
 
   const handleClickCreateSlo = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+    navigateToUrl(basePath.prepend(paths.sloCreate));
   };
   return (
     <EuiButton
@@ -31,9 +31,7 @@ export function CreateSloBtn() {
       fill
       onClick={handleClickCreateSlo}
     >
-      {i18n.translate('xpack.observability.slo.sloList.pageHeader.create', {
-        defaultMessage: 'Create SLO',
-      })}
+      {i18n.translate('xpack.slo.sloList.pageHeader.create', { defaultMessage: 'Create SLO' })}
     </EuiButton>
   );
 }

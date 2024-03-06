@@ -9,7 +9,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
@@ -38,7 +38,7 @@ export function useDeleteSlo() {
     {
       onError: (error, { name }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
+          title: i18n.translate('xpack.slo.slo.delete.errorNotification', {
             defaultMessage: 'Failed to delete {name}',
             values: { name },
           }),
@@ -48,7 +48,7 @@ export function useDeleteSlo() {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
         toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
+          i18n.translate('xpack.slo.slo.delete.successNotification', {
             defaultMessage: 'Deleted {name}',
             values: { name },
           })
