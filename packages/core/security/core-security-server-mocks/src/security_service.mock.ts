@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SecurityServiceSetup, SecurityServiceStart } from '@kbn/core-security-server';
+import type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  SecurityRequestHandlerContext,
+} from '@kbn/core-security-server';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
@@ -58,10 +62,20 @@ const createServiceMock = () => {
   return mock;
 };
 
+const createRequestHandlerContextMock = () => {
+  const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
+    authc: {
+      getCurrentUser: jest.fn(),
+    },
+  };
+  return mock;
+};
+
 export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,
   createInternalStart: createInternalStartMock,
+  createRequestHandlerContext: createRequestHandlerContextMock,
 };

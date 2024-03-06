@@ -19,6 +19,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -132,6 +133,7 @@ function createCoreRequestHandlerContextMock() {
     deprecations: {
       client: deprecationsServiceMock.createClient(),
     },
+    security: securityServiceMock.createRequestHandlerContext(),
   };
 }
 
