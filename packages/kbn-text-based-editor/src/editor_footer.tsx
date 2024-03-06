@@ -106,7 +106,14 @@ export const EditorFooter = memo(function EditorFooter({
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
   return (
-    <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
+    <EuiFlexGroup
+      gutterSize="none"
+      responsive={false}
+      direction="column"
+      css={css`
+        width: ${containerWidth}px;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           gutterSize="s"

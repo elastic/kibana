@@ -20,6 +20,7 @@ import {
   formatDate,
   Criteria,
   EuiButtonIcon,
+  CustomItemAction,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
 
@@ -50,7 +51,7 @@ export function QueryHistoryAction({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            color={'primary'}
+            color="primary"
             onClick={toggleHistory}
             css={css`
               padding-inline: 0;
@@ -86,9 +87,19 @@ const items: QueryHistoryItem[] = [
     duration: '13ms',
     timeRun: '12 November 2023',
   },
+  {
+    status: 'success',
+    queryString: 'from logstash-* | limit 10 | keep bytes',
+    duration: '12ms',
+    timeRun: '13 November 2023',
+  },
 ];
 
-export const getTableColumns = (width: number): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
+export const getTableColumns = (
+  width: number,
+  actions: Array<CustomItemAction<QueryHistoryItem>>
+): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
+  const shouldHideOptions = width < 560;
   return [
     {
       field: 'status',
@@ -119,25 +130,41 @@ export const getTableColumns = (width: number): Array<EuiBasicTableColumn<QueryH
       truncateText: false,
       sortable: false,
     },
+    ...(!shouldHideOptions
+      ? [
+          {
+            field: 'timeRun',
+            name: i18n.translate(
+              'textBasedEditor.query.textBasedLanguagesEditor.timeRunColumnLabel',
+              {
+                defaultMessage: 'Time run',
+              }
+            ),
+            sortable: true,
+            render: (timeRun: QueryHistoryItem['timeRun']) => formatDate(timeRun, 'dobLong'),
+            width: '240px',
+          },
+        ]
+      : []),
+    ...(!shouldHideOptions
+      ? [
+          {
+            field: 'duration',
+            name: i18n.translate(
+              'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
+              {
+                defaultMessage: 'Last duration',
+              }
+            ),
+            sortable: false,
+            width: '120px',
+          },
+        ]
+      : []),
     {
-      field: 'timeRun',
-      name: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.timeRunColumnLabel', {
-        defaultMessage: 'Time run',
-      }),
-      sortable: true,
-      render: (timeRun: QueryHistoryItem['timeRun']) => formatDate(timeRun, 'dobLong'),
-      width: '240px',
-    },
-    {
-      field: 'duration',
-      name: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
-        {
-          defaultMessage: 'Last duration',
-        }
-      ),
-      sortable: false,
-      width: '120px',
+      name: '',
+      actions,
+      width: '40px',
     },
   ];
 };
@@ -151,9 +178,28 @@ export function QueryHistory({
   containerWidth: number;
   runQuery: () => void;
 }) {
+  const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
+    return [
+      {
+        render: (item: QueryHistoryItem) => {
+          return (
+            <EuiFlexGroup gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="playFilled" size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="copy" size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
+      },
+    ];
+  }, []);
   const columns = useMemo(() => {
-    return getTableColumns(containerWidth);
-  }, [containerWidth]);
+    return getTableColumns(containerWidth, actions);
+  }, [actions, containerWidth]);
+
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const onTableChange = ({ page, sort }: Criteria<QueryHistoryItem>) => {
@@ -187,17 +233,21 @@ export function QueryHistory({
             defaultMessage: 'Queries history table',
           }
         )}
+        responsive={false}
         items={items}
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
         css={css`
-          width: 100%;
+          width: ${containerWidth}px;
           .euiTable {
             background-color: ${euiTheme.colors.lightestShade};
           }
+          .euiTable tbody tr:nth-child(odd) {
+            background-color: ${euiTheme.colors.emptyShade};
+          }
         `}
-        tableLayout="auto"
+        tableLayout="fixed"
       />
     </EuiFlexGroup>
   );
@@ -211,7 +261,6 @@ export function QueryColumn({
   queryString: string;
 }) {
   const { euiTheme } = useEuiTheme();
-  const REST_ELEMENTS_WIDTH = 455;
   const containerRef = useRef<HTMLElement>(null);
 
   const [isExpandable, setIsExpandable] = useState(false);
@@ -222,7 +271,7 @@ export function QueryColumn({
       const textIsOverlapping = containerRef.current.offsetWidth < containerRef.current.scrollWidth;
       setIsExpandable(textIsOverlapping);
     }
-  }, []);
+  }, [containerWidth]);
 
   return (
     <>
@@ -249,7 +298,6 @@ export function QueryColumn({
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: ${isRowExpanded ? 'pre-wrap' : 'nowrap'};
-          width: ${containerWidth - REST_ELEMENTS_WIDTH}px;
           padding-left: ${isExpandable ? euiTheme.size.s : euiTheme.size.xl};
         `}
         ref={containerRef}
