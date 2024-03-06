@@ -28,6 +28,7 @@ export interface CreateEsSearchIterableOptions<TDocument = unknown> {
   usePointInTime?: boolean;
 }
 
+// FIXME:PT need to revisit this type - its not working as expected
 type InferEsSearchIteratorResultValue<TDocument = unknown> =
   CreateEsSearchIterableOptions<TDocument>['resultsMapper'] extends undefined
     ? SearchResponse<TDocument>
@@ -84,8 +85,13 @@ export const createEsSearchIterable = <TDocument = unknown>({
     return { done, value };
   };
 
-  const setValue = (searchResponse: SearchResponse<TDocument>): void => {
+  const setValue = async (searchResponse: SearchResponse<TDocument>): Promise<void> => {
     value = resultsMapper ? resultsMapper(searchResponse) : searchResponse;
+
+    if (value && 'then' in value && typeof value.then === 'function') {
+      // eslint-disable-next-line require-atomic-updates
+      value = await value;
+    }
   };
 
   const setDone = async (): Promise<void> => {
@@ -134,7 +140,7 @@ export const createEsSearchIterable = <TDocument = unknown>({
     searchAfterValue = lastSearchHit.sort;
     // eslint-disable-next-line require-atomic-updates
     pointInTime = Promise.resolve({ id: searchResult.pit_id ?? '' });
-    setValue(searchResult);
+    await setValue(searchResult);
 
     // If (for some reason) we don't have a `searchAfterValue`,
     // then throw an error, or else we'll keep looping forever
