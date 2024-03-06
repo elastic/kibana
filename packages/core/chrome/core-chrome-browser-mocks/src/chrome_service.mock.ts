@@ -70,8 +70,6 @@ const createStartContractMock = () => {
     setChromeStyle: jest.fn(),
     project: {
       setHome: jest.fn(),
-      setProjectsUrl: jest.fn(),
-      setProjectUrl: jest.fn(),
       setProjectName: jest.fn(),
       initNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
