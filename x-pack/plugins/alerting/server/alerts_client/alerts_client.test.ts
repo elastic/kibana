@@ -1921,13 +1921,11 @@ describe('Alerts Client', () => {
             // @ts-ignore
             .mockResolvedValueOnce({});
 
-          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery({
-            ...getParamsByUpdateMaintenanceWindowIds,
-            maintenanceWindows: [
-              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-              { id: 'mw3' } as unknown as MaintenanceWindow,
-            ],
-          });
+          // @ts-expect-error
+          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery([
+            ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+            { id: 'mw3' } as unknown as MaintenanceWindow,
+          ]);
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
           expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);

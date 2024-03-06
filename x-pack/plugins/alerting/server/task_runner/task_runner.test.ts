@@ -834,7 +834,7 @@ describe('Task Runner', () => {
       mockMaintenanceWindows
     );
 
-    alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery.mockResolvedValue({
+    alertsClient.persistAlertsWithUpdatedMaintenanceWindows.mockResolvedValue({
       alertIds: [],
       maintenanceWindowIds: ['test-id-1', 'test-id-2'],
     });
@@ -855,12 +855,9 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    expect(alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery).toHaveBeenLastCalledWith({
-      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-      maintenanceWindows: mockMaintenanceWindows,
-      ruleId: '1',
-      spaceId: 'default',
-    });
+    expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenLastCalledWith(
+      mockMaintenanceWindows
+    );
 
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([

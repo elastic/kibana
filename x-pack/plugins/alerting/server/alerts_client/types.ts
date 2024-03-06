@@ -81,13 +81,11 @@ export interface IAlertsClient<
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   persistAlerts(): Promise<void>;
-  getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
-  updateAlertsMaintenanceWindowIdByScopedQuery?(
-    params: UpdateAlertsMaintenanceWindowIdByScopedQueryParams
-  ): Promise<{
+  persistAlertsWithUpdatedMaintenanceWindows?(maintenanceWindows: MaintenanceWindow[]): Promise<{
     alertIds: string[];
     maintenanceWindowIds: string[];
-  }>;
+  } | null>;
+  getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;

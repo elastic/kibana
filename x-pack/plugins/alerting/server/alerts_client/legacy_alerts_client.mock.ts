@@ -17,6 +17,7 @@ const createLegacyAlertsClientMock = () => {
       hasReachedAlertLimit: jest.fn(),
       checkLimitUsage: jest.fn(),
       persistAlerts: jest.fn(),
+      persistAlertsWithUpdatedMaintenanceWindows: jest.fn(),
       getAlert: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),

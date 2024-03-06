@@ -45,7 +45,6 @@ import {
   UpdateableAlert,
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
-  UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
   ScopedQueryAggregationResult,
 } from './types';
 import {
@@ -62,6 +61,8 @@ import {
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { filterMaintenanceWindows } from '../task_runner/get_maintenance_windows';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -499,6 +500,24 @@ export class AlertsClient<
     }
   }
 
+  public async persistAlertsWithUpdatedMaintenanceWindows(maintenanceWindows: MaintenanceWindow[]) {
+    // Persist alerts first
+    await this.persistAlerts();
+
+    // Try to update the persisted alerts with maintenance windows with a scoped query
+    let updateAlertsMaintenanceWindowResult = null;
+    try {
+      updateAlertsMaintenanceWindowResult =
+        await this.updateAlertsMaintenanceWindowIdByScopedQuery?.(maintenanceWindows);
+    } catch (e) {
+      this.options.logger.debug(
+        `Failed to update alert matched by maintenance window scoped query for rule ${this.ruleType.id}:${this.options.rule.id}: '${this.options.rule.name}'.`
+      );
+    }
+
+    return updateAlertsMaintenanceWindowResult;
+  }
+
   public getAlertsToSerialize() {
     // The flapping value that is persisted inside the task manager state (and used in the next execution)
     // is different than the value that should be written to the alert document. For this reason, we call
@@ -633,21 +652,19 @@ export class AlertsClient<
     }
   }
 
-  public async updateAlertsMaintenanceWindowIdByScopedQuery({
-    ruleId,
-    spaceId,
-    executionUuid,
-    maintenanceWindows,
-  }: UpdateAlertsMaintenanceWindowIdByScopedQueryParams) {
-    const maintenanceWindowsWithScopedQuery = maintenanceWindows.filter(
-      ({ scopedQuery }) => scopedQuery
-    );
-    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
-      ({ scopedQuery }) => !scopedQuery
-    );
-    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
-      ({ id }) => id
-    );
+  private async updateAlertsMaintenanceWindowIdByScopedQuery(
+    maintenanceWindows: MaintenanceWindow[]
+  ) {
+    const maintenanceWindowsWithScopedQuery = filterMaintenanceWindows({
+      maintenanceWindows,
+      withScopedQuery: true,
+      idsOnly: false,
+    }) as MaintenanceWindow[];
+    const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindows({
+      maintenanceWindows,
+      withScopedQuery: false,
+      idsOnly: true,
+    }) as string[];
 
     if (maintenanceWindowsWithScopedQuery.length === 0) {
       return {
@@ -659,9 +676,9 @@ export class AlertsClient<
     // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
     // indicating the maintenance window has matches a number of alerts with the scoped query.
     const aggsResult = await this.getMaintenanceWindowScopedQueryAlerts({
-      ruleId,
-      spaceId,
-      executionUuid,
+      ruleId: this.options.rule.id,
+      spaceId: this.options.rule.spaceId,
+      executionUuid: this.options.rule.executionId,
       maintenanceWindows: maintenanceWindowsWithScopedQuery,
     });
 
