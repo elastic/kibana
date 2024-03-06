@@ -195,7 +195,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiFlexGroup>
+                        <EuiFlexGroup responsive={false}>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
                               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {

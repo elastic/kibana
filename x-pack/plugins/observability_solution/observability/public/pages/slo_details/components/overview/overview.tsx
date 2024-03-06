@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   occurrencesBudgetingMethodSchema,
+  querySchema,
   rollingTimeWindowTypeSchema,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { DisplayQuery } from './display_query';
 import { useKibana } from '../../../../utils/kibana_react';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -129,27 +124,50 @@ export function Overview({ slo }: Props) {
           title={i18n.translate('xpack.observability.slo.sloDetails.overview.tagsTitle', {
             defaultMessage: 'Tags',
           })}
-          subtitle={
-            slo.tags.length > 0 ? (
-              <EuiFlexGroup
-                direction="row"
-                alignItems="flexStart"
-                gutterSize="s"
-                responsive={false}
-                wrap
-              >
-                {slo.tags.map((tag) => (
-                  <EuiFlexItem grow={false} key={tag}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : (
-              <EuiText size="s">-</EuiText>
-            )
-          }
+          subtitle={<TagsList tags={slo.tags} />}
         />
         {IndicatorOverview}
+        {'index' in slo.indicator.params && (
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.indexTitle', {
+              defaultMessage: 'Index pattern',
+            })}
+            subtitle={slo.indicator.params.index}
+          />
+        )}
+        {'filter' in slo.indicator.params && (
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.overallQueryTitle', {
+              defaultMessage: 'Overall query',
+            })}
+            subtitle={
+              <DisplayQuery
+                query={slo.indicator.params.filter}
+                index={slo.indicator.params.index}
+              />
+            }
+          />
+        )}
+        {'good' in slo.indicator.params && querySchema.is(slo.indicator.params.good) && (
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.goodQueryTitle', {
+              defaultMessage: 'Good query',
+            })}
+            subtitle={
+              <DisplayQuery query={slo.indicator.params.good} index={slo.indicator.params.index} />
+            }
+          />
+        )}
+        {'total' in slo.indicator.params && querySchema.is(slo.indicator.params.total) && (
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.totalQueryTitle', {
+              defaultMessage: 'Total query',
+            })}
+            subtitle={
+              <DisplayQuery query={slo.indicator.params.total} index={slo.indicator.params.index} />
+            }
+          />
+        )}
       </EuiFlexGrid>
     </EuiPanel>
   );

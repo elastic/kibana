@@ -39,13 +39,13 @@ import {
   useMlKibana,
 } from '../../../../contexts/kibana';
 import { useEnabledFeatures } from '../../../../contexts/ml';
-import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
   useDeleteAction,
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
+import { useMlIndexUtils } from '../../../../util/index_service';
 
 interface Props {
   details: Record<string, any>;
@@ -115,6 +115,7 @@ export const Controls: FC<Props> = React.memo(
         application: { navigateToUrl, capabilities },
       },
     } = useMlKibana();
+    const { getDataViewIdFromName } = useMlIndexUtils();
 
     const hasIngestPipelinesCapabilities =
       capabilities.management?.ingest?.ingest_pipelines === true;
