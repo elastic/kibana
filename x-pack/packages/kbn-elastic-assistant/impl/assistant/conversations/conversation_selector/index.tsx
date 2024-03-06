@@ -126,7 +126,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
         onConversationSelected(
           createdConversation
-            ? { cId: createdConversation.id, cTitle: createdConversation.title }
+            ? { cId: '', cTitle: createdConversation.title }
             : { cId: '', cTitle: DEFAULT_CONVERSATION_TITLE }
         );
       },

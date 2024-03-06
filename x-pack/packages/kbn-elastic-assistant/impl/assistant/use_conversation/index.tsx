@@ -158,7 +158,7 @@ export const useConversation = (): UseConversation => {
    */
   const setApiConfig = useCallback(
     async ({ conversation, apiConfig }: SetApiConfigProps) => {
-      if (conversation.title === conversation.id) {
+      if (conversation.id === '') {
         return createConversationApi({
           http,
           conversation: {

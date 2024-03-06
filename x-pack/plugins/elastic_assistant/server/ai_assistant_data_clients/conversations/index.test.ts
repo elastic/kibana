@@ -166,7 +166,9 @@ describe('AIAssistantConversationsDataClient', () => {
 
     await assistantConversationsDataClient.updateConversation({
       existingConversation: getConversationMock(getQueryConversationParams()),
-      conversationUpdateProps: getUpdateConversationSchemaMock('12345'),
+      conversationUpdateProps: getUpdateConversationSchemaMock(
+        '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+      ),
     });
 
     const params = clusterClient.updateByQuery.mock.calls[0][0] as UpdateByQueryRequest;
@@ -190,7 +192,7 @@ describe('AIAssistantConversationsDataClient', () => {
         },
         assignEmpty: false,
         exclude_from_last_conversation_storage: false,
-        id: '12345',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         messages: [
           {
             '@timestamp': '2019-12-13T16:40:33.400Z',
