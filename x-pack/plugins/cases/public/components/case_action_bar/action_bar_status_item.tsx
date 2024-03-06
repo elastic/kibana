@@ -24,6 +24,6 @@ const ActionBarStatusItemComponent: React.FC<Props> = ({ title, children }) => {
   );
 };
 
-ActionBarStatusItemComponent.displayName = 'StatusContextMenu';
+ActionBarStatusItemComponent.displayName = 'ActionBarStatusItem';
 
 export const ActionBarStatusItem = memo(ActionBarStatusItemComponent);
