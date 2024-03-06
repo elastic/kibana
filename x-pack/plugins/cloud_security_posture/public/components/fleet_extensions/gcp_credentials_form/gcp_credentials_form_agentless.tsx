@@ -19,18 +19,27 @@ import { getPosturePolicy } from '../utils';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 
+// TODO: when adding project id and then switching to organization account, the project id is not removed
 export const GcpCredentialsFormAgentless = ({
   input,
   newPolicy,
   updatePolicy,
   disabled,
 }: GcpFormProps) => {
-  // atm only JSON blob is supported by GCP in agentless, filtering out other options
-  const fields = getInputVarsFields(input, gcpField.fields).filter((field) =>
-    ['gcp.organization_id', 'gcp.project_id', 'gcp.credentials.json'].includes(field.id)
-  );
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
+
+  /*
+    For Agentless only JSON credentials type is supported.
+    Also in case of organisation setup, project_id is not required in contrast to Agent-based.
+   */
+  const fields = getInputVarsFields(input, gcpField.fields).filter((field) => {
+    if (isOrganization) {
+      return ['gcp.organization_id', 'gcp.credentials.json'].includes(field.id);
+    } else {
+      return ['gcp.project_id', 'gcp.credentials.json'].includes(field.id);
+    }
+  });
 
   return (
     <>

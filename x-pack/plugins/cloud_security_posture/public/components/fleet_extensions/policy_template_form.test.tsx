@@ -1529,8 +1529,8 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).toBeInTheDocument();
-      expect(projectIdField).toBeInTheDocument();
       expect(credentialsJsonField).toBeInTheDocument();
+      expect(projectIdField).not.toBeInTheDocument();
       expect(credentialsTypSelector).not.toBeInTheDocument();
       expect(credentialsFileField).not.toBeInTheDocument();
     });
