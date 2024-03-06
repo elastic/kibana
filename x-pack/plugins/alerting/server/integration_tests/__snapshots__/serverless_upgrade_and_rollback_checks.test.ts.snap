@@ -3246,6 +3246,22 @@ Object {
                                 },
                                 "type": "number",
                               },
+                              "customDescription": Object {
+                                "flags": Object {
+                                  "default": [Function],
+                                  "error": [Function],
+                                  "presence": "optional",
+                                },
+                                "rules": Array [
+                                  Object {
+                                    "args": Object {
+                                      "method": [Function],
+                                    },
+                                    "name": "custom",
+                                  },
+                                ],
+                                "type": "string",
+                              },
                               "customLabel": Object {
                                 "flags": Object {
                                   "default": [Function],
@@ -3402,6 +3418,22 @@ Object {
                                 ],
                                 "type": "number",
                               },
+                              "customDescription": Object {
+                                "flags": Object {
+                                  "default": [Function],
+                                  "error": [Function],
+                                  "presence": "optional",
+                                },
+                                "rules": Array [
+                                  Object {
+                                    "args": Object {
+                                      "method": [Function],
+                                    },
+                                    "name": "custom",
+                                  },
+                                ],
+                                "type": "string",
+                              },
                               "customLabel": Object {
                                 "flags": Object {
                                   "default": [Function],
@@ -3527,6 +3559,22 @@ Object {
                                         "presence": "optional",
                                       },
                                       "keys": Object {
+                                        "customDescription": Object {
+                                          "flags": Object {
+                                            "default": [Function],
+                                            "error": [Function],
+                                            "presence": "optional",
+                                          },
+                                          "rules": Array [
+                                            Object {
+                                              "args": Object {
+                                                "method": [Function],
+                                              },
+                                              "name": "custom",
+                                            },
+                                          ],
+                                          "type": "string",
+                                        },
                                         "customLabel": Object {
                                           "flags": Object {
                                             "default": [Function],
@@ -3770,6 +3818,22 @@ Object {
                                                     "presence": "optional",
                                                   },
                                                   "keys": Object {
+                                                    "customDescription": Object {
+                                                      "flags": Object {
+                                                        "default": [Function],
+                                                        "error": [Function],
+                                                        "presence": "optional",
+                                                      },
+                                                      "rules": Array [
+                                                        Object {
+                                                          "args": Object {
+                                                            "method": [Function],
+                                                          },
+                                                          "name": "custom",
+                                                        },
+                                                      ],
+                                                      "type": "string",
+                                                    },
                                                     "customLabel": Object {
                                                       "flags": Object {
                                                         "default": [Function],
@@ -4248,6 +4312,22 @@ Object {
                                     "presence": "optional",
                                   },
                                   "keys": Object {
+                                    "customDescription": Object {
+                                      "flags": Object {
+                                        "default": [Function],
+                                        "error": [Function],
+                                        "presence": "optional",
+                                      },
+                                      "rules": Array [
+                                        Object {
+                                          "args": Object {
+                                            "method": [Function],
+                                          },
+                                          "name": "custom",
+                                        },
+                                      ],
+                                      "type": "string",
+                                    },
                                     "customLabel": Object {
                                       "flags": Object {
                                         "default": [Function],
@@ -4491,6 +4571,22 @@ Object {
                                                 "presence": "optional",
                                               },
                                               "keys": Object {
+                                                "customDescription": Object {
+                                                  "flags": Object {
+                                                    "default": [Function],
+                                                    "error": [Function],
+                                                    "presence": "optional",
+                                                  },
+                                                  "rules": Array [
+                                                    Object {
+                                                      "args": Object {
+                                                        "method": [Function],
+                                                      },
+                                                      "name": "custom",
+                                                    },
+                                                  ],
+                                                  "type": "string",
+                                                },
                                                 "customLabel": Object {
                                                   "flags": Object {
                                                     "default": [Function],
