@@ -74,6 +74,7 @@ export {
   type PublishesWritablePanelDescription,
 } from './interfaces/publishes_panel_description';
 export {
+  getPanelTitle,
   apiPublishesPanelTitle,
   apiPublishesWritablePanelTitle,
   useDefaultPanelTitle,

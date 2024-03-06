@@ -6,10 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '../common/constants';
 
-export function registerCasesPersistableState(cases: CasesSetup | undefined, logger: Logger) {
+export function registerCasesPersistableState(cases: CasesServerSetup | undefined, logger: Logger) {
   if (cases) {
     try {
       cases.attachmentFramework.registerPersistableState({

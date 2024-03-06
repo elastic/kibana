@@ -7,13 +7,9 @@
 
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
-jest.mock('../../services/field_format_service', () => ({
-  mlFieldFormatService: {
-    getFieldFormat: jest.fn(),
-  },
-}));
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
@@ -28,6 +24,15 @@ const utilityProps = {
     x: 10432423,
   },
 };
+
+const servicesMock = {
+  mlServices: {
+    mlFieldFormatService: {
+      getFieldFormat: jest.fn(),
+    },
+  },
+};
+
 describe('ExplorerChart', () => {
   const mlSelectSeverityServiceMock = {
     state: {
@@ -49,11 +54,13 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ExplorerChartDistribution
-        mlSelectSeverityService={mlSelectSeverityServiceMock}
-        tooltipService={mockTooltipService}
-        {...utilityProps}
-      />
+      <KibanaContextProvider services={servicesMock}>
+        <ExplorerChartDistribution
+          mlSelectSeverityService={mlSelectSeverityServiceMock}
+          tooltipService={mockTooltipService}
+          {...utilityProps}
+        />
+      </KibanaContextProvider>
     );
 
     // without setting any attributes and corresponding data
@@ -74,12 +81,14 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ExplorerChartDistribution
-        seriesConfig={config}
-        mlSelectSeverityService={mlSelectSeverityServiceMock}
-        tooltipService={mockTooltipService}
-        {...utilityProps}
-      />
+      <KibanaContextProvider services={servicesMock}>
+        <ExplorerChartDistribution
+          seriesConfig={config}
+          mlSelectSeverityService={mlSelectSeverityServiceMock}
+          tooltipService={mockTooltipService}
+          {...utilityProps}
+        />
+      </KibanaContextProvider>
     );
 
     // test if the loading indicator is shown
@@ -106,14 +115,16 @@ describe('ExplorerChart', () => {
 
     // We create the element including a wrapper which sets the width:
     return mountWithIntl(
-      <div style={{ width: '500px' }}>
-        <ExplorerChartDistribution
-          seriesConfig={config}
-          mlSelectSeverityService={mlSelectSeverityServiceMock}
-          tooltipService={mockTooltipService}
-          {...utilityProps}
-        />
-      </div>
+      <KibanaContextProvider services={servicesMock}>
+        <div style={{ width: '500px' }}>
+          <ExplorerChartDistribution
+            seriesConfig={config}
+            mlSelectSeverityService={mlSelectSeverityServiceMock}
+            tooltipService={mockTooltipService}
+            {...utilityProps}
+          />
+        </div>
+      </KibanaContextProvider>
     );
   }
 
