@@ -21,6 +21,7 @@ import {
   DiscoverCustomizationService,
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
+import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -113,13 +114,7 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props: MainRouteProps = {
     isDev: false,
     customizationCallbacks: [],
-    customizationContext: {
-      displayMode: 'standalone',
-      inlineTopNav: {
-        enabled: false,
-        showLogsExplorerTabs: false,
-      },
-    },
+    customizationContext: mockCustomizationContext,
   };
 
   return mountWithIntl(

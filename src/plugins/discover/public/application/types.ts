@@ -19,28 +19,6 @@ export enum FetchStatus {
   ERROR = 'error',
 }
 
-export type DiscoverDisplayMode = 'embedded' | 'standalone';
-
-export interface DiscoverCustomizationContext {
-  /*
-   * Display mode in which discover is running
-   */
-  displayMode: DiscoverDisplayMode;
-  /**
-   * New inline top nav configuration
-   */
-  inlineTopNav: {
-    /**
-     * Whether or not to show the new inline top nav
-     */
-    enabled: boolean;
-    /**
-     * Whether or not to show the Log Explorer tabs
-     */
-    showLogsExplorerTabs: boolean;
-  };
-}
-
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];

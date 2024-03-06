@@ -72,7 +72,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { RegisterCustomizationProfile } from './customizations';
+import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,
   createProfileRegistry,
@@ -83,7 +83,6 @@ import {
   type DiscoverContainerProps,
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
-import { DiscoverCustomizationContext } from './application/types';
 
 /**
  * @public

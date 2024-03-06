@@ -23,7 +23,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.internalState.transitions.setDataView(dataViewMock);
+  stateContainer.customizationContext.displayMode = 'standalone';
   stateContainer.customizationContext.inlineTopNav.enabled = true;
+  stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = false;
 
   return {
     stateContainer,
