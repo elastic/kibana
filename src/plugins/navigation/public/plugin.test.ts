@@ -8,6 +8,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { of } from 'rxjs';
 import {
   DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
@@ -39,6 +40,7 @@ const setup = (
 
   const coreStart = coreMock.createStart();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const cloud = cloudMock.createStart();
 
   const getGlobalSetting$ = jest.fn();
   const settingsGlobalClient = {
@@ -47,7 +49,7 @@ const setup = (
   };
   coreStart.settings.globalClient = settingsGlobalClient;
 
-  return { plugin, coreStart, unifiedSearch, getGlobalSetting$ };
+  return { plugin, coreStart, unifiedSearch, cloud, getGlobalSetting$ };
 };
 
 describe('Navigation Plugin', () => {
@@ -66,7 +68,7 @@ describe('Navigation Plugin', () => {
     const featureOn = true;
 
     it('should add the default solution navs but **not** set the active nav', () => {
-      const { plugin, coreStart, unifiedSearch, getGlobalSetting$ } = setup({ featureOn });
+      const { plugin, coreStart, unifiedSearch, cloud, getGlobalSetting$ } = setup({ featureOn });
 
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: false, // NOT enabled, so we should not set the active nav
@@ -79,7 +81,7 @@ describe('Navigation Plugin', () => {
         return of(value);
       });
 
-      plugin.start(coreStart, { unifiedSearch });
+      plugin.start(coreStart, { unifiedSearch, cloud });
 
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
       const [arg] = coreStart.chrome.project.updateSolutionNavigations.mock.calls[0];
@@ -89,7 +91,7 @@ describe('Navigation Plugin', () => {
     });
 
     it('should add the default solution navs **and** set the active nav', () => {
-      const { plugin, coreStart, unifiedSearch, getGlobalSetting$ } = setup({ featureOn });
+      const { plugin, coreStart, unifiedSearch, cloud, getGlobalSetting$ } = setup({ featureOn });
 
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
@@ -102,7 +104,7 @@ describe('Navigation Plugin', () => {
         return of(value);
       });
 
-      plugin.start(coreStart, { unifiedSearch });
+      plugin.start(coreStart, { unifiedSearch, cloud });
 
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
 
@@ -113,7 +115,7 @@ describe('Navigation Plugin', () => {
     });
 
     it('if not "visible", should not set the active nav', () => {
-      const { plugin, coreStart, unifiedSearch, getGlobalSetting$ } = setup({ featureOn });
+      const { plugin, coreStart, unifiedSearch, cloud, getGlobalSetting$ } = setup({ featureOn });
 
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
@@ -126,7 +128,7 @@ describe('Navigation Plugin', () => {
         return of(value);
       });
 
-      plugin.start(coreStart, { unifiedSearch });
+      plugin.start(coreStart, { unifiedSearch, cloud });
 
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(null, {
