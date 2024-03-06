@@ -108,7 +108,9 @@ export interface ITelemetryReceiver {
   /**
    * As the policy id + policy version does not exist on the Endpoint Metrics document
    * we need to fetch information about the Fleet Agent and sync the metrics document
-   * with the Agent's policy data. This method maps policy info by agent id.
+   * with the Agent's policy data.
+   *
+   * @returns Map of agent id to policy id
    */
   fetchFleetAgents(): Promise<Map<string, string>>;
 
