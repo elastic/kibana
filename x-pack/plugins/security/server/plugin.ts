@@ -64,6 +64,7 @@ import type { UserSettingServiceStart } from './user_profile/user_setting_servic
 import { UserSettingService } from './user_profile/user_setting_service';
 import type { AuthenticatedUser, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
+import { buildSecurityApi } from './build_security_api';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -303,6 +304,12 @@ export class SecurityPlugin
     });
 
     this.registerDeprecations(core, license);
+
+    core.security.registerSecurityApi(
+      buildSecurityApi({
+        getAuthc: this.getAuthentication.bind(this),
+      })
+    );
 
     defineRoutes({
       router: core.http.createRouter(),
