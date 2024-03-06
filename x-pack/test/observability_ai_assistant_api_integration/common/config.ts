@@ -76,6 +76,15 @@ async function downloadElserModel(): Promise<string> {
     'https://ml-models.elastic.co/elser_model_2.vocab.json',
     path.join(elserModelDir, 'elser_model_2.vocab.json')
   );
+  // TODO: Remove again - This is just to show that the file is actually present on the file system
+  // eslint-disable-next-line no-console
+  console.log('Files in elserModelDir:', fs.readdirSync(elserModelDir));
+  // eslint-disable-next-line no-console
+  console.log(
+    'Contents of elser_model_2.metadata.json:',
+    fs.readFileSync(path.join(elserModelDir, 'elser_model_2.metadata.json'), 'utf8')
+  );
+  // TODO: Remove again - end
   return path.resolve(elserModelDir);
 }
 
