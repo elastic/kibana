@@ -757,103 +757,127 @@ export class TaskRunner<
   }
 
   private async processRunResults({
-    nextRun,
+    schedule,
     stateWithMetrics,
   }: {
-    nextRun: string | null;
+    schedule: Result<IntervalSchedule, Error>;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
   }) {
-    const {
-      params: { alertId: ruleId, spaceId },
-    } = this.taskInstance;
+    const { executionStatus: execStatus, executionMetrics: execMetrics } =
+      await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+        const {
+          params: { alertId: ruleId, spaceId },
+          startedAt,
+          schedule: taskSchedule,
+        } = this.taskInstance;
 
-    const namespace = this.context.spaceIdToNamespace(spaceId);
+        let nextRun: string | null = null;
+        if (isOk(schedule)) {
+          nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+        } else if (taskSchedule) {
+          nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+        }
 
-    // Getting executionStatus for backwards compatibility
-    const { status: executionStatus } = map<
-      RuleTaskStateAndMetrics,
-      ElasticsearchError,
-      IExecutionStatusAndMetrics
-    >(
-      stateWithMetrics,
-      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
-      (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
-    );
+        const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    // New consolidated statuses for lastRun
-    const { lastRun, metrics: executionMetrics } = map<
-      RuleTaskStateAndMetrics,
-      ElasticsearchError,
-      ILastRun
-    >(
-      stateWithMetrics,
-      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
-      (err: ElasticsearchError) => lastRunFromError(err)
-    );
+        // Getting executionStatus for backwards compatibility
+        const { status: executionStatus } = map<
+          RuleTaskStateAndMetrics,
+          ElasticsearchError,
+          IExecutionStatusAndMetrics
+        >(
+          stateWithMetrics,
+          (ruleRunStateWithMetrics) =>
+            executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
+          (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
+        );
 
-    if (apm.currentTransaction) {
-      if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
-        apm.currentTransaction.setOutcome('success');
-      } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
-        apm.currentTransaction.setOutcome('failure');
-      } else if (lastRun.outcome === 'succeeded') {
-        apm.currentTransaction.setOutcome('success');
-      } else if (lastRun.outcome === 'failed') {
-        apm.currentTransaction.setOutcome('failure');
-      }
-    }
+        // New consolidated statuses for lastRun
+        const { lastRun, metrics: executionMetrics } = map<
+          RuleTaskStateAndMetrics,
+          ElasticsearchError,
+          ILastRun
+        >(
+          stateWithMetrics,
+          (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
+          (err: ElasticsearchError) => lastRunFromError(err)
+        );
 
-    this.logger.debug(
-      `deprecated ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(
-        executionStatus
-      )}`
-    );
-    this.logger.debug(
-      `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
-    );
-    if (executionMetrics) {
-      this.logger.debug(
-        `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
-      );
-    }
+        if (apm.currentTransaction) {
+          if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
+            apm.currentTransaction.setOutcome('success');
+          } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
+            apm.currentTransaction.setOutcome('failure');
+          } else if (lastRun.outcome === 'succeeded') {
+            apm.currentTransaction.setOutcome('success');
+          } else if (lastRun.outcome === 'failed') {
+            apm.currentTransaction.setOutcome('failure');
+          }
+        }
 
-    // set start and duration based on event log
-    const { start, duration } = this.alertingEventLogger.getStartAndDuration();
-    if (null != start) {
-      executionStatus.lastExecutionDate = start;
-    }
-    if (null != duration) {
-      executionStatus.lastDuration = nanosToMillis(duration);
-    }
+        this.logger.debug(
+          `deprecated ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(
+            executionStatus
+          )}`
+        );
+        this.logger.debug(
+          `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
+        );
+        if (executionMetrics) {
+          this.logger.debug(
+            `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
+          );
+        }
 
-    // if executionStatus indicates an error, fill in fields in
-    this.ruleMonitoring.addHistory({
-      duration: executionStatus.lastDuration,
-      hasError: executionStatus.error != null,
-      runDate: this.runDate,
-    });
+        // set start and duration based on event log
+        const { start, duration } = this.alertingEventLogger.getStartAndDuration();
+        if (null != start) {
+          executionStatus.lastExecutionDate = start;
+        }
+        if (null != duration) {
+          executionStatus.lastDuration = nanosToMillis(duration);
+        }
 
-    if (!this.cancelled) {
-      this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-      if (lastRun.outcome === 'failed') {
-        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-      } else if (executionStatus.error) {
-        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-      }
-      this.logger.debug(
-        `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
-          executionStatus
-        )} - ${JSON.stringify(lastRun)}`
-      );
-      await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
-        executionStatus: ruleExecutionStatusToRaw(executionStatus),
-        nextRun,
-        lastRun: lastRunToRaw(lastRun),
-        monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+        // if executionStatus indicates an error, fill in fields in
+        this.ruleMonitoring.addHistory({
+          duration: executionStatus.lastDuration,
+          hasError: executionStatus.error != null,
+          runDate: this.runDate,
+        });
+
+        if (!this.cancelled) {
+          this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+          if (lastRun.outcome === 'failed') {
+            this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+          } else if (executionStatus.error) {
+            this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+          }
+          this.logger.debug(
+            `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
+              executionStatus
+            )} - ${JSON.stringify(lastRun)}`
+          );
+          await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
+            executionStatus: ruleExecutionStatusToRaw(executionStatus),
+            nextRun,
+            lastRun: lastRunToRaw(lastRun),
+            monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          });
+        }
+
+        if (startedAt) {
+          // Capture how long it took for the rule to run after being claimed
+          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+        }
+
+        return { executionStatus, executionMetrics };
       });
-    }
 
-    return { executionStatus, executionMetrics };
+    this.alertingEventLogger.done({
+      status: execStatus,
+      metrics: execMetrics,
+      timings: this.timer.toJson(),
+    });
   }
 
   async loadIndirectParams(): Promise<RuleDataResult<RuleData>> {
@@ -925,21 +949,7 @@ export class TaskRunner<
       schedule = asErr(err);
     }
 
-    let nextRun: string | null = null;
-    if (isOk(schedule)) {
-      nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
-    } else if (taskSchedule) {
-      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-    }
-
-    const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
-      TaskRunnerTimerSpan.ProcessRuleRun,
-      async () =>
-        this.processRunResults({
-          nextRun,
-          stateWithMetrics,
-        })
-    );
+    await this.processRunResults({ schedule, stateWithMetrics });
 
     const transformRunStateToTaskState = (
       runStateWithMetrics: RuleTaskStateAndMetrics
@@ -949,17 +959,6 @@ export class TaskRunner<
         previousStartedAt: startedAt?.toISOString(),
       };
     };
-
-    if (startedAt) {
-      // Capture how long it took for the rule to run after being claimed
-      this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-    }
-
-    this.alertingEventLogger.done({
-      status: executionStatus,
-      metrics: executionMetrics,
-      timings: this.timer.toJson(),
-    });
 
     const getTaskRunError = (state: Result<RuleTaskStateAndMetrics, Error>) => {
       return isErr(state)
