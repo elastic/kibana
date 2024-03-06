@@ -58,6 +58,7 @@ export class TimelineTestService extends FtrService {
       await this.supertest
         .post(TIMELINE_DRAFT_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({ timelineType: 'default' })
         .then(this.getHttpResponseFailureHandler())
         .then((response) => response.body as TimelineResponse)
@@ -112,6 +113,7 @@ export class TimelineTestService extends FtrService {
     return await this.supertest
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .send({
         timelineId,
         version,
@@ -126,6 +128,7 @@ export class TimelineTestService extends FtrService {
     await this.supertest
       .delete(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .send({
         savedObjectIds: Array.isArray(id) ? id : [id],
       })
