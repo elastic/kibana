@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
   isMetricElementEvent,
@@ -16,28 +14,30 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { SloCardBadgesPortal } from './badges_portal';
-import { useSloListActions } from '../../hooks/use_slo_list_actions';
-import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
-import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
-import { useKibana } from '../../../../utils/kibana_react';
-import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
-import { SloCardItemActions } from './slo_card_item_actions';
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useState } from 'react';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { BurnRateRuleParams } from '../../../../typings';
+import { useKibana } from '../../../../utils/kibana_react';
+import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
+import { useSloListActions } from '../../hooks/use_slo_list_actions';
+import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
+import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
+import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
+
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
-  rules: Array<Rule<SloRule>> | undefined;
+  rules: Array<Rule<BurnRateRuleParams>> | undefined;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: number;
@@ -108,7 +108,19 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         `}
         title={slo.summary.status}
       >
-        <SloCardChart slo={slo} historicalSliData={historicalSliData} />
+        <SloCardChart
+          slo={slo}
+          historicalSliData={historicalSliData}
+          badges={
+            <SloCardItemBadges
+              slo={slo}
+              rules={rules}
+              activeAlerts={activeAlerts}
+              handleCreateRule={handleCreateRule}
+              hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
+            />
+          }
+        />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -120,15 +132,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           />
         )}
       </EuiPanel>
-      <SloCardBadgesPortal containerRef={containerRef}>
-        <SloCardItemBadges
-          slo={slo}
-          rules={rules}
-          activeAlerts={activeAlerts}
-          handleCreateRule={handleCreateRule}
-          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
-        />
-      </SloCardBadgesPortal>
 
       <BurnRateRuleFlyout
         slo={slo}
@@ -168,9 +171,11 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
 
 export function SloCardChart({
   slo,
+  badges,
   onClick,
   historicalSliData,
 }: {
+  badges: React.ReactNode;
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
   onClick?: () => void;
@@ -223,6 +228,7 @@ export function SloCardChart({
               ),
               icon: () => <EuiIcon type="visGauge" size="l" />,
               color: cardColor,
+              body: badges,
             },
           ],
         ]}
