@@ -17,11 +17,17 @@ Cypress.Commands.add('loginAsSuperUser', () => {
 });
 
 Cypress.Commands.add('loginAsViewerUser', () => {
-  return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme2' });
+  return cy.loginAs({
+    username: ApmUsername.viewerUser,
+    password: 'changeme2',
+  });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
-  return cy.loginAs({ username: ApmUsername.editorUser, password: 'changeme2' });
+  return cy.loginAs({
+    username: ApmUsername.editorUser,
+    password: 'changeme2',
+  });
 });
 
 Cypress.Commands.add('loginAsMonitorUser', () => {
