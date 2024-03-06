@@ -58,26 +58,32 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-              <EuiText>
-                {!isCrawler
-                  ? hasMultipleConnectors
-                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleConnectorsText', {
-                        defaultMessage: '{count} connectors',
+                <EuiText>
+                  {!isCrawler
+                    ? hasMultipleConnectors
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.multipleConnectorsText',
+                          {
+                            defaultMessage: '{count} connectors',
+                            values: { count: connectorCount },
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.singleConnectorText',
+                          {
+                            defaultMessage: '{count} connector',
+                            values: { count: connectorCount },
+                          }
+                        )
+                    : hasMultipleConnectors
+                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
+                        defaultMessage: '{count} web crawlers',
                         values: { count: connectorCount },
                       })
-                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleConnectorText', {
-                        defaultMessage: '{count} connector',
+                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
+                        defaultMessage: '{count} web crawler',
                         values: { count: connectorCount },
-                      })
-                  : hasMultipleConnectors
-                  ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
-                      defaultMessage: '{count} web crawlers',
-                      values: { count: connectorCount },
-                    })
-                  : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
-                      defaultMessage: '{count} web crawler',
-                      values: { count: connectorCount },
-                    })}
+                      })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
