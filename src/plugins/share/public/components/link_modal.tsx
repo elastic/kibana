@@ -204,7 +204,9 @@ export const LinkModal = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiCodeBlock whiteSpace="pre">{shareableUrl ?? url}</EuiCodeBlock>
+        <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
+          {shareableUrl ?? url}
+        </EuiCodeBlock>
         <EuiSpacer />
       </EuiForm>
       <EuiModalFooter>{renderButtons()}</EuiModalFooter>
