@@ -130,8 +130,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   );
 
   const { investigationFields, isLoading: isInvestigationFieldsLoading } = useInvestigationFields({
-    esqlQuery,
-    isEsqlRule: isEsqlRuleValue,
+    esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
     indexPatternsFields: indexPattern.fields,
   });
 

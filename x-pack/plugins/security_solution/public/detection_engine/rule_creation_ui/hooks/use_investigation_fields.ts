@@ -59,7 +59,6 @@ const useEsqlFields: UseEsqlFields = (esqlQuery) => {
 };
 
 type UseInvestigationFields = (params: {
-  isEsqlRule: boolean;
   esqlQuery: string | undefined;
   indexPatternsFields: DataViewFieldBase[];
 }) => {
@@ -68,14 +67,13 @@ type UseInvestigationFields = (params: {
 };
 
 export const useInvestigationFields: UseInvestigationFields = ({
-  isEsqlRule,
   esqlQuery,
   indexPatternsFields,
 }) => {
   const { fields: esqlFields, isLoading } = useEsqlFields(esqlQuery);
 
   const investigationFields = useMemo(() => {
-    if (!esqlQuery || !isEsqlRule) {
+    if (!esqlQuery) {
       return indexPatternsFields;
     }
 
@@ -84,7 +82,7 @@ export const useInvestigationFields: UseInvestigationFields = ({
     const isEsqlQueryAggregating = computeIsESQLQueryAggregating(esqlQuery);
 
     return isEsqlQueryAggregating ? esqlFields : [...esqlFields, ...indexPatternsFields];
-  }, [esqlFields, esqlQuery, indexPatternsFields, isEsqlRule]);
+  }, [esqlFields, esqlQuery, indexPatternsFields]);
 
   return {
     investigationFields,

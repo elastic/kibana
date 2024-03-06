@@ -55,7 +55,6 @@ describe('useInvestigationFields', () => {
     const { result } = renderHook(
       () =>
         useInvestigationFields({
-          isEsqlRule: true,
           esqlQuery: mockEsqlQuery,
           indexPatternsFields: mockIndexPatternFields,
         }),
@@ -69,7 +68,6 @@ describe('useInvestigationFields', () => {
     const { result, waitForNextUpdate } = renderHook(
       () =>
         useInvestigationFields({
-          isEsqlRule: true,
           esqlQuery: '',
           indexPatternsFields: mockIndexPatternFields,
         }),
@@ -81,12 +79,11 @@ describe('useInvestigationFields', () => {
     expect(result.current.investigationFields).toEqual(mockIndexPatternFields);
   });
 
-  it('should return only index pattern fields when rule type is not ES|QL', async () => {
+  it('should return only index pattern fields when ES|QL query is undefined', async () => {
     const { result } = renderHook(
       () =>
         useInvestigationFields({
-          isEsqlRule: false,
-          esqlQuery: mockEsqlQuery,
+          esqlQuery: undefined,
           indexPatternsFields: mockIndexPatternFields,
         }),
       { wrapper }
@@ -101,7 +98,6 @@ describe('useInvestigationFields', () => {
     const { result } = renderHook(
       () =>
         useInvestigationFields({
-          isEsqlRule: true,
           esqlQuery: mockEsqlQuery,
           indexPatternsFields: mockIndexPatternFields,
         }),
@@ -123,7 +119,6 @@ describe('useInvestigationFields', () => {
     const { result } = renderHook(
       () =>
         useInvestigationFields({
-          isEsqlRule: true,
           esqlQuery: mockEsqlQuery,
           indexPatternsFields: mockIndexPatternFields,
         }),
