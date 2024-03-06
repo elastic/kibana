@@ -13,9 +13,10 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import type { ExportPanelShareOpts } from '.';
+import { BaseParamsV2 } from '@kbn/reporting-common/types';
 import { checkLicense } from '../..';
-import { ReportingPanelContent } from './reporting_panel_content_lazy';
+import { ExportPanelShareOpts } from '.';
+import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
   apiClient,
@@ -75,7 +76,6 @@ export const reportingCsvShareProvider = ({
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
-    // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
     if (usesUiCapabilities) {
       capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
@@ -84,34 +84,34 @@ export const reportingCsvShareProvider = ({
     }
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
-      const panelTitle = i18n.translate('reporting.share.contextMenu.csvReportsButtonLabel', {
-        defaultMessage: 'CSV Reports',
+      const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
+        defaultMessage: 'Export',
       });
 
       shareActions.push({
         shareMenuItem: {
           name: panelTitle,
-          icon: 'document',
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'CSVReports',
-          sortOrder: 1,
+          ['data-test-subj']: 'CSVDownload',
         },
         panel: {
           id: 'csvReportingPanel',
           title: panelTitle,
           content: (
-            <ReportingPanelContent
+            <CsvModalContent
+              onClose={() => {
+                onClose();
+              }}
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
-              reportType={reportType}
-              layoutId={undefined}
+              reportType={sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE}
               objectId={objectId}
-              getJobParams={getJobParams}
-              onClose={onClose}
+              getJobParams={getJobParams as unknown as BaseParamsV2}
               theme={theme}
+              objectType={objectType}
             />
           ),
         },

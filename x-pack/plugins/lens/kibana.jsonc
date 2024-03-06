@@ -36,7 +36,8 @@
       "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "contentManagement"
+      "contentManagement", 
+      "esUiShared"
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",

@@ -5969,6 +5969,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/share-modal@link:packages/kbn-share-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/share-plugin@link:src/plugins/share":
   version "0.0.0"
   uid ""

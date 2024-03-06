@@ -1,0 +1,6 @@
+{
+    "type": "shared-common",
+    "id": "@kbn/share-modal",
+    "owner": "@elastic/appex-sharedux"
+  }
+  

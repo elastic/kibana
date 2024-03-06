@@ -8,10 +8,10 @@
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
 import { FC, lazy, Suspense } from 'react';
-import type { DownloadPanelContentProps } from './csv_download_panel_content';
+import type { ReportingModalProps } from './csv_download_panel_content';
 
 const LazyComponent = lazy(() =>
-  import('./csv_download_panel_content').then(({ DownloadPanelContent }) => ({
+  import('./csv_download_panel_content').then(({ ReportingModalContent }) => ({
     default: DownloadPanelContent,
   }))
 );
@@ -30,7 +30,7 @@ export const PanelSpinner: React.FC = (props) => {
   );
 };
 
-export const DownloadPanelContent: FC<Omit<DownloadPanelContentProps, 'intl'>> = (props) => {
+export const DownloadPanelContent: FC<Omit<ReportingModalProps, 'intl'>> = (props) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

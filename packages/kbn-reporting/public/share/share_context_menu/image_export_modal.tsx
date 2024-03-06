@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
   EuiButton,
+  EuiIcon,
   EuiButtonEmpty,
   EuiCopy,
   EuiFlexGroup,
@@ -15,37 +17,25 @@ import {
   EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { BaseParams } from '@kbn/reporting-common/types';
-import { ReportingAPIClient } from '@kbn/reporting-public';
-import {
-  ErrorUnsavedWorkPanel,
-  ErrorUrlTooLongPanel,
-} from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/components';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { ReportingAPIClient } from '../..';
+import { JobParamsProviderOptions } from '.';
+import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './reporting_panel_content/components';
+import { getMaxUrlLength } from './reporting_panel_content/constants';
 
-interface ReportingSharingData {
-  title: string;
-  layout: LayoutParams;
-  reportingDisabled?: boolean;
-  [key: string]: unknown;
-}
-const CHROMIUM_MAX_URL_LENGTH = 25 * 1000;
-const getMaxUrlLength = () => CHROMIUM_MAX_URL_LENGTH;
-
-interface JobParamsProviderOptions {
-  sharingData: ReportingSharingData;
-  shareableUrl: string;
-  objectType: string;
-}
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
@@ -55,20 +45,20 @@ export interface ReportingModalProps {
   objectId?: string;
   isDirty?: boolean;
   onClose: () => void;
-  onClick: () => void;
   theme: ThemeServiceSetup;
+  layoutOption?: 'print' | 'canvas';
+  // canvas breaks if required
   jobProviderOptions?: JobParamsProviderOptions;
+  // needed for canvas
   getJobParams?: JobAppParamsPDFV2;
   objectType: string;
-  isDisabled: boolean;
-  warnings: string[];
 }
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
 export type Props = ReportingModalProps & { intl: InjectedIntl };
 
-type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf' | 'csv';
+type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf';
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const {
@@ -78,14 +68,15 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     theme,
     onClose,
     objectId,
+    layoutOption,
     jobProviderOptions,
     objectType,
-    isDisabled,
   } = props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<AllowedImageExportType>('printablePdfV2');
+  const [usePrintLayout, setPrintLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
   const isMounted = useMountedState();
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
@@ -105,13 +96,6 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         layout,
         title,
       };
-      if (type === 'csv') {
-        return {
-          title,
-          objectType,
-          locatorParams,
-        };
-      }
 
       if (type === 'printablePdfV2') {
         // multi locator for PDF V2
@@ -136,14 +120,31 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       // single URL for PNG
       return { ...baseParams, relativeUrl };
     },
-    [apiClient, props.getJobParams, objectType]
+    [apiClient, objectType, props.getJobParams]
   );
+
+  const getLayout = useCallback((): LayoutParams => {
+    const { layout } = getJobsParams(selectedRadio, jobProviderOptions);
+
+    let dimensions = layout?.dimensions;
+
+    if (!dimensions) {
+      const el = document.querySelector('[data-shared-items-container]');
+      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+      dimensions = { height, width };
+    }
+    if (usePrintLayout) {
+      return { id: 'print', dimensions };
+    }
+
+    return { id: 'preserve_layout', dimensions };
+  }, [getJobsParams, jobProviderOptions, selectedRadio, usePrintLayout]);
 
   const getJobParams = useCallback(
     (shareableUrl?: boolean) => {
-      return { ...getJobsParams(selectedRadio, jobProviderOptions) };
+      return { ...getJobsParams(selectedRadio, jobProviderOptions), layout: getLayout() };
     },
-    [getJobsParams, jobProviderOptions, selectedRadio]
+    [getJobsParams, getLayout, jobProviderOptions, selectedRadio]
   );
 
   const getAbsoluteReportGenerationUrl = useMemo(
@@ -228,26 +229,59 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       });
   };
 
+  const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
+    setPrintLayout(evt.target.checked);
+  };
+
+  const renderOptions = () => {
+    if (layoutOption === 'print' && selectedRadio !== 'pngV2') {
+      return (
+        <>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                defaultMessage="Optimize for printing"
+              />
+            }
+            checked={usePrintLayout}
+            onChange={handlePrintLayoutChange}
+            data-test-subj="usePrintLayout"
+          />
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
+                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
+              />
+            }
+          >
+            <EuiIcon type="questionInCircle" />
+          </EuiToolTip>
+        </>
+      );
+    }
+    return null;
+  };
   const renderCopyURLButton = ({
     isUnsaved,
   }: {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) => {
-    if (isUnsaved) {
-      if (exceedsMaxLength) {
-        return <ErrorUrlTooLongPanel isUnsaved />;
-      }
-      return <ErrorUnsavedWorkPanel />;
+    if (isUnsaved && exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved />;
     } else if (exceedsMaxLength) {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiToolTip content="Copy this POST URL to call generation from outside Kibana or from Watcher.">
+      <>
+        {isUnsaved && <ErrorUnsavedWorkPanel />}
         <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
           {(copy) => (
             <EuiButtonEmpty
               iconType="copy"
+              disabled={isUnsaved}
               flush="both"
               onClick={copy}
               data-test-subj="shareReportingCopyURL"
@@ -259,7 +293,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             </EuiButtonEmpty>
           )}
         </EuiCopy>
-      </EuiToolTip>
+      </>
     );
   };
 
@@ -295,45 +329,29 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         />
       </EuiButton>
     );
-
   return (
     <>
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+        <EuiText size="s">Exports can take a few minutes to generate.</EuiText>
+        <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-          {objectType === 'lens' && !isDisabled ? (
-            <EuiRadioGroup
-              options={[
-                { id: 'printablePdfV2', label: 'PDF' },
-                { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
-                { id: 'csv', label: 'CSV', 'data-test-subj': 'csvReportOption' },
-              ]}
-              onChange={(id) => {
-                setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
-              }}
-              name="image reporting radio group"
-              idSelected={selectedRadio}
-              legend={{
-                children: <span>File type</span>,
-              }}
-            />
-          ) : (
-            <EuiRadioGroup
-              options={[
-                { id: 'printablePdfV2', label: 'PDF' },
-                { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
-              ]}
-              onChange={(id) => {
-                setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
-              }}
-              name="image reporting radio group"
-              idSelected={selectedRadio}
-              legend={{
-                children: <span>File type</span>,
-              }}
-            />
-          )}
+          <EuiRadioGroup
+            options={[
+              { id: 'printablePdfV2', label: 'PDF' },
+              { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
+            ]}
+            onChange={(id) => {
+              setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
+            }}
+            name="image reporting radio group"
+            idSelected={selectedRadio}
+            legend={{
+              children: <span>File type</span>,
+            }}
+          />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+        {renderOptions()}
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
       </EuiForm>
       <EuiModalFooter>{saveWarningMessageWithButton}</EuiModalFooter>
