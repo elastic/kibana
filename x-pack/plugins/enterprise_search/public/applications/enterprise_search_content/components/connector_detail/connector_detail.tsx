@@ -45,9 +45,9 @@ export enum ConnectorDetailTabId {
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
+  const { startConnectorPoll } = useActions(ConnectorViewLogic);
   useEffect(() => {
-    fetchConnector({ connectorId });
+    startConnectorPoll(connectorId);
   }, []);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
@@ -119,24 +119,6 @@ export const ConnectorDetail: React.FC = () => {
   ];
 
   const CONNECTOR_TABS = [
-    {
-      content: <ConnectorConfiguration />,
-      id: ConnectorDetailTabId.CONFIGURATION,
-      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.CONFIGURATION,
-          })
-        ),
-    },
     ...(hasFilteringFeature
       ? [
           {
@@ -181,6 +163,27 @@ export const ConnectorDetail: React.FC = () => {
     },
   ];
 
+  const CONFIG_TAB = [
+    {
+      content: <ConnectorConfiguration />,
+      id: ConnectorDetailTabId.CONFIGURATION,
+      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.CONFIGURATION,
+          })
+        ),
+    },
+  ];
+
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
     disabled: !index,
@@ -216,6 +219,7 @@ export const ConnectorDetail: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...CONNECTOR_TABS,
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
+    ...CONFIG_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
@@ -227,6 +231,11 @@ export const ConnectorDetail: React.FC = () => {
       isLoading={isLoading}
       pageHeader={{
         pageTitle: connector ? <ConnectorNameAndDescription connector={connector} /> : '...',
+        rightSideGroupProps: {
+          gutterSize: 's',
+          responsive: false,
+          wrap: false,
+        },
         rightSideItems: getHeaderActions(index, hasAppSearchAccess),
         tabs,
       }}

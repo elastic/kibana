@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -100,12 +99,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
         language analyzer for the index."
         />
       </EuiText>
-      <EuiSpacer />
-      <EuiLink>
-        {i18n.translate('xpack.enterpriseSearch.attachIndexBox.learnMoreAboutIndicesLinkLabel', {
-          defaultMessage: 'Learn more about indices',
-        })}
-      </EuiLink>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>

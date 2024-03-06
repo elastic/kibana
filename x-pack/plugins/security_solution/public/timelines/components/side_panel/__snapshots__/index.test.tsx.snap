@@ -287,7 +287,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 
 exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -631,7 +631,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
