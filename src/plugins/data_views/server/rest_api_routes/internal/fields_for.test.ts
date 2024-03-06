@@ -13,7 +13,7 @@ describe('_fields_for_wildcard', () => {
     it('should throw if receiving a string of comma-separated values', () => {
       const value = '_source,_id';
       expect(() => parseFields(value, 'metaFields')).toThrowErrorMatchingInlineSnapshot(
-        `"metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name"`
+        `"metaFields should be an array of strings, a JSON-stringified array of strings, or a single string"`
       );
     });
 
