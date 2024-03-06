@@ -281,7 +281,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiFlexGroup>
+                        <EuiFlexGroup responsive={false}>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
                               data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
