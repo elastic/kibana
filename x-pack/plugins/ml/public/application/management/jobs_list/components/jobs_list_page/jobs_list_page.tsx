@@ -76,8 +76,8 @@ export const JobsListPage: FC<Props> = ({
   const theme$ = coreStart.theme.theme$;
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart.http, usageCollection),
-    [coreStart.http, usageCollection]
+    () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
+    [coreStart.http, data.dataViews, usageCollection]
   );
 
   const check = async () => {
