@@ -113,12 +113,10 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
    * @param options.conversationUpdateProps.replacements The new value for replacements, or "undefined" if this should not be updated.
    */
   public updateConversation = async ({
-    existingConversation,
     conversationUpdateProps,
     authenticatedUser,
     isPatch,
   }: {
-    existingConversation: ConversationResponse;
     conversationUpdateProps: ConversationUpdateProps;
     authenticatedUser?: AuthenticatedUser;
     isPatch?: boolean;
@@ -128,7 +126,6 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
       esClient,
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
-      existingConversation,
       conversationUpdateProps,
       isPatch,
       user: authenticatedUser,

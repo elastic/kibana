@@ -8,11 +8,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AIAssistantConversationsDataClient } from '.';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
-import {
-  getConversationMock,
-  getQueryConversationParams,
-  getUpdateConversationSchemaMock,
-} from '../../__mocks__/conversations_schema.mock';
+import { getUpdateConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
 import { AIAssistantDataClientParams } from '..';
 
 const date = '2023-03-28T22:27:28.159Z';
@@ -165,7 +161,6 @@ describe('AIAssistantConversationsDataClient', () => {
     );
 
     await assistantConversationsDataClient.updateConversation({
-      existingConversation: getConversationMock(getQueryConversationParams()),
       conversationUpdateProps: getUpdateConversationSchemaMock(
         '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
       ),
