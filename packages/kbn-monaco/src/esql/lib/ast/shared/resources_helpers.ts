@@ -8,7 +8,7 @@
 
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
-import { ESQLAst } from '../types';
+import type { ESQLAst } from '../types';
 
 export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
   const prevCommand = ast[Math.max(ast.length - 2, 0)];

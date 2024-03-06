@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177639
-  registry.when.skip('Serverless active instances', { config: 'basic', archives: [] }, () => {
+  registry.when('Serverless active instances', { config: 'basic', archives: [] }, () => {
     const {
       memoryTotal,
       billedDurationMs,
