@@ -4160,6 +4160,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-security-browser-internal@link:packages/core/security/core-security-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-browser-mocks@link:packages/core/security/core-security-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-browser@link:packages/core/security/core-security-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-security-common@link:packages/core/security/core-security-common":
   version "0.0.0"
   uid ""

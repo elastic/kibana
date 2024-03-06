@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { securityServiceMock } from './src/security_service.mock';
+import type { CoreInternalSecurityContract } from '@kbn/core-security-browser';
+
+export const getDefaultSecurityImplementation = (): CoreInternalSecurityContract => {
+  return {
+    authc: {
+      getCurrentUser: () => {
+        return Promise.reject(new Error('No authenticated user'));
+      },
+    },
+  };
+};

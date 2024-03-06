@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { securityServiceMock } from './src/security_service.mock';
+import type { SecurityServiceSetup, SecurityServiceStart } from '@kbn/core-security-browser';
+
+export type InternalSecurityServiceSetup = SecurityServiceSetup;
+export type InternalSecurityServiceStart = SecurityServiceStart;
