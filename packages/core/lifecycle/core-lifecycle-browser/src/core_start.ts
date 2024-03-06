@@ -22,6 +22,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-browser';
+import type { SecurityServiceStart } from '@kbn/core-security-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -71,4 +72,6 @@ export interface CoreStart {
   theme: ThemeServiceStart;
   /** {@link PluginsServiceStart} */
   plugins: PluginsServiceStart;
+  /** {@link SecurityServiceStart} */
+  security: SecurityServiceStart;
 }

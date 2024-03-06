@@ -93,6 +93,9 @@ export function createPluginSetupContext<
     uiSettings: deps.uiSettings,
     settings: deps.settings,
     theme: deps.theme,
+    security: {
+      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+    },
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
@@ -156,6 +159,9 @@ export function createPluginStartContext<
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,
+    security: {
+      authc: deps.security.authc,
+    },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
