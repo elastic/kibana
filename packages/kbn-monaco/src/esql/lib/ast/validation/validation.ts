@@ -885,6 +885,7 @@ export async function validateAst(
     });
     messages.push(...commandMessages);
   }
+
   return {
     errors: [...errors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
