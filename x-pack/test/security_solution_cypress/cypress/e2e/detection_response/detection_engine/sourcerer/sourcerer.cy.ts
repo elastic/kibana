@@ -51,7 +51,8 @@ describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
     isSourcererOptions(DEFAULT_INDEX_PATTERN.filter((pattern) => pattern !== 'auditbeat-*'));
   });
 
-  describe('Modified badge', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177586
+  describe.skip('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
       openSourcerer();
