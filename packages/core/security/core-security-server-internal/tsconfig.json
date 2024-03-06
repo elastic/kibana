@@ -18,6 +18,5 @@
     "@kbn/logging",
     "@kbn/core-base-server-internal",
     "@kbn/core-http-server",
-    "@kbn/core-security-server-internal",
   ]
 }

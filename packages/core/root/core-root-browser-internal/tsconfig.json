@@ -62,6 +62,8 @@
     "@kbn/config",
     "@kbn/core-custom-branding-browser-internal",
     "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-security-browser-mocks",
+    "@kbn/core-security-browser-internal",
   ],
   "exclude": [
     "target/**/*",
