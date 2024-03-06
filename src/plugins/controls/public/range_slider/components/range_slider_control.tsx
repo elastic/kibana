@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
@@ -18,6 +18,7 @@ import { ControlError } from '../../control_group/component/control_error_compon
 import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
@@ -164,6 +165,27 @@ export const RangeSliderControl: FC = () => {
         inputPopoverProps={{
           panelMinWidth: MIN_POPOVER_WIDTH,
         }}
+        append={
+          isInvalid ? (
+            <div className="rangeSlider__invalidToken">
+              <EuiToolTip
+                position="top"
+                content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
+                delay="long"
+              >
+                <EuiToken
+                  tabIndex={0}
+                  iconType="alert"
+                  size="s"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
+                  title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
+                />
+              </EuiToolTip>
+            </div>
+          ) : undefined
+        }
         onMouseUp={() => {
           // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
           // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to

@@ -83,6 +83,61 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.collectConnectorStats",
+        "type": "Function",
+        "tags": [],
+        "label": "collectConnectorStats",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorStats",
+            "text": "ConnectorStats"
+          },
+          "[]>"
+        ],
+        "path": "packages/kbn-search-connectors/lib/collect_connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.collectConnectorStats.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/collect_connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.ConnectorConfigurationComponent",
         "type": "Function",
         "tags": [],
@@ -3168,6 +3223,20 @@
           },
           {
             "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.Connector.last_deleted_document_count",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "last_deleted_document_count",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
             "id": "def-common.Connector.last_incremental_sync_scheduled_at",
             "type": "CompoundType",
             "tags": [],
@@ -3175,6 +3244,20 @@
             "description": [],
             "signature": [
               "string | null"
+            ],
+            "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.Connector.last_indexed_document_count",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "last_indexed_document_count",
+            "description": [],
+            "signature": [
+              "number | null"
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -3958,6 +4041,266 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ConnectorStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorStats",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.serviceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serviceType",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.isNative",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNative",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.isDeleted",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeleted",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.ConnectorStatus",
+                "text": "ConnectorStatus"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.indexName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.dlsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dlsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.sslEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sslEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.fetchSelectively",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fetchSelectively",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.textExtractionServiceEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "textExtractionServiceEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.documents",
+            "type": "Object",
+            "tags": [],
+            "label": "documents",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.DocumentsStats",
+                "text": "DocumentsStats"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.dataSourceSpecific",
+            "type": "Object",
+            "tags": [],
+            "label": "dataSourceSpecific",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.DataSourceSpecificStats",
+                "text": "DataSourceSpecificStats"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.scheduling",
+            "type": "Object",
+            "tags": [],
+            "label": "scheduling",
+            "description": [],
+            "signature": [
+              "{ accessControl: Scheduling; full: Scheduling; incremental: Scheduling; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.syncRules",
+            "type": "Object",
+            "tags": [],
+            "label": "syncRules",
+            "description": [],
+            "signature": [
+              "{ active: { withBasicRules: boolean; withAdvancedRules: boolean; }; draft: { withBasicRules: boolean; withAdvancedRules: boolean; }; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.ingestPipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              "{ name: string; extractBinaryContent: boolean; reduceWhitespace: boolean; runMLInference: boolean; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorStats.syncJobs",
+            "type": "Object",
+            "tags": [],
+            "label": "syncJobs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStats",
+                "text": "SyncJobStats"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.ConnectorSyncJob",
         "type": "Interface",
         "tags": [],
@@ -4334,6 +4677,160 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.DataSourceSpecificStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataSourceSpecificStats",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.confluence",
+            "type": "Object",
+            "tags": [],
+            "label": "confluence",
+            "description": [],
+            "signature": [
+              "{ dataSourceType: string; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.github",
+            "type": "Object",
+            "tags": [],
+            "label": "github",
+            "description": [],
+            "signature": [
+              "{ isCloud: boolean; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.jira",
+            "type": "Object",
+            "tags": [],
+            "label": "jira",
+            "description": [],
+            "signature": [
+              "{ dataSourceType: string; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.mongodb",
+            "type": "Object",
+            "tags": [],
+            "label": "mongodb",
+            "description": [],
+            "signature": [
+              "{ directConnect: boolean; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.mssql",
+            "type": "Object",
+            "tags": [],
+            "label": "mssql",
+            "description": [],
+            "signature": [
+              "{ validateHost: boolean; tables: number; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.mysql",
+            "type": "Object",
+            "tags": [],
+            "label": "mysql",
+            "description": [],
+            "signature": [
+              "{ tables: number; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.oracle",
+            "type": "Object",
+            "tags": [],
+            "label": "oracle",
+            "description": [],
+            "signature": [
+              "{ tables: number; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.postgresql",
+            "type": "Object",
+            "tags": [],
+            "label": "postgresql",
+            "description": [],
+            "signature": [
+              "{ tables: number; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.slack",
+            "type": "Object",
+            "tags": [],
+            "label": "slack",
+            "description": [],
+            "signature": [
+              "{ autoJoinChannelsEnabled: boolean; syncUsersEnabled: boolean; fetchLastNDays: number; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DataSourceSpecificStats.zoom",
+            "type": "Object",
+            "tags": [],
+            "label": "zoom",
+            "description": [],
+            "signature": [
+              "{ recordingAge: number; } | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.Dependency",
         "type": "Interface",
         "tags": [],
@@ -4365,6 +4862,53 @@
               "string | number | boolean | null"
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.DocumentsStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentsStats",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DocumentsStats.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DocumentsStats.volume",
+            "type": "number",
+            "tags": [],
+            "label": "volume",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DocumentsStats.inLastSync",
+            "type": "number",
+            "tags": [],
+            "label": "inLastSync",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5351,6 +5895,349 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.SyncJobStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "SyncJobStats",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStats.overall",
+            "type": "Object",
+            "tags": [],
+            "label": "overall",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsDetails",
+                "text": "SyncJobStatsDetails"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStats.withTextExtractionServiceEnabled",
+            "type": "Object",
+            "tags": [],
+            "label": "withTextExtractionServiceEnabled",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsDetails",
+                "text": "SyncJobStatsDetails"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.SyncJobStatsByState",
+        "type": "Interface",
+        "tags": [],
+        "label": "SyncJobStatsByState",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.manual",
+            "type": "number",
+            "tags": [],
+            "label": "manual",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.scheduled",
+            "type": "number",
+            "tags": [],
+            "label": "scheduled",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.completed",
+            "type": "number",
+            "tags": [],
+            "label": "completed",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.errored",
+            "type": "number",
+            "tags": [],
+            "label": "errored",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.canceled",
+            "type": "number",
+            "tags": [],
+            "label": "canceled",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.suspended",
+            "type": "number",
+            "tags": [],
+            "label": "suspended",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.idle",
+            "type": "number",
+            "tags": [],
+            "label": "idle",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.running",
+            "type": "number",
+            "tags": [],
+            "label": "running",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.totalDurationSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "totalDurationSeconds",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.SyncJobStatsByType",
+        "type": "Interface",
+        "tags": [],
+        "label": "SyncJobStatsByType",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByType.overall",
+            "type": "Object",
+            "tags": [],
+            "label": "overall",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsByState",
+                "text": "SyncJobStatsByState"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByType.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsByState",
+                "text": "SyncJobStatsByState"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByType.full",
+            "type": "Object",
+            "tags": [],
+            "label": "full",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsByState",
+                "text": "SyncJobStatsByState"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByType.incremental",
+            "type": "Object",
+            "tags": [],
+            "label": "incremental",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsByState",
+                "text": "SyncJobStatsByState"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.SyncJobStatsDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "SyncJobStatsDetails",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsDetails.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsDetails.last30Days",
+            "type": "Object",
+            "tags": [],
+            "label": "last30Days",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsByType",
+                "text": "SyncJobStatsByType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsDetails.last7Days",
+            "type": "Object",
+            "tags": [],
+            "label": "last7Days",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobStatsByType",
+                "text": "SyncJobStatsByType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.Validation",
         "type": "Interface",
         "tags": [],
@@ -5668,7 +6555,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          " | null; last_incremental_sync_scheduled_at: string | null; last_seen: string | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
+          " | null; last_deleted_document_count: number | null; last_incremental_sync_scheduled_at: string | null; last_indexed_document_count: number | null; last_seen: string | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -35287,200 +36174,6 @@
                         "trackAdoption": false
                       }
                     ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "max_concurrent_tasks",
-                    "description": [],
-                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.default_value",
-                        "type": "number",
-                        "tags": [],
-                        "label": "default_value",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.depends_on",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "depends_on",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.display",
-                        "type": "string",
-                        "tags": [],
-                        "label": "display",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.DisplayType",
-                            "text": "DisplayType"
-                          },
-                          ".NUMERIC"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.label",
-                        "type": "string",
-                        "tags": [],
-                        "label": "label",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.options",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "options",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.order",
-                        "type": "number",
-                        "tags": [],
-                        "label": "order",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.required",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "required",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.sensitive",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "sensitive",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.tooltip",
-                        "type": "string",
-                        "tags": [],
-                        "label": "tooltip",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.FieldType",
-                            "text": "FieldType"
-                          },
-                          ".INTEGER"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.ui_restrictions",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "ui_restrictions",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.validations",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "validations",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.outlook.configuration.max_concurrent_tasks.value",
-                        "type": "string",
-                        "tags": [],
-                        "label": "value",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
                   }
                 ]
               },
@@ -40631,7 +41324,7 @@
                             "section": "def-common.DisplayType",
                             "text": "DisplayType"
                           },
-                          ".TEXTAREA"
+                          ".TEXTBOX"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
