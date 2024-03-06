@@ -93,7 +93,7 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
           }),
         },
-        ...(productFeatures.showAIPlayground
+        ...(productFeatures.showPlayground
           ? [
               {
                 id: 'ai-playground',

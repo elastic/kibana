@@ -73,7 +73,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
-    showAIPlayground: false,
+    showPlayground: false,
   },
   renderHeaderActions: jest.fn(),
   security: securityMock.createStart(),

@@ -11,7 +11,7 @@ import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerAIPlaygroundRoutes({ log, router, config }: RouteDependencies) {
-  if (!config.showAIPlayground) {
+  if (!config.showPlayground) {
     return;
   }
 

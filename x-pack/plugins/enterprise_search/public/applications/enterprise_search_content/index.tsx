@@ -75,7 +75,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
 
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   const {
-    productFeatures: { showAIPlayground },
+    productFeatures: { showPlayground },
   } = useValues(KibanaLogic);
   return (
     <Routes>
@@ -89,7 +89,7 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route path={CRAWLERS_PATH}>
         <CrawlersRouter />
       </Route>
-      {showAIPlayground && (
+      {showPlayground && (
         <Route path={AI_PLAYGROUND_PATH}>
           <AIPlayground />
         </Route>

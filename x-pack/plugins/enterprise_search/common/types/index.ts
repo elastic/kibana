@@ -44,7 +44,7 @@ export interface ProductFeatures {
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;
   // Temp Feature Flag for AI Playground page
-  showAIPlayground: boolean;
+  showPlayground: boolean;
 }
 
 export interface SearchOAuth {
