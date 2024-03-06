@@ -9,20 +9,20 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt, EuiLink } from '@el
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { DslData, useGetDslStatus } from '../hooks/use_get_dsl_status';
-import { useManagementLocator } from './useManagementLocator';
+import { DataStreamStatus, useGetDataStreamStatuses } from '../hooks/use_get_data_stream_statuses';
+import { useManagementLocator } from './use_management_locator';
 
 export const DslRetentionTab = () => {
-  const { dslData, loading, error } = useGetDslStatus();
-  if (loading === false && dslData === undefined)
+  const { dataStreamStatuses, loading, error } = useGetDataStreamStatuses();
+  if (loading === false && dataStreamStatuses === undefined)
     return <ErrorEmptyPrompt error={error?.message} />;
 
   return (
     <EuiBasicTable
-      items={dslData ?? []}
-      loading={loading === true && dslData === undefined}
+      items={dataStreamStatuses ?? []}
+      loading={loading === true && dataStreamStatuses === undefined}
       noItemsMessage={
-        loading === false && dslData === [] ? (
+        loading === false && (dataStreamStatuses?.length ?? 0) === 0 ? (
           <FormattedMessage
             id="xpack.synthetics.dslRetention.noData"
             defaultMessage="No retention data found"
@@ -35,13 +35,13 @@ export const DslRetentionTab = () => {
   );
 };
 
-const DSL_RETENTION_COLUMNS: Array<EuiBasicTableColumn<DslData>> = [
+const DSL_RETENTION_COLUMNS: Array<EuiBasicTableColumn<DataStreamStatus>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.synthetics.dslRetention.columns.name', {
       defaultMessage: 'Dataset',
     }),
-    render: (name: string, { dataStreamName }: DslData) => {
+    render: (name: string, { dataStreamName }: DataStreamStatus) => {
       if (!dataStreamName) {
         return name;
       }
@@ -70,6 +70,7 @@ const DSL_RETENTION_COLUMNS: Array<EuiBasicTableColumn<DslData>> = [
     ),
   },
 ];
+
 function DataStreamLink({ dataStream, name }: { dataStream: string; name: string }) {
   const templatePath = useManagementLocator(`/data_streams/${dataStream}`);
 
