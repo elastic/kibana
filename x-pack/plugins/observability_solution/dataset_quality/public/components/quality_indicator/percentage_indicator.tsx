@@ -26,7 +26,7 @@ export function QualityPercentageIndicator({
   const isFewDegradedDocsAvailable = percentage && percentage < FEW_DEGRADED_DOCS_THRESHOLD;
 
   const description = isFewDegradedDocsAvailable ? (
-    <DatasetWithFewDegradedDocs percentage={percentage} degradedDocsCount={degradedDocsCount} />
+    <DatasetWithFewDegradedDocs degradedDocsCount={degradedDocsCount} />
   ) : (
     <DatasetWithManyDegradedDocs percentage={percentage} />
   );
@@ -34,16 +34,10 @@ export function QualityPercentageIndicator({
   return <QualityIndicator quality={quality} description={description} />;
 }
 
-const DatasetWithFewDegradedDocs = ({
-  percentage,
-  degradedDocsCount,
-}: {
-  percentage: number;
-  degradedDocsCount?: number;
-}) => {
+const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?: number }) => {
   return (
     <EuiText size="s">
-      ~<FormattedNumber value={percentage} />%{' '}
+      ~0%{' '}
       <EuiToolTip
         content={i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
           defaultMessage: '{degradedDocsCount} degraded docs in this dataset.',

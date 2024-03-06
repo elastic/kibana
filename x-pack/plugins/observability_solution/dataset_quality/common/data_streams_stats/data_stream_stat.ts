@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_DEGRADED_DOCS } from '../constants';
 import { DataStreamType } from '../types';
 import { indexNameToDataStreamParts } from '../utils';
 import { Integration } from './integration';
@@ -56,10 +57,7 @@ export class DataStreamStat {
       integration: dataStreamStat.integration
         ? Integration.create(dataStreamStat.integration)
         : undefined,
-      degradedDocs: {
-        percentage: 0,
-        count: 0,
-      },
+      degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
     return new DataStreamStat(dataStreamStatProps);
