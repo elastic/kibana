@@ -10,11 +10,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
-import { combineLatest } from 'rxjs';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
+import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 
 const buttonCss = css`
   padding: 4px 2px 0 2px;
@@ -31,7 +30,6 @@ export function NavControl({}: {}) {
 
   const {
     services: {
-      application: { currentAppId$, applications$ },
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
@@ -41,8 +39,6 @@ export function NavControl({}: {}) {
   } = useKibana();
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
-
-  const [isVisible, setIsVisible] = useState(false);
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -55,27 +51,18 @@ export function NavControl({}: {}) {
 
   const keyRef = useRef(v4());
 
+  const { isVisible } = useIsNavControlVisible();
+
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       setHasBeenOpened(true);
       setIsOpen(true);
     });
 
-    const appSubscription = combineLatest(currentAppId$, applications$).subscribe({
-      next: ([appId, applications]) => {
-        const isObservabilityApp =
-          appId &&
-          applications.get(appId)?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
-
-        setIsVisible(!!isObservabilityApp);
-      },
-    });
-
     return () => {
       conversationSubscription.unsubscribe();
-      appSubscription.unsubscribe();
     };
-  }, [service.conversations.predefinedConversation$, currentAppId$, applications$]);
+  }, [service.conversations.predefinedConversation$]);
 
   const { messages, title } = useObservable(service.conversations.predefinedConversation$) ?? {
     messages: [],
