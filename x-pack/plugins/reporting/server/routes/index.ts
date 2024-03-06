@@ -18,9 +18,14 @@ import { registerJobInfoRoutesPublic } from './public/jobs';
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
-  registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerGenerationRoutesInternal(reporting, logger);
   registerJobInfoRoutesInternal(reporting);
   registerGenerationRoutesPublic(reporting, logger);
   registerJobInfoRoutesPublic(reporting);
+
+  // (deprecated) allow users to download CSV without generating a report
+  const config = reporting.getConfig();
+  if (config.csv.enablePanelActionDownload) {
+    registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
+  }
 }

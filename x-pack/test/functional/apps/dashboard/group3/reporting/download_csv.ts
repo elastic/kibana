@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail(actionItemTestSubj); // wait for the full panel to display or else the test runner could click the wrong option!
     log.debug('click "Download CSV"');
     await testSubjects.click(actionItemTestSubj);
-    await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
+    await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
   describe('Download CSV', () => {
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
         await clickDownloadCsv();
-        await testSubjects.existOrFail('csvDownloadStarted');
+        await testSubjects.existOrFail('csvReportStarted');
 
         const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
         expect(csvFile).to.not.be(null);

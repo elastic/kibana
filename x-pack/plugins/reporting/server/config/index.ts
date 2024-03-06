@@ -13,7 +13,10 @@ import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: {
-    csv: { scroll: true },
+    csv: {
+      enablePanelActionDownload: true,
+      scroll: true,
+    },
     poll: true,
     roles: true,
     export_types: true,

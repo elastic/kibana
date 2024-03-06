@@ -32,6 +32,14 @@ interface BaseParamsCSV {
 export type JobParamsCSV = BaseParamsCSV & BaseParams;
 export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
 
+/**
+ * Public-facing interface
+ * Apps should use this interface to build job params. The browserTimezone and version
+ * fields become automatically provided by Reporting
+ * @public
+ */
+export type JobAppParamsCSV = Omit<JobParamsCSV, 'browserTimezone' | 'version'>;
+
 interface CsvFromSavedObjectBase {
   objectType: 'search';
 }
