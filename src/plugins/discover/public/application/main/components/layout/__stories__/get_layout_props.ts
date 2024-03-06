@@ -126,7 +126,10 @@ function getSavedSearch(dataView: DataView) {
 
 const customizationContext: DiscoverCustomizationContext = {
   displayMode: 'standalone',
-  showLogsExplorerTabs: false,
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
 };
 
 export function getDocumentsLayoutProps(dataView: DataView) {

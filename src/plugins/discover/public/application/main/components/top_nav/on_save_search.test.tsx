@@ -27,7 +27,10 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
     history,
     customizationContext: {
       displayMode: 'standalone',
-      showLogsExplorerTabs: false,
+      inlineTopNav: {
+        enabled: false,
+        showLogsExplorerTabs: false,
+      },
     },
   });
   stateContainer.savedSearchState.set(savedSearch);

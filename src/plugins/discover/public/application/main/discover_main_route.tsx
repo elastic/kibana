@@ -39,7 +39,7 @@ import {
   useDiscoverCustomizationService,
 } from '../../customizations';
 import type { DiscoverCustomizationContext } from '../types';
-import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
+import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { isTextBasedQuery } from './utils/is_text_based_query';
 import { DiscoverStateContainer, LoadParams } from './services/discover_state';
 
@@ -353,7 +353,7 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <>
-          <DiscoverTopNavServerless stateContainer={stateContainer} hideNavMenuItems={loading} />
+          <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
           {mainContent}
         </>
       </DiscoverMainProvider>

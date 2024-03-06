@@ -27,9 +27,18 @@ export interface DiscoverCustomizationContext {
    */
   displayMode: DiscoverDisplayMode;
   /**
-   * Whether or not to show the Log Explorer tabs
+   * New inline top nav configuration
    */
-  showLogsExplorerTabs: boolean;
+  inlineTopNav: {
+    /**
+     * Whether or not to show the new inline top nav
+     */
+    enabled: boolean;
+    /**
+     * Whether or not to show the Log Explorer tabs
+     */
+    showLogsExplorerTabs: boolean;
+  };
 }
 
 export interface RecordsFetchResponse {

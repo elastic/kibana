@@ -20,7 +20,7 @@ import {
   createCustomizationService,
   DiscoverCustomizationService,
 } from '../../customizations/customization_service';
-import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
+import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -100,13 +100,11 @@ describe('DiscoverMainRoute', () => {
     });
   });
 
-  test('should pass hideNavMenuItems=true to DiscoverTopNavServerless while loading', async () => {
+  test('should pass hideNavMenuItems=true to DiscoverTopNavInline while loading', async () => {
     const component = mountComponent(true, true);
-    expect(component.find(DiscoverTopNavServerless).prop('hideNavMenuItems')).toBe(true);
+    expect(component.find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(true);
     await waitFor(() => {
-      expect(component.update().find(DiscoverTopNavServerless).prop('hideNavMenuItems')).toBe(
-        false
-      );
+      expect(component.update().find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(false);
     });
   });
 });
@@ -117,7 +115,10 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
     customizationCallbacks: [],
     customizationContext: {
       displayMode: 'standalone',
-      showLogsExplorerTabs: false,
+      inlineTopNav: {
+        enabled: false,
+        showLogsExplorerTabs: false,
+      },
     },
   };
 

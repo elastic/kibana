@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
-import { DiscoverTopNavServerless } from './discover_topnav_serverless';
+import { DiscoverTopNavInline } from './discover_topnav_inline';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
@@ -23,6 +23,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.internalState.transitions.setDataView(dataViewMock);
+  stateContainer.customizationContext.inlineTopNav.enabled = true;
 
   return {
     stateContainer,
@@ -32,7 +33,7 @@ function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
 
 const mockUseKibana = useKibana as jest.Mock;
 
-describe('DiscoverTopNavServerless', () => {
+describe('DiscoverTopNavInline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
@@ -40,67 +41,50 @@ describe('DiscoverTopNavServerless', () => {
     });
   });
 
-  it('should not render when serverless plugin is not defined', async () => {
+  it('should not render when top nav inline is not enabled', async () => {
     const props = getProps();
+    props.stateContainer.customizationContext.inlineTopNav.enabled = false;
     render(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavServerless {...props} />
+        <DiscoverTopNavInline {...props} />
       </DiscoverMainProvider>
     );
-    const topNav = screen.queryByTestId('discoverTopNavServerless');
+    const topNav = screen.queryByTestId('discoverTopNavInline');
     expect(topNav).toBeNull();
   });
 
-  it('should render when serverless plugin is defined and displayMode is "standalone"', async () => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        ...mockDiscoverService,
-        serverless: true,
-      },
-    });
+  it('should render when top nav inline is enabled and displayMode is "standalone"', async () => {
     const props = getProps();
     render(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavServerless {...props} />
+        <DiscoverTopNavInline {...props} />
       </DiscoverMainProvider>
     );
-    const topNav = screen.queryByTestId('discoverTopNavServerless');
+    const topNav = screen.queryByTestId('discoverTopNavInline');
     expect(topNav).not.toBeNull();
   });
 
-  it('should not render when serverless plugin is defined and displayMode is not "standalone"', async () => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        ...mockDiscoverService,
-        serverless: true,
-      },
-    });
+  it('should not render when top nav inline is enabled and displayMode is not "standalone"', async () => {
     const props = getProps();
     props.stateContainer.customizationContext.displayMode = 'embedded';
     render(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavServerless {...props} />
+        <DiscoverTopNavInline {...props} />
       </DiscoverMainProvider>
     );
-    const topNav = screen.queryByTestId('discoverTopNavServerless');
+    const topNav = screen.queryByTestId('discoverTopNavInline');
     expect(topNav).toBeNull();
   });
 
   describe('nav menu items', () => {
     it('should show nav menu items when hideNavMenuItems is false', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...mockDiscoverService,
-          serverless: true,
-        },
-      });
       const props = getProps();
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavServerless {...props} />
+          <DiscoverTopNavInline {...props} />
         </DiscoverMainProvider>
       );
-      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
         const topNavMenuItems = screen.queryByTestId('topNavMenuItems');
@@ -109,19 +93,13 @@ describe('DiscoverTopNavServerless', () => {
     });
 
     it('should hide nav menu items when hideNavMenuItems is true', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...mockDiscoverService,
-          serverless: true,
-        },
-      });
       const props = getProps({ hideNavMenuItems: true });
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavServerless {...props} />
+          <DiscoverTopNavInline {...props} />
         </DiscoverMainProvider>
       );
-      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
         const topNavMenuItems = screen.queryByTestId('topNavMenuItems');
@@ -132,20 +110,14 @@ describe('DiscoverTopNavServerless', () => {
 
   describe('LogsExplorerTabs', () => {
     it('should render when showLogsExplorerTabs is true', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...mockDiscoverService,
-          serverless: true,
-        },
-      });
       const props = getProps();
-      props.stateContainer.customizationContext.showLogsExplorerTabs = true;
+      props.stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = true;
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavServerless {...props} />
+          <DiscoverTopNavInline {...props} />
         </DiscoverMainProvider>
       );
-      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
         const logsExplorerTabs = screen.queryByTestId('logsExplorerTabs');
@@ -154,19 +126,13 @@ describe('DiscoverTopNavServerless', () => {
     });
 
     it('should not render when showLogsExplorerTabs is false', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...mockDiscoverService,
-          serverless: true,
-        },
-      });
       const props = getProps();
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavServerless {...props} />
+          <DiscoverTopNavInline {...props} />
         </DiscoverMainProvider>
       );
-      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
         const logsExplorerTabs = screen.queryByTestId('logsExplorerTabs');
