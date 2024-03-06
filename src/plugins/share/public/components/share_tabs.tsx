@@ -103,6 +103,7 @@ export const ShareMenuTabs = ({
           isEmbedded={isEmbedded}
           onClose={onClose}
           action={buttonHandler().filter(({ id }) => id === 'link')[0]}
+          urlService={urlService}
         />
       ),
     });
