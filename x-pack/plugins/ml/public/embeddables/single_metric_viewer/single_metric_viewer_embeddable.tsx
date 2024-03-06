@@ -94,6 +94,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
                 ...this.services[2],
               },
               ...this.services[0],
+              ...this.services[1],
             }}
           >
             <DatePickerContextProvider {...datePickerDeps}>
