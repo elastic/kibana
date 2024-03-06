@@ -21,6 +21,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isEqual } from 'lodash';
 import type { SloSettings } from '../../../server/domain/models';
 import { usePutSloSettings } from './use_put_slo_settings';
 
@@ -124,7 +125,17 @@ export function SettingsForm() {
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="o11ySettingsFormCancelButton">
+            <EuiButtonEmpty
+              data-test-subj="o11ySettingsFormCancelButton"
+              onClick={() => {
+                setUseAllRemoteClusters(currentSettings?.useAllRemoteClusters || false);
+                setSelectedRemoteClusters(currentSettings?.selectedRemoteClusters || []);
+              }}
+              isDisabled={isEqual(currentSettings, {
+                useAllRemoteClusters,
+                selectedRemoteClusters,
+              })}
+            >
               {i18n.translate('xpack.observability.settingsForm.euiButtonEmpty.cancelLabel', {
                 defaultMessage: 'Cancel',
               })}
@@ -136,6 +147,10 @@ export function SettingsForm() {
               color="primary"
               fill
               onClick={() => onSubmit()}
+              isDisabled={isEqual(currentSettings, {
+                useAllRemoteClusters,
+                selectedRemoteClusters,
+              })}
             >
               {i18n.translate('xpack.observability.settingsForm.applyButtonEmptyLabel', {
                 defaultMessage: 'Apply',
