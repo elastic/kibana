@@ -25,7 +25,6 @@ export const createDashboardSavedObjectType = ({
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  switchToModelVersionAt: '8.10.0',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'dashboardApp',
@@ -45,7 +44,7 @@ export const createDashboardSavedObjectType = ({
     1: {
       changes: [],
       schemas: {
-        forwardCompatibility: dashboardAttributesSchemaV1,
+        forwardCompatibility: dashboardAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
         create: dashboardAttributesSchemaV1,
       },
     },
@@ -63,7 +62,7 @@ export const createDashboardSavedObjectType = ({
         },
       ],
       schemas: {
-        forwardCompatibility: dashboardAttributesSchemaV2,
+        forwardCompatibility: dashboardAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
         create: dashboardAttributesSchemaV2,
       },
     },
