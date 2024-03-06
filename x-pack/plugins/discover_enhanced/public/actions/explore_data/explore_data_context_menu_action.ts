@@ -23,8 +23,4 @@ export class ExploreDataContextMenuAction
   public readonly type = ACTION_EXPLORE_DATA;
 
   public readonly order = 200;
-
-  public async isCompatible(context: EmbeddableApiContext): Promise<boolean> {
-    return await super.isCompatible(context);
-  }
 }
