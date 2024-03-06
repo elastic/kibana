@@ -46,7 +46,7 @@ export const FleetStatusProvider: React.FC<{
     ...defaultFleetStatus,
     enabled: config.agents.enabled,
     isLoading,
-    isReady: (!isLoading && data?.isReady) ?? false,
+    isReady: (!isLoading && data?.isReady) ?? defaultFleetStatus?.isReady ?? false,
     missingRequirements: data?.missing_requirements,
     missingOptionalFeatures: data?.missing_optional_features,
     isSecretsStorageEnabled: data?.is_secrets_storage_enabled,
