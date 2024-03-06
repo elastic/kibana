@@ -137,7 +137,9 @@ export const AlertsPopover = () => {
       pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
       const { logsExplorerState } = pageState.context;
-      const dataView = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
+      const dataView = hydrateDataSourceSelection(
+        logsExplorerState.dataSourceSelection
+      ).toDataviewSpec();
       const query =
         logsExplorerState?.query && 'query' in logsExplorerState.query
           ? String(logsExplorerState.query.query)
@@ -206,7 +208,7 @@ export const AlertsPopover = () => {
   }
 
   if (items.length > 0) {
-    items.push(<EuiHorizontalRule margin="none" />);
+    items.push(<EuiHorizontalRule key="horizontalRule" margin="none" />);
   }
 
   items.push(
