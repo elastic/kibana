@@ -40,6 +40,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { sloSettings } from './saved_objects/slo_settings';
 import { SloOrphanSummaryCleanupTask } from './services/slo/tasks/orphan_summary_cleanup_task';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
@@ -342,6 +343,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     core.savedObjects.registerType(slo);
+    core.savedObjects.registerType(sloSettings);
     core.savedObjects.registerType(threshold);
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {

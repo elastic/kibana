@@ -22,6 +22,7 @@ export const SLO_CREATE_PATH = '/slos/create' as const;
 export const SLO_EDIT_PATH = '/slos/edit/:sloId' as const;
 export const SLOS_OUTDATED_DEFINITIONS_PATH = '/slos/outdated-definitions' as const;
 export const CASES_PATH = '/cases' as const;
+export const SETTINGS_PATH = '/slos/settings' as const;
 
 export const paths = {
   observability: {
@@ -31,6 +32,7 @@ export const paths = {
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
     ruleDetails: (ruleId: string) => `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(ruleId)}`,
     slos: `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}`,
+    slosSettings: `${OBSERVABILITY_BASE_PATH}${SETTINGS_PATH}`,
     slosWelcome: `${OBSERVABILITY_BASE_PATH}${SLOS_WELCOME_PATH}`,
     slosOutdatedDefinitions: `${OBSERVABILITY_BASE_PATH}${SLOS_OUTDATED_DEFINITIONS_PATH}`,
     sloCreate: `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}`,

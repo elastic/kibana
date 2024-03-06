@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './duration';
-export * from './indicators';
-export * from './time_window';
-export * from './slo';
-export * from './settings';
+import * as t from 'io-ts';
+
+export const sloSettingsSchema = t.type({
+  useAllRemoteClusters: t.boolean,
+  selectedRemoteClusters: t.array(t.string),
+});

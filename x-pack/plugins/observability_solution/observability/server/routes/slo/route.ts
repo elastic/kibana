@@ -13,17 +13,22 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSloDefinitionsParamsSchema,
-  findSLOParamsSchema,
   findSLOGroupsParamsSchema,
+  findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   resetSLOParamsSchema,
+  sloSettingsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
+import * as t from 'io-ts';
+
+import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../../saved_objects/slo_settings';
 import type { IndicatorTypes } from '../../domain/models';
+import { SloSettings } from '../../domain/models';
 import {
   CreateSLO,
   DefaultSummaryClient,
@@ -32,10 +37,10 @@ import {
   DeleteSLO,
   DeleteSLOInstances,
   FindSLO,
+  FindSLOGroups,
   GetSLO,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
-  FindSLOGroups,
 } from '../../services/slo';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
@@ -540,7 +545,59 @@ const getPreviewData = createObservabilityServerRoute({
   },
 });
 
+const getSloSettings = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slo/settings',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  handler: async ({ context }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    try {
+      const object = await soClient.get<SloSettings>(SO_SLO_SETTINGS_TYPE, sloSettingsObjectId);
+      return object.attributes;
+    } catch (e) {
+      return {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: [],
+      };
+    }
+  },
+});
+
+const putSloSettings = createObservabilityServerRoute({
+  endpoint: 'PUT /internal/observability/slo/settings',
+  options: {
+    tags: ['access:slo_write'],
+    access: 'internal',
+  },
+  params: t.type({
+    body: sloSettingsSchema,
+  }),
+  handler: async ({ context, params }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    try {
+      const object = await soClient.create<SloSettings>(SO_SLO_SETTINGS_TYPE, params.body, {
+        id: sloSettingsObjectId,
+        overwrite: true,
+      });
+      return object.attributes;
+    } catch (e) {
+      return {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: [],
+      };
+    }
+  },
+});
+
 export const sloRouteRepository = {
+  ...getSloSettings,
+  ...putSloSettings,
   ...createSLORoute,
   ...inspectSLORoute,
   ...deleteSLORoute,

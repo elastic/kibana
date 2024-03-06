@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -37,6 +38,7 @@ import {
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
+  SETTINGS_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
@@ -135,6 +137,13 @@ export const routes = {
   [ALERT_DETAIL_PATH]: {
     handler: () => {
       return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  [SETTINGS_PATH]: {
+    handler: () => {
+      return <SloSettingsPage />;
     },
     params: {},
     exact: true,

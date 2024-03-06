@@ -43,6 +43,15 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'Add integrations',
               })}
             </EuiHeaderLink>
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/observability/slos/settings')}
+              iconType="gear"
+            >
+              {i18n.translate('xpack.observability.home.addData', {
+                defaultMessage: 'Settings',
+              })}
+            </EuiHeaderLink>
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>
