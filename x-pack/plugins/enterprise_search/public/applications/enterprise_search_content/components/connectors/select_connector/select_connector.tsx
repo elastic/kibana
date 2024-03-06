@@ -37,18 +37,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   CONNECTOR_CLIENTS_TYPE,
   CONNECTOR_NATIVE_TYPE,
-  INGESTION_METHOD_IDS,
 } from '../../../../../../common/constants';
 
 import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
 import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { parseQueryParams } from '../../../../shared/query_params';
 
-import { NEW_INDEX_METHOD_PATH, NEW_INDEX_PATH } from '../../../routes';
+import { NEW_CONNECTOR_PATH, NEW_INDEX_PATH } from '../../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 
 import { CONNECTORS } from '../../search_index/connector/constants';
@@ -345,9 +343,7 @@ export const SelectConnector: React.FC = () => {
                       );
                     }
                     KibanaLogic.values.navigateToUrl(
-                      `${generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-                        type: INGESTION_METHOD_IDS.CONNECTOR,
-                      })}?${queryParam.toString()}`
+                      `${NEW_CONNECTOR_PATH}?${queryParam.toString()}`
                     );
                   }}
                   documentationUrl={connector.docsUrl}

@@ -25,14 +25,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
-
-import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import {
-  NEW_INDEX_METHOD_PATH,
+  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH,
   NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
@@ -209,9 +206,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                   fill
                   onClick={() => {
                     KibanaLogic.values.navigateToUrl(
-                      generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-                        type: INGESTION_METHOD_IDS.CRAWLER,
-                      })
+                      NEW_CRAWLER_PATH
                     );
                   }}
                 >

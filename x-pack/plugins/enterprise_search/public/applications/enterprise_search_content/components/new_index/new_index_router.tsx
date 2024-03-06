@@ -11,7 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   NEW_INDEX_PATH,
-  NEW_INDEX_METHOD_PATH,
+  NEW_API_PATH,
 } from '../../routes';
 
 import { NewIndex } from './new_index';
@@ -23,8 +23,8 @@ export const NewIndexRouter: React.FC = () => {
       <Route path={NEW_INDEX_PATH} exact>
         <NewIndex />
       </Route>
-      <Route path={NEW_INDEX_METHOD_PATH} exact>
-        <NewSearchIndexPage />
+      <Route path={NEW_API_PATH} exact>
+        <NewSearchIndexPage type="api"/>
       </Route>
     </Routes>
   );

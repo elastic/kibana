@@ -133,8 +133,7 @@ const getConnectorModeBadge = (isNative?: boolean) => {
   return undefined;
 };
 
-export const NewSearchIndexPage: React.FC = () => {
-  const type = decodeURIComponent(useParams<{ type: string }>().type);
+export const NewSearchIndexPage: React.FC = ({type}) => {
   const { search } = useLocation();
   const { service_type: inputServiceType, connector_type: inputConnectorType } =
     parseQueryParams(search);

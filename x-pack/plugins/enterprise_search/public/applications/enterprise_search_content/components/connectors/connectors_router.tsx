@@ -9,14 +9,22 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { NEW_INDEX_SELECT_CONNECTOR_PATH} from '../../routes';
+import { CONNECTORS_PATH, NEW_CRAWLER_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH, NEW_CONNECTOR_PATH} from '../../routes';
 import { SelectConnector } from './select_connector/select_connector';
+import { NewSearchIndexPage } from '../new_index/new_search_index_page';
+import { Connectors } from './connectors';
 
 export const ConnectorsRouter: React.FC = () => {
   return (
     <Routes>
       <Route path={NEW_INDEX_SELECT_CONNECTOR_PATH}>
         <SelectConnector />
+      </Route>
+      <Route path={NEW_CONNECTOR_PATH}>
+        <NewSearchIndexPage type="connector"/>
+      </Route>
+      <Route path={CONNECTORS_PATH}>
+        <Connectors isCrawler={false} />
       </Route>
     </Routes>
   );
