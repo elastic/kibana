@@ -374,7 +374,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   };
 
   // show this when wildcard with matches operator
-  const getEventFilterWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
+  const getWildcardPerformanceWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
         {precedingWarning}{' '}
@@ -456,7 +456,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             value: wildcardValue,
           });
           actualWarning =
-            warning === WILDCARD_WARNING ? getEventFilterWildcardWarningInfo(warning) : warning;
+            warning === WILDCARD_WARNING ? getWildcardPerformanceWarningInfo(warning) : warning;
         }
 
         return (

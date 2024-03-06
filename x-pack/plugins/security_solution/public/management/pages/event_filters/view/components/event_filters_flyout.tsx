@@ -72,6 +72,8 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       getInitialExceptionFromEvent(data)
     );
 
+    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+
     const policiesIsLoading = useMemo<boolean>(
       () => policiesRequest.isLoading || policiesRequest.isRefetching,
       [policiesRequest]
@@ -122,6 +124,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     }, [isSubmittingData, policiesIsLoading, onClose]);
 
     const handleOnSubmit = useCallback(() => {
+      // do something here bubaz
       return submitData(exception, {
         onSuccess: (result) => {
           toasts.addSuccess(getCreationSuccessMessage(result));
@@ -230,6 +233,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
+        {showConfirmModal && confirmModal}
       </EuiFlyout>
     );
   }
