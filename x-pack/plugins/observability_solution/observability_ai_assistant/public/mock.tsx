@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
@@ -49,6 +49,7 @@ export const mockService: ObservabilityAIAssistantService = {
     openNewConversation: noop,
     predefinedConversation$: new Observable(),
   },
+  navigate: async () => of(),
 };
 
 function createSetupContract(): ObservabilityAIAssistantPublicSetup {

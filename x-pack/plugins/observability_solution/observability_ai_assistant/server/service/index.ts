@@ -13,7 +13,10 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntryRole, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import {
+  KnowledgeBaseEntryRole,
+  ObservabilityAIAssistantScreenContextRequest,
+} from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
@@ -291,7 +294,7 @@ export class ObservabilityAIAssistantService {
     resources,
     client,
   }: {
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;

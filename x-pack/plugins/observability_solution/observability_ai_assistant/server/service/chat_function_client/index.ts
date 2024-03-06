@@ -10,13 +10,13 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
 import {
-  type ContextRegistry,
   FunctionVisibility,
-  type RegisterContextDefinition,
   type ContextDefinition,
+  type ContextRegistry,
   type FunctionResponse,
+  type RegisterContextDefinition,
 } from '../../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContext } from '../../../common/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type { FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
 
@@ -35,8 +35,12 @@ export class ChatFunctionClient {
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
-  constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContext[]) {
+  private readonly actions: Required<ObservabilityAIAssistantScreenContextRequest>['actions'];
+
+  constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContextRequest[]) {
     const allData = compact(screenContexts.flatMap((context) => context.data));
+
+    this.actions = compact(screenContexts.flatMap((context) => context.actions));
 
     if (allData.length) {
       this.registerFunction(
@@ -74,6 +78,10 @@ export class ChatFunctionClient {
         }
       );
     }
+
+    this.actions.forEach((action) => {
+      this.validators.set(action.name, ajv.compile(action.parameters));
+    });
   }
 
   registerFunction: RegisterFunction = (definition, respond) => {
@@ -85,7 +93,7 @@ export class ChatFunctionClient {
     this.contextRegistry.set(context.name, context);
   };
 
-  private validate(name: string, parameters: unknown) {
+  validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
     const result = validator(parameters);
     if (!result) {
@@ -95,6 +103,10 @@ export class ChatFunctionClient {
 
   getContexts(): ContextDefinition[] {
     return Array.from(this.contextRegistry.values());
+  }
+
+  hasAction(name: string) {
+    return this.actions.find((action) => action.name === name);
   }
 
   getFunctions({
@@ -115,6 +127,10 @@ export class ChatFunctionClient {
     });
 
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
+  }
+
+  getActions() {
+    return this.actions;
   }
 
   hasFunction(name: string): boolean {

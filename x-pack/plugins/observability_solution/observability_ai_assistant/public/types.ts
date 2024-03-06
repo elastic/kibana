@@ -9,7 +9,10 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
-import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+import type {
+  MessageAddEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../common/conversation_complete';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -47,7 +50,7 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
@@ -80,6 +83,7 @@ export interface ObservabilityAIAssistantService {
   setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
+  navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
