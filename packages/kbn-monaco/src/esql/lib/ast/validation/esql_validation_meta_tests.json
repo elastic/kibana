@@ -3551,11 +3551,11 @@
       "error": true
     },
     {
-      "query": "from a_index | where count_distinct(stringField)",
+      "query": "from a_index | where count_distinct(stringField, numberField)",
       "error": true
     },
     {
-      "query": "from a_index | where count_distinct(stringField) > 0",
+      "query": "from a_index | where count_distinct(stringField, numberField) > 0",
       "error": true
     },
     {
@@ -4627,19 +4627,19 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = count_distinct(stringField)",
+      "query": "from a_index | eval var = count_distinct(stringField, numberField)",
       "error": true
     },
     {
-      "query": "from a_index | eval var = count_distinct(stringField) > 0",
+      "query": "from a_index | eval var = count_distinct(stringField, numberField) > 0",
       "error": true
     },
     {
-      "query": "from a_index | eval count_distinct(stringField)",
+      "query": "from a_index | eval count_distinct(stringField, numberField)",
       "error": true
     },
     {
-      "query": "from a_index | eval count_distinct(stringField) > 0",
+      "query": "from a_index | eval count_distinct(stringField, numberField) > 0",
       "error": true
     },
     {
@@ -8227,27 +8227,27 @@
       "error": false
     },
     {
-      "query": "from a_index | stats var = count_distinct(stringField)",
+      "query": "from a_index | stats var = count_distinct(stringField, numberField)",
       "error": false
     },
     {
-      "query": "from a_index | stats count_distinct(stringField)",
+      "query": "from a_index | stats count_distinct(stringField, numberField)",
       "error": false
     },
     {
-      "query": "from a_index | stats var = round(count_distinct(stringField))",
+      "query": "from a_index | stats var = round(count_distinct(stringField, numberField))",
       "error": false
     },
     {
-      "query": "from a_index | stats round(count_distinct(stringField))",
+      "query": "from a_index | stats round(count_distinct(stringField, numberField))",
       "error": false
     },
     {
-      "query": "from a_index | stats var = round(count_distinct(stringField)) + count_distinct(stringField)",
+      "query": "from a_index | stats var = round(count_distinct(stringField, numberField)) + count_distinct(stringField, numberField)",
       "error": false
     },
     {
-      "query": "from a_index | stats round(count_distinct(stringField)) + count_distinct(stringField)",
+      "query": "from a_index | stats round(count_distinct(stringField, numberField)) + count_distinct(stringField, numberField)",
       "error": false
     },
     {
@@ -8604,6 +8604,22 @@
     },
     {
       "query": "from a_index | eval numberField = \"5\"",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | keep ```round(numberField) + 1`` + 1`",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | keep ```````round(numberField) + 1```` + 1`` + 1`",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | eval ```````round(numberField) + 1```` + 1`` + 1` + 1 | keep ```````````````round(numberField) + 1```````` + 1```` + 1`` + 1`",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | eval ```````round(numberField) + 1```` + 1`` + 1` + 1 | eval ```````````````round(numberField) + 1```````` + 1```` + 1`` + 1` + 1 | keep ```````````````````````````````round(numberField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`",
       "error": false
     }
   ]

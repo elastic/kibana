@@ -60,6 +60,11 @@ const policies = [
   },
 ];
 
+const NESTING_LEVELS = 4;
+const NESTED_DEPTHS = Array(NESTING_LEVELS)
+  .fill(0)
+  .map((_, i) => i + 1);
+
 function getCallbackMocks() {
   return {
     getFieldsFor: jest.fn(async ({ query }) => {
@@ -953,7 +958,7 @@ describe('validation logic', () => {
       ]);
     }
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       for (const evenOp of ['-', '+']) {
         for (const oddOp of ['-', '+']) {
           // This builds a combination of +/- operators
@@ -1201,7 +1206,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS not NULL`, []);
     }
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       for (const evenOp of ['-', '+']) {
         for (const oddOp of ['-', '+']) {
           // This builds a combination of +/- operators
@@ -1723,7 +1728,7 @@ describe('validation logic', () => {
       'At least one aggregation function required in [STATS], found [numberField+1]',
     ]);
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       const moreBuiltinWrapping = Array(nesting).fill('+1').join('');
       testErrorsAndWarnings(`from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
       testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
@@ -2229,6 +2234,52 @@ describe('validation logic', () => {
       [],
       ['Column [numberField] of type number has been overwritten as new type: string']
     );
+  });
+
+  describe('quoting and escaping expressions', () => {
+    function getTicks(amount: number) {
+      return Array(amount).fill('`').join('');
+    }
+    /**
+     * Given an initial quoted expression, build a new quoted expression
+     * that appends as many +1 to the previous one based on the nesting level
+     * i.e. given the expression `round(...) + 1` returns
+     * ```round(...) + 1`` + 1` (for nesting 1)
+     * ```````round(...) + 1```` + 1`` + 1` (for nesting 2)
+     *  etc...
+     * Note how backticks double for each level + wrapping quotes
+     * The general rule follows an exponential curve given a nesting N:
+     * (`){ (2^N)-1 } ticks expression (`){ 2^N-1 } +1 (`){ 2^N-2 } +1 ... +1
+     *
+     * Mind that nesting arg here is equivalent to N-1
+     */
+    function buildNestedExpression(expr: string, nesting: number) {
+      const openingTicks = getTicks(Math.pow(2, nesting + 1) - 1);
+      const firstClosingBatch = getTicks(Math.pow(2, nesting));
+      const additionalPlusOneswithTicks = Array(nesting)
+        .fill(' + 1')
+        .reduce((acc, plusOneAppended, i) => {
+          // workout how many ticks to add: 2^N-i
+          const ticks = getTicks(Math.pow(2, nesting - 1 - i));
+          return `${acc}${plusOneAppended}${ticks}`;
+        }, '');
+      const ret = `${openingTicks}${expr}${firstClosingBatch}${additionalPlusOneswithTicks}`;
+      return ret;
+    }
+
+    for (const nesting of NESTED_DEPTHS) {
+      // start with a quotable expression
+      const expr = 'round(numberField) + 1';
+      const startingQuery = `from a_index | eval ${expr}`;
+      // now pipe for each nesting level a new eval command that appends a +1 to the previous quoted expression
+      const finalQuery = `${startingQuery} | ${Array(nesting)
+        .fill('')
+        .map((_, i) => {
+          return `eval ${buildNestedExpression(expr, i)} + 1`;
+        })
+        .join(' | ')} | keep ${buildNestedExpression(expr, nesting)}`;
+      testErrorsAndWarnings(finalQuery, []);
+    }
   });
 
   describe('callbacks', () => {

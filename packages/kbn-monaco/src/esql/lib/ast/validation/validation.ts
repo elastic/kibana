@@ -227,7 +227,7 @@ function validateFunctionColumnArg(
           }
           // do not validate any further for now, only count() accepts wildcard as args...
         } else {
-          if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+          if (!isEqualType(actualArg, argDef, references, parentCommand, nameHit)) {
             // guaranteed by the check above
             const columnHit = getColumnHit(nameHit!, references);
             messages.push(
@@ -869,7 +869,7 @@ export async function validateAst(
     });
   }
 
-  const variables = collectVariables(ast, availableFields);
+  const variables = collectVariables(ast, availableFields, queryString);
   // notify if the user is rewriting a column as variable with another type
   messages.push(...validateFieldsShadowing(availableFields, variables));
   messages.push(...validateUnsupportedTypeFields(availableFields));
@@ -881,6 +881,7 @@ export async function validateAst(
       policies: availablePolicies,
       variables,
       metadataFields: availableMetadataFields,
+      query: queryString,
     });
     messages.push(...commandMessages);
   }
