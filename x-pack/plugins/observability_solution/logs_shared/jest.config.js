@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/logs_shared'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/logs_shared',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/logs_shared'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/logs_shared',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/logs_shared/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/plugins/observability_solution/logs_shared/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

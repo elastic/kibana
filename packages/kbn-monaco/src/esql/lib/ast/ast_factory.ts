@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   type ShowInfoContext,
   type ShowFunctionsContext,
@@ -25,9 +26,9 @@ import {
   type ShowCommandContext,
   type EnrichCommandContext,
   type WhereCommandContext,
-  esql_parser,
+  default as esql_parser,
 } from '../../antlr/esql_parser';
-import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_parser_listener';
+import { default as ESQLParserListener } from '../../antlr/esql_parser_listener';
 import { createCommand, createFunction, createOption, createLiteral } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
@@ -62,7 +63,7 @@ export class AstListener implements ESQLParserListener {
     const commandAst = createCommand('show', ctx);
 
     this.ast.push(commandAst);
-    commandAst.text = ctx.text;
+    commandAst.text = ctx.getText();
     commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
   }
 
@@ -75,7 +76,7 @@ export class AstListener implements ESQLParserListener {
     const commandAst = createCommand('show', ctx);
     this.ast.push(commandAst);
     // update the text
-    commandAst.text = ctx.text;
+    commandAst.text = ctx.getText();
     commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
   }
 
@@ -119,7 +120,10 @@ export class AstListener implements ESQLParserListener {
     const metadataContent =
       metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
     if (metadataContent) {
-      const option = createOption(metadataContent.METADATA().text.toLowerCase(), metadataContent);
+      const option = createOption(
+        metadataContent.METADATA().getText().toLowerCase(),
+        metadataContent
+      );
       commandAst.args.push(option);
       option.args.push(...collectAllColumnIdentifiers(metadataContent));
     }
@@ -142,13 +146,13 @@ export class AstListener implements ESQLParserListener {
   exitStatsCommand(ctx: StatsCommandContext) {
     const command = createCommand('stats', ctx);
     this.ast.push(command);
-    const fields = ctx.fields();
+
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFieldsStatements(fields[0]));
+      command.args.push(...collectAllFieldsStatements(ctx.fields(0)));
     }
     if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx._stats ? fields[1] : fields[0]));
+      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
     }
   }
 
@@ -159,7 +163,7 @@ export class AstListener implements ESQLParserListener {
   exitLimitCommand(ctx: LimitCommandContext) {
     const command = createCommand('limit', ctx);
     this.ast.push(command);
-    if (ctx.tryGetToken(esql_parser.INTEGER_LITERAL, 0)) {
+    if (ctx.getToken(esql_parser.INTEGER_LITERAL, 0)) {
       const literal = createLiteral('number', ctx.INTEGER_LITERAL());
       if (literal) {
         command.args.push(literal);
@@ -174,7 +178,7 @@ export class AstListener implements ESQLParserListener {
   exitSortCommand(ctx: SortCommandContext) {
     const command = createCommand('sort', ctx);
     this.ast.push(command);
-    command.args.push(...visitOrderExpression(ctx.orderExpression()));
+    command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
   }
 
   /**
@@ -204,7 +208,7 @@ export class AstListener implements ESQLParserListener {
   exitRenameCommand(ctx: RenameCommandContext) {
     const command = createCommand('rename', ctx);
     this.ast.push(command);
-    command.args.push(...visitRenameClauses(ctx.renameClause()));
+    command.args.push(...visitRenameClauses(ctx.renameClause_list()));
   }
 
   /**
@@ -253,5 +257,21 @@ export class AstListener implements ESQLParserListener {
     const command = createCommand('enrich', ctx);
     this.ast.push(command);
     command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
+  }
+
+  enterEveryRule(ctx: ParserRuleContext): void {
+    // method not implemented, added to satisfy interface expectation
+  }
+
+  visitErrorNode(node: ErrorNode): void {
+    // method not implemented, added to satisfy interface expectation
+  }
+
+  visitTerminal(node: TerminalNode): void {
+    // method not implemented, added to satisfy interface expectation
+  }
+
+  exitEveryRule(ctx: ParserRuleContext): void {
+    // method not implemented, added to satisfy interface expectation
   }
 }

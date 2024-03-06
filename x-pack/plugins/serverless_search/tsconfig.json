@@ -43,5 +43,6 @@
     "@kbn/code-editor",
     "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/core-logging-server-mocks",
   ]
 }
