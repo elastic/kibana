@@ -38,9 +38,14 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
+
 import { SloPlugin } from './plugin';
 
 export interface SloPublicPluginsSetup {
@@ -59,12 +64,15 @@ export interface SloPublicPluginsSetup {
 
 export interface SloPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
+  cases: CasesUiStart;
   cloud?: CloudStart;
   dataViewEditor: DataViewEditorStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
   share: SharePluginStart;
   licensing: LicensingPluginStart;
   embeddable: EmbeddableStart;
@@ -78,6 +86,7 @@ export interface SloPublicPluginsStart {
   lens: LensPublicStart;
   charts: ChartsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

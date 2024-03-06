@@ -22,7 +22,7 @@ export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocato
 
   public readonly getLocation = async (slo: SloEditLocatorParams) => {
     return {
-      app: 'observability',
+      app: 'slo',
       path: setStateToKbnUrl<SloEditParams>(
         '_a',
         {

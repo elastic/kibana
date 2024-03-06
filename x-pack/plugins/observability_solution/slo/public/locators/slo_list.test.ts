@@ -12,7 +12,7 @@ describe('SloListLocator', () => {
 
   it("returns the correct url with the default search state when no 'kqlQuery' provided", async () => {
     const location = await locator.getLocation({});
-    expect(location.app).toEqual('observability');
+    expect(location.app).toEqual('slo');
     expect(location.path).toMatchInlineSnapshot(
       `"/slos?search=(filters:!(),groupBy:ungrouped,kqlQuery:'',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
     );

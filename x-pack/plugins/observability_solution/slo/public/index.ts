@@ -21,4 +21,4 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => {
   return new SloPlugin(initializerContext);
 };
-export type { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
+export type { SloPublicPluginsSetup, SloPublicPluginsStart, SloPublicStart } from './types';

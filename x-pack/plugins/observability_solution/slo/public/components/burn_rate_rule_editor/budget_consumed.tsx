@@ -41,14 +41,12 @@ export function BudgetConsumed({
     <EuiFormRow
       label={
         <>
-          {i18n.translate('xpack.observability.slo.rules.budgetConsumed.rowLabel', {
+          {i18n.translate('xpack.slo.rules.budgetConsumed.rowLabel', {
             defaultMessage: '% Budget consumed',
           })}{' '}
           <EuiIconTip
             position="top"
-            content={i18n.translate('xpack.observability.slo.rules.budgetConsumed.tooltip', {
-              defaultMessage: 'How much budget is consumed before the first alert is fired.',
-            })}
+            content={i18n.translate('xpack.slo.budgetConsumed.', { defaultMessage: '' })}
           />
         </>
       }

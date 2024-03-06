@@ -9,7 +9,7 @@ import {
   CalendarAlignedTimeWindow,
   RollingTimeWindow,
   TimeWindow,
-} from '../../../domain/models/time_window';
+} from '../../domain/models/time_window';
 import { ninetyDays, oneMonth, oneWeek, sevenDays, thirtyDays } from './duration';
 
 export function sevenDaysRolling(): RollingTimeWindow {

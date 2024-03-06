@@ -53,9 +53,9 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('xpack.sloEmbeddable.config.sloSelector.headerTitle', {
+          {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
             defaultMessage: 'SLO configuration',
-          })}
+          })}{' '}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -85,7 +85,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           <>
             <EuiSpacer />
             <EuiSwitch
-              label={i18n.translate('xpack.sloConfiguration.euiSwitch.showAllGroupByLabel', {
+              label={i18n.translate('xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel', {
                 defaultMessage: 'Show all related group-by instances',
               })}
               checked={showAllGroupByInstances}

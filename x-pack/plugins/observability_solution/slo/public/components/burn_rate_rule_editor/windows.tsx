@@ -166,19 +166,13 @@ function Window({
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate('xpack.observability.slo.rules.actionGroupSelectorLabel', {
-              defaultMessage: 'Action Group',
-            })}
-          >
+          <EuiFormRow label={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}>
             <EuiSelect
               data-test-subj="sloBurnRateActionGroupSelctor"
               options={ACTION_GROUP_OPTIONS}
               value={actionGroup}
               onChange={onActionGroupChange}
-              aria-label={i18n.translate('xpack.observability.slo.rules.actionGroupSelectorLabel', {
-                defaultMessage: 'Action Group',
-              })}
+              aria-label={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -190,12 +184,8 @@ function Window({
             style={{ marginBottom: '-1em' }}
             onClick={() => onDelete(id)}
             disabled={disableDelete}
-            title={i18n.translate('xpack.observability.slo.rules.deleteWindowLabel', {
-              defaultMessage: 'Delete window',
-            })}
-            aria-label={i18n.translate('xpack.observability.slo.rules.deleteWindowLabel', {
-              defaultMessage: 'Delete window',
-            })}
+            title={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}
+            aria-label={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -229,22 +219,8 @@ const getErrorBudgetExhaustionText = (
   budgetMode = false
 ) =>
   budgetMode
-    ? i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.budgetMode.text', {
-        defaultMessage:
-          '{formatedHours} hours until error budget exhaustion. The burn rate threshold is {burnRateThreshold}x.',
-        values: {
-          formatedHours: formattedHours,
-          burnRateThreshold: numeral(burnRateThreshold).format('0[.0]'),
-        },
-      })
-    : i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.burnRateMode.text', {
-        defaultMessage:
-          '{formatedHours} hours until error budget exhaustion. {budgetConsumed} budget consumed before first alert.',
-        values: {
-          formatedHours: formattedHours,
-          budgetConsumed: numeral(budgetConsumed).format('0.00%'),
-        },
-      });
+    ? i18n.translate('xpack.slo.getErrorBudgetExhaustionText.', { defaultMessage: '' })
+    : i18n.translate('xpack.slo.getErrorBudgetExhaustionText.', { defaultMessage: '' });
 
 export const createNewWindow = (
   slo?: SLOResponse | CreateSLOInput,
@@ -292,7 +268,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
     <>
       <EuiTitle size="xs">
         <h5>
-          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.defineMultipleBurnRateLabel', {
+          {i18n.translate('xpack.slo.burnRateRuleEditor.h5.defineMultipleBurnRateLabel', {
             defaultMessage: 'Define multiple burn rate windows',
           })}
         </h5>
@@ -325,7 +301,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
             iconType={'plusInCircleFilled'}
             onClick={handleAddWindow}
             isDisabled={windows.length === (totalNumberOfWindows || 4)}
-            aria-label={i18n.translate('xpack.observability.slo.rules.addWindowAriaLabel', {
+            aria-label={i18n.translate('xpack.slo.rules.addWindowAriaLabel', {
               defaultMessage: 'Add window',
             })}
           >
@@ -340,7 +316,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
             compressed
             onChange={handleModeChange}
             checked={!budgetMode}
-            label={i18n.translate('xpack.observability.slo.rules.useBurnRateModeLabel', {
+            label={i18n.translate('xpack.slo.rules.useBurnRateModeLabel', {
               defaultMessage: 'Burn rate mode',
             })}
           />

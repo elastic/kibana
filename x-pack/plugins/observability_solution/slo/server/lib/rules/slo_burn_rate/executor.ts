@@ -20,7 +20,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
@@ -235,7 +235,7 @@ function buildReason(
   windowDef: WindowSchema
 ) {
   if (instanceId === ALL_VALUE) {
-    return i18n.translate('xpack.observability.slo.alerting.burnRate.reason', {
+    return i18n.translate('xpack.slo.alerting.burnRate.reason', {
       defaultMessage:
         '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
       values: {
@@ -248,7 +248,7 @@ function buildReason(
       },
     });
   }
-  return i18n.translate('xpack.observability.slo.alerting.burnRate.reasonForInstanceId', {
+  return i18n.translate('xpack.slo.alerting.burnRate.reasonForInstanceId', {
     defaultMessage:
       '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate} for {instanceId}. Alert when above {burnRateThreshold} for both windows',
     values: {

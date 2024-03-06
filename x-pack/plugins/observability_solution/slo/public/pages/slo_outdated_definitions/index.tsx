@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+// import { HeaderMenu } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
-// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../common/locators/paths';
 import { SloListEmpty } from '../slos/components/slo_list_empty';

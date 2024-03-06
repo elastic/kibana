@@ -23,13 +23,13 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           {slo.summary.status === 'NO_DATA' && (
             <EuiToolTip
               position="top"
-              content={i18n.translate('xpack.observability.slo.sloStatusBadge.noDataTooltip', {
+              content={i18n.translate('xpack.slo.sloStatusBadge.noDataTooltip', {
                 defaultMessage:
                   'It may take some time before the data is aggregated and available.',
               })}
             >
               <EuiBadge color="default">
-                {i18n.translate('xpack.observability.slo.sloStatusBadge.noData', {
+                {i18n.translate('xpack.slo.sloStatusBadge.noData', {
                   defaultMessage: 'No data',
                 })}
               </EuiBadge>
@@ -37,21 +37,21 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           )}
           {slo.summary.status === 'HEALTHY' && (
             <EuiBadge color="success">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.healthy', {
+              {i18n.translate('xpack.slo.sloStatusBadge.healthy', {
                 defaultMessage: 'Healthy',
               })}
             </EuiBadge>
           )}
           {slo.summary.status === 'DEGRADING' && (
             <EuiBadge color="warning">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.degrading', {
+              {i18n.translate('xpack.slo.sloStatusBadge.degrading', {
                 defaultMessage: 'Degrading',
               })}
             </EuiBadge>
           )}
           {slo.summary.status === 'VIOLATED' && (
             <EuiBadge color="danger">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.violated', {
+              {i18n.translate('xpack.slo.sloStatusBadge.violated', {
                 defaultMessage: 'Violated',
               })}
             </EuiBadge>
@@ -64,7 +64,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           {/* Prevent badges from growing when inside an EuiFlexGroup by wrapping content with div */}
           <div>
             <EuiBadge color="default">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.forecasted', {
+              {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
                 defaultMessage: 'Forecasted',
               })}
             </EuiBadge>

@@ -26,8 +26,8 @@ import {
   MetricCustomIndicator,
   SLO,
   StoredSLO,
-} from '../../../domain/models';
-import { SO_SLO_TYPE } from '../../../saved_objects';
+} from '../../domain/models';
+import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';
 import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
 

@@ -26,22 +26,20 @@ export function SloResetConfirmationModal({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="sloResetConfirmationModal"
-      title={i18n.translate('xpack.observability.slo.resetConfirmationModal.title', {
+      title={i18n.translate('xpack.slo.resetConfirmationModal.title', {
         defaultMessage: 'Reset {name}?',
         values: { name },
       })}
-      cancelButtonText={i18n.translate(
-        'xpack.observability.slo.resetConfirmationModal.cancelButtonLabel',
-        { defaultMessage: 'Cancel' }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.observability.slo.resetConfirmationModal.resetButtonLabel',
-        { defaultMessage: 'Reset' }
-      )}
+      cancelButtonText={i18n.translate('xpack.slo.resetConfirmationModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.slo.resetConfirmationModal.resetButtonLabel', {
+        defaultMessage: 'Reset',
+      })}
       onCancel={onCancel}
       onConfirm={onConfirm}
     >
-      {i18n.translate('xpack.observability.slo.resetConfirmationModal.descriptionText', {
+      {i18n.translate('xpack.slo.resetConfirmationModal.descriptionText', {
         defaultMessage: 'Resetting this SLO will also regenerate the historical data.',
       })}
     </EuiConfirmModal>

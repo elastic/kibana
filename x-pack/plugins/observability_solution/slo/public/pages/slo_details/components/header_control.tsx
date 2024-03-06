@@ -10,15 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
 
+import type { RulesParams } from '@kbn/observability-plugin/public';
+import { rulesLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
-import { rulesLocatorID, sloFeatureId } from '../../../../common';
+import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/use_delete_slo';
-import type { RulesParams } from '../../../locators/rules';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 

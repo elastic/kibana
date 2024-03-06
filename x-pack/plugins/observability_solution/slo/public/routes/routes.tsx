@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useKibana } from '../utils/kibana_react';
 import { SlosPage } from '../pages/slos/slos';
 import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
@@ -19,38 +17,12 @@ import {
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
-  ROOT_PATH,
 } from '../../common/locators/paths';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 
-// Note: React Router DOM <Redirect> component was not working here
-// so I've recreated this simple version for this purpose.
-function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: string }) {
-  const {
-    application: { navigateToApp },
-  } = useKibana().services;
-  const history = useHistory();
-  const { search, hash } = useLocation();
-
-  if (redirectToApp) {
-    navigateToApp(redirectToApp, { path: `/${search}${hash}`, replace: true });
-  } else if (to) {
-    history.replace(to);
-  }
-  return null;
-}
-
 export const routes = {
-  [ROOT_PATH]: {
-    handler: () => {
-      return <SimpleRedirect to={SLOS_PATH} />;
-    },
-    params: {},
-    exact: true,
-  },
   [SLOS_PATH]: {
     handler: () => {
-      console.log('!!Slos Page');
       return <SlosPage />;
     },
     params: {},

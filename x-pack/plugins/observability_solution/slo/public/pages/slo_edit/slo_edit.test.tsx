@@ -15,13 +15,12 @@ import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { useCreateSlo } from '../../hooks/slo/use_create_slo';
-import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
-import { useCreateRule } from '../../hooks/use_create_rule';
-import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useCreateSlo } from '../../hooks/use_create_slo';
+import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useUpdateSlo } from '../../hooks/use_update_slo';
+import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -36,13 +35,12 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
-jest.mock('../../hooks/use_fetch_data_views');
-jest.mock('../../hooks/slo/use_fetch_slo_details');
-jest.mock('../../hooks/slo/use_create_slo');
-jest.mock('../../hooks/slo/use_update_slo');
-jest.mock('../../hooks/use_create_rule');
-jest.mock('../../hooks/slo/use_fetch_apm_suggestions');
-jest.mock('../../hooks/slo/use_capabilities');
+jest.mock('../../hooks/use_fetch_slo_details');
+jest.mock('../../hooks/use_create_slo');
+jest.mock('../../hooks/use_update_slo');
+jest.mock('@kbn/observability-plugin/public');
+jest.mock('../../hooks/use_fetch_apm_suggestions');
+jest.mock('../../hooks/use_capabilities');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -204,7 +202,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 
@@ -227,7 +225,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 
@@ -258,7 +256,7 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
       });
     });
 
@@ -423,7 +421,7 @@ describe('SLO Edit Page', () => {
           fireEvent.click(getByTestId('sloFormSubmitButton'));
         });
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
         });
       });
     });

@@ -29,8 +29,7 @@ export interface SloRouteCreateOptions {
   };
 }
 
-// export type AbstractObservabilityServerRouteRepository = ServerRouteRepository;
+export type AbstractSloServerRouteRepository = ServerRouteRepository;
 
-// export type ObservabilityAPIReturnType<
-//   TEndpoint extends EndpointOf<ObservabilityServerRouteRepository>
-// > = ReturnOf<ObservabilityServerRouteRepository, TEndpoint>;
+export type ObservabilityAPIReturnType<TEndpoint extends EndpointOf<SloServerRouteRepository>> =
+  ReturnOf<SloServerRouteRepository, TEndpoint>;

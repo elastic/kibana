@@ -11,7 +11,7 @@ import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
 import { ValidationBurnRateRuleResult } from './validation';
@@ -60,7 +60,7 @@ export function BurnRateRuleEditor(props: Props) {
     <>
       <EuiTitle size="xs">
         <h5>
-          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.chooseASLOToMonitorLabel', {
+          {i18n.translate('xpack.slo.burnRateRuleEditor.h5.chooseASLOToMonitorLabel', {
             defaultMessage: 'Choose a SLO to monitor',
           })}
         </h5>
@@ -73,11 +73,7 @@ export function BurnRateRuleEditor(props: Props) {
           <EuiCallOut
             color="warning"
             size="s"
-            title={i18n.translate('xpack.observability.slo.rules.groupByMessage', {
-              defaultMessage:
-                'The SLO you selected has been created with a group-by on "{groupByField}". This rule will monitor and generate an alert for every instance found in the group-by field.',
-              values: { groupByField: selectedSlo.groupBy },
-            })}
+            title={i18n.translate('xpack.slo.burnRateRuleEditor.', { defaultMessage: '' })}
           />
         </>
       )}

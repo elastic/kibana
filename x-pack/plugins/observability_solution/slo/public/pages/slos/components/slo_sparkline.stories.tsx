@@ -8,6 +8,7 @@
 import { HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import {
   DEGRADING_FAST_ROLLING_SLO,
   HEALTHY_RANDOM_ROLLING_SLO,
@@ -16,7 +17,6 @@ import {
   historicalSummaryData,
   NO_DATA_TO_HEALTHY_ROLLING_SLO,
 } from '../../../data/slo/historical_summary_data';
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { Props, SloSparkline as Component } from './slo_sparkline';
 
 export default {

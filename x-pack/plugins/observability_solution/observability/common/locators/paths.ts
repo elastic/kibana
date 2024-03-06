@@ -15,8 +15,6 @@ export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been m
 export const RULES_PATH = '/alerts/rules' as const;
 export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
-export const SLOS_PATH = '/slos' as const;
-export const SLO_DETAIL_PATH = '/slos/:sloId' as const;
 export const CASES_PATH = '/cases' as const;
 
 export const paths = {

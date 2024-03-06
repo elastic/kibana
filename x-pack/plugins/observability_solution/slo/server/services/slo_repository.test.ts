@@ -11,7 +11,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { sloSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLO, StoredSLO } from '../domain/models';
-import { SLOIdConflict, SLONotFound } from '../../errors';
+import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { aStoredSLO, createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';

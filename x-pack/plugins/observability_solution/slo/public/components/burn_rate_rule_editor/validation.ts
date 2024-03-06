@@ -66,29 +66,23 @@ const isValidLongWindowDuration = (duration: Duration): boolean => {
   return unit === 'h' && value >= MIN_DURATION_IN_HOURS && value <= MAX_DURATION_IN_HOURS;
 };
 
-const SLO_REQUIRED = i18n.translate('xpack.observability.slo.rules.burnRate.errors.sloRequired', {
+const SLO_REQUIRED = i18n.translate('xpack.slo.rules.burnRate.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
 
 const LONG_WINDOW_DURATION_REQUIRED = i18n.translate(
-  'xpack.observability.slo.rules.burnRate.errors.windowDurationRequired',
+  'xpack.slo.rules.burnRate.errors.windowDurationRequired',
   { defaultMessage: 'The lookback period is required.' }
 );
 
-const LONG_WINDOW_DURATION_INVALID = i18n.translate(
-  'xpack.observability.slo.rules.longWindow.errorText',
-  {
-    defaultMessage: 'The lookback period must be between 1 and 72 hours.',
-  }
-);
+const LONG_WINDOW_DURATION_INVALID = i18n.translate('xpack.slo.rules.longWindow.errorText', {
+  defaultMessage: 'The lookback period must be between 1 and 72 hours.',
+});
 
 const BURN_RATE_THRESHOLD_REQUIRED = i18n.translate(
-  'xpack.observability.slo.rules.burnRate.errors.burnRateThresholdRequired',
+  'xpack.slo.rules.burnRate.errors.burnRateThresholdRequired',
   { defaultMessage: 'Burn rate threshold is required.' }
 );
 
 const getInvalidThresholdValueError = (maxBurnRate: number) =>
-  i18n.translate('xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue', {
-    defaultMessage: 'Burn rate threshold must be between 0.01 and {maxBurnRate}.',
-    values: { maxBurnRate },
-  });
+  i18n.translate('xpack.slo.getInvalidThresholdValueError.', { defaultMessage: '' });

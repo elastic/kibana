@@ -39,7 +39,7 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
 
   const sortByOptions: Option[] = [
     {
-      label: i18n.translate('xpack.observability.slo.list.sortBy.sliValue', {
+      label: i18n.translate('xpack.slo.list.sortBy.sliValue', {
         defaultMessage: 'SLI value',
       }),
       checked: sortBy === 'sli_value',
@@ -47,14 +47,14 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
       onClick: () => {
         handleChangeSortBy({
           value: 'sli_value',
-          label: i18n.translate('xpack.observability.slo.list.sortBy.sliValue', {
+          label: i18n.translate('xpack.slo.list.sortBy.sliValue', {
             defaultMessage: 'SLI value',
           }),
         });
       },
     },
     {
-      label: i18n.translate('xpack.observability.slo.list.sortBy.sloStatus', {
+      label: i18n.translate('xpack.slo.list.sortBy.sloStatus', {
         defaultMessage: 'SLO status',
       }),
       checked: sortBy === 'status',
@@ -62,14 +62,14 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
       onClick: () => {
         handleChangeSortBy({
           value: 'status',
-          label: i18n.translate('xpack.observability.slo.list.sortBy.sloStatus', {
+          label: i18n.translate('xpack.slo.list.sortBy.sloStatus', {
             defaultMessage: 'SLO status',
           }),
         });
       },
     },
     {
-      label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
+      label: i18n.translate('xpack.slo.list.sortBy.errorBudgetConsumed', {
         defaultMessage: 'Error budget consumed',
       }),
       checked: sortBy === 'error_budget_consumed',
@@ -77,14 +77,14 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
       onClick: () => {
         handleChangeSortBy({
           value: 'error_budget_consumed',
-          label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
+          label: i18n.translate('xpack.slo.list.sortBy.errorBudgetConsumed', {
             defaultMessage: 'Error budget consumed',
           }),
         });
       },
     },
     {
-      label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetRemaining', {
+      label: i18n.translate('xpack.slo.list.sortBy.errorBudgetRemaining', {
         defaultMessage: 'Error budget remaining',
       }),
       checked: sortBy === 'error_budget_remaining',
@@ -92,7 +92,7 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
       onClick: () => {
         handleChangeSortBy({
           value: 'error_budget_remaining',
-          label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetRemaining', {
+          label: i18n.translate('xpack.slo.list.sortBy.errorBudgetRemaining', {
             defaultMessage: 'Error budget remaining',
           }),
         });
@@ -131,6 +131,6 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
   );
 }
 
-const SORT_BY_LABEL = i18n.translate('xpack.observability.slo.list.sortByTypeLabel', {
+const SORT_BY_LABEL = i18n.translate('xpack.slo.list.sortByTypeLabel', {
   defaultMessage: 'Sort by',
 });

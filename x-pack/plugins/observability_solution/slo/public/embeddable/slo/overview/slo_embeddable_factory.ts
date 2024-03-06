@@ -15,7 +15,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
-import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
+import { SloPublicPluginsStart, SloPublicStart } from '../../..';
 import type { SloEmbeddableInput } from './types';
 
 export const COMMON_SLO_GROUPING = [
@@ -36,10 +36,7 @@ export class SloOverviewEmbeddableFactoryDefinition
   public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
-    private getStartServices: CoreSetup<
-      ObservabilityPublicPluginsStart,
-      ObservabilityPublicStart
-    >['getStartServices']
+    private getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
   ) {}
 
   public async isEditable() {
@@ -76,13 +73,13 @@ export class SloOverviewEmbeddableFactoryDefinition
   }
 
   public getDescription() {
-    return i18n.translate('xpack.observability.sloEmbeddable.description', {
+    return i18n.translate('xpack.slo.sloEmbeddable.description', {
       defaultMessage: 'Get an overview of your SLO health',
     });
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.observability.sloEmbeddable.displayName', {
+    return i18n.translate('xpack.slo.sloEmbeddable.displayName', {
       defaultMessage: 'SLO Overview',
     });
   }

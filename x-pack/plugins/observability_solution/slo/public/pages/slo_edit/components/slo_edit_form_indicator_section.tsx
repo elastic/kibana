@@ -83,6 +83,6 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
   );
 }
 
-const indicatorLabel = i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
+const indicatorLabel = i18n.translate('xpack.slo.sloEdit.definition.sliType', {
   defaultMessage: 'Choose the SLI type',
 });

@@ -11,7 +11,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
 import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { SLO_ALERTS_EMBEDDABLE } from '../embeddable/slo/constants';
-import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '..';
+import { SloPublicPluginsStart, SloPublicStart } from '..';
 import { SloAlertsEmbeddableInput } from '../embeddable/slo/alerts/types';
 
 export const EDIT_SLO_ALERTS_ACTION = 'editSloAlertsPanelAction';
@@ -19,10 +19,7 @@ export interface EditSloAlertsPanelContext {
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
 }
 export function createEditSloAlertsPanelAction(
-  getStartServices: CoreSetup<
-    ObservabilityPublicPluginsStart,
-    ObservabilityPublicStart
-  >['getStartServices']
+  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EditSloAlertsPanelContext> {
   return {
     id: EDIT_SLO_ALERTS_ACTION,
@@ -31,7 +28,7 @@ export function createEditSloAlertsPanelAction(
       return 'pencil';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.observability.actions.editSloAlertsEmbeddableTitle', {
+      i18n.translate('xpack.slo.actions.editSloAlertsEmbeddableTitle', {
         defaultMessage: 'Edit configuration',
       }),
     async execute({ embeddable }) {

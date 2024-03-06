@@ -14,8 +14,9 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AlertsLocatorParams, observabilityPaths } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
-import { AlertsLocatorParams, observabilityPaths, sloFeatureId } from '../../../../common';
+import { sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -56,7 +57,7 @@ export function sloBurnRateRuleType(
   });
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
-    name: i18n.translate('xpack.observability.slo.rules.burnRate.name', {
+    name: i18n.translate('xpack.slo.rules.burnRate.name', {
       defaultMessage: 'SLO burn rate',
     }),
     fieldsForAAD: SLO_BURN_RATE_AAD_FIELDS,
@@ -103,41 +104,38 @@ export function sloBurnRateRuleType(
 }
 
 const thresholdActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.thresholdDescription',
+  'xpack.slo.alerting.thresholdDescription',
   {
     defaultMessage: 'The burn rate threshold value.',
   }
 );
 
-const windowActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.windowDescription',
-  {
-    defaultMessage: 'The window duration with the associated burn rate value.',
-  }
-);
+const windowActionVariableDescription = i18n.translate('xpack.slo.alerting.windowDescription', {
+  defaultMessage: 'The window duration with the associated burn rate value.',
+});
 
 export const reasonActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.reasonDescription',
+  'xpack.slo.alerting.reasonDescription',
   {
     defaultMessage: 'A concise description of the reason for the alert',
   }
 );
 export const timestampActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.timestampDescription',
+  'xpack.slo.alerting.timestampDescription',
   {
     defaultMessage: 'A timestamp of when the alert was detected.',
   }
 );
 
 export const viewInAppUrlActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.viewInAppUrlDescription',
+  'xpack.slo.alerting.viewInAppUrlDescription',
   {
     defaultMessage: 'The url to the SLO details page to help with further investigation.',
   }
 );
 
 export const alertDetailsUrlActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.alertDetailsUrlDescription',
+  'xpack.slo.alerting.alertDetailsUrlDescription',
   {
     defaultMessage:
       'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
@@ -145,21 +143,21 @@ export const alertDetailsUrlActionVariableDescription = i18n.translate(
 );
 
 export const sloIdActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.sloIdDescription',
+  'xpack.slo.alerting.sloIdDescription',
   {
     defaultMessage: 'The SLO unique identifier.',
   }
 );
 
 export const sloNameActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.sloNameDescription',
+  'xpack.slo.alerting.sloNameDescription',
   {
     defaultMessage: 'The SLO name.',
   }
 );
 
 export const sloInstanceIdActionVariableDescription = i18n.translate(
-  'xpack.observability.slo.alerting.sloInstanceIdDescription',
+  'xpack.slo.alerting.sloInstanceIdDescription',
   {
     defaultMessage: 'The SLO instance id.',
   }

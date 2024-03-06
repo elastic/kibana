@@ -13,9 +13,9 @@ import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../../../common/constants';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { GroupView } from './group_view';
 
-jest.mock('../../../../hooks/slo/use_fetch_slo_groups');
+jest.mock('../../../../hooks/use_fetch_slo_groups');
 jest.mock('../../hooks/use_url_search_state');
-jest.mock('../../../../hooks/slo/use_fetch_slo_list');
+jest.mock('../../../../hooks/use_fetch_slo_list');
 
 const useFetchSloGroupsMock = useFetchSloGroups as jest.Mock;
 const useUrlSearchStateMock = useUrlSearchState as jest.Mock;

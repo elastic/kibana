@@ -43,7 +43,7 @@ export function LongWindowDuration({
         step={1}
         value={String(durationValue)}
         onChange={onDurationValueChange}
-        aria-label={i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
+        aria-label={i18n.translate('xpack.slo.rules.longWindow.valueLabel', {
           defaultMessage: 'Lookback period in hours',
         })}
         data-test-subj="durationValueInput"
@@ -54,7 +54,7 @@ export function LongWindowDuration({
 
 const getRowLabel = (shortWindowDuration: Duration) => (
   <>
-    {i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
+    {i18n.translate('xpack.slo.rules.longWindow.rowLabel', {
       defaultMessage: 'Lookback (hours)',
     })}{' '}
     <EuiIconTip position="top" content={getTooltipText(shortWindowDuration)} />
@@ -62,7 +62,7 @@ const getRowLabel = (shortWindowDuration: Duration) => (
 );
 
 const getTooltipText = (shortWindowDuration: Duration) =>
-  i18n.translate('xpack.observability.slo.rules.longWindowDuration.tooltip', {
+  i18n.translate('xpack.slo.rules.longWindowDuration.tooltip', {
     defaultMessage:
       'Lookback period over which the burn rate is computed. A shorter lookback period of {shortWindowDuration} minutes (1/12 the lookback period) will be used for faster recovery',
     values: { shortWindowDuration: toMinutes(shortWindowDuration) },

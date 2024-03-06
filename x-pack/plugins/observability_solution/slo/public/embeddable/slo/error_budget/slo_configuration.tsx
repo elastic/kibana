@@ -41,7 +41,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
     <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.headerTitle', {
+          {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
             defaultMessage: 'SLO configuration',
           })}
         </EuiModalHeaderTitle>

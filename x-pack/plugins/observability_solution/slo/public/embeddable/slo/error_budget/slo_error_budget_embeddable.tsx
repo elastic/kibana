@@ -53,7 +53,7 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
 
     this.setTitle(
       this.input.title ||
-        i18n.translate('xpack.observability.sloErrorBudgetEmbeddable.displayTitle', {
+        i18n.translate('xpack.slo.sloErrorBudgetEmbeddable.displayTitle', {
           defaultMessage: 'SLO Error Budget burn down',
         })
     );

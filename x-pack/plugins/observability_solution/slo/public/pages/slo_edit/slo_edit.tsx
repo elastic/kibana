@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+// import { HeaderMenu } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { useCapabilities } from '../../hooks/use_capabilities';
@@ -16,7 +17,7 @@ import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnos
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+// TODO SLO: uncomment
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {

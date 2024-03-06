@@ -54,7 +54,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              {i18n.translate('xpack.equivalentApiRequest.h2.equivalentAPIRequestToLabel', {
+              {i18n.translate('xpack.slo.equivalentApiRequest.h2.equivalentAPIRequestToLabel', {
                 defaultMessage: 'Equivalent API request',
               })}
             </h2>

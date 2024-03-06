@@ -6,9 +6,9 @@
  */
 
 import { validateSLO } from '.';
-import { oneMinute, sixHours } from '../../services/slo/fixtures/duration';
-import { createSLO } from '../../services/slo/fixtures/slo';
-import { sevenDaysRolling } from '../../services/slo/fixtures/time_window';
+import { oneMinute, sixHours } from '../../services/fixtures/duration';
+import { createSLO } from '../../services/fixtures/slo';
+import { sevenDaysRolling } from '../../services/fixtures/time_window';
 import { Duration, DurationUnit } from '../models';
 
 describe('validateSLO', () => {

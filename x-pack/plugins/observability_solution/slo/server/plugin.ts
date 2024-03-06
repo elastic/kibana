@@ -38,8 +38,9 @@ import { SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 
-// TODO think about renaming to singular
-interface SlosPluginSetup {
+export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
+
+export interface PluginSetup {
   alerting: PluginSetupContract;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
@@ -49,7 +50,7 @@ interface SlosPluginSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
-interface SlosPluginStart {
+export interface PluginStart {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
@@ -57,8 +58,7 @@ interface SlosPluginStart {
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
-// TODO think about renaning SlosPlugin to SloPlugin
-export class SlosPlugin implements Plugin<SlosPluginSetup, SlosPluginStart> {
+export class SloPlugin implements Plugin<SloPluginSetup> {
   private readonly logger: Logger;
   private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
 
@@ -67,17 +67,15 @@ export class SlosPlugin implements Plugin<SlosPluginSetup, SlosPluginStart> {
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: SlosPluginSetup) {
+  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     const config = this.initContext.config.get<SloConfig>();
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-    // Register server side APIs
-    // defineRoutes(router);
 
     const savedObjectTypes = [SO_SLO_TYPE];
 
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
-      name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
+      name: i18n.translate('xpack.slo.featureRegistry.linkSloTitle', {
         defaultMessage: 'SLOs',
       }),
       order: 1200,
@@ -166,8 +164,7 @@ export class SlosPlugin implements Plugin<SlosPluginSetup, SlosPluginStart> {
     );
   }
 
-  public start(core: CoreStart, plugins: SlosPluginStart) {
-    this.logger.debug('slos: Started');
+  public start(core: CoreStart, plugins: PluginStart) {
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 

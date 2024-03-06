@@ -10,37 +10,29 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { toDuration } from './duration';
 
-export const INDICATOR_CUSTOM_KQL = i18n.translate('xpack.observability.slo.indicators.customKql', {
+export const INDICATOR_CUSTOM_KQL = i18n.translate('xpack.slo.indicators.customKql', {
   defaultMessage: 'Custom KQL',
 });
 
-export const INDICATOR_CUSTOM_METRIC = i18n.translate(
-  'xpack.observability.slo.indicators.customMetric',
-  {
-    defaultMessage: 'Custom Metric',
-  }
-);
+export const INDICATOR_CUSTOM_METRIC = i18n.translate('xpack.slo.indicators.customMetric', {
+  defaultMessage: 'Custom Metric',
+});
 
-export const INDICATOR_TIMESLICE_METRIC = i18n.translate(
-  'xpack.observability.slo.indicators.timesliceMetric',
-  {
-    defaultMessage: 'Timeslice Metric',
-  }
-);
+export const INDICATOR_TIMESLICE_METRIC = i18n.translate('xpack.slo.indicators.timesliceMetric', {
+  defaultMessage: 'Timeslice Metric',
+});
 
-export const INDICATOR_HISTOGRAM = i18n.translate('xpack.observability.slo.indicators.histogram', {
+export const INDICATOR_HISTOGRAM = i18n.translate('xpack.slo.indicators.histogram', {
   defaultMessage: 'Histogram Metric',
 });
 
-export const INDICATOR_APM_LATENCY = i18n.translate(
-  'xpack.observability.slo.indicators.apmLatency',
-  { defaultMessage: 'APM latency' }
-);
+export const INDICATOR_APM_LATENCY = i18n.translate('xpack.slo.indicators.apmLatency', {
+  defaultMessage: 'APM latency',
+});
 
-export const INDICATOR_APM_AVAILABILITY = i18n.translate(
-  'xpack.observability.slo.indicators.apmAvailability',
-  { defaultMessage: 'APM availability' }
-);
+export const INDICATOR_APM_AVAILABILITY = i18n.translate('xpack.slo.indicators.apmAvailability', {
+  defaultMessage: 'APM availability',
+});
 
 export function toIndicatorTypeLabel(
   indicatorType: SLOWithSummaryResponse['indicator']['type']
@@ -70,53 +62,50 @@ export function toIndicatorTypeLabel(
 }
 
 export const BUDGETING_METHOD_OCCURRENCES = i18n.translate(
-  'xpack.observability.slo.budgetingMethod.occurrences',
+  'xpack.slo.budgetingMethod.occurrences',
   {
     defaultMessage: 'Occurrences',
   }
 );
 
-export const BUDGETING_METHOD_TIMESLICES = i18n.translate(
-  'xpack.observability.slo.budgetingMethod.timeslices',
-  {
-    defaultMessage: 'Timeslices',
-  }
-);
+export const BUDGETING_METHOD_TIMESLICES = i18n.translate('xpack.slo.budgetingMethod.timeslices', {
+  defaultMessage: 'Timeslices',
+});
 
 export function toDurationLabel(durationStr: string): string {
   const duration = toDuration(durationStr);
 
   switch (duration.unit) {
     case 'm':
-      return i18n.translate('xpack.observability.slo.duration.minute', {
+      return i18n.translate('xpack.slo.duration.minute', {
         defaultMessage: '{duration, plural, one {1 minute} other {# minutes}}',
         values: {
           duration: duration.value,
         },
       });
     case 'h':
-      return i18n.translate('xpack.observability.slo.duration.hour', {
+      return i18n.translate('xpack.slo.duration.hour', {
         defaultMessage: '{duration, plural, one {1 hour} other {# hours}}',
         values: {
           duration: duration.value,
         },
       });
     case 'd':
-      return i18n.translate('xpack.observability.slo.duration.day', {
+      return i18n.translate('xpack.slo.duration.day', {
         defaultMessage: '{duration, plural, one {1 day} other {# days}}',
         values: {
           duration: duration.value,
         },
       });
     case 'w':
-      return i18n.translate('xpack.observability.slo.duration.week', {
+      return i18n.translate('xpack.slo.duration.week', {
         defaultMessage: '{duration, plural, one {1 week} other {# weeks}}',
         values: {
           duration: duration.value,
         },
       });
     case 'M':
-      return i18n.translate('xpack.observability.slo.duration.month', {
+      return i18n.translate('xpack.slo.duration.month', {
         defaultMessage: '{duration, plural, one {1 month} other {# months}}',
         values: {
           duration: duration.value,
@@ -130,23 +119,23 @@ export function toDurationAdverbLabel(durationStr: string): string {
 
   switch (duration.unit) {
     case 'm':
-      return i18n.translate('xpack.observability.slo.duration.minutely', {
+      return i18n.translate('xpack.slo.duration.minutely', {
         defaultMessage: 'Minutely',
       });
     case 'h':
-      return i18n.translate('xpack.observability.slo.duration.hourly', {
+      return i18n.translate('xpack.slo.duration.hourly', {
         defaultMessage: 'Hourly',
       });
     case 'd':
-      return i18n.translate('xpack.observability.slo.duration.daily', {
+      return i18n.translate('xpack.slo.duration.daily', {
         defaultMessage: 'Daily',
       });
     case 'w':
-      return i18n.translate('xpack.observability.slo.duration.weekly', {
+      return i18n.translate('xpack.slo.duration.weekly', {
         defaultMessage: 'Weekly',
       });
     case 'M':
-      return i18n.translate('xpack.observability.slo.duration.monthly', {
+      return i18n.translate('xpack.slo.duration.monthly', {
         defaultMessage: 'Monthly',
       });
   }

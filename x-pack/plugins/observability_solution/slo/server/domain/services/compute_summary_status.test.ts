@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createErrorBudget } from '../../services/slo/fixtures/error_budget';
-import { createSLO } from '../../services/slo/fixtures/slo';
+import { createErrorBudget } from '../../services/fixtures/error_budget';
+import { createSLO } from '../../services/fixtures/slo';
 import { computeSummaryStatus } from './compute_summary_status';
 
 describe('ComputeSummaryStatus', () => {

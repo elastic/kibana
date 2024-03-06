@@ -110,7 +110,7 @@ export function useLensDefinition(
                     {
                       type: 'manual',
                       id: uuidv4(),
-                      label: i18n.translate('xpack.observability.slo.errorRateChart.alertLabel', {
+                      label: i18n.translate('xpack.slo.errorRateChart.alertLabel', {
                         defaultMessage: 'Alert',
                       }),
                       key: {
@@ -123,12 +123,9 @@ export function useLensDefinition(
                     },
                     {
                       type: 'manual',
-                      label: i18n.translate(
-                        'xpack.observability.slo.errorRateChart.activeAlertLabel',
-                        {
-                          defaultMessage: 'Active alert',
-                        }
-                      ),
+                      label: i18n.translate('xpack.slo.errorRateChart.activeAlertLabel', {
+                        defaultMessage: 'Active alert',
+                      }),
                       key: {
                         type: 'range',
                         timestamp: moment(alertTimeRange.from).toISOString(),
@@ -151,10 +148,10 @@ export function useLensDefinition(
                   {
                     type: 'manual',
                     id: uuidv4(),
-                    label: i18n.translate(
-                      'xpack.observability.slo.errorRateChart.alertAnnotationLabel',
-                      { defaultMessage: '{total} alert', values: { total: annotation.total } }
-                    ),
+                    label: i18n.translate('xpack.slo.errorRateChart.alertAnnotationLabel', {
+                      defaultMessage: '{total} alert',
+                      values: { total: annotation.total },
+                    }),
                     key: {
                       type: 'point_in_time',
                       timestamp: moment(annotation.date).toISOString(),
@@ -262,7 +259,7 @@ export function useLensDefinition(
                     customLabel: true,
                   },
                   '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14': {
-                    label: i18n.translate('xpack.observability.slo.errorRateChart.errorRateLabel', {
+                    label: i18n.translate('xpack.slo.errorRateChart.errorRateLabel', {
                       defaultMessage: 'Error rate',
                     }),
                     dataType: 'number',
@@ -352,7 +349,7 @@ export function useLensDefinition(
                     customLabel: true,
                   },
                   '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14': {
-                    label: i18n.translate('xpack.observability.slo.errorRateChart.errorRateLabel', {
+                    label: i18n.translate('xpack.slo.errorRateChart.errorRateLabel', {
                       defaultMessage: 'Error rate',
                     }),
                     dataType: 'number',

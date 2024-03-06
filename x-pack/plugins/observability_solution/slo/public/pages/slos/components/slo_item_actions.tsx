@@ -17,12 +17,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
+import { RulesParams } from '@kbn/observability-plugin/public';
+import { rulesLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { paths } from '../../../../common/locators/paths';
-import { RulesParams } from '../../../locators/rules';
-import { rulesLocatorID } from '../../../../common';
 
 interface Props {
   slo: SLOWithSummaryResponse;

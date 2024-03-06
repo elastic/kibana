@@ -24,7 +24,7 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
     const path = !!sloId ? `${SLOS_PATH}/${encodeURI(sloId)}${queryParams}` : SLOS_PATH;
 
     return {
-      app: 'observability',
+      app: 'slo',
       path,
       state: {},
     };

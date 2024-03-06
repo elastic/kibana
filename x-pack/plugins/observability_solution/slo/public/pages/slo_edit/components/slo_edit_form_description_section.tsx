@@ -42,7 +42,7 @@ export function SloEditFormDescriptionSection() {
           <EuiFormRow
             fullWidth
             isInvalid={getFieldState('name').invalid}
-            label={i18n.translate('xpack.observability.slo.sloEdit.description.sloName', {
+            label={i18n.translate('xpack.slo.sloEdit.description.sloName', {
               defaultMessage: 'SLO Name',
             })}
           >
@@ -57,12 +57,9 @@ export function SloEditFormDescriptionSection() {
                   isInvalid={fieldState.invalid}
                   id={sloNameId}
                   data-test-subj="sloFormNameInput"
-                  placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.description.sloNamePlaceholder',
-                    {
-                      defaultMessage: 'Name for the SLO',
-                    }
-                  )}
+                  placeholder={i18n.translate('xpack.slo.sloEdit.description.sloNamePlaceholder', {
+                    defaultMessage: 'Name for the SLO',
+                  })}
                 />
               )}
             />
@@ -72,7 +69,7 @@ export function SloEditFormDescriptionSection() {
         <EuiFlexItem grow>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.observability.slo.sloEdit.description.sloDescription', {
+            label={i18n.translate('xpack.slo.sloEdit.description.sloDescription', {
               defaultMessage: 'Description',
             })}
             labelAppend={<OptionalText />}
@@ -89,7 +86,7 @@ export function SloEditFormDescriptionSection() {
                   id={descriptionId}
                   data-test-subj="sloFormDescriptionTextArea"
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.description.sloDescriptionPlaceholder',
+                    'xpack.slo.sloEdit.description.sloDescriptionPlaceholder',
                     {
                       defaultMessage: 'A short description of the SLO',
                     }
@@ -103,7 +100,7 @@ export function SloEditFormDescriptionSection() {
         <EuiFlexItem grow>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.observability.slo.sloEdit.tags.label', {
+            label={i18n.translate('xpack.slo.sloEdit.tags.label', {
               defaultMessage: 'Tags',
             })}
           >
@@ -117,10 +114,10 @@ export function SloEditFormDescriptionSection() {
                   {...field}
                   id={tagsId}
                   fullWidth
-                  aria-label={i18n.translate('xpack.observability.slo.sloEdit.tags.placeholder', {
+                  aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
                     defaultMessage: 'Add tags',
                   })}
-                  placeholder={i18n.translate('xpack.observability.slo.sloEdit.tags.placeholder', {
+                  placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
                     defaultMessage: 'Add tags',
                   })}
                   isInvalid={fieldState.invalid}

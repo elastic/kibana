@@ -93,7 +93,7 @@ export function SloErrorBudget({
     return (
       <LoadingContainer>
         <LoadingContent>
-          {i18n.translate('xpack.sloEmbeddable.overview.sloNotFoundText', {
+          {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
               'The SLO has been deleted. You can safely delete the widget from the dashboard.',
           })}

@@ -9,9 +9,8 @@ import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
-import { paths } from '../../../../common/locators/paths';
 
 export interface Props {
   viewMode?: 'compact' | 'default';
@@ -32,7 +31,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
       );
       navigateToUrl(
         `${basePath.prepend(
-          paths.observability.alerts // TODO SLO: import paths from observability
+          observabilityPaths.alerts
         )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
       );
     }

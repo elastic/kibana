@@ -74,7 +74,6 @@ import {
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  SLOS_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
@@ -204,15 +203,6 @@ export class Plugin
         },
       ],
     },
-    // {
-    //   id: 'slos',
-    //   title: i18n.translate('xpack.observability.slosLinkTitle', {
-    //     defaultMessage: 'SLOs',
-    //   }),
-    //   visibleIn: [],
-    //   order: 8002,
-    //   path: SLOS_PATH,
-    // },
     getCasesDeepLinks({
       basePath: CASES_PATH,
       extend: {

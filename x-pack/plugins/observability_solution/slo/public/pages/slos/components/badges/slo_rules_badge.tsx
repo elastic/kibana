@@ -21,7 +21,7 @@ export function SloRulesBadge({ rules, onClick }: Props) {
   return rules === undefined || rules.length > 0 ? null : (
     <EuiToolTip
       position="top"
-      content={i18n.translate('xpack.observability.slo.slo.rulesBadge.popover', {
+      content={i18n.translate('xpack.slo.slo.rulesBadge.popover', {
         defaultMessage:
           'There are no rules configured for this SLO yet. You will not receive alerts when SLO is breached.',
       })}

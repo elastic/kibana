@@ -15,7 +15,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { COMMON_SLO_GROUPING } from '../overview/slo_embeddable_factory';
 import { SLO_ALERTS_EMBEDDABLE, SLOAlertsEmbeddable } from './slo_alerts_embeddable';
-import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
+import { SloPublicPluginsStart, SloPublicStart } from '../../..';
 import { SloAlertsEmbeddableInput } from './types';
 
 export type SloAlertsEmbeddableFactory = EmbeddableFactory;
@@ -25,10 +25,7 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
   public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
-    private getStartServices: CoreSetup<
-      ObservabilityPublicPluginsStart,
-      ObservabilityPublicStart
-    >['getStartServices'],
+    private getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices'],
     private kibanaVersion: string
   ) {}
 
@@ -57,13 +54,13 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
   }
 
   public getDescription() {
-    return i18n.translate('xpack.observability.sloAlertsEmbeddable.description', {
+    return i18n.translate('xpack.slo.sloAlertsEmbeddable.description', {
       defaultMessage: 'Get an overview of your SLO alerts',
     });
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.observability.sloAlertsEmbeddable.displayName', {
+    return i18n.translate('xpack.slo.sloAlertsEmbeddable.displayName', {
       defaultMessage: 'SLO Alerts',
     });
   }

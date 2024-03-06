@@ -69,7 +69,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h2>
-                  {i18n.translate('xpack.observability.slo.burnRate.title', {
+                  {i18n.translate('xpack.slo.burnRate.title', {
                     defaultMessage: 'Burn rate',
                   })}
                 </h2>
@@ -77,16 +77,13 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.observability.slo.burnRate.technicalPreviewBadgeTitle',
-                  {
-                    defaultMessage: 'Technical Preview',
-                  }
-                )}
+                label={i18n.translate('xpack.slo.burnRate.technicalPreviewBadgeTitle', {
+                  defaultMessage: 'Technical Preview',
+                })}
                 size="s"
                 tooltipPosition="bottom"
                 tooltipContent={i18n.translate(
-                  'xpack.observability.slo.burnRate.technicalPreviewBadgeDescription',
+                  'xpack.slo.burnRate.technicalPreviewBadgeDescription',
                   {
                     defaultMessage:
                       'This functionality is in technical preview and is subject to change or may be removed in future versions. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Technical preview features are not subject to the support service level agreement of official generally available features.',
@@ -97,7 +94,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              legend={i18n.translate('xpack.observability.slo.burnRate.timeRangeBtnLegend', {
+              legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
                 defaultMessage: 'Select the time range',
               })}
               options={burnRateOptions.map((opt) => ({ id: opt.id, label: opt.label }))}

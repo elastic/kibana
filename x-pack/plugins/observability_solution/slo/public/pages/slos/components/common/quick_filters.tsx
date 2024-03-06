@@ -115,14 +115,12 @@ const Container = styled.div`
   }
 `;
 
-const TAGS_LABEL = i18n.translate('xpack.observability.slo.list.tags', {
+const TAGS_LABEL = i18n.translate('xpack.slo.list.tags', {
   defaultMessage: 'Tags',
 });
-
-const STATUS_LABEL = i18n.translate('xpack.observability.slo.list.status', {
+const STATUS_LABEL = i18n.translate('xpack.slo.list.status', {
   defaultMessage: 'Status',
 });
-
-const ALL_LABEL = i18n.translate('xpack.observability.slo.list.all', {
+const ALL_LABEL = i18n.translate('xpack.slo.list.all', {
   defaultMessage: 'All',
 });

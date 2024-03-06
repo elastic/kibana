@@ -7,8 +7,8 @@
 
 import { computeBurnRate } from './compute_burn_rate';
 import { toDateRange } from './date_range';
-import { createSLO } from '../../services/slo/fixtures/slo';
-import { ninetyDaysRolling } from '../../services/slo/fixtures/time_window';
+import { createSLO } from '../../services/fixtures/slo';
+import { ninetyDaysRolling } from '../../services/fixtures/time_window';
 
 describe('computeBurnRate', () => {
   it('computes 0 when total is 0', () => {

@@ -65,21 +65,21 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
           <EuiSteps
             steps={[
               {
-                title: i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
+                title: i18n.translate('xpack.slo.sloEdit.definition.title', {
                   defaultMessage: 'Define SLI',
                 }),
                 children: <SloEditFormIndicatorSection isEditMode={isEditMode} />,
                 status: isIndicatorSectionValid ? 'complete' : 'incomplete',
               },
               {
-                title: i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
+                title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
                   defaultMessage: 'Set objectives',
                 }),
                 children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
                 status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
               },
               {
-                title: i18n.translate('xpack.observability.slo.sloEdit.description.title', {
+                title: i18n.translate('xpack.slo.sloEdit.description.title', {
                   defaultMessage: 'Describe SLO',
                 }),
                 children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,

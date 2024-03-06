@@ -12,7 +12,7 @@ import React from 'react';
 export function HeaderTitle() {
   return (
     <EuiFlexItem grow={false}>
-      {i18n.translate('xpack.slosPageTitle', {
+      {i18n.translate('xpack.slo.slosPageTitle', {
         defaultMessage: 'SLOs',
       })}
     </EuiFlexItem>

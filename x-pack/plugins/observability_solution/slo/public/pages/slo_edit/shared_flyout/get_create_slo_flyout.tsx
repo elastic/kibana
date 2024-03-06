@@ -13,15 +13,14 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RecursivePartial } from '@kbn/utility-types';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { CreateSLOForm } from '../types';
-import { PluginContext } from '../../../context/plugin_context/plugin_context';
-import { ObservabilityRuleTypeRegistry } from '../../..';
-import { ObservabilityPublicPluginsStart, ConfigSchema } from '../../../plugin';
+import { PluginContext } from '../../../context/plugin_context';
+import { SloPublicPluginsStart } from '../../../types';
 import { SloAddFormFlyout } from './slo_form';
 
 export const getCreateSLOFlyoutLazy = ({
   core,
-  config,
   plugins,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
@@ -30,8 +29,7 @@ export const getCreateSLOFlyoutLazy = ({
   isServerless,
 }: {
   core: CoreStart;
-  config: ConfigSchema;
-  plugins: ObservabilityPublicPluginsStart;
+  plugins: SloPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   isDev?: boolean;
@@ -60,7 +58,6 @@ export const getCreateSLOFlyoutLazy = ({
         <PluginContext.Provider
           value={{
             isDev,
-            config,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
           }}

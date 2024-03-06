@@ -27,9 +27,9 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/slo/use_fetch_slo_list');
-jest.mock('../../hooks/slo/use_capabilities');
-jest.mock('../../hooks/slo/use_fetch_global_diagnosis');
+jest.mock('../../hooks/use_fetch_slo_list');
+jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_fetch_global_diagnosis');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
@@ -151,7 +151,7 @@ describe('SLOs Welcome Page', () => {
         createNewSloButton?.click();
 
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.observability.sloCreate);
+          expect(mockNavigate).toBeCalledWith(paths.sloCreate);
         });
       });
     });
@@ -172,7 +172,7 @@ describe('SLOs Welcome Page', () => {
       it('should navigate to the SLO List page', async () => {
         render(<SlosWelcomePage />);
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+          expect(mockNavigate).toBeCalledWith(paths.slos);
         });
       });
     });

@@ -26,7 +26,7 @@ export function SloGroupByBadge({ slo, color }: Props) {
       <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.observability.slo.groupByBadge', {
+          content={i18n.translate('xpack.slo.groupByBadge', {
             defaultMessage: 'Group by {groupKey}',
             values: {
               groupKey: slo.groupBy,

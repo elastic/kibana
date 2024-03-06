@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOResponse } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 
 interface Props {
   initialSlo?: SLOResponse;
@@ -54,10 +54,10 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
       error={hasError ? errors[0] : undefined}
     >
       <EuiComboBox
-        aria-label={i18n.translate('xpack.observability.slo.rules.sloSelector.ariaLabel', {
+        aria-label={i18n.translate('xpack.slo.rules.sloSelector.ariaLabel', {
           defaultMessage: 'SLO',
         })}
-        placeholder={i18n.translate('xpack.observability.slo.rules.sloSelector.placeholder', {
+        placeholder={i18n.translate('xpack.slo.rules.sloSelector.placeholder', {
           defaultMessage: 'Select a SLO',
         })}
         data-test-subj="sloSelector"
@@ -75,7 +75,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   );
 }
 
-const rowLabel = i18n.translate('xpack.observability.slo.rules.sloSelector.rowLabel', {
+const rowLabel = i18n.translate('xpack.slo.rules.sloSelector.rowLabel', {
   defaultMessage: 'SLO',
 });
 

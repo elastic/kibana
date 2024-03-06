@@ -16,6 +16,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
+// import { HeaderMenu } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
@@ -35,7 +36,6 @@ import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
-// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
   const {

@@ -45,7 +45,7 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       },
     },
     {
-      label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
+      label: i18n.translate('xpack.slo.list.groupBy.tags', {
         defaultMessage: 'Tags',
       }),
       checked: groupBy === 'slo.tags',
@@ -55,7 +55,7 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       },
     },
     {
-      label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
+      label: i18n.translate('xpack.slo.list.groupBy.status', {
         defaultMessage: 'Status',
       }),
       checked: groupBy === 'status',
@@ -65,7 +65,7 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       },
     },
     {
-      label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
+      label: i18n.translate('xpack.slo.list.groupBy.sliType', {
         defaultMessage: 'SLI type',
       }),
       checked: groupBy === 'slo.indicator.type',
@@ -105,10 +105,9 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
   );
 }
 
-export const NONE_LABEL = i18n.translate('xpack.observability.slo.list.groupBy.sliIndicator', {
+export const NONE_LABEL = i18n.translate('xpack.slo.list.groupBy.sliIndicator', {
   defaultMessage: 'None',
 });
-
-export const GROUP_TITLE = i18n.translate('xpack.observability.slo.groupPopover.group.title', {
+export const GROUP_TITLE = i18n.translate('xpack.slo.groupPopover.group.title', {
   defaultMessage: 'Group by',
 });

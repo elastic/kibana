@@ -14,7 +14,7 @@ export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?
 export const ALERT_ACTION_ID = 'slo.burnRate.alert';
 export const ALERT_ACTION = {
   id: ALERT_ACTION_ID,
-  name: i18n.translate('xpack.observability.slo.alerting.burnRate.alertAction', {
+  name: i18n.translate('xpack.slo.alerting.burnRate.alertAction', {
     defaultMessage: 'Critical',
   }),
 };
@@ -22,7 +22,7 @@ export const ALERT_ACTION = {
 export const HIGH_PRIORITY_ACTION_ID = 'slo.burnRate.high';
 export const HIGH_PRIORITY_ACTION = {
   id: HIGH_PRIORITY_ACTION_ID,
-  name: i18n.translate('xpack.observability.slo.alerting.burnRate.highPriorityAction', {
+  name: i18n.translate('xpack.slo.alerting.burnRate.highPriorityAction', {
     defaultMessage: 'High',
   }),
 };
@@ -30,7 +30,7 @@ export const HIGH_PRIORITY_ACTION = {
 export const MEDIUM_PRIORITY_ACTION_ID = 'slo.burnRate.medium';
 export const MEDIUM_PRIORITY_ACTION = {
   id: MEDIUM_PRIORITY_ACTION_ID,
-  name: i18n.translate('xpack.observability.slo.alerting.burnRate.mediumPriorityAction', {
+  name: i18n.translate('xpack.slo.alerting.burnRate.mediumPriorityAction', {
     defaultMessage: 'Medium',
   }),
 };
@@ -38,7 +38,7 @@ export const MEDIUM_PRIORITY_ACTION = {
 export const LOW_PRIORITY_ACTION_ID = 'slo.burnRate.low';
 export const LOW_PRIORITY_ACTION = {
   id: LOW_PRIORITY_ACTION_ID,
-  name: i18n.translate('xpack.observability.slo.alerting.burnRate.lowPriorityAction', {
+  name: i18n.translate('xpack.slo.alerting.burnRate.lowPriorityAction', {
     defaultMessage: 'Low',
   }),
 };
@@ -78,4 +78,3 @@ export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
 
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
-

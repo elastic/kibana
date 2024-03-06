@@ -25,7 +25,7 @@ export function FeedbackButton({ disabled }: Props) {
       color="warning"
       iconType="editorComment"
     >
-      {i18n.translate('xpack.observability.slo.feedbackButtonLabel', {
+      {i18n.translate('xpack.slo.feedbackButtonLabel', {
         defaultMessage: 'Tell us what you think!',
       })}
     </EuiButton>

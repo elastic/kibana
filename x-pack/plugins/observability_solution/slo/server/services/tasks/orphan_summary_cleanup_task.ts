@@ -15,7 +15,7 @@ import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/ap
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { ObservabilityConfig } from '../..';
+import { SloConfig } from '../..';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
@@ -49,9 +49,9 @@ export class SloOrphanSummaryCleanupTask {
   private taskManager?: TaskManagerStartContract;
   private soClient?: SavedObjectsClientContract;
   private esClient?: ElasticsearchClient;
-  private config: ObservabilityConfig;
+  private config: SloConfig;
 
-  constructor(taskManager: TaskManagerSetupContract, logger: Logger, config: ObservabilityConfig) {
+  constructor(taskManager: TaskManagerSetupContract, logger: Logger, config: SloConfig) {
     this.logger = logger;
     this.config = config;
 

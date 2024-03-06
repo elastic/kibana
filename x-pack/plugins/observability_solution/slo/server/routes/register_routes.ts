@@ -19,13 +19,13 @@ import axios from 'axios';
 import * as t from 'io-ts';
 import { SloConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
-import { ObservabilityRequestHandlerContext } from '../types';
-import { AbstractObservabilityServerRouteRepository } from './types';
+import { SloRequestHandlerContext } from '../types';
+import { AbstractSloServerRouteRepository } from './types';
 
 interface RegisterRoutes {
   config: SloConfig;
   core: CoreSetup;
-  repository: AbstractObservabilityServerRouteRepository;
+  repository: AbstractSloServerRouteRepository;
   logger: Logger;
   dependencies: RegisterRoutesDependencies;
 }
@@ -48,7 +48,7 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
     const { endpoint, options, handler, params } = route;
     const { pathname, method } = parseEndpoint(endpoint);
 
-    (router[method] as RouteRegistrar<typeof method, ObservabilityRequestHandlerContext>)(
+    (router[method] as RouteRegistrar<typeof method, SloRequestHandlerContext>)(
       {
         path: pathname,
         validate: routeValidationObject,

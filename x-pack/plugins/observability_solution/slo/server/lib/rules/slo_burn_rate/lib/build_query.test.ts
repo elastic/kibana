@@ -11,7 +11,7 @@ import {
   createKQLCustomIndicator,
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
-} from '../../../../services/slo/fixtures/slo';
+} from '../../../../services/fixtures/slo';
 
 const STARTED_AT = new Date('2023-01-01T00:00:00.000Z');
 

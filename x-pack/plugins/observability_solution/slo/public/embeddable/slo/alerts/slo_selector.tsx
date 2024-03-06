@@ -20,10 +20,9 @@ interface Props {
   singleSelection?: boolean;
 }
 
-const SLO_REQUIRED = i18n.translate('xpack.sloEmbeddable.config.errors.sloRequired', {
+const SLO_REQUIRED = i18n.translate('xpack.slo.sloEmbeddable.config.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
-
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
   const mapSlosToOptions = (slos: SloItem[] | SLOWithSummaryResponse[] | undefined) =>
     slos?.map((slo) => ({
@@ -72,10 +71,10 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
   return (
     <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>
       <EuiComboBox
-        aria-label={i18n.translate('xpack.sloEmbeddable.config.sloSelector.ariaLabel', {
+        aria-label={i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.ariaLabel', {
           defaultMessage: 'SLO',
         })}
-        placeholder={i18n.translate('xpack.sloEmbeddable.config.sloSelector.placeholder', {
+        placeholder={i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.placeholder', {
           defaultMessage: 'Select a SLO',
         })}
         data-test-subj="sloSelector"

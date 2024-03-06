@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { buildSlo } from '../../../../data/slo/slo';
 import { Overview as Component, Props } from './overview';
 

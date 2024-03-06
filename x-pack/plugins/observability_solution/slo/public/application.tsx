@@ -24,10 +24,7 @@ import { PluginContext } from './context/plugin_context'; // TODO SLO: rethink a
 import { SloPublicPluginsStart } from './types';
 import { routes } from './routes/routes';
 
-// import { SlosApp } from './components/app'; // TODO SLO: delete this one
-
 function App() {
-  console.log('!!App', routes);
   return (
     <>
       <Routes>
@@ -35,7 +32,6 @@ function App() {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
           const Wrapper = () => {
-            console.log('!!Wrapper');
             return handler();
           };
           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
@@ -64,7 +60,6 @@ export const renderApp = ({
   kibanaVersion: string;
   isServerless?: boolean;
 }) => {
-  console.log(observabilityRuleTypeRegistry, '!!observabilityRuleTypeRegistry');
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;

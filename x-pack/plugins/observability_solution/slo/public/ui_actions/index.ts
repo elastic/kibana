@@ -9,11 +9,11 @@ import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
-import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '..';
+import { SloPublicPluginsStart, SloPublicStart } from '..';
 
 export function registerSloAlertsUiActions(
   uiActions: UiActionsSetup,
-  core: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>
+  core: CoreSetup<SloPublicPluginsStart, SloPublicStart>
 ) {
   // Initialize actions
   const editSloAlertsPanelAction = createEditSloAlertsPanelAction(core.getStartServices);

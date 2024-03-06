@@ -9,8 +9,8 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { buildForecastedSlo } from '../../../../data/slo/slo';
-import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloBadges as Component, SloBadgesProps } from './slo_badges';
 
 export default {

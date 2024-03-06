@@ -28,7 +28,7 @@ export class SloListLocatorDefinition implements LocatorDefinition<SloListLocato
     const state: SearchState = deepmerge<SearchState>(DEFAULT_STATE, { kqlQuery });
 
     return {
-      app: 'observability',
+      app: 'slo',
       path: setStateToKbnUrl(
         SLO_LIST_SEARCH_URL_STORAGE_KEY,
         state,

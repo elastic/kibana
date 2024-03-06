@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-
 import {
   App,
   AppMountParameters,
@@ -23,15 +21,18 @@ import type { SloPublicSetup, SloPublicStart } from './types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
-import { BASE_PATH } from '../common/locators/paths';
-// import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
+import { SLOS_BASE_PATH } from '../common/locators/paths';
+import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
   constructor(private readonly initContext: PluginInitializerContext) {} // TODO SLO: Do I need ConfigSchema here?
 
-  public setup(coreSetup: CoreSetup<SloPublicPluginsStart>, pluginsSetup: SloPublicPluginsSetup) {
+  public setup(
+    coreSetup: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
+    pluginsSetup: SloPublicPluginsSetup
+  ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
     const sloDetailsLocator = pluginsSetup.share.url.locators.create(
@@ -61,9 +62,9 @@ export class SloPlugin
     const app: App = {
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts
+      order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts TODO SLO: remove this comment
       euiIconType: 'logoObservability',
-      appRoute: BASE_PATH,
+      appRoute: SLOS_BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
       // Do I need deep links
       mount,
@@ -127,20 +128,20 @@ export class SloPlugin
   }
 
   // TODO SLO: register alert table configuration
-  public start(coreStart: CoreStart, plugins: SloPublicPluginsStart) {
-    // const kibanaVersion = this.initContext.env.packageInfo.version;
-    const { ruleTypeRegistry, actionTypeRegistry } = plugins.triggersActionsUi;
+  public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
     return {
-      // getCreateSLOFlyout: getCreateSLOFlyoutLazy({
-      //   config,
-      //   core: coreStart,
-      //   isDev: this.initContext.env.mode.dev,
-      //   kibanaVersion,
-      //   observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      //   ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-      //   plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
-      //   isServerless: !!pluginsStart.serverless,
-      // }),
+      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
+        core: coreStart,
+        isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
+        observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        isServerless: !!pluginsStart.serverless,
+      }),
     };
   }
 

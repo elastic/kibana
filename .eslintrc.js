@@ -898,7 +898,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
         'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
-        'x-pack/plugins/observability_solution/slo/**/*.stories',
+        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
       ],
       rules: {
         'react/function-component-definition': [

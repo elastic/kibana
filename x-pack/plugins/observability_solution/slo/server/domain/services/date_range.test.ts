@@ -11,7 +11,7 @@ import {
   sevenDaysRolling,
   thirtyDaysRolling,
   weeklyCalendarAligned,
-} from '../../services/slo/fixtures/time_window';
+} from '../../services/fixtures/time_window';
 import { toDateRange } from './date_range';
 
 const NOW = new Date('2022-08-11T08:31:00.000Z');

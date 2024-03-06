@@ -24,15 +24,12 @@ function formatTime(minutes: number) {
   if (minutes > 59) {
     const mins = minutes % 60;
     const hours = (minutes - mins) / 60;
-    return i18n.translate('xpack.observability.slo.rules.timeTable.minuteHoursLabel', {
+    return i18n.translate('xpack.slo.rules.timeTable.minuteHoursLabel', {
       defaultMessage: '{hours}h {mins}m',
       values: { hours, mins },
     });
   }
-  return i18n.translate('xpack.observability.slo.rules.timeTable.minuteLabel', {
-    defaultMessage: '{minutes}m',
-    values: { minutes },
-  });
+  return i18n.translate('xpack.slo.formatTime.', { defaultMessage: '' });
 }
 
 export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
@@ -55,9 +52,7 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
   const columns = [
     {
       field: 'rate',
-      name: i18n.translate('xpack.observability.slo.rules.timeTable.rateColumnLabel', {
-        defaultMessage: 'Error rate',
-      }),
+      name: i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' }),
       render: (rate: number) => numeral(rate).format('0%'),
     },
     ...windows.map((windowDef, index) => ({
@@ -72,26 +67,15 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
   return (
     <>
       <EuiTitle size="xs">
-        <h5>
-          {i18n.translate('xpack.observability.slo.rules.timeTable.title', {
-            defaultMessage: 'How long will it take for the alert to fire?',
-          })}
-        </h5>
+        <h5>{i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' })}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s">
-        <p>
-          {i18n.translate('xpack.observability.slo.rules.timeTable.description', {
-            defaultMessage:
-              'The table below lists the error rates and approximately how long it would take to receive your first alert with the current configuration.',
-          })}
-        </p>
+        <p>{i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' })}</p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiBasicTable<{ rate: number } & WindowSchema>
-        tableCaption={i18n.translate('xpack.observability.slo.rules.tableCaption', {
-          defaultMessage: 'Alerting time table',
-        })}
+        tableCaption={i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' })}
         items={rows}
         columns={columns}
       />

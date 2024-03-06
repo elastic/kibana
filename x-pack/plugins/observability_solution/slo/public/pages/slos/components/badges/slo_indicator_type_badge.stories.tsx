@@ -9,12 +9,12 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import {
   buildCustomKqlIndicator,
   buildApmAvailabilityIndicator,
   buildApmLatencyIndicator,
 } from '../../../../data/slo/indicator';
-import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloIndicatorTypeBadge as Component, Props } from './slo_indicator_type_badge';
 import { buildSlo } from '../../../../data/slo/slo';
 

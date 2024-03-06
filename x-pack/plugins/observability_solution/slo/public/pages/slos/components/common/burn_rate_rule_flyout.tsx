@@ -8,7 +8,7 @@
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGetFilteredRuleTypes } from '@kbn/observability-plugin/public';
+import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { paths } from '../../../../../common/locators/paths';
 import { sloKeys } from '../../../../hooks/query_key_factory';
@@ -32,7 +32,7 @@ export function BurnRateRuleFlyout({
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  // const filteredRuleTypes = useGetFilteredRuleTypes();
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const queryClient = useQueryClient();
 
@@ -56,7 +56,7 @@ export function BurnRateRuleFlyout({
     <AddRuleFlyout
       canChangeTrigger={canChangeTrigger}
       consumer={sloFeatureId}
-      // filteredRuleTypes={filteredRuleTypes}
+      filteredRuleTypes={filteredRuleTypes}
       ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
       initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
       onSave={handleSavedRule}

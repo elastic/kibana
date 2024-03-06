@@ -47,7 +47,7 @@ export function SloTimeWindowBadge({ slo, color }: Props) {
   return (
     <EuiFlexItem grow={false}>
       <EuiBadge color={color ?? euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
-        {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
+        {i18n.translate('xpack.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
           values: {
             elapsed: Math.min(elapsedDurationInDays, totalDurationInDays),

@@ -23,7 +23,7 @@ export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
       values={{
         numOfSlos: slos.length,
         instances: i18n.translate(
-          'xpack.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount',
+          'xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount',
           {
             defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
             values: { count: sloList?.total ?? 0 },

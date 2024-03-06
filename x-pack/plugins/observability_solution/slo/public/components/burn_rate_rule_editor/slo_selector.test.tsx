@@ -11,11 +11,11 @@ import { wait } from '@testing-library/user-event/dist/utils';
 import React from 'react';
 
 import { emptySloList } from '../../data/slo/slo';
-import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { render } from '../../utils/test_helper';
 import { SloSelector } from './slo_selector';
 
-jest.mock('../../hooks/slo/use_fetch_slo_definitions');
+jest.mock('../../hooks/use_fetch_slo_definitions');
 
 const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 

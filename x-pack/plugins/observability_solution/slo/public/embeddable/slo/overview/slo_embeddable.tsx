@@ -56,7 +56,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
 
     this.setTitle(
       this.input.title ||
-        i18n.translate('xpack.sloEmbeddable.displayTitle', {
+        i18n.translate('xpack.slo.sloEmbeddable.displayTitle', {
           defaultMessage: 'SLO Overview',
         })
     );

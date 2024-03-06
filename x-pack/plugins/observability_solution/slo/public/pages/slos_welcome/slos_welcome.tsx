@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+// import { HeaderMenu } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -26,7 +27,6 @@ import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { paths } from '../../../common/locators/paths';
 import illustration from './assets/illustration.svg';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
-// import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
 export function SlosWelcomePage() {

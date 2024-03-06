@@ -13,11 +13,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SloEmbeddableInput, EmbeddableSloProps } from './types';
 
-import { ObservabilityPublicPluginsStart } from '../../..';
+import { SloPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
 export async function resolveEmbeddableSloUserInput(
   coreStart: CoreStart,
-  pluginStart: ObservabilityPublicPluginsStart,
+  pluginStart: SloPublicPluginsStart,
   input?: SloEmbeddableInput
 ): Promise<EmbeddableSloProps> {
   const { overlays } = coreStart;

@@ -31,15 +31,12 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
     <EuiFormRow
       label={
         <>
-          {i18n.translate('xpack.observability.slo.rules.burnRate.rowLabel', {
+          {i18n.translate('xpack.slo.rules.burnRate.rowLabel', {
             defaultMessage: 'Burn rate threshold',
           })}{' '}
           <EuiIconTip
             position="top"
-            content={i18n.translate('xpack.observability.slo.rules.burnRate.tooltip', {
-              defaultMessage:
-                'The burn rate is how fast the service consumes the error budget over the lookback period.',
-            })}
+            content={i18n.translate('xpack.slo.burnRate.', { defaultMessage: '' })}
           />
         </>
       }

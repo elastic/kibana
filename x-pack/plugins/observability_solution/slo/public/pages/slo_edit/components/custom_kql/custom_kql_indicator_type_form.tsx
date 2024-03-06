@@ -36,7 +36,7 @@ export function CustomKqlIndicatorTypeForm() {
         <IndexFieldSelector
           indexFields={timestampFields}
           name="indicator.params.timestampField"
-          label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+          label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
             defaultMessage: 'Timestamp field',
           })}
           placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {

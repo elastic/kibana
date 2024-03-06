@@ -12,11 +12,11 @@ import { schema, TypeOf } from '@kbn/config-schema';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SlosPlugin } = await import('./plugin');
-  return new SlosPlugin(initializerContext);
+  const { SloPlugin } = await import('./plugin');
+  return new SloPlugin(initializerContext);
 }
 
-export type { SlosPluginSetup, SlosPluginStart } from './types';
+export type { PluginSetup, PluginStart } from './plugin';
 
 const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),

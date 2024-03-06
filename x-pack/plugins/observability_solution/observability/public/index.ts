@@ -51,11 +51,11 @@ export {
   uptimeOverviewLocatorID,
 } from '../common';
 
-export type { SloEditLocatorParams } from './locators/slo_edit';
+export type { RulesParams } from './locators/rules';
 export { getRenderCellValue } from './components/alerts_table/common/render_cell_value';
 export { useGetAlertFlyoutComponents } from './components/alerts_flyout/use_get_alert_flyout_components';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
-
+export { HeaderMenu } from './pages/overview/components/header_menu/header_menu';
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 
@@ -78,6 +78,8 @@ export { useCreateRule } from './hooks/use_create_rule';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 
+export { KibanaReactStorybookDecorator } from './utils/kibana_react.storybook_decorator';
+
 export type {
   ObservabilityRuleTypeFormatter,
   ObservabilityRuleTypeModel,
@@ -90,6 +92,7 @@ export { DatePickerContextProvider } from './context/date_picker_context/date_pi
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
 export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
+export type { render } from './utils/test_helper';
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';

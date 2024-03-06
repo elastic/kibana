@@ -18,7 +18,7 @@ import {
   SLO_ERROR_BUDGET_EMBEDDABLE,
   SLOErrorBudgetEmbeddable,
 } from './slo_error_budget_embeddable';
-import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
+import { SloPublicPluginsStart, SloPublicStart } from '../../..';
 import { SloErrorBudgetEmbeddableInput } from './types';
 
 export type SloErrorBudgetEmbeddableFactory = EmbeddableFactory;
@@ -28,10 +28,7 @@ export class SloErrorBudgetEmbeddableFactoryDefinition implements EmbeddableFact
   public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
-    private getStartServices: CoreSetup<
-      ObservabilityPublicPluginsStart,
-      ObservabilityPublicStart
-    >['getStartServices']
+    private getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
   ) {}
 
   public async isEditable() {
@@ -59,13 +56,13 @@ export class SloErrorBudgetEmbeddableFactoryDefinition implements EmbeddableFact
   }
 
   public getDescription() {
-    return i18n.translate('xpack.observability.sloErrorBudgetEmbeddable.description', {
+    return i18n.translate('xpack.slo.sloErrorBudgetEmbeddable.description', {
       defaultMessage: 'Get an error budget burn down chart of your SLOs',
     });
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.observability.sloErrorBudgetEmbeddable.displayName', {
+    return i18n.translate('xpack.slo.sloErrorBudgetEmbeddable.displayName', {
       defaultMessage: 'SLO Error budget burn down',
     });
   }

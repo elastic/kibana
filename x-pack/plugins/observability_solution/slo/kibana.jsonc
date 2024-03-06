@@ -32,7 +32,12 @@
       "presentationUtil",
       "features",
       "licensing",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "spaces",
+      "serverless",
     ],
     "requiredBundles": [
       "kibanaReact",

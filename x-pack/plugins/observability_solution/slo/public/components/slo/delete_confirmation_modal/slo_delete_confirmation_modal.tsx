@@ -26,28 +26,26 @@ export function SloDeleteConfirmationModal({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="sloDeleteConfirmationModal"
-      title={i18n.translate('xpack.observability.slo.deleteConfirmationModal.title', {
+      title={i18n.translate('xpack.slo.deleteConfirmationModal.title', {
         defaultMessage: 'Delete {name}?',
         values: { name },
       })}
-      cancelButtonText={i18n.translate(
-        'xpack.observability.slo.deleteConfirmationModal.cancelButtonLabel',
-        { defaultMessage: 'Cancel' }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.observability.slo.deleteConfirmationModal.deleteButtonLabel',
-        { defaultMessage: 'Delete' }
-      )}
+      cancelButtonText={i18n.translate('xpack.slo.deleteConfirmationModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.slo.deleteConfirmationModal.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      })}
       onCancel={onCancel}
       onConfirm={onConfirm}
     >
       {groupBy !== ALL_VALUE
-        ? i18n.translate('xpack.observability.slo.deleteConfirmationModal.groupByDisclaimerText', {
+        ? i18n.translate('xpack.slo.deleteConfirmationModal.groupByDisclaimerText', {
             defaultMessage:
               'This SLO has been generated with a group key on "{groupKey}". Deleting this SLO definition will result in all instances being deleted.',
             values: { groupKey: groupBy },
           })
-        : i18n.translate('xpack.observability.slo.deleteConfirmationModal.descriptionText', {
+        : i18n.translate('xpack.slo.deleteConfirmationModal.descriptionText', {
             defaultMessage: "You can't recover this SLO after deleting it.",
           })}
     </EuiConfirmModal>

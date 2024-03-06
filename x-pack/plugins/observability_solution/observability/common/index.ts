@@ -61,7 +61,7 @@ export {
 } from './progressive_loading';
 
 export const casesFeatureId = 'observabilityCases';
-
+export const sloFeatureId = 'slo';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
 // want to change it.
@@ -79,10 +79,13 @@ export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
+// TODO SLO: maybe move to obs-shared?
+export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
+export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
+export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;
 export type { AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
-
 export { observabilityAlertFeatureIds } from './constants';
