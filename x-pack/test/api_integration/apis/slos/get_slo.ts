@@ -15,7 +15,7 @@ import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/177806
-  describe.skip('Get SLOs', function () {
+  describe('Get SLOs', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
