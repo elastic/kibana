@@ -34,7 +34,7 @@ import { SourceLoadingPage } from '../../components/source_loading_page';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
-import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
+import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
@@ -91,6 +91,18 @@ export const InfrastructurePage = () => {
                         {settingsTabTitle}
                       </EuiHeaderLink>
                       <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                      <Route
+                        path={'/hosts'}
+                        render={() => {
+                          return <AnomalyDetectionFlyout hideJobType hideSelectGroup />;
+                        }}
+                      />
+                      <Route
+                        path={'/detail/host'}
+                        render={() => {
+                          return <AnomalyDetectionFlyout hideJobType hideSelectGroup />;
+                        }}
+                      />
                       {config.featureFlags.alertsAndRulesDropdownEnabled && (
                         <MetricsAlertDropdown />
                       )}

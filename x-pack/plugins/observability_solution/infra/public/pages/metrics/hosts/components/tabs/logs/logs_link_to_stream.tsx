@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getLogsLocatorsFromUrlService, LogViewReference } from '@kbn/logs-shared-plugin/common';
@@ -24,26 +23,24 @@ export const LogsLinkToStream = ({ startTime, endTime, query, logView }: LogsLin
   const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
 
   return (
-    <RedirectAppLinks coreStart={services}>
-      <EuiButtonEmpty
-        href={logsLocator.getRedirectUrl({
-          time: endTime,
-          timeRange: {
-            startTime,
-            endTime,
-          },
-          filter: query,
-          logView,
-        })}
-        data-test-subj="hostsView-logs-link-to-stream-button"
-        iconType="popout"
-        flush="both"
-      >
-        <FormattedMessage
-          id="xpack.infra.hostsViewPage.tabs.logs.openInLogsUiLinkText"
-          defaultMessage="Open in Logs"
-        />
-      </EuiButtonEmpty>
-    </RedirectAppLinks>
+    <EuiButtonEmpty
+      href={logsLocator.getRedirectUrl({
+        time: endTime,
+        timeRange: {
+          startTime,
+          endTime,
+        },
+        filter: query,
+        logView,
+      })}
+      data-test-subj="hostsView-logs-link-to-stream-button"
+      iconType="popout"
+      flush="both"
+    >
+      <FormattedMessage
+        id="xpack.infra.hostsViewPage.tabs.logs.openInLogsUiLinkText"
+        defaultMessage="Open in Logs"
+      />
+    </EuiButtonEmpty>
   );
 };
