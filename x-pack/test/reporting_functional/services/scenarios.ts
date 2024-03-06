@@ -80,7 +80,7 @@ export function createScenarios(
   const tryDashboardDownloadCsvFail = async (savedSearchTitle: string) => {
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
+    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
 
     if (!(await testSubjects.exists(actionItemTestSubj))) {
       await testSubjects.click('embeddablePanelMore-mainMenu');
@@ -93,13 +93,13 @@ export function createScenarios(
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
     await dashboardPanelActions.clickContextMenuMoreItem();
-    await testSubjects.missingOrFail('embeddablePanelAction-downloadCsvReport');
+    await testSubjects.missingOrFail('embeddablePanelAction-generateCsvReport');
   };
   const tryDashboardDownloadCsvSuccess = async (savedSearchTitle: string) => {
     const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
     await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
     await dashboardPanelActions.clickContextMenuMoreItem();
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
+    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
     await testSubjects.existOrFail(actionItemTestSubj);
     /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
       actionItemTestSubj

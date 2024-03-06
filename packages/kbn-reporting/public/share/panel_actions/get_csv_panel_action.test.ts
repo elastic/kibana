@@ -110,6 +110,10 @@ describe('GetCsvReportPanelAction', () => {
     } as unknown as ActionContext;
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('translates empty embeddable context into job params', async () => {
     const panel = new ReportingCsvPanelAction({
       core,
@@ -183,7 +187,10 @@ describe('GetCsvReportPanelAction', () => {
 
     await panel.execute(context);
 
-    expect(core.http.post).toHaveBeenCalled();
+    expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_searchsource', {
+      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'\',version:\'7.15.0\')"}',
+      method: 'POST',
+    });
   });
 
   it('shows a toast when it unsuccessfully fails', async () => {
@@ -200,7 +207,11 @@ describe('GetCsvReportPanelAction', () => {
 
     await panel.execute(context);
 
-    expect(core.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith({
+      'data-test-subj': 'generateCsvFail',
+      text: "We couldn't generate your CSV at this time.",
+      title: 'CSV report failed',
+    });
   });
 
   it(`doesn't allow csv generation with bad licenses`, async () => {
@@ -273,6 +284,38 @@ describe('GetCsvReportPanelAction', () => {
       });
 
       expect(await plugin.isCompatible(context)).toEqual(true);
+    });
+  });
+
+  describe('download csv', () => {
+    beforeEach(() => {
+      csvConfig = {
+        scroll: {} as ClientConfigType['csv']['scroll'],
+        enablePanelActionDownload: true,
+      };
+
+      core.http.post.mockResolvedValue({});
+    });
+
+    it('shows a success toast when the download successfully starts', async () => {
+      const panel = new ReportingCsvPanelAction({
+        core,
+        apiClient,
+        startServices$: mockStartServices$,
+        usesUiCapabilities: true,
+        csvConfig,
+      });
+
+      await Rx.firstValueFrom(mockStartServices$);
+
+      await panel.execute(context);
+
+      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        'data-test-subj': 'csvDownloadStarted',
+        text: expect.any(Function),
+        title: 'CSV download started',
+      });
+      expect(core.notifications.toasts.addDanger).not.toHaveBeenCalled();
     });
   });
 });

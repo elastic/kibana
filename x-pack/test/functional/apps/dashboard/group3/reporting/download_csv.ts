@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
-import { REPO_ROOT } from '@kbn/repo-info';
 import expect from '@kbn/expect';
-import fs from 'fs';
-import path from 'path';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
@@ -23,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
   const retry = getService('retry');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects([
     'reporting',
     'common',
@@ -39,16 +37,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  const getCsvPath = (name: string) =>
-    path.resolve(REPO_ROOT, `target/functional-tests/downloads/${name}.csv`);
+  const getCsv = async () => {
+    await toasts.dismissAll();
+    const url = await PageObjects.reporting.getReportURL(60000);
+    const res = await PageObjects.reporting.getResponse(url);
 
-  // checks every 100ms for the file to exist in the download dir
-  // just wait up to 5 seconds
-  const getDownload = (filePath: string) => {
-    return retry.tryForTime(5000, async () => {
-      expect(fs.existsSync(filePath)).to.be(true);
-      return fs.readFileSync(filePath).toString();
-    });
+    expect(res.status).to.equal(200);
+    expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+    return res.text;
   };
 
   const clickActionsMenu = async (headingTestSubj: string) => {
@@ -60,25 +56,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('click "More"');
     await dashboardPanelActions.clickContextMenuMoreItem();
 
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
+    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
     await testSubjects.existOrFail(actionItemTestSubj); // wait for the full panel to display or else the test runner could click the wrong option!
-    log.debug('click "Download CSV"');
+    log.debug('click "Generate CSV"');
     await testSubjects.click(actionItemTestSubj);
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
-    before('initialize tests', async () => {
+  describe('Generate CSV', () => {
+    beforeEach('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
+      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       await browser.setWindowSize(1600, 850);
-    });
-
-    afterEach('remove download', () => {
-      try {
-        fs.unlinkSync(getCsvPath('Ecommerce Data'));
-      } catch (e) {
-        // it might not have been there to begin with
-      }
     });
 
     describe('Default Saved Search Data', () => {
@@ -91,12 +80,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.teardownEcommerce();
       });
 
-      it('Download CSV export of a saved search panel', async function () {
+      it('Generate CSV export of a saved search panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
+        const csvFile = await getCsv();
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -109,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
+        const csvFile = await getCsv();
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -121,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
+        const csvFile = await getCsv();
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -135,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
         await testSubjects.existOrFail('csvReportStarted');
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
+        const csvFile = await getCsv(); // file exists with proper name
         expect(csvFile).to.not.be(null);
       });
     });
@@ -167,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath(TEST_SEARCH_TITLE));
+        const csvFile = await getCsv();
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -196,11 +185,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
-      it('Download CSV export of a saved search panel', async () => {
+      it('Generate CSV export of a saved search panel', async () => {
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('namessearch'));
+        const csvFile = await getCsv();
         expectSnapshot(csvFile).toMatch();
       });
     });

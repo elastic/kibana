@@ -55,7 +55,7 @@ export interface TaskPayloadCsvFromSavedObject extends CsvFromSavedObjectBase, B
   pagingStrategy: CsvPagingStrategy;
 }
 
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
+export const CSV_REPORTING_ACTION = 'generateCsvReport';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
