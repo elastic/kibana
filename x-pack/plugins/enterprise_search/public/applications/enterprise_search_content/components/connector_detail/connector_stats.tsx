@@ -115,7 +115,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                           {
                             defaultMessage: '{documentAmount} Documents',
                             values: {
-                              documentAmount: indexData?.total.docs.count ?? '-',
+                              documentAmount: indexData?.total.docs.count ?? 0,
                             },
                           }
                         )}
@@ -124,23 +124,25 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLinkTo
-                  to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                    connectorId: connector.id,
-                    tabId: ConnectorDetailTabId.DOCUMENTS,
-                  })}
-                >
-                  <EuiText textAlign="right">
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
-                      {
-                        defaultMessage: 'See documents',
-                      }
-                    )}
-                  </EuiText>
-                </EuiLinkTo>
-              </EuiFlexItem>
+              {!!indexData && (
+                <EuiFlexItem>
+                  <EuiLinkTo
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.DOCUMENTS,
+                    })}
+                  >
+                    <EuiText textAlign="right">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
+                        {
+                          defaultMessage: 'See documents',
+                        }
+                      )}
+                    </EuiText>
+                  </EuiLinkTo>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           }
         />

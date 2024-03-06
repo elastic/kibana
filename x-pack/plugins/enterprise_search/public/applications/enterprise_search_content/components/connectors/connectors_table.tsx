@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
@@ -41,7 +41,7 @@ interface ConnectorsTableProps {
   isLoading?: boolean;
   items: ConnectorViewItem[];
   meta?: Meta;
-  onChange: (criteria: CriteriaWithPagination<Connector>) => void;
+  onChange: (criteria: CriteriaWithPagination<ConnectorViewItem>) => void;
   onDelete: (connectorName: string, connectorId: string, indexName: string | null) => void;
 }
 export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
@@ -69,7 +69,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
                 defaultMessage: 'Connector name',
               }
             ),
-            render: (connector: Connector) => (
+            render: (connector: ConnectorViewItem) => (
               <EuiLinkTo
                 to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
               >
@@ -81,18 +81,23 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         ]
       : []),
     {
-      field: 'index_name',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.indexName',
         {
           defaultMessage: 'Index name',
         }
       ),
-      render: (indexName: string) =>
-        indexName ? (
-          <EuiLinkTo to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName })}>
-            {indexName}
-          </EuiLinkTo>
+      render: (connector: ConnectorViewItem) =>
+        connector.index_name ? (
+          connector.indexExists ? (
+            <EuiLinkTo
+              to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: connector.index_name })}
+            >
+              {connector.index_name}
+            </EuiLinkTo>
+          ) : (
+            connector.index_name
+          )
         ) : (
           '--'
         ),
