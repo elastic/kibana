@@ -98,6 +98,20 @@ export default function ({ getService }: FtrProviderContext) {
         .get(FIELDS_PATH)
         .query({
           pattern: 'basic_index',
+          fields: ['bar'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
+    it('returns a single field as requested with jhson encoding', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
           fields: JSON.stringify(['bar']),
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
@@ -112,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(FIELDS_PATH)
         .query({
           pattern: 'basic_index',
-          meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
+          meta_fields: ['_id', '_source', 'crazy_meta_field'],
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(200, {
@@ -198,6 +212,34 @@ export default function ({ getService }: FtrProviderContext) {
           indices: ['basic_index'],
         })
         .then(ensureFieldsAreSorted);
+    });
+
+    it('can request fields by type', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
+          field_types: 'boolean',
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
+    it('can request fields by multiple types', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
+          field_types: ['boolean', 'text'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0], testFields[1]],
+          indices: ['basic_index'],
+        });
     });
 
     it('returns fields when one pattern exists and the other does not', async () => {
