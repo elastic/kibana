@@ -27,6 +27,12 @@ export class FieldEditorService extends FtrService {
   public async setCustomLabel(name: string) {
     await this.testSubjects.setValue('customLabelRow > input', name);
   }
+  public async enableCustomDescription() {
+    await this.testSubjects.setEuiSwitch('customDescriptionRow > toggle', 'check');
+  }
+  public async setCustomDescription(description: string) {
+    await this.testSubjects.setValue('customDescriptionRow > input', description);
+  }
   public async enableValue() {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'check');
   }
