@@ -16,14 +16,18 @@ import {
 } from '../../../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import * as i18n from './translations';
-import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useReadonlyHeader } from '../../../use_readonly_header';
 import { AlertDetailsRedirect } from './alert_details_redirect';
 
+const LazyDetectionEnginePage = React.lazy(
+  // NOTE: adding manual chunk name so that we can trace it easily in the devtools
+  () => import(/* webpackChunkName: "lazy_detections_page" */ './lazy/detections_page')
+);
+
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
-    <DetectionEnginePage />
+    <LazyDetectionEnginePage />
     <SpyRoute pageName={SecurityPageName.alerts} />
   </TrackApplicationView>
 );

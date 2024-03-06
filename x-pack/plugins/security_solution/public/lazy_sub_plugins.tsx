@@ -44,4 +44,5 @@ const subPluginClasses = {
   ThreatIntelligence,
   EntityAnalytics,
 };
+
 export { subPluginClasses };
