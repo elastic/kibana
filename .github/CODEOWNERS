@@ -504,7 +504,7 @@ examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
-x-pack/plugins/logs_shared @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -528,7 +528,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
-x-pack/plugins/metrics_data_access @elastic/obs-knowledge-team
+x-pack/plugins/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/cancellable_search @elastic/ml-ui
@@ -991,63 +991,59 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
-/x-pack/plugins/observability_solution/infra/server/routes @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/server/saved_objects/metrics_explorer_view @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/server/saved_objects/inventory_view @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/server/services @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/server/lib @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/server/lib/log_analysis @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/docs/state_machines @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/inventory_models @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/http_api/metrics_api.ts @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/http_api/snapshot_api.ts @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/http_api/log_analysis @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/http_api/metrics_explorer_views @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/http_api/host_details @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/snapshot_metric_i18n.ts @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/inventory_views @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/color_palette.test.ts @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/performance_tracing.ts @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/log_search_summary @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/metrics_sources @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/saved_views @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/infra_ml @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/formatters @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/log_text_scale @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/log_analysis @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/search_strategies/log_entries @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/common/metrics_explorer_views @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/source_configuration @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/color_palette.ts @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/common/log_search_result @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/public/apps/logs_app.tsx @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/public/apps/metrics_app.tsx @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/lens @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/try_it_button.tsx @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/fixed_datepicker.tsx
-/x-pack/plugins/observability_solution/infra/public/components/logging @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/public/components/infrastructure_node_metrics_tables @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/saved_views @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/feature_feedback_button.tsx @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/log_stream @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/public/components/source_configuration @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/components/asset_details @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/containers/logs @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/public/containers/metrics_source @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/containers/metrics_explorer @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/containers/ml @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/pages/logs @elastic/obs-ux-logs-team
-/x-pack/plugins/observability_solution/infra/public/pages/metrics @elastic/obs-ux-infra_services-team
+## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
+## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
+## the priority on codeownership will be as follow:
+## - infra -> both teams (automatically generated by script)
+## - infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-ux-infra_services-team
+## - Logs UI code exceptions -> @elastic/obs-ux-logs-team
+## This should allow the infra team to work without dependencies on the @elastic/obs-ux-logs-team, which will maintain ownership of the Logs UI code only.
+
+## infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/common @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/docs @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/alerting @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/apps @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/public/common @elastic/obs-ux-infra_services-team
-/x-pack/plugins/observability_solution/infra/public/observability_logs @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/components @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/containers @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/hooks @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/images @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/lib @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/pages @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/public/services @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/test_utils @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/public/utils @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/server/lib @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/server/routes @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/server/saved_objects @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/server/services @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/server/usage @elastic/obs-ux-infra_services-team
+/x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
+## Logs UI code exceptions -> @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/http_api/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/log_search_result @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/log_search_summary @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/log_text_scale @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/performance_tracing.ts @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/common/search_strategies/log_entries @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/docs/state_machines @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/apps/logs_app.tsx @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/components/log_stream @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/components/logging @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/containers/logs @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/observability_logs @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/public/pages/logs @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/server/lib/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/observability_solution/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+# Infra Monitoring tests
+/x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 
 # Observability UX management team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
@@ -1542,8 +1538,8 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
+/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 

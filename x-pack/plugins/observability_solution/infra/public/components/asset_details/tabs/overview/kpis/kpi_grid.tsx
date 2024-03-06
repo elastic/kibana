@@ -6,13 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import useAsync from 'react-use/lib/useAsync';
-import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
-import { Kpi } from './kpi';
+import { EuiFlexGroup } from '@elastic/eui';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
+import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 interface Props {
   dataView?: DataView;
@@ -21,35 +20,26 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
-  const model = findInventoryModel('host');
-  const { euiTheme } = useEuiTheme();
+  const { searchSessionId } = useLoadingStateContext();
 
-  const { value: dashboards } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
+  const filters = useMemo(() => {
+    return [
+      buildCombinedHostsFilter({
+        field: 'host.name',
+        values: [assetName],
+        dataView,
+      }),
+    ];
+  }, [dataView, assetName]);
 
-  const charts = useMemo(
-    () =>
-      dashboards?.kpi.get({
-        metricsDataViewId: dataView?.id,
-        options: {
-          seriesColor: euiTheme.colors.lightestShade,
-        },
-      }).charts ?? [],
-    [dataView, euiTheme.colors.lightestShade, dashboards?.kpi]
-  );
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {charts.map((chartProps, index) => (
-        <EuiFlexItem key={index}>
-          <Kpi
-            {...chartProps}
-            dateRange={dateRange}
-            assetName={assetName}
-            height={KPI_CHART_HEIGHT}
-          />
-        </EuiFlexItem>
-      ))}
+      <HostKpiCharts
+        dataView={dataView}
+        filters={filters}
+        dateRange={dateRange}
+        searchSessionId={searchSessionId}
+      />
     </EuiFlexGroup>
   );
 };
