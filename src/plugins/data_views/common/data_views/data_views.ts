@@ -487,7 +487,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
+    const defaultIndexPatternId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
     return defaultIndexPatternId ?? null;
   };
 
