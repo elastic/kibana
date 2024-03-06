@@ -112,7 +112,7 @@ const createInstallButtonColumn = (
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
-  render: (ruleId: RuleSignatureId, record) => {
+  render: (ruleId: RuleSignatureId, record: Rule) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
     const isInstallButtonDisabled = isRuleInstalling || isDisabled;
     return (
