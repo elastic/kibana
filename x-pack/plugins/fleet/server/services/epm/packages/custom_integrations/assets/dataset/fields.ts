@@ -7,20 +7,6 @@
 
 import * as yaml from 'js-yaml';
 
-export const createBaseFields = () => {
-  const fields = [
-    { name: 'data_stream.type', type: 'constant_keyword', description: 'Data stream type.' },
-    { name: 'data_stream.dataset', type: 'constant_keyword', description: 'Data stream dataset.' },
-    {
-      name: 'data_stream.namespace',
-      type: 'constant_keyword',
-      description: 'Data stream namespace.',
-    },
-    { name: '@timestamp', type: 'date', description: 'Event timestamp.' },
-  ];
-  return yaml.dump(fields);
-};
-
 export const createAgentFields = () => {
   const fields = [
     {
