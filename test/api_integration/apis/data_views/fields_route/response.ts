@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
-    it('returns a single field as requested with jhson encoding', async () => {
+    it('returns a single field as requested with json encoding', async () => {
       await supertest
         .get(FIELDS_PATH)
         .query({
