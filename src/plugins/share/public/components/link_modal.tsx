@@ -30,7 +30,7 @@ interface LinkProps {
   shareableUrlForSavedObject?: string;
   shareableUrl?: string;
   onClose: () => void;
-  action: any;
+  action: { formattedMessageId: string; defaultMessage: string; dataTestSubj: string };
   urlService: BrowserUrlService;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
