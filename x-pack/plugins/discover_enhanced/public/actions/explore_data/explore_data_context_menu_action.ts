@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { KibanaLocation } from '@kbn/share-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
@@ -27,9 +26,5 @@ export class ExploreDataContextMenuAction
 
   public async isCompatible(context: EmbeddableApiContext): Promise<boolean> {
     return await super.isCompatible(context);
-  }
-
-  public async getLocation(context: EmbeddableApiContext): Promise<KibanaLocation> {
-    return super.getLocation(context);
   }
 }

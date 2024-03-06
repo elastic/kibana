@@ -97,11 +97,13 @@ export abstract class AbstractExploreDataAction {
     const params: DiscoverAppLocatorParams = {
       dataViewId: shared.getDataViews(embeddable)[0],
       filters: [
+        // combine filters from all possible sources
         ...(parentParams.filters ?? []),
         ...(childParams.filters ?? []),
         ...(eventParams?.filters ?? []),
       ],
-      query: childParams.query ?? parentParams.query,
+      query: parentParams.query ?? childParams.query, // overwrite the child query with the parent query
+      // prioritize event time range for chart action; otherwise, overwrite the parent time range with the child's
       timeRange: eventParams?.timeRange ?? childParams.timeRange ?? parentParams.timeRange,
     };
 
@@ -136,7 +138,7 @@ export abstract class AbstractExploreDataAction {
   public async getHref(api: EmbeddableApiContext): Promise<string> {
     const { embeddable } = api;
 
-    if (!shared.hasExactlyOneDataView(embeddable)) {
+    if (!this.isCompatible({ embeddable })) {
       throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
