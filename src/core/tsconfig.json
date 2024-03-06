@@ -160,6 +160,7 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-security-server",
     "@kbn/core-security-common",
+    "@kbn/core-security-server-mocks",
   ],
   "exclude": [
     "target/**/*",
