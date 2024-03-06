@@ -107,9 +107,9 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
       dispatch,
     }),
     /**
-     * We want to trigger a rerender only the permissions will change.
+     * We want to trigger a rerender only when the permissions will change.
      * The registries, the owner, and the rest of the values should
-     *  not change during the lifecycle of the cases application.
+     * not change during the lifecycle of the cases application.
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

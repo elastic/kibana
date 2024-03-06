@@ -121,6 +121,20 @@ const CaseContainerComponent: React.FC = () => {
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
   }, [endTourStep, isTourActive]);
 
+  useEffect(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.casePage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        expandedDetail: {},
+        show: false,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
