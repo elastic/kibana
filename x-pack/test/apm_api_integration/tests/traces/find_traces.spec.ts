@@ -88,7 +88,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Find traces when traces exist', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177543
+  registry.when.skip('Find traces when traces exist', { config: 'basic', archives: [] }, () => {
     before(() => {
       const java = apm
         .service({ name: 'java', environment: 'production', agentName: 'java' })
