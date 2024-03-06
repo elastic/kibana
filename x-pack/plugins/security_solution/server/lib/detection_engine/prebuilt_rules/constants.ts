@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Settings } from './settings';
+export const PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS = 1800000 as const; // 30 minutes
