@@ -13,7 +13,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
-import type { AGENTLESS_POLICY_ID } from '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
+import { AGENTLESS_POLICY_ID } from '@kbn/fleet-plugin/common/constants';
 import type {
   CloudbeatConfigKeyType,
   CloudSecurityInstallationStats,
