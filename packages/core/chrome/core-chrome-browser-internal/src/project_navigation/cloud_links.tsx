@@ -33,7 +33,14 @@ const parseCloudURLs = (cloudLinks: CloudLinks): CloudLinks => {
 };
 
 export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
-  const { billingUrl, deploymentsUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
+  const {
+    billingUrl,
+    deploymentsUrl,
+    deploymentUrl,
+    projectsUrl,
+    performanceUrl,
+    usersAndRolesUrl,
+  } = cloud;
 
   const links: CloudLinks = {};
 
@@ -79,6 +86,15 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
         defaultMessage: 'View all deployments',
       }),
       href: deploymentsUrl,
+    };
+  }
+
+  if (projectsUrl) {
+    links.projects = {
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.allProjectsLinkText', {
+        defaultMessage: 'View all projects',
+      }),
+      href: projectsUrl,
     };
   }
 

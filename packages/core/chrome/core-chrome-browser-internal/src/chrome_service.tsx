@@ -303,19 +303,9 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectsUrl = (projectsUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectsUrl(projectsUrl);
-    };
-
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
-    };
-
-    const setProjectUrl = (projectUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectUrl(projectUrl);
     };
 
     const isIE = () => {
@@ -543,8 +533,6 @@ export class ChromeService {
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
-        setProjectsUrl,
-        setProjectUrl,
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),

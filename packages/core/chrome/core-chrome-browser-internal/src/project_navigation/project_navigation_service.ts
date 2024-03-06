@@ -64,9 +64,7 @@ export class ProjectNavigationService {
     current: SideNavComponent | null;
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -125,20 +123,11 @@ export class ProjectNavigationService {
       getProjectHome$: () => {
         return this.projectHome$.asObservable();
       },
-      setProjectsUrl: (projectsUrl: string) => {
-        this.projectsUrl$.next(projectsUrl);
-      },
-      getProjectsUrl$: () => {
-        return this.projectsUrl$.asObservable();
-      },
       setProjectName: (projectName: string) => {
         this.projectName$.next(projectName);
       },
       getProjectName$: () => {
         return this.projectName$.asObservable();
-      },
-      setProjectUrl: (projectUrl: string) => {
-        this.projectUrl$.next(projectUrl);
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         navTreeDefinition: Observable<NavigationTreeDefinition<LinkId>>,
@@ -168,8 +157,6 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           chromeBreadcrumbs$,
-          this.projectsUrl$,
-          this.projectUrl$,
           this.projectName$,
           this.solutionNavDefinitions$,
           this.activeSolutionNavDefinitionId$,
@@ -180,8 +167,6 @@ export class ProjectNavigationService {
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-              projectsUrl,
-              projectUrl,
               projectName,
               solutionNavDefinitions,
               activeSolutionNavDefinitionId,
@@ -198,9 +183,7 @@ export class ProjectNavigationService {
                   : undefined;
 
               return buildBreadcrumbs({
-                projectUrl,
                 projectName,
-                projectsUrl,
                 projectBreadcrumbs,
                 activeNodes,
                 chromeBreadcrumbs,

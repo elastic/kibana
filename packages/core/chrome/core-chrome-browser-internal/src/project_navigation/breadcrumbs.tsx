@@ -23,18 +23,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getSolutionNavSwitcherBreadCrumb } from '../ui/solution_nav_switcher_breadcrumbs';
 
 export function buildBreadcrumbs({
-  projectsUrl,
   projectName,
-  projectUrl,
   cloudLinks,
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
   solutionNavigations,
 }: {
-  projectsUrl?: string;
   projectName?: string;
-  projectUrl?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
@@ -49,9 +45,7 @@ export function buildBreadcrumbs({
   };
 }): ChromeProjectBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
-    projectsUrl,
     projectName,
-    projectUrl,
     solutionNavigations,
     cloudLinks,
   });
@@ -104,15 +98,11 @@ export function buildBreadcrumbs({
 }
 
 function buildRootCrumb({
-  projectsUrl,
   projectName,
-  projectUrl,
   solutionNavigations,
   cloudLinks,
 }: {
-  projectsUrl?: string;
   projectName?: string;
-  projectUrl?: string;
   cloudLinks: CloudLinks;
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
@@ -144,13 +134,13 @@ function buildRootCrumb({
       <EuiContextMenuPanel
         size="s"
         items={[
-          <EuiContextMenuItem key="project" href={projectUrl} icon={'gear'}>
+          <EuiContextMenuItem key="project" href={cloudLinks.deployment?.href} icon={'gear'}>
             <FormattedMessage
               id="core.ui.primaryNav.cloud.linkToProject"
               defaultMessage="Manage project"
             />
           </EuiContextMenuItem>,
-          <EuiContextMenuItem key="projects" href={projectsUrl} icon={'grid'}>
+          <EuiContextMenuItem key="projects" href={cloudLinks.projects?.href} icon={'grid'}>
             <FormattedMessage
               id="core.ui.primaryNav.cloud.linkToAllProjects"
               defaultMessage="View all projects"

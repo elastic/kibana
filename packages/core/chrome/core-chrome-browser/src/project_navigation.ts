@@ -54,13 +54,15 @@ export type CloudLinkId =
   | 'performance'
   | 'billingAndSub'
   | 'deployment'
-  | 'deployments';
+  | 'deployments'
+  | 'projects';
 
 export interface CloudURLs {
   baseUrl?: string;
   billingUrl?: string;
   deploymentsUrl?: string;
   deploymentUrl?: string;
+  projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
 }

@@ -49,22 +49,10 @@ export interface InternalChromeStart extends ChromeStart {
     setHome(homeHref: string): void;
 
     /**
-     * Sets the cloud's projects page.
-     * @param projectsUrl
-     */
-    setProjectsUrl(projectsUrl: string): void;
-
-    /**
      * Sets the project name.
      * @param projectName
      */
     setProjectName(projectName: string): void;
-
-    /**
-     * Sets the project url.
-     * @param projectUrl
-     */
-    setProjectUrl(projectUrl: string): void;
 
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,

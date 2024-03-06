@@ -65,14 +65,9 @@ export class ServerlessPlugin
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
     const { cloud } = dependencies;
-    if (cloud.projectsUrl) {
-      project.setProjectsUrl(cloud.projectsUrl);
-    }
+
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
-    }
-    if (cloud.deploymentUrl) {
-      project.setProjectUrl(cloud.deploymentUrl);
     }
 
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
