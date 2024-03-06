@@ -21,6 +21,12 @@ export interface CloudStart {
    */
   cloudId?: string;
   /**
+   * This is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/deployments`
+   */
+  deploymentsUrl?: string;
+  /**
    * This is the path to the Cloud deployment management page for the deployment to which the Kibana instance belongs. The value is already prepended with `baseUrl`.
    *
    * @example `{baseUrl}/deployments/bfdad4ef99a24212a06d387593686d63`

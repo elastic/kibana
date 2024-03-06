@@ -11,22 +11,20 @@ import { i18n } from '@kbn/i18n';
 import type {
   ChromeProjectBreadcrumb,
   SolutionNavigationDefinitions,
+  CloudLinks,
 } from '@kbn/core-chrome-browser';
 
 export const getSolutionNavSwitcherBreadCrumb = ({
   definitions,
   activeId,
   onChange,
-  allDeploymentsUrl,
-  deploymentUrl,
+  cloudLinks,
 }: {
   definitions: SolutionNavigationDefinitions;
   activeId: string;
   onChange: (id: string) => void;
-  allDeploymentsUrl: string;
-  deploymentUrl: string;
+  cloudLinks: CloudLinks;
 }): ChromeProjectBreadcrumb => {
-
   return {
     text: i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.myDeploymentLabel', {
       defaultMessage: 'My deployment',
@@ -46,6 +44,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
             <EuiListGroupItem
               key={id}
               label={title}
+              isActive={id === activeId}
               iconType={icon as string}
               onClick={() => {
                 onChange(id);
@@ -53,19 +52,22 @@ export const getSolutionNavSwitcherBreadCrumb = ({
             />,
           ])}
         </EuiListGroup>
+
         <EuiSpacer size="s" />
 
-        <EuiButtonEmpty href={deploymentUrl} color="text" iconType="gear">
-          {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
-            defaultMessage: 'Manage this deployment',
-          })}
-        </EuiButtonEmpty>
+        {cloudLinks.deployment && (
+          <EuiButtonEmpty href={cloudLinks.deployment.href} color="text" iconType="gear">
+            {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
+              defaultMessage: 'Manage this deployment',
+            })}
+          </EuiButtonEmpty>
+        )}
 
-        <EuiButtonEmpty href={allDeploymentsUrl} color="text" iconType="spaces">
-          {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.viewAllDeploymentsLabel', {
-            defaultMessage: 'View all deployments',
-          })}
-        </EuiButtonEmpty>
+        {cloudLinks.deployments && (
+          <EuiButtonEmpty href={cloudLinks.deployments.href} color="text" iconType="spaces">
+            {cloudLinks.deployments.title}
+          </EuiButtonEmpty>
+        )}
       </>
     ),
     popoverProps: { panelPaddingSize: 'm', zIndex: 6000, panelStyle: { width: 260 } },

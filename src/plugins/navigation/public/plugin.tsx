@@ -88,7 +88,10 @@ export class NavigationPublicPlugin
       solutionNavigation: { featureOn: isSolutionNavigationFeatureOn },
     } = config;
 
-    if (isSolutionNavigationFeatureOn) {
+    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
+    const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud;
+
+    if (isSolutionNavEnabled) {
       this.addDefaultSolutionNavigation({ core, chrome, cloud });
 
       combineLatest([
@@ -117,7 +120,10 @@ export class NavigationPublicPlugin
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
-      addSolutionNavigation: this.addSolutionNavigation.bind(this),
+      addSolutionNavigation: (solutionNavigation: SolutionNavigation) => {
+        if (!isSolutionNavEnabled) return;
+        return this.addSolutionNavigation(solutionNavigation);
+      },
     };
   }
 

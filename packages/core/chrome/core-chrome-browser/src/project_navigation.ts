@@ -49,10 +49,17 @@ export type AppDeepLinkId =
   | ObservabilityLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+export type CloudLinkId =
+  | 'userAndRoles'
+  | 'performance'
+  | 'billingAndSub'
+  | 'deployment'
+  | 'deployments';
 
 export interface CloudURLs {
+  baseUrl?: string;
   billingUrl?: string;
+  deploymentsUrl?: string;
   deploymentUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;

@@ -15,6 +15,7 @@ import {
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
   SolutionNavigationDefinitions,
+  CloudLinks,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,8 +26,7 @@ export function buildBreadcrumbs({
   projectsUrl,
   projectName,
   projectUrl,
-  deploymentUrl = '',
-  allDeploymentsUrl = '',
+  cloudLinks,
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
@@ -35,13 +35,12 @@ export function buildBreadcrumbs({
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
-  allDeploymentsUrl?: string;
-  deploymentUrl?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
+  cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
@@ -54,8 +53,7 @@ export function buildBreadcrumbs({
     projectName,
     projectUrl,
     solutionNavigations,
-    deploymentUrl,
-    allDeploymentsUrl,
+    cloudLinks,
   });
 
   if (projectBreadcrumbs.params.absolute) {
@@ -110,14 +108,12 @@ function buildRootCrumb({
   projectName,
   projectUrl,
   solutionNavigations,
-  deploymentUrl,
-  allDeploymentsUrl,
+  cloudLinks,
 }: {
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
-  allDeploymentsUrl: string;
-  deploymentUrl: string;
+  cloudLinks: CloudLinks;
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
     activeId: string;
@@ -132,8 +128,7 @@ function buildRootCrumb({
       definitions,
       onChange,
       activeId,
-      deploymentUrl,
-      allDeploymentsUrl,
+      cloudLinks,
     });
   }
 

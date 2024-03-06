@@ -17,6 +17,7 @@ import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinitions,
   ChromeStyle,
+  CloudLinks,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -83,6 +84,7 @@ export class ProjectNavigationService {
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
+  private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
   private http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
@@ -171,6 +173,7 @@ export class ProjectNavigationService {
           this.projectName$,
           this.solutionNavDefinitions$,
           this.activeSolutionNavDefinitionId$,
+          this.cloudLinks$,
         ]).pipe(
           map(
             ([
@@ -182,6 +185,7 @@ export class ProjectNavigationService {
               projectName,
               solutionNavDefinitions,
               activeSolutionNavDefinitionId,
+              cloudLinks,
             ]) => {
               const solutionNavigations =
                 Object.keys(solutionNavDefinitions).length > 0 &&
@@ -201,6 +205,7 @@ export class ProjectNavigationService {
                 activeNodes,
                 chromeBreadcrumbs,
                 solutionNavigations,
+                cloudLinks,
               });
             }
           )
@@ -226,6 +231,7 @@ export class ProjectNavigationService {
     }
 
     const cloudLinks = getCloudLinks(cloudUrls);
+    this.cloudLinks$.next(cloudLinks);
 
     this.navigationChangeSubscription = combineLatest([navTreeDefinition, this.deepLinksMap$])
       .pipe(
