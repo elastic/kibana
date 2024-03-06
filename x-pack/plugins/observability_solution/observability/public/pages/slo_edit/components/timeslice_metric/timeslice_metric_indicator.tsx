@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -132,6 +133,8 @@ export function TimesliceMetricIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
+
+        <RunTimeFieldUsed dataView={dataView} />
 
         <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 

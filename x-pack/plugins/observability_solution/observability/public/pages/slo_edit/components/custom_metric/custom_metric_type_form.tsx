@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
@@ -152,6 +153,8 @@ export function CustomMetricIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
+
+        <RunTimeFieldUsed dataView={dataView} />
 
         <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
