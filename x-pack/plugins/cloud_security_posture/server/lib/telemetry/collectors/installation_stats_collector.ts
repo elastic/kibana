@@ -21,6 +21,8 @@ import type {
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
 
+const AGENTLESS_POLICY_ID = 'agentless'; // the policy id defined here: https://github.com/elastic/project-controller/blob/main/internal/project/security/security_kibana_config.go#L86
+
 interface CredentialMappings {
   'gcp.credentials.file': 'credentials file';
   'gcp.credentials.json': 'credentials json';
@@ -101,8 +103,10 @@ const getInstalledPackagePolicies = (
       const agentCounts =
         agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
         0;
+
       const isAgentless =
-        agentPolicies?.find((agentPolicy) => 'agentless' === packagePolicy.policy_id) !== undefined
+        agentPolicies?.find((agentPolicy) => AGENTLESS_POLICY_ID === packagePolicy.policy_id) !==
+        undefined
           ? true
           : false;
 
