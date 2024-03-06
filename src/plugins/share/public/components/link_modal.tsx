@@ -16,8 +16,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
+import type { LocatorPublic } from '../../common';
+import { BrowserUrlService } from '../types';
 
 interface LinkProps {
   objectType: string;
@@ -28,6 +31,11 @@ interface LinkProps {
   shareableUrl?: string;
   onClose: () => void;
   action: any;
+  urlService: BrowserUrlService;
+  shareableUrlLocatorParams?: {
+    locator: LocatorPublic<any>;
+    params: any;
+  };
 }
 
 interface UrlParams {
@@ -44,55 +52,81 @@ export const LinkModal = ({
   shareableUrl,
   shareableUrlForSavedObject,
   action,
+  urlService,
+  shareableUrlLocatorParams,
 }: LinkProps) => {
+  const isMounted = useMountedState();
+  const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
+  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
-  const isNotSaved = () => {
+  const isNotSaved = useCallback(() => {
     return objectId === undefined || objectId === '' || isDirty;
-  };
+  }, [objectId, isDirty]);
 
-  const makeUrlEmbeddable = (url: string): string => {
+  const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = url.indexOf('?') !== -1;
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return url.replace('?', `${embedParam}&`);
+      return tempUrl.replace('?', `${embedParam}&`);
     }
 
-    return `${url}${embedParam}`;
-  };
+    return `${tempUrl}${embedParam}`;
+  }, []);
 
-  const getUrlParamExtensions = (url: string): string => {
-    return urlParams
-      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-          const urlParam = urlParams[key];
-          return urlParam
-            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                const isQueryParamEnabled = urlParam[queryParam];
-                return isQueryParamEnabled
-                  ? queryAccumulator + `&${queryParam}=true`
-                  : queryAccumulator;
-              }, urlAccumulator)
-            : urlAccumulator;
-        }, url)
-      : url;
-  };
+  const getUrlParamExtensions = useCallback(
+    (tempUrl: string): string => {
+      return urlParams
+        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+            const urlParam = urlParams[key];
+            return urlParam
+              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                  const isQueryParamEnabled = urlParam[queryParam];
+                  return isQueryParamEnabled
+                    ? queryAccumulator + `&${queryParam}=true`
+                    : queryAccumulator;
+                }, urlAccumulator)
+              : urlAccumulator;
+          }, tempUrl)
+        : tempUrl;
+    },
+    [urlParams]
+  );
 
-  const updateUrlParams = (url: string) => {
-    url = isEmbedded ? makeUrlEmbeddable(url) : url;
-    url = urlParams ? getUrlParamExtensions(url) : url;
-    // setCopyLinkData(url);
-    return url;
-  };
+  const updateUrlParams = useCallback(
+    (tempUrl: string) => {
+      tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+      tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
+      setUrl(tempUrl);
+      return tempUrl;
+    },
+    [makeUrlEmbeddable, getUrlParamExtensions, urlParams, isEmbedded]
+  );
 
-  const getSavedObjectUrl = () => {
+  const getSnapshotUrl = useCallback(
+    (forSavedObject?: boolean) => {
+      let tempUrl = '';
+      if (forSavedObject && shareableUrlForSavedObject) {
+        tempUrl = shareableUrlForSavedObject;
+      }
+      if (!tempUrl) {
+        tempUrl = shareableUrl || window.location.href;
+      }
+
+      return updateUrlParams(tempUrl);
+    },
+    [shareableUrl, shareableUrlForSavedObject, updateUrlParams]
+  );
+
+  const getSavedObjectUrl = useCallback(() => {
     if (isNotSaved()) {
       return;
     }
 
-    const url = getSnapshotUrl(true);
+    const tempUrl = getSnapshotUrl(true);
 
-    const parsedUrl = parseUrl(url);
+    const parsedUrl = parseUrl(tempUrl);
     if (!parsedUrl || !parsedUrl.hash) {
       return;
     }
@@ -115,32 +149,42 @@ export const LinkModal = ({
       }),
     });
     return updateUrlParams(formattedUrl);
-  };
+  }, [getSnapshotUrl, isNotSaved, updateUrlParams]);
 
-  const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = '';
-    if (forSavedObject && shareableUrlForSavedObject) {
-      url = shareableUrlForSavedObject;
-    }
-    if (!url) {
-      url = shareableUrl || window.location.href;
-    }
-    return updateUrlParams(url);
-  };
+  const createShortUrl = useCallback(
+    async (tempUrl: string) => {
+      if (!isMounted) return;
+      const shortUrl = shareableUrlLocatorParams
+        ? await urlService.shortUrls.get(null).createWithLocator(shareableUrlLocatorParams)
+        : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
+      setShortUrlCache(shortUrl as string);
+      setUrl(shortUrl as string);
+    },
+    [isMounted, shareableUrlLocatorParams, urlService.shortUrls]
+  );
 
-  const renderLink = () => {
+  const setUrlHelper = useCallback(() => {
+    let tempUrl: string | undefined;
+
     if (objectType === 'dashboard' || objectType === 'search') {
-      return getSnapshotUrl();
+      tempUrl = getSnapshotUrl();
+    } else {
+      tempUrl = getSavedObjectUrl();
     }
-    return getSavedObjectUrl();
-  };
+    return url === '' ? setUrl(tempUrl!) : createShortUrl(tempUrl!);
+  }, [getSavedObjectUrl, getSnapshotUrl, createShortUrl, objectType, url]);
+
+  useEffect(() => {
+    isMounted();
+    setUrlHelper();
+  }, [isMounted, setUrlHelper]);
 
   const renderButtons = () => {
-    const { formattedMessageId, defaultMessage } = action;
+    const { formattedMessageId, defaultMessage, dataTestSubj } = action;
     return (
-      <EuiCopy textToCopy={renderLink() ?? ''}>
+      <EuiCopy textToCopy={shortUrlCache ?? url}>
         {(copy) => (
-          <EuiButton fill data-test-subj={''} onClick={copy}>
+          <EuiButton fill data-test-subj={dataTestSubj} onClick={copy}>
             <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
           </EuiButton>
         )}
@@ -160,7 +204,7 @@ export const LinkModal = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiCodeBlock whiteSpace="pre">{renderLink()}</EuiCodeBlock>
+        <EuiCodeBlock whiteSpace="pre">{shareableUrl ?? url}</EuiCodeBlock>
         <EuiSpacer />
       </EuiForm>
       <EuiModalFooter>{renderButtons()}</EuiModalFooter>
