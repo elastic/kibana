@@ -67,7 +67,8 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: putResponseBody, status: putResponseStatus } = await supertest
         .put(`/internal/ml/trained_models/${testModelId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(getCommonRequestHeader('1'));
+        .set(getCommonRequestHeader('1'))
+        .send(requestBody);
       ml.api.assertResponseStatusCode(403, putResponseStatus, putResponseBody);
 
       // verify that model has not been created
