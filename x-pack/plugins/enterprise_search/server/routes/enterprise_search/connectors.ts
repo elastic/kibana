@@ -575,14 +575,9 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { connectorId } = request.params;
       const connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
 
-      const indexExists = connectorResult?.index_name
-        ? await client.asCurrentUser.indices.exists({
-            index: connectorResult.index_name,
-          })
-        : false;
       return response.ok({
         body: {
-          connector: { ...connectorResult, index_exists: indexExists },
+          connector: connectorResult,
         },
       });
     })
