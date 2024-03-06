@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-import { sourcererScopeSelectedDataViewId } from '../store/sourcerer/selectors';
+import { scopeIdSelector } from '../store/sourcerer/selectors';
+import { useDeepEqualSelector } from './use_selector';
 import type { SourcererScopeName } from '../store/sourcerer/model';
-import type { State } from '../store';
+
+const getScopeSelector = scopeIdSelector();
 
 export const useDataViewId = (scopeId: SourcererScopeName): string | undefined => {
-  const dataViewId = useSelector((state: State) =>
-    sourcererScopeSelectedDataViewId(state, scopeId)
-  );
-  return dataViewId ?? undefined;
+  const dataView = useDeepEqualSelector((state) => getScopeSelector(state, scopeId));
+  return dataView?.selectedDataViewId ?? undefined;
 };

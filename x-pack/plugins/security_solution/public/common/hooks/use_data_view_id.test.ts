@@ -9,7 +9,7 @@ import { TestProviders } from '../mock';
 import { SourcererScopeName } from '../store/sourcerer/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
 import { useDataViewId } from './use_data_view_id';
-import * as sourcererSelectors from '../store/sourcerer/selectors';
+import * as useSelector from './use_selector';
 
 describe('useDataViewId', () => {
   it.each(Object.values(SourcererScopeName))(
@@ -21,9 +21,7 @@ describe('useDataViewId', () => {
   );
 
   it('should return undefined if dataViewId selector returns null', () => {
-    jest
-      .spyOn(sourcererSelectors, 'sourcererScopeSelectedDataViewId')
-      .mockImplementationOnce(() => null);
+    jest.spyOn(useSelector, 'useDeepEqualSelector').mockReturnValueOnce(null);
 
     const { result } = renderHook(useDataViewId, {
       initialProps: SourcererScopeName.default,
