@@ -13,7 +13,6 @@ import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats
 import { v4 as uuidv4 } from 'uuid';
 import { PersistenceAPI } from '../types';
 
-import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
 import {
@@ -319,7 +318,7 @@ export class DataViewsService {
    * @param key used to indicate uniqueness of the error
    */
   private onError: OnError;
-  private dataViewCache: ReturnType<typeof createDataViewCache>;
+  private dataViewCache: Map<string, Promise<DataView>>;
   /**
    * Can the user save advanced settings?
    */
@@ -355,7 +354,7 @@ export class DataViewsService {
     this.getCanSave = getCanSave;
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
-    this.dataViewCache = createDataViewCache();
+    this.dataViewCache = new Map();
     this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
@@ -450,9 +449,9 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
-      this.dataViewCache.clear(id);
+      this.dataViewCache.delete(id);
     } else {
-      this.dataViewCache.clearAll();
+      this.dataViewCache.clear();
     }
   };
 
@@ -930,13 +929,17 @@ export class DataViewsService {
       return dataView;
     });
 
-    const indexPatternPromise =
-      dataViewFromCache ||
-      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
+    let indexPatternPromise: Promise<DataView>;
+    if (dataViewFromCache) {
+      indexPatternPromise = dataViewFromCache;
+    } else {
+      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
+      this.dataViewCache.set(id, indexPatternPromise);
+    }
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
-      this.dataViewCache.clear(id);
+      this.dataViewCache.delete(id);
     });
 
     return indexPatternPromise;
@@ -999,11 +1002,16 @@ export class DataViewsService {
         return cachedDataView;
       }
 
-      return this.dataViewCache.set(spec.id, doCreate());
+      const dataViewPromise = doCreate();
+
+      this.dataViewCache.set(spec.id, dataViewPromise);
+
+      return dataViewPromise;
     }
 
     const dataView = await doCreate();
-    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    return dataView;
   }
 
   /**
@@ -1162,7 +1170,7 @@ export class DataViewsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          this.dataViewCache.clear(indexPattern.id!);
+          this.dataViewCache.delete(indexPattern.id!);
 
           // Try the save again
           return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
@@ -1179,7 +1187,7 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
-    this.dataViewCache.clear(indexPatternId);
+    this.dataViewCache.delete(indexPatternId);
     return this.savedObjectsClient.delete(indexPatternId);
   }
 

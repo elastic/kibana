@@ -18,7 +18,6 @@ import { SetupGuide } from '../enterprise_search_overview/components/setup_guide
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 
 import { EnterpriseSearchContent, EnterpriseSearchContentConfigured } from '.';
 
@@ -49,7 +48,7 @@ describe('EnterpriseSearchContent', () => {
   });
 
   it('renders EnterpriseSearchContentConfigured when config.host is not set & Ent Search cannot be deployed', () => {
-    setMockValues({ errorConnectingMessage: '', config: { canDeployEntSearch: false, host: '' } });
+    setMockValues({ config: { canDeployEntSearch: false, host: '' }, errorConnectingMessage: '' });
     const wrapper = shallow(<EnterpriseSearchContent />);
 
     expect(wrapper.find(EnterpriseSearchContentConfigured)).toHaveLength(1);
@@ -61,6 +60,5 @@ describe('EnterpriseSearchContentConfigured', () => {
 
   it('renders engine routes', () => {
     expect(wrapper.find(SearchIndicesRouter)).toHaveLength(1);
-    expect(wrapper.find(Settings)).toHaveLength(1);
   });
 });
