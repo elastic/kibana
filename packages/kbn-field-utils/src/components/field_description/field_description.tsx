@@ -9,8 +9,9 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiTextProps, EuiButtonEmpty } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-const MAX_VISIBLE_LENGTH = 140;
+const MAX_VISIBLE_LENGTH = 110;
 
 export interface FieldDescriptionProps {
   field: {
@@ -18,14 +19,12 @@ export interface FieldDescriptionProps {
     customDescription?: string;
   };
   color?: EuiTextProps['color'];
-  size?: EuiTextProps['size'];
   truncate?: boolean;
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   field,
   color,
-  size = 's',
   truncate = true,
 }) => {
   const customDescription = (field?.customDescription || '').trim();
@@ -37,17 +36,17 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   }
 
   return (
-    <div>
-      <EuiText
-        data-test-subj={`fieldDescription-${field.name}`}
-        color={color}
-        size={size}
+    <EuiText data-test-subj={`fieldDescription-${field.name}`} color={color} size="xs">
+      <span
         className="eui-textBreakWord"
+        css={css`
+          display: ${isTruncated ? 'inline' : 'block'};
+        `}
       >
         {isTruncated
-          ? customDescription.slice(0, MAX_VISIBLE_LENGTH).trim() + '…'
+          ? customDescription.slice(0, MAX_VISIBLE_LENGTH).trim() + '… '
           : customDescription}
-      </EuiText>
+      </span>
       {isTooLong && (
         <EuiButtonEmpty
           key={String(isTruncated)}
@@ -65,6 +64,6 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
               })}
         </EuiButtonEmpty>
       )}
-    </div>
+    </EuiText>
   );
 };

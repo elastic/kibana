@@ -269,7 +269,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
     {field.customDescription ? (
       <div>
         <EuiSpacer size="xs" />
-        <FieldDescription field={field} color="subdued" size="xs" />
+        <FieldDescription field={field} color="subdued" />
       </div>
     ) : null}
   </span>
