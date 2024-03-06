@@ -30,9 +30,7 @@ export enum FunctionVisibility {
   All = 'all',
 }
 
-export interface FunctionDefinition<
-  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
-> {
+export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = any> {
   name: string;
   description: string;
   visibility?: FunctionVisibility;

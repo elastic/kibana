@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
+import { createScreenContextAction } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 
@@ -54,6 +55,27 @@ export function useNavControlScreenContext() {
 
     return service.setScreenContext({
       screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}.`,
+      actions: [
+        createScreenContextAction(
+          {
+            name: 'foo',
+            description: 'foo',
+            parameters: {
+              type: 'object',
+              properties: {
+                foo: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+          async ({}) => {
+            return {
+              content: 'Action succesfully executed',
+            };
+          }
+        ),
+      ],
     });
   }, [service, from, to, href]);
 }

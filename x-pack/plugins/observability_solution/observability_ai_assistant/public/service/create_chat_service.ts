@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
+import type { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import { pick } from 'lodash';
-import { concatMap, delay, filter, map, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
 import {
-  BufferFlushEvent,
+  concatMap,
+  delay,
+  filter,
+  from,
+  map,
+  Observable,
+  of,
+  scan,
+  shareReplay,
+  switchMap,
+  timestamp,
+} from 'rxjs';
+import {
+  type BufferFlushEvent,
   StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
+  type StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
 } from '../../common/conversation_complete';
 import {
@@ -32,6 +44,7 @@ import type {
   RenderFunction,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
+import { complete } from './complete';
 
 const MIN_DELAY = 35;
 
@@ -82,19 +95,19 @@ export async function createChatService({
   analytics,
   signal: setupAbortSignal,
   registrations,
-  client,
+  apiClient,
 }: {
   analytics: AnalyticsServiceStart;
   signal: AbortSignal;
   registrations: ChatRegistrationRenderFunction[];
-  client: ObservabilityAIAssistantAPIClient;
+  apiClient: ObservabilityAIAssistantAPIClient;
 }): Promise<ObservabilityAIAssistantChatService> {
   const functionRegistry: FunctionRegistry = new Map();
 
   const renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>> = new Map();
 
   const [{ functionDefinitions, contextDefinitions }] = await Promise.all([
-    client('GET /internal/observability_ai_assistant/functions', {
+    apiClient('GET /internal/observability_ai_assistant/functions', {
       signal: setupAbortSignal,
     }),
     ...registrations.map((registration) => {
@@ -117,77 +130,7 @@ export async function createChatService({
     });
   };
 
-  return {
-    sendAnalyticsEvent: (event) => {
-      sendEvent(analytics, event);
-    },
-    renderFunction: (name, args, response, onActionClick) => {
-      const fn = renderFunctionRegistry.get(name);
-
-      if (!fn) {
-        throw new Error(`Function ${name} not found`);
-      }
-
-      const parsedArguments = args ? JSON.parse(args) : {};
-
-      const parsedResponse = {
-        content: JSON.parse(response.content ?? '{}'),
-        data: JSON.parse(response.data ?? '{}'),
-      };
-
-      return fn?.({
-        response: parsedResponse,
-        arguments: parsedArguments,
-        onActionClick,
-      });
-    },
-    getContexts: () => contextDefinitions,
-    getFunctions,
-    hasFunction: (name: string) => {
-      return functionRegistry.has(name);
-    },
-    hasRenderFunction: (name: string) => {
-      return renderFunctionRegistry.has(name);
-    },
-    complete({ screenContexts, connectorId, conversationId, messages, persist, signal }) {
-      return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
-        client('POST /internal/observability_ai_assistant/chat/complete', {
-          params: {
-            body: {
-              connectorId,
-              conversationId,
-              screenContexts,
-              messages,
-              persist,
-            },
-          },
-          signal,
-          asResponse: true,
-          rawResponse: true,
-        })
-          .then((_response) => {
-            const response = _response as unknown as HttpResponse<IncomingMessage>;
-            const response$ = toObservable(response)
-              .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
-                filter(
-                  (line): line is StreamingChatResponseEvent =>
-                    line.type !== StreamingChatResponseEventType.BufferFlush
-                ),
-                throwSerializedChatCompletionErrors()
-              )
-              .subscribe(subscriber);
-
-            signal.addEventListener('abort', () => {
-              response$.unsubscribe();
-            });
-          })
-          .catch((err) => {
-            subscriber.error(err);
-            subscriber.complete();
-          });
-      });
-    },
+  const client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'> = {
     chat(
       name: string,
       {
@@ -213,7 +156,7 @@ export async function createChatService({
           );
         });
 
-        client('POST /internal/observability_ai_assistant/chat', {
+        apiClient('POST /internal/observability_ai_assistant/chat', {
           params: {
             body: {
               name,
@@ -270,5 +213,68 @@ export async function createChatService({
         shareReplay()
       );
     },
+    complete({ getScreenContexts, connectorId, conversationId, messages, persist, signal }) {
+      return complete(
+        {
+          getScreenContexts,
+          connectorId,
+          conversationId,
+          messages,
+          persist,
+          signal,
+          client,
+        },
+        ({ params }) => {
+          return from(
+            apiClient('POST /internal/observability_ai_assistant/chat/complete', {
+              params,
+              signal,
+              asResponse: true,
+              rawResponse: true,
+            })
+          ).pipe(
+            map((_response) => toObservable(_response as unknown as HttpResponse<IncomingMessage>)),
+            switchMap((response$) => response$),
+            map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+            shareReplay()
+          );
+        }
+      );
+    },
+  };
+
+  return {
+    sendAnalyticsEvent: (event) => {
+      sendEvent(analytics, event);
+    },
+    renderFunction: (name, args, response, onActionClick) => {
+      const fn = renderFunctionRegistry.get(name);
+
+      if (!fn) {
+        throw new Error(`Function ${name} not found`);
+      }
+
+      const parsedArguments = args ? JSON.parse(args) : {};
+
+      const parsedResponse = {
+        content: JSON.parse(response.content ?? '{}'),
+        data: JSON.parse(response.data ?? '{}'),
+      };
+
+      return fn?.({
+        response: parsedResponse,
+        arguments: parsedArguments,
+        onActionClick,
+      });
+    },
+    getContexts: () => contextDefinitions,
+    getFunctions,
+    hasFunction: (name: string) => {
+      return functionRegistry.has(name);
+    },
+    hasRenderFunction: (name: string) => {
+      return renderFunctionRegistry.has(name);
+    },
+    ...client,
   };
 }
