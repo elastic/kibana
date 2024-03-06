@@ -24,12 +24,14 @@ import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
-import { getUpdateScript } from '../../conversations_data_client/helpers';
-import { transformToCreateScheme } from '../../conversations_data_client/create_conversation';
+import { getUpdateScript } from '../../ai_assistant_data_clients/conversations/helpers';
+import { transformToCreateScheme } from '../../ai_assistant_data_clients/conversations/create_conversation';
+import { transformESToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
 import {
   UpdateConversationSchema,
   transformToUpdateScheme,
-} from '../../conversations_data_client/update_conversation';
+} from '../../ai_assistant_data_clients/conversations/update_conversation';
+import { SearchEsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 
 export interface BulkOperationError {
   message: string;
@@ -81,13 +83,11 @@ const buildBulkResponse = (
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-        // status_code: 500,
         attributes: {
           errors: errors.map((e: BulkOperationError) => ({
             status_code: e.status ?? 500,
             conversations: [{ id: e.document.id, name: '' }],
             message: e.message,
-            // err_code: '500',
           })),
           results,
           summary,
@@ -163,7 +163,7 @@ export const bulkActionConversationsRoute = (
           }
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findConversations({
+            const result = await dataClient?.findDocuments<SearchEsConversationSchema>({
               perPage: 100,
               page: 1,
               filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
@@ -171,10 +171,10 @@ export const bulkActionConversationsRoute = (
                 .join(' OR ')})`,
               fields: ['title'],
             });
-            if (result?.data != null && result.data.length > 0) {
+            if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `conversations titles: "${result.data
+                body: `conversations titles: "${transformESToConversations(result.data)
                   .map((c) => c.title)
                   .join(',')}" already exists`,
               });
@@ -200,13 +200,13 @@ export const bulkActionConversationsRoute = (
               getUpdateScript({ conversation: document, isPatch: true }),
           });
 
-          const created = await dataClient?.findConversations({
+          const created = await dataClient?.findDocuments<SearchEsConversationSchema>({
             page: 1,
             perPage: 1000,
             filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
             fields: ['id'],
           });
-          const updated = await dataClient?.findConversations({
+          const updated = await dataClient?.findDocuments<SearchEsConversationSchema>({
             page: 1,
             perPage: 1000,
             filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
@@ -214,8 +214,8 @@ export const bulkActionConversationsRoute = (
           });
 
           return buildBulkResponse(response, {
-            updated: updated?.data,
-            created: created?.data,
+            updated: updated?.data ? transformESToConversations(updated?.data) : [],
+            created: created?.data ? transformESToConversations(created?.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

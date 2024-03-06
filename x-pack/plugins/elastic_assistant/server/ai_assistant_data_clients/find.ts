@@ -6,15 +6,12 @@
  */
 
 import { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { estypes } from '@elastic/elasticsearch';
 import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
-import { FindConversationsResponse } from '@kbn/elastic-assistant-common';
-import { transformESToConversations } from './transforms';
-import { SearchEsConversationSchema } from './types';
 
-interface FindConversationsOptions {
+interface FindOptions {
   filter?: string;
   fields?: string[];
   perPage: number;
@@ -22,20 +19,29 @@ interface FindConversationsOptions {
   sortField?: string;
   sortOrder?: estypes.SortOrder;
   esClient: ElasticsearchClient;
-  conversationIndex: string;
+  index: string;
   runtimeMappings?: MappingRuntimeFields | undefined;
+  logger: Logger;
 }
 
-export const findConversations = async ({
+export interface FindResponse<T> {
+  data: estypes.SearchResponse<T, Record<string, estypes.AggregationsAggregate>>;
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export const findDocuments = async <TSearchSchema>({
   esClient,
   filter,
   page,
   perPage,
   sortField,
-  conversationIndex,
+  index,
   fields,
   sortOrder,
-}: FindConversationsOptions): Promise<FindConversationsResponse> => {
+  logger,
+}: FindOptions): Promise<FindResponse<TSearchSchema>> => {
   const query = getQueryFilter({ filter });
   let sort: Sort | undefined;
   const ascOrDesc = sortOrder ?? ('asc' as const);
@@ -48,28 +54,33 @@ export const findConversations = async ({
       },
     };
   }
-  const response = await esClient.search<SearchEsConversationSchema>({
-    body: {
-      query,
-      track_total_hits: true,
-      sort,
-    },
-    _source: true,
-    from: (page - 1) * perPage,
-    ignore_unavailable: true,
-    index: conversationIndex,
-    seq_no_primary_term: true,
-    size: perPage,
-  });
-  return {
-    data: transformESToConversations(response),
-    page,
-    perPage,
-    total:
-      (typeof response.hits.total === 'number'
-        ? response.hits.total // This format is to be removed in 8.0
-        : response.hits.total?.value) ?? 0,
-  };
+  try {
+    const response = await esClient.search<TSearchSchema>({
+      body: {
+        query,
+        track_total_hits: true,
+        sort,
+      },
+      _source: true,
+      from: (page - 1) * perPage,
+      ignore_unavailable: true,
+      index,
+      seq_no_primary_term: true,
+      size: perPage,
+    });
+    return {
+      data: response,
+      page,
+      perPage,
+      total:
+        (typeof response.hits.total === 'number'
+          ? response.hits.total // This format is to be removed in 8.0
+          : response.hits.total?.value) ?? 0,
+    };
+  } catch (err) {
+    logger.error(`Error fetching documents: ${err}`);
+    throw err;
+  }
 };
 
 export interface GetQueryFilterOptions {

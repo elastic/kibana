@@ -6,14 +6,15 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AIAssistantConversationsDataClient } from '../conversations_data_client';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
 
 const createConversationsDataClientMock = () => {
   const mocked: ConversationsDataClientMock = {
-    findConversations: jest.fn(),
+    findDocuments: jest.fn(),
     appendConversationMessages: jest.fn(),
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
@@ -29,4 +30,22 @@ export const conversationsDataClientMock: {
   create: () => ConversationsDataClientMock;
 } = {
   create: createConversationsDataClientMock,
+};
+
+type AIAssistantDataClientContract = PublicMethodsOf<AIAssistantDataClient>;
+export type AIAssistantDataClientMock = jest.Mocked<AIAssistantDataClientContract>;
+
+const createAIAssistantDataClientMock = () => {
+  const mocked: AIAssistantDataClientMock = {
+    findDocuments: jest.fn(),
+    getReader: jest.fn(),
+    getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+  };
+  return mocked;
+};
+
+export const dataClientMock: {
+  create: () => AIAssistantDataClientMock;
+} = {
+  create: createAIAssistantDataClientMock,
 };

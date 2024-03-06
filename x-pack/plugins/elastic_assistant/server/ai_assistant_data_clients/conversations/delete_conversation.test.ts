@@ -9,39 +9,11 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { DeleteConversationParams, deleteConversation } from './delete_conversation';
 import { getConversation } from './get_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { getConversationResponseMock } from '../../__mocks__/response';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),
 }));
-
-export const getConversationResponseMock = (): ConversationResponse => ({
-  id: 'test',
-  title: 'test',
-  apiConfig: {
-    connectorId: '1',
-    connectorTypeTitle: 'test-connector',
-    defaultSystemPromptId: 'default-system-prompt',
-    model: 'test-model',
-    provider: 'OpenAI',
-  },
-  excludeFromLastConversationStorage: false,
-  messages: [],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  replacements: {} as any,
-  createdAt: Date.now().toLocaleString(),
-  namespace: 'default',
-  isDefault: false,
-  updatedAt: Date.now().toLocaleString(),
-  timestamp: Date.now().toLocaleString(),
-  category: 'assistant',
-  users: [
-    {
-      id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      name: 'elastic',
-    },
-  ],
-});
 
 export const getDeleteConversationOptionsMock = (): DeleteConversationParams => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

@@ -17,7 +17,7 @@ import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
 import { updateConversationRoute } from './user_conversations/update_route';
-import { findUserConversationsRoute } from './user_conversations/find_user_conversations_route';
+import { findUserConversationsRoute } from './user_conversations/find_route';
 import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
 import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
 import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';

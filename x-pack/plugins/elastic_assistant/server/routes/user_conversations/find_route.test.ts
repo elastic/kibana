@@ -10,7 +10,7 @@ import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assist
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
-import { findUserConversationsRoute } from './find_user_conversations_route';
+import { findUserConversationsRoute } from './find_route';
 
 describe('Find user conversations route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -20,8 +20,8 @@ describe('Find user conversations route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(
-      getFindConversationsResultWithSingleHit()
+    clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+      Promise.resolve(getFindConversationsResultWithSingleHit())
     );
     clients.elasticAssistant.getCurrentUser.mockResolvedValue({
       username: 'my_username',
@@ -44,7 +44,7 @@ describe('Find user conversations route', () => {
     });
 
     test('catches error if search throws error', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockImplementation(
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockImplementation(
         async () => {
           throw new Error('Test error');
         }

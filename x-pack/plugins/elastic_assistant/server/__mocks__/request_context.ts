@@ -14,8 +14,9 @@ import {
   ElasticAssistantRequestHandlerContext,
 } from '../types';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { conversationsDataClientMock } from './conversations_data_client.mock';
-import { AIAssistantConversationsDataClient } from '../conversations_data_client';
+import { conversationsDataClientMock, dataClientMock } from './data_clients.mock';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -31,8 +32,8 @@ export const createMockClients = () => {
       logger: loggingSystemMock.createLogger(),
       telemetry: coreMock.createSetup().analytics,
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
-      getAIAssistantPromptsDataClient: jest.fn(),
-      getAIAssistantAnonymizationFieldsDataClient: jest.fn(),
+      getAIAssistantPromptsDataClient: dataClientMock.create(),
+      getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
     },
@@ -95,8 +96,14 @@ const createElasticAssistantRequestContextMock = (
     > &
       (() => Promise<AIAssistantConversationsDataClient | null>),
 
-    getAIAssistantAnonymizationFieldsDataClient: jest.fn(),
-    getAIAssistantPromptsDataClient: jest.fn(),
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn(
+      () => clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient
+    ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
+      (() => Promise<AIAssistantDataClient | null>),
+    getAIAssistantPromptsDataClient: jest.fn(
+      () => clients.elasticAssistant.getAIAssistantPromptsDataClient
+    ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
+      (() => Promise<AIAssistantDataClient | null>),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),

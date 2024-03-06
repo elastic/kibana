@@ -12,12 +12,14 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { conversationsDataClientMock } from '../__mocks__/conversations_data_client.mock';
-import { AIAssistantConversationsDataClient } from '../conversations_data_client';
+import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantService } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
 
-jest.mock('../conversations_data_client');
+jest.mock('../ai_assistant_data_clients/conversations', () => ({
+  AIAssistantConversationsDataClient: jest.fn(),
+}));
 
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -148,7 +150,7 @@ describe('AI Assistant Service', () => {
 
   describe('createAIAssistantConversationsDataClient()', () => {
     let assistantService: AIAssistantService;
-    beforeEach(async () => {
+    beforeEach(() => {
       (AIAssistantConversationsDataClient as jest.Mock).mockImplementation(
         () => conversationsDataClient
       );

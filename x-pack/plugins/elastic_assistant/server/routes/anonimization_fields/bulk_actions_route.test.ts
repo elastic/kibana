@@ -6,28 +6,28 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { bulkActionConversationsRoute } from './bulk_actions_route';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { getConversationsBulkActionRequest, requestMock } from '../../__mocks__/request';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
+import { getAnonymizationFieldsBulkActionRequest, requestMock } from '../../__mocks__/request';
+import { ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
 import {
-  getFindConversationsResultWithSingleHit,
   getEmptyFindResult,
+  getFindAnonymizationFieldsResultWithSingleHit,
 } from '../../__mocks__/response';
-import {
-  getConversationMock,
-  getCreateConversationSchemaMock,
-  getPerformBulkActionSchemaMock,
-  getUpdateConversationSchemaMock,
-} from '../../__mocks__/conversations_schema.mock';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { bulkActionAnonymizationFieldsRoute } from './bulk_actions_route';
+import {
+  getAnonymizationFieldMock,
+  getCreateAnonymizationFieldSchemaMock,
+  getPerformBulkActionSchemaMock,
+  getUpdateAnonymizationFieldSchemaMock,
+} from '../../__mocks__/anonymization_fields_schema.mock';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockConversation = getConversationMock(getUpdateConversationSchemaMock());
+  const mockAnonymizationField = getAnonymizationFieldMock(getUpdateAnonymizationFieldSchemaMock());
   const mockUser1 = {
     profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
     username: 'my_username',
@@ -42,31 +42,31 @@ describe('Perform bulk action route', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
-      Promise.resolve(getFindConversationsResultWithSingleHit())
+    clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValue(
+      Promise.resolve(getFindAnonymizationFieldsResultWithSingleHit())
     );
     (
-      (await clients.elasticAssistant.getAIAssistantConversationsDataClient.getWriter())
+      (await clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.getWriter())
         .bulk as jest.Mock
     ).mockResolvedValue({
-      docs_created: [mockConversation, mockConversation],
-      docs_updated: [mockConversation, mockConversation],
+      docs_created: [mockAnonymizationField, mockAnonymizationField],
+      docs_updated: [mockAnonymizationField, mockAnonymizationField],
       docs_deleted: [],
       errors: [],
     });
     context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
-    bulkActionConversationsRoute(server.router, logger);
+    bulkActionAnonymizationFieldsRoute(server.router, logger);
   });
 
   describe('status codes', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValueOnce(
+      clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValueOnce(
         Promise.resolve(getEmptyFindResult())
       );
       const response = await server.inject(
-        getConversationsBulkActionRequest(
-          [getCreateConversationSchemaMock()],
-          [getUpdateConversationSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
+        getAnonymizationFieldsBulkActionRequest(
+          [getCreateAnonymizationFieldSchemaMock()],
+          [getUpdateAnonymizationFieldSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
           ['99403909-ca9b-49ba-9d7a-7e5320e68d05']
         ),
         requestContextMock.convertContext(context)
@@ -74,7 +74,7 @@ describe('Perform bulk action route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
-        conversations_count: 2,
+        anonymization_fields_count: 2,
         attributes: {
           results: someBulkActionResults(),
           summary: {
@@ -88,38 +88,38 @@ describe('Perform bulk action route', () => {
     });
   });
 
-  describe('conversations bulk actions failures', () => {
-    it('returns partial failure error if update of few conversations fail', async () => {
+  describe('anonymization fields bulk actions failures', () => {
+    it('returns partial failure error if update of few anonymization fields fail', async () => {
       (
-        (await clients.elasticAssistant.getAIAssistantConversationsDataClient.getWriter())
+        (await clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.getWriter())
           .bulk as jest.Mock
       ).mockResolvedValue({
-        docs_created: [mockConversation, mockConversation],
+        docs_created: [mockAnonymizationField, mockAnonymizationField],
         docs_updated: [],
         docs_deleted: [],
         errors: [
           {
             message: 'mocked validation message',
-            document: { id: 'failed-conversation-id-1', name: 'Detect Root/Admin Users' },
+            document: { id: 'failed-anonymization-field-id-1', name: 'Detect Root/Admin Users' },
           },
           {
             message: 'mocked validation message',
-            document: { id: 'failed-conversation-id-2', name: 'Detect Root/Admin Users' },
+            document: { id: 'failed-anonymization-field-id-2', name: 'Detect Root/Admin Users' },
           },
           {
             message: 'test failure',
-            document: { id: 'failed-conversation-id-3', name: 'Detect Root/Admin Users' },
+            document: { id: 'failed-anonymization-field-id-3', name: 'Detect Root/Admin Users' },
           },
         ],
         total: 5,
       });
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValueOnce(
+      clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValueOnce(
         Promise.resolve(getEmptyFindResult())
       );
       const response = await server.inject(
-        getConversationsBulkActionRequest(
-          [getCreateConversationSchemaMock()],
-          [getUpdateConversationSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
+        getAnonymizationFieldsBulkActionRequest(
+          [getCreateAnonymizationFieldSchemaMock()],
+          [getUpdateAnonymizationFieldSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
           ['99403909-ca9b-49ba-9d7a-7e5320e68d05']
         ),
         requestContextMock.convertContext(context)
@@ -137,9 +137,9 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              conversations: [
+              anonymization_fields: [
                 {
-                  id: 'failed-conversation-id-1',
+                  id: 'failed-anonymization-field-id-1',
                   name: '',
                 },
               ],
@@ -147,9 +147,9 @@ describe('Perform bulk action route', () => {
             },
             {
               message: 'mocked validation message',
-              conversations: [
+              anonymization_fields: [
                 {
-                  id: 'failed-conversation-id-2',
+                  id: 'failed-anonymization-field-id-2',
                   name: '',
                 },
               ],
@@ -157,9 +157,9 @@ describe('Perform bulk action route', () => {
             },
             {
               message: 'test failure',
-              conversations: [
+              anonymization_fields: [
                 {
-                  id: 'failed-conversation-id-3',
+                  id: 'failed-anonymization-field-id-3',
                   name: '',
                 },
               ],
@@ -177,7 +177,7 @@ describe('Perform bulk action route', () => {
     it('rejects payloads with no ids in delete operation', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+        path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
         body: { ...getPerformBulkActionSchemaMock(), delete: { ids: [] } },
       });
       const result = server.validate(request);
@@ -189,7 +189,7 @@ describe('Perform bulk action route', () => {
     it('accepts payloads with only delete action', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+        path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
         body: getPerformBulkActionSchemaMock(),
       });
       const result = server.validate(request);
@@ -200,7 +200,7 @@ describe('Perform bulk action route', () => {
     it('accepts payloads with all operations', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+        path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
         body: getPerformBulkActionSchemaMock(),
       });
       const result = server.validate(request);
@@ -211,7 +211,7 @@ describe('Perform bulk action route', () => {
     it('rejects payload if there is more than 100 deletes in payload', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+        path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
         body: {
           ...getPerformBulkActionSchemaMock(),
           delete: { ids: Array.from({ length: 101 }).map(() => 'fake-id') },

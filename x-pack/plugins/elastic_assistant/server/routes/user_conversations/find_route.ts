@@ -19,6 +19,8 @@ import {
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import { SearchEsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { transformESToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -47,7 +49,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const currentUser = ctx.elasticAssistant.getCurrentUser();
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
-          const result = await dataClient?.findConversations({
+          const result = await dataClient?.findDocuments<SearchEsConversationSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -56,7 +58,19 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             fields: query.fields,
           });
 
-          return response.ok({ body: result });
+          if (result) {
+            return response.ok({
+              body: {
+                perPage: result.perPage,
+                page: result.page,
+                total: result.total,
+                data: transformESToConversations(result.data),
+              },
+            });
+          }
+          return response.ok({
+            body: { perPage: query.per_page, page: query.page, data: [], total: 0 },
+          });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

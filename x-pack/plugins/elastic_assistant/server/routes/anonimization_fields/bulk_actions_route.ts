@@ -32,11 +32,11 @@ import {
   transformESToAnonymizationFields,
   transformToCreateScheme,
   transformToUpdateScheme,
-} from '../../anonymization_fields_data_client/helpers';
+} from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import {
   SearchEsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
-} from '../../anonymization_fields_data_client/types';
+} from '../../ai_assistant_data_clients/anonymization_fields/types';
 
 export interface BulkOperationError {
   message: string;
@@ -87,9 +87,12 @@ const buildBulkResponse = (
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-        status_code: 500,
         attributes: {
-          errors: [],
+          errors: errors.map((e: BulkOperationError) => ({
+            status_code: e.status ?? 500,
+            anonymization_fields: [{ id: e.document.id, name: '' }],
+            message: e.message,
+          })),
           results,
           summary,
         },
@@ -135,7 +138,11 @@ export const bulkActionAnonymizationFieldsRoute = (
         const { body } = request;
         const assistantResponse = buildResponse(response);
 
-        if (body?.update && body.update?.length > ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE) {
+        const operationsCount =
+          (body?.update ? body.update?.length : 0) +
+          (body?.create ? body.create?.length : 0) +
+          (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
+        if (operationsCount > ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE) {
           return assistantResponse.error({
             body: `More than ${ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
             statusCode: 400,

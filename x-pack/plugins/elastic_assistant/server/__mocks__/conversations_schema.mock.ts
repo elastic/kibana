@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
@@ -12,6 +13,53 @@ import {
   ConversationResponse,
   ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common';
+import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+
+export const getConversationSearchEsMock = () => {
+  const searchResponse: estypes.SearchResponse<SearchEsConversationSchema> = {
+    took: 3,
+    timed_out: false,
+    _shards: {
+      total: 2,
+      successful: 2,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: 1,
+        relation: 'eq',
+      },
+      max_score: 0,
+      hits: [
+        {
+          _index: 'foo',
+          _id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          _source: {
+            category: 'assistant',
+            '@timestamp': '2019-12-13T16:40:33.400Z',
+            created_at: '2019-12-13T16:40:33.400Z',
+            updated_at: '2019-12-13T16:40:33.400Z',
+            namespace: 'default',
+            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            title: 'test',
+            api_config: {},
+            exclude_from_last_conversation_storage: true,
+            is_default: false,
+            messages: [],
+            replacements: {},
+            users: [
+              {
+                name: 'elastic',
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+  return searchResponse;
+};
 
 export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   title: 'Welcome',

@@ -20,8 +20,8 @@ import {
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
-import { SearchEsAnonymizationFieldsSchema } from '../../anonymization_fields_data_client/types';
-import { transformESToAnonymizationFields } from '../../anonymization_fields_data_client/helpers';
+import { SearchEsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 
 export const findAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,

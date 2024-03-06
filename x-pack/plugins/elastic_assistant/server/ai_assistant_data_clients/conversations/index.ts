@@ -5,109 +5,31 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
-import { estypes } from '@elastic/elasticsearch';
 import {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
-  FindConversationsResponse,
   Message,
 } from '@kbn/elastic-assistant-common';
-import { IIndexPatternString } from '../types';
 import { createConversation } from './create_conversation';
-import { findConversations } from './find_conversations';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
-import { getIndexTemplateAndPattern } from '../lib/data_client/helpers';
-import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
-
-export interface AIAssistantConversationsDataClientParams {
-  elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  kibanaVersion: string;
-  spaceId: string;
-  logger: Logger;
-  indexPatternsResorceName: string;
-  currentUser: AuthenticatedUser | null;
-}
-
-export class AIAssistantConversationsDataClient {
-  /** Kibana space id the conversation are part of */
-  private readonly spaceId: string;
-
-  /** User creating, modifying, deleting, or updating a conversation */
-  private readonly currentUser: AuthenticatedUser | null;
-
-  private writerCache: Map<string, DocumentsDataWriter> = new Map();
-
-  private indexTemplateAndPattern: IIndexPatternString;
-
-  constructor(private readonly options: AIAssistantConversationsDataClientParams) {
-    this.indexTemplateAndPattern = getIndexTemplateAndPattern(
-      this.options.indexPatternsResorceName,
-      this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
-    );
-    this.currentUser = this.options.currentUser;
-    this.spaceId = this.options.spaceId;
+import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
+export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
+  constructor(public readonly options: AIAssistantDataClientParams) {
+    super(options);
   }
 
-  public getWriter = async (): Promise<DocumentsDataWriter> => {
-    const spaceId = this.spaceId;
-    if (this.writerCache.get(spaceId)) {
-      return this.writerCache.get(spaceId) as DocumentsDataWriter;
-    }
-    await this.initializeWriter(spaceId, this.indexTemplateAndPattern.alias);
-    return this.writerCache.get(spaceId) as DocumentsDataWriter;
-  };
-
-  private async initializeWriter(spaceId: string, index: string): Promise<DocumentsDataWriter> {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const writer = new DocumentsDataWriter({
-      esClient,
-      spaceId,
-      index,
-      logger: this.options.logger,
-      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
-    });
-
-    this.writerCache.set(spaceId, writer);
-    return writer;
-  }
-
-  public getReader = async (options: { spaceId?: string } = {}) => {
-    const indexPatterns = this.indexTemplateAndPattern.alias;
-
-    return {
-      search: async <
-        TSearchRequest extends ESSearchRequest,
-        TConversationDoc = Partial<ConversationResponse>
-      >(
-        request: TSearchRequest
-      ): Promise<ESSearchResponse<TConversationDoc, TSearchRequest>> => {
-        try {
-          const esClient = await this.options.elasticsearchClientPromise;
-          return (await esClient.search({
-            ...request,
-            index: indexPatterns,
-            ignore_unavailable: true,
-            seq_no_primary_term: true,
-          })) as unknown as ESSearchResponse<TConversationDoc, TSearchRequest>;
-        } catch (err) {
-          this.options.logger.error(
-            `Error performing search in AIAssistantDataClient - ${err.message}`
-          );
-          throw err;
-        }
-      },
-    };
-  };
-
+  /**
+   * Updates a conversation with the new messages.
+   * @param options
+   * @param options.id The existing conversation id.
+   * @param options.authenticatedUser Current authenticated user.
+   * @returns The conversation response
+   */
   public getConversation = async ({
     id,
     authenticatedUser,
@@ -149,34 +71,6 @@ export class AIAssistantConversationsDataClient {
     });
   };
 
-  public findConversations = async ({
-    perPage,
-    page,
-    sortField,
-    sortOrder,
-    filter,
-    fields,
-  }: {
-    perPage: number;
-    page: number;
-    sortField?: string;
-    sortOrder?: string;
-    filter?: string;
-    fields?: string[];
-  }): Promise<FindConversationsResponse> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return findConversations({
-      esClient,
-      fields,
-      page,
-      perPage,
-      filter,
-      sortField,
-      conversationIndex: this.indexTemplateAndPattern.alias,
-      sortOrder: sortOrder as estypes.SortOrder,
-    });
-  };
-
   /**
    * Creates a conversation, if given at least the "title" and "apiConfig"
    * See {@link https://www.elastic.co/guide/en/security/current/}
@@ -212,11 +106,11 @@ export class AIAssistantConversationsDataClient {
    * for more information around optimistic concurrency control.
    * @param options
    * @param options.conversationUpdateProps
-   * @param options.id id of the conversation to replace the conversation container data with.
-   * @param options.title The new tilet, or "undefined" if this should not be updated.
-   * @param options.messages The new messages, or "undefined" if this should not be updated.
-   * @param options.excludeFromLastConversationStorage The new value for excludeFromLastConversationStorage, or "undefined" if this should not be updated.
-   * @param options.replacements The new value for replacements, or "undefined" if this should not be updated.
+   * @param options.conversationUpdateProps.id id of the conversation to replace the conversation container data with.
+   * @param options.conversationUpdateProps.title The new tilet, or "undefined" if this should not be updated.
+   * @param options.conversationUpdateProps.messages The new messages, or "undefined" if this should not be updated.
+   * @param options.conversationUpdateProps.excludeFromLastConversationStorage The new value for excludeFromLastConversationStorage, or "undefined" if this should not be updated.
+   * @param options.conversationUpdateProps.replacements The new value for replacements, or "undefined" if this should not be updated.
    */
   public updateConversation = async ({
     existingConversation,

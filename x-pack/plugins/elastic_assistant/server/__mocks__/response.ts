@@ -6,42 +6,86 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { getConversationMock, getQueryConversationParams } from './conversations_schema.mock';
+import { getConversationSearchEsMock } from './conversations_schema.mock';
 import { estypes } from '@elastic/elasticsearch';
+import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import { FindResponse } from '../ai_assistant_data_clients/find';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/promts/types';
+import { getPromptsSearchEsMock } from './prompts_schema.mock';
+import { SearchEsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
 };
 
-export interface FindHit<T = ConversationResponse> {
-  page: number;
-  perPage: number;
-  total: number;
-  data: T[];
-}
-
-export const getEmptyFindResult = (): FindHit => ({
+export const getEmptyFindResult = (): FindResponse<SearchEsConversationSchema> => ({
   page: 1,
   perPage: 1,
   total: 0,
-  data: [],
+  data: getBasicEmptySearchResponse(),
 });
 
-export const getFindConversationsResultWithSingleHit = (): FindHit => ({
+export const getFindConversationsResultWithSingleHit =
+  (): FindResponse<SearchEsConversationSchema> => ({
+    page: 1,
+    perPage: 1,
+    total: 1,
+    data: getConversationSearchEsMock(),
+  });
+
+export const getFindPromptsResultWithSingleHit = (): FindResponse<SearchEsPromptsSchema> => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getConversationMock(getQueryConversationParams(true))],
+  data: getPromptsSearchEsMock(),
 });
 
-export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
-  took: 1,
-  timed_out: false,
-  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: {
-    hits: [],
-    total: { relation: 'eq', value: 0 },
-    max_score: 0,
+export const getFindAnonymizationFieldsResultWithSingleHit =
+  (): FindResponse<SearchEsAnonymizationFieldsSchema> => ({
+    page: 1,
+    perPage: 1,
+    total: 1,
+    data: getAnonymizationFieldsSearchEsMock(),
+  });
+
+export const getBasicEmptySearchResponse =
+  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: {
+      hits: [],
+      total: { relation: 'eq', value: 0 },
+      max_score: 0,
+    },
+  });
+
+export const getConversationResponseMock = (): ConversationResponse => ({
+  id: 'test',
+  title: 'test',
+  apiConfig: {
+    connectorId: '1',
+    connectorTypeTitle: 'test-connector',
+    defaultSystemPromptId: 'default-system-prompt',
+    model: 'test-model',
+    provider: 'OpenAI',
   },
+  excludeFromLastConversationStorage: false,
+  messages: [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacements: {} as any,
+  createdAt: Date.now().toLocaleString(),
+  namespace: 'default',
+  isDefault: false,
+  updatedAt: Date.now().toLocaleString(),
+  timestamp: Date.now().toLocaleString(),
+  category: 'assistant',
+  users: [
+    {
+      id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      name: 'elastic',
+    },
+  ],
 });

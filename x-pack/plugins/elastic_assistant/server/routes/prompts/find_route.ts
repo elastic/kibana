@@ -19,8 +19,8 @@ import {
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
-import { SearchEsPromptsSchema } from '../../promts_data_client/types';
-import { transformESToPrompts } from '../../promts_data_client/helpers';
+import { SearchEsPromptsSchema } from '../../ai_assistant_data_clients/promts/types';
+import { transformESToPrompts } from '../../ai_assistant_data_clients/promts/helpers';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned

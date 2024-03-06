@@ -38,8 +38,8 @@ describe('Create conversation route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(
-      getEmptyFindResult()
+    clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+      Promise.resolve(getEmptyFindResult())
     ); // no current conversations
     clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
@@ -73,8 +73,8 @@ describe('Create conversation route', () => {
 
   describe('unhappy paths', () => {
     test('returns a duplicate error if conversation_id already exists', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(
-        getFindConversationsResultWithSingleHit()
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+        Promise.resolve(getFindConversationsResultWithSingleHit())
       );
       const response = await server.inject(
         getCreateConversationRequest(),

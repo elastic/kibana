@@ -50,13 +50,13 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             });
           }
 
-          const result = await dataClient?.findConversations({
+          const result = await dataClient?.findDocuments({
             perPage: 100,
             page: 1,
             filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND title:${request.body.title}`,
             fields: ['title'],
           });
-          if (result?.data != null && result.data.length > 0) {
+          if (result?.data != null && result.total > 0) {
             return assistantResponse.error({
               statusCode: 409,
               body: `conversation title: "${request.body.title}" already exists`,

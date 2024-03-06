@@ -21,6 +21,7 @@ export interface GetConversationParams {
 
 export const getConversation = async ({
   esClient,
+  logger,
   conversationIndex,
   id,
   user,
@@ -45,32 +46,37 @@ export const getConversation = async ({
         },
       ]
     : [];
-  const response = await esClient.search<SearchEsConversationSchema>({
-    body: {
-      query: {
-        bool: {
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      _id: id,
+  try {
+    const response = await esClient.search<SearchEsConversationSchema>({
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        _id: id,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-            ...filterByUser,
-          ],
+              ...filterByUser,
+            ],
+          },
         },
       },
-    },
-    _source: true,
-    ignore_unavailable: true,
-    index: conversationIndex,
-    seq_no_primary_term: true,
-  });
-  const conversation = transformESToConversations(response);
-  return conversation[0] ?? null;
+      _source: true,
+      ignore_unavailable: true,
+      index: conversationIndex,
+      seq_no_primary_term: true,
+    });
+    const conversation = transformESToConversations(response);
+    return conversation[0] ?? null;
+  } catch (err) {
+    logger.error(`Error fetching conversation: ${err} with id: ${id}`);
+    throw err;
+  }
 };

@@ -9,11 +9,15 @@ import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
 import {
   ConversationCreateProps,
   ConversationUpdateProps,
+  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PostEvaluateRequestBodyInput,
   PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
@@ -22,6 +26,14 @@ import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
+import {
+  PromptCreateProps,
+  PromptUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  AnonymizationFieldCreateProps,
+  AnonymizationFieldUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
@@ -74,6 +86,18 @@ export const getCurrentUserFindRequest = () =>
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   });
 
+export const getCurrentUserPromptsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  });
+
+export const getCurrentUserAnonymizationFieldsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+  });
+
 export const getDeleteConversationRequest = (id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd') =>
   requestMock.create({
     method: 'delete',
@@ -121,6 +145,40 @@ export const getConversationsBulkActionRequest = (
   requestMock.create({
     method: 'patch',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+    body: {
+      create,
+      update,
+      delete: {
+        ids: deleteIds,
+      },
+    },
+  });
+
+export const getPromptsBulkActionRequest = (
+  create: PromptCreateProps[] = [],
+  update: PromptUpdateProps[] = [],
+  deleteIds: string[] = []
+) =>
+  requestMock.create({
+    method: 'patch',
+    path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
+    body: {
+      create,
+      update,
+      delete: {
+        ids: deleteIds,
+      },
+    },
+  });
+
+export const getAnonymizationFieldsBulkActionRequest = (
+  create: AnonymizationFieldCreateProps[] = [],
+  update: AnonymizationFieldUpdateProps[] = [],
+  deleteIds: string[] = []
+) =>
+  requestMock.create({
+    method: 'patch',
+    path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
     body: {
       create,
       update,

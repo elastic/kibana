@@ -19,22 +19,27 @@ export const deleteConversation = async ({
   id,
   logger,
 }: DeleteConversationParams): Promise<number | undefined> => {
-  const response = await esClient.deleteByQuery({
-    body: {
-      query: {
-        ids: {
-          values: [id],
+  try {
+    const response = await esClient.deleteByQuery({
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
         },
       },
-    },
-    conflicts: 'proceed',
-    index: conversationIndex,
-    refresh: true,
-  });
+      conflicts: 'proceed',
+      index: conversationIndex,
+      refresh: true,
+    });
 
-  if (!response.deleted && response.deleted === 0) {
-    logger.error(`Error deleting conversation by id: ${id}`);
-    throw Error('No conversation has been deleted');
+    if (!response.deleted && response.deleted === 0) {
+      logger.error(`Error deleting conversation by id: ${id}`);
+      throw Error('No conversation has been deleted');
+    }
+    return response.deleted;
+  } catch (err) {
+    logger.error(`Error deleting conversation: ${err} with id: ${id}`);
+    throw err;
   }
-  return response.deleted;
 };

@@ -12,8 +12,8 @@ import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
-import { getIndexTemplateAndPattern } from '../lib/data_client/helpers';
-import { DocumentsDataWriter } from '../lib/data_client/documents_data_writer';
+import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
+import { DocumentsDataWriter } from '../lib/data_stream/documents_data_writer';
 import { FindResponse, findDocuments } from './find';
 
 export interface AIAssistantDataClientParams {
@@ -27,16 +27,16 @@ export interface AIAssistantDataClientParams {
 
 export class AIAssistantDataClient {
   /** Kibana space id the document index are part of */
-  private readonly spaceId: string;
+  public readonly spaceId: string;
 
   /** User creating, modifying, deleting, or updating a document */
   private readonly currentUser: AuthenticatedUser | null;
 
   private writerCache: Map<string, DocumentsDataWriter> = new Map();
 
-  private indexTemplateAndPattern: IIndexPatternString;
+  public indexTemplateAndPattern: IIndexPatternString;
 
-  constructor(private readonly options: AIAssistantDataClientParams) {
+  constructor(public readonly options: AIAssistantDataClientParams) {
     this.indexTemplateAndPattern = getIndexTemplateAndPattern(
       this.options.indexPatternsResorceName,
       this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
@@ -68,7 +68,7 @@ export class AIAssistantDataClient {
     return writer;
   }
 
-  public getReader = async <TResponse>(options: { spaceId?: string } = {}) => {
+  public getReader = async <TResponse>() => {
     const indexPatterns = this.indexTemplateAndPattern.alias;
 
     return {
@@ -118,6 +118,7 @@ export class AIAssistantDataClient {
       sortField,
       index: this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
+      logger: this.options.logger,
     });
   };
 }

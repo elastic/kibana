@@ -23,8 +23,7 @@ import {
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { estypes } from '@elastic/elasticsearch';
-import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
+import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
@@ -33,8 +32,11 @@ import {
   transformToCreateScheme,
   transformToUpdateScheme,
   transformESToPrompts,
-} from '../../promts_data_client/helpers';
-import { SearchEsPromptsSchema, UpdatePromptSchema } from '../../promts_data_client/types';
+} from '../../ai_assistant_data_clients/promts/helpers';
+import {
+  SearchEsPromptsSchema,
+  UpdatePromptSchema,
+} from '../../ai_assistant_data_clients/promts/types';
 
 export interface BulkOperationError {
   message: string;
@@ -85,9 +87,12 @@ const buildBulkResponse = (
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-        status_code: 500,
         attributes: {
-          errors: [],
+          errors: errors.map((e: BulkOperationError) => ({
+            status_code: e.status ?? 500,
+            prompts: [{ id: e.document.id, name: '' }],
+            message: e.message,
+          })),
           results,
           summary,
         },
@@ -130,9 +135,13 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         const { body } = request;
         const assistantResponse = buildResponse(response);
 
-        if (body?.update && body.update?.length > ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE) {
+        const operationsCount =
+          (body?.update ? body.update?.length : 0) +
+          (body?.create ? body.create?.length : 0) +
+          (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
+        if (operationsCount > PROMPTS_TABLE_MAX_PAGE_SIZE) {
           return assistantResponse.error({
-            body: `More than ${ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+            body: `More than ${PROMPTS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
             statusCode: 400,
           });
         }
@@ -194,36 +203,22 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             authenticatedUser,
           });
 
-          const created =
-            docsCreated.length > 0
-              ? (
-                  await dataClient?.findDocuments<SearchEsPromptsSchema>({
-                    page: 1,
-                    perPage: 1000,
-                    filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-                    fields: ['id'],
-                  })
-                )?.data
-              : [];
-          const updated =
-            docsUpdated.length > 0
-              ? (
-                  await dataClient?.findDocuments<SearchEsPromptsSchema>({
-                    page: 1,
-                    perPage: 1000,
-                    filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-                    fields: ['id'],
-                  })
-                )?.data
-              : [];
+          const created = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+            page: 1,
+            perPage: 1000,
+            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
+            fields: ['id'],
+          });
+          const updated = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+            page: 1,
+            perPage: 1000,
+            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
+            fields: ['id'],
+          });
 
           return buildBulkResponse(response, {
-            updated: updated
-              ? transformESToPrompts(updated as estypes.SearchResponse<SearchEsPromptsSchema>)
-              : [],
-            created: created
-              ? transformESToPrompts(created as estypes.SearchResponse<SearchEsPromptsSchema>)
-              : [],
+            updated: updated?.data ? transformESToPrompts(updated.data) : [],
+            created: created?.data ? transformESToPrompts(created.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

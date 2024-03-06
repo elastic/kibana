@@ -19,7 +19,7 @@ import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
-import { getConversationResponseMock } from '../conversations_data_client/update_conversation.test';
+import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),

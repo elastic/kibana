@@ -12,7 +12,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
 import { AssistantResourceNames } from '../types';
-import { AIAssistantConversationsDataClient } from '../conversations_data_client';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -20,10 +20,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from '../conversations_data_client/conversations_configuration_type';
-import { assistantPromptsFieldMap } from '../promts_data_client/prompts_configuration_type';
-import { assistantAnonymizationFieldsFieldMap } from '../anonymization_fields_data_client/anonymization_fields_configuration_type';
-import { AIAssistantDataClient } from '../ai_assistant_data_client.ts';
+import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/promts/field_maps_configuration';
+import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
