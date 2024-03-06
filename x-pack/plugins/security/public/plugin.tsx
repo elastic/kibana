@@ -32,6 +32,7 @@ import { accountManagementApp, UserProfileAPIClient } from './account_management
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import { AuthenticationService } from './authentication';
+import { buildSecurityApi } from './build_security_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -131,6 +132,8 @@ export class SecurityPlugin
       getStartServices: core.getStartServices,
       securityApiClients: this.securityApiClients,
     });
+
+    core.security.registerSecurityApi(buildSecurityApi({ authc: this.authc }));
 
     if (management) {
       this.managementService.setup({
