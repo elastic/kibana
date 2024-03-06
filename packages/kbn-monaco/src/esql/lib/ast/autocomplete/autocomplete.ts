@@ -1113,7 +1113,6 @@ async function getFunctionArgsSuggestions(
     !columnExists(arg, {
       fields: fieldsMap,
       variables: variablesExcludingCurrentCommandOnes,
-      query: innerText,
     }).hit;
   if (noArgDefined || isUnknownColumn) {
     const commandArgIndex = command.args.findIndex(
