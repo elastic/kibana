@@ -512,15 +512,10 @@ export const GcpInputVarFields = ({
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
 
-  let credentialsTypeValue = credentialsTypeFields?.value;
-
-  if (!credentialsTypeValue) {
-    if (credentialFilesFields) {
-      credentialsTypeValue = credentialFieldValue;
-    } else if (credentialJSONFields) {
-      credentialsTypeValue = credentialJSONValue;
-    }
-  }
+  const credentialsTypeValue =
+    credentialsTypeFields?.value ||
+    (credentialFilesFields && credentialFieldValue) ||
+    (credentialJSONFields && credentialJSONValue);
 
   return (
     <div>
