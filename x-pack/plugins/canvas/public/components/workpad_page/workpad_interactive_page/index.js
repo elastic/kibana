@@ -221,13 +221,13 @@ const InteractivePageComponent = React.memo((props) => {
   const handlers = useMemo(
     () =>
       createHandlers(eventHandlers, {
-        zoomScale: props.zoomScale,
-        commit,
+        ...props,
         canvasOrigin,
+        commit,
         canDragElement,
       }),
-    [canDragElement, canvasOrigin, commit, props.zoomScale]
-  ); // Captures user intent, needs to have reconciled state
+    [canDragElement, canvasOrigin, commit, props]
+  );
 
   const cursor = aeroStore?.getCurrentState().currentScene.cursor;
 

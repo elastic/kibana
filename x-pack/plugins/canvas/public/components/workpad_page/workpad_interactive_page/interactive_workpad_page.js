@@ -28,7 +28,6 @@ export class InteractiveWorkpadPage extends PureComponent {
   }
 
   render() {
-    console.error('elements', this.props.elements);
     const {
       pageId,
       pageStyle,

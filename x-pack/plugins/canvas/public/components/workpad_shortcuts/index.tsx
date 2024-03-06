@@ -6,35 +6,24 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import { withHandlers, compose } from 'recompose';
 import { WorkpadShortcuts as Component, Props as WorkpadShortcutsProps } from './workpad_shortcuts';
 import {
   groupHandlerCreators,
   layerHandlerCreators,
   basicHandlerCreators,
   clipboardHandlerCreators,
+  Props as HandlerCreatorProps,
   positionHandlerCreators,
 } from '../../lib/element_handler_creators';
-import { createHandlers } from '../sidebar_header/sidebar_header';
 
-export const WorkpadShortcuts = (props: WorkpadShortcutsProps) => {
-  const groupHandlers = createHandlers(groupHandlerCreators, { ...props });
-  const layerHandlers = createHandlers(layerHandlerCreators, { ...props });
-  const basicHandlers = createHandlers(basicHandlerCreators, { ...props });
-  const clipboardHandlers = createHandlers(clipboardHandlerCreators, { ...props });
-  const positionHandlers = createHandlers(positionHandlerCreators, { ...props });
-
-  return (
-    <Component
-      {...props}
-      {...groupHandlers}
-      {...layerHandlers}
-      {...basicHandlers}
-      {...clipboardHandlers}
-      {...positionHandlers}
-    />
-  );
-};
+export const WorkpadShortcuts = compose<WorkpadShortcutsProps, HandlerCreatorProps>(
+  withHandlers(groupHandlerCreators),
+  withHandlers(layerHandlerCreators),
+  withHandlers(basicHandlerCreators),
+  withHandlers(clipboardHandlerCreators),
+  withHandlers(positionHandlerCreators)
+)(Component);
 
 WorkpadShortcuts.propTypes = {
   pageId: PropTypes.string.isRequired,

@@ -34,11 +34,19 @@ const mapStateToProps = (state, { isSelected, pageId, isFullscreen }) => ({
 
 const ComposedWorkpadPageComponent = (props) => {
   const Component = props.isInteractive ? InteractivePage : StaticPage;
-  return <Component {...props} {...animationProps(props)} />;
+  return <Component {...props} />;
 };
 
-export const ComposedWorkpadPage = connect(mapStateToProps, null, null, {
-  areOwnPropsEqual: isEqual, // this is critical, else random unrelated rerenders in the parent cause glitches here
+const mergeProps = (stateProps, _, ownProps) => {
+  return {
+    ...stateProps,
+    ...animationProps(ownProps),
+    ...ownProps,
+  };
+};
+
+export const ComposedWorkpadPage = connect(mapStateToProps, null, mergeProps, {
+  areMergedPropsEqual: isEqual, // this is critical, else random unrelated rerenders in the parent cause glitches here
 })(ComposedWorkpadPageComponent);
 
 export const WorkpadPage = (props) => {

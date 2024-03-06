@@ -122,7 +122,7 @@ const mergeProps = (
 
 export const EditMenuWithContext = React.memo((props: PropsFromRedux) => {
   const { undo, redo } = useContext(WorkpadRoutingContext);
-  const hasPasteData: boolean = useMemo(() => getClipboardData(), []);
+  const hasPasteData: boolean = useMemo(() => Boolean(getClipboardData()), []);
 
   const basicHandlers = createHandlers(basicHandlerCreators, props);
   const clipboardHandler = createHandlers(clipboardHandlerCreators, props);
