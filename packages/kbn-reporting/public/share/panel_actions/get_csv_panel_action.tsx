@@ -70,8 +70,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
-      defaultMessage: 'Download CSV',
+    return i18n.translate('reporting.share.panelAction.generateCsvPanelTitle', {
+      defaultMessage: 'Generate CSV report',
     });
   }
 
@@ -138,10 +138,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     this.isDownloading = true;
 
     this.notifications.toasts.addSuccess({
-      title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
+      title: i18n.translate('reporting.share.panelAction.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
-      text: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedMessage', {
+      text: i18n.translate('reporting.share.panelAction.csvDownloadStartedMessage', {
         defaultMessage: `Your CSV will download momentarily.`,
       }),
       'data-test-subj': 'csvDownloadStarted',
@@ -180,10 +180,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   private onGenerationFail(_error: Error) {
     this.isDownloading = false;
     this.notifications.toasts.addDanger({
-      title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
-        defaultMessage: `CSV download failed`,
+      title: i18n.translate('reporting.share.panelAction.failedCsvReportTitle', {
+        defaultMessage: `CSV report generation failed`,
       }),
-      text: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadMessage', {
+      text: i18n.translate('reporting.share.panelAction.failedCsvReportMessage', {
         defaultMessage: `We couldn't generate your CSV at this time.`,
       }),
       'data-test-subj': 'downloadCsvFail',
