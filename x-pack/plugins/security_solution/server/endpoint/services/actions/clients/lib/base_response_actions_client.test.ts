@@ -550,6 +550,22 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 500);
     });
   });
+
+  describe('#fetchAllPendingActions()', () => {
+    it('should return an async iterable', () => {
+      const iterable = baseClassMock.fetchAllPendingActions();
+
+      expect(iterable).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide an array of pending actions', async () => {
+      for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
+        expect(true).toBeFalsy();
+      }
+    });
+  });
 });
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
@@ -577,5 +593,9 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
+  }
+
+  public fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+    return super.fetchAllPendingActions();
   }
 }

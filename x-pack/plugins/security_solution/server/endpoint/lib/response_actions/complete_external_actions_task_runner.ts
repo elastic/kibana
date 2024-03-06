@@ -45,7 +45,7 @@ export class CompleteExternalActionsTaskRunner
     options: BatchHandlerCallbackOptions<LogsEndpointActionResponse>
   ): Promise<void> {
     // FIXME:PT implement
-    this.log.debug(`Batch processing:\n${stringify(options.data)}`);
+    this.log.error(`TODO: Batch processing:\n${stringify(options.data)}`);
   }
 
   private getNextRunDate(): Date | undefined {
