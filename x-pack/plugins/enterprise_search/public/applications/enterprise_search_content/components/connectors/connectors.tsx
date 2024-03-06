@@ -72,7 +72,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
     <SelectConnector />
   ) : (
     <>
-      <DeleteConnectorModal />
+      <DeleteConnectorModal isCrawler={isCrawler} />
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
