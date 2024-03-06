@@ -6,7 +6,10 @@
  */
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
+
+import { useMlKibana } from '../contexts/kibana';
 
 // TODO Consolidate with legacy code in `ml/public/application/util/index_utils.ts`.
 export function indexServiceFactory(dataViewsService: DataViewsContract) {
@@ -19,9 +22,6 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
      * @returns The data view ID or null if it doesn't exist.
      */
     async getDataViewIdFromName(name: string, job?: Job): Promise<string | null> {
-      if (dataViewsService === null) {
-        throw new Error('Data views are not initialized!');
-      }
       const dataViews = await dataViewsService.find(name);
       const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
       if (!dataView) {
@@ -39,17 +39,20 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
       return dataView.id ?? dataView.getIndexPattern();
     },
     getDataViewById(id: string): Promise<DataView> {
-      if (dataViewsService === null) {
-        throw new Error('Data views are not initialized!');
-      }
-
       if (id) {
         return dataViewsService.get(id);
       } else {
         return dataViewsService.create({});
       }
     },
+    async loadDataViewListItems() {
+      return (await dataViewsService.getIdsWithTitle()).sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+    },
   };
 }
 
 export type MlIndexUtils = ReturnType<typeof indexServiceFactory>;
+
+export const useMlIndexUtils = () => indexServiceFactory(useMlKibana().services.data.dataViews);

@@ -49,6 +49,7 @@ describe('AnomalyChartsEmbeddableFactory', () => {
     expect(Object.keys(createServices[2])).toEqual([
       'anomalyDetectorService',
       'anomalyExplorerService',
+      'mlFieldFormatService',
       'mlResultsService',
     ]);
   });

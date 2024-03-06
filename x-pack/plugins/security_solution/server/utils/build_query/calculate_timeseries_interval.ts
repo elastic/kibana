@@ -7,7 +7,7 @@
 
 /*
  ** Applying the same logic as:
- ** x-pack/plugins/apm/server/lib/helpers/get_bucket_size/calculate_auto.js
+ ** x-pack/plugins/observability_solution/apm/server/lib/helpers/get_bucket_size/calculate_auto.js
  */
 import moment from 'moment';
 

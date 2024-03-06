@@ -227,5 +227,20 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(404);
     });
+
+    it('returns 200 when index is closed', async () => {
+      const es = getService('es');
+
+      await es.indices.close({ index: 'basic_index' });
+
+      await supertest
+        .get(FIELDS_FOR_WILDCARD_PATH)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .query({ pattern: 'basic_index' })
+        .expect(200, {
+          fields: [],
+          indices: [],
+        });
+    });
   });
 }
