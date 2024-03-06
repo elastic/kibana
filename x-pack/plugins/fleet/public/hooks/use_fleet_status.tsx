@@ -42,8 +42,6 @@ export const FleetStatusProvider: React.FC<{
 
   const { data, isLoading, refetch } = useGetFleetStatusQuery();
 
-  console.log({ data });
-
   const state = {
     ...defaultFleetStatus,
     enabled: config.agents.enabled,
