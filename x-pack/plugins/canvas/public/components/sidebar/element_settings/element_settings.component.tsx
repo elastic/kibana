@@ -112,7 +112,9 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
           // contains args, which should react on input changes and change the expression,
           // according to the logic they encapsulate.
           // Good example: columns have changed, the args of expression `math` should be changed, containing the new columns.
-          <div style={{ display: 'none' }}>{content}</div>
+          <div key={`${id}-content`} style={{ display: 'none' }}>
+            {content}
+          </div>
         )
       ),
     [selectedTab, tabs]

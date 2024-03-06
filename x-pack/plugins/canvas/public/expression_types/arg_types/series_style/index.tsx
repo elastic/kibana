@@ -6,7 +6,7 @@
  */
 
 import PropTypes from 'prop-types';
-import { lifecycle, compose } from 'recompose';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
@@ -30,22 +30,16 @@ const formatLabel = (label: string, props: Props) => {
   return `${strings.getStyleLabel()}: ${label}`;
 };
 
-const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
-  lifecycle<Props, {}>({
-    componentWillMount() {
-      const label = get(this.props.argValue, 'chain.0.arguments.label.0', '');
-      if (label) {
-        this.props.setLabel(formatLabel(label, this.props));
-      }
-    },
-    componentDidUpdate(prevProps) {
-      const newLabel = get(this.props.argValue, 'chain.0.arguments.label.0', '');
-      if (newLabel && prevProps.label !== formatLabel(newLabel, this.props)) {
-        this.props.setLabel(formatLabel(newLabel, this.props));
-      }
-    },
-  })
-)(ExtendedTemplate);
+const EnhancedExtendedTemplate = (props: Props & ExtendedTemplateProps) => {
+  useEffect(() => {
+    const label = get(props.argValue, 'chain.0.arguments.label.0', '');
+    if (label && props.label !== formatLabel(label, props)) {
+      props.setLabel(formatLabel(label, props));
+    }
+  }, [props]);
+
+  return <ExtendedTemplate {...props} />;
+};
 
 EnhancedExtendedTemplate.propTypes = {
   argValue: PropTypes.any.isRequired,

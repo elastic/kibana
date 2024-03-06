@@ -41,8 +41,8 @@ export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }:
 
   return (
     <EuiFlexGrid gutterSize="l" columns={4}>
-      {map(elements, (element: CustomElement, index) => {
-        const { name, displayName = '', help = '', image } = element;
+      {map(elements, (element: CustomElement) => {
+        const { name, displayName = '', help = '', image, id } = element;
         const whenClicked = () => onClick(element);
 
         if (
@@ -55,7 +55,7 @@ export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }:
         }
 
         return (
-          <EuiFlexItem key={index} className="canvasElementCard__wrapper">
+          <EuiFlexItem key={id} className="canvasElementCard__wrapper">
             <ElementCard
               title={displayName || name}
               description={help}

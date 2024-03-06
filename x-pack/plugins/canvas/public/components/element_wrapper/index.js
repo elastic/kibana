@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connectAdvanced } from 'react-redux';
-import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
+import { omit } from 'lodash/fp';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
@@ -56,24 +57,20 @@ function selectorFactory(dispatch) {
   };
 }
 
-export const ElementWrapper = compose(
-  connectAdvanced(selectorFactory),
-  withPropsOnChange(
-    (props, nextProps) => !isEqual(props.element, nextProps.element),
-    (props) => {
-      const { element, createHandlers } = props;
-      const handlers = createHandlers(element);
-      // this removes element and createHandlers from passed props
-      return { handlers };
-    }
-  ),
-  mapProps((props) => {
-    // remove element and createHandlers from props passed to component
-    // eslint-disable-next-line no-unused-vars
-    const { element, createHandlers, selectedPage, ...restProps } = props;
-    return restProps;
-  })
-)(Component);
+const ElementWrapperComponent = React.memo(
+  (props) => {
+    const handlers = props.createHandlers(props.element);
+    return (
+      <Component
+        {...omit(['element', 'createHandlers', 'selectedPage'], props)}
+        handlers={handlers}
+      />
+    );
+  },
+  (prevProps, nextProps) => !isEqual(prevProps.element, nextProps.element)
+);
+
+export const ElementWrapper = connectAdvanced(selectorFactory)(ElementWrapperComponent);
 
 ElementWrapper.propTypes = {
   element: PropTypes.shape({

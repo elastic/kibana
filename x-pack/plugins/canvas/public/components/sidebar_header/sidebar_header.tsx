@@ -36,7 +36,7 @@ const getSelectedNodes = (state: State, pageId: string): Array<string | undefine
   return selectedNodeIds.map((id: string) => nodes.find((s) => s.id === id));
 };
 
-const createHandlers = function <T>(
+export const createHandlers = function <T>(
   handlers: Record<keyof T, (...args: any[]) => any>,
   context: Record<string, unknown>
 ) {

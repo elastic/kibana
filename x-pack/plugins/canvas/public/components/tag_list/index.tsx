@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { compose, withProps } from 'recompose';
+import React, { useCallback } from 'react';
 import { tagsRegistry } from '../../lib/tags_registry';
-import { TagList as Component, Props as ComponentProps } from './tag_list';
+import { TagList as Component } from './tag_list';
 import { TagSpec } from '../../lib/tag';
 
 interface Props {
@@ -21,8 +21,10 @@ interface Props {
   tagType: 'health' | 'badge';
 }
 
-export const TagList = compose<ComponentProps, Props>(
-  withProps(() => ({
-    getTag: (tag: string): TagSpec => tagsRegistry.get(tag) || { name: tag, color: undefined },
-  }))
-)(Component);
+export const TagList = React.memo((props: Props) => {
+  const getTag = useCallback(
+    (tag: string): TagSpec => tagsRegistry.get(tag) || { name: tag, color: undefined },
+    []
+  );
+  return <Component {...props} getTag={getTag} />;
+});

@@ -9,10 +9,8 @@ import React, { useContext } from 'react';
 import isEqual from 'react-fast-compare';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { branch, compose, shouldUpdate, withProps } from 'recompose';
 import { canUserWrite } from '../../state/selectors/app';
 import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
-import { not } from '../../lib/aeroelastic/functional';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 import { StaticPage } from './workpad_static_page';
 import { InteractivePage } from './workpad_interactive_page';
@@ -34,12 +32,22 @@ const mapStateToProps = (state, { isSelected, pageId, isFullscreen }) => ({
   pageStyle: getPageById(state, pageId).style,
 });
 
-export const ComposedWorkpadPage = compose(
-  shouldUpdate(not(isEqual)), // this is critical, else random unrelated rerenders in the parent cause glitches here
-  withProps(animationProps),
-  connect(mapStateToProps),
-  branch(({ isInteractive }) => isInteractive, InteractivePage, StaticPage)
-)();
+const ComposedWorkpadPageComponent = (props) => {
+  const Component = props.isInteractive ? InteractivePage : StaticPage;
+  return <Component {...props} />;
+};
+
+const mergeProps = (stateProps, _, ownProps) => {
+  return {
+    ...stateProps,
+    ...animationProps(ownProps),
+    ...ownProps,
+  };
+};
+
+export const ComposedWorkpadPage = connect(mapStateToProps, null, mergeProps, {
+  areMergedPropsEqual: isEqual, // this is critical, else random unrelated rerenders in the parent cause glitches here
+})(ComposedWorkpadPageComponent);
 
 export const WorkpadPage = (props) => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);

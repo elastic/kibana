@@ -39,6 +39,6 @@ export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLab
 ShapePickerPopover.propTypes = {
   ariaLabel: PropTypes.string,
   onChange: PropTypes.func,
-  shapes: PropTypes.object.isRequired,
+  shapes: PropTypes.array.isRequired,
   value: PropTypes.string,
 };

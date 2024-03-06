@@ -14,7 +14,6 @@ When editing code in Canvas, be aware of the following active migrations, (gener
 - Convert file(s) to Typescript.
 - Convert React classes to Functional components, (where applicable).
 - Add Storybook stories for components, (and thus Storyshots).
-- Remove `recompose` in favor of React hooks.
 - Apply improved component structure.
 - Write tests.
 
