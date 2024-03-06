@@ -15,13 +15,5 @@ export function registerAIPlaygroundRoutes({ log, router, config }: RouteDepende
     return;
   }
 
-  registerRoutes(
-    { log, router },
-    {
-      querySourceFields: '/internal/enterprise_search/ai_playground/query_source_fields',
-      chat: '/internal/enterprise_search/ai_playground/chat',
-      apiKey: '/internal/enterprise_search/ai_playground/api_key',
-    },
-    elasticsearchErrorHandler
-  );
+  registerRoutes({ log, router }, '/internal/enterprise_search', elasticsearchErrorHandler);
 }

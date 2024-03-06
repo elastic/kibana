@@ -17,7 +17,7 @@ import { IRouter, RequestHandler } from '@kbn/core/server';
 
 export function registerAIPlaygroundRoutes(
   { log, router }: { log: Logger; router: IRouter },
-  paths: { querySourceFields: string; chat: string; apiKey: string },
+  basePath: string,
   errorHandler: <ContextType, RequestType, ResponseType>(
     log: Logger,
     requestHandler: RequestHandler<ContextType, RequestType, ResponseType>
@@ -25,7 +25,7 @@ export function registerAIPlaygroundRoutes(
 ) {
   router.post(
     {
-      path: paths.querySourceFields,
+      path: `${basePath}/ai_playground/query_source_fields`,
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
@@ -47,7 +47,7 @@ export function registerAIPlaygroundRoutes(
 
   router.post(
     {
-      path: paths.chat,
+      path: `${basePath}/ai_playground/chat`,
       validate: {
         body: schema.object({
           data: schema.any(),
@@ -114,7 +114,7 @@ export function registerAIPlaygroundRoutes(
 
   router.post(
     {
-      path: paths.apiKey,
+      path: `${basePath}/ai_playground/api_key`,
       validate: {
         body: schema.object({
           name: schema.string(),
