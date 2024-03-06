@@ -50,6 +50,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   useEffect(() => {
     if (!canCreateSameNameIndex) {
       setShowError(true);
+    } else {
+      setShowError(false);
     }
   }, [canCreateSameNameIndex]);
 
@@ -117,14 +119,17 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 ? ''
                 : i18n.translate(
                     'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
-                    { defaultMessage: 'You can use an existing index or create a new one' }
+                    { defaultMessage: 'You can use an existing index or create a new one.' }
                   )
             }
             error={
               showError
                 ? i18n.translate(
                     'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
-                    { defaultMessage: 'You can use another existing index or create a new one' }
+                    {
+                      defaultMessage:
+                        "You can't create a new index using an existing index name. Choose an existing index or create a new index with a new name.",
+                    }
                   )
                 : undefined
             }
@@ -152,6 +157,9 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
               onCreateOption={(value) => {
+                if (showError) {
+                  setShowError(false);
+                }
                 setSelectedIndex({ label: value.trim(), shouldCreate: true });
               }}
               singleSelection={{ asPlainText: true }}

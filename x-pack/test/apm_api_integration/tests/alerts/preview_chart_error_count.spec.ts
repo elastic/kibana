@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     // FLAKY: https://github.com/elastic/kibana/issues/172769
-    describe.skip('error_count', () => {
+    describe('error_count', () => {
       beforeEach(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
@@ -306,7 +306,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
     // FLAKY: https://github.com/elastic/kibana/issues/176975
-    describe.skip('error_count', () => {
+    describe('error_count', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });

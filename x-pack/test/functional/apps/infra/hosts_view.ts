@@ -466,7 +466,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
-              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+              const tileValue =
+                metric === 'hostsCount'
+                  ? await pageObjects.infraHostsView.getKPITileValue(metric)
+                  : await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+
               expect(tileValue).to.eql(value);
             });
           });
@@ -622,7 +626,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'diskUsage', value: '17.2%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
-                const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+                const tileValue =
+                  metric === 'hostsCount'
+                    ? await pageObjects.infraHostsView.getKPITileValue(metric)
+                    : await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                 expect(tileValue).to.eql(value);
               });
             })
