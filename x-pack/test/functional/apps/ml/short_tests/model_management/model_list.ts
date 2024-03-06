@@ -173,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await maybeClearSearchInput();
           await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
-          await ml.trainedModelsFlyout.assertClosed();
+          await ml.trainedModelsFlyout.close();
         });
       });
     });
