@@ -98,7 +98,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
       ownFocus
       onClose={onClose}
       aria-labelledby={'addTrainedModelFlyout'}
-      data-test-subj={'addTrainedModelFlyout'}
+      data-test-subj={'mlAddTrainedModelFlyout'}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
