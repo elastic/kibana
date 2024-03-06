@@ -18,5 +18,7 @@
     "@kbn/logging",
     "@kbn/core-base-server-internal",
     "@kbn/core-http-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
   ]
 }

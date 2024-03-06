@@ -19,5 +19,7 @@
     "@kbn/core-security-browser",
     "@kbn/logging",
     "@kbn/core-base-browser-internal",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-browser-mocks",
   ]
 }
