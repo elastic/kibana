@@ -13,6 +13,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
+import type { AGENTLESS_POLICY_ID } from '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import type {
   CloudbeatConfigKeyType,
   CloudSecurityInstallationStats,
@@ -20,8 +21,6 @@ import type {
 } from './types';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
-
-const AGENTLESS_POLICY_ID = 'agentless'; // the policy id defined here: https://github.com/elastic/project-controller/blob/main/internal/project/security/security_kibana_config.go#L86
 
 interface CredentialMappings {
   'gcp.credentials.file': 'credentials file';

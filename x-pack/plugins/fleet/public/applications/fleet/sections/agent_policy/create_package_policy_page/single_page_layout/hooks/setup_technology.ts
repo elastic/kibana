@@ -13,7 +13,7 @@ import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 
-export const AGENTLESS_POLICY_ID = 'agentless';
+export const AGENTLESS_POLICY_ID = 'agentless'; // the policy id defined here: https://github.com/elastic/project-controller/blob/main/internal/project/security/security_kibana_config.go#L86
 
 export const useAgentlessPolicy = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
