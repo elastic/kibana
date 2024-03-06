@@ -44,6 +44,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
+import { buildSecurityApi } from './build_security_api';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
@@ -64,7 +65,6 @@ import type { UserSettingServiceStart } from './user_profile/user_setting_servic
 import { UserSettingService } from './user_profile/user_setting_service';
 import type { AuthenticatedUser, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
-import { buildSecurityApi } from './build_security_api';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
