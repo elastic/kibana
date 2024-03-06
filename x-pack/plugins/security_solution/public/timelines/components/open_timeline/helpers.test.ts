@@ -779,7 +779,7 @@ describe('helpers', () => {
         savedTimeline: true,
         timeline: {
           ...mockTimelineModel,
-          version: null,
+          version: '1',
           updated: undefined,
           changed: undefined,
         },

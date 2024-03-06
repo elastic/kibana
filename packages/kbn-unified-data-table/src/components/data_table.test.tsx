@@ -262,6 +262,7 @@ describe('UnifiedDataTable', () => {
         fields: undefined,
         dataGridRef: expect.any(Object),
         metadata: {
+          dataViewId: 'the-data-view-id',
           someKey: 'someValue',
         },
       });
@@ -283,6 +284,7 @@ describe('UnifiedDataTable', () => {
         ],
         dataGridRef: expect.any(Object),
         metadata: {
+          dataViewId: 'the-data-view-id',
           someKey: 'someValue',
         },
       });

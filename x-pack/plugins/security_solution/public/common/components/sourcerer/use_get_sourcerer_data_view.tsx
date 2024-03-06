@@ -11,8 +11,12 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useKibana } from '../../lib/kibana';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
 
-// TODO: Define what the difference is between this and the sourcererDataView returned
-// from useSourcererDataView
+/*
+ *
+ * returns the created dataView based on sourcererDataView spec
+ * returned from useSourcererDataView
+ *
+ * */
 export const useGetScopedSourcererDataView = ({
   sourcererScope,
 }: {

@@ -48,7 +48,7 @@ import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
-import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/get_sourcerer_data_view';
+import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
 import { defaultUdtHeaders } from '../default_headers';
 
 export const SAMPLE_SIZE_SETTING = 500;
@@ -485,11 +485,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
 export const TimelineDataTable: React.FC<CommonDataTableProps> = memo((props) => {
   const dataView = useGetScopedSourcererDataView({ sourcererScope: SourcererScopeName.timeline });
-  return dataView ? (
-    <TimelineDataTableComponent dataView={dataView} {...props} />
-  ) : (
-    <div>{'TO DO: SHOW ERROR COMPONENT'}</div>
-  );
+  if (!dataView) {
+    throw new Error('DataView must be defined');
+  }
+  return <TimelineDataTableComponent dataView={dataView} {...props} />;
 });
 
 // eslint-disable-next-line import/no-default-export
