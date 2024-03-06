@@ -167,7 +167,7 @@ export class NavigationPublicPlugin
         id: 'es',
         title: 'Search',
         icon: 'logoElasticsearch',
-        homePage: 'discover', // Temp. Wil be updated when all links are registered
+        homePage: 'dev_tools', // Temp. Wil be updated when all links are registered
         sideNavComponentGetter: getSideNavComponentGetter(
           {
             body: [
@@ -180,7 +180,17 @@ export class NavigationPublicPlugin
                 defaultIsCollapsed: false,
                 isCollapsible: false,
                 breadcrumbStatus: 'hidden',
-                children: [],
+                children: [
+                  {
+                    id: 'dev_tools',
+                    title: 'Dev Tools',
+                    link: 'dev_tools:console',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+                    },
+                    spaceBefore: 'm',
+                  },
+                ],
               },
             ],
           },
@@ -204,7 +214,12 @@ export class NavigationPublicPlugin
                 defaultIsCollapsed: false,
                 isCollapsible: false,
                 breadcrumbStatus: 'hidden',
-                children: [],
+                children: [
+                  {
+                    link: 'discover',
+                    spaceBefore: 'm',
+                  },
+                ],
               },
             ],
           },
@@ -215,7 +230,7 @@ export class NavigationPublicPlugin
         id: 'security',
         title: 'Security',
         icon: 'logoSecurity',
-        homePage: 'discover', // Temp. Wil be updated when all links are registered
+        homePage: 'integrations', // Temp. Wil be updated when all links are registered
         sideNavComponentGetter: getSideNavComponentGetter(
           {
             body: [
@@ -227,7 +242,12 @@ export class NavigationPublicPlugin
                 icon: 'logoSecurity',
                 breadcrumbStatus: 'hidden',
                 defaultIsCollapsed: false,
-                children: [],
+                children: [
+                  {
+                    link: 'integrations',
+                    spaceBefore: 'm',
+                  },
+                ],
               },
             ],
           },

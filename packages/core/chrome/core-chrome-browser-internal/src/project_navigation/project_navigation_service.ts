@@ -84,6 +84,7 @@ export class ProjectNavigationService {
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
+  private navLinksService?: ChromeNavLinks;
   private http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
@@ -98,6 +99,7 @@ export class ProjectNavigationService {
     setChromeStyle,
   }: StartDeps) {
     this.application = application;
+    this.navLinksService = navLinksService;
     this.http = http;
     this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
@@ -379,6 +381,11 @@ export class ProjectNavigationService {
 
       if (sideNavComponentGetter) {
         this.setSideNavComponent(sideNavComponentGetter());
+      }
+
+      const link = this.navLinksService?.get(definition.homePage ?? 'home');
+      if (link) {
+        this.application?.navigateToUrl(link.href);
       }
     }
   }
