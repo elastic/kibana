@@ -460,18 +460,8 @@ export class DataViewsService {
       return [];
     }
 
-    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
-
-    return this.savedObjectsCache.map(
-      (so) =>
-        new DataViewLazy({
-          spec: this.savedObjectToSpec(so),
-          fieldFormats: this.fieldFormats,
-          shortDotsEnable,
-          metaFields,
-          apiClient: this.apiClient,
-        })
+    return await Promise.all(
+      this.savedObjectsCache.map(async (so) => (await this.getDataViewLazy(so.id)) as DataViewLazy)
     );
   };
 
@@ -966,9 +956,9 @@ export class DataViewsService {
       }
 
       const spec = this.savedObjectToSpec(savedObject);
-      // todo make shared code
-      const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-      const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+
+      const shortDotsEnable = await this.getShortDotsEnable();
+      const metaFields = await this.getMetaFields();
 
       const dataViewLazy = new DataViewLazy({
         spec,
@@ -1322,8 +1312,8 @@ export class DataViewsService {
 
   // unsaved DataViewLazy changes will not be reflected in the returned DataView
   async toDataView(dataViewLazy: DataViewLazy) {
-    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+    const shortDotsEnable = await this.getShortDotsEnable();
+    const metaFields = await this.getMetaFields();
 
     const dataView = new DataView({
       spec: await dataViewLazy.toSpec(),
