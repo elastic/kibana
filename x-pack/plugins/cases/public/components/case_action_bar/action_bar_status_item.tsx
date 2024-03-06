@@ -8,21 +8,19 @@
 import React, { type ReactNode, memo } from 'react';
 import { EuiTitle } from '@elastic/eui';
 
-interface Props {
+interface ActionBarStatusItemProps {
   title: string | ReactNode;
   children?: ReactNode;
 }
 
-const ActionBarStatusItemComponent: React.FC<Props> = ({ title, children }) => {
-  return (
-    <>
-      <EuiTitle size="xxs">
-        <strong>{title}</strong>
-      </EuiTitle>
-      {children}
-    </>
-  );
-};
+const ActionBarStatusItemComponent: React.FC<ActionBarStatusItemProps> = ({ title, children }) => (
+  <>
+    <EuiTitle size="xxs">
+      <strong>{title}</strong>
+    </EuiTitle>
+    {children}
+  </>
+);
 
 ActionBarStatusItemComponent.displayName = 'ActionBarStatusItem';
 
