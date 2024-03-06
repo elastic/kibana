@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import moment from 'moment';
 import { EuiResizeObserver } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { throttle } from 'lodash';
@@ -48,18 +49,7 @@ export interface EmbeddableSingleMetricViewerContainerProps {
 
 export const EmbeddableSingleMetricViewerContainer: FC<
   EmbeddableSingleMetricViewerContainerProps
-> = ({
-  id,
-  embeddableContext,
-  embeddableInput,
-  services,
-  refresh,
-  onInputChange,
-  onOutputChange,
-  onRenderComplete,
-  onError,
-  onLoading,
-}) => {
+> = ({ id, embeddableContext, embeddableInput, services, refresh, onRenderComplete }) => {
   useEmbeddableExecutionContext<SingleMetricViewerEmbeddableInput>(
     services[0].executionContext,
     embeddableInput,
@@ -72,8 +62,9 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [detectorIndex, setDetectorIndex] = useState<number>(0);
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
+  const [jobsLoaded, setJobsLoaded] = useState(false);
 
-  const { mlApiServices } = services[2];
+  const { mlApiServices, mlJobService } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
     embeddableInput,
     refresh,
@@ -81,12 +72,25 @@ export const EmbeddableSingleMetricViewerContainer: FC<
     onRenderComplete
   );
   const selectedJobId = data?.jobIds[0];
+  // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,
+  // otherwise anomaly table data will not be loaded.
+  const functionDescription =
+    (data?.functionDescription ?? '') === '' ? undefined : data.functionDescription;
   const previousRefresh = usePrevious(lastRefresh ?? 0);
   const mlTimeSeriesExplorer = useTimeSeriesExplorerService();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
   const toastNotificationService = useToastNotificationService();
+
+  useEffect(function setUpJobsLoaded() {
+    async function loadJobs() {
+      await mlJobService.loadJobsWrapper();
+      setJobsLoaded(true);
+    }
+    loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     function setUpSelectedJob() {
@@ -174,7 +178,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
           ref={resizeRef}
           className="ml-time-series-explorer"
         >
-          {data !== undefined && autoZoomDuration !== undefined && (
+          {data !== undefined && autoZoomDuration !== undefined && jobsLoaded && (
             <TimeSeriesExplorerEmbeddableChart
               chartWidth={chartWidth - containerPadding}
               dataViewsService={services[1].data.dataViews}
@@ -182,14 +186,17 @@ export const EmbeddableSingleMetricViewerContainer: FC<
               appStateHandler={appStateHandler}
               autoZoomDuration={autoZoomDuration}
               bounds={bounds}
+              dateFormatTz={moment.tz.guess()}
               lastRefresh={lastRefresh ?? 0}
               previousRefresh={previousRefresh}
               selectedJobId={selectedJobId}
               selectedDetectorIndex={detectorIndex}
               selectedEntities={data.selectedEntities}
               selectedForecastId={selectedForecastId}
+              tableInterval="auto"
+              tableSeverity={0}
               zoom={zoom}
-              functionDescription={data.functionDescription}
+              functionDescription={functionDescription}
               selectedJob={selectedJob}
             />
           )}

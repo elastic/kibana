@@ -14,7 +14,7 @@ import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { deflattenCustomFieldKey, getLocalStorageKey, isFlattenCustomField } from '../utils';
+import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';
 
 const mergeSystemAndCustomFieldConfigs = ({
   systemFilterConfig,
@@ -52,7 +52,7 @@ const shouldBeActive = ({
 const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
   const { appId } = useCasesContext();
   const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
-    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableFiltersConfig, appId),
+    `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
     []
   );
 

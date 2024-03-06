@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import type { SourcererScopeName } from '../store/sourcerer/model';
-import { getSelectedDataviewSelector } from '../store/sourcerer/selectors';
-import { useDeepEqualSelector } from './use_selector';
-
-// Calls it from the module scope due to non memoized selectors https://github.com/elastic/kibana/issues/159315
-const selectedDataviewSelector = getSelectedDataviewSelector();
+import { sourcererSelectors } from '../store/sourcerer';
+import type { State } from '../store';
 
 export const useGetFieldSpec = (scopeId: SourcererScopeName) => {
-  const dataView = useDeepEqualSelector((state) => selectedDataviewSelector(state, scopeId));
-
+  const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
+  const selectedDataViewId = useSelector((state: State) =>
+    sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId)
+  );
+  const dataView = useMemo(
+    () => kibanaDataViews.find((dv) => dv.id === selectedDataViewId),
+    [kibanaDataViews, selectedDataViewId]
+  );
   return useCallback(
     (fieldName: string) => {
       const fields = dataView?.fields;

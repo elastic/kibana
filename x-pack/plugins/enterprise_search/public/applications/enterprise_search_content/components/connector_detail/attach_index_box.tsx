@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -38,10 +37,22 @@ export interface AttachIndexBoxProps {
 }
 
 export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => {
-  const { createIndex, attachIndex, setConnector } = useActions(AttachIndexLogic);
-  const { isLoading: isSaveLoading } = useValues(AttachIndexLogic);
+  const { createIndex, attachIndex, setConnector, checkIndexExists } = useActions(AttachIndexLogic);
+  const {
+    isLoading: isSaveLoading,
+    isExistLoading,
+    canCreateSameNameIndex,
+  } = useValues(AttachIndexLogic);
   const [selectedIndex, setSelectedIndex] = useState<{ label: string; shouldCreate?: boolean }>();
   const [selectedLanguage] = useState<string>();
+  const [showError, setShowError] = useState<boolean>(false);
+  useEffect(() => {
+    if (!canCreateSameNameIndex) {
+      setShowError(true);
+    } else {
+      setShowError(false);
+    }
+  }, [canCreateSameNameIndex]);
 
   const { makeRequest } = useActions(FetchAllIndicesAPILogic);
   const { data, status } = useValues(FetchAllIndicesAPILogic);
@@ -65,6 +76,9 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   useEffect(() => {
     setConnector(connector);
     makeRequest({});
+    if (!connector.index_name) {
+      checkIndexExists({ indexName: connector.name });
+    }
   }, [connector.id]);
 
   return (
@@ -86,12 +100,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
         />
       </EuiText>
       <EuiSpacer />
-      <EuiLink>
-        {i18n.translate('xpack.enterpriseSearch.attachIndexBox.learnMoreAboutIndicesLinkLabel', {
-          defaultMessage: 'Learn more about indices',
-        })}
-      </EuiLink>
-      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -99,10 +107,26 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexLabel',
               { defaultMessage: 'Associated index' }
             )}
-            helpText={i18n.translate(
-              'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
-              { defaultMessage: 'You can use an existing index or create a new one' }
-            )}
+            helpText={
+              showError
+                ? ''
+                : i18n.translate(
+                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
+                    { defaultMessage: 'You can use an existing index or create a new one.' }
+                  )
+            }
+            error={
+              showError
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
+                    {
+                      defaultMessage:
+                        "You can't create a new index using an existing index name. Choose an existing index or create a new index with a new name.",
+                    }
+                  )
+                : undefined
+            }
+            isInvalid={showError}
           >
             <EuiComboBox
               placeholder={i18n.translate(
@@ -118,9 +142,17 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               )}
               isLoading={isLoading}
               options={options}
-              onChange={(selection) => setSelectedIndex(selection[0] || undefined)}
+              onChange={(selection) => {
+                if (showError) {
+                  setShowError(false);
+                }
+                setSelectedIndex(selection[0] || undefined);
+              }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
               onCreateOption={(value) => {
+                if (showError) {
+                  setShowError(false);
+                }
                 setSelectedIndex({ label: value.trim(), shouldCreate: true });
               }}
               singleSelection={{ asPlainText: true }}
@@ -130,6 +162,21 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={() => {
+              createIndex({ indexName: connector.name, language: null });
+            }}
+            isLoading={isSaveLoading || isExistLoading}
+            disabled={!canCreateSameNameIndex}
+          >
+            {i18n.translate('xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel', {
+              defaultMessage: 'Create and attach an index with same name',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={() => onSave()} disabled={!selectedIndex} isLoading={isSaveLoading}>
             {i18n.translate('xpack.enterpriseSearch.attachIndexBox.saveConfigurationButtonLabel', {
