@@ -35,7 +35,6 @@ import {
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
-import { SelectConnector } from './select_connector/select_connector';
 
 import { CannotConnect } from '../search_index/components/cannot_connect';
 
@@ -46,6 +45,7 @@ import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
 import { CrawlerEmptyState } from './crawler_empty_state';
 import { DeleteConnectorModal } from './delete_connector_modal';
+import { SelectConnector } from './select_connector/select_connector';
 
 export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
@@ -205,9 +205,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                   iconType="plusInCircle"
                   fill
                   onClick={() => {
-                    KibanaLogic.values.navigateToUrl(
-                      NEW_CRAWLER_PATH
-                    );
+                    KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH);
                   }}
                 >
                   {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {

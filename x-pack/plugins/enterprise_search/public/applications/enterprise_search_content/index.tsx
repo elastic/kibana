@@ -32,7 +32,7 @@ import {
   ERROR_STATE_PATH,
   ROOT_PATH,
   SEARCH_INDICES_PATH,
-  SETUP_GUIDE_PATH
+  SETUP_GUIDE_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {

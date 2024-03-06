@@ -34,10 +34,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  CONNECTOR_CLIENTS_TYPE,
-  CONNECTOR_NATIVE_TYPE,
-} from '../../../../../../common/constants';
+import { CONNECTOR_CLIENTS_TYPE, CONNECTOR_NATIVE_TYPE } from '../../../../../../common/constants';
 
 import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
 import { BACK_BUTTON_LABEL } from '../../../../shared/constants';

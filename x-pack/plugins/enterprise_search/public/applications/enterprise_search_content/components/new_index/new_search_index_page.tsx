@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,10 +20,10 @@ import {
 } from '../../../../../common/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 
+import { connectorsBreadcrumbs, crawlersBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { CONNECTORS } from '../search_index/connector/constants';
 import { baseBreadcrumbs } from '../search_indices';
-import { connectorsBreadcrumbs, crawlersBreadcrumbs } from '../connectors/connectors';
 
 import { MethodApi } from './method_api/method_api';
 import { MethodConnector } from './method_connector/method_connector';
@@ -133,7 +133,7 @@ const getConnectorModeBadge = (isNative?: boolean) => {
   return undefined;
 };
 
-export const NewSearchIndexPage: React.FC = ({type}) => {
+export const NewSearchIndexPage: React.FC = ({ type }) => {
   const { search } = useLocation();
   const { service_type: inputServiceType, connector_type: inputConnectorType } =
     parseQueryParams(search);

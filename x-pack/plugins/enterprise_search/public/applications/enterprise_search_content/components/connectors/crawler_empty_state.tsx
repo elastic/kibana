@@ -45,9 +45,7 @@ export const CrawlerEmptyState: React.FC = () => {
             disabled={Boolean(errorConnectingMessage)}
             fill
             iconType="plusInCircle"
-            onClick={() =>
-              KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH)
-            }
+            onClick={() => KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH)}
           >
             {i18n.translate('xpack.enterpriseSearch.crawlerEmptyState.newWebCrawlerButtonLabel', {
               defaultMessage: 'New web crawler',

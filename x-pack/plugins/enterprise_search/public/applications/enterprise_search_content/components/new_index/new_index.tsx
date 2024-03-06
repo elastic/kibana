@@ -77,9 +77,9 @@ export const NewIndex: React.FC = () => {
                         KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
                       } else if (type === INGESTION_METHOD_IDS.CRAWLER) {
                         KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH);
-                      } else { 
+                      } else {
                         KibanaLogic.values.navigateToUrl(NEW_API_PATH);
-                      } 
+                      }
                     }}
                   />
                 </EuiFlexItem>

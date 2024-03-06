@@ -9,10 +9,12 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { CONNECTORS_PATH, NEW_CRAWLER_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH, NEW_CONNECTOR_PATH} from '../../routes';
-import { SelectConnector } from './select_connector/select_connector';
+import { CONNECTORS_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH, NEW_CONNECTOR_PATH } from '../../routes';
+
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';
+
 import { Connectors } from './connectors';
+import { SelectConnector } from './select_connector/select_connector';
 
 export const ConnectorsRouter: React.FC = () => {
   return (
@@ -21,7 +23,7 @@ export const ConnectorsRouter: React.FC = () => {
         <SelectConnector />
       </Route>
       <Route path={NEW_CONNECTOR_PATH}>
-        <NewSearchIndexPage type="connector"/>
+        <NewSearchIndexPage type="connector" />
       </Route>
       <Route path={CONNECTORS_PATH}>
         <Connectors isCrawler={false} />
