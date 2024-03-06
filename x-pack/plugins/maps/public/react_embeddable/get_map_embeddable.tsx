@@ -9,21 +9,63 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { RegisterReactEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  type ReactEmbeddableFactory,
+  initializeReactEmbeddableTitles,
+  initializeReactEmbeddableUuid,
+  RegisterReactEmbeddable,
+  useReactEmbeddableApiHandle,
+  useReactEmbeddableUnsavedChanges
+} from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { MapApi } from './types';
 import type { MapEmbeddableInput } from '../embeddable/types';
 import { SavedMap } from '../routes/map_page';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { getSpacesApi } from '../kibana_services';
 import { MapContainer } from '../connected_components/map_container';
 
-export async function getMapEmbeddable(state: MapEmbeddableInput, maybeId?: string) {
+export async function getMapEmbeddable(
+  factory: ReactEmbeddableFactory<MapEmbeddableInput, MapApi>,
+  state: MapEmbeddableInput, 
+  maybeId?: string
+) {
   const savedMap = new SavedMap({
     mapEmbeddableInput: state
   });
   await savedMap.whenReady();
 
+  const uuid = initializeReactEmbeddableUuid(maybeId);
+  const { titlesApi, titleComparators, serializeTitles } =
+    initializeReactEmbeddableTitles(state);
+
   return RegisterReactEmbeddable((apiRef) => {
+    
+    const { unsavedChanges, resetUnsavedChanges } = useReactEmbeddableUnsavedChanges(
+      uuid,
+      factory,
+      {
+        ...titleComparators,
+      }
+    );
+
+    useReactEmbeddableApiHandle(
+      {
+        ...titlesApi,
+        unsavedChanges,
+        resetUnsavedChanges,
+        serializeState: async () => {
+          return {
+            rawState: {
+              ...serializeTitles(),
+            },
+          };
+        },
+      },
+      apiRef,
+      uuid
+    );
+
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
       const spaces = getSpacesApi();
       return sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
