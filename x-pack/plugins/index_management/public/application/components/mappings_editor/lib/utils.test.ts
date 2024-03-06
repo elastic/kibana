@@ -83,16 +83,22 @@ describe('utils', () => {
       expect(getFieldMeta({ name: 'text_field', type: 'text' }).canHaveMultiFields).toEqual(true);
     });
     test('returns "canHaveMultiFields:true" for keyword data type', () => {
-      expect(getFieldMeta({ name: 'keyword_field', type: 'keyword' }).canHaveMultiFields).toEqual(true);
+      expect(getFieldMeta({ name: 'keyword_field', type: 'keyword' }).canHaveMultiFields).toEqual(
+        true
+      );
     });
     test('returns "canHaveMultiFields:true" for IP data type', () => {
       expect(getFieldMeta({ name: 'ip_field', type: 'ip' }).canHaveMultiFields).toEqual(true);
     });
     test('returns "canHaveMultiFields:true" for wildcard data type', () => {
-      expect(getFieldMeta({ name: 'wildcard_field', type: 'wildcard' }).canHaveMultiFields).toEqual(true);
+      expect(getFieldMeta({ name: 'wildcard_field', type: 'wildcard' }).canHaveMultiFields).toEqual(
+        true
+      );
     });
     test('returns "canHaveMultiFields:false" for flattened data type', () => {
-      expect(getFieldMeta({ name: 'flattened_field', type: 'flattened' }).canHaveMultiFields).toEqual(false);
+      expect(
+        getFieldMeta({ name: 'flattened_field', type: 'flattened' }).canHaveMultiFields
+      ).toEqual(false);
     });
   });
 });
