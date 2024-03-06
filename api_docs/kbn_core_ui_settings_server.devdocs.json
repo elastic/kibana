@@ -264,7 +264,7 @@
               "\nRemoves multiple uiSettings values by keys."
             ],
             "signature": [
-              "(keys: string[]) => Promise<void>"
+              "(keys: string[], options?: { validateKeys?: boolean | undefined; handleWriteErrors?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
@@ -284,6 +284,47 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.IUiSettingsClient.removeMany.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-ui-settings-server",
+                    "id": "def-common.IUiSettingsClient.removeMany.$2.validateKeys",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "validateKeys",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/core-ui-settings-server",
+                    "id": "def-common.IUiSettingsClient.removeMany.$2.handleWriteErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "handleWriteErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
