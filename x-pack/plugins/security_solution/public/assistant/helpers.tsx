@@ -21,8 +21,6 @@ export interface QueryField {
   values: string;
 }
 
-export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
-
 export const getPromptContextFromDetectionRules = (rules: Rule[]): string => {
   const data = rules.map((rule) => `Rule Name:${rule.name}\nRule Description:${rule.description}`);
 

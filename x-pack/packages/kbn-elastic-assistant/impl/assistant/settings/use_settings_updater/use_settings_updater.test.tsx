@@ -18,8 +18,8 @@ import {
 import { HttpSetup } from '@kbn/core/public';
 
 const mockConversations = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
 };
 
 const mockHttp = {
@@ -59,7 +59,7 @@ const mockValues = {
 };
 
 const updatedValues = {
-  conversations: { [customConvo.id]: customConvo },
+  conversations: { [customConvo.title]: customConvo },
   allSystemPrompts: [mockSuperheroSystemPrompt],
   allQuickPrompts: [{ title: 'Prompt 2', prompt: 'Prompt 2', color: 'red' }],
   defaultAllow: ['allow2'],

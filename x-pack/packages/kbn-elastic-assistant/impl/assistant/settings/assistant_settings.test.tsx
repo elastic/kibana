@@ -22,8 +22,8 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 
 const mockConversations = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
 };
 const saveSettings = jest.fn();
 

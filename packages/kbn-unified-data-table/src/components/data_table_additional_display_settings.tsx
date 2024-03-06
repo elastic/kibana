@@ -90,54 +90,65 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
 
+  const settings = [];
+
+  if (onChangeHeaderRowHeight && onChangeHeaderRowHeightLines) {
+    settings.push(
+      <RowHeightSettings
+        rowHeight={headerRowHeight}
+        rowHeightLines={headerRowHeightLines}
+        label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
+          defaultMessage: 'Header row height',
+        })}
+        onChangeRowHeight={onChangeHeaderRowHeight}
+        onChangeRowHeightLines={onChangeHeaderRowHeightLines}
+        data-test-subj="unifiedDataTableHeaderRowHeightSettings"
+        maxRowHeight={5}
+      />
+    );
+  }
+
+  if (onChangeRowHeight && onChangeRowHeightLines) {
+    settings.push(
+      <RowHeightSettings
+        rowHeight={rowHeight}
+        rowHeightLines={rowHeightLines}
+        label={i18n.translate('unifiedDataTable.rowHeightLabel', {
+          defaultMessage: 'Cell row height',
+        })}
+        onChangeRowHeight={onChangeRowHeight}
+        onChangeRowHeightLines={onChangeRowHeightLines}
+        data-test-subj="unifiedDataTableRowHeightSettings"
+      />
+    );
+  }
+
+  if (onChangeSampleSize) {
+    settings.push(
+      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+        <EuiRange
+          compressed
+          fullWidth
+          min={minRangeSampleSize}
+          max={maxAllowedSampleSize}
+          step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
+          showInput
+          value={activeSampleSize}
+          onChange={onChangeActiveSampleSize}
+          data-test-subj="unifiedDataTableSampleSizeInput"
+        />
+      </EuiFormRow>
+    );
+  }
+
   return (
     <>
-      {onChangeHeaderRowHeight && onChangeHeaderRowHeightLines && (
-        <RowHeightSettings
-          rowHeight={headerRowHeight}
-          rowHeightLines={headerRowHeightLines}
-          label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
-            defaultMessage: 'Header row height',
-          })}
-          onChangeRowHeight={onChangeHeaderRowHeight}
-          onChangeRowHeightLines={onChangeHeaderRowHeightLines}
-          data-test-subj="unifiedDataTableHeaderRowHeightSettings"
-          maxRowHeight={5}
-        />
-      )}
-      {onChangeRowHeight && onChangeRowHeightLines && (
-        <>
-          <EuiHorizontalRule margin="s" />
-          <RowHeightSettings
-            rowHeight={rowHeight}
-            rowHeightLines={rowHeightLines}
-            label={i18n.translate('unifiedDataTable.rowHeightLabel', {
-              defaultMessage: 'Cell row height',
-            })}
-            onChangeRowHeight={onChangeRowHeight}
-            onChangeRowHeightLines={onChangeRowHeightLines}
-            data-test-subj="unifiedDataTableRowHeightSettings"
-          />
-        </>
-      )}
-      {onChangeSampleSize && (
-        <>
-          <EuiHorizontalRule margin="s" />
-          <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-            <EuiRange
-              compressed
-              fullWidth
-              min={minRangeSampleSize}
-              max={maxAllowedSampleSize}
-              step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
-              showInput
-              value={activeSampleSize}
-              onChange={onChangeActiveSampleSize}
-              data-test-subj="unifiedDataTableSampleSizeInput"
-            />
-          </EuiFormRow>
-        </>
-      )}
+      {settings.map((setting, index) => (
+        <React.Fragment key={`setting-${index}`}>
+          {index > 0 && <EuiHorizontalRule margin="s" />}
+          {setting}
+        </React.Fragment>
+      ))}
     </>
   );
 };

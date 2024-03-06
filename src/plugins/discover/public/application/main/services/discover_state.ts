@@ -88,6 +88,10 @@ export interface LoadParams {
    */
   dataView?: DataView;
   /**
+   * Custom initial app state for loading a saved search
+   */
+  initialAppState?: DiscoverAppState;
+  /**
    * the data view spec to use, if undefined, the saved search's data view will be used
    */
   dataViewSpec?: DataViewSpec;
@@ -183,7 +187,7 @@ export interface DiscoverStateContainer {
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
-    onChangeDataView: (id: string) => Promise<void>;
+    onChangeDataView: (id: string | DataView) => Promise<void>;
     /**
      * Set the currently selected data view
      * @param dataView

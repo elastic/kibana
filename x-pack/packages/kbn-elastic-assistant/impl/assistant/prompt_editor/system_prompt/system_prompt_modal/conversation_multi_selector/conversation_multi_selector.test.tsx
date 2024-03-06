@@ -23,16 +23,16 @@ describe('ConversationMultiSelector', () => {
   });
   it('Selects an existing quick prompt', () => {
     const { getByTestId } = render(<ConversationMultiSelector {...testProps} />);
-    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(welcomeConvo.id);
+    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(welcomeConvo.title);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    fireEvent.click(getByTestId(`conversationMultiSelectorOption-${alertConvo.id}`));
+    fireEvent.click(getByTestId(`conversationMultiSelectorOption-${alertConvo.title}`));
     expect(onConversationSelectionChange).toHaveBeenCalledWith([alertConvo, welcomeConvo]);
   });
 
   it('Selects existing conversation from the search  input', () => {
     const { getByTestId } = render(<ConversationMultiSelector {...testProps} />);
     fireEvent.change(getByTestId('comboBoxSearchInput'), {
-      target: { value: alertConvo.id },
+      target: { value: alertConvo.title },
     });
     fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
       key: 'Enter',

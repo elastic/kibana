@@ -30,7 +30,7 @@ export interface AgentExecutorParams {
   llmType?: string;
   logger: Logger;
   onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
+  replacements: Record<string, string>;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;

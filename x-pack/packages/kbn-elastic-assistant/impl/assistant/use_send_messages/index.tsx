@@ -19,7 +19,7 @@ interface SendMessagesProps {
   http: HttpSetup;
   messages: Message[];
   conversationId: string;
-  replacements?: Record<string, string>;
+  replacements: Record<string, string>;
 }
 
 interface UseSendMessages {

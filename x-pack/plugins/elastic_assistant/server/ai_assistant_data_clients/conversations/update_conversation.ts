@@ -53,7 +53,6 @@ export interface UpdateConversationParams {
   logger: Logger;
   user?: AuthenticatedUser;
   conversationIndex: string;
-  existingConversation: ConversationResponse;
   conversationUpdateProps: ConversationUpdateProps;
   isPatch?: boolean;
 }
@@ -62,7 +61,6 @@ export const updateConversation = async ({
   esClient,
   logger,
   conversationIndex,
-  existingConversation,
   conversationUpdateProps,
   isPatch,
   user,
@@ -76,7 +74,7 @@ export const updateConversation = async ({
       index: conversationIndex,
       query: {
         ids: {
-          values: [existingConversation.id],
+          values: [params.id],
         },
       },
       refresh: true,
@@ -123,7 +121,7 @@ export const updateConversation = async ({
               newMessage.content = message.content;
               newMessage.is_error = message.is_error;
               newMessage.reader = message.reader;
-              newMessage.role = message.role; 
+              newMessage.role = message.role;
               messages.add(newMessage);
             }
             ctx._source.messages = messages;
@@ -135,27 +133,21 @@ export const updateConversation = async ({
 
     if (response.failures && response.failures.length > 0) {
       logger.warn(
-        `Error updating conversation: ${response.failures.map((f) => f.id)} by ID: ${
-          existingConversation.id
-        }`
+        `Error updating conversation: ${response.failures.map((f) => f.id)} by ID: ${params.id}`
       );
       return null;
-    }
-
-    if (!response.updated && response.updated === 0) {
-      throw Error('No conversation has been updated');
     }
 
     const updatedConversation = await getConversation({
       esClient,
       conversationIndex,
-      id: existingConversation.id,
+      id: params.id,
       logger,
       user,
     });
     return updatedConversation;
   } catch (err) {
-    logger.warn(`Error updating conversation: ${err} by ID: ${existingConversation.id}`);
+    logger.warn(`Error updating conversation: ${err} by ID: ${params.id}`);
     throw err;
   }
 };
@@ -188,7 +180,7 @@ export const transformToUpdateScheme = (
       '@timestamp': message.timestamp,
       content: getMessageContentWithoutReplacements({
         messageContent: message.content,
-        replacements: replacements as Record<string, string> | undefined,
+        replacements: (replacements ?? {}) as Record<string, string>,
       }),
       is_error: message.isError,
       reader: message.reader,

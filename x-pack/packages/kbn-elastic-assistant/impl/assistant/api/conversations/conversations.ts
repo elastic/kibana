@@ -110,7 +110,7 @@ export interface DeleteConversationParams {
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.id] - Conversation id to be deleted
+ * @param {string} [options.title] - Conversation title to be deleted
  * @param {AbortSignal} [options.signal] - AbortSignal
  * @param {IToasts} [options.toasts] - IToasts
  *

@@ -9,7 +9,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { Conversation } from '../..';
 
 export const alertConvo: Conversation = {
-  id: 'Alert summary',
+  id: '',
   title: 'Alert summary',
   category: 'assistant',
   isDefault: true,
@@ -33,7 +33,7 @@ export const alertConvo: Conversation = {
 };
 
 export const emptyWelcomeConvo: Conversation = {
-  id: 'Welcome',
+  id: '',
   title: 'Welcome',
   category: 'assistant',
   isDefault: true,
@@ -63,7 +63,7 @@ export const welcomeConvo: Conversation = {
 };
 
 export const customConvo: Conversation = {
-  id: 'Custom option',
+  id: '',
   category: 'assistant',
   title: 'Custom option',
   isDefault: false,

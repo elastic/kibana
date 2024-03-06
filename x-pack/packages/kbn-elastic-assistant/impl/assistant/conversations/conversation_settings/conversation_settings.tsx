@@ -75,7 +75,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         const isNew = typeof c === 'string';
         const newSelectedConversation: Conversation | undefined = isNew
           ? {
-              id: c ?? '',
+              id: '',
               title: c ?? '',
               category: 'assistant',
               messages: [],
@@ -87,10 +87,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             }
           : c;
 
-        if (
-          newSelectedConversation &&
-          (isNew || newSelectedConversation.id === newSelectedConversation.title)
-        ) {
+        if (newSelectedConversation && (isNew || newSelectedConversation.id === '')) {
           setConversationSettings({
             ...conversationSettings,
             [isNew ? c : newSelectedConversation.title]: newSelectedConversation,
@@ -99,7 +96,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             ...conversationsSettingsBulkActions,
             create: {
               ...(conversationsSettingsBulkActions.create ?? {}),
-              [newSelectedConversation.id]: newSelectedConversation,
+              [newSelectedConversation.title]: newSelectedConversation,
             },
           });
         } else if (newSelectedConversation != null) {
@@ -161,18 +158,18 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             ...conversationSettings,
             [updatedConversation.title]: updatedConversation,
           });
-          if (selectedConversation.id !== selectedConversation.title) {
+          if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
+                [updatedConversation.title]: {
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                     : {}),
                   apiConfig: {
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     defaultSystemPromptId: systemPromptId,
@@ -185,7 +182,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id]: updatedConversation,
+                [updatedConversation.title]: updatedConversation,
               },
             });
           }
@@ -236,13 +233,13 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
+                [updatedConversation.title]: {
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                     : {}),
                   apiConfig: {
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     connectorId: connector?.id,
@@ -257,7 +254,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id]: updatedConversation,
+                [updatedConversation.title]: updatedConversation,
               },
             });
           }
@@ -290,20 +287,20 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.id]: updatedConversation,
+            [updatedConversation.title]: updatedConversation,
           });
-          if (selectedConversation.id !== selectedConversation.title) {
+          if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
+                [updatedConversation.title]: {
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                     : {}),
                   apiConfig: {
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     model,
@@ -316,7 +313,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id]: updatedConversation,
+                [updatedConversation.title]: updatedConversation,
               },
             });
           }

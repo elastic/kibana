@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -25,6 +25,7 @@ import { mockAssistantAvailability, TestProviders } from '../mock/test_providers
 import { useFetchCurrentUserConversations } from './api';
 import { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
+import { useConversation } from './use_conversation';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -33,6 +34,8 @@ jest.mock('react-use');
 jest.mock('./prompt_editor', () => ({ PromptEditor: jest.fn() }));
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
+
+jest.mock('./use_conversation');
 
 const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
@@ -57,9 +60,16 @@ const mockData = {
     apiConfig: {},
   },
 };
+const mockDeleteConvo = jest.fn();
+const mockUseConversation = {
+  getConversation: jest.fn(),
+  getDefaultConversation: jest.fn().mockReturnValue(mockData.Welcome),
+  deleteConversation: mockDeleteConvo,
+};
 
 describe('Assistant', () => {
   beforeAll(() => {
+    (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     jest.mocked(useConnectorSetup).mockReturnValue({
       comments: [],
       prompt: <></>,
@@ -67,7 +77,13 @@ describe('Assistant', () => {
 
     jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
-    const connectors: unknown[] = [{}];
+    const connectors: unknown[] = [
+      {
+        id: 'hi',
+        name: 'OpenAI connector',
+        actionTypeId: '.gen-ai',
+      },
+    ];
     jest.mocked(useLoadConnectors).mockReturnValue({
       isSuccess: true,
       data: connectors,
@@ -159,6 +175,23 @@ describe('Assistant', () => {
         })
       );
     });
+
+    it('should delete conversation when delete button is clicked', async () => {
+      renderAssistant();
+      await act(async () => {
+        fireEvent.click(
+          within(screen.getByTestId('conversation-selector')).getByTestId(
+            'comboBoxToggleListButton'
+          )
+        );
+      });
+
+      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+      expect(mockDeleteConvo).toHaveBeenCalledWith('Welcome Id');
+    });
   });
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation title to local storage', async () => {
@@ -216,6 +249,66 @@ describe('Assistant', () => {
       });
 
       expect(setConversationTitle).toHaveBeenLastCalledWith('electric sheep');
+    });
+    it('should fetch current conversation when id has value', async () => {
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation: jest
+          .fn()
+          .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' }),
+      });
+      renderAssistant();
+
+      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      await act(async () => {
+        fireEvent.click(previousConversationButton);
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            ...mockData['electric sheep'],
+            title: 'updated title',
+          },
+        })
+      );
+
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith('updated title');
+    });
+    it('should refetch all conversations when id is empty', async () => {
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          ...mockData,
+          'electric sheep': { ...mockData['electric sheep'], id: '' },
+        },
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: {
+            ...mockData,
+            'electric sheep': {
+              ...mockData['electric sheep'],
+              apiConfig: { newProp: true },
+            },
+          },
+        }),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+      renderAssistant();
+
+      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      await act(async () => {
+        fireEvent.click(previousConversationButton);
+      });
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            ...mockData['electric sheep'],
+            apiConfig: { newProp: true },
+          },
+        })
+      );
     });
   });
 

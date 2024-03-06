@@ -30,7 +30,6 @@ export class ActionsClientLlm extends LLM {
   #connectorId: string;
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-  #actionResultData: string;
   #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
@@ -53,11 +52,6 @@ export class ActionsClientLlm extends LLM {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
-    this.#actionResultData = '';
-  }
-
-  getActionResultData(): string {
-    return this.#actionResultData;
   }
 
   _llmType() {
@@ -109,7 +103,6 @@ export class ActionsClientLlm extends LLM {
         `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
       );
     }
-    this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
 
     return content; // per the contact of _call, return a string
   }

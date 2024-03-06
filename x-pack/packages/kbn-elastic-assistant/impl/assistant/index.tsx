@@ -160,12 +160,12 @@ const AssistantComponent: React.FC<Props> = ({
   }, [selectedConversationTitle, setConversationTitle]);
 
   const [currentConversation, setCurrentConversation] = useState<Conversation>(
-    getDefaultConversation({ conversationId: selectedConversationTitle })
+    getDefaultConversation({ cTitle: selectedConversationTitle })
   );
 
   const refetchCurrentConversation = useCallback(
     async (cId?: string) => {
-      if (cId === selectedConversationTitle || !conversations[selectedConversationTitle]) {
+      if (cId === '' || !conversations[selectedConversationTitle]) {
         return;
       }
       const updatedConversation = await getConversation(
@@ -180,7 +180,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && Object.keys(conversations).length > 0) {
       const conversation =
         conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
       if (conversation) {
@@ -302,7 +302,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
-      if (cTitle === cId) {
+      if (cId === '') {
         const updatedConv = await refetchResults();
         if (updatedConv) {
           setCurrentConversation(updatedConv[cTitle]);
@@ -311,25 +311,15 @@ const AssistantComponent: React.FC<Props> = ({
             getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cTitle] })?.id
           );
         }
-      } else if (cId !== cTitle) {
+      } else {
         setSelectedConversationTitle(cTitle);
         const refetchedConversation = await refetchCurrentConversation(cId);
-        if (refetchedConversation) {
-          setCurrentConversation(refetchedConversation);
-          setConversations({ ...(conversations ?? {}), [cTitle]: refetchedConversation });
-        }
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
-      } else {
-        setSelectedConversationTitle(cTitle);
-        setCurrentConversation(conversations[cTitle]);
-        setEditingSystemPromptId(
-          getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cTitle] })?.id
-        );
       }
     },
-    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
@@ -338,7 +328,7 @@ const AssistantComponent: React.FC<Props> = ({
     onSetupComplete: () => {
       setConversations({
         ...conversations,
-        [currentConversation.id]: clearPresentationData(currentConversation),
+        [currentConversation.title]: clearPresentationData(currentConversation),
       });
     },
   });

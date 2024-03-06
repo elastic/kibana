@@ -11,12 +11,7 @@ import { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation, Message } from '../../assistant_context/types';
 import { API_ERROR } from '../translations';
 import { MODEL_GPT_3_5_TURBO } from '../../connectorland/models/model_selector/model_selector';
-import {
-  getFormattedMessageContent,
-  getOptionalRequestParams,
-  hasParsableResponse,
-  llmTypeDictionary,
-} from '../helpers';
+import { getOptionalRequestParams, llmTypeDictionary } from '../helpers';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
@@ -30,7 +25,7 @@ export interface FetchConnectorExecuteAction {
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
-  replacements?: Record<string, string>;
+  replacements: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
 }
@@ -182,12 +177,7 @@ export const fetchConnectorExecuteAction = async ({
         : undefined;
 
     return {
-      response: hasParsableResponse({
-        isEnabledRAGAlerts,
-        isEnabledKnowledgeBase,
-      })
-        ? getFormattedMessageContent(response.data)
-        : response.data,
+      response: response.data,
       isError: false,
       isStream: false,
       traceData,

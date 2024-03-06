@@ -126,11 +126,11 @@ const statusToErrorMessage = (statusCode: number) => {
 export class CustomResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
-    const contentType: CustomHttpResponseOptions<T>['headers'] = {
+  error({ statusCode, body, headers }: CustomHttpResponseOptions<string>) {
+    const contentType: CustomHttpResponseOptions<string>['headers'] = {
       'content-type': 'application/json',
     };
-    const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
+    const defaultedHeaders: CustomHttpResponseOptions<string>['headers'] = {
       ...contentType,
       ...(headers ?? {}),
     };

@@ -62,7 +62,6 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
           }
           const conversation = await dataClient?.updateConversation({
-            existingConversation,
             conversationUpdateProps: request.body,
             authenticatedUser,
           });

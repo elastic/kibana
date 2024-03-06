@@ -58,6 +58,8 @@ const getNextConversationTitle = (
     : conversationTitles[conversationTitles.indexOf(selectedConversationTitle) + 1];
 };
 
+const getConvoId = (cId: string, cTitle: string): string => (cId === cTitle ? '' : cId);
+
 export type ConversationSelectorOption = EuiComboBoxOptionOption<{
   isDefault: boolean;
 }>;
@@ -80,7 +82,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
-        id: conversation.id ?? conversation.title,
+        id: conversation.id !== '' ? conversation.id : conversation.title,
         label: conversation.title,
       }));
     }, [conversations]);
@@ -109,7 +111,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         let createdConversation;
         if (!optionExists) {
           const newConversation: Conversation = {
-            id: searchValue,
+            id: '',
             title: searchValue,
             category: 'assistant',
             messages: [],
@@ -121,10 +123,11 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           };
           createdConversation = await createConversation(newConversation);
         }
+
         onConversationSelected(
           createdConversation
             ? { cId: createdConversation.id, cTitle: createdConversation.title }
-            : { cId: DEFAULT_CONVERSATION_TITLE, cTitle: DEFAULT_CONVERSATION_TITLE }
+            : { cId: '', cTitle: DEFAULT_CONVERSATION_TITLE }
         );
       },
       [
@@ -138,15 +141,16 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
-      (cId: string) => {
-        onConversationDeleted(cId);
-        if (selectedConversationTitle === cId) {
+      (deletedTitle: string) => {
+        onConversationDeleted(deletedTitle);
+        if (selectedConversationTitle === deletedTitle) {
           const prevConversationTitle = getPreviousConversationTitle(
             conversationTitles,
             selectedConversationTitle
           );
+
           onConversationSelected({
-            cId: conversations[prevConversationTitle].id,
+            cId: getConvoId(conversations[prevConversationTitle].id, prevConversationTitle),
             cTitle: prevConversationTitle,
           });
         }
@@ -166,7 +170,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           setSelectedOptions([]);
         } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
           const { id, label } = newOptions?.[0];
-          await onConversationSelected({ cId: id, cTitle: label });
+
+          await onConversationSelected({ cId: getConvoId(id, label), cTitle: label });
         }
       },
       [conversationOptions, onConversationSelected]
@@ -174,11 +179,19 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const onLeftArrowClick = useCallback(() => {
       const prevTitle = getPreviousConversationTitle(conversationTitles, selectedConversationTitle);
-      onConversationSelected({ cId: conversations[prevTitle].id, cTitle: prevTitle });
+
+      onConversationSelected({
+        cId: getConvoId(conversations[prevTitle].id, prevTitle),
+        cTitle: prevTitle,
+      });
     }, [conversationTitles, selectedConversationTitle, onConversationSelected, conversations]);
     const onRightArrowClick = useCallback(() => {
       const nextTitle = getNextConversationTitle(conversationTitles, selectedConversationTitle);
-      onConversationSelected({ cId: conversations[nextTitle].id, cTitle: nextTitle });
+
+      onConversationSelected({
+        cId: getConvoId(conversations[nextTitle].id, nextTitle),
+        cTitle: nextTitle,
+      });
     }, [conversationTitles, selectedConversationTitle, onConversationSelected, conversations]);
 
     // Register keyboard listener for quick conversation switching
@@ -224,7 +237,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value, id } = option;
+      const { label, value } = option;
+
       return (
         <EuiFlexGroup
           alignItems="center"
@@ -259,7 +273,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    onDelete(id ?? '');
+                    onDelete(label ?? '');
                   }}
                   data-test-subj="delete-option"
                   css={css`

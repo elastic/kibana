@@ -89,7 +89,6 @@ describe('updateConversation', () => {
       esClient,
       logger: loggerMock.create(),
       conversationIndex: 'index-1',
-      existingConversation,
       conversationUpdateProps: conversation,
       user: mockUser1,
     });
@@ -104,35 +103,15 @@ describe('updateConversation', () => {
   test('it returns null when there is not a conversation to update', async () => {
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
     const conversation = getUpdateConversationOptionsMock();
-    const existingConversation = getConversationResponseMock();
 
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     const updatedList = await updateConversation({
       esClient,
       logger: loggerMock.create(),
       conversationIndex: 'index-1',
-      existingConversation,
       conversationUpdateProps: conversation,
       user: mockUser1,
     });
     expect(updatedList).toEqual(null);
-  });
-
-  test('throw error if no conversation was updated', async () => {
-    const existingConversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
-    const conversation = getUpdateConversationOptionsMock();
-    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.updateByQuery.mockResolvedValue({ updated: 0 });
-    await expect(
-      updateConversation({
-        esClient,
-        logger: loggerMock.create(),
-        conversationIndex: 'index-1',
-        existingConversation,
-        conversationUpdateProps: conversation,
-        user: mockUser1,
-      })
-    ).rejects.toThrow('No conversation has been updated');
   });
 });

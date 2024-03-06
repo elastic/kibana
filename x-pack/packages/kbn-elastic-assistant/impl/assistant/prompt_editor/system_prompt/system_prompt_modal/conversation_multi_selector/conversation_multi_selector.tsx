@@ -34,7 +34,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
       () =>
         conversations.map((conversation) => ({
           label: conversation.title ?? '',
-          'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.id),
+          'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.title),
         })),
       [conversations]
     );

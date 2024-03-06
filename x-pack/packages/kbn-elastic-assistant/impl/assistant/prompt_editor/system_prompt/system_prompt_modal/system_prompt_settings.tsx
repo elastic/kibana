@@ -140,7 +140,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
             const getApiConfig = (
               operation: Record<string, ConversationUpdateParams> | undefined
             ) => ({
-              ...((operation ? operation[convo.id] ?? {} : {}).apiConfig ?? {}),
+              ...((operation ? operation[convo.title] ?? {} : {}).apiConfig ?? {}),
               defaultSystemPromptId: getDefaultSystemPromptId(convo),
             });
             const createOperation =
@@ -148,7 +148,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                 ? {
                     create: {
                       ...(updatedConversationsSettingsBulkActions.create ?? {}),
-                      [convo.id]: {
+                      [convo.title]: {
                         ...convo,
                         apiConfig: {
                           ...convo.apiConfig,
@@ -164,9 +164,9 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                 ? {
                     update: {
                       ...(updatedConversationsSettingsBulkActions.update ?? {}),
-                      [convo.id]: {
+                      [convo.title]: {
                         ...(updatedConversationsSettingsBulkActions.update
-                          ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
+                          ? updatedConversationsSettingsBulkActions.update[convo.title] ?? {}
                           : {}),
                         apiConfig: getApiConfig(updatedConversationsSettingsBulkActions.update),
                       },

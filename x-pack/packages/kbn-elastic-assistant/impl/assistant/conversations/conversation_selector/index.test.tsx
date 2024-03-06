@@ -65,7 +65,7 @@ describe('Conversation selector', () => {
       </TestProviders>
     );
     expect(getByTestId('conversation-selector')).toBeInTheDocument();
-    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.id);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.title);
   });
   it('On change, selects new item', () => {
     const { getByTestId } = render(
@@ -74,9 +74,9 @@ describe('Conversation selector', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('comboBoxSearchInput'));
-    fireEvent.click(getByTestId(`convo-option-${alertConvo.id}`));
+    fireEvent.click(getByTestId(`convo-option-${alertConvo.title}`));
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: alertConvo.id,
+      cId: '',
       cTitle: alertConvo.title,
     });
   });
@@ -107,7 +107,7 @@ describe('Conversation selector', () => {
       charCode: 13,
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: customOption,
+      cId: '',
       cTitle: customOption,
     });
   });
@@ -123,10 +123,10 @@ describe('Conversation selector', () => {
 
     fireEvent.click(getByTestId('comboBoxSearchInput'));
     expect(
-      within(getByTestId(`convo-option-${customConvo.id}`)).getByTestId('delete-option')
+      within(getByTestId(`convo-option-${customConvo.title}`)).getByTestId('delete-option')
     ).toBeInTheDocument();
     expect(
-      within(getByTestId(`convo-option-${alertConvo.id}`)).queryByTestId('delete-option')
+      within(getByTestId(`convo-option-${alertConvo.title}`)).queryByTestId('delete-option')
     ).not.toBeInTheDocument();
   });
 
@@ -141,7 +141,7 @@ describe('Conversation selector', () => {
 
     fireEvent.click(getByTestId('comboBoxSearchInput'));
     fireEvent.click(
-      within(getByTestId(`convo-option-${customConvo.id}`)).getByTestId('delete-option')
+      within(getByTestId(`convo-option-${customConvo.title}`)).getByTestId('delete-option')
     );
     jest.runAllTimers();
     expect(onConversationSelected).not.toHaveBeenCalled();
@@ -161,10 +161,10 @@ describe('Conversation selector', () => {
 
     fireEvent.click(getByTestId('comboBoxSearchInput'));
     fireEvent.click(
-      within(getByTestId(`convo-option-${customConvo.id}`)).getByTestId('delete-option')
+      within(getByTestId(`convo-option-${customConvo.title}`)).getByTestId('delete-option')
     );
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: welcomeConvo.id,
+      cId: '',
       cTitle: welcomeConvo.title,
     });
   });
@@ -185,7 +185,7 @@ describe('Conversation selector', () => {
       charCode: 27,
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: alertConvo.id,
+      cId: '',
       cTitle: alertConvo.title,
     });
   });
@@ -204,7 +204,7 @@ describe('Conversation selector', () => {
       charCode: 26,
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: customConvo.id,
+      cId: '',
       cTitle: customConvo.title,
     });
   });

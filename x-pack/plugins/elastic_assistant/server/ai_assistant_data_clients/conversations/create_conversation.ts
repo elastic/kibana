@@ -97,7 +97,7 @@ export const transformToCreateScheme = (
       '@timestamp': message.timestamp,
       content: getMessageContentWithoutReplacements({
         messageContent: message.content,
-        replacements: replacements as Record<string, string> | undefined,
+        replacements: (replacements ?? {}) as Record<string, string>,
       }),
       is_error: message.isError,
       reader: message.reader,
