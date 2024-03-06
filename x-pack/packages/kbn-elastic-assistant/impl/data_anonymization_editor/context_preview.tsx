@@ -61,7 +61,7 @@ const SelectedPromptContextPreviewComponent = ({
       <code>
         <>
           {Object.entries(data.anonymizedData).map(([key, value]) => (
-            <div>
+            <div key={key}>
               {`${key},`}
 
               {data.replacements[value[0]] ? (

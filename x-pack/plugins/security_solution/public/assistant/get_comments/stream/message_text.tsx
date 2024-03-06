@@ -169,6 +169,7 @@ export function MessageText({ loading, content, index }: Props) {
         data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
+        textSize="s"
       >
         {`${content}${loading ? CURSOR : ''}`}
       </EuiMarkdownFormat>

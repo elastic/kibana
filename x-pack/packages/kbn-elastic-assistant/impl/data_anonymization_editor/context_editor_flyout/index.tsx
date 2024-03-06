@@ -71,22 +71,12 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
-                iconType={showRealValues ? 'eyeClosed' : 'eye'}
+                iconType={showRealValues ? 'eye' : 'eyeClose'}
                 onClick={() => setShowRealValues(!showRealValues)}
               >
-                {showRealValues
-                  ? I18n.translate(
-                      'xpack.elasticAssistant.dataAnonymizationEditor.hideRealValues',
-                      {
-                        defaultMessage: 'Show anonymized',
-                      }
-                    )
-                  : I18n.translate(
-                      'xpack.elasticAssistant.dataAnonymizationEditor.showRealValues',
-                      {
-                        defaultMessage: 'Show real values',
-                      }
-                    )}
+                {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.hideRealValues', {
+                  defaultMessage: 'Show anonymized',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
 

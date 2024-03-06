@@ -59,7 +59,11 @@ export const ChatSend: React.FC<Props> = ({
         position: relative;
       `}
     >
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          width: 100%;
+        `}
+      >
         <PromptTextArea
           onPromptSubmit={handleSendMessage}
           ref={promptTextAreaRef}
@@ -70,12 +74,19 @@ export const ChatSend: React.FC<Props> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem
-        css={css`
-          right: 0;
-          position: absolute;
-          padding-right: ${euiThemeVars.euiSizeS};
-          top: ${!isFlyoutMode ? '11px' : 'auto'};
-        `}
+        css={
+          isFlyoutMode
+            ? css`
+                right: 0;
+                position: absolute;
+                margin-right: ${euiThemeVars.euiSizeS};
+              `
+            : css`
+                left: -34px;
+                position: relative;
+                top: 11px;
+              `
+        }
         grow={false}
       >
         <ChatActions

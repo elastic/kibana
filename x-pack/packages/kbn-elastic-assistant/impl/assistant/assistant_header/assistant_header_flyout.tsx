@@ -210,7 +210,13 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="cross" color="text" size="xs" onClick={onCloseFlyout} />
+              <EuiButtonIcon
+                aria-label="xxx"
+                iconType="cross"
+                color="text"
+                size="xs"
+                onClick={onCloseFlyout}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -240,7 +246,9 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 
           <EuiFlexItem grow={false}>
             <EuiPopover
-              button={<EuiButtonIcon iconType="boxesVertical" onClick={onButtonClick} />}
+              button={
+                <EuiButtonIcon aria-label="test" iconType="boxesVertical" onClick={onButtonClick} />
+              }
               isOpen={isPopoverOpen}
               closePopover={closePopover}
               panelPaddingSize="none"

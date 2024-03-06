@@ -49,7 +49,12 @@ export const ChatActions: React.FC<Props> = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={SUBMIT_MESSAGE}>
+        <EuiToolTip
+          position="right"
+          content={!isLoading && SUBMIT_MESSAGE}
+          display="block"
+          repositionOnScroll
+        >
           <EuiButtonIcon
             aria-label={SUBMIT_MESSAGE}
             data-test-subj="submit-chat"
@@ -57,7 +62,7 @@ export const ChatActions: React.FC<Props> = ({
             display={isFlyoutMode && promptValue?.length ? 'fill' : 'base'}
             size={isFlyoutMode ? 'm' : 's'}
             iconType={isFlyoutMode ? 'kqlFunction' : 'returnKey'}
-            isDisabled={isDisabled}
+            isDisabled={isDisabled || !promptValue?.length}
             isLoading={isLoading}
             onClick={onSendMessage}
           />

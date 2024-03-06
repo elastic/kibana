@@ -235,7 +235,10 @@ const AssistantComponent: React.FC<Props> = ({
   const commentsContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const parent = commentsContainerRef.current?.parentElement;
+    const parent = isFlyoutMode
+      ? commentsContainerRef.current?.parentElement?.parentElement
+      : commentsContainerRef.current?.parentElement;
+
     if (!parent) {
       return;
     }
@@ -518,7 +521,7 @@ const AssistantComponent: React.FC<Props> = ({
             inline-size: 50vw;
           `}
         >
-          <CommentContainer ref={commentsContainerRef}>
+          <CommentContainer>
             <EuiFlexGroup
               css={css`
                 overflow: hidden;
@@ -559,7 +562,7 @@ const AssistantComponent: React.FC<Props> = ({
                     flex: 1;
                   `}
                 >
-                  <EuiPanel hasShadow={false}>
+                  <EuiPanel hasShadow={false} panelRef={commentsContainerRef}>
                     {comments}
 
                     {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (

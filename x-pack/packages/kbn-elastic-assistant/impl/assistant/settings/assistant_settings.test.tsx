@@ -51,6 +51,7 @@ const testProps = {
   onClose,
   onSave,
   setSelectedConversationId,
+  isFlyoutMode: false,
 };
 jest.mock('../../assistant_context');
 
