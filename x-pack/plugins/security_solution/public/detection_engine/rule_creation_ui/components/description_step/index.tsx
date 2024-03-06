@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
   buildHighlightedFieldsOverrideDescription,
+  buildSetupDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -301,6 +302,9 @@ export const getDescriptionItem = (
   } else if (field === 'note') {
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
+  } else if (field === 'setup') {
+    const val: string = get(field, data);
+    return buildSetupDescription(label, val);
   } else if (field === 'ruleType') {
     const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);

@@ -197,7 +197,7 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',
-  setup: '# this is some setup markdown documentation',
+  setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
 });
 

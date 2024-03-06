@@ -635,3 +635,21 @@ export const buildAlertSuppressionMissingFieldsDescription = (
     },
   ];
 };
+
+export const buildSetupDescription = (label: string, setup: string): ListItems[] => {
+  if (setup.trim() !== '') {
+    return [
+      {
+        title: label,
+        description: (
+          <NoteDescriptionContainer>
+            <div data-test-subj="setupDescriptionItem" className="eui-yScrollWithShadows">
+              {setup}
+            </div>
+          </NoteDescriptionContainer>
+        ),
+      },
+    ];
+  }
+  return [];
+};
