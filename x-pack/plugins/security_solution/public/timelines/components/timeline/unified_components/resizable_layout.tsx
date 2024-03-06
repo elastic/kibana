@@ -36,10 +36,10 @@ export const TimelineResizableLayoutComponent = ({
   unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
 }) => {
   const [sidebarPanelNode] = useState(() =>
-    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight sidebarPanel' } })
   );
   const [mainPanelNode] = useState(() =>
-    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight mainPanel' } })
   );
 
   const { euiTheme } = useEuiTheme();

@@ -17,7 +17,7 @@ Required field for all events.",
         ],
         "example": "2016-05-23T08:05:34.853Z",
         "id": "@timestamp",
-        "initialWidth": 215,
+        "initialWidth": 190,
         "type": "date",
       },
       Object {

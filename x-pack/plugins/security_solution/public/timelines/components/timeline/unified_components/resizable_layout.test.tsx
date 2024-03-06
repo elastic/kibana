@@ -9,15 +9,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import TimelineResizableLayout from './resizable_layout';
 
-// jest.mock('react-reverse-portal', () => ({
-//   InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-//   OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-//   createHtmlPortalNode: () => ({ unmount: jest.fn() }),
-// }));
+const TestSideBarPanel = <div data-test-subj="sidebar__panel">{'Sidebar Panel'}</div>;
 
-const TestSideBarPanel = () => <div data-test-subj="sidebar__panel">{'Sidebar Panel'}</div>;
-
-const MainPanel = () => <div data-test-subj="main__panel">{'Main Panel'}</div>;
+const MainPanel = <div data-test-subj="main__panel">{'Main Panel'}</div>;
 
 const container = document.createElement('div');
 container.style.width = '1000px';
@@ -45,9 +39,9 @@ const TestComponent = () => {
 describe('ResizableLayout', () => {
   it('should render without any issues', async () => {
     render(<TestComponent />);
-    screen.debug(undefined, 100000);
 
     await waitFor(() => {
+      screen.debug(undefined, 100000);
       expect(screen.getByTestId('sidebar__panel')).toBeVisible();
     });
   });

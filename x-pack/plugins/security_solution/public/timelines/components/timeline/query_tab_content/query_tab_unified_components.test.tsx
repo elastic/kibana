@@ -16,7 +16,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, cleanup, fireEvent, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -104,6 +104,7 @@ const useTimelineEventsMock = jest.fn(() => [
       activePage: 0,
       totalPages: 10,
     },
+    refreshedAt: Date.now(),
     totalCount: 70,
     loadPage: loadPageMock,
   },
@@ -118,6 +119,8 @@ describe('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
+    const SECOND = 1000;
+    jest.setTimeout(10 * SECOND);
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
@@ -146,17 +149,19 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  it('should render unifiedDataTable in timeline', async () => {
-    renderTestComponents();
-    await waitFor(() => {
-      expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+  describe('render', () => {
+    it('should render unifiedDataTable in timeline', async () => {
+      renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
     });
-  });
 
-  it('should render unified-field-list in timeline', async () => {
-    renderTestComponents();
-    await waitFor(() => {
-      expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
+    it('should render unified-field-list in timeline', async () => {
+      renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
+      });
     });
   });
 
@@ -275,8 +280,8 @@ describe('query tab with unified timeline', () => {
 
       await waitFor(() => {
         expect(screen.getByTitle('Sort Old-New')).toBeVisible();
-        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
       });
+      expect(screen.getByTitle('Sort New-Old')).toBeVisible();
 
       useTimelineEventsMock.mockClear();
 
@@ -400,6 +405,75 @@ describe('query tab with unified timeline', () => {
           })
         );
       });
+    });
+  });
+
+  describe('left controls', () => {
+    it('should clear all sorting', async () => {
+      renderTestComponents();
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
+      expect(
+        within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+      ).toHaveTextContent('1');
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
+
+      // // timestamp sorting indicators
+      expect(
+        await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
+      ).toBeVisible();
+
+      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSortingClearButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeNull();
+      });
+    });
+
+    it('should be able to sort by multiple columns', async () => {
+      renderTestComponents();
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
+      expect(
+        within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+      ).toHaveTextContent('1');
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
+
+      // // timestamp sorting indicators
+      expect(
+        await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
+      ).toBeVisible();
+
+      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+
+      // add more columns to sorting
+      fireEvent.click(screen.getByText(/Pick fields to sort by/));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
+        ).toBeVisible();
+      });
+
+      fireEvent.click(
+        screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
+      );
+
+      // check new columns for sorting validity
+      await waitFor(() => {
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')).toBeVisible();
+      });
+      expect(
+        screen.getByTestId('euiDataGridColumnSorting-sortColumn-event.severity')
+      ).toBeVisible();
+
+      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
     });
   });
 });
