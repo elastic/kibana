@@ -29,6 +29,8 @@ export interface ConnectorStatsProps {
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => {
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
   const { data } = useValues(FetchSyncJobsStatsApiLogic);
+  const connectorCount = (data?.connected || 0) + (data?.incomplete || 0);
+  const hasMultipleConnectors = connectorCount > 1;
 
   useEffect(() => {
     makeRequest({ isCrawler });
@@ -59,15 +61,15 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 <EuiText>
                   {!isCrawler
                     ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
-                        defaultMessage: '{count} connectors',
+                        defaultMessage: hasMultipleConnectors ? '{count} connectors' : '{count} connector',
                         values: {
-                          count: (data?.connected || 0) + (data?.incomplete || 0),
+                          count: connectorCount,
                         },
                       })
                     : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
-                        defaultMessage: '{count} web crawlers',
+                        defaultMessage: hasMultipleConnectors ? '{count} web crawlers' : '{count} web crawler',
                         values: {
-                          count: (data?.connected || 0) + (data?.incomplete || 0),
+                          count: connectorCount,
                         },
                       })}
                 </EuiText>
