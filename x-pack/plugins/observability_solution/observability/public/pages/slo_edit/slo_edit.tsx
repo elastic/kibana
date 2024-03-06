@@ -10,13 +10,12 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
@@ -26,7 +25,6 @@ export function SloEditPage() {
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const { isError: hasErrorInGlobalDiagnosis } = useFetchSloGlobalDiagnosis();
-  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
@@ -65,7 +63,7 @@ export function SloEditPage() {
   }
 
   return (
-    <ObservabilityPageTemplate
+    <ObservabilityAppPageTemplate
       pageHeader={{
         pageTitle: slo
           ? i18n.translate('xpack.observability.sloEditPageTitle', {
@@ -78,8 +76,7 @@ export function SloEditPage() {
       }}
       data-test-subj="slosEditPage"
     >
-      <HeaderMenu />
       <SloEditForm slo={slo} />
-    </ObservabilityPageTemplate>
+    </ObservabilityAppPageTemplate>
   );
 }

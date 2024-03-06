@@ -17,14 +17,12 @@ import { LoadingObservability } from '../../components/loading_observability';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { DataAssistantFlyout } from './components/data_assistant_flyout';
 import { DataSections } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
-import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
@@ -33,6 +31,7 @@ import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
@@ -48,8 +47,6 @@ export function OverviewPage() {
     },
     kibanaVersion,
   } = useKibana().services;
-
-  const { ObservabilityPageTemplate } = usePluginContext();
 
   useBreadcrumbs([
     {
@@ -144,7 +141,7 @@ export function OverviewPage() {
   }
 
   return (
-    <ObservabilityPageTemplate
+    <ObservabilityAppPageTemplate
       isPageDataLoaded={isAllRequestsComplete}
       pageHeader={{
         pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
@@ -164,8 +161,6 @@ export function OverviewPage() {
         'data-test-subj': 'obltOverviewPageHeader',
       }}
     >
-      <HeaderMenu />
-
       <ObservabilityOnboardingCallout />
 
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="obltOverviewAlerts">
@@ -229,6 +224,6 @@ export function OverviewPage() {
       {isDataAssistantFlyoutVisible ? (
         <DataAssistantFlyout onClose={() => setIsDataAssistantFlyoutVisible(false)} />
       ) : null}
-    </ObservabilityPageTemplate>
+    </ObservabilityAppPageTemplate>
   );
 }

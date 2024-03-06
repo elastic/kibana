@@ -22,7 +22,7 @@ import type {
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
-import { NavControl } from './components/nav_control.tsx';
+import { NavControl } from './components/nav_control';
 import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
 import { SharedProviders } from './utils/shared_providers';
 

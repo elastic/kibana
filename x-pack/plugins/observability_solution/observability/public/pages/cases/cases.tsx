@@ -6,24 +6,20 @@
  */
 
 import React from 'react';
-
 import { observabilityFeatureId } from '../../../common';
-import { usePluginContext } from '../../hooks/use_plugin_context';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 import { Cases } from './components/cases';
 import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 
 export function CasesPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
   const { canUseCases } = useKibana().services.cases.helpers;
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
 
   return userCasesPermissions.read ? (
-    <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
-      <HeaderMenu />
+    <ObservabilityAppPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
       <Cases permissions={userCasesPermissions} />
-    </ObservabilityPageTemplate>
+    </ObservabilityAppPageTemplate>
   ) : (
     <CaseFeatureNoPermissions />
   );

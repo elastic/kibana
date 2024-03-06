@@ -11,9 +11,11 @@ import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
-import { ChatFlyout } from '../chat/chat_flyout';
+import { ChatFlyout, FlyoutPositionMode } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
+import { useFlyoutState } from '../../hooks/use_flyout_state';
+import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 
 const buttonCss = css`
   padding: 4px 2px 0 2px;
@@ -53,6 +55,8 @@ export function NavControl({}: {}) {
 
   const { isVisible } = useIsNavControlVisible();
 
+  useNavControlScreenContext();
+
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       setHasBeenOpened(true);
@@ -63,6 +67,15 @@ export function NavControl({}: {}) {
       conversationSubscription.unsubscribe();
     };
   }, [service.conversations.predefinedConversation$]);
+
+  const { flyoutState, setFlyoutState } = useFlyoutState();
+
+  const handleSetFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
+    setFlyoutState({
+      ...flyoutState,
+      flyoutPositionMode: newFlyoutPositionMode,
+    });
+  };
 
   const { messages, title } = useObservable(service.conversations.predefinedConversation$) ?? {
     messages: [],
@@ -96,6 +109,8 @@ export function NavControl({}: {}) {
               setIsOpen(false);
             }}
             startedFrom="appTopNavbar"
+            initialFlyoutPositionMode={flyoutState.flyoutPositionMode}
+            onSetFlyoutPositionMode={handleSetFlyoutPositionMode}
           />
         </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : undefined}

@@ -20,14 +20,13 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { paths } from '../../../common/locators/paths';
 import illustration from './assets/illustration.svg';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 
 export function SlosWelcomePage() {
   const {
@@ -36,7 +35,6 @@ export function SlosWelcomePage() {
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
-  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
@@ -61,8 +59,7 @@ export function SlosWelcomePage() {
   }, [basePath, hasSlosAndHasPermissions, navigateToUrl]);
 
   return hasSlosAndHasPermissions || isLoading ? null : (
-    <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
-      <HeaderMenu />
+    <ObservabilityAppPageTemplate data-test-subj="slosPageWelcomePrompt">
       <SloOutdatedCallout />
       <EuiPageTemplate.EmptyPrompt
         title={
@@ -205,6 +202,6 @@ export function SlosWelcomePage() {
           </>
         }
       />
-    </ObservabilityPageTemplate>
+    </ObservabilityAppPageTemplate>
   );
 }

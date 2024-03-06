@@ -13,13 +13,13 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiPopover,
   EuiToolTip,
   useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { useForceUpdate } from '../../hooks/use_force_update';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
@@ -37,19 +37,26 @@ const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 const SIDEBAR_WIDTH = 400;
 
 export type FlyoutWidthMode = 'side' | 'full';
+export type FlyoutPositionMode = 'push' | 'overlay';
 
 export function ChatFlyout({
+  initialConversationId,
   initialTitle,
   initialMessages,
-  onClose,
+  initialFlyoutPositionMode,
   isOpen,
   startedFrom,
+  onClose,
+  onSetFlyoutPositionMode,
 }: {
+  initialConversationId?: string;
   initialTitle: string;
   initialMessages: Message[];
+  initialFlyoutPositionMode?: FlyoutPositionMode;
   isOpen: boolean;
   startedFrom: StartedFrom;
   onClose: () => void;
+  onSetFlyoutPositionMode?: (mode: FlyoutPositionMode) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -60,9 +67,12 @@ export function ChatFlyout({
 
   const knowledgeBase = useKnowledgeBase();
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
 
   const [flyoutWidthMode, setFlyoutWidthMode] = useState<FlyoutWidthMode>('side');
+  const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
+    initialFlyoutPositionMode || 'overlay'
+  );
 
   const [conversationsExpanded, setConversationsExpanded] = useState(false);
 
@@ -156,6 +166,11 @@ export function ChatFlyout({
     setFlyoutWidthMode(newFlyoutWidthMode);
   };
 
+  const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
+    setFlyoutPositionMode(newFlyoutPositionMode);
+    onSetFlyoutPositionMode?.(newFlyoutPositionMode);
+  };
+
   return isOpen ? (
     <ObservabilityAIAssistantMultipaneFlyoutContext.Provider
       value={{
@@ -163,7 +178,7 @@ export function ChatFlyout({
         setVisibility: setIsSecondSlotVisible,
       }}
     >
-      <EuiFlyout
+      <EuiFlyoutResizable
         className={flyoutClassName}
         closeButtonProps={{
           css: {
@@ -171,13 +186,16 @@ export function ChatFlyout({
             marginTop: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
           },
         }}
+        paddingSize="m"
+        pushAnimation
+        minWidth={SIDEBAR_WIDTH}
         size={getFlyoutWidth({
           breakpoint,
           expanded: conversationsExpanded,
           flyoutWidthMode,
           isSecondSlotVisible,
         })}
-        paddingSize="m"
+        type={flyoutPositionMode}
         onClose={() => {
           onClose();
           setIsSecondSlotVisible(false);
@@ -261,6 +279,7 @@ export function ChatFlyout({
               connectors={connectors}
               currentUser={currentUser}
               flyoutWidthMode={flyoutWidthMode}
+              flyoutPositionMode={flyoutPositionMode}
               initialTitle={initialTitle}
               initialMessages={initialMessages}
               initialConversationId={conversationId}
@@ -271,6 +290,7 @@ export function ChatFlyout({
                 setConversationId(conversation.conversation.id);
               }}
               onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
+              onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
             />
           </EuiFlexItem>
 
@@ -290,7 +310,7 @@ export function ChatFlyout({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </ObservabilityAIAssistantMultipaneFlyoutContext.Provider>
   ) : null;
 }

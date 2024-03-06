@@ -27,6 +27,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicStart {}
@@ -44,6 +45,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   ml: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -57,4 +59,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   ml: MlPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
