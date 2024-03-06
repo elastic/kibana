@@ -185,6 +185,20 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
+const getQueryLabel = (ruleType: Type) => {
+  switch (ruleType) {
+    case 'eql': {
+      return i18n.EQL_QUERY_LABEL;
+    }
+    case 'esql': {
+      return i18n.ESQL_QUERY_LABEL;
+    }
+    default: {
+      return i18n.QUERY_LABEL;
+    }
+  }
+};
+
 /* eslint complexity: ["error", 25]*/
 // eslint-disable-next-line complexity
 export const getDescriptionItem = (
@@ -200,6 +214,9 @@ export const getDescriptionItem = (
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     const savedQueryName = get('queryBar.title', data);
+    const ruleType: Type = get('ruleType', data);
+    const queryLabel = getQueryLabel(ruleType);
+
     return buildQueryBarDescription({
       field,
       filters,
@@ -208,6 +225,7 @@ export const getDescriptionItem = (
       savedId,
       savedQueryName,
       indexPatterns,
+      queryLabel,
     });
   } else if (field === 'responseActions') {
     return [];
