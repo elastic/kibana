@@ -248,7 +248,7 @@ describe('AddPrebuiltRulesTable', () => {
     expect(installRuleButton).not.toBeInTheDocument();
   });
 
-  it('renders `Install rule` on rule rows for users with no write permissions', async () => {
+  it('renders `Install rule` on rule rows for users with write permissions', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
