@@ -88,7 +88,7 @@ export const ShareMenuTabs = ({
 
     tabs.push({
       id: 'link',
-      name: i18n.translate('share.contextMenu.permalinksLabel', {
+      name: i18n.translate('share.contextMenu.permalinksTab', {
         defaultMessage: 'Links',
       }),
       // do not break functional tests
@@ -118,7 +118,7 @@ export const ShareMenuTabs = ({
     if (allowEmbed) {
       tabs.push({
         id: 'embed',
-        name: i18n.translate('share.contextMenu.embedCodeLabel', {
+        name: i18n.translate('share.contextMenu.embedCodeTab', {
           defaultMessage: 'Embed',
         }),
         action: buttonHandler().filter(({ id }) => id === 'embed')[0],
