@@ -614,7 +614,6 @@ export const formatAboutStepData = (
     ...(!isEmpty(setup) ? { setup } : {}),
     ...rest,
   };
-  console.log(resp);
   return resp;
 };
 
