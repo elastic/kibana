@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
+
 import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from '@kbn/core/public';
 
 export interface ShareOptions {
@@ -38,6 +40,11 @@ export interface ShareToSpaceFlyoutProps {
    * Default is 'Edit spaces for object'.
    */
   flyoutTitle?: string;
+  /**
+   * Optional react component which can be used to show a warning or additional information.
+   * The component will be rendered below the flyout title and above the flyout content.
+   */
+  additionalContent?: ReactElement;
   /**
    * When enabled, if the object is not yet shared to multiple spaces, a callout will be displayed that suggests the user might want to
    * create a copy instead.
