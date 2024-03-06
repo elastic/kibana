@@ -1645,16 +1645,6 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/ai-assist@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@elastic/ai-assist/-/ai-assist-0.0.8.tgz#126a4d0b403c8571d0bc14f2a7bb9f1f5e8920eb"
-  integrity sha512-i/oztg5UH5EiVoBk+ASSsoyBg6ldPUFdjx8ioBY9B4BqT5Jk61XrtD+dJA0cWfazClRS5naArrWsd3Gb/OvUrA==
-  dependencies:
-    "@elastic/elasticsearch" "^8.11.0"
-    "@langchain/community" "^0.0.20"
-    "@langchain/openai" "^0.0.12"
-    ai "^2.2.33"
-
 "@elastic/apm-rum-core@^5.21.0":
   version "5.21.0"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.21.0.tgz#0dc214b2c829c80a2cd07d37a250c89761fe8386"
@@ -1743,12 +1733,20 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.12.2":
-  version "8.12.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.12.2.tgz#7a241f739a509cc59faee85f79a4c9e9e5ba9128"
-  integrity sha512-04NvH3LIgcv1Uwguorfw2WwzC9Lhfsqs9f0L6uq6MrCw0lqe/HOQ6E8vJ6EkHAA15iEfbhtxOtenbZVVcE+mAQ==
+"@elastic/elasticsearch@^8.11.0":
+  version "8.12.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.12.1.tgz#fd80ef7a4cb959832ae01623a428055f65ffa0e4"
+  integrity sha512-/dJtxtvoN2vRXip6xUrEyzthhzVUOKL8L9YNq25HpMwqiqrJTK70/dOp6GM8oTVQ87UPyJBiiCxQY2+cvg2XWw==
   dependencies:
-    "@elastic/transport" "^8.4.1"
+    "@elastic/transport" "^8.4.0"
+    tslib "^2.4.0"
+
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.9.1-canary.1":
+  version "8.9.1-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.9.1-canary.1.tgz#7c1cdc6cc4129910544b2a3abd6a73b9fcc82ff3"
+  integrity sha512-pxFP57AEmbsgC6LsGv7xyAR4qCXiX6JXAGVdzBXDl2qEdz1p5y3htgyT6tGvyTV11Ma0AflsWx0jJ1vrp6bGew==
+  dependencies:
+    "@elastic/transport" "^8.3.3"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.5.1":
@@ -1928,18 +1926,6 @@
   version "8.4.1"
   resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.4.1.tgz#f98c5a5e2156bcb3f01170b4aca7e7de4d8b61b8"
   integrity sha512-/SXVuVnuU5b4dq8OFY4izG+dmGla185PcoqgK6+AJMpmOeY1QYVNbWtCwvSvoAANN5D/wV+EBU8+x7Vf9EphbA==
-  dependencies:
-    debug "^4.3.4"
-    hpagent "^1.0.0"
-    ms "^2.1.3"
-    secure-json-parse "^2.4.0"
-    tslib "^2.4.0"
-    undici "^5.22.1"
-
-"@elastic/transport@^8.4.0":
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.4.0.tgz#e1ec05f7a2857162c161e2c97008f9b21301a673"
-  integrity sha512-Yb3fDa7yGD0ca3uMbL64M3vM1cE5h5uHmBcTjkdB4VpCasRNKSd09iDpwqX8zX1tbBtxcaKYLceKthWvPeIxTw==
   dependencies:
     debug "^4.3.4"
     hpagent "^1.0.0"
@@ -6656,20 +6642,19 @@
     uuid "^9.0.0"
     zod "^3.22.3"
 
-"@langchain/core@~0.1.13", "@langchain/core@~0.1.16":
-  version "0.1.24"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.1.24.tgz#e029a5641147ef0d9219750704e9f2c5d9b01aa3"
-  integrity sha512-MBsBMses4/6zUetPzZaw9FyRqCebvB+jqaZE+VNDK37wzW+W4hssxat6gyfFbqegOw2VUG64yy57velLbe8fCw==
+"@langchain/core@~0.1.13", "@langchain/core@~0.1.16", "@langchain/core@~0.1.41":
+  version "0.1.42"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.1.42.tgz#36fa9bbc3a62fef1b3a9b93c7655b12b35747cb5"
+  integrity sha512-sk5s1dZiJHTeZMkdG4c0RouxJGBSox0HhQsPDngOCVlD895g8BHjUl8jdW0/P0xIuIQ5pujQmlaJYilhsucDzA==
   dependencies:
     ansi-styles "^5.0.0"
     camelcase "6"
     decamelize "1.2.0"
     js-tiktoken "^1.0.8"
-    langsmith "~0.0.48"
+    langsmith "~0.1.7"
     ml-distance "^4.0.0"
     p-queue "^6.6.2"
     p-retry "4"
-    sax "^1.3.0"
     uuid "^9.0.0"
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
@@ -6686,11 +6671,11 @@
     zod-to-json-schema "3.20.3"
 
 "@langchain/openai@~0.0.10":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.0.14.tgz#27a6ba83f6b754391868b22f3b90cd440038acf0"
-  integrity sha512-co6nRylPrLGY/C3JYxhHt6cxLq07P086O7K3QaZH7SFFErIN9wSzJonpvhZR07DEUq6eK6wKgh2ORxA/NcjSRQ==
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.0.16.tgz#f3a75ef8b5e2e2fcc3adcad66f5defa13e8eb4a1"
+  integrity sha512-GUEeyQ4/pwqr60sPwadrlN5DLe8a3sOhF3ZC96bJTqt9P6rmBQTxwYSHysmsRL/VN9k79+CsqTQ1krrwbocDmQ==
   dependencies:
-    "@langchain/core" "~0.1.13"
+    "@langchain/core" "~0.1.41"
     js-tiktoken "^1.0.7"
     openai "^4.26.0"
     zod "^3.22.4"
@@ -11330,9 +11315,9 @@ aggregate-error@^3.0.0, aggregate-error@^3.1.0:
     indent-string "^4.0.0"
 
 ai@^2.2.33:
-  version "2.2.33"
-  resolved "https://registry.yarnpkg.com/ai/-/ai-2.2.33.tgz#cf81359812885d5583492edc1a622aa85be5dbf5"
-  integrity sha512-y9iMgt/RjFZCrjx5NuC+tdZqvunM9Bo1ufuC1BpgyjPmmE2RYduM+3Whjez0fu808KkwTQvvhUhhC5NkAy8/9g==
+  version "2.2.37"
+  resolved "https://registry.yarnpkg.com/ai/-/ai-2.2.37.tgz#49bae60229937bde351d72d3ff721ccb8060edb2"
+  integrity sha512-JIYm5N1muGVqBqWnvkt29FmXhESoO5TcDxw74OE41SsM+uIou6NPDDs0XWb/ABcd1gmp6k5zym64KWMPM2xm0A==
   dependencies:
     eventsource-parser "1.0.0"
     nanoid "3.3.6"
@@ -13551,6 +13536,11 @@ cli-width@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-3.0.0.tgz#a2f48437a2caa9a22436e794bf071ec9e61cedf6"
   integrity sha512-FxqpkPPwu1HjuN93Omfm4h8uIanXofW0RxVEW3k5RKx+mJJYSthzNhp32Kzxxy3YAEZ/Dc/EWN1vZRY0+kOhbw==
+
+client-only@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/client-only/-/client-only-0.0.1.tgz#38bba5d403c41ab150bff64a95c85013cf73bca1"
+  integrity sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==
 
 cliui@^3.0.3:
   version "3.2.0"
@@ -21347,6 +21337,17 @@ langsmith@^0.0.48, langsmith@~0.0.48:
     p-retry "4"
     uuid "^9.0.0"
 
+langsmith@~0.1.7:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.13.tgz#cdaa653c1300c7277c46ecdbd6d416bde9c95f6d"
+  integrity sha512-iyGrsaWhZ70F1aG8T8Nd4iH33Z0JFMdxbfBbaRV/+LkJDH4PByZHNJbApT6G2pQmmYD0cei9oW7kXp89N5SXXQ==
+  dependencies:
+    "@types/uuid" "^9.0.1"
+    commander "^10.0.1"
+    p-queue "^6.6.2"
+    p-retry "4"
+    uuid "^9.0.0"
+
 language-subtag-registry@~0.3.2:
   version "0.3.21"
   resolved "https://registry.yarnpkg.com/language-subtag-registry/-/language-subtag-registry-0.3.21.tgz#04ac218bea46f04cb039084602c6da9e788dd45a"
@@ -24017,9 +24018,9 @@ openai@^4.17.0, openai@^4.24.1:
     web-streams-polyfill "^3.2.1"
 
 openai@^4.24.2, openai@^4.26.0:
-  version "4.26.1"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.26.1.tgz#7b7c0225c09922445f68f3c4cdbd5775ed31108c"
-  integrity sha512-DvWbjhWbappsFRatOWmu4Dp1/Q4RG9oOz6CfOSjy0/Drb8G+5iAiqWAO4PfpGIkhOOKtvvNfQri2SItl+U7LhQ==
+  version "4.28.4"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-4.28.4.tgz#d4bf1f53a89ef151bf066ef284489e12e7dd1657"
+  integrity sha512-RNIwx4MT/F0zyizGcwS+bXKLzJ8QE9IOyigDG/ttnwB220d58bYjYFp0qjvGwEFBO6+pvFVIDABZPGDl46RFsg==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -27677,11 +27678,6 @@ sax@>=0.6.0, sax@^1.2.1:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-sax@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/sax/-/sax-1.3.0.tgz"
-  integrity sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==
-
 saxes@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/saxes/-/saxes-6.0.0.tgz#fe5b4a4768df4f14a201b1ba6a65c1f3d9988cc5"
@@ -29398,6 +29394,30 @@ swagger2openapi@^7.0.6:
     reftools "^1.1.9"
     yaml "^1.10.0"
     yargs "^17.0.1"
+
+swr-store@0.10.6:
+  version "0.10.6"
+  resolved "https://registry.yarnpkg.com/swr-store/-/swr-store-0.10.6.tgz#1856bda886e87dbed40c8c9874c1b1624d2e502d"
+  integrity sha512-xPjB1hARSiRaNNlUQvWSVrG5SirCjk2TmaUyzzvk69SZQan9hCJqw/5rG9iL7xElHU784GxRPISClq4488/XVw==
+  dependencies:
+    dequal "^2.0.3"
+
+swr@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-2.2.0.tgz#575c6ac1bec087847f4c86a39ccbc0043c834d6a"
+  integrity sha512-AjqHOv2lAhkuUdIiBu9xbuettzAzWXmCEcLONNKJRba87WAefz8Ca9d6ds/SzrPc235n1IxWYdhJ2zF3MNUaoQ==
+  dependencies:
+    use-sync-external-store "^1.2.0"
+
+swrev@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/swrev/-/swrev-4.0.0.tgz#83da6983c7ef9d71ac984a9b169fc197cbf18ff8"
+  integrity sha512-LqVcOHSB4cPGgitD1riJ1Hh4vdmITOp+BkmfmXRh4hSF/t7EnS4iD+SOTmq7w5pPm/SiPeto4ADbKS6dHUDWFA==
+
+swrv@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/swrv/-/swrv-1.0.4.tgz#278b4811ed4acbb1ae46654972a482fd1847e480"
+  integrity sha512-zjEkcP8Ywmj+xOJW3lIT65ciY/4AL4e/Or7Gj0MzU3zBJNMdJiT8geVZhINavnlHRMMCcJLHhraLTAiDOTmQ9g==
 
 symbol-observable@^1.0.4, symbol-observable@^1.1.0, symbol-observable@^1.2.0:
   version "1.2.0"
@@ -32359,7 +32379,7 @@ zod@^3.22.3:
 
 zod@^3.22.4:
   version "3.22.4"
-  resolved "https://registry.npmjs.org/zod/-/zod-3.22.4.tgz"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
   integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
 
 zwitch@^1.0.0:

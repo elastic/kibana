@@ -7,13 +7,13 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useChat as aiAssistUseChat, UseChatHelpers } from '@elastic/ai-assist/dist/react';
-import { AIPlaygroundPluginStartDeps } from '../types';
+import { useAIAssistChat } from './useAIAssistChat';
+import { AIPlaygroundPluginStartDeps, UseChatHelpers } from '../types';
 
 export const useChat = (): UseChatHelpers => {
   const { services } = useKibana<AIPlaygroundPluginStartDeps>();
 
-  const chatHelpers = aiAssistUseChat({
+  const chatHelpers = useAIAssistChat({
     api: async (request: RequestInit) => {
       const response = await services.http.post('/internal/enterprise_search/ai_playground/chat', {
         ...request,

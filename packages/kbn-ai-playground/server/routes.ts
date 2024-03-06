@@ -7,8 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { fetchFields } from '../lib/fetch_query_source_fields';
-import Assist, { ConversationalChain, Prompt } from '@elastic/ai-assist';
-import { ChatOpenAI } from '@elastic/ai-assist/models';
+import { AssistClientOptionsWithClient, createAssist as Assist } from '../utils/assist';
+import { ConversationalChain } from '../utils/conversationalChain';
+import { Prompt } from '../utils/prompt';
+import { ChatOpenAI } from '@langchain/openai';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { Logger } from '@kbn/logging';
 import { IRouter, RequestHandler } from '@kbn/core/server';
@@ -58,7 +60,7 @@ export function registerAIPlaygroundRoutes(
 
       const aiClient = Assist({
         es_client: client.asCurrentUser,
-      });
+      } as AssistClientOptionsWithClient);
 
       const { messages, data } = await request.body;
 

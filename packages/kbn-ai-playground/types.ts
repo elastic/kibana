@@ -17,7 +17,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export enum MessageRole {
-  'user' = 'user',
+  'user' = 'human',
   'assistant' = 'assistant',
   'system' = 'system',
 }
@@ -26,7 +26,18 @@ export interface Message {
   id: string;
   content: string | React.ReactNode;
   createdAt?: Date;
+  annotations?: Annotations[];
   role: MessageRole;
+}
+
+export interface Annotation {
+  metadata: { id: string; score: number };
+  pageContent: string;
+}
+
+export interface Annotations {
+  type: 'citations' | 'retrieved_docs';
+  documents: Annotation[];
 }
 
 export interface Doc {
@@ -107,3 +118,73 @@ export enum SummarizationModelName {
   gpt3_5_turbo_16k_0613 = 'gpt-3.5-turbo-16k-0613',
   gpt3_5_turbo = 'gpt-3.5-turbo-instruct',
 }
+
+export type JSONValue =
+  | null
+  | string
+  | number
+  | boolean
+  | { [x: string]: JSONValue }
+  | Array<JSONValue>;
+
+export type ChatRequestOptions = {
+  options?: RequestOptions;
+  data?: Record<string, string>;
+};
+
+export type CreateMessage = Omit<Message, 'id'> & {
+  id?: Message['id'];
+};
+
+export type ChatRequest = {
+  messages: Message[];
+  options?: RequestOptions;
+  data?: Record<string, string>;
+};
+
+export type UseChatOptions = {
+  api?: string | ((init: RequestInit) => Promise<Response>);
+  id?: string;
+  initialInput?: string;
+  onError?: (error: Error) => void;
+  headers?: Record<string, string> | Headers;
+  body?: object;
+};
+
+export type AssistantMessage = {
+  id: string;
+  role: 'assistant';
+  content: Array<{
+    type: 'text';
+    text: {
+      value: string;
+    };
+  }>;
+};
+
+export type RequestOptions = {
+  headers?: Record<string, string> | Headers;
+  body?: object;
+};
+
+export type UseChatHelpers = {
+  messages: Message[];
+  error: undefined | Error;
+  append: (
+    message: Message | CreateMessage,
+    chatRequestOptions?: ChatRequestOptions
+  ) => Promise<string | null | undefined>;
+  reload: (chatRequestOptions?: ChatRequestOptions) => Promise<string | null | undefined>;
+  stop: () => void;
+  setMessages: (messages: Message[]) => void;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  handleInputChange: (
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
+  ) => void;
+  handleSubmit: (
+    e: React.FormEvent<HTMLFormElement>,
+    chatRequestOptions?: ChatRequestOptions
+  ) => void;
+  isLoading: boolean;
+};

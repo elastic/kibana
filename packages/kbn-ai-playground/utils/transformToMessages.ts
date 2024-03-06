@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UseChatHelpers } from '@elastic/ai-assist/dist/react/index';
+import { UseChatHelpers } from '../types';
 import { AIMessage, Message, MessageRole } from '../types';
-import { Annotation, transformAnnotationToDoc } from './transformAnnotationToDoc';
+import { transformAnnotationToDoc } from './transformAnnotationToDoc';
 
 export const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>
   messages.map(({ id, content, createdAt, role, annotations }) => {
@@ -16,24 +16,21 @@ export const transformFromChatMessages = (messages: UseChatHelpers['messages']):
       id,
       content,
       createdAt,
-      role: role === 'assistant' ? MessageRole.assistant : MessageRole.user,
+      role: role === MessageRole.assistant ? MessageRole.assistant : MessageRole.user,
     };
 
-    if (role === 'assistant') {
-      // @ts-ignore
+    if (role === MessageRole.assistant) {
       return {
         ...commonMessageProp,
         citations: Array.isArray(annotations)
-          ? // @ts-ignore
-            annotations
+          ? annotations
               .find((annotation) => annotation.type === 'citations')
-              ?.documents?.map<Annotation>(transformAnnotationToDoc)
+              ?.documents?.map(transformAnnotationToDoc)
           : [],
         retrievalDocs: Array.isArray(annotations)
-          ? // @ts-ignore
-            annotations
+          ? annotations
               .find((annotation) => annotation.type === 'retrieved_docs')
-              ?.documents?.map<Annotation>(transformAnnotationToDoc)
+              ?.documents?.map(transformAnnotationToDoc)
           : [],
       } as AIMessage;
     }

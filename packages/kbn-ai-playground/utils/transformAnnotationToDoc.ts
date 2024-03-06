@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Doc } from '../types';
-
-export interface Annotation {
-  metadata: { id: string; score: number };
-  pageContent: string;
-}
+import { Annotation, Doc } from '../types';
 
 export const transformAnnotationToDoc = (annotation: Annotation): Doc => ({
   id: annotation.metadata.id,
