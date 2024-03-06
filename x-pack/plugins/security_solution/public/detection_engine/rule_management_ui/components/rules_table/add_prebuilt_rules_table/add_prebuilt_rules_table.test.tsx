@@ -25,15 +25,6 @@ jest.mock('../rules_changelog_link', () => ({
 jest.mock('./add_prebuilt_rules_table_filters', () => ({
   AddPrebuiltRulesTableFilters: jest.fn().mockReturnValue(<></>),
 }));
-jest.mock('../../../../../common/components/popover_items', () => ({
-  PopoverItems: jest.fn().mockReturnValue(<></>),
-}));
-jest.mock(
-  '../../../../../detections/components/rules/related_integrations/integrations_popover',
-  () => ({
-    IntegrationsPopover: jest.fn().mockReturnValue(<></>),
-  })
-);
 
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => ({
   usePerformInstallAllRules: () => ({
