@@ -1212,7 +1212,15 @@
                 "section": "def-public.ControlOutput",
                 "text": "ControlOutput"
               },
-              ">, unknown>, partial: Partial<TEmbeddableInput> | undefined, otherPanels: ",
+              ">, ",
+              {
+                "pluginId": "savedObjectsFinder",
+                "scope": "common",
+                "docId": "kibSavedObjectsFinderPluginApi",
+                "section": "def-common.FinderAttributes",
+                "text": "FinderAttributes"
+              },
+              ">, partial: Partial<TEmbeddableInput> | undefined, otherPanels: ",
               {
                 "pluginId": "controls",
                 "scope": "common",
@@ -1285,7 +1293,15 @@
                     "section": "def-public.ControlOutput",
                     "text": "ControlOutput"
                   },
-                  ">, unknown>"
+                  ">, ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.FinderAttributes",
+                    "text": "FinderAttributes"
+                  },
+                  ">"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
@@ -1549,7 +1565,15 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ", any>, unknown>"
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">"
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
         "deprecated": false,
@@ -2482,7 +2506,15 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ", any>, unknown>,",
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -3604,7 +3636,15 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ", any>, unknown>,",
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -4954,7 +4994,15 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ", any>, unknown>, \"type\">"
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">, \"type\">"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
@@ -5642,7 +5690,15 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ">, unknown>"
+          ">, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,

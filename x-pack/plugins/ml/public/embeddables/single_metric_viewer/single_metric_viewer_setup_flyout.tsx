@@ -26,7 +26,12 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(coreStart, undefined, true);
+      const { jobIds } = await resolveJobSelection(
+        coreStart,
+        pluginStart.data.dataViews,
+        undefined,
+        true
+      );
       const title = getDefaultSingleMetricViewerPanelTitle(jobIds);
       const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 

@@ -227,6 +227,11 @@ export const ConnectorDetail: React.FC = () => {
       isLoading={isLoading}
       pageHeader={{
         pageTitle: connector ? <ConnectorNameAndDescription connector={connector} /> : '...',
+        rightSideGroupProps: {
+          gutterSize: 's',
+          responsive: false,
+          wrap: false,
+        },
         rightSideItems: getHeaderActions(index, hasAppSearchAccess),
         tabs,
       }}
