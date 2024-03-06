@@ -11,7 +11,7 @@ import type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
 } from '@kbn/core-security-server';
-import type { InternalSecurityServiceStart } from '..';
+import type { InternalSecurityServiceStart } from './internal_contracts';
 
 export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerContext {
   #authc?: AuthcRequestHandlerContext;
