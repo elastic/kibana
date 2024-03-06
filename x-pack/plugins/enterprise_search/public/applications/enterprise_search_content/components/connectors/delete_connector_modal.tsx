@@ -49,15 +49,17 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
 
   return isDeleteModalVisible ? (
     <EuiConfirmModal
-    title={!isCrawler
-            ? i18n.translate('xpack.enterpriseSearch.content.connectors.deleteModal.title', {
+      title={
+        !isCrawler
+          ? i18n.translate('xpack.enterpriseSearch.content.connectors.deleteModal.title', {
               defaultMessage: 'Delete {connectorCount} connector?',
               values: { connectorCount: 1 },
             })
-            : i18n.translate('xpack.enterpriseSearch.content.crawlers.deleteModal.title', {
+          : i18n.translate('xpack.enterpriseSearch.content.crawlers.deleteModal.title', {
               defaultMessage: 'Delete {connectorCount} crawler?',
               values: { connectorCount: 1 },
-            })}
+            })
+      }
       onCancel={() => {
         closeDeleteModal();
       }}
