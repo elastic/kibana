@@ -47,24 +47,62 @@ export interface CoreRouteHandlerContextParams {
  * @internal
  */
 export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
-  readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
-  readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
-  readonly uiSettings: CoreUiSettingsRouteHandlerContext;
-  readonly deprecations: CoreDeprecationsRouteHandlerContext;
-  readonly security: CoreSecurityRouteHandlerContext;
+  #elasticsearch?: CoreElasticsearchRouteHandlerContext;
+  #savedObjects?: CoreSavedObjectsRouteHandlerContext;
+  #uiSettings?: CoreUiSettingsRouteHandlerContext;
+  #deprecations?: CoreDeprecationsRouteHandlerContext;
+  #security?: CoreSecurityRouteHandlerContext;
 
-  constructor(coreStart: CoreRouteHandlerContextParams, request: KibanaRequest) {
-    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(coreStart.elasticsearch, request);
-    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(coreStart.savedObjects, request);
-    this.uiSettings = new CoreUiSettingsRouteHandlerContext(
-      coreStart.uiSettings,
-      this.savedObjects
-    );
-    this.deprecations = new CoreDeprecationsRouteHandlerContext(
-      coreStart.deprecations,
-      this.elasticsearch,
-      this.savedObjects
-    );
-    this.security = new CoreSecurityRouteHandlerContext(coreStart.security, request);
+  constructor(
+    private readonly coreStart: CoreRouteHandlerContextParams,
+    private readonly request: KibanaRequest
+  ) {}
+
+  public get elasticsearch() {
+    if (!this.#elasticsearch) {
+      this.#elasticsearch = new CoreElasticsearchRouteHandlerContext(
+        this.coreStart.elasticsearch,
+        this.request
+      );
+    }
+    return this.#elasticsearch;
+  }
+
+  public get savedObjects() {
+    if (!this.#savedObjects) {
+      this.#savedObjects = new CoreSavedObjectsRouteHandlerContext(
+        this.coreStart.savedObjects,
+        this.request
+      );
+    }
+    return this.#savedObjects;
+  }
+
+  public get uiSettings() {
+    if (!this.#uiSettings) {
+      this.#uiSettings = new CoreUiSettingsRouteHandlerContext(
+        this.coreStart.uiSettings,
+        this.savedObjects
+      );
+    }
+    return this.#uiSettings;
+  }
+
+  public get deprecations() {
+    if (!this.#deprecations) {
+      this.#deprecations = new CoreDeprecationsRouteHandlerContext(
+        this.coreStart.deprecations,
+        this.elasticsearch,
+        this.savedObjects
+      );
+    }
+    return this.#deprecations;
+  }
+
+  public get security() {
+    if (!this.#security) {
+      this.#security = new CoreSecurityRouteHandlerContext(this.coreStart.security, this.request);
+    }
+    return this.#security;
   }
 }
