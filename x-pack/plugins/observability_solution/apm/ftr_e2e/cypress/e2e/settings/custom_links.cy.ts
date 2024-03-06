@@ -18,7 +18,7 @@ const deleteAllCustomLinks = () => {
     headers: {
       'kbn-xsrf': 'e2e_test',
     },
-    auth: { user: 'editor', pass: 'changeme' },
+    auth: { user: 'editor', pass: 'changeme2' },
   }).then((response) => {
     const promises = response.body.customLinks.map((item: any) => {
       if (item.id) {
@@ -30,7 +30,7 @@ const deleteAllCustomLinks = () => {
           headers: {
             'kbn-xsrf': 'e2e_test',
           },
-          auth: { user: 'editor', pass: 'changeme' },
+          auth: { user: 'editor', pass: 'changeme2' },
           failOnStatusCode: false,
         });
       }

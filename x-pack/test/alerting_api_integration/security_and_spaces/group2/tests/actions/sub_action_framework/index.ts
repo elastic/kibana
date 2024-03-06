@@ -40,7 +40,7 @@ const createSubActionConnector = async ({
       },
       secrets: {
         username: 'elastic',
-        password: 'changeme',
+        password: 'changeme2',
         ...secrets,
       },
     })

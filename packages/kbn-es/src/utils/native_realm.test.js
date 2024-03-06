@@ -28,7 +28,7 @@ const log = new ToolingLog();
 let nativeRealm;
 
 beforeEach(() => {
-  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', client: mockClient, log });
+  nativeRealm = new NativeRealm({ elasticPassword: 'changeme2', client: mockClient, log });
 });
 
 afterAll(() => {
@@ -146,7 +146,7 @@ Array [
   Array [
     Object {
       "body": Object {
-        "password": "changeme",
+        "password": "changeme2",
       },
       "refresh": "wait_for",
       "username": "logstash_system",
@@ -155,7 +155,7 @@ Array [
   Array [
     Object {
       "body": Object {
-        "password": "changeme",
+        "password": "changeme2",
       },
       "refresh": "wait_for",
       "username": "elastic",
@@ -164,7 +164,7 @@ Array [
   Array [
     Object {
       "body": Object {
-        "password": "changeme",
+        "password": "changeme2",
       },
       "refresh": "wait_for",
       "username": "beats_system",

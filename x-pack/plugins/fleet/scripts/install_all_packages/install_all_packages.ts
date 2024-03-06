@@ -13,7 +13,7 @@ import yargs from 'yargs';
 const DEFAULT_REGISTRY_URL = 'https://epr.elastic.co';
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
-const DEFAULT_KIBANA_PASSWORD = 'changeme';
+const DEFAULT_KIBANA_PASSWORD = 'changeme2';
 const KIBANA_VERSION = kibanaPackageJson.version;
 const PUBLIC_VERSION_V1 = '2023-10-31';
 

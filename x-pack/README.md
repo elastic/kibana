@@ -26,9 +26,9 @@ By default, Kibana will run with X-Pack installed as mentioned in the [contribut
 
 Elasticsearch will run with a basic license. To run with a trial license, including security, you can specifying that with the `yarn es` command.
 
-Example: `yarn es snapshot --license trial --password changeme`
+Example: `yarn es snapshot --license trial --password changeme2`
 
-By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
+By default, this will also set the password for native realm accounts to the password provided (`changeme2` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
 # Testing
 

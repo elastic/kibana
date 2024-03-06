@@ -55,7 +55,7 @@ describe('CoreUsageDataService', () => {
 
   const mockConfig = {
     unused_config: {},
-    elasticsearch: { username: 'kibana_system', password: 'changeme' },
+    elasticsearch: { username: 'kibana_system', password: 'changeme2' },
     plugins: { paths: ['pluginA', 'pluginAB', 'pluginB'] },
     server: { port: 5603, basePath: '/zvt', rewriteBasePath: true },
     logging: { json: false },

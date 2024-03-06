@@ -12,7 +12,7 @@ const baseMockConfig = {
   datasetName: 'my-dataset',
   namespace: 'default',
   logFilePaths: ['/my-service.logs'],
-  apiKey: 'elastic:changeme',
+  apiKey: 'elastic:changeme2',
   esHost: ['http://localhost:9200'],
   logfileId: 'my-logs-id',
 };

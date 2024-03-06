@@ -87,13 +87,13 @@ describe('Keystore', () => {
     it('is called on initialization', () => {
       const load = sandbox.spy(Keystore.prototype, 'load');
 
-      new Keystore('/data/protected.keystore', 'changeme');
+      new Keystore('/data/protected.keystore', 'changeme2');
 
       expect(load.calledOnce).toBe(true);
     });
 
     it('can load a password protected keystore', () => {
-      const keystore = new Keystore('/data/protected.keystore', 'changeme');
+      const keystore = new Keystore('/data/protected.keystore', 'changeme2');
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
     });
 
@@ -113,7 +113,7 @@ describe('Keystore', () => {
 
   describe('reset', () => {
     it('clears the data', () => {
-      const keystore = new Keystore('/data/protected.keystore', 'changeme');
+      const keystore = new Keystore('/data/protected.keystore', 'changeme2');
       keystore.reset();
       expect(keystore.data).toEqual({});
     });
@@ -171,7 +171,7 @@ describe('Keystore', () => {
   describe('encrypt', () => {
     it('has randomness ', () => {
       const text = 'foo';
-      const password = 'changeme';
+      const password = 'changeme2';
 
       const dataOne = Keystore.encrypt(text, password);
       const dataTwo = Keystore.encrypt(text, password);
@@ -180,7 +180,7 @@ describe('Keystore', () => {
     });
 
     it('can immediately be decrypted', () => {
-      const password = 'changeme';
+      const password = 'changeme2';
       const secretText = 'foo';
 
       const data = Keystore.encrypt(secretText, password);
@@ -192,7 +192,7 @@ describe('Keystore', () => {
 
   describe('decrypt', () => {
     const text = 'foo';
-    const password = 'changeme';
+    const password = 'changeme2';
     const ciphertext =
       'ctvRsD0l0u958QoPuINQX+wgspbXt2+7IJ7gNbCND2dCGZxYOCwMH9' +
       'MEdZZG4cevSrnhYOaxh24POFhtisSdCSlLWsKNQU8NK1zqNQ3RRP8HxayZJB7ly9uOLbDS+' +

@@ -14,7 +14,7 @@ function deleteAllRules() {
     log: false,
     method: 'GET',
     url: '/api/alerting/rules/_find',
-    auth: { user: 'editor', pass: 'changeme' },
+    auth: { user: 'editor', pass: 'changeme2' },
   }).then(({ body }) => {
     if (body.data.length > 0) {
       cy.log(`Deleting rules`);
@@ -26,7 +26,7 @@ function deleteAllRules() {
         log: false,
         method: 'DELETE',
         url: `/api/alerting/rule/${id}`,
-        auth: { user: 'editor', pass: 'changeme' },
+        auth: { user: 'editor', pass: 'changeme2' },
       });
     });
   });

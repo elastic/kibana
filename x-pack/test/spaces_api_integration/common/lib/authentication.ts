@@ -12,7 +12,7 @@ export const AUTHENTICATION = {
   },
   SUPERUSER: {
     username: 'elastic',
-    password: 'changeme',
+    password: 'changeme2',
   },
   KIBANA_LEGACY_USER: {
     username: 'a_kibana_legacy_user',

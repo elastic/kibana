@@ -51,16 +51,16 @@ describe('CreateUserPage', () => {
     );
 
     fireEvent.change(await findByLabelText('Username'), { target: { value: 'jdoe' } });
-    fireEvent.change(await findByLabelText('Password'), { target: { value: 'changeme' } });
+    fireEvent.change(await findByLabelText('Password'), { target: { value: 'changeme2' } });
     fireEvent.change(await findByLabelText('Confirm password'), {
-      target: { value: 'changeme' },
+      target: { value: 'changeme2' },
     });
     fireEvent.click(await findByRole('button', { name: 'Create user' }));
 
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe', {
         body: JSON.stringify({
-          password: 'changeme',
+          password: 'changeme2',
           username: 'jdoe',
           full_name: '',
           email: '',

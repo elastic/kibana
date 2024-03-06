@@ -7,4 +7,4 @@
  */
 
 export const ELASTIC_SERVERLESS_SUPERUSER = 'elastic_serverless';
-export const ELASTIC_SERVERLESS_SUPERUSER_PASSWORD = 'changeme';
+export const ELASTIC_SERVERLESS_SUPERUSER_PASSWORD = 'changeme2';

@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list
         const { body: exceptionBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list item
         const { body: exceptionItemBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateExceptionListItemMinimalSchemaMock(), // using Old version of Exception List
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list
         const { body: exceptionBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list item
         const { body: exceptionItemBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateExceptionListItemNewerVersionSchemaMock(), // using newer version of Exception List
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list
         const { body: exceptionBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListDetectionSchemaMock())
           .expect(200);
@@ -248,7 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list item
         const { body: exceptionItemBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateExceptionListItemMinimalSchemaMock(), // using Old version of Exception List
@@ -322,7 +322,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list
         const { body: exceptionBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListDetectionSchemaMock())
           .expect(200);
@@ -330,7 +330,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // create an exception list item
         const { body: exceptionItemBody } = await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(ROLES.soc_manager, 'changeme')
+          .auth(ROLES.soc_manager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateExceptionListItemNewerVersionSchemaMock(), // using newer version of Exception List

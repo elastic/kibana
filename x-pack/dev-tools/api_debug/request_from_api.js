@@ -14,9 +14,9 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/con
 function getRequestParams(argv) {
   // use `--host=https://somedomain.com:5601` or else http://localhost:5601 is defaulted
   const host = argv.host || 'http://localhost:5601';
-  // use `--auth=myuser:mypassword` or else elastic:changeme is defaulted
+  // use `--auth=myuser:mypassword` or else elastic:changeme2 is defaulted
   // passing `--auth` with no value effectively sends no auth
-  const auth = argv.auth || 'elastic:changeme';
+  const auth = argv.auth || 'elastic:changeme2';
   const authStr = abab.btoa(auth);
   // auto-add a leading slash to basePath
   const basePath = argv.basePath ? '/' + argv.basePath : '';

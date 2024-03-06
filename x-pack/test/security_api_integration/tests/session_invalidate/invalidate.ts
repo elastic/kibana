@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const randomness = getService('randomness');
   const kibanaServerConfig = config.get('servers.kibana');
-  const notSuperuserTestUser = { username: 'test_user', password: 'changeme' };
+  const notSuperuserTestUser = { username: 'test_user', password: 'changeme2' };
 
   async function checkSessionCookie(
     sessionCookie: Cookie,

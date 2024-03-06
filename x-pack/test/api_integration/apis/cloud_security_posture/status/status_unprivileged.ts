@@ -85,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
-          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme2')
           .expect(200);
 
         expect(res.kspm.status).to.eql(
@@ -144,7 +144,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
-          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme2')
           .expect(200);
 
         expect(res.kspm.status).to.eql(
@@ -188,7 +188,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
-          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme2')
           .expect(200);
 
         expect(res.kspm.status).to.eql(
@@ -235,7 +235,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
-          .auth(UNPRIVILEGED_USERNAME, 'changeme')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme2')
           .expect(200);
 
         expect(res.kspm.status).to.eql(

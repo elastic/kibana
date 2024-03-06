@@ -76,7 +76,7 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('text=UsernamePassword >> input[type="text"]');
     await page.fill('text=UsernamePassword >> input[type="text"]', 'elastic');
     await page.press('text=UsernamePassword >> input[type="text"]', 'Tab');
-    await page.fill('input[type="password"]', 'changeme');
+    await page.fill('input[type="password"]', 'changeme2');
     await page.click('button:has-text("Save")');
     await page.click(
       'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]'
@@ -141,7 +141,7 @@ journey('AlertingDefaults', async ({ page, params }) => {
   );
 
   step('Login to kibana with readonly', async () => {
-    await syntheticsApp.loginToKibana('viewer', 'changeme');
+    await syntheticsApp.loginToKibana('viewer', 'changeme2');
   });
 
   step('Go to http://localhost:5620/app/synthetics/settings/alerting', async () => {

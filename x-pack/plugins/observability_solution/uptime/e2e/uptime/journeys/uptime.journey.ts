@@ -26,7 +26,7 @@ journey('uptime', ({ page, params }) => {
     await page.fill('[data-test-subj=loginUsername]', 'elastic', {
       timeout: 60 * 1000,
     });
-    await page.fill('[data-test-subj=loginPassword]', 'changeme');
+    await page.fill('[data-test-subj=loginPassword]', 'changeme2');
 
     await page.click('[data-test-subj=loginSubmit]');
   });

@@ -9,7 +9,7 @@ The following environment variables can be specified
 - `ELASTICSEARCH_URL` Elasticsearch url e.g. `http://127.0.0.1:9200`
 - `KIBANA_URL` Kibana url e.g. `http://127.0.0.1:560`
 - `USERNAME` a user name to authenticate requests e.g. `elastic`
-- `PASSWORD` a password to authenticate requests e.g. `changeme`
+- `PASSWORD` a password to authenticate requests e.g. `changeme2`
 
 If an environment variable is not specified sensible defaults is used.
 
@@ -32,10 +32,10 @@ Output
  warn Environment variable "ELASTICSEARCH_URL" is not set, using "http://127.0.0.1:9200" as a default value
  info Using environment variable KIBANA_URL=http://127.0.0.1:5601/kbn
  warn Environment variable "USERNAME" is not set, using "elastic" as a default value
- warn Environment variable "PASSWORD" is not set, using "changeme" as a default value
+ warn Environment variable "PASSWORD" is not set, using "changeme2" as a default value
  info Creating role "t1_analyst"...
  info Role "t1_analyst" has been created
  info Creating user "t1_analyst"...
- info User "t1_analyst" has been created (password "changeme")
+ info User "t1_analyst" has been created (password "changeme2")
  succ Done
 ```

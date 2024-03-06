@@ -3,14 +3,14 @@
 elasticsearch:
   host: "http://localhost:9200"
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
   installKibanaUser: false
 
 # Define the connection to Kibana
 kibana:
   host: "http://localhost:5601"
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
   installAssets: true
 
 # Define the indexing options

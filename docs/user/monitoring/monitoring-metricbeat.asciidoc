@@ -176,7 +176,7 @@ output.elasticsearch:
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 ----------------------------------
 <1> In this example, the data is stored on a monitoring cluster with nodes
 `es-mon-1` and `es-mon-2`.

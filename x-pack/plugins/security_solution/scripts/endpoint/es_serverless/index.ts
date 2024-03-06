@@ -46,7 +46,7 @@ ${
         ' ',
         gray('Password for all'),
         gray('accounts set'),
-        `${gray('to:')} ${cyan('changeme')}`,
+        `${gray('to:')} ${cyan('changeme2')}`,
       ].join('\n'),
     ],
     { separator: '  ', widths: [50, 40] }

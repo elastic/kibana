@@ -8,7 +8,7 @@
 /*
 Starts http and https proxies to use to test actions within Kibana or with curl.
 
-Assumes you have elasticsearch running on https://elastic:changeme@localhost:9200,
+Assumes you have elasticsearch running on https://elastic:changeme2@localhost:9200,
 otherwise expect 500 responses from those requests.  All other requests should
 work as expected.
 
@@ -22,14 +22,14 @@ curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080       
 curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080                                https://www.example.com; \
 curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                 http://www.example.com; \
 curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                https://www.example.com; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080                                https://elastic:changeme@localhost:9200; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                https://elastic:changeme@localhost:9200; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme   http://www.example.com; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme  https://www.example.com; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme   http://www.example.com; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme  https://www.example.com; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme  https://elastic:changeme@localhost:9200; \
-curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme  https://elastic:changeme@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080                                https://elastic:changeme2@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                https://elastic:changeme2@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme2   http://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme2  https://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme2   http://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme2  https://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme2  https://elastic:changeme2@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme2  https://elastic:changeme2@localhost:9200; \
 echo done - you should run all the lines above as one command
 
 */
@@ -45,7 +45,7 @@ const proxy = require('proxy');
 const PROGRAM = path.basename(__filename).replace(/.js$/, '');
 const CertDir = path.resolve(__dirname, '../../../../../packages/kbn-dev-utils/certs');
 
-const Auth = 'elastic:changeme';
+const Auth = 'elastic:changeme2';
 const AuthB64 = Buffer.from(Auth).toString('base64');
 
 const HttpsOptions = {

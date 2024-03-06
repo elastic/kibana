@@ -38,7 +38,7 @@ export async function loginToKibana({
 
   await page.fill(
     '[data-test-subj=loginPassword]',
-    user?.password ?? 'changeme'
+    user?.password ?? 'changeme2'
   );
 
   await page.click('[data-test-subj=loginSubmit]');

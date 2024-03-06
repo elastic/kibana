@@ -46,7 +46,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
 
       const createUser = async ({
         username,
-        password = 'changeme',
+        password = 'changeme2',
         kibanaFeatures = { actions: ['all'] },
       }: {
         username: string;
@@ -80,7 +80,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
         });
 
         await securityService.user.create(username, {
-          password: 'changeme',
+          password: 'changeme2',
           full_name: role.name,
           roles: [role.name],
         });
@@ -135,7 +135,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
         subActionParams,
         expectedHttpCode = 200,
         username = 'elastic',
-        password = 'changeme',
+        password = 'changeme2',
         errorLogger = logErrorDetails,
       }: {
         supertest: SuperTest.SuperTest<SuperTest.Test>;

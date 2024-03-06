@@ -29,7 +29,7 @@ export const kbnTestConfig = new (class KbnTestConfig {
   }
 
   getUrlParts(user: UserAuth = kibanaTestUser): UrlParts {
-    // allow setting one complete TEST_KIBANA_URL for ES like https://elastic:changeme@example.com:9200
+    // allow setting one complete TEST_KIBANA_URL for ES like https://elastic:changeme2@example.com:9200
     if (process.env.TEST_KIBANA_URL) {
       const testKibanaUrl = url.parse(process.env.TEST_KIBANA_URL);
       return {

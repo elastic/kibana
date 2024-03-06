@@ -58,8 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it(`should add new user ${customUserName}`, async function () {
       await PageObjects.security.createUser({
         username: customUserName,
-        password: 'changeme',
-        confirm_password: 'changeme',
+        password: 'changeme2',
+        confirm_password: 'changeme2',
         full_name: 'dls EAST',
         email: 'dlstest@elastic.com',
         roles: ['kibana_admin', customRole],
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('user East should only see EAST doc', async function () {
       await PageObjects.security.forceLogout();
-      await PageObjects.security.login(customUserName, 'changeme');
+      await PageObjects.security.login(customUserName, 'changeme2');
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();

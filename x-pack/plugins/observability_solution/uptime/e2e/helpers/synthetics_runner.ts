@@ -46,7 +46,7 @@ export class SyntheticsRunner {
 
   async createTestUsers() {
     await createApmUsers({
-      elasticsearch: { node: this.elasticsearchUrl, username: 'elastic', password: 'changeme' },
+      elasticsearch: { node: this.elasticsearchUrl, username: 'elastic', password: 'changeme2' },
       kibana: { hostname: this.kibanaUrl },
     });
   }

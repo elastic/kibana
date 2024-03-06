@@ -363,7 +363,7 @@ if [[ $CMD == "fleet_server" ]]; then
     -e ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST} \
     -e KIBANA_HOST=${KIBANA_HOST}/${KIBANA_BASE_PATH} \
     -e KIBANA_USERNAME=elastic \
-    -e KIBANA_PASSWORD=changeme \
+    -e KIBANA_PASSWORD=changeme2 \
     -e KIBANA_FLEET_SETUP=1 \
     -e FLEET_INSECURE=1 \
     -e FLEET_SERVER_ENABLE=1 \
@@ -418,4 +418,4 @@ yarn serverless-security
 yarn serverless-oblt
 ```
 
-Once running, you can login with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
+Once running, you can login with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme2`.

@@ -49,7 +49,7 @@ describe('SamlSessionManager', () => {
       hostname: 'localhost',
       port: 5620,
       username: 'elastic',
-      password: 'changeme',
+      password: 'changeme2',
     };
     const isCloud = false;
     const samlSessionManagerOptions = {
@@ -147,7 +147,7 @@ describe('SamlSessionManager', () => {
       protocol: 'https' as 'http' | 'https',
       hostname: 'cloud',
       username: 'elastic',
-      password: 'changeme',
+      password: 'changeme2',
     };
     const isCloud = true;
     const samlSessionManagerOptions = {

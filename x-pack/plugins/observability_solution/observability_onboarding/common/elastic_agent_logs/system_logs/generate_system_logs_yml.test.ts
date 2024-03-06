@@ -9,7 +9,7 @@ import { generateSystemLogsYml } from './generate_system_logs_yml';
 
 const baseMockConfig = {
   namespace: 'default',
-  apiKey: 'elastic:changeme',
+  apiKey: 'elastic:changeme2',
   esHost: ['http://localhost:9200'],
   uuid: '8df0ff52-6f3b-4b5a-a2da-f06c55d111d1',
 };

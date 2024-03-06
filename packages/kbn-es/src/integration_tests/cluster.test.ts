@@ -204,7 +204,7 @@ describe('#installSource()', () => {
     const options: InstallSourceOptions = {
       sourcePath: 'bar',
       license: 'trial',
-      password: 'changeme',
+      password: 'changeme2',
       basePath: 'someBasePath',
       installPath: 'someInstallPath',
       esArgs: ['foo=true'],
@@ -253,7 +253,7 @@ describe('#installSnapshot()', () => {
     const options: InstallSnapshotOptions = {
       version: '8.10.0',
       license: 'trial',
-      password: 'changeme',
+      password: 'changeme2',
       basePath: 'someBasePath',
       installPath: 'someInstallPath',
       esArgs: ['foo=true'],
@@ -302,7 +302,7 @@ describe('#installArchive()', () => {
     installArchiveMock.mockResolvedValue({ installPath: 'foo' });
     const options: InstallArchiveOptions = {
       license: 'trial',
-      password: 'changeme',
+      password: 'changeme2',
       basePath: 'someBasePath',
       installPath: 'someInstallPath',
       esArgs: ['foo=true'],

@@ -99,12 +99,12 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     const roleName = role.name;
 
     await this.createRole(role);
-    await this.createUser(roleName, 'changeme', [roleName]);
+    await this.createUser(roleName, 'changeme2', [roleName]);
 
     return {
       role: roleName,
       username: roleName,
-      password: 'changeme',
+      password: 'changeme2',
     };
   }
 

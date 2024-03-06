@@ -19,7 +19,7 @@ When {kib} first starts up, it executes the following `POST` request against {es
 ----------------------------------
 POST /_security/privilege
 Content-Type: application/json
-Authorization: Basic {kib} changeme
+Authorization: Basic {kib} changeme2
 
 {
    "kibana-.kibana":{

@@ -546,7 +546,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should NOT be able to create an exception list', async () => {
           await supertestWithoutAuth
             .post(EXCEPTION_LIST_ITEM_URL)
-            .auth(role, 'changeme')
+            .auth(role, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(getCreateExceptionListItemMinimalSchemaMock())
             .expect(403);
@@ -555,7 +555,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should NOT be able to create an exception list item', async () => {
           await supertestWithoutAuth
             .post(EXCEPTION_LIST_ITEM_URL)
-            .auth(role, 'changeme')
+            .auth(role, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(getCreateExceptionListItemMinimalSchemaMock())
             .expect(403);

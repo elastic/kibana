@@ -2,10 +2,10 @@
 
 ## Myriad ways to use jq to discern discrete info from the svc
 Below, I will leave out the so types call, which is:
-`node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220 --soTypes --json`
+`node scripts/saved_objs_info.js --esUrl http://elastic:changeme2@localhost:9220 --soTypes --json`
 
 #### At time of this writing, without `jq`, the svc call result was:
-`node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220 --soTypes`
+`node scripts/saved_objs_info.js --esUrl http://elastic:changeme2@localhost:9220 --soTypes`
 
 ```
 ### Saved Object Types Count: 5

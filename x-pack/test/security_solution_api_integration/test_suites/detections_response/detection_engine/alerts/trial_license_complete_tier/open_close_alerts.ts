@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertestWithoutAuth
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
             .set('kbn-xsrf', 'true')
-            .auth(ROLES.t1_analyst, 'changeme')
+            .auth(ROLES.t1_analyst, 'changeme2')
             .send(setAlertStatus({ alertIds, status: 'closed' }))
             .expect(200);
 
@@ -313,7 +313,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertestWithoutAuth
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
             .set('kbn-xsrf', 'true')
-            .auth(userAndRole, 'changeme') // each user has the same password
+            .auth(userAndRole, 'changeme2') // each user has the same password
             .send(setAlertStatus({ alertIds, status: 'closed' }))
             .expect(200);
 

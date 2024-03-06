@@ -59,13 +59,13 @@ const main = () => {
     .option('es-url', {
       demandOption: false,
       type: 'string',
-      default: 'http://elastic:changeme@localhost:9200',
+      default: 'http://elastic:changeme2@localhost:9200',
       description: 'The url for Elasticsearch',
     })
     .option('kibana-url', {
       demandOption: false,
       type: 'string',
-      default: 'http://elastic:changeme@localhost:5601/kbn/app',
+      default: 'http://elastic:changeme2@localhost:5601/kbn/app',
       description: 'The url for Kibana',
     })
     .option('mappings-dir', {

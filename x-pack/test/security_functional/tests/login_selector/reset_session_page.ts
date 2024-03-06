@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects, updateBaselines }: FtrPro
   const PageObjects = getPageObjects(['security', 'common']);
 
   describe('reset session page', function () {
-    const userWithoutPermissions = { username: 'user_without_permissions', password: 'changeme' };
+    const userWithoutPermissions = { username: 'user_without_permissions', password: 'changeme2' };
 
     before(async () => {
       // We use a really small window to minimize differences across os's and browsers.

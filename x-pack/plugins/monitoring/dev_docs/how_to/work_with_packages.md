@@ -115,8 +115,8 @@ You may want to test local Kibana changes against the elastic-package stack, and
 Once an elastic-package stack is started, update `kibana_system` password on the running elasticsearch:
 
 ```bash
-curl --insecure -u elastic:changeme -H 'Content-Type: application/json' \
-https://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+curl --insecure -u elastic:changeme2 -H 'Content-Type: application/json' \
+https://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme2"}'
 ```
 
 Now configure the local Kibana on a different port so we don't conflict with the one started by elastic-package, and ignore certificate verification:
@@ -125,7 +125,7 @@ Now configure the local Kibana on a different port so we don't conflict with the
 server.port: 5602
 
 elasticsearch.username: kibana_system
-elasticsearch.password: changeme
+elasticsearch.password: changeme2
 elasticsearch.ignoreVersionMismatch: true
 elasticsearch.hosts: ["https://localhost:9200"]
 elasticsearch.ssl.verificationMode: none

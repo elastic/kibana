@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertestWithoutAuth
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .auth(ROLES.hunter_no_actions, 'changeme')
+          .auth(ROLES.hunter_no_actions, 'changeme2')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertestWithoutAuth
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .auth(ROLES.hunter, 'changeme')
+          .auth(ROLES.hunter, 'changeme2')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertestWithoutAuth
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .auth(ROLES.hunter_no_actions, 'changeme')
+          .auth(ROLES.hunter_no_actions, 'changeme2')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')

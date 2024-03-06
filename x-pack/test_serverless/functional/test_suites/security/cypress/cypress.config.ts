@@ -22,9 +22,9 @@ export default defineCypressConfig({
   numTestsKeptInMemory: 10,
   env: {
     KIBANA_USERNAME: 'system_indices_superuser',
-    KIBANA_PASSWORD: 'changeme',
+    KIBANA_PASSWORD: 'changeme2',
     ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-    ELASTICSEARCH_PASSWORD: 'changeme',
+    ELASTICSEARCH_PASSWORD: 'changeme2',
   },
   e2e: {
     experimentalRunAllSpecs: true,

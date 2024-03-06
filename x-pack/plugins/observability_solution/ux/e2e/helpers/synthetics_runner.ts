@@ -49,7 +49,7 @@ export class SyntheticsRunner {
       elasticsearch: {
         node: this.elasticsearchUrl,
         username: 'elastic',
-        password: 'changeme',
+        password: 'changeme2',
       },
       kibana: { hostname: this.kibanaUrl },
     });

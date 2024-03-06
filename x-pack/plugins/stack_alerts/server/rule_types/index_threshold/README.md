@@ -32,7 +32,7 @@ against.
 Start `es-hb-sim`:
 
 ```
-es-hb-sim 1 es-hb-sim host-A https://elastic:changeme@localhost:9200
+es-hb-sim 1 es-hb-sim host-A https://elastic:changeme2@localhost:9200
 ```
 
 This will start indexing documents of the following form, to the `es-hb-sim`

@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: [createdMigration.migration_id] })
-        .auth(ROLES.t1_analyst, 'changeme')
+        .auth(ROLES.t1_analyst, 'changeme2')
         .expect(200);
 
       const finalizeResponse: FinalizeResponse & {

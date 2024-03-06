@@ -37,7 +37,7 @@ journey('ProjectAPIKeys', async ({ page }) => {
     await page.click('input[name="username"]');
     await page.fill('input[name="username"]', 'elastic');
     await page.press('input[name="username"]', 'Tab');
-    await page.fill('input[name="password"]', 'changeme');
+    await page.fill('input[name="password"]', 'changeme2');
     await Promise.all([
       page.waitForNavigation({ url: 'http://localhost:5620/app/synthetics/settings/alerting' }),
       page.click('button:has-text("Log in")'),
@@ -60,7 +60,7 @@ journey('ProjectAPIKeys', async ({ page }) => {
     expect(page.url()).toBe('http://localhost:5620/login?msg=LOGGED_OUT');
     await page.fill('input[name="username"]', 'viewer');
     await page.press('input[name="username"]', 'Tab');
-    await page.fill('input[name="password"]', 'changeme');
+    await page.fill('input[name="password"]', 'changeme2');
     await Promise.all([
       page.waitForNavigation({ url: 'http://localhost:5620/app/home' }),
       page.click('button:has-text("Log in")'),

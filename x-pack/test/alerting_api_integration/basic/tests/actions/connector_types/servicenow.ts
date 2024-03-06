@@ -21,7 +21,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     },
     secrets: {
       password: 'elastic',
-      username: 'changeme',
+      username: 'changeme2',
     },
     params: {
       incident: {

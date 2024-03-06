@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
       if (!isElasticsearchAnonymousAccessEnabled) {
         before(async () => {
           await security.user.create('anonymous_user', {
-            password: 'changeme',
+            password: 'changeme2',
             roles: [],
             full_name: 'Guest',
           });
@@ -276,7 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         if (!isElasticsearchAnonymousAccessEnabled) {
           await security.user.create('anonymous_user', {
-            password: 'changeme',
+            password: 'changeme2',
             roles: ['anonymous_role'],
             full_name: 'Guest',
           });

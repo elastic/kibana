@@ -110,7 +110,7 @@ export interface CreateTestEsClusterOptions {
   /**
    * Password for the `elastic` user. This is set after the cluster has started.
    *
-   * Defaults to `changeme`.
+   * Defaults to `changeme2`.
    */
   password?: string;
   /**
@@ -163,7 +163,7 @@ export function createTestEsCluster<
 >(options: Options): EsTestCluster<Options> {
   const {
     port = esTestConfig.getPort(),
-    password = 'changeme',
+    password = 'changeme2',
     license = 'basic',
     log,
     writeLogsToPath,

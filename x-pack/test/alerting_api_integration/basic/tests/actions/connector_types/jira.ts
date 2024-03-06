@@ -21,7 +21,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     },
     secrets: {
       email: 'elastic',
-      apiToken: 'changeme',
+      apiToken: 'changeme2',
     },
     params: {
       incident: {

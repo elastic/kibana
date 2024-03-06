@@ -29,7 +29,7 @@ const deleteAllServiceGroups = () => {
     headers: {
       'kbn-xsrf': 'e2e_test',
     },
-    auth: { user: 'editor', pass: 'changeme' },
+    auth: { user: 'editor', pass: 'changeme2' },
   }).then((response) => {
     const promises = response.body.serviceGroups.map((item: any) => {
       if (item.id) {
@@ -40,7 +40,7 @@ const deleteAllServiceGroups = () => {
           headers: {
             'kbn-xsrf': 'e2e_test',
           },
-          auth: { user: 'editor', pass: 'changeme' },
+          auth: { user: 'editor', pass: 'changeme2' },
         });
       }
     });

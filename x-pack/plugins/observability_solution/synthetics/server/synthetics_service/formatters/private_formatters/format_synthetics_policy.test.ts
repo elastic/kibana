@@ -558,7 +558,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 password: {
                   type: 'password',
-                  value: '"changeme"',
+                  value: '"changeme2"',
                 },
                 proxy_url: {
                   type: 'text',
@@ -1187,7 +1187,7 @@ const httpPolicy: any = {
   urls: 'https://www.google.com',
   max_redirects: '0',
   'url.port': null,
-  password: 'changeme',
+  password: 'changeme2',
   proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],

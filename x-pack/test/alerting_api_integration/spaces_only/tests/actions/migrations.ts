@@ -35,7 +35,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body.config).not.key('isCaseOwned');
       expect(response.body.config).to.eql({
         apiUrl:
-          'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira',
+          'http://elastic:changeme2@localhost:5620/api/_actions-FTS-external-service-simulators/jira',
         projectKey: 'CK',
       });
     });

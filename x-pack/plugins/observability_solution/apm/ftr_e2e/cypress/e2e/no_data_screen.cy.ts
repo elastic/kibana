@@ -52,6 +52,6 @@ function setApmIndices(body: Record<string, string>) {
     method: 'POST',
     body,
     headers: { 'kbn-xsrf': true },
-    auth: { user: 'editor', pass: 'changeme' },
+    auth: { user: 'editor', pass: 'changeme2' },
   });
 }

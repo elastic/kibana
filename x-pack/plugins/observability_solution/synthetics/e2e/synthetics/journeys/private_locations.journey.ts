@@ -153,7 +153,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   step('login with non super user', async () => {
     await page.click('[data-test-subj="userMenuAvatar"]');
     await page.click('text="Log out"');
-    await syntheticsApp.loginToKibana('viewer', 'changeme');
+    await syntheticsApp.loginToKibana('viewer', 'changeme2');
   });
 
   step('viewer user cannot add locations', async () => {

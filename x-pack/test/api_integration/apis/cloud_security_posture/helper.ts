@@ -106,7 +106,7 @@ export async function createPackagePolicy(
 
 export const createUser = async (security: SecurityService, userName: string, roleName: string) => {
   await security.user.create(userName, {
-    password: 'changeme',
+    password: 'changeme2',
     roles: [roleName],
     full_name: 'a reporting user',
   });

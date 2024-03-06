@@ -177,7 +177,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
     if (hasAuth) {
       connector.secrets = {
         user: 'bob',
-        password: 'changeme',
+        password: 'changeme2',
       };
     }
     const { status, body } = await supertest

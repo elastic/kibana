@@ -58,8 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('After Add user new: , userObj.userName');
       await PageObjects.security.createUser({
         username: 'Rashmi',
-        password: 'changeme',
-        confirm_password: 'changeme',
+        password: 'changeme2',
+        confirm_password: 'changeme2',
         full_name: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com',
         roles: ['logstash_reader'],
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
       await PageObjects.security.forceLogout();
-      await PageObjects.security.login('Rashmi', 'changeme');
+      await PageObjects.security.login('Rashmi', 'changeme2');
     });
 
     it('Kibana User does not have link to user management', async function () {

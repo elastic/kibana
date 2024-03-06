@@ -23,7 +23,7 @@ yarn es serverless --projectType=security --kill
 yarn serverless-security
 ```
 
-Once running, you can login at `http://localhost:5601` with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
+Once running, you can login at `http://localhost:5601` with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme2`.
 
 Note: it is not possible to use a base path in serverless mode. In case of issue, make sure the `server.basePath` property is not set in the config.
 

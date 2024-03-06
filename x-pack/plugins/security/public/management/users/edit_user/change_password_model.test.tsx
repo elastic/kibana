@@ -13,7 +13,7 @@ describe('ChangePasswordModal', () => {
     describe('for current user', () => {
       it('should show an error when it is current user with no current password', () => {
         expect(
-          validateChangePasswordForm({ password: 'changeme', confirm_password: 'changeme' }, true)
+          validateChangePasswordForm({ password: 'changeme2', confirm_password: 'changeme2' }, true)
         ).toMatchInlineSnapshot(`
                   Object {
                     "current_password": "Enter your current password.",
@@ -26,7 +26,7 @@ describe('ChangePasswordModal', () => {
           validateChangePasswordForm(
             {
               password: undefined,
-              confirm_password: 'changeme',
+              confirm_password: 'changeme2',
             } as unknown as ChangePasswordFormValues,
             true
           )
@@ -52,7 +52,7 @@ describe('ChangePasswordModal', () => {
         expect(
           validateChangePasswordForm(
             {
-              password: 'changeme',
+              password: 'changeme2',
               confirm_password: 'notTheSame',
             },
             true
@@ -70,8 +70,8 @@ describe('ChangePasswordModal', () => {
           validateChangePasswordForm(
             {
               current_password: 'oldpassword',
-              password: 'changeme',
-              confirm_password: 'changeme',
+              password: 'changeme2',
+              confirm_password: 'changeme2',
             },
             true
           )
@@ -85,7 +85,7 @@ describe('ChangePasswordModal', () => {
           validateChangePasswordForm(
             {
               password: undefined,
-              confirm_password: 'changeme',
+              confirm_password: 'changeme2',
             } as unknown as ChangePasswordFormValues,
             false
           )
@@ -109,7 +109,7 @@ describe('ChangePasswordModal', () => {
         expect(
           validateChangePasswordForm(
             {
-              password: 'changeme',
+              password: 'changeme2',
               confirm_password: 'notTheSame',
             },
             false
@@ -125,8 +125,8 @@ describe('ChangePasswordModal', () => {
         expect(
           validateChangePasswordForm(
             {
-              password: 'changeme',
-              confirm_password: 'changeme',
+              password: 'changeme2',
+              confirm_password: 'changeme2',
             },
             false
           )

@@ -26,7 +26,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
      */
     async createUser(user: { name: string; roles: string[]; password?: string }): Promise<void> {
       const { name, roles, password } = user;
-      await security.user.create(name, { roles, password: password ?? 'changeme' });
+      await security.user.create(name, { roles, password: password ?? 'changeme2' });
     },
 
     /**

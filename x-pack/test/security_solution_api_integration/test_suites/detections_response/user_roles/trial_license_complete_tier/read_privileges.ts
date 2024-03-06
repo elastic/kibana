@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.t1_analyst);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.t1_analyst, 'changeme')
+        .auth(ROLES.t1_analyst, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.t2_analyst);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.t2_analyst, 'changeme')
+        .auth(ROLES.t2_analyst, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.hunter);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.hunter, 'changeme')
+        .auth(ROLES.hunter, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.rule_author);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.rule_author, 'changeme')
+        .auth(ROLES.rule_author, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({
@@ -344,7 +344,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.soc_manager);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.soc_manager, 'changeme')
+        .auth(ROLES.soc_manager, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({
@@ -409,7 +409,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.platform_engineer);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.platform_engineer, 'changeme')
+        .auth(ROLES.platform_engineer, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({
@@ -474,7 +474,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createUserAndRole(getService, ROLES.detections_admin);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
-        .auth(ROLES.detections_admin, 'changeme')
+        .auth(ROLES.detections_admin, 'changeme2')
         .send()
         .expect(200);
       expect(body).to.eql({

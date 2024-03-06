@@ -34,7 +34,7 @@ Cypress.Commands.add(
 Cypress.Commands.add('loginAsElastic', () => {
   return cy.loginAs({
     username: 'elastic',
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
@@ -82,6 +82,6 @@ Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown
     headers: {
       'kbn-xsrf': 'e2e_test',
     },
-    auth: { user: 'elastic', pass: 'changeme' },
+    auth: { user: 'elastic', pass: 'changeme2' },
   });
 });

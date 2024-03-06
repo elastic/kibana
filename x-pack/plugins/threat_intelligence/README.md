@@ -33,7 +33,7 @@ There are many ways to get data for you local development. We first focus on get
    output.elasticsearch:
    hosts: ["localhost:9200"]
    username: "elastic"
-   password: "changeme"
+   password: "changeme2"
 
    setup.kibana:
    host: "localhost:5601" // make sure to run Kibana with --no-base-path option or specify server.basePath in Kibana config and use it here as a path, eg. localhost:5601/kbn

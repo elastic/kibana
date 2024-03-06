@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should NOT be able to preview a rule', async () => {
           await supertestWithoutAuth
             .post(DETECTION_ENGINE_RULES_PREVIEW)
-            .auth(role, 'changeme')
+            .auth(role, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule())
             .expect(403);
@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should return with an error about not having correct permissions', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_RULES_PREVIEW)
-            .auth(role, 'changeme')
+            .auth(role, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule())
             .expect(200);

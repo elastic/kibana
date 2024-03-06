@@ -12,9 +12,9 @@ import { Config } from '../types';
 
 export async function setupKibanaSystemUser(config: Config, client: Client, logger: ToolingLog) {
   await client.security
-    .changePassword({ username: 'kibana_system', body: { password: 'changeme' } })
+    .changePassword({ username: 'kibana_system', body: { password: 'changeme2' } })
     .then(() => {
-      logger.info('Password changed to "changeme" for "kibana_system" user');
+      logger.info('Password changed to "changeme2" for "kibana_system" user');
     })
     .catch(
       elasticsearchErrorHandler(

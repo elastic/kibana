@@ -11,7 +11,7 @@ export enum ProfilingUsername {
   editorUser = 'editor',
 }
 
-export const PROFILING_TEST_PASSWORD = 'changeme';
+export const PROFILING_TEST_PASSWORD = 'changeme2';
 
 export const profilingUsers: Record<ProfilingUsername, { builtInRoleNames?: string[] }> = {
   [ProfilingUsername.noAccessUser]: {},

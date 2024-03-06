@@ -10,7 +10,7 @@ export function loginPageProvider({
   page,
   isRemote = false,
   username = 'elastic',
-  password = 'changeme',
+  password = 'changeme2',
 }: {
   page: Page;
   isRemote?: boolean;

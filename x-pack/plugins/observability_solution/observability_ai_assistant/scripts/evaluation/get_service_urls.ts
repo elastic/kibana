@@ -11,7 +11,7 @@ import fetch from 'node-fetch';
 import { format, parse, Url } from 'url';
 
 async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
-  const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
+  const possibleCredentials = [`admin:changeme2`, `elastic:changeme2`];
   for (const auth of possibleCredentials) {
     const url = format({
       ...parsedTarget,

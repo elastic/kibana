@@ -6,7 +6,7 @@ Run the cli
 > the **--esUrl** arg is required; tells the svc which elastic search endpoint to use
 
 ```shell
- λ node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220 --soTypes
+ λ node scripts/saved_objs_info.js --esUrl http://elastic:changeme2@localhost:9220 --soTypes
 ```
 
 Result

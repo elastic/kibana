@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
       body: {
         grant_type: 'password',
         username: 'elastic',
-        password: 'changeme',
+        password: 'changeme2',
       },
     });
 

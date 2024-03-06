@@ -73,9 +73,9 @@ yarn --cwd x-pack/plugins/security_solution
 CYPRESS_BASE_URL=http://localhost:5601 \
 CYPRESS_KIBANA_URL=http://localhost:5601 \
 CYPRESS_KIBANA_USERNAME=elastic \
-CYPRESS_KIBANA_PASSWORD=changeme \
+CYPRESS_KIBANA_PASSWORD=changeme2 \
 CYPRESS_ELASTICSEARCH_USERNAME=system_indices_superuser \
-CYPRESS_ELASTICSEARCH_PASSWORD=changeme \
+CYPRESS_ELASTICSEARCH_PASSWORD=changeme2 \
 CYPRESS_ELASTICSEARCH_URL=http://localhost:9200 cypress:dw:open
 ```
 

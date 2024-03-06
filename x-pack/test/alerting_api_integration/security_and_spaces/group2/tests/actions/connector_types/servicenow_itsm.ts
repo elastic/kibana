@@ -53,7 +53,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
     },
     secrets: {
       password: 'elastic',
-      username: 'changeme',
+      username: 'changeme2',
     },
   };
   const mockServiceNowOAuth = {

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await Promise.all(
         ['one', 'two', 'three'].map((userPrefix) =>
           security.user.create(`user_${userPrefix}`, {
-            password: 'changeme',
+            password: 'changeme2',
             roles: [`role_${userPrefix}`],
           })
         )
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             providerType: 'basic',
             providerName: 'basic',
             currentURL: '/',
-            params: { username: `user_${userPrefix}`, password: 'changeme' },
+            params: { username: `user_${userPrefix}`, password: 'changeme2' },
           })
           .expect(200);
 

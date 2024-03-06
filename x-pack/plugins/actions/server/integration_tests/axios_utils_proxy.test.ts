@@ -41,7 +41,7 @@ const KIBANA_KEY = fsReadFileSync(KIBANA_KEY_FILE, 'utf8');
 const KIBANA_CRT = fsReadFileSync(KIBANA_CRT_FILE, 'utf8');
 const CA = fsReadFileSync(CA_FILE, 'utf8');
 
-const Auth = 'elastic:changeme';
+const Auth = 'elastic:changeme2';
 const AuthB64 = Buffer.from(Auth).toString('base64');
 
 const ServerResponse = 'A unique response returned by the server!';

@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.t1_analyst, 'changeme')
+            .auth(ROLE.t1_analyst, 'changeme2')
             .set('kbn-xsrf', 'xxx')
             .set(apiListItem.version ? 'Elastic-Api-Version' : 'foo', '2023-10-31')
             .send(apiListItem.body)
@@ -197,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.t1_analyst, 'changeme')
+            .auth(ROLE.t1_analyst, 'changeme2')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(200);
@@ -215,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.platform_engineer, 'changeme')
+            .auth(ROLE.platform_engineer, 'changeme2')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(403, {
@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.platform_engineer, 'changeme')
+            .auth(ROLE.platform_engineer, 'changeme2')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(200);
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.endpoint_operations_analyst, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme2')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(403, {
@@ -271,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.endpoint_operations_analyst, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme2')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(200);

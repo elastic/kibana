@@ -16,17 +16,17 @@ const env = process.env;
 
 export const kibanaTestUser = {
   username: env.TEST_KIBANA_USER || 'elastic',
-  password: env.TEST_KIBANA_PASS || 'changeme',
+  password: env.TEST_KIBANA_PASS || 'changeme2',
 };
 
 export const kibanaServerTestUser = {
   username: env.TEST_KIBANA_SERVER_USER || 'kibana_system',
-  password: env.TEST_KIBANA_SERVER_PASS || 'changeme',
+  password: env.TEST_KIBANA_SERVER_PASS || 'changeme2',
 };
 
 export const adminTestUser = {
   username: env.TEST_ES_USER || 'elastic',
-  password: env.TEST_ES_PASS || 'changeme',
+  password: env.TEST_ES_PASS || 'changeme2',
 };
 
 /**
@@ -34,7 +34,7 @@ export const adminTestUser = {
  */
 export const systemIndicesSuperuser = {
   username: SYSTEM_INDICES_SUPERUSER,
-  password: env.TEST_ES_PASS || 'changeme',
+  password: env.TEST_ES_PASS || 'changeme2',
 };
 
 export const kibanaTestSuperuserServerless = {

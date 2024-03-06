@@ -2,7 +2,7 @@
 
 Kerberos fixtures are created with the following principals:
 
-* tester@TEST.ELASTIC.CO (password is `changeme`)
+* tester@TEST.ELASTIC.CO (password is `changeme2`)
 * host/kerberos.test.elastic.co@TEST.ELASTIC.CO
 * HTTP/localhost@TEST.ELASTIC.CO
 

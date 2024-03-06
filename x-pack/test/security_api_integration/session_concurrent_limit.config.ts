@@ -51,7 +51,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           anonymous: {
             anonymous1: {
               order: 3,
-              credentials: { username: 'anonymous_user', password: 'changeme' },
+              credentials: { username: 'anonymous_user', password: 'changeme2' },
             },
           },
         })}`,

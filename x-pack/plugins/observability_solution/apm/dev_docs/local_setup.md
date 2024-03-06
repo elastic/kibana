@@ -41,7 +41,7 @@ Update `config/kibana.dev.yml` with:
 ```yml
 elasticsearch.hosts: http://localhost:9200
 elasticsearch.username: kibana_system
-elasticsearch.password: changeme
+elasticsearch.password: changeme2
 ```
 
 Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/README.md)
@@ -77,7 +77,7 @@ Update `config/kibana.dev.yml` with:
 ```yml
 elasticsearch.hosts: http://localhost:9200
 elasticsearch.username: admin
-elasticsearch.password: changeme
+elasticsearch.password: changeme2
 ```
 
 # Setup default APM users
@@ -85,7 +85,7 @@ elasticsearch.password: changeme
 APM behaves differently depending on which role and permissions a logged in user has. To create APM users run:
 
 ```sh
-node x-pack/plugins/observability_solution/apm/scripts/create_apm_users.js --username admin --password changeme --kibana-url http://localhost:5601
+node x-pack/plugins/observability_solution/apm/scripts/create_apm_users.js --username admin --password changeme2 --kibana-url http://localhost:5601
 ```
 
 This will create:

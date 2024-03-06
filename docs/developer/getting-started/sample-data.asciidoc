@@ -20,7 +20,7 @@ The provided `makelogs` script will generate sample data.
 node scripts/makelogs --auth <username>:<password>
 ----
 
-The default username and password combination are `elastic:changeme`
+The default username and password combination are `elastic:changeme2`
 
 Make sure to execute `node scripts/makelogs` *after* {es} is up and running!
 

@@ -35,7 +35,7 @@ export const getEnvAuth = (role: SecurityRoleName): User => {
   }
   const user: User = {
     username: role,
-    password: 'changeme',
+    password: 'changeme2',
   };
   return user;
 };

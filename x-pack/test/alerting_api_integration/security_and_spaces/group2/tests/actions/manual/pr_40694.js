@@ -9,7 +9,7 @@
 
 const fetch = require('node-fetch');
 
-const KBN_URLBASE = process.env.KBN_URLBASE || 'http://elastic:changeme@localhost:5601';
+const KBN_URLBASE = process.env.KBN_URLBASE || 'http://elastic:changeme2@localhost:5601';
 
 if (require.main === module) main();
 
@@ -27,7 +27,7 @@ async function main() {
     },
     secrets: {
       user: 'elastic',
-      password: 'changeme',
+      password: 'changeme2',
     },
   });
   console.log(`result of create: ${JSON.stringify(response, null, 4)}`);
@@ -45,7 +45,7 @@ async function main() {
     },
     secrets: {
       user: 'elastic',
-      password: 'changeme',
+      password: 'changeme2',
     },
   });
 

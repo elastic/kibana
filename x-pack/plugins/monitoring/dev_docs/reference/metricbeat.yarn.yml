@@ -10,7 +10,7 @@ metricbeat.modules:
     hosts:
       - "host.docker.internal:9200"
     username: "elastic"
-    password: "changeme"
+    password: "changeme2"
 
   - module: kibana
     xpack.enabled: true
@@ -18,7 +18,7 @@ metricbeat.modules:
     period: 10s
     hosts: [ "host.docker.internal:5601" ]
     username: "elastic"
-    password: "changeme"
+    password: "changeme2"
 
   - module: beat
     xpack.enabled: true
@@ -38,4 +38,4 @@ metricbeat.modules:
 output.elasticsearch:
   hosts: [ "host.docker.internal:9200" ]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"

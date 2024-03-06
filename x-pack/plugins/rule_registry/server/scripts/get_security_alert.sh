@@ -18,5 +18,5 @@ cd ..
 
 # Example: ./get_observability_alert.sh hunter
 curl -v -k \
- -u $USER:changeme \
+ -u $USER:changeme2 \
  -X GET "${KIBANA_URL}${SPACE_URL}/internal/rac/alerts?id=$ID&index=.alerts-security-solution" | jq .

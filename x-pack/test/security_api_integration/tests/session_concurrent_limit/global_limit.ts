@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const randomness = getService('randomness');
   const kibanaServerConfig = config.get('servers.kibana');
-  const testUser = { username: 'test_user', password: 'changeme' };
+  const testUser = { username: 'test_user', password: 'changeme2' };
   const basicProvider = { type: 'basic', name: 'basic1' };
   const samlProvider = { type: 'saml', name: 'saml1' };
   const anonymousProvider = { type: 'anonymous', name: 'anonymous1' };
@@ -122,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Disable cleanup task to not interfere with the tests.
       await toggleSessionCleanupTask(false);
       await security.user.create('anonymous_user', {
-        password: 'changeme',
+        password: 'changeme2',
         roles: [],
         full_name: 'Guest',
       });

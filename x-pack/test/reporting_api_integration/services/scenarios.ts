@@ -165,7 +165,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const generateCsv = async (
     job: JobParamsCSV,
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme2'
   ) => {
     const jobParams = rison.encode(job);
 
@@ -199,7 +199,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const getJobErrorCode = async (
     id: string,
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme2'
   ): Promise<undefined | string> => {
     const {
       body: [job],

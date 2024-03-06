@@ -24,8 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add new user', async function () {
       await PageObjects.security.createUser({
         username: 'newuser',
-        password: 'changeme',
-        confirm_password: 'changeme',
+        password: 'changeme2',
+        confirm_password: 'changeme2',
         full_name: 'newuserFirst newuserLast',
         email: 'newuser@myEmail.com',
         roles: ['kibana_admin', 'superuser'],
@@ -40,13 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('login as new user and verify email', async function () {
-      await PageObjects.security.login('newuser', 'changeme');
+      await PageObjects.security.login('newuser', 'changeme2');
       await PageObjects.accountSetting.verifyAccountSettings('newuser');
     });
 
     it('click changepassword link, change the password and re-login', async function () {
       await PageObjects.accountSetting.verifyAccountSettings('newuser');
-      await PageObjects.accountSetting.changePassword('changeme', 'mechange');
+      await PageObjects.accountSetting.changePassword('changeme2', 'mechange');
       await PageObjects.security.forceLogout();
     });
 

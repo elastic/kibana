@@ -61,9 +61,9 @@ export const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
-    auth: `${role}:changeme`,
+    auth: `${role}:changeme2`,
     username: role,
-    password: 'changeme',
+    password: 'changeme2',
     protocol: kibana.protocol.replace(':', ''),
     hostname: kibana.hostname,
     port: kibana.port,
@@ -154,9 +154,9 @@ export const loginWithUser = (user: User) => {
 export const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
-    auth: `${role}:changeme`,
+    auth: `${role}:changeme2`,
     username: role,
-    password: 'changeme',
+    password: 'changeme2',
     protocol: Cypress.env('protocol'),
     hostname: Cypress.env('hostname'),
     port: Cypress.env('configport'),
@@ -169,7 +169,7 @@ export const loginWithRole = async (role: ROLES) => {
       currentURL: '/',
       params: {
         username: role,
-        password: 'changeme',
+        password: 'changeme2',
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },

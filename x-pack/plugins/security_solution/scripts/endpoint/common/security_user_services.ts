@@ -11,7 +11,7 @@ import { userInfo } from 'os';
 export const createSecuritySuperuser = async (
   esClient: Client,
   username: string = userInfo().username,
-  password: string = 'changeme'
+  password: string = 'changeme2'
 ): Promise<{ username: string; password: string; created: boolean }> => {
   if (!username || !password) {
     throw new Error(`username and password require values.`);

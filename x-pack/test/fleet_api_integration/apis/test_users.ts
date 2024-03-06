@@ -19,7 +19,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_all_int_all',
-    password: 'changeme',
+    password: 'changeme2',
   },
   setup: {
     permissions: {
@@ -30,7 +30,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'setup',
-    password: 'changeme',
+    password: 'changeme2',
   },
   fleet_no_access: {
     permissions: {
@@ -40,7 +40,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_no_access',
-    password: 'changeme',
+    password: 'changeme2',
   },
   fleet_all_only: {
     permissions: {
@@ -50,7 +50,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_all_only',
-    password: 'changeme',
+    password: 'changeme2',
   },
   fleet_all_int_read: {
     permissions: {
@@ -61,7 +61,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_all_int_read',
-    password: 'changeme',
+    password: 'changeme2',
   },
   integr_all_only: {
     permissions: {
@@ -71,7 +71,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'integr_all',
-    password: 'changeme',
+    password: 'changeme2',
   },
   // for package_policy get one, bulk get with ids, get list
   endpoint_integr_read_policy: {
@@ -90,7 +90,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'endpoint_integr_read_policy',
-    password: 'changeme',
+    password: 'changeme2',
   },
   // for package_policy update API
   endpoint_integr_write_policy: {
@@ -102,7 +102,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'endpoint_integr_write_policy',
-    password: 'changeme',
+    password: 'changeme2',
   },
   // agent status API
   endpoint_fleet_all_integr_read_policy: {
@@ -114,7 +114,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'endpoint_fleet_all_integr_read_policy',
-    password: 'changeme',
+    password: 'changeme2',
   },
   // no access to integrations or policies
   endpoint_fleet_read_integr_none: {
@@ -126,7 +126,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'endpoint_fleet_read_integr_none',
-    password: 'changeme',
+    password: 'changeme2',
   },
   // no fleet or integrations but read access to security solution app
   endpoint_integr_read_only_fleet_none: {
@@ -137,7 +137,7 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'endpoint_integr_read_only_fleet_none',
-    password: 'changeme',
+    password: 'changeme2',
   },
 };
 

@@ -22,7 +22,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     },
     secrets: {
       apiKeyId: 'elastic',
-      apiKeySecret: 'changeme',
+      apiKeySecret: 'changeme2',
     },
     params: {
       incident: {

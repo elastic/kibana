@@ -36,7 +36,7 @@ class EsTestConfig {
   }
 
   getUrlParts() {
-    // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
+    // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme2@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
       const testEsUrl = Url.parse(process.env.TEST_ES_URL);
       if (!testEsUrl.port) {

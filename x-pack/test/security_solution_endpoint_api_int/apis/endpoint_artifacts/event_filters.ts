@@ -185,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
           const body = eventFilterApiCall.getBody({ os_types: ['linux', 'windows'] });
 
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Using superuser there as we need custom license for this action
           await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -213,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Using superuser here as we need custom license for this action
           await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(200);
@@ -225,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
         it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(200);
@@ -239,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of [...eventFilterCalls, ...needsWritePrivilege]) {
         it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.hunter, 'changeme')
+            .auth(ROLE.hunter, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(403);
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of needsReadPrivilege) {
         it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.hunter, 'changeme')
+            .auth(ROLE.hunter, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(200);
@@ -265,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]) {
         it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.t1_analyst, 'changeme')
+            .auth(ROLE.t1_analyst, 'changeme2')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(403);

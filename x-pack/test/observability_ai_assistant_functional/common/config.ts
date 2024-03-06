@@ -70,7 +70,7 @@ export function createTestConfig(
                 supertest(
                   format({
                     ...(baseConfig.servers.kibana as UrlObject),
-                    auth: `test_user:changeme`,
+                    auth: `test_user:changeme2`,
                   })
                 )
               ),

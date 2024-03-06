@@ -11,12 +11,12 @@ import { rootRequest } from '../tasks/api_calls/common';
 /**
  * Utility function creates roles and corresponding users per each role with names
  * matching role names. Each user gets the same `password` passed in which is
- * `changeme` by default.
+ * `changeme2` by default.
  *
  * @param roles an array of security `Role`s
- * @param password custom password if `changeme` doesn't fit
+ * @param password custom password if `changeme2` doesn't fit
  */
-export function setupUsers(roles: Role[], password = 'changeme'): void {
+export function setupUsers(roles: Role[], password = 'changeme2'): void {
   for (const role of roles) {
     createRole(role);
     createUser(role.name, password, [role.name]);

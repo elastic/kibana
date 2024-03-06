@@ -25,7 +25,7 @@ export async function loginToKibana({
     timeout: 60 * 1000,
   });
 
-  await page.fill('[data-test-subj=loginPassword]', user?.password ?? 'changeme');
+  await page.fill('[data-test-subj=loginPassword]', user?.password ?? 'changeme2');
 
   await page.click('[data-test-subj=loginSubmit]');
 

@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertestWithoutAuth
           .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
           .set('kbn-xsrf', 'true')
-          .auth(userAndRole, 'changeme') // each user has the same password
+          .auth(userAndRole, 'changeme2') // each user has the same password
           .send(
             setAlertAssignees({
               assigneesToAdd: ['user-1'],

@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add new user customer1 ', async function () {
       await PageObjects.security.createUser({
         username: 'customer1',
-        password: 'changeme',
-        confirm_password: 'changeme',
+        password: 'changeme2',
+        confirm_password: 'changeme2',
         full_name: 'customer one',
         email: 'flstest@elastic.com',
         roles: ['kibana_admin', 'a_viewssnrole'],
@@ -88,8 +88,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add new user customer2 ', async function () {
       await PageObjects.security.createUser({
         username: 'customer2',
-        password: 'changeme',
-        confirm_password: 'changeme',
+        password: 'changeme2',
+        confirm_password: 'changeme2',
         full_name: 'customer two',
         email: 'flstest@elastic.com',
         roles: ['kibana_admin', 'a_view_no_ssn_role'],
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('user customer1 should see ssn', async function () {
       await PageObjects.security.forceLogout();
-      await PageObjects.security.login('customer1', 'changeme');
+      await PageObjects.security.login('customer1', 'changeme2');
       await PageObjects.common.navigateToApp('discover');
       await retry.tryForTime(10000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('user customer2 should not see ssn', async function () {
       await PageObjects.security.forceLogout();
-      await PageObjects.security.login('customer2', 'changeme');
+      await PageObjects.security.login('customer2', 'changeme2');
       await PageObjects.common.navigateToApp('discover');
       await retry.tryForTime(10000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();

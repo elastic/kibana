@@ -35,7 +35,7 @@ const isHttpUrl = (str: string) => {
 export async function installArchive(archive: string, options?: InstallArchiveOptions) {
   const {
     license = 'basic',
-    password = 'changeme',
+    password = 'changeme2',
     basePath = BASE_PATH,
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,

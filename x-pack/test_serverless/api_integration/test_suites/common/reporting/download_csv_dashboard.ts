@@ -12,7 +12,7 @@ import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-commo
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ELASTIC_USERNAME = 'elastic_serverless';
-const ELASTIC_PASSWORD = 'changeme';
+const ELASTIC_PASSWORD = 'changeme2';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 const getMockJobParams = (obj: object) => {

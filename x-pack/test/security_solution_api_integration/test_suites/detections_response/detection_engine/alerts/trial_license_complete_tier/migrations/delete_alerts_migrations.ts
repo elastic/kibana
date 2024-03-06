@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: [createdMigration.migration_id] })
-        .auth(ROLES.t1_analyst, 'changeme')
+        .auth(ROLES.t1_analyst, 'changeme2')
         .expect(200);
 
       const deletedMigration = body.migrations[0];

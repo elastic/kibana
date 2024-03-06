@@ -136,7 +136,7 @@ export const createRuntimeServices = async ({
       );
 
       username = 'system_indices_superuser';
-      password = 'changeme';
+      password = 'changeme2';
     } else {
       const superuserResponse = await createSecuritySuperuser(
         createEsClient({

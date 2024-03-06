@@ -50,9 +50,9 @@ export const getCypressBaseConfig = (
         ELASTICSEARCH_URL: 'http://localhost:9200',
         FLEET_SERVER_URL: 'https://localhost:8220',
         KIBANA_USERNAME: 'system_indices_superuser',
-        KIBANA_PASSWORD: 'changeme',
+        KIBANA_PASSWORD: 'changeme2',
         ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-        ELASTICSEARCH_PASSWORD: 'changeme',
+        ELASTICSEARCH_PASSWORD: 'changeme2',
 
         // Default log level for instance of `ToolingLog` created via `crateToolingLog()`. Set this
         // to `debug` or `verbose` when wanting to debug tooling used by tests (ex. data indexer functions).

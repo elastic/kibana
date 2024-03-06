@@ -13,7 +13,7 @@ describe('Serverless', () => {
     cy.visit('/', {
       auth: {
         username: 'elastic_serverless',
-        password: 'changeme',
+        password: 'changeme2',
       },
     });
     navigatesToLandingPage();

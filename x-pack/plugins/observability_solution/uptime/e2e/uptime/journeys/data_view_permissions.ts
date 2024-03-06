@@ -19,7 +19,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
     await waitForLoadingToFinish({ page });
     try {
       await callKibana({
-        elasticsearch: { username: 'elastic', password: 'changeme' },
+        elasticsearch: { username: 'elastic', password: 'changeme2' },
         kibana: { hostname: params.kibanaUrl },
         options: {
           method: 'DELETE',
@@ -41,7 +41,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await login.loginToKibana('viewer', 'changeme');
+    await login.loginToKibana('viewer', 'changeme2');
   });
 
   step('Click explore data button', async () => {

@@ -194,7 +194,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .auth(ROLES.t1_analyst, 'changeme')
+        .auth(ROLES.t1_analyst, 'changeme2')
         .send({ index: [legacySignalsIndexName] })
         .expect(400);
 

@@ -26,7 +26,7 @@ ELASTICSEARCH_PASSWORD=$(grep -E '^elasticsearch.password: ' "$CONFIG_FILE" | se
 # Set default values if the extracted values are empty
 [ -z "$ELASTICSEARCH_HOSTS" ] && ELASTICSEARCH_HOSTS="http://localhost:9200"
 [ -z "$ELASTICSEARCH_USERNAME" ] && ELASTICSEARCH_USERNAME="system_indices_superuser"
-[ -z "$ELASTICSEARCH_PASSWORD" ] && ELASTICSEARCH_PASSWORD="changeme"
+[ -z "$ELASTICSEARCH_PASSWORD" ] && ELASTICSEARCH_PASSWORD="changeme2"
 
 # Get the list of indices from the _cat/indices API
 echo "Getting list of indices..."

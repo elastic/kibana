@@ -87,7 +87,7 @@ export class CommonPageObject extends FtrService {
           this.config.get('servers.kibana.password')
         );
       } else {
-        await this.loginPage.login('test_user', 'changeme');
+        await this.loginPage.login('test_user', 'changeme2');
       }
 
       if (appUrl.includes('/status')) {

@@ -47,7 +47,7 @@ function getEsConfig({
   const ccsConfig: CcsConfig | undefined = config.get('esTestCluster.ccs');
 
   const password: string | undefined = isSecurityEnabled
-    ? 'changeme'
+    ? 'changeme2'
     : config.get('servers.elasticsearch.password');
 
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');

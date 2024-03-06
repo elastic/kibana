@@ -41,7 +41,7 @@ export default function ({ getService }) {
 
     it('should say permission denied for limited user', async () => {
       const username = 'limited_user';
-      const password = 'changeme';
+      const password = 'changeme2';
 
       await security.user.create(username, {
         password: password,

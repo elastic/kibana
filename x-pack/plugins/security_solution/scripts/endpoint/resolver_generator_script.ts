@@ -125,13 +125,13 @@ async function main() {
     node: {
       alias: 'n',
       describe: 'elasticsearch node url',
-      default: 'http://elastic:changeme@127.0.0.1:9200',
+      default: 'http://elastic:changeme2@127.0.0.1:9200',
       type: 'string',
     },
     kibana: {
       alias: 'k',
       describe: 'kibana url',
-      default: 'http://elastic:changeme@127.0.0.1:5601',
+      default: 'http://elastic:changeme2@127.0.0.1:5601',
       type: 'string',
     },
     eventIndex: {
@@ -268,7 +268,7 @@ async function main() {
     rbacUser: {
       alias: 'rbac',
       describe:
-        'Creates a set of roles and users, password=changeme, with RBAC privileges enabled/disabled. Neither have the superuser role. ',
+        'Creates a set of roles and users, password=changeme2, with RBAC privileges enabled/disabled. Neither have the superuser role. ',
       type: 'boolean',
       default: false,
     },
@@ -353,7 +353,7 @@ async function main() {
       logger.warning(
         'Option `--withNewUser` not supported in serverless.\n' +
           'Ensure that `--kibana` and `--node` options are defined with username/password of ' +
-          '`system_indices_superuser:changeme`'
+          '`system_indices_superuser:changeme2`'
       );
     }
   }

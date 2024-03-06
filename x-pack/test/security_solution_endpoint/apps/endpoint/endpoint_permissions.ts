@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await PageObjects.security.forceLogout();
 
       // ensure Security Solution is properly initialized
-      await PageObjects.security.login('system_indices_superuser', 'changeme');
+      await PageObjects.security.login('system_indices_superuser', 'changeme2');
       await PageObjects.detections.navigateToAlerts();
       await testSubjects.existOrFail('manage-alert-detection-rules');
 
@@ -63,7 +63,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await createUserAndRole(getService, role);
 
           // log back in with new uer
-          await PageObjects.security.login(role, 'changeme');
+          await PageObjects.security.login(role, 'changeme2');
         });
 
         after(async () => {

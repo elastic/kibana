@@ -35,7 +35,7 @@ The list of Roles that are loaded into security serverless projects. The values 
 
 ### `users`
 
-List of users that are loaded into ES for serverless. This file currently includes a user for each of the Security Project roles (same name as the role). All users in this file have their password set to `changeme`
+List of users that are loaded into ES for serverless. This file currently includes a user for each of the Security Project roles (same name as the role). All users in this file have their password set to `changeme2`
 
 Format: `user:encrypted_password`
 

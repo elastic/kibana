@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries[0].field = 'some.invalid.field';
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -275,7 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['linux', 'windows'];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -300,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const blocklistApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(200);
@@ -314,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.artifact_read_privileges, 'changeme')
+              .auth(ROLE.artifact_read_privileges, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(403);
@@ -324,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const blocklistApiCall of needsReadPrivilege) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.artifact_read_privileges, 'changeme')
+              .auth(ROLE.artifact_read_privileges, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(200);
@@ -340,7 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.t1_analyst, 'changeme')
+              .auth(ROLE.t1_analyst, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(403);

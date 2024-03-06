@@ -125,7 +125,7 @@ node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexP
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/fleet_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/fleet_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme2@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.

@@ -142,7 +142,7 @@ For more detailed instructions you can check [apm-server dev documentation](http
   
   ## Uncomment the following lines under `output.elasticsearch:`
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
   protocol: "http" // This is by default set to HTTPS, change it to http
   ```
 - Run APM Server locally

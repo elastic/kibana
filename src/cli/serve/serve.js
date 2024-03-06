@@ -148,7 +148,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       }
 
       if (!has('elasticsearch.password')) {
-        set('elasticsearch.password', 'changeme');
+        set('elasticsearch.password', 'changeme2');
       }
     }
 

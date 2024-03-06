@@ -71,7 +71,7 @@ async function init() {
   if (argv.local) {
     esHost = 'http://localhost:9200';
     kbHost = 'http://127.0.0.1:5601';
-    password = 'changeme';
+    password = 'changeme2';
     username = 'elastic';
   }
 
@@ -99,7 +99,7 @@ async function init() {
     );
 
     console.log('Example 1:');
-    console.log('--username elastic --password changeme\n');
+    console.log('--username elastic --password changeme2\n');
 
     console.log('Example 2:');
     console.log('--apiKey very_secret\n');

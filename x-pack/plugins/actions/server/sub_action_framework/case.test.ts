@@ -37,7 +37,7 @@ describe('CaseConnector', () => {
       logger,
       connector: { id: 'test-id', type: '.test' },
       config: { url: 'https://example.com' },
-      secrets: { username: 'elastic', password: 'changeme' },
+      secrets: { username: 'elastic', password: 'changeme2' },
       services,
     });
   });

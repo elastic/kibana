@@ -55,7 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ccs: {
         remoteClusterUrl:
           process.env.REMOTE_CLUSTER_URL ??
-          `http://elastic:changeme@localhost:${baseConfig.get('servers.elasticsearch.port') + 1}`,
+          `http://elastic:changeme2@localhost:${baseConfig.get('servers.elasticsearch.port') + 1}`,
       },
     },
   };

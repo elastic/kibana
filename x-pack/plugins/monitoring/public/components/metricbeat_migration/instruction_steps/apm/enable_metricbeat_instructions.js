@@ -96,7 +96,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMoni
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 `}
         </EuiCodeBlock>
         {securitySetup}

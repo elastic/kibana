@@ -169,7 +169,7 @@ export const USERS = {
   },
   SUPERUSER: {
     username: 'elastic',
-    password: 'changeme',
+    password: 'changeme2',
     roles: [],
     superuser: true,
     description: 'superuser',

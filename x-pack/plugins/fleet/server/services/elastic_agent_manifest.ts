@@ -57,7 +57,7 @@ spec:
               value: "elastic"
             # The basic authentication password used to connect to Elasticsearch
             - name: ES_PASSWORD
-              value: "changeme"
+              value: "changeme2"
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -384,7 +384,7 @@ spec:
               value: "elastic"
             # The basic authentication password used to connect to Kibana and retrieve a service_token to enable Fleet
             - name: KIBANA_FLEET_PASSWORD
-              value: "changeme"
+              value: "changeme2"
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

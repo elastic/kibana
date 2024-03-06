@@ -51,7 +51,7 @@ list_stragglers() {
 curl_so_count() {
   local so=${1:-search-session}
   local count
-  count=$(curl -s -XGET "http://elastic:changeme@localhost:9220/.kibana/_count" -H "kbn-xsrf: archive-migration-functions" -H "Content-Type: application/json" -d'
+  count=$(curl -s -XGET "http://elastic:changeme2@localhost:9220/.kibana/_count" -H "kbn-xsrf: archive-migration-functions" -H "Content-Type: application/json" -d'
 {
   "query": {
     "bool": {
@@ -102,7 +102,7 @@ create_space() {
 
   curl -H "Content-Type: application/json" -H "kbn-xsrf: archive-migration-functions" \
     -X POST -d "$payload" \
-    --user elastic:changeme http://localhost:5620/api/spaces/space
+    --user elastic:changeme2 http://localhost:5620/api/spaces/space
 }
 
 delete_space() {
@@ -110,7 +110,7 @@ delete_space() {
 
   curl -H "kbn-xsrf: archive-migration-functions" \
     -X DELETE \
-    --user elastic:changeme http://localhost:5620/api/spaces/space/"$id"
+    --user elastic:changeme2 http://localhost:5620/api/spaces/space/"$id"
 }
 
 # Just a note that this is using Gnu date.
@@ -403,7 +403,7 @@ load_kbn_list() {
 
 print_so_types() {
   set -x
-  node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220
+  node scripts/saved_objs_info.js --esUrl http://elastic:changeme2@localhost:9220
   set +x
 }
 
@@ -432,7 +432,7 @@ unload_kbns() {
 
 ping_server() {
   set -x
-  server_addr="http://elastic:changeme@localhost:9220"
+  server_addr="http://elastic:changeme2@localhost:9220"
   curl -k "${server_addr}/_cat/health?v=true"
   set +x
 }

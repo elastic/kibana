@@ -28,7 +28,7 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
       page,
       isRemote,
       username: isRemote ? remoteUsername : 'elastic',
-      password: isRemote ? remotePassword : 'changeme',
+      password: isRemote ? remotePassword : 'changeme2',
     }),
     ...utilsPageProvider({ page }),
     async navigateToMonitorDetails(monitorId: string) {

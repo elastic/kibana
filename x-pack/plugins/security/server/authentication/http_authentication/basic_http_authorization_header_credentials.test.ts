@@ -49,9 +49,9 @@ describe('BasicHTTPAuthorizationHeaderCredentials.parseFromRequest()', () => {
 
 describe(`toString()`, () => {
   it('concatenates username and password using a colon and then base64 encodes the string', () => {
-    const basicCredentials = new BasicHTTPAuthorizationHeaderCredentials('elastic', 'changeme');
+    const basicCredentials = new BasicHTTPAuthorizationHeaderCredentials('elastic', 'changeme2');
 
-    expect(basicCredentials.toString()).toEqual(Buffer.from(`elastic:changeme`).toString('base64')); // I don't like that this so closely mirror the actual implementation
+    expect(basicCredentials.toString()).toEqual(Buffer.from(`elastic:changeme2`).toString('base64')); // I don't like that this so closely mirror the actual implementation
     expect(basicCredentials.toString()).toEqual('ZWxhc3RpYzpjaGFuZ2VtZQ=='); // and I don't like that this is so opaque. Both together seem reasonable...
   });
 });

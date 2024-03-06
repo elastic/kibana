@@ -45,7 +45,7 @@ export class SyntheticsServices {
   async enableMonitorManagedViaApi() {
     try {
       await axios.put(this.kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
-        auth: { username: 'elastic', password: 'changeme' },
+        auth: { username: 'elastic', password: 'changeme2' },
         headers: { 'kbn-xsrf': 'true' },
       });
     } catch (e) {
@@ -74,7 +74,7 @@ export class SyntheticsServices {
             : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
         testData,
         {
-          auth: { username: 'elastic', password: 'changeme' },
+          auth: { username: 'elastic', password: 'changeme2' },
           headers: { 'kbn-xsrf': 'true' },
         }
       );
@@ -120,7 +120,7 @@ export class SyntheticsServices {
         this.kibanaUrl + SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
         { isDisabled: false },
         {
-          auth: { username: 'elastic', password: 'changeme' },
+          auth: { username: 'elastic', password: 'changeme2' },
           headers: { 'kbn-xsrf': 'true' },
         }
       );

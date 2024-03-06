@@ -55,7 +55,7 @@ const UNAUTHORIZED_KEY = fsReadFileSync(UNAUTHORIZED_KEY_FILE);
 const UNAUTHORIZED_CRT = fsReadFileSync(UNAUTHORIZED_CRT_FILE);
 const UNAUTHORIZED_CA = fsReadFileSync(UNAUTHORIZED_CA_FILE);
 
-const Auth = 'elastic:changeme';
+const Auth = 'elastic:changeme2';
 const AuthB64 = Buffer.from(Auth).toString('base64');
 
 describe('axios connections', () => {

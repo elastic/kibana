@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.entries[0].field = 'some.invalid.field';
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.entries.push({ ...body.entries[0] });
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['linux', 'windows'];
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -256,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             // Using superuser here as we need custom license for this action
             await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -267,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const trustedAppApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(200);
@@ -281,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.hunter, 'changeme')
+              .auth(ROLE.hunter, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(403);
@@ -291,7 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const trustedAppApiCall of needsReadPrivilege) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.hunter, 'changeme')
+              .auth(ROLE.hunter, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(200);
@@ -307,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.t1_analyst, 'changeme')
+              .auth(ROLE.t1_analyst, 'changeme2')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(403);

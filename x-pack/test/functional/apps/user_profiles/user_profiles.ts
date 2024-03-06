@@ -66,9 +66,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const changePasswordButton = await pageObjects.userProfiles.getChangePasswordButton();
         await changePasswordButton.click();
 
-        await pageObjects.userProfiles.setCurrentPasswordField('changeme');
-        await pageObjects.userProfiles.setNewPasswordField('changeme2');
-        await pageObjects.userProfiles.setConfirmPasswordField('changeme2');
+        await pageObjects.userProfiles.setCurrentPasswordField('changeme2');
+        await pageObjects.userProfiles.setNewPasswordField('changeme22');
+        await pageObjects.userProfiles.setConfirmPasswordField('changeme22');
 
         const submitButton = await pageObjects.userProfiles.getChangePasswordFormSubmitButton();
         await submitButton.click();
@@ -79,9 +79,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await changePasswordButton.click();
 
-        await pageObjects.userProfiles.setCurrentPasswordField('changeme2');
-        await pageObjects.userProfiles.setNewPasswordField('changeme');
-        await pageObjects.userProfiles.setConfirmPasswordField('changeme');
+        await pageObjects.userProfiles.setCurrentPasswordField('changeme22');
+        await pageObjects.userProfiles.setNewPasswordField('changeme2');
+        await pageObjects.userProfiles.setConfirmPasswordField('changeme2');
 
         await submitButton.click();
 

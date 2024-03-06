@@ -96,7 +96,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, { esM
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 `}
         </EuiCodeBlock>
         {securitySetup}

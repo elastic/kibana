@@ -25,7 +25,7 @@ PUT _watcher/watch/error_report
               "auth":{ <5>
                 "basic":{
                   "username":"elastic",
-                  "password":"changeme"
+                  "password":"changeme2"
                 }
               }
             }

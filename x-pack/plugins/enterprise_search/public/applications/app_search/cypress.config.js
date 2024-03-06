@@ -14,7 +14,7 @@ export default defineCypressConfig({
     supportFile: './cypress/support/commands.ts',
   },
   env: {
-    password: 'changeme',
+    password: 'changeme2',
     username: 'elastic',
   },
   execTimeout: 120000,

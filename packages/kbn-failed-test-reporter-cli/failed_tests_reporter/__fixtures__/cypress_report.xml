@@ -29,22 +29,22 @@ You can fix this problem by:
 https://on.cypress.io/element-is-animating
 
 Because this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `timeline flyout button`
-    at cypressErr (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:146621:16)
-    at cypressErrByPath (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:146630:10)
-    at Object.throwErrByPath (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:146593:11)
-    at Object.ensureElementIsNotAnimating (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:137560:24)
-    at ensureNotAnimating (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:127434:13)
-    at runAllChecks (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:127522:9)
-    at retryActionability (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:127542:16)
-    at tryCatcher (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:9065:23)
-    at Function.Promise.attempt.Promise.try (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:6339:29)
-    at tryFn (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:140680:21)
-    at whenStable (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:140715:12)
-    at http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:140259:16
-    at tryCatcher (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:9065:23)
-    at Promise._settlePromiseFromHandler (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7000:31)
-    at Promise._settlePromise (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7057:18)
-    at Promise._settlePromise0 (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7102:10)]]></failure>
+    at cypressErr (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:146621:16)
+    at cypressErrByPath (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:146630:10)
+    at Object.throwErrByPath (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:146593:11)
+    at Object.ensureElementIsNotAnimating (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:137560:24)
+    at ensureNotAnimating (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:127434:13)
+    at runAllChecks (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:127522:9)
+    at retryActionability (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:127542:16)
+    at tryCatcher (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:9065:23)
+    at Function.Promise.attempt.Promise.try (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:6339:29)
+    at tryFn (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:140680:21)
+    at whenStable (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:140715:12)
+    at http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:140259:16
+    at tryCatcher (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:9065:23)
+    at Promise._settlePromiseFromHandler (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:7000:31)
+    at Promise._settlePromise (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:7057:18)
+    at Promise._settlePromise0 (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:7102:10)]]></failure>
     </testcase>
   </testsuite>
 </testsuites>

@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'token',
           providerName: 'token',
           currentURL: '/',
-          params: { username: 'elastic', password: 'changeme' },
+          params: { username: 'elastic', password: 'changeme2' },
         })
         .expect(200);
 

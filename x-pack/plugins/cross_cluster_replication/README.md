@@ -9,7 +9,7 @@ You can run a local cluster and simulate a remote cluster within a single Kibana
 4. Start your "local" cluster by running `.es/8.0.0/bin/elasticsearch`.
 5. Run `yarn start` to start Kibana so that it connects to the "local" cluster.
 6. Start your "remote" cluster by running `.es/8.0.0-2/bin/elasticsearch -E cluster.name=europe -E transport.port=9400`.
-7. Index a document into your "remote" cluster by running `curl -X PUT http://elastic:changeme@localhost:9201/my-leader-index --data '{"settings":{"number_of_shards":1,"soft_deletes.enabled":true}}' --header "Content-Type: application/json"`. Note that these settings are required for testing auto-follow pattern conflicts errors (see below).
+7. Index a document into your "remote" cluster by running `curl -X PUT http://elastic:changeme2@localhost:9201/my-leader-index --data '{"settings":{"number_of_shards":1,"soft_deletes.enabled":true}}' --header "Content-Type: application/json"`. Note that these settings are required for testing auto-follow pattern conflicts errors (see below).
 
 Now you can create follower indices and auto-follow patterns to replicate the `my-leader-index`
 index on the "remote" cluster that's available at `127.0.0.1:9400`.

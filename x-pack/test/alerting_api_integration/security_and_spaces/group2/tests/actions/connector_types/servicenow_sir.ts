@@ -28,7 +28,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
     },
     secrets: {
       password: 'elastic',
-      username: 'changeme',
+      username: 'changeme2',
     },
     params: {
       subAction: 'pushToService',
@@ -65,7 +65,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
     },
     secrets: {
       password: 'elastic',
-      username: 'changeme',
+      username: 'changeme2',
     },
   };
   const mockServiceNowOAuth = {

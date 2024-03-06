@@ -93,7 +93,7 @@ for the last 10 seconds.
 This example uses [now-iso][] to generate iso date strings.
 
 ```console
-curl -k  "https://elastic:changeme@localhost:5601/internal/triggers_actions_ui/data/_time_series_query" \
+curl -k  "https://elastic:changeme2@localhost:5601/internal/triggers_actions_ui/data/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d "{
     \"index\":           \"es-hb-sim\",
     \"timeField\":       \"@timestamp\",
@@ -136,7 +136,7 @@ curl -k  "https://elastic:changeme@localhost:5601/internal/triggers_actions_ui/d
 To get the current value of the calculated metric, you can leave off the date:
 
 ```
-curl -k  "https://elastic:changeme@localhost:5601/internal/triggers_actions_ui/data/_time_series_query" \
+curl -k  "https://elastic:changeme2@localhost:5601/internal/triggers_actions_ui/data/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d '{
     "index":           "es-hb-sim",
     "timeField":       "@timestamp",

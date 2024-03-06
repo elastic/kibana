@@ -96,7 +96,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { e
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 `}
         </EuiCodeBlock>
         {securitySetup}

@@ -18,13 +18,13 @@ describe('cli/serve/read_keystore', () => {
   });
 
   it('returns structured keystore data', () => {
-    const keystoreData = { 'elasticsearch.password': 'changeme' };
+    const keystoreData = { 'elasticsearch.password': 'changeme2' };
     Keystore.prototype.data = keystoreData;
 
     const data = readKeystore();
     expect(data).toEqual({
       elasticsearch: {
-        password: 'changeme',
+        password: 'changeme2',
       },
     });
   });

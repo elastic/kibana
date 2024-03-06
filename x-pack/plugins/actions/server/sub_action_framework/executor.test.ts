@@ -24,7 +24,7 @@ import { IService, ServiceParams } from './types';
 describe('Executor', () => {
   const actionId = 'test-action-id';
   const config = { url: 'https://example.com' };
-  const secrets = { username: 'elastic', password: 'changeme' };
+  const secrets = { username: 'elastic', password: 'changeme2' };
   const params = { subAction: 'testUrl', subActionParams: { url: 'https://example.com' } };
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;

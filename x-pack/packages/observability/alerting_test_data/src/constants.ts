@@ -11,7 +11,7 @@ export const ALERT_ACTION_INDEX = 'test-alert-action-index';
 
 export const KIBANA_DEFAULT_URL = 'http://127.0.0.1:5601';
 export const USERNAME = 'elastic';
-export const PASSWORD = 'changeme';
+export const PASSWORD = 'changeme2';
 
 export const HEADERS = {
   'kbn-xsrf': 'true',

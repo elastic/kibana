@@ -76,7 +76,7 @@ function options(y: Argv) {
       string: true,
     })
     .example(
-      '$0 simple_logs --target=http://admin:changeme@localhost:9200',
+      '$0 simple_logs --target=http://admin:changeme2@localhost:9200',
       'Ingest data to specific Elasticsearch cluster'
     )
     .example('$0 simple_logs --live', 'Continuously ingest data to local development cluster')

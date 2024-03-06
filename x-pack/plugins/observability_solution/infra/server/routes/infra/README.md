@@ -23,7 +23,7 @@ The response includes:
 Request
 
 ```bash
-curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' \
+curl --location -u elastic:changeme2 'http://0.0.0.0:5601/ftw/api/metrics/infra' \
 --header 'kbn-xsrf: xxxx' \
 --header 'Content-Type: application/json' \
 --data '{

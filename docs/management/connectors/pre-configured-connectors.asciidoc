@@ -47,7 +47,7 @@ connector:
           header2: value2
       secrets:                  <5>
         user: elastic
-        password: changeme
+        password: changeme2
 ```
 
 <1>  The key is the connector identifier, `my-slack1` in this example.

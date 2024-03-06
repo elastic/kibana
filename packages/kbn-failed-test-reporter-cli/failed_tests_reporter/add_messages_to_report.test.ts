@@ -311,8 +311,8 @@ it('rewrites cypress reports with minimal changes', async () => {
      You can fix this problem by:
        - Passing \`{force: true}\` which disables all error checking
     @@ -46,5 +37,5 @@
-         at Promise._settlePromise (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7057:18)
-         at Promise._settlePromise0 (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
+         at Promise._settlePromise (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:7057:18)
+         at Promise._settlePromise0 (http://elastic:changeme2@localhost:61141/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
          ‹/testcase›
        ‹/testsuite›
     -‹/testsuites›

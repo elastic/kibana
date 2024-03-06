@@ -31,8 +31,8 @@ test('returns value for valid URI as per RFC3986', () => {
   expect(uriSchema.validate('tel:+500-111-222-333')).toBe('tel:+500-111-222-333');
   expect(uriSchema.validate('file:///kibana.log')).toBe('file:///kibana.log');
   expect(uriSchema.validate('http://elastic@localhost:9200')).toBe('http://elastic@localhost:9200');
-  expect(uriSchema.validate('http://elastic:changeme@localhost:9200')).toBe(
-    'http://elastic:changeme@localhost:9200'
+  expect(uriSchema.validate('http://elastic:changeme2@localhost:9200')).toBe(
+    'http://elastic:changeme2@localhost:9200'
   );
   expect(uriSchema.validate('ldap://[2001:db8::7]/c=GB?objectClass?one')).toBe(
     'ldap://[2001:db8::7]/c=GB?objectClass?one'

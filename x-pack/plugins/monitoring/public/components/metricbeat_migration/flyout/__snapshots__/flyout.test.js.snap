@@ -262,7 +262,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 
             </EuiCodeBlock>
             <React.Fragment>
@@ -636,7 +636,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 
             </EuiCodeBlock>
             <React.Fragment>
@@ -971,7 +971,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 
             </EuiCodeBlock>
             <React.Fragment>
@@ -1313,7 +1313,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 
             </EuiCodeBlock>
             <React.Fragment>
@@ -1645,7 +1645,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 
             </EuiCodeBlock>
             <React.Fragment>
@@ -1956,7 +1956,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
-  #password: "changeme"
+  #password: "changeme2"
 
             </EuiCodeBlock>
             <React.Fragment>

@@ -49,4 +49,4 @@ export const users: Record<
   },
 };
 
-export const DATASET_QUALITY_TEST_PASSWORD = 'changeme';
+export const DATASET_QUALITY_TEST_PASSWORD = 'changeme2';

@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'token',
           providerName: 'token',
           currentURL: '/',
-          params: { username: 'elastic', password: 'changeme' },
+          params: { username: 'elastic', password: 'changeme2' },
         })
         .expect(200);
     });
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'token',
           providerName: 'token',
           currentURL: '/',
-          params: { username: 'elastic', password: 'changeme' },
+          params: { username: 'elastic', password: 'changeme2' },
         })
         .expect(200);
 
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'token',
           providerName: 'token',
           currentURL: '/',
-          params: { username: 'elastic', password: 'changeme' },
+          params: { username: 'elastic', password: 'changeme2' },
         })
         .expect(400);
 
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'token',
           providerName: 'token',
           currentURL: '/',
-          params: { password: 'changeme' },
+          params: { password: 'changeme2' },
         })
         .expect(400);
 

@@ -27,7 +27,7 @@ import { InstallSourceOptions } from './types';
  */
 export async function installSource({
   license = 'basic',
-  password = 'changeme',
+  password = 'changeme2',
   sourcePath,
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, 'source'),

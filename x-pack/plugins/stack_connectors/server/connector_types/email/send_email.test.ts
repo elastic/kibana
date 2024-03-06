@@ -63,7 +63,7 @@ describe('send_email module', () => {
       Array [
         Object {
           "auth": Object {
-            "pass": "changeme",
+            "pass": "changeme2",
             "user": "elastic",
           },
           "host": undefined,
@@ -107,7 +107,7 @@ describe('send_email module', () => {
       Array [
         Object {
           "auth": Object {
-            "pass": "changeme",
+            "pass": "changeme2",
             "user": "elastic",
           },
           "host": undefined,
@@ -208,7 +208,7 @@ describe('send_email module', () => {
             "transport": Object {
               "clientId": "123456",
               "clientSecret": "sdfhkdsjhfksdjfh",
-              "password": "changeme",
+              "password": "changeme2",
               "service": "exchange_server",
               "tenantId": "98765",
               "user": "elastic",
@@ -886,7 +886,7 @@ function getSendEmailOptions(
     transport: {
       service: 'other',
       user: 'elastic',
-      password: 'changeme',
+      password: 'changeme2',
       ...transport,
     },
     hasAuth: true,

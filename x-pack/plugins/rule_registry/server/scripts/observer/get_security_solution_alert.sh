@@ -18,5 +18,5 @@ USER=${1:-'hunter'}
 
 # Example: ./find_rules.sh
 curl -s -k \
- -u $USER:changeme \
+ -u $USER:changeme2 \
  -X GET ${KIBANA_URL}${SPACE_URL}/security-myfakepath | jq .

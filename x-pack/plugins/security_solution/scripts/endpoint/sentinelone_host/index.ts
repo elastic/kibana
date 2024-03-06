@@ -55,7 +55,7 @@ console and pushes the data to Elasticsearch.`,
       default: {
         kibanaUrl: 'http://127.0.0.1:5601',
         username: 'elastic',
-        password: 'changeme',
+        password: 'changeme2',
         policy: '',
       },
       help: `
@@ -71,7 +71,7 @@ console and pushes the data to Elasticsearch.`,
                           like it is already setup.
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
-      --password          Optional. Password associated with the username (Default: changeme)
+      --password          Optional. Password associated with the username (Default: changeme2)
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
 `,
     },

@@ -15,7 +15,7 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
    1. Set **Hosts** with `localhost:5601`
    2. Set **Metrics Path** with `/(BASEPATH)/api/monitoring_collection/v1/prometheus`
    3. Remove the values from **Bearer Token File** and **SSL Certificate Authorities**
-   4. Set **Username** and **Password** with `elastic` and `changeme`
+   4. Set **Username** and **Password** with `elastic` and `changeme2`
 5. Add the following configuration to `kibana.dev.yml`
 
     ```yml

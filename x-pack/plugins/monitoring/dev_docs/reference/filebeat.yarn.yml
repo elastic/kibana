@@ -33,4 +33,4 @@ filebeat.modules:
 output.elasticsearch:
   hosts: [ "host.docker.internal:9200" ]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"

@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const jobInfo = await supertest
         .get(INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/kraz4j94154g0763b583rc37')
-        .auth('test_user', 'changeme');
+        .auth('test_user', 'changeme2');
 
       expect(jobInfo.body.output.warnings).to.eql([
         'Error: Max attempts reached (1). Queue timeout reached.',

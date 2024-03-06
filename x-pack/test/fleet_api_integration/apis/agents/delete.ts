@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
         spaces: ['*'],
       },
       username: 'fleet_user',
-      password: 'changeme',
+      password: 'changeme2',
     },
     fleet_admin: {
       permissions: {
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         spaces: ['*'],
       },
       username: 'fleet_admin',
-      password: 'changeme',
+      password: 'changeme2',
     },
   };
   describe('fleet_delete_agent', () => {

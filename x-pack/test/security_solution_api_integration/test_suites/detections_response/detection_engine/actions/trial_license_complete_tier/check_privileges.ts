@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
           await createUserAndRole(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
-            pass: 'changeme',
+            pass: 'changeme2',
           });
           await waitForRulePartialFailure({
             supertest,
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
           await createUserAndRole(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
-            pass: 'changeme',
+            pass: 'changeme2',
           });
           await waitForRulePartialFailure({
             supertest,

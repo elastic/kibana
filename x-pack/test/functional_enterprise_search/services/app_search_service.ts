@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTERPRISE_SEARCH_USER = 'enterprise_search';
-const ENTERPRISE_SEARCH_PASSWORD = 'changeme';
+const ENTERPRISE_SEARCH_PASSWORD = 'changeme2';
 import {
   createEngine,
   createMetaEngine,

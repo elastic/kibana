@@ -7,7 +7,7 @@ elasticsearch:
 kibana:
   host: "http://localhost:5601"
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
   installAssets: false
 
 # Define the indexing options

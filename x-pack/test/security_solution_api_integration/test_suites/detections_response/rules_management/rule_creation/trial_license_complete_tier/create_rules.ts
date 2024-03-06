@@ -413,7 +413,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should NOT be able to create a rule', async () => {
           await supertestWithoutAuth
             .post(DETECTION_ENGINE_RULES_URL)
-            .auth(role, 'changeme')
+            .auth(role, 'changeme2')
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '2023-10-31')
             .send(getCustomQueryRuleParams())

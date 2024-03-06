@@ -31,7 +31,7 @@ export const createUserAndRole = async (
 
   await securityService.role.create(role, roleDefinition);
   await securityService.user.create(role, {
-    password: 'changeme',
+    password: 'changeme2',
     roles: [role],
     full_name: role,
     email: 'detections-reader@example.com',

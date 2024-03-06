@@ -54,7 +54,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         // `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
         `--elasticsearch.username=kibana_system`,
-        `--elasticsearch.password=changeme`,
+        `--elasticsearch.password=changeme2`,
         '--xpack.reporting.enabled=false',
         `--xpack.uptime.service.manifestUrl=${manifestUrl}`,
         `--xpack.uptime.service.username=${

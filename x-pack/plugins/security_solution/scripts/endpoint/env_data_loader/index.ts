@@ -57,7 +57,7 @@ ${HORIZONTAL_LINE}
         default: {
           kibana: 'http://127.0.0.1:5601',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
           policyCount: 10,
           trustedAppsCount: 10,
           eventFiltersCount: 10,
@@ -71,7 +71,7 @@ ${HORIZONTAL_LINE}
         help: `
         --username                      User name to be used for auth against elasticsearch and
                                         kibana (Default: elastic).
-        --password                      User name Password (Default: changeme)
+        --password                      User name Password (Default: changeme2)
         --kibana                        The url to Kibana (Default: http://127.0.0.1:5601)
         --policyCount                   How many policies to create (Default: 10)
         --trustedAppsCount              How many Trusted Applications to create (Default: 10)

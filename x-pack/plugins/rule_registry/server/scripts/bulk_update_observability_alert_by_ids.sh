@@ -23,7 +23,7 @@ cd ..
 curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
- -u observer:changeme \
+ -u observer:changeme2 \
  -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/bulk_update \
 -d "{\"ids\": $IDS, \"status\":\"$STATUS\", \"index\":\".alerts-observability.apm.alerts\"}" | jq .
 # -d "{\"ids\": $IDS, \"query\": \"kibana.rac.alert.status: open\", \"status\":\"$STATUS\", \"index\":\".alerts-observability.apm.alerts\"}" | jq .

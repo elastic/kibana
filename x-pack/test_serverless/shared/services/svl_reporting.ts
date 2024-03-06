@@ -19,7 +19,7 @@ const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'K
 // const REPORTING_USER_PASSWORD = 'reporting_user-password';
 // const REPORTING_USER_USERNAME = 'reporting_user';
 const REPORTING_USER_USERNAME = 'elastic_serverless';
-const REPORTING_USER_PASSWORD = 'changeme';
+const REPORTING_USER_PASSWORD = 'changeme2';
 
 /**
  * Services to create roles and users for security testing

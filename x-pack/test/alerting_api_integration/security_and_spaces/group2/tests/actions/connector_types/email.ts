@@ -238,7 +238,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           },
           secrets: {
             user: 'bob',
-            password: 'changeme',
+            password: 'changeme2',
           },
         })
         .expect(400)
@@ -264,7 +264,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           },
           secrets: {
             user: 'bob',
-            password: 'changeme',
+            password: 'changeme2',
           },
         })
         .expect(400)
@@ -292,7 +292,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           },
           secrets: {
             user: 'bob',
-            password: 'changeme',
+            password: 'changeme2',
           },
         })
         .expect(200);

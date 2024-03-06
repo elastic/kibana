@@ -25,7 +25,7 @@ export const cli = () => {
           kibana: 'http://127.0.0.1:5601',
           elasticsearch: 'http://127.0.0.1:9200',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
           asSuperuser: false,
           actionDelay: DEFAULT_ACTION_DELAY,
           checkinInterval: DEFAULT_CHECKIN_INTERVAL,
@@ -35,7 +35,7 @@ export const cli = () => {
                             kibana (Default: elastic).
                             **IMPORTANT:** if 'asSuperuser' option is not used, then the
                             user defined here MUST have 'superuser' AND 'kibana_system' roles
-        --password          User name Password (Default: changeme)
+        --password          User name Password (Default: changeme2)
         --asSuperuser       If defined, then a Security super user will be created using the
                             the credentials defined via 'username' and 'password' options. This
                             new user will then be used to run this utility.

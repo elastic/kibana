@@ -52,7 +52,7 @@ describe('ClusterConfigurationForm', () => {
       target: { value: 'kibana_system' },
     });
     fireEvent.change(await findByLabelText('Password'), {
-      target: { value: 'changeme' },
+      target: { value: 'changeme2' },
     });
     fireEvent.click(await findByLabelText('Certificate authority'));
     fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
@@ -64,7 +64,7 @@ describe('ClusterConfigurationForm', () => {
           body: JSON.stringify({
             host: 'https://localhost:9200',
             username: 'kibana_system',
-            password: 'changeme',
+            password: 'changeme2',
             caCert: 'cert',
           }),
         }

@@ -219,7 +219,7 @@ services:
     environment:
       ELASTICSEARCH_HOST: http://elasticsearch.example.org
       ELASTICSEARCH_USERNAME: 'ems'
-      ELASTICSEARCH_PASSWORD: 'changeme'
+      ELASTICSEARCH_PASSWORD: 'changeme2'
 ----------------------------------------------------------
 
 [float]

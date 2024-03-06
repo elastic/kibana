@@ -154,7 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           grant_type: 'password',
           run_as: 'test_user',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
         });
 
         await browser.refresh();
@@ -265,7 +265,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           grant_type: 'password',
           run_as: 'test_user',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
         });
 
         await browser.refresh();
@@ -313,7 +313,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           grant_type: 'password',
           run_as: 'test_user',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
         });
 
         await browser.refresh();
@@ -353,7 +353,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           grant_type: 'password',
           run_as: 'elastic',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
         });
 
         await browser.refresh();

@@ -35,7 +35,7 @@ const fillForm = async ({ getByTestId }: RenderResult) => {
   });
 
   await act(async () => {
-    await userEvent.type(getByTestId('secrets.password-input'), 'changeme', {
+    await userEvent.type(getByTestId('secrets.password-input'), 'changeme2', {
       delay: 10,
     });
   });
@@ -141,7 +141,7 @@ describe('SimpleConnectorForm', () => {
           url: 'https://example.com',
         },
         secrets: {
-          password: 'changeme',
+          password: 'changeme2',
           username: 'elastic',
         },
       },

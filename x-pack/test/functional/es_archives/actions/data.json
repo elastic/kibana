@@ -23,7 +23,7 @@
       "action": {
         "actionTypeId": ".jira",
         "config": {
-          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira",
+          "apiUrl": "http://elastic:changeme2@localhost:5620/api/_actions-FTS-external-service-simulators/jira",
           "casesConfiguration": {
             "mapping": [
               {

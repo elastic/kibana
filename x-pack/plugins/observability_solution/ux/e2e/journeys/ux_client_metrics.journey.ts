@@ -46,7 +46,7 @@ journey('UX ClientMetrics', async ({ page, params }) => {
     });
     await loginToKibana({
       page,
-      user: { username: 'viewer', password: 'changeme' },
+      user: { username: 'viewer', password: 'changeme2' },
     });
   });
 

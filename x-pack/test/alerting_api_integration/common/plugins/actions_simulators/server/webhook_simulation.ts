@@ -107,7 +107,7 @@ function validateAuthentication(credentials: any, res: any) {
   try {
     expect(credentials).to.eql({
       username: 'elastic',
-      password: 'changeme',
+      password: 'changeme2',
     });
     res.statusCode = 200;
     res.end('OK');

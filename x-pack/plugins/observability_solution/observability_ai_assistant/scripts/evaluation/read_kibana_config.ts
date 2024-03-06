@@ -37,7 +37,7 @@ export const readKibanaConfig = () => {
   return {
     'elasticsearch.hosts': 'http://localhost:9200',
     'elasticsearch.username': 'elastic',
-    'elasticsearch.password': 'changeme',
+    'elasticsearch.password': 'changeme2',
     ...loadedKibanaConfig,
     ...cliEsCredentials,
   };

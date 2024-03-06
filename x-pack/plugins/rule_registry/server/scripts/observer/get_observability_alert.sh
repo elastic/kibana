@@ -17,5 +17,5 @@ cd ..
 
 # Example: ./find_rules.sh
 curl -s -k \
- -u $USER:changeme \
+ -u $USER:changeme2 \
  -X GET ${KIBANA_URL}${SPACE_URL}/monitoring-myfakepath | jq .

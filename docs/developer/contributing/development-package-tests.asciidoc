@@ -52,8 +52,8 @@ node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.56.1 \
   -E discovery.type=single-node \
   --license=trial
-TEST_KIBANA_URL=http://elastic:changeme@<ip>:5601 \
-TEST_ES_URL=http://elastic:changeme@192.168.56.1:9200 \
+TEST_KIBANA_URL=http://elastic:changeme2@<ip>:5601 \
+TEST_ES_URL=http://elastic:changeme2@192.168.56.1:9200 \
   node scripts/functional_test_runner.js --include-tag=smoke
 ```
 

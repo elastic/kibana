@@ -15,7 +15,7 @@ import {
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
     await axios.put(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
-      auth: { username: 'elastic', password: 'changeme' },
+      auth: { username: 'elastic', password: 'changeme2' },
       headers: { 'kbn-xsrf': 'true' },
     });
   } catch (e) {
@@ -37,7 +37,7 @@ export const addTestMonitor = async (
   };
   try {
     await axios.post(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, testData, {
-      auth: { username: 'elastic', password: 'changeme' },
+      auth: { username: 'elastic', password: 'changeme2' },
       headers: { 'kbn-xsrf': 'true' },
     });
   } catch (e) {

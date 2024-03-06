@@ -41,7 +41,7 @@ const ONLY_S2_ROLE: Role = {
 
 const ONLY_S2_USER: User = {
   username: 'only_s2_user',
-  password: 'changeme',
+  password: 'changeme2',
   roles: [ONLY_S2_ROLE.name],
 };
 

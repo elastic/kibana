@@ -31,7 +31,7 @@ import() {
   pushd "$dir"
   docker run --rm -ti --net=host -v "$PWD:/data" elasticdump/elasticsearch-dump:latest \
     --input="/data/$file" \
-    --output="http://admin:changeme@localhost:9200/$index" \
+    --output="http://admin:changeme2@localhost:9200/$index" \
     --type=data --fsCompress --noRefresh --support-big-int --limit=10000
   popd
 }

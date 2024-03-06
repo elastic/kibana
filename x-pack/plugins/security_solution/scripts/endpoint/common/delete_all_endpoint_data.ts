@@ -32,7 +32,7 @@ export const deleteAllEndpointData = async (
 
   const isServerless = await isServerlessKibanaFlavor(esClient);
   const unrestrictedUser = isServerless
-    ? { password: 'changeme', username: 'system_indices_superuser', created: false }
+    ? { password: 'changeme2', username: 'system_indices_superuser', created: false }
     : await createSecuritySuperuser(esClient, 'super_superuser');
   const esUrl = getEsUrlFromClient(esClient);
   const esClientUnrestricted = createEsClient({

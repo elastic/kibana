@@ -20,7 +20,7 @@ is listening on port 5603 due to the base path proxy, but you should
 still access {kib} on port 5601.
 
 By default, you can log in with username `elastic` and password
-`changeme`. See the `--help` options on `yarn es <command>` if
+`changeme2`. See the `--help` options on `yarn es <command>` if
 you’d like to configure a different password.
 
 [discrete]

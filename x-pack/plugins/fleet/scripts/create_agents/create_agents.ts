@@ -25,7 +25,7 @@ const printUsage = () =>
     [--count]: number of agents to create, defaults to 50k
     [--kibana]: full url of kibana instance to create agents and policy in e.g http://localhost:5601/mybase, defaults to http://localhost:5601
     [--username]: username for kibana, defaults to elastic
-    [--password]: password for kibana, defaults to changeme
+    [--password]: password for kibana, defaults to changeme2
     [--batches]: run the script in batches, defaults to 1 e.g if count is 50 and batches is 10, 500 agents will be created and 10 agent policies
     [--concurrentBatches]: how many batches to run concurrently, defaults to 10
     [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
@@ -33,7 +33,7 @@ const printUsage = () =>
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
-const DEFAULT_KIBANA_PASSWORD = 'changeme';
+const DEFAULT_KIBANA_PASSWORD = 'changeme2';
 const PUBLIC_VERSION_V1 = '2023-10-31';
 
 const DEFAULT_UNENROLL_TIMEOUT = 300; // 5 minutes

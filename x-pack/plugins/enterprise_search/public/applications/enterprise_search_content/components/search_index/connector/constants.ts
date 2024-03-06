@@ -241,7 +241,7 @@ export const getConnectorTemplate = ({
 }) => dedent`connectors:
   -
     connector_id: "${connectorData.id}"
-    service_type: "${connectorData.service_type || 'changeme'}"${
+    service_type: "${connectorData.service_type || 'changeme2'}"${
   apiKeyData?.encoded
     ? `
     api_key: "${apiKeyData?.encoded}"`

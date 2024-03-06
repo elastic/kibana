@@ -1446,7 +1446,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: 'changeme',
+        value: 'changeme2',
       },
       data_center_username: {
         default_value: null,
@@ -1490,7 +1490,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
-        value: 'changeme',
+        value: 'changeme2',
       },
       account_email: {
         default_value: null,

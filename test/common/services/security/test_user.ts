@@ -15,7 +15,7 @@ import { User } from './user';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_USER_NAME = 'test_user';
-const TEST_USER_PASSWORD = 'changeme';
+const TEST_USER_PASSWORD = 'changeme2';
 
 export class TestUser extends FtrService {
   private readonly config = this.ctx.getService('config');

@@ -51,7 +51,7 @@ export const cli = async () => {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticUrl: 'http://127.0.0.1:9200',
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
           version: '',
           policy: '',
           force: false,
@@ -73,7 +73,7 @@ export const cli = async () => {
                           (Default: 8220)
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
-      --password          Optional. Password associated with the username (Default: changeme)
+      --password          Optional. Password associated with the username (Default: changeme2)
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
       --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
 `,

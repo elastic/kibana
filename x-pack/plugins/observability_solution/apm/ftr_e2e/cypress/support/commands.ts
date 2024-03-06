@@ -13,28 +13,28 @@ import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
 Cypress.Commands.add('loginAsSuperUser', () => {
-  return cy.loginAs({ username: 'elastic', password: 'changeme' });
+  return cy.loginAs({ username: 'elastic', password: 'changeme2' });
 });
 
 Cypress.Commands.add('loginAsViewerUser', () => {
-  return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme2' });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
-  return cy.loginAs({ username: ApmUsername.editorUser, password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.editorUser, password: 'changeme2' });
 });
 
 Cypress.Commands.add('loginAsMonitorUser', () => {
   return cy.loginAs({
     username: ApmUsername.apmMonitorClusterAndIndices,
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
 Cypress.Commands.add('loginAsApmManageOwnAndCreateAgentKeys', () => {
   return cy.loginAs({
     username: ApmUsername.apmManageOwnAndCreateAgentKeys,
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
@@ -140,7 +140,7 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
-      auth: { user: 'editor', pass: 'changeme' },
+      auth: { user: 'editor', pass: 'changeme2' },
     });
   }
 );

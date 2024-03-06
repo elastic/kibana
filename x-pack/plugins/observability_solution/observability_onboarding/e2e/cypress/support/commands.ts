@@ -27,28 +27,28 @@ export type InstallationStepStatus =
 Cypress.Commands.add('loginAsViewerUser', () => {
   return cy.loginAs({
     username: ObservabilityOnboardingUsername.viewerUser,
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
   return cy.loginAs({
     username: ObservabilityOnboardingUsername.editorUser,
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
 Cypress.Commands.add('loginAsLogMonitoringUser', () => {
   return cy.loginAs({
     username: ObservabilityOnboardingUsername.logMonitoringUser,
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
 Cypress.Commands.add('loginAsElastic', () => {
   return cy.loginAs({
     username: 'elastic',
-    password: 'changeme',
+    password: 'changeme2',
   });
 });
 
@@ -116,7 +116,7 @@ Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
       'kbn-xsrf': 'e2e_test',
       'Elastic-Api-Version': '2023-10-31',
     },
-    auth: { user: 'editor', pass: 'changeme' },
+    auth: { user: 'editor', pass: 'changeme2' },
   });
 });
 
@@ -130,7 +130,7 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
     headers: {
       'kbn-xsrf': 'e2e_test',
     },
-    auth: { user: 'editor', pass: 'changeme' },
+    auth: { user: 'editor', pass: 'changeme2' },
     failOnStatusCode: false,
   }).then((response) => {
     const status = response.body.item?.status;
@@ -146,7 +146,7 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
           'kbn-xsrf': 'e2e_test',
           'Elastic-Api-Version': '2023-10-31',
         },
-        auth: { user: 'editor', pass: 'changeme' },
+        auth: { user: 'editor', pass: 'changeme2' },
       });
     }
   });
@@ -170,7 +170,7 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
-      auth: { user: 'editor', pass: 'changeme' },
+      auth: { user: 'editor', pass: 'changeme2' },
       body: {
         status,
       },

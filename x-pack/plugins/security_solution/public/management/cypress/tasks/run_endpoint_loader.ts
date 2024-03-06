@@ -31,7 +31,7 @@ export const runEndpointLoaderScript = () => {
     `--numHosts=1 ` +
     `--numDocs=1 ` +
     `--fleet ` +
-    `--withNewUser=santaEndpoint:changeme ` +
+    `--withNewUser=santaEndpoint:changeme2 ` +
     `--anc=1 ` +
     `--gen=1 ` +
     `--ch=1 ` +

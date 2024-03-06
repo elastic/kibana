@@ -26,7 +26,7 @@ export const addTestMonitorProject = async (
         ),
       testData,
       {
-        auth: { username: 'elastic', password: 'changeme' },
+        auth: { username: 'elastic', password: 'changeme2' },
         headers: { 'kbn-xsrf': 'true' },
       }
     );

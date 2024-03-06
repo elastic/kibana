@@ -16,7 +16,7 @@ export const archive = {
   description: 'Install and run from an Elasticsearch tar',
   usage: 'es archive <path> [<args>]',
   help: (defaults: Record<string, any> = {}) => {
-    const { password = 'changeme', 'base-path': basePath } = defaults;
+    const { password = 'changeme2', 'base-path': basePath } = defaults;
 
     return dedent`
       Options:

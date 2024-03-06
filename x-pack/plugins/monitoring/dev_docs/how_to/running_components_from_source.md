@@ -20,13 +20,13 @@ For metricbeat collection, omit the monitoring settings.
 
 Optionally set `--max-workers=1` for less terminal noise once the initial build is complete.
 
-The passwords won't be the usual "changeme" so run this to set them for use with typical Kibana dev settings:
+The passwords won't be the usual "changeme2" so run this to set them for use with typical Kibana dev settings:
 
 ```shell
 curl -k -u elastic-admin:elastic-password -H 'Content-Type: application/json' \
-  http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme"}'
-curl -k -u elastic:changeme -H 'Content-Type: application/json' \
-  http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+  http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme2"}'
+curl -k -u elastic:changeme2 -H 'Content-Type: application/json' \
+  http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme2"}'
 ```
 
 ### Multi-cluster tests (for CCR/CCS or listing)
@@ -69,9 +69,9 @@ Then restart the server and reset the passwords:
 
 ```shell
 curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
-http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme"}'
-curl -u elastic:changeme -H 'Content-Type: application/json' \
-http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme2"}'
+curl -u elastic:changeme2 -H 'Content-Type: application/json' \
+http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme2"}'
 ```
 
 To start the second server (in another terminal from the same directory), run the commands below:
@@ -85,7 +85,7 @@ cp -r config/* "${ES_PATH_CONF}"
 To report internal collection to the main server, you also need to add the password to the new keychain:
 
 ```shell
-echo changeme | ./bin/elasticsearch-keystore add xpack.monitoring.exporters.id0.auth.secure_password
+echo changeme2 | ./bin/elasticsearch-keystore add xpack.monitoring.exporters.id0.auth.secure_password
 ```
 
 And finally start the server, with or without internal collection enabled (make sure ES_PATH_CONF is still set to `config-secondary`):
@@ -107,9 +107,9 @@ You'll likely want to reset the passwords for the secondary cluster as well:
 
 ```shell
 curl -k -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
-  http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme"}'
-curl -k -u elastic:changeme -H 'Content-Type: application/json' \
-  http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+  http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme2"}'
+curl -k -u elastic:changeme2 -H 'Content-Type: application/json' \
+  http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme2"}'
 ```
 
 For metricbeat collection, omit the monitoring settings, provide both cluster hosts to the elasticsearch metricbeat module config (see [metricbeat](#metricbeat) section below), and remove the exporter password from the keychain:
@@ -123,7 +123,7 @@ For metricbeat collection, omit the monitoring settings, provide both cluster ho
 Once you have two clusters going you can use something like this to configure the remote (or use Kibana).
 
 ```
-curl -u elastic:changeme -H 'Content-Type: application/json' \
+curl -u elastic:changeme2 -H 'Content-Type: application/json' \
   -XPUT -d'{"persistent": {"cluster": {"remote": {"secondary": {"seeds": ["127.0.0.1:9310"]}}}}}' \
   http://localhost:9200/_cluster/settings
 ```
@@ -131,7 +131,7 @@ curl -u elastic:changeme -H 'Content-Type: application/json' \
 Create an index on the secondary cluster:
 
 ```
-curl -XPOST -H'Content-Type: application/json' -d'{"some": "stuff"}' -u elastic:changeme http://localhost:9210/stuff/_doc
+curl -XPOST -H'Content-Type: application/json' -d'{"some": "stuff"}' -u elastic:changeme2 http://localhost:9210/stuff/_doc
 ```
 
 Then use the "Cross-Cluster Replication" Kibana UI to set up a follower index (`stuff-replica`) in the main cluster.
@@ -196,9 +196,9 @@ At this point, the 2 nodes will elect a master which will print out the password
 
 ```
 curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
-http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme"}'
-curl -u elastic:changeme -H 'Content-Type: application/json' \
-http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme2"}'
+curl -u elastic:changeme2 -H 'Content-Type: application/json' \
+http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme2"}'
 ```
 
 Then in the third terminal run this for node main-2:
@@ -217,7 +217,7 @@ cp -r config/* "${ES_PATH_CONF}"
 One the third node is booted you should be able to see all 3 in the nodes list of any instance. You can confirm this with:
 
 ```
-curl -u elastic:changeme localhost:9200/_cat/nodes
+curl -u elastic:changeme2 localhost:9200/_cat/nodes
 ```
 
 Starting a 3 node secondary cluster is a similar process, included here for easy copy-paste.
@@ -252,9 +252,9 @@ At this point you can reset the password via port 9210:
 
 ```
 curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
-http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme"}'
-curl -u elastic:changeme -H 'Content-Type: application/json' \
-http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme2"}'
+curl -u elastic:changeme2 -H 'Content-Type: application/json' \
+http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme2"}'
 ```
 
 Then for secondary-2 run:
@@ -291,7 +291,7 @@ metricbeat.modules:
       - "localhost:9211"
       - "localhost:9212"
     username: "elastic"
-    password: "changeme"
+    password: "changeme2"
 
   - module: kibana
     xpack.enabled: true
@@ -299,7 +299,7 @@ metricbeat.modules:
     period: 10s
     hosts: [ "localhost:5601" ]
     username: "elastic"
-    password: "changeme"
+    password: "changeme2"
 
   - module: beat
     xpack.enabled: true
@@ -311,7 +311,7 @@ metricbeat.modules:
 output.elasticsearch:
   hosts: [ "localhost:9200" ]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
 ```
 
 ## Kibana
@@ -350,7 +350,7 @@ metricbeat.modules:
       # secondary
       - "localhost:9210"
     username: "elastic"
-    password: "changeme"
+    password: "changeme2"
 
   - module: kibana
     xpack.enabled: true
@@ -358,7 +358,7 @@ metricbeat.modules:
     period: 10s
     hosts: [ "localhost:5601" ]
     username: "elastic"
-    password: "changeme"
+    password: "changeme2"
 
   - module: logstash
     xpack.enabled: true
@@ -379,12 +379,12 @@ metricbeat.modules:
     period: 10s
     hosts: ["http://localhost:3002"]
     username: elastic
-    password: changeme
+    password: changeme2
 
 output.elasticsearch:
   hosts: [ "localhost:9200" ]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
 ```
 
 Feel free to comment out any sections for components you're not currently running.
@@ -405,7 +405,7 @@ metricbeat.modules:
 output.elasticsearch:
   hosts: [ "localhost:9200" ]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
 ```
 
 And run that in the foreground from another terminal with `./metricbeat -e -c metricbeat.beats.yml`.
@@ -418,7 +418,7 @@ monitoring:
   elasticsearch:
     hosts: ["http://localhost:9200"]
     username: elastic
-    password: changeme
+    password: changeme2
 ```
 
 You can also include a `cluster_uuid` setting which will presume you're shipping direct to the [monitoring deployment](../reference/terminology.md#monitoring-deployment).
@@ -449,7 +449,7 @@ filebeat.modules:
 output.elasticsearch:
   hosts: [ "http://localhost:9200" ]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
 ```
 
 Update the paths if your beats and elasticsearch clones are not siblings on your filesystem.
@@ -490,7 +490,7 @@ http.port: 5068
 output.elasticsearch:
   hosts: ["localhost:9200"]
   username: "elastic"
-  password: "changeme"
+  password: "changeme2"
 ```
 
 You can also include a `monitoring` with an optional `cluster_uuid` setting which will presume you're shipping direct to the [monitoring deployment](../reference/terminology.md#monitoring-deployment). This is the same behavior as filebeat/metricbeat.
@@ -519,7 +519,7 @@ output {
   elasticsearch {
     hosts => ["http://localhost:9200"]
     user => elastic
-    password => changeme
+    password => changeme2
   }
 }
 ```
@@ -539,7 +539,7 @@ To enable internal collection, add the following to `config/logstash.yml`. Remov
 xpack.monitoring.enabled: true
 xpack.monitoring.collection.pipeline.details.enabled: true
 xpack.monitoring.elasticsearch.username: elastic
-xpack.monitoring.elasticsearch.password: changeme
+xpack.monitoring.elasticsearch.password: changeme2
 xpack.monitoring.elasticsearch.hosts: ["http://localhost:9200"]
 ```
 
@@ -551,7 +551,7 @@ While undocumented, logstash also supports a direct monitoring mode using these 
 monitoring.enabled: true
 monitoring.elasticsearch.hosts: https://localhost:9200
 monitoring.elasticsearch.username: elastic
-monitoring.elasticsearch.password: changeme
+monitoring.elasticsearch.password: changeme2
 ```
 
 Any active elasticsearch output will be checked for it's UUID ([code](https://github.com/elastic/logstash/blob/e11d0364d4b3d3722d152ae9ef86d41265c9d879/logstash-core/lib/logstash/java_pipeline.rb#L329)) and monitoring documents will be indexed for each cluster.
@@ -590,7 +590,7 @@ docker run --name entsearch --rm \
   -p 3002:3002 \
   -e elasticsearch.host='http://host.docker.internal:9200' \
   -e elasticsearch.username=elastic \
-  -e elasticsearch.password=changeme \
+  -e elasticsearch.password=changeme2 \
   -e allow_es_settings_modification=true \
   -e kibana.host='http://host.docker.internal:5601/ftw' \
   -e monitoring.reporting_enabled=true \

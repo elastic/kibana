@@ -74,7 +74,7 @@ node x-pack/plugins/observability_solution/apm/scripts/test/api --runner --basic
 #### API Test tips
 
 - For data generation in API tests have a look at the [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace/README.md) package
-- For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
+- For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme2`)
 
 ---
 
@@ -130,7 +130,7 @@ node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/con
 ```
 
 APM tests are located in `x-pack/test/functional/apps/apm`.
-For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme2)
 diff --git a/x-pack/plugins/observability_solution/apm/scripts/test/README.md b/x-pack/plugins/observability_solution/apm/scripts/test/README.md
 
 ## Serverless API tests

@@ -116,7 +116,7 @@ describe('#preboot', () => {
     });
 
     it('set `credentialsSpecified` to `true` if `password` is specified', async () => {
-      mockConfig$.next(configSchema.validate({ password: 'changeme' }));
+      mockConfig$.next(configSchema.validate({ password: 'changeme2' }));
       const prebootContract = await elasticsearchService.preboot();
       expect(prebootContract.config.credentialsSpecified).toBe(true);
     });

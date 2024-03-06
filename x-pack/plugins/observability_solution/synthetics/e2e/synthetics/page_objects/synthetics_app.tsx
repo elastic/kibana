@@ -29,7 +29,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       page,
       isRemote,
       username: isRemote ? remoteUsername : 'elastic',
-      password: isRemote ? remotePassword : 'changeme',
+      password: isRemote ? remotePassword : 'changeme2',
     }),
     ...utilsPageProvider({ page }),
 

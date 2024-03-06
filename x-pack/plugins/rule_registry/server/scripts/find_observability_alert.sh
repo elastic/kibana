@@ -24,6 +24,6 @@ cd ..
 curl -v \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
- -u observer:changeme \
+ -u observer:changeme2 \
  -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/find \
 -d "{\"query\": { \"match\": { \"kibana.alert.status\": \"open\" }}, \"index\":\".alerts-observability.apm.alerts\"}" | jq .

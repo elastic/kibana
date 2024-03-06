@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username: testUserName, password: 'changeme' },
+          params: { username: testUserName, password: 'changeme2' },
         })
         .expect(200);
       return parseCookie(response.headers['set-cookie'][0])!;
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await security.user.create(testUserName, {
-        password: 'changeme',
+        password: 'changeme2',
         roles: [`viewer`],
         full_name: 'User With Profile',
         email: 'user_with_profile@get_current_test',

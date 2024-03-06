@@ -61,7 +61,7 @@ fi
 
 if [ "${FN}" == "kibana_index" ]; then
   # search the kibana index
-  curl -XPOST http://elastic:changeme@localhost:9200/.kibana/_search -u elastic:changeme -d '' | jq
+  curl -XPOST http://elastic:changeme2@localhost:9200/.kibana/_search -u elastic:changeme2 -d '' | jq
   exit 0;
 fi
 

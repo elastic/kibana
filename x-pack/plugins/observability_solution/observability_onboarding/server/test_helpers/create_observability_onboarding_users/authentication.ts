@@ -47,4 +47,4 @@ export const users: Record<
   },
 };
 
-export const OBSERVABILITY_ONBOARDING_TEST_PASSWORD = 'changeme';
+export const OBSERVABILITY_ONBOARDING_TEST_PASSWORD = 'changeme2';

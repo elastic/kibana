@@ -20,7 +20,7 @@
 # you'll need jq installed
 #   https://stedolan.github.io/jq/download/
 
-KIBANA_URL=https://elastic:changeme@localhost:5601
+KIBANA_URL=https://elastic:changeme2@localhost:5601
 
 # create email action
 ACTION_ID_EMAIL=`curl -X POST --insecure --silent \

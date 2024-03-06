@@ -5,7 +5,7 @@
  * 2.0.
  */
 const ELASTICSEARCH_USERNAME = 'elastic';
-const ELASTICSEARCH_PASSWORD = 'changeme';
+const ELASTICSEARCH_PASSWORD = 'changeme2';
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
 export const constructUrlWithUser = (route: string) => {

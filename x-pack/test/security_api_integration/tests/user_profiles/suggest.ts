@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       await Promise.all(
         ['one', 'two', 'three'].map((userPrefix) =>
           security.user.create(`user_${userPrefix}`, {
-            password: 'changeme',
+            password: 'changeme2',
             roles: [`role_${userPrefix}`],
             full_name: userPrefix.toUpperCase(),
             email: `${userPrefix}@elastic.co`,
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
             providerType: 'basic',
             providerName: 'basic',
             currentURL: '/',
-            params: { username: `user_${userPrefix}`, password: 'changeme' },
+            params: { username: `user_${userPrefix}`, password: 'changeme2' },
           })
           .expect(200);
         usersSessions.set(`user_${userPrefix}`, {

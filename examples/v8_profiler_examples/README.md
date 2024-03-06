@@ -36,8 +36,8 @@ So one of the following should work for you, to run a 10 second CPU profile
 using an interval of 100μs (default: 5s / 1000μs):
 
 ```
-curl -OJ "http://elastic:changeme@localhost:5601/_dev/cpu_profile?duration=10&interval=100"
-curl -kOJ "https://elastic:changeme@localhost:5601/_dev/cpu_profile?duration=10&interval=100"
+curl -OJ "http://elastic:changeme2@localhost:5601/_dev/cpu_profile?duration=10&interval=100"
+curl -kOJ "https://elastic:changeme2@localhost:5601/_dev/cpu_profile?duration=10&interval=100"
 ```
 
 The files generated will be:

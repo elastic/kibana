@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertestWithoutAuth
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
         .set('kbn-xsrf', 'true')
-        .auth(ROLES.t1_analyst, 'changeme')
+        .auth(ROLES.t1_analyst, 'changeme2')
         .query({ from: '2020-10-10' })
         .expect(403);
 

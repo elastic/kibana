@@ -21,7 +21,7 @@ const KNOWN_ROLE_DEFINITIONS = {
   ...KNOWN_ESS_ROLE_DEFINITIONS,
   ...KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 };
-const DEFAULT_PASSWORD = 'changeme';
+const DEFAULT_PASSWORD = 'changeme2';
 
 cli()
   .then(() => logger.success('Done'))

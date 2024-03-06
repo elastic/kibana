@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         ..._monitors[1],
         params: JSON.stringify({
           username: 'elastic',
-          password: 'changeme',
+          password: 'changeme2',
         }),
         locations: [
           {

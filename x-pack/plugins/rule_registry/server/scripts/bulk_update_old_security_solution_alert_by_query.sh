@@ -23,6 +23,6 @@ cd ..
 curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
- -u hunter:changeme \
+ -u hunter:changeme2 \
  -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/bulk_update \
 -d "{\"query\": \"$QUERY\", \"status\":\"$STATUS\", \"index\":\".siem-signals*\"}" | jq .

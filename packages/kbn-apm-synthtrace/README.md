@@ -99,13 +99,13 @@ Via the CLI, you can run scenarios, either using a fixed time range or continuou
 For live data ingestion:
 
 ```
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --live
+node scripts/synthtrace simple_trace.ts --target=http://admin:changeme2@localhost:9200 --live
 ```
 
 For a fixed time window:
 
 ```
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
+node scripts/synthtrace simple_trace.ts --target=http://admin:changeme2@localhost:9200 --from=now-24h --to=now
 ```
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**

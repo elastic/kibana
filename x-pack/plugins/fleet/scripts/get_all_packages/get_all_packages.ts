@@ -17,7 +17,7 @@ import type { PackageInfo } from '../../common';
 const REGISTRY_URL = 'https://epr.elastic.co';
 const KIBANA_URL = 'http://localhost:5601';
 const KIBANA_USERNAME = 'elastic';
-const KIBANA_PASSWORD = 'changeme';
+const KIBANA_PASSWORD = 'changeme2';
 const KIBANA_VERSION = kibanaPackageJson.version;
 const PUBLIC_VERSION_V1 = '2023-10-31';
 

@@ -101,7 +101,7 @@ async function runFunctionalTest(props: TestRunProps) {
         )
       ),
       TEST_PERFORMANCE_PHASE: phase,
-      TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
+      TEST_ES_URL: 'http://elastic:changeme2@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',
     },
   });

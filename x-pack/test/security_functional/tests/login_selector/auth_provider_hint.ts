@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .expect(200);
 
       await security.user.create('anonymous_user', {
-        password: 'changeme',
+        password: 'changeme2',
         roles: ['superuser'],
         full_name: 'Guest',
       });

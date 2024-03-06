@@ -29,11 +29,11 @@ If you want to run Kibana locally and connect it with the Kubernetes cluster, fo
 
 **Note**: You should start the local Kibana instance before or immediately after running the Tilt command.
 
-As part of the Tilt setup, a `kibana_system_user` is created with the password `changeme`. You can use this user and password for your `kibana.yml` file:
+As part of the Tilt setup, a `kibana_system_user` is created with the password `changeme2`. You can use this user and password for your `kibana.yml` file:
 
 ```
 elasticsearch.username: kibana_system_user
-elasticsearch.password: changeme
+elasticsearch.password: changeme2
 ```
 
 ### Building and Uploading APM Server Package

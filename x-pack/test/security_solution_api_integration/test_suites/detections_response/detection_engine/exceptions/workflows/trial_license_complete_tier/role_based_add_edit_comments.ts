@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
         await supertestWithoutAuth
           .post(EXCEPTION_LIST_URL)
-          .auth(detectionAdmin, 'changeme')
+          .auth(detectionAdmin, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListDetectionSchemaMock())
           .expect(200);
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Add comment by the Detection Admin
         await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(detectionAdmin, 'changeme')
+          .auth(detectionAdmin, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send({
             ...ruleException,
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(detectionAdmin, 'changeme')
+          .auth(detectionAdmin, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
         await supertestWithoutAuth
           .put(EXCEPTION_LIST_ITEM_URL)
-          .auth(socManager, 'changeme')
+          .auth(socManager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(updatePayload)
           .expect(200);
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(socManager, 'changeme')
+          .auth(socManager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
         await supertestWithoutAuth
           .post(EXCEPTION_LIST_URL)
-          .auth(detectionAdmin, 'changeme')
+          .auth(detectionAdmin, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Add comment by the Detection Admin
         await supertestWithoutAuth
           .post(EXCEPTION_LIST_ITEM_URL)
-          .auth(detectionAdmin, 'changeme')
+          .auth(detectionAdmin, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send({
             ...getCreateExceptionListItemMinimalSchemaMock(),
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(detectionAdmin, 'changeme')
+          .auth(detectionAdmin, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
         await supertestWithoutAuth
           .put(EXCEPTION_LIST_ITEM_URL)
-          .auth(socManager, 'changeme')
+          .auth(socManager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send(updatePayload)
           .expect(200);
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
               getCreateExceptionListMinimalSchemaMock().list_id
             }`
           )
-          .auth(socManager, 'changeme')
+          .auth(socManager, 'changeme2')
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);

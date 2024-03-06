@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       simulatorUrl = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
       );
-      editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
+      editSimulatorUrl = simulatorUrl.replace('/elastic:changeme2@', '/');
     });
 
     beforeEach(async () => {
