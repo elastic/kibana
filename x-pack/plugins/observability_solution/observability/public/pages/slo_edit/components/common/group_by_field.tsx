@@ -28,6 +28,8 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
 
   const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
     useFetchGroupByCardinality(index, timestampField, groupByField);
+  const groupBy = [groupByField].flat().filter((value) => !!value);
+  const hasGroupBy = !groupBy.includes(ALL_VALUE) && groupBy.length;
 
   return (
     <>
@@ -55,7 +57,7 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
         isLoading={!!index && isLoading}
         isDisabled={!index}
       />
-      {!isGroupByCardinalityLoading && !!groupByCardinality && (
+      {!isGroupByCardinalityLoading && !!groupByCardinality && hasGroupBy && (
         <EuiCallOut
           size="s"
           iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}

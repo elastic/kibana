@@ -11,6 +11,7 @@ import {
   DataView,
   DataViewField,
   DataViewListItem,
+  DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
@@ -29,7 +30,7 @@ const rollupIndexPatternListName = i18n.translate(
 );
 
 export const isRollup = (indexPatternType: string = '') => {
-  return indexPatternType === 'rollup';
+  return indexPatternType === DataViewType.ROLLUP;
 };
 
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
@@ -76,14 +77,14 @@ export const getTags = (
   const tags = [];
   if (isDefault) {
     tags.push({
-      key: 'default',
+      key: DataViewType.DEFAULT,
       name: defaultIndexPatternListName,
       'data-test-subj': 'default-tag',
     });
   }
   if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
-      key: 'rollup',
+      key: DataViewType.ROLLUP,
       name: rollupIndexPatternListName,
       'data-test-subj': 'rollup-tag',
     });
