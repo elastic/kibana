@@ -73,6 +73,6 @@ export function joinByKey(
       map.set(stableKey, { ...current });
     }
 
-    return [*map.values()];
+    return [...map.values()];
   }, []);
 }
