@@ -22,10 +22,10 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ConnectorDetailRouter } from './components/connector_detail/connector_detail_router';
 import { Connectors } from './components/connectors/connectors';
+import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';=
 import { Settings } from './components/settings';
-import { SelectConnector } from './components/connectors/select_connector/select_connector';=
 import {
   CONNECTORS_PATH,
   CONNECTOR_DETAIL_PATH,
@@ -33,8 +33,8 @@ import {
   ERROR_STATE_PATH,
   ROOT_PATH,
   SEARCH_INDICES_PATH,
-  SETUP_GUIDE_PATH,
-  NEW_INDEX_SELECT_CONNECTOR_PATH, NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH, NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH
+  SETTINGS_PATH,
+  SETUP_GUIDE_PATH
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -80,14 +80,8 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
       </Route>
-      <Route path={NEW_INDEX_SELECT_CONNECTOR_PATH} exact>
-        <SelectConnector />
-      </Route>
-      <Route path={NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH} exact>
-        <SelectConnector />
-      </Route>
-      <Route path={NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH} exact>
-        <SelectConnector />
+      <Route path={SEARCH_INDICES_PATH}>
+        <ConnectorsRouter />
       </Route>
       <Route path={CONNECTOR_DETAIL_PATH}>
         <ConnectorDetailRouter />
