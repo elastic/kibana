@@ -141,7 +141,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
-  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
+  const analysisStartTime = useRef<number | undefined>(window.performance.now());
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
@@ -236,7 +236,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           remainingFieldCandidates,
           significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
         });
-      } else {
+      } else if (loaded > 0) {
         // Reset all overrides.
         setOverrides(undefined);
 
@@ -250,15 +250,15 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         }
 
         // Track performance metric
-        if (loadIndexDataStartTime.current !== undefined) {
-          const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+        if (analysisStartTime.current !== undefined) {
+          const analysisDuration = window.performance.now() - analysisStartTime.current;
 
           // Set this to undefined so reporting the metric gets triggered only once.
-          loadIndexDataStartTime.current = undefined;
+          analysisStartTime.current = undefined;
 
           reportPerformanceMetricEvent(analytics, {
             eventName: 'aiopsLogRateAnalysisCompleted',
-            duration: loadIndexDataDuration,
+            duration: analysisDuration,
           });
         }
       }
