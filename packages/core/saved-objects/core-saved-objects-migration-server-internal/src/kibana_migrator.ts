@@ -39,12 +39,12 @@ import { DocumentMigrator } from './document_migrator';
 import { runZeroDowntimeMigration } from './zdt';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { runV2Migration } from './run_v2_migration';
-import HASH_TO_VERSION_MAP from './hash_to_version_map.json';
+
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
-  hashToVersionMap?: Record<string, string>;
+  hashToVersionMap: Record<string, string>;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
   kibanaIndex: string;
   kibanaVersion: string;
@@ -89,7 +89,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     typeRegistry,
     kibanaIndex,
     defaultIndexTypesMap,
-    hashToVersionMap = HASH_TO_VERSION_MAP,
+    hashToVersionMap,
     soMigrationsConfig,
     kibanaVersion,
     logger,

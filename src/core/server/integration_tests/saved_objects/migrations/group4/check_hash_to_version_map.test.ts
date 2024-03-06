@@ -12,9 +12,10 @@
 
 import crypto from 'crypto';
 import { mapValues } from 'lodash';
-import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-// eslint-disable-next-line @kbn/imports/uniform_imports
-import HASH_TO_VERSION_MAP from '../../../../../../../packages/core/saved-objects/core-saved-objects-migration-server-internal/src/hash_to_version_map.json';
+import {
+  getVirtualVersionMap,
+  HASH_TO_VERSION_MAP,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
 import { getCurrentVersionTypeRegistry } from '../kibana_migrator_test_kit';
 

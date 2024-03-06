@@ -251,6 +251,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
       // are moved over to their new index (.my_index)
       '.my_complementary_index': ['testtype3'],
     },
+    hashToVersionMap: {},
     typeRegistry: createRegistry([
       // typeRegistry depicts an updated index map:
       //   .my_index: ['testtype', 'testtype3'],
